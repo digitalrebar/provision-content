@@ -1,6 +1,6 @@
 #
 # This template populates updates the machine object's
-# BootEnv in DRP to 'local' or some other bootenv.
+# BootEnv in DRP to 'ce-local' or some other bootenv.
 #
 # Runs as part of a shell script for kickstart or net-post-install
 # The template does is always on, but can be modified
@@ -10,15 +10,15 @@
 #
 # Parameter YAML format:
 #
-# next_boot_env: local
+# next_boot_env: ce-local
 #
 # Defaults:
-# next_boot_env - defaults to local if unspecified
+# next_boot_env - defaults to ce-local if unspecified
 #
 (cd /bin; curl -s -f -L -o drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"; chmod 755 drpcli)
 export RS_ENDPOINT="{{.ApiURL}}"
 # This will contain a token appropriate for the path being
 # used below.  Either a create or update/show token
 export RS_TOKEN="{{.GenerateToken}}"
-drpcli machines update "{{.Machine.UUID}}" '{"BootEnv": "{{if .ParamExists "next_boot_env"}}{{.Param "next_boot_env"}}{{else}}local{{end}}"}'
+drpcli machines update "{{.Machine.UUID}}" '{"BootEnv": "{{if .ParamExists "next_boot_env"}}{{.Param "next_boot_env"}}{{else}}ce-local{{end}}"}'
 

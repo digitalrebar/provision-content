@@ -47,13 +47,9 @@ exec > /root/post-install.log 2>&1
 set -x
 export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
 
-{{ template "set-hostname.tmpl" . }}
-{{ template "web-proxy.tmpl" . }}
-{{ template "centos-drp-only-repos.tmpl" . }}
-{{ template "root-remote-access.tmpl" . }}
-{{ template "join-to-dr.tmpl" . }}
-
-{{ template "update-drp-local.tmpl" . }}
+{{ template "ce-set-hostname.tmpl" . }}
+{{ template "ce-root-remote-access.tmpl" . }}
+{{ template "ce-update-drp-local.tmpl" . }}
 
 sync
 %end

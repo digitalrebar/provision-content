@@ -1,5 +1,5 @@
 ---
-Name: discovery
+Name: ce-discovery
 Description: "The boot environment to use to have unknown machines boot to Sledgehammer"
 OnlyUnknown: true
 OS:
