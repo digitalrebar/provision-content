@@ -21,3 +21,4 @@ deploy:
   - drp-community-content.sha256
   on:
     repo: digitalrebar/provision-content
+    tags: true
