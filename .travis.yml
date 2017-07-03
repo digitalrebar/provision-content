@@ -20,4 +20,4 @@ deploy:
   - drp-community-content.zip
   - drp-community-content.sha256
   on:
-    repo: rackn/provision-content
+    repo: digitalrebar/provision-content
