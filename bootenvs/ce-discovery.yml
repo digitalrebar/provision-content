@@ -9,7 +9,7 @@ OS:
 Kernel: vmlinuz0
 Initrds:
   - "stage1.img"
-BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.api={{.ApiURL}}"
+BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.api={{.ApiURL}} -- console=ttyS0,115200 console=ttyS1,115200 console=tty0"
 Templates:
   - Name: pxelinux
     Path: pxelinux.cfg/default
