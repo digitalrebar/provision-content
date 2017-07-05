@@ -1,0 +1,40 @@
+BootParams: 'debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
+  netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
+  root=/dev/ram rw quiet -- console=ttyS0,115200 console=ttyS1,115200 console=tty0'
+Initrds:
+- install/netboot/ubuntu-installer/amd64/initrd.gz
+Kernel: install/netboot/ubuntu-installer/amd64/linux
+Name: ce-ubuntu-16.04-install
+OS:
+  Family: ubuntu
+  IsoFile: ubuntu-16.04.2-server-amd64.iso
+  IsoSha256: 737ae7041212c628de5751d15c3016058b0e833fdc32e7420209b76ca3d0a535
+  IsoUrl: http://mirrors.kernel.org/ubuntu-releases/16.04/ubuntu-16.04.2-server-amd64.iso
+  Name: ubuntu-16.04
+  Version: '16.04'
+RequiredParams:
+OptionalParams:
+- dns-domain
+- ntp_servers
+- operating-system-disk
+- provisioner-default-password-hash
+- provisioner-default-user
+- proxy-servers
+- access_keys
+Templates:
+- ID: ce-default-pxelinux.tmpl
+  Name: pxelinux
+  Path: pxelinux.cfg/{{.Machine.HexAddress}}
+- ID: ce-default-elilo.tmpl
+  Name: elilo
+  Path: '{{.Machine.HexAddress}}.conf'
+- ID: ce-default-ipxe.tmpl
+  Name: ipxe
+  Path: '{{.Machine.Address}}.ipxe'
+- ID: ce-net_seed.tmpl
+  Name: seed
+  Path: '{{.Machine.Path}}/seed'
+- ID: ce-net-post-install.sh.tmpl
+  Name: net-post-install.sh
+  Path: '{{.Machine.Path}}/post-install.sh'
+TenantId: 1
