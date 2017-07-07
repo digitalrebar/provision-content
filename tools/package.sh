@@ -18,6 +18,8 @@ tmpdir="$(mktemp -d /tmp/rs-bundle-XXXXXXXX)"
 cp -a bootenvs "$tmpdir"
 cp -a profiles "$tmpdir"
 cp -a templates "$tmpdir"
+mkdir -p "$tmpdir/tools"
+cp -a tools/install.sh "$tmpdir/tools"
 (
     cd "$tmpdir"
     $shasum $(find . -type f) >sha256sums
