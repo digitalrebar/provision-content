@@ -16,7 +16,7 @@ drpcli prefs set unknownBootEnv ce-discovery defaultBootEnv ce-sledgehammer
 echo "You may want to also run:"
 echo
 echo "  export RS_KEY=${RS_KEY:-rocketskates:r0cketsk8ts}"
-echo "  cd comminuty-assets"
+echo "  cd community-assets"
 echo "  drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
 echo "  drpcli bootenvs install bootenvs/ce-centos.7.3.1611.yml"
 echo
