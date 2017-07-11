@@ -6,10 +6,11 @@ DEFAULT_DRP_VERSION="tip"
 
 usage() {
         echo
-	echo "Usage: $0 [--drp-version=<Version to install>]"
+	echo "Usage: $0 [--drp-version=<Version to install>] [--force]"
         echo
         echo "Options:"
-        echo "  --debug=[true|false] # Enables debug output"
+        echo "  --debug=[true|false]    # Enables debug output"
+        echo "  --force                 # Force download of content"
         echo "  --drp-version=<string>  # Version identifier if downloading.  stable, tip, or specific version label."
         echo "                          # Defaults to $DEFAULT_DRP_VERSION"
         echo
@@ -30,6 +31,9 @@ while (( $# > 0 )); do
         --help|-h)
             usage
             exit 0
+            ;;
+        --force|-f)
+            force=true
             ;;
         --*)
             arg_key="${arg_key#--}"
@@ -159,10 +163,13 @@ if [[ ! -e drp-community-content.sha256 || $force ]] ; then
     echo "Installing Version $DRP_VERSION of Digital Rebar Provision Content"
     curl -sfL -o drp-community-content.zip https://github.com/digitalrebar/provision-content/releases/download/$DRP_VERSION/drp-community-content.zip
     curl -sfL -o drp-community-content.sha256 https://github.com/digitalrebar/provision-content/releases/download/$DRP_VERSION/drp-community-content.sha256
+fi
 
+if [[ ! -e bootenvs || $force ]] ; then
     $shasum -c drp-community-content.sha256
     $tar -xf drp-community-content.zip
 fi
+
 $shasum -c sha256sums || exit 1
 
 export RS_KEY=${RS_KEY:-rocketskates:r0cketsk8ts}

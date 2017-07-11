@@ -18,7 +18,7 @@ bring_up_admin "drp-${TRAVIS_JOB_NUMBER//./-}"
 ssh -i cicd root@$IP mkdir -p drp-content/tools
 scp -i cicd -r drp-community-content.* root@$IP:drp-content
 scp -i cicd -r tools/install.sh root@$IP:drp-content/tools
-ssh -i cicd root@$IP chmod 755 tools/install.sh
+ssh -i cicd root@$IP chmod 755 drp-content/tools/install.sh
 ssh -i cicd root@$IP "cd drp-content ; tools/install.sh"
 
 ssh -i cicd root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
