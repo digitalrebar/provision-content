@@ -19,7 +19,7 @@ error=0
 # IP of DRP server
 DRP_IP=$1
 ADMIN_IP=$1
-NodeName=$2
+NodeName="$2-${TRAVIS_JOB_NUMBER//./-}"
 
 # The name has parameters: Get them
 INSTALL_BE=$(echo $NodeName | awk -F- '{ print $1 }')

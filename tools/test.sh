@@ -12,7 +12,7 @@ if [ ! -e drp-community-content.zip ] ; then
     exit 1
 fi
 
-bring_up_admin
+bring_up_admin "drp-${TRAVIS_JOB_NUMBER//./-}"
 
 # Install content - we are testing
 ssh -i cicd root@$IP mkdir -p drp-content
