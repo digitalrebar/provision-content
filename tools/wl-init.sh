@@ -52,6 +52,9 @@ PATH=$PATH:`pwd`
 if [ -f ~/.dr_info ] ; then
     . ~/.dr_info
 fi
+if [ -f ./dr_info ] ; then
+    . ./dr_info
+fi
 
 # Allow for "FORCING" From run-in-*.sh scripts
 if [[ $FORCE_PROVIDER ]] ; then

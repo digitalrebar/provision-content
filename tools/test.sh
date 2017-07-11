@@ -7,11 +7,16 @@
 
 . tools/wl-lib.sh
 
+if [ ! -e drp-community-content.zip ] ; then
+    echo "Missing zip file to test.  Run tools/package.sh"
+    exit 1
+fi
+
 bring_up_admin
 
 # Install content - we are testing
 ssh root@$IP mkdir -p drp-content
-scp -r * root@$IP:drp-content
+scp -r drp-community-content.* root@$IP:drp-content
 ssh root@$IP "cd drp-content ; tools/install.sh"
 
 ssh root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
