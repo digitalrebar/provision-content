@@ -9,12 +9,9 @@ branches:
   - gh-pages
 script:
 - mkdir -p ~/.ssh
-- cp tool/ssh-config ~/.ssh/config
+- cp tools/ssh-config ~/.ssh/config
 - chmod 600 ~/.ssh/config
 - ./tools/package.sh
-- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in dr_info.enc -out dr_info -d
-- openssl aes-256-cbc -K $encrypted_66fdb05a14c8_key -iv $encrypted_66fdb05a14c8_iv -in cicd.enc -out cicd -d
-- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in cicd.pub.enc -out cicd.pub -d
 - ./tools/test.sh
 notifications:
   slack:
@@ -30,3 +27,7 @@ deploy:
   on:
     repo: digitalrebar/provision-content
     tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in dr_info.enc -out dr_info -d
+- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in cicd.enc -out cicd -d
+- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in cicd.pub.enc -out cicd.pub -d
