@@ -101,26 +101,6 @@ validate_tools() {
         fi
     fi
 
-    if ! which ansible &>/dev/null; then
-        if [[ $OS_FAMILY == rhel ]] ; then
-            sudo yum -y install epel-release # Everyone gets epel for free.
-            sudo yum install -y ansible python-netaddr
-        elif [[ $OS_FAMILY == debian ]] ; then
-            sudo apt-get install -y software-properties-common
-            sudo apt-add-repository -y ppa:ansible/ansible
-            sudo apt-get update -y
-            sudo apt-get install -y ansible python-netaddr
-        fi
-
-        if ! which ansible &>/dev/null; then
-            echo "Please install Ansible!"
-            if [[ $OS_FAMILY == darwin ]] ; then
-                echo "Something like: brew install ansible or pip install ansible python-netaddr"
-            fi
-            error=1
-        fi
-    fi
-
     if ! which curl &>/dev/null; then
         if [[ $OS_FAMILY == rhel ]] ; then
             sudo yum install -y curl
