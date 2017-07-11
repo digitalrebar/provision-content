@@ -57,11 +57,11 @@ start_machine $NodeName $DRP_IP
 NodePxeId=$PXE_DEVICE_ID
 NodeIP=$PXE_IP
 
-NodeUUID=$(ssh root@$DRP_IP "drpcli machines list Address=$NodeIP" | jq -r .[].Uuid)
+NodeUUID=$(ssh -i cicd root@$DRP_IP "drpcli machines list Address=$NodeIP" | jq -r .[].Uuid)
 count=0
 while [[ $NodeUUID == "" ]] ; do
         sleep 6
-        NodeUUID=$(ssh root@$DRP_IP "drpcli machines list Address=$NodeIP" | jq -r .[].Uuid)
+        NodeUUID=$(ssh -i cicd root@$DRP_IP "drpcli machines list Address=$NodeIP" | jq -r .[].Uuid)
         count=$((count+1))
         if [[ $count -gt 200 ]]; then
                 break
@@ -99,27 +99,27 @@ if [[ $error -ne 0 ]] ; then
         exit 1 
 fi
 
-ssh root@$DRP_IP "drpcli machines bootenv $NodeUUID $InstallBE"
+ssh -i cicd root@$DRP_IP "drpcli machines bootenv $NodeUUID $InstallBE"
 if [[ $COMPLETE_BE == s ]] ; then
-    ssh root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-sledgehammer-final"
+    ssh -i cicd root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-sledgehammer-final"
 fi
 if [[ $DEFAULT_DISK == d ]] ; then
-    ssh root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-os-disk"
+    ssh -i cicd root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-os-disk"
 fi
 if [[ $ROOT_SSH_PASSWORD == y ]] ; then
-    ssh root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-yes-password"
+    ssh -i cicd root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-yes-password"
 fi
 if [[ $CUSTOM_PASSWORD == p ]] ; then
-    ssh root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-user-password"
+    ssh -i cicd root@$DRP_IP "drpcli machines addprofile $NodeUUID ce-user-password"
 fi
 
 ssh -i key1 root@$NodeIP reboot
 
 count=0
-NodeBE=$(ssh root@$DRP_IP "drpcli machines show $NodeUUID" | jq -r .BootEnv)
+NodeBE=$(ssh -i cicd root@$DRP_IP "drpcli machines show $NodeUUID" | jq -r .BootEnv)
 while [[ $NodeBE != $CompleteBE ]] ; do
         sleep 6
-        NodeBE=$(ssh root@$DRP_IP "drpcli machines show $NodeUUID" | jq -r .BootEnv)
+        NodeBE=$(ssh -i cicd root@$DRP_IP "drpcli machines show $NodeUUID" | jq -r .BootEnv)
         count=$((count+1))
         if [[ $count -gt 200 ]]; then
                 break

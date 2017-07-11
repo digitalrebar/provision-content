@@ -67,6 +67,3 @@ export ADMIN_IP="$IP/$CIDR"
 
 . tools/run-in-system.sh
 
-echo "Packet Device ID: $DEVICE_ID"
-echo "repeat Packet run: ./run-in-packet.sh --device-id=${DEVICE_ID} ${NODENAME}"
-echo "SSH access: ssh -X root@${IP}"

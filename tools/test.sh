@@ -15,15 +15,15 @@ fi
 bring_up_admin
 
 # Install content - we are testing
-ssh root@$IP mkdir -p drp-content
-scp -r drp-community-content.* root@$IP:drp-content
-ssh root@$IP "cd drp-content ; tools/install.sh"
+ssh -i cicd root@$IP mkdir -p drp-content
+scp -i cicd -r drp-community-content.* root@$IP:drp-content
+ssh -i cicd root@$IP "cd drp-content ; tools/install.sh"
 
-ssh root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
-ssh root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-centos-7.3.1611.yml"
+ssh -i cicd root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
+ssh -i cicd root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-centos-7.3.1611.yml"
 
 # Packet console parameter
-ssh root@$IP "drpcli profiles set global param kernel_console to 'console=ttyS1,115200'"
+ssh -i cicd root@$IP "drpcli profiles set global param kernel_console to 'console=ttyS1,115200'"
 
 # access_keys - default to nothing
 rm -rf key1* key2*
@@ -33,10 +33,10 @@ ssh root@$IP "drpcli profiles set global param access_keys to '{ \"key1\": \"$(c
 
 
 # Testing profiles
-ssh root@$IP "drpcli profiles create '{ \"Name\": \"ce-sledgehammer-final\", \"Params\": { \"next_boot_env\": \"ce-sledgehammer\" } }'"
-ssh root@$IP "drpcli profiles create '{ \"Name\": \"ce-user-password\", \"Params\": { \"provisioner-default-user\": \"fred\", \"provisioner-default-password-hash\": \"\$6\$drprocksdrprocks\$KLQOIAGEXNmHvtCRFIhlWR3gW1LfHtAW6ngPNW0v6q/wBKJmbYQLDWF26nL3bDbYkdyL0jgSl/T0e/yGEpDmn/\", \"access_ssh_root_mode\": \"yes\" } }'"
-ssh root@$IP "drpcli profiles create '{ \"Name\": \"ce-yes-password\", \"Params\": { \"access_ssh_root_mode\": \"yes\" } }'"
-ssh root@$IP "drpcli profiles create '{ \"Name\": \"ce-os-disk\", \"Params\": { \"operating-system-disk\": \"sda\" } }'"
+ssh -i cicd root@$IP "drpcli profiles create '{ \"Name\": \"ce-sledgehammer-final\", \"Params\": { \"next_boot_env\": \"ce-sledgehammer\" } }'"
+ssh -i cicd root@$IP "drpcli profiles create '{ \"Name\": \"ce-user-password\", \"Params\": { \"provisioner-default-user\": \"fred\", \"provisioner-default-password-hash\": \"\$6\$drprocksdrprocks\$KLQOIAGEXNmHvtCRFIhlWR3gW1LfHtAW6ngPNW0v6q/wBKJmbYQLDWF26nL3bDbYkdyL0jgSl/T0e/yGEpDmn/\", \"access_ssh_root_mode\": \"yes\" } }'"
+ssh -i cicd root@$IP "drpcli profiles create '{ \"Name\": \"ce-yes-password\", \"Params\": { \"access_ssh_root_mode\": \"yes\" } }'"
+ssh -i cicd root@$IP "drpcli profiles create '{ \"Name\": \"ce-os-disk\", \"Params\": { \"operating-system-disk\": \"sda\" } }'"
 
 mkdir -p logs
 rm -rf logs/*
