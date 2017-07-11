@@ -18,6 +18,6 @@ echo
 echo "  export RS_KEY=${RS_KEY:-rocketskates:r0cketsk8ts}"
 echo "  cd community-assets"
 echo "  drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
-echo "  drpcli bootenvs install bootenvs/ce-centos.7.3.1611.yml"
+echo "  drpcli bootenvs install bootenvs/ce-centos-7.3.1611.yml"
 echo
 

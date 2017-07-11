@@ -9,7 +9,7 @@ OS:
 Kernel: vmlinuz0
 Initrds:
   - "stage1.img"
-BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.api={{.ApiURL}} -- console=ttyS0,115200 console=ttyS1,115200 console=tty0"
+BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.api={{.ApiURL}} -- {{ if .ParamExists \"kernel_console\"}}{{.Param \"kernel_console\" }}{{ end }}"
 Templates:
   - Name: pxelinux
     Path: pxelinux.cfg/default
@@ -85,7 +85,7 @@ Templates:
           chmod 755 /usr/bin/drpcli
       fi
 
-      {{ template "root-remote-access.tmpl" . }}
+      {{ template "ce-root-remote-access.tmpl" . }}
 
       # This will contain a token appropriate for the path being
       # used below.  Either a create or update/show token
@@ -112,7 +112,7 @@ Templates:
           # Let the annealer do its thing.
           while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
                                                \"Address\": \"$IP\",
-                                               \"BootEnv\": \"sledgehammer\"}")"; do
+                                               \"BootEnv\": \"ce-sledgehammer\"}")"; do
               echo "We could not create a node for ourself, trying again."
               sleep 5
           done
@@ -130,8 +130,6 @@ Templates:
       fi
       echo "${HOSTNAME#*.}" >/etc/domainname
       hostname "$HOSTNAME"
-
-      {{ template "additional-interfaces.tmpl" . }}
 
       # Force reliance on DNS
       echo '127.0.0.1 localhost' >/etc/hosts
