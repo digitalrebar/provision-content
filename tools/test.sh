@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Copyright 2017, RackN Inc
 
+set -x
+
+export TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER:-localtest}
+
 # Still helper commands for finding values.
 #curl -s -H "X-Auth-Token: $PROVIDER_PACKET_KEY" https://api.packet.net/plans
 #curl -s -H "X-Auth-Token: $PROVIDER_PACKET_KEY" https://api.packet.net/operating-systems
@@ -65,6 +69,9 @@ done
 COUNT=6
 while [[ $COUNT -ne 0 ]]
 do
+    # Export logs to the admin node for now.
+    scp -i cicd -r logs root@$IP:
+
     sleep 10
     COUNT=`ps auxwww | grep test-node.sh | grep -v grep | wc -l`
     echo "Remaining: $COUNT"

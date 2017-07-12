@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Copyright 2017, RackN Inc
 
+set -x
+
 . ./tools/wl-lib.sh
 
 # root-remote-access template
