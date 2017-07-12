@@ -10,10 +10,9 @@ OS:
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
-BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}} rs.api={{.ApiURL}} -- console=ttyS0,115200 console=ttyS1,115200 console=tty0"
+BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}} rs.api={{.ApiURL}} -- {{ if .ParamExists \"kernel_console\"}}{{.Param \"kernel_console\" }}{{ end }}"
 RequiredParams:
 OptionalParams:
-  - "ntp_servers"
   - "access_keys"
 Templates:
   - Name: "pxelinux"
@@ -72,26 +71,12 @@ Templates:
       export PS4="${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): "
       cp /usr/share/zoneinfo/GMT /etc/localtime
 
-      {{ template "root-remote-access.tmpl" . }}
+      {{ template "ce-root-remote-access.tmpl" . }}
 
       # Set up just enough infrastructure to let the jigs work.
       # Allow client to pass http proxy environment variables
       echo "AcceptEnv http_proxy https_proxy no_proxy" >> /etc/ssh/sshd_config
       service sshd restart
-
-      # Synchronize our date
-      {{ if (.ParamExists "ntp_servers") }}
-      ntpdate "{{index (.Param "ntp_servers") 0}}"
-      {{ end }}
-
-      {{ if (.ParamExists "access_keys") }}
-      mkdir -p /root/.ssh
-      cat >/root/.ssh/authorized_keys <<EOF
-      ### BEGIN GENERATED CONTENT
-      {{ range $key := .Param "access_keys" }}{{$key}}{{ end }}
-      #### END GENERATED CONTENT
-      EOF
-      {{ end }}
 
       # The last line in this script must always be exit 0!!
       exit 0

@@ -7,8 +7,16 @@ cache:
 branches:
   except:
   - gh-pages
+addons:
+  apt:
+    packages:
+      - sshpass
 script:
+- mkdir -p ~/.ssh
+- cp tools/ssh-config ~/.ssh/config
+- chmod 600 ~/.ssh/config
 - ./tools/package.sh
+- ./tools/test.sh
 notifications:
   slack:
     secure: chI7AURpzbl+wXD1t6BOlOLillq1Ou6/yqAe5hViO3M6fr/8cC18EgCOLVa/NfOjkCDzWGqaZUEByu3EySnSoxmlEyNBdeCbHJYG6zPmmof4OUH50zJNVJ3NolQ+J/rkA/c2LPGKPb85sy8ariHD+IjiHJdXXqiS5u8J82C1M8jZOKn7dYHVbAcR6bOaIuoBTpU1myl5EI1FmV/8VrUJ70jLlqpAd61Wr1jGu1U2Pqoe/6asUEA+j6UTxisgUpzX3eYEsH9F743sOx9m80BC8qDDWTWRjD7CoBaRf4nNvm6jZDr0q6E82CTkxA1lxrOXjCgW3q6d7n05iCtjgSgoE4j9cghAZw3gIeFSGyX5zaYr+XsEsM+jJYN0VMWxJ0GE28Yw2fG+MJq2vSztPGt45tlj4vlSgA7Icr7fc9YnuTHrJYG5qV0C5ovgzHFDTwFA4+b3LXnCTW0XaCuupqeNappBzYl8Jc38Ne+ZDALDSTlbS/e2bXJ463o6e7pLyJ0Tmc3I9z8y6OxJcBSPfZf7INuYAlL9AqUpOse7i4Q9VbW0qvHIY4eIRzQoEE8ud47sO/BTj2Fbm+t0v/hAo/svbKlvxzdWYueu1Rq9Y9rYlxDOkJuqQEFUwahEIv0ZHZfv6T5TmJ30vLO7+MGqgaOVGYO1CO/WqRJMT+iglpHQgS4=
@@ -23,3 +31,6 @@ deploy:
   on:
     repo: digitalrebar/provision-content
     tags: true
+before_install:
+- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in e-info.tgz.enc -out e-info.tgz -d
+- tar -zxvf e-info.tgz

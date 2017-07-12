@@ -25,7 +25,6 @@ cat > /target/update_system2.sh <<'EOF2341'
 set -x
 export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
 
-{{ template "ce-set-hostname.tmpl" . }}
 {{ template "ce-root-remote-access.tmpl" . }}
 {{ template "ce-update-drp-local.tmpl" . }}
 

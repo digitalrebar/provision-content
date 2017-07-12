@@ -1,6 +1,7 @@
 BootParams: 'debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
   netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
-  root=/dev/ram rw quiet -- console=ttyS0,115200 console=ttyS1,115200 console=tty0'
+  root=/dev/ram rw quiet {{ if .ParamExists "kernel_console"}}{{.Param "kernel_console" }}{{ end }} --
+  {{ if .ParamExists "kernel_console"}}{{.Param "kernel_console" }}{{ end }}'
 Initrds:
 - install/netboot/ubuntu-installer/amd64/initrd.gz
 Kernel: install/netboot/ubuntu-installer/amd64/linux
@@ -14,12 +15,9 @@ OS:
   Version: '16.04'
 RequiredParams:
 OptionalParams:
-- dns-domain
-- ntp_servers
 - operating-system-disk
 - provisioner-default-password-hash
 - provisioner-default-user
-- proxy-servers
 - access_keys
 Templates:
 - ID: ce-default-pxelinux.tmpl

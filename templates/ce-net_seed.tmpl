@@ -11,46 +11,23 @@ d-i keyboard-configuration/toggle select No toggling
 d-i netcfg/choose_interface select auto
 d-i netcfg/dhcp_timeout string 120
 d-i netcfg/get_hostname string {{.Machine.ShortName}}
-{{if .ParamExists "dns-domain"}}
-d-i netcfg/get_domain string {{.Param "dns-domain"}}
-{{end}}
 d-i mirror/country string manual
 {{if (eq "debian" .Env.OS.Family)}}
 d-i mirror/protocol string http
 d-i mirror/http/hostname string http.us.debian.org
 d-i mirror/http/directory string /debian
 {{else}}
-{{ if .ParamExists "local_repo" }}
-{{ if eq (.Param "local_repo") true }}
-d-i mirror/protocol string {{.ParseUrl "scheme" .Env.InstallUrl}}
-d-i mirror/http/hostname string {{.ParseUrl "host" .Env.InstallUrl}}
-d-i mirror/http/directory string {{.ParseUrl "path" .Env.InstallUrl}}
-{{else}}
 d-i mirror/http/hostname string archive.ubuntu.com
 d-i mirror/http/directory string /ubuntu
 {{end}}
-{{else}}
-d-i mirror/http/hostname string archive.ubuntu.com
-d-i mirror/http/directory string /ubuntu
-{{end}}
-{{end}}
-{{if .ParamExists "proxy-servers"}}
-d-i mirror/http/proxy string {{index (.Param "proxy-servers") 0 "url"}}
-{{else}}
 d-i mirror/http/proxy string
-{{end}}
 d-i apt-setup/security_host string
 d-i apt-setup/security_path string
 d-i clock-setup/utc boolean true
 d-i time/zone string UTC
-{{if .ParamExists "ntp_servers"}}
-d-i clock-setup/ntp boolean true
-d-i clock-setup/ntp-server string {{index (.Param "ntp_servers") 0}}
-{{else}}
 d-i clock-setup/ntp boolean false
-{{end}}
 {{if .ParamExists "operating-system-disk"}}
-d-i partman-auto/disk string {{ .Param "operating-system-disk" }}
+d-i partman-auto/disk string /dev/{{ .Param "operating-system-disk" }}
 {{else}}
 d-i partman-auto/disk string /dev/sda
 {{end}}
@@ -80,7 +57,7 @@ d-i live-installer/net-image string {{.Env.InstallUrl}}/install/filesystem.squas
 {{end}}
 d-i passwd/user-fullname string {{if .ParamExists "provisioner-default-user"}}{{ .Param "provisioner-default-user" }}{{else}}rocketskates{{end}}
 d-i passwd/username string {{if .ParamExists "provisioner-default-user"}}{{ .Param "provisioner-default-user" }}{{else}}rocketskates{{end}}
-d-i passwd/user-password-crypted password {{if .ParamExists "provisioner-default-password-hash"}}{{ .Param "provisioner-default-password-hash" }}{{else}}$6$rebar$HBaBj/uDmsQMEw4Si6eja9Yba3rhB73Na36hbrp9KxDHm6s5veeWyXlsUkoxRACtP47978iiidziRdsYUC7gC/{{end}}
+d-i passwd/user-password-crypted password {{if .ParamExists "provisioner-default-password-hash"}}{{ .Param "provisioner-default-password-hash" }}{{else}}$6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1{{end}}
 d-i user-setup/allow-password-weak boolean true
 d-i user-setup/encrypt-home boolean false
 d-i debian-installer/allow_unauthenticated string true
@@ -90,8 +67,8 @@ d-i pkgsel/update-policy select none
 d-i grub-installer/only_debian boolean true
 {{if (not (and (eq "debian" .Env.OS.Family) (gt "7" .Env.OS.Version)))}}
 {{if .ParamExists "operating-system-disk"}}
-d-i grub-installer/choose_bootdev select {{ .Param "operating-system-disk" }}
-d-i grub-installer/bootdev string {{ .Param "operating-system-disk" }}
+d-i grub-installer/choose_bootdev select /dev/{{ .Param "operating-system-disk" }}
+d-i grub-installer/bootdev string /dev/{{ .Param "operating-system-disk" }}
 {{else}}
 d-i grub-installer/choose_bootdev select /dev/sda
 d-i grub-installer/bootdev string /dev/sda

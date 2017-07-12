@@ -2,13 +2,13 @@ Name: ce-local
 OS:
   Name: local
 Templates:
-- ID: local-pxelinux.tmpl
+- ID: ce-local-pxelinux.tmpl
   Name: pxelinux
   Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
-- ID: local-elilo.tmpl
+- ID: ce-local-elilo.tmpl
   Name: elilo
   Path: "{{.Machine.HexAddress}}.conf"
-- ID: local-ipxe.tmpl
+- ID: ce-local-ipxe.tmpl
   Name: ipxe
   Path: "{{.Machine.Address}}.ipxe"
 TenantId: 1
