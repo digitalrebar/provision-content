@@ -7,6 +7,10 @@ cache:
 branches:
   except:
   - gh-pages
+addons:
+  apt:
+    packages:
+      - sshpass
 script:
 - mkdir -p ~/.ssh
 - cp tools/ssh-config ~/.ssh/config
