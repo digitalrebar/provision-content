@@ -35,7 +35,7 @@ ssh -i cicd root@$IP "drpcli profiles set global param kernel_console to 'consol
 rm -rf key1* key2*
 ssh-keygen -t rsa -f key1 -N ""
 ssh-keygen -t rsa -f key2 -N ""
-ssh root@$IP "drpcli profiles set global param access_keys to '{ \"key1\": \"$(cat key1.pub)\", \"key2\": \"$(cat key2.pub)\" }'"
+ssh -i cicd root@$IP "drpcli profiles set global param access_keys to '{ \"key1\": \"$(cat key1.pub)\", \"key2\": \"$(cat key2.pub)\" }'"
 
 
 # Testing profiles
