@@ -8,9 +8,9 @@ Kernel: install/netboot/ubuntu-installer/amd64/linux
 Name: ce-ubuntu-16.04-install
 OS:
   Family: ubuntu
-  IsoFile: ubuntu-16.04.2-server-amd64.iso
-  IsoSha256: 737ae7041212c628de5751d15c3016058b0e833fdc32e7420209b76ca3d0a535
-  IsoUrl: http://mirrors.kernel.org/ubuntu-releases/16.04/ubuntu-16.04.2-server-amd64.iso
+  IsoFile: ubuntu-16.04.3-server-amd64.iso
+  IsoSha256: a06cd926f5855d4f21fb4bc9978a35312f815fbda0d0ef7fdc846861f4fc4600
+  IsoUrl: http://mirrors.kernel.org/ubuntu-releases/16.04/ubuntu-16.04.3-server-amd64.iso
   Name: ubuntu-16.04
   Version: '16.04'
 RequiredParams:
