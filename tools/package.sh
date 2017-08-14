@@ -13,19 +13,12 @@ case $(uname -s) in
         exit 1;;
 esac
 
+if [ ! -e drp ] ; then
+  mkdir -p drp
+  cd drp
+  curl -fsSL https://raw.githubusercontent.com/digitalrebar/provision/master/tools/install.sh | bash -s -- --isolated --drp-version=tip install
+  cd ..
+fi
 
-tmpdir="$(mktemp -d /tmp/rs-bundle-XXXXXXXX)"
-cp -a bootenvs "$tmpdir"
-cp -a profiles "$tmpdir"
-cp -a templates "$tmpdir"
-mkdir -p "$tmpdir/tools"
-cp -a tools/install.sh "$tmpdir/tools"
-(
-    cd "$tmpdir"
-    $shasum $(find . -type f) >sha256sums
-    zip -p -r drp-community-content.zip *
-)
-
-cp "$tmpdir/drp-community-content.zip" .
-$shasum drp-community-content.zip > drp-community-content.sha256
-rm -rf "$tmpdir"
+drp/drpcli contents bundle drp-community-content.yaml --format=yaml
+$shasum drp-community-content.yaml > drp-community-content.sha256

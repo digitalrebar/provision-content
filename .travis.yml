@@ -26,7 +26,7 @@ deploy:
   api_key:
     secure: fLwWEA4oJjfS7jjX9mnbnhTv7Dc7OfEjvbJslhJ8Kue71Oq8l4VzePJl1G6zhICNrcQjIWTSnBtQvAMvlby9ij/PY1d8U/8KvV/KHBE++iyyAXYPVBTiXs3QnrW/gQPKvcm3dnDgR25tl3Ygz/9mmGyUl2hv88bn70Ac8C/dqxiv7LuOCur4bgqBCAS0iOEt2LHkz2+1yFkKuDLHEIua1VEj37qGnKl3fPkWja/t1/O27trGInUnu2caESeQwkHV0+LgQ0rF9IIvV7ZEswdTrM6hQ6MyPePhhnOW0nDA1gejfoGVWhAiSJgHPIDku6CH70r5JRvckqB73l+/CfC4xcP3Bq95T2Ci2GeTE7/fEMq7APQasI/g9JB9QlZlpj+9P/yWaL1VpvF7If4eHm8hSqYZwqPcuFAou2vIFqZvL19KqUJWTQldr01caZmuuA+ZQTTzFHA+1/WRs5X3M6aDirO2ZYHB6Bg1VlQ5Y5wTeal75Lo5GL0BzhN3PAO979RbitDdOLWHx/PjBnbI2IxO1kTtu7evFDvHM+9+MWpUeJckRhnzG1kqodgqzlbFfacNWuQe2s32RIwzSstO7FtwbDCGPTzlGntJpC3HaYlVt1Q09rr/fILEHXywkn1FPDmSmJZvW+bLYEA8wxWX8Vo77lWFK3Qo9W0ma4HCqnFOmyc=
   file:
-  - drp-community-content.zip
+  - drp-community-content.yaml
   - drp-community-content.sha256
   on:
     repo: digitalrebar/provision-content

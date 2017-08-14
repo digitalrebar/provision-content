@@ -11,22 +11,21 @@ export TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER:-localtest}
 
 . tools/wl-lib.sh
 
-if [ ! -e drp-community-content.zip ] ; then
-    echo "Missing zip file to test.  Run tools/package.sh"
+if [ ! -e drp-community-content.yaml ] ; then
+    echo "Missing yaml file to test.  Run tools/package.sh"
     exit 1
 fi
 
 bring_up_admin "drp-${TRAVIS_JOB_NUMBER//./-}"
 
 # Install content - we are testing
-ssh -i cicd root@$IP mkdir -p drp-content/tools
-scp -i cicd -r drp-community-content.* root@$IP:drp-content
-scp -i cicd -r tools/install.sh root@$IP:drp-content/tools
-ssh -i cicd root@$IP chmod 755 drp-content/tools/install.sh
-ssh -i cicd root@$IP "cd drp-content ; tools/install.sh"
+ssh -i cicd root@$IP mkdir -p /usr/share/dr-provision
+scp -i cicd -r drp-community-content.yaml root@$IP:drp-content:/usr/share/dr-provision/default.yaml
+ssh -i cicd root@$IP service dr-provision restart
 
-ssh -i cicd root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-ubuntu-16.04.yml"
-ssh -i cicd root@$IP "cd drp-content ; drpcli bootenvs install bootenvs/ce-centos-7.3.1611.yml"
+# Pull ISO
+ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-ubuntu-16.04-install"
+ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-centos-7.3.1611-install"
 
 # Packet console parameter
 ssh -i cicd root@$IP "drpcli profiles set global param kernel-console to 'console=ttyS1,115200'"
