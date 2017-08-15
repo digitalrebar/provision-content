@@ -25,12 +25,11 @@ cat > /target/update_system2.sh <<'EOF2341'
 set -x
 export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
 
-{{ template "ce-root-remote-access.tmpl" . }}
-{{ template "ce-update-drp-local.tmpl" . }}
+{{template "ce-root-remote-access.tmpl" .}}
+{{template "ce-update-drp-local.tmpl" .}}
 
 EOF2341
 
 chmod +x /target/update_system2.sh
 chroot /target /update_system2.sh
 sync
-

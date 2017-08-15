@@ -1,8 +1,8 @@
 Name: ce-root-access
 Params:
-  access_keys:
+  access-keys:
     greg: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDvqrpVfs9MXwjleLNPICcjAMviF3FJq85sMAe/4ejNDLMOcjDIFz4aQxrZx6sPlaqWADdy9XADaKgaYZwNssE9s6GNGJVORXl+vacLslwcrWo7aThzfKSlkn6wul3PcVjvIINQGiH/sUznLT8zUGR0hWX2Pds80iSxaQhIoFC8+DEVPSr5CIlliaCiYmwBB2FjBvR6ryltqxx3PIjJ4RwiP77DV6kdkG2khdY2XB7WLJptlgrg2U20TKG/9LrBqPFcM/m0BEmp01xN60A/O5Iw+vTXQoR3CX0mlNIzQIeAbtqau+uPkzd2TPzNOZebEvOnw1MxJPLjLqvxXRw54Bt9 galthaus@Gregs-MacBook-Pro.local
-  # access_ssh_root_mode can be specified to change how Root can be accessed
+  # access-ssh-root-mode can be specified to change how Root can be accessed
   # Values: "without-password|yes|no|forced-commands-only"
-  access_ssh_root_mode: without-password
+  access-ssh-root-mode: without-password
 
