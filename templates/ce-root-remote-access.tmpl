@@ -5,29 +5,29 @@
 # Runs as part of a shell script for kickstart or net-post-install
 # The template does nothing if proxy-servers is undefined
 #
-# Required Parameters: access_keys
-# Optional Parameters: access_ssh_root_mode
+# Required Parameters: access-keys
+# Optional Parameters: access-ssh-root-mode
 #
 # Parameter YAML format:
 #
-# access_keys:
+# access-keys:
 #   greg:  ssh-rsa key
 #   greg2:  ssh-rsa key
-# access_ssh_root_mode: "without-password|yes|no|forced-commands-only"
+# access-ssh-root-mode: "without-password|yes|no|forced-commands-only"
 #
 # Defaults:
-# access_keys - empty
-# access_ssh_root_mode - defaults to "without-password" if unspecified
+# access-keys - empty
+# access-ssh-root-mode - defaults to "without-password" if unspecified
 #
-{{if .ParamExists "access_keys"}}
+{{if .ParamExists "access-keys"}}
 mkdir -p /root/.ssh
 cat >/root/.ssh/authorized_keys <<EOFSSHACCESS
 ### BEGIN GENERATED CONTENT
-{{ range $key := .Param "access_keys" }}
+{{range $key := .Param "access-keys"}}
 {{$key}}
-{{ end }}
+{{end}}
 ### END GENERATED CONTENT
 EOFSSHACCESS
-echo "PermitRootLogin {{if .ParamExists "access_ssh_root_mode"}}{{.Param "access_ssh_root_mode"}}{{else}}without-password{{end}}" >> /etc/ssh/sshd_config
+echo "PermitRootLogin {{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}" >> /etc/ssh/sshd_config
 echo "AcceptEnv http_proxy https_proxy no_proxy" >> /etc/ssh/sshd_config
 {{end}}

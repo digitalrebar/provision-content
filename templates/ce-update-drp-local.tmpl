@@ -6,19 +6,19 @@
 # The template does is always on, but can be modified
 #
 # Required Parameters:
-# Optional Parameters: next_boot_env
+# Optional Parameters: next-boot-env
 #
 # Parameter YAML format:
 #
-# next_boot_env: ce-local
+# next-boot-env: ce-local
 #
 # Defaults:
-# next_boot_env - defaults to ce-local if unspecified
+# next-boot-env - defaults to ce-local if unspecified
 #
 (cd /bin; curl -s -f -L -o drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"; chmod 755 drpcli)
 export RS_ENDPOINT="{{.ApiURL}}"
 # This will contain a token appropriate for the path being
 # used below.  Either a create or update/show token
 export RS_TOKEN="{{.GenerateToken}}"
-drpcli machines update "{{.Machine.UUID}}" '{"BootEnv": "{{if .ParamExists "next_boot_env"}}{{.Param "next_boot_env"}}{{else}}ce-local{{end}}"}'
+drpcli machines update "{{.Machine.UUID}}" '{"BootEnv": "{{if .ParamExists "next-boot-env"}}{{.Param "next-boot-env"}}{{else}}ce-local{{end}}"}'
 
