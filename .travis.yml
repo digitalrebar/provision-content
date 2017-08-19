@@ -12,6 +12,7 @@ addons:
     packages:
     - sshpass
     - bsdtar
+    - p7zip-full
 script:
 - mkdir -p ~/.ssh
 - cp tools/ssh-config ~/.ssh/config
