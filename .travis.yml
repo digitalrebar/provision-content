@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
     - sshpass
+    - bsdtar
 script:
 - mkdir -p ~/.ssh
 - cp tools/ssh-config ~/.ssh/config
