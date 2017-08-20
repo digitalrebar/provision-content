@@ -20,5 +20,7 @@ if [ ! -e drp ] ; then
   cd ..
 fi
 
-drp/drpcli contents bundle drp-community-content.yaml --format=yaml
+. tools/version.sh
+
+drp/drpcli contents bundle drp-community-content.yaml Name="Digital Rebar Provision Community Content" Version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" Source="https://github.com/digitalrebar/provision-content" Description="Community Content" --format=yaml
 $shasum drp-community-content.yaml > drp-community-content.sha256

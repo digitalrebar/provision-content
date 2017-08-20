@@ -30,6 +30,7 @@ sleep 10
 # Pull ISO
 ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-ubuntu-16.04-install"
 ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-centos-7.3.1611-install"
+ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-sledgehammer"
 
 # Packet console parameter
 ssh -i cicd root@$IP "drpcli profiles set global param kernel-console to 'console=ttyS1,115200'"
