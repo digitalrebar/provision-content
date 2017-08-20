@@ -19,9 +19,13 @@ fi
 bring_up_admin "drp-${TRAVIS_JOB_NUMBER//./-}"
 
 # Install content - we are testing
+ssh -i cicd root@$IP service dr-provision stop
 ssh -i cicd root@$IP mkdir -p /usr/share/dr-provision
-scp -i cicd -r drp-community-content.yaml root@$IP:drp-content:/usr/share/dr-provision/default.yaml
-ssh -i cicd root@$IP service dr-provision restart
+scp -i cicd -r drp-community-content.yaml root@$IP:/usr/share/dr-provision/default.yaml
+ssh -i cicd root@$IP service dr-provision start
+
+# Wait for DRP to start.
+sleep 10
 
 # Pull ISO
 ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-ubuntu-16.04-install"
