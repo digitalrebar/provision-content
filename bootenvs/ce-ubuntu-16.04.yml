@@ -12,7 +12,8 @@ Initrds:
 Kernel: "install/netboot/ubuntu-installer/amd64/linux"
 BootParams: "debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
   netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
-  root=/dev/ram rw quiet -- {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
+  root=/dev/ram rw quiet {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}} --
+  {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"
@@ -36,4 +37,3 @@ Templates:
   - ID: "ce-net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
-TenantId: 1

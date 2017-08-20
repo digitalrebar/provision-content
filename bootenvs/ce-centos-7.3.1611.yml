@@ -28,4 +28,3 @@ Templates:
   - ID: "ce-centos-7.ks.tmpl"
     Name: "compute.ks"
     Path: "{{.Machine.Path}}/compute.ks"
-TenantId: 1
