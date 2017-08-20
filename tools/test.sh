@@ -31,6 +31,8 @@ sleep 10
 ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-ubuntu-16.04-install"
 ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-centos-7.3.1611-install"
 ssh -i cicd root@$IP "drpcli bootenvs uploadiso ce-sledgehammer"
+ssh -i cicd root@$IP "drpcli prefs set defaultBootEnv ce-sledgehammer"
+ssh -i cicd root@$IP "drpcli prefs set unknownBootEnv ce-discovery"
 
 # Packet console parameter
 ssh -i cicd root@$IP "drpcli profiles set global param kernel-console to 'console=ttyS1,115200'"
