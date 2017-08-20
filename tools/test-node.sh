@@ -9,7 +9,7 @@ set -x
 # access_ssh_root_mode - defaults to without-password
 
 # update-drp-local template
-# next_boot_env - defaults to ce-local
+# next_boot_env - defaults to local
 
 # Kick start / Preseed templates
 # operating-system-disk - defaults to /dev/sda
@@ -44,7 +44,7 @@ fi
 
 CompleteBE=bad
 if [[ $COMPLETE_BE == l ]] ; then
-    CompleteBE=ce-local
+    CompleteBE=local
 fi
 if [[ $COMPLETE_BE == s ]] ; then
     CompleteBE=ce-sledgehammer
