@@ -31,7 +31,7 @@ Templates:
   - ID: "ce-default-ipxe.tmpl"
     Name: "ipxe"
     Path: "{{.Machine.Address}}.ipxe"
-  - ID: "ce-net_seed.tmpl"
+  - ID: "ce-net-seed.tmpl"
     Name: "seed"
     Path: "{{.Machine.Path}}/seed"
   - ID: "ce-net-post-install.sh.tmpl"
