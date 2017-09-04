@@ -25,7 +25,7 @@ echo "Device IP = $IP/$CIDR"
 
 ssh -i cicd root@$IP apt-get update
 ssh -i cicd root@$IP mkdir -p provision
-ssh -i cicd root@$IP "cd provision ; curl -fsSL https://raw.githubusercontent.com/digitalrebar/provision/master/tools/install.sh | bash -s -- --drp-version=tip install"
+ssh -i cicd root@$IP "cd provision ; curl -fsSL https://raw.githubusercontent.com/digitalrebar/provision/master/tools/install.sh | bash -s -- --nocontent --drp-version=tip install"
 ssh -i cicd root@$IP "systemctl daemon-reload && systemctl enable dr-provision"
 ssh -i cicd root@$IP "systemctl daemon-reload && systemctl start dr-provision"
 
