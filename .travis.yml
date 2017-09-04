@@ -30,6 +30,7 @@ deploy:
   file:
   - drp-community-content.yaml
   - drp-community-content.sha256
+  skip_cleanup: true
   on:
     repo: digitalrebar/provision-content
     tags: true
