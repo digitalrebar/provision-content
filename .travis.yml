@@ -18,7 +18,7 @@ script:
 - cp tools/ssh-config ~/.ssh/config
 - chmod 600 ~/.ssh/config
 - ./tools/package.sh
-- ./tools/test.sh
+#- ./tools/test.sh
 notifications:
   slack:
     secure: SZbSknaaUrVGpmRxvBMQhWeG5TKNHhiTHZTb8ZT+00dQcMjfGfa0vFhXgWgKjm/Hwt6YMw/GbwPWCudhvRnwmnVKytrf55hsmlE+N/jdoyg3VNRW4r2PwbBRnqtc37JNC6BvgJpKNbqM4zBc5ze9AMZ31uPLuTAFaMZwcwnpwr2Qha6DoQDGrnzuxxOMsFz6wH7YvMa3hvSDFSC2Vbgu57a0KwaZsyCH5aS2G7n9p346fElSe9f1Zy8Q/xlkxl9Eu6ZhynwXjcWDsL4KOdXjrbGHYgQEJT3xgO985zsV4MisM4xBVe08MyrJQbJO1rkYXZkElyIHHHTySiw6v/JOInlAroD29tJo+RZZ8LL04KT2Lghq0Du9MELUo0q1a/mcKJ4KSG2YNbY98TyP2FIEdL9iGLM5WNhU59kY1T7VKv+b4Z/ngGZFr3C4d/RhGdV5Ys2rLAYTsT+za9/D4zzg09abSYmonWKyzyaWe4ifbcnN6Yx9F+UrGYLSEzHaGCRDggPDkxZodRRhAyfUu/BE9XxplmoWJH+1cFuIgg1YXj4vCQxnrUdwVfLClHv24aSdn4HZW4bx41aNf9FaEWLLJjmcRUP7uPQvexioiotlvrRZVkZKqjc/qj8Xdicx+qtgOIUU3e9p2xq4t4FXgrbJOB5e+Zbs8x2yjoIVS/RsLiU=
