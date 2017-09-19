@@ -4,9 +4,9 @@
 # These two bootenvs are linked and should be used as a pair.
 Name: "ce-sledgehammer"
 OS:
-  Name: "sledgehammer/307bfd7208f655e3da4cc8ccfd87676dd4097085"
-  IsoFile: "sledgehammer-307bfd7208f655e3da4cc8ccfd87676dd4097085.tar"
-  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/307bfd7208f655e3da4cc8ccfd87676dd4097085/sledgehammer-307bfd7208f655e3da4cc8ccfd87676dd4097085.tar"
+  Name: "sledgehammer/b3c09ebd5a9c228c66d8a617b6f5d10ccbe1c273"
+  IsoFile: "sledgehammer-b3c09ebd5a9c228c66d8a617b6f5d10ccbe1c273.tar"
+  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/b3c09ebd5a9c228c66d8a617b6f5d10ccbe1c273/sledgehammer-b3c09ebd5a9c228c66d8a617b6f5d10ccbe1c273.tar"
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
