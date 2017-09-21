@@ -42,5 +42,5 @@ fi
 
 . tools/version.sh
 
-drp/drpcli contents bundle drp-community-content.yaml Name="Digital Rebar Provision Community Content" Version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" Source="https://github.com/digitalrebar/provision-content" Description="Community Content" --format=yaml
+drp/drpcli contents bundle drp-community-content.yaml Description="Digital Rebar Provision Community Content" Version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" Source="https://github.com/digitalrebar/provision-content" Name="drp-community-content" --format=yaml
 $shasum drp-community-content.yaml > drp-community-content.sha256
