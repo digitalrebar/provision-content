@@ -33,6 +33,7 @@ BootParams: >-
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
+  - "part-scheme"
   - "operating-system-disk"
   - "provisioner-default-user"
   - "provisioner-default-fullname"

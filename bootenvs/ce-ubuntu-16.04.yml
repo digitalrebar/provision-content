@@ -16,6 +16,7 @@ BootParams: "debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyb
   {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
 RequiredParams:
 OptionalParams:
+  - "part-scheme"
   - "operating-system-disk"
   - "provisioner-default-password-hash"
   - "provisioner-default-user"
