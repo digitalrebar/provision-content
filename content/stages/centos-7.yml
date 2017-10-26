@@ -5,6 +5,9 @@ RunnerWait: true
 OptionalParams:
   - "change-stage/map"
 Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
   - "change-stage"
 Meta:
   icon: download

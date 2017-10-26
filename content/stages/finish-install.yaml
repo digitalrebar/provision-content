@@ -2,7 +2,7 @@
 Name: "finish-install"
 BootEnv: "local"
 Tasks:
-  - change-stage
+  - "change-stage"
 Meta:
   icon: checkmark
   color: yellow

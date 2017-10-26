@@ -5,6 +5,8 @@ RunnerWait: true
 OptionalParams:
   - "change-stage/map"
 Tasks:
+  - "ubuntu-drp-only-repos"
+  - "ssh-access"
   - "change-stage"
 Meta:
   icon: download
