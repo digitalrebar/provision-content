@@ -1,4 +1,5 @@
 # DigitalRebar Provision Centos-6 (and related distros) kickstart
+
 install
 url --url {{ .Env.InstallUrl }}
 # Add support for our local proxy.
@@ -47,8 +48,6 @@ efibootmgr
 exec > /root/post-install.log 2>&1
 set -x
 export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
-
-{{ template "centos-drp-only-repos.tmpl" . }}
 
 RUNNER_WAIT=false
 {{ template "runner.tmpl" . }}
