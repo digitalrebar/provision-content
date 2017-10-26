@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# This will contain a token appropriate for the path being
+# used below.  Either a create or update/show token
+export RS_UUID="{{.Machine.UUID}}"
+export RS_TOKEN="{{.GenerateToken}}"
+
+# Make sure we have a drpcli and jq somewhere
+ProvURL="{{.ProvisionerURL}}"
+(mkdir -p /usr/local/bin; cd /usr/local/bin; curl -s -f -L -o jq "$ProvURL/files/jq"; chmod 755 jq)
+PATH=$PATH:/usr/local/bin
+
+drpcli info get | jq .features | grep -q '"sane-exit-codes"'
+if [[ $? == 0 ]] ; then
+    echo "DRP supports 'sane-exit-codes' using them ..."
+    SUCCESS_CODE=0
+    FAIL_CODE=1
+    REBOOT_CODE=64
+    STOP_CODE=16
+else
+    echo "DRP does NOT support 'sane-exit-codes' using old codes ..."
+    SUCCESS_CODE=0
+    FAIL_CODE=4
+    REBOOT_CODE=1
+    STOP_CODE=4
+fi
+
+# Get current stage
+CURRENT_STAGE=$(drpcli machines show ${RS_UUID} | jq .Stage -r)
+echo "Machine's current stage: $CURRENT_STAGE"
+
+declare -A DATA
+
+{{if .ParamExists "change-stage/map"}}
+{{ range $key, $value := (.Param "change-stage/map")}}
+DATA["{{$key}}"]="{{$value}}"
+{{end}}
+{{end}}
+
+if [[ ${DATA["$CURRENT_STAGE"]} == "" ]] ; then
+    NEWSTAGE=""
+    RET_CODE=0
+
+    echo "No stage to change to - return $RET_CODE"
+else
+    echo "Checking for data: $CURRENT_STAGE from ${DATA["$CURRENT_STAGE"]}"
+    IFS=':' read -r -a array <<< "${DATA["$CURRENT_STAGE"]}"
+
+    if [[ ${array[0]} == "" ]] ; then
+        NEWSTAGE="none"
+        RET_CODE=$SUCCESS_CODE
+    else
+        NEWSTAGE="${array[0]}"
+        if [[ ${array[1]} == Success ]] ; then
+            RET_CODE=$SUCCESS_CODE
+        elif [[ ${array[1]} == Reboot ]] ; then
+            RET_CODE=$REBOOT_CODE
+        elif [[ ${array[1]} == Stop ]] ; then
+            if [[ $STOP_CODE == 4 ]] ; then
+                echo "Stop only supported with 'sane-exit-codes'.  Failing ..."
+                exit $FAIL_CODE
+            fi
+            RET_CODE=$STOP_CODE
+        fi
+    fi
+
+    echo "Attempting to test Stage to $NEWSTAGE and return $RET_CODE"
+
+    # Update stage to indicate that we are done.
+    if ! drpcli machines stage "${RS_UUID}" "$NEWSTAGE" --force ; then
+        echo "\nFailed to change stage: Returning $FAIL_CODE"
+        exit $FAIL_CODE
+    fi
+fi
+
+echo "\nChanged stage successfully: Returning $RET_CODE"
+exit $RET_CODE

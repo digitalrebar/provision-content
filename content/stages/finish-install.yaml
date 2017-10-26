@@ -1,0 +1,10 @@
+---
+Name: "finish-install"
+BootEnv: "local"
+Tasks:
+  - change-stage
+Meta:
+  icon: checkmark
+  color: yellow
+  title: RackN Content
+

@@ -1,0 +1,43 @@
+---
+Name: "ubuntu-16.04-install"
+OS:
+  Name: "ubuntu-16.04"
+  Family: "ubuntu"
+  IsoFile: "ubuntu-16.04.3-server-amd64.iso"
+  IsoSha256: "a06cd926f5855d4f21fb4bc9978a35312f815fbda0d0ef7fdc846861f4fc4600"
+  IsoUrl: "http://mirrors.kernel.org/ubuntu-releases/16.04/ubuntu-16.04.3-server-amd64.iso"
+  Version: "16.04"
+Initrds:
+  - "install/netboot/ubuntu-installer/amd64/initrd.gz"
+Kernel: "install/netboot/ubuntu-installer/amd64/linux"
+BootParams: "debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
+  netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
+  root=/dev/ram rw quiet {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}} --
+  {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
+RequiredParams:
+OptionalParams:
+  - "part-scheme"
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "provisioner-default-user"
+  - "access-keys"
+  - "kernel-console"
+  - "proxy-servers"
+  - "ntp-servers"
+  - "dns-domain"
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-elilo.tmpl"
+    Name: "elilo"
+    Path: "{{.Machine.HexAddress}}.conf"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "net-seed.tmpl"
+    Name: "seed"
+    Path: "{{.Machine.Path}}/seed"
+  - ID: "net-post-install.sh.tmpl"
+    Name: "net-post-install.sh"
+    Path: "{{.Machine.Path}}/post-install.sh"

@@ -1,0 +1,13 @@
+Description: A task to change stages
+Name: change-stage
+OptionalParams: null
+RequiredParams: null
+Templates:
+- ID: change-stage.sh.tmpl
+  Name: Change stage
+  Path: ""
+Meta:
+  icon: shuffle
+  color: blue
+  title: RackN Content
+  feature-flags: "sane-exit-codes"

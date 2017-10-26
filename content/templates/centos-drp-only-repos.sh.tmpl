@@ -1,0 +1,34 @@
+#!/bin/bash
+{{ if .ParamExists "local_repo" }}
+{{ if eq (.Param "local_repo") true }}
+#
+# This template forces a yum-based install
+# to use only the local DRP provided repo.
+#
+# Runs as part of a shell script for kickstart
+# The template does is only functional if local_repo is true.
+#
+# Required Parameters: local_repo
+# Optional Parameters:
+#
+# Parameter YAML format:
+#
+# local_repo: true
+#
+# Defaults:
+# local_repo - Function is enabled if and only local_repo is true
+#
+(cd /etc/yum.repos.d; rm -f * || :)
+
+# Use the install repo from the provisioner for local package installation
+cat >/etc/yum.repos.d/00-rebar-base.repo <<EOFLOCALREPO
+[rebar-base]
+name=DigitalRebar Provision Base Repo
+baseurl={{.Env.InstallUrl}}
+gpgcheck=0
+EOFLOCALREPO
+
+yum -y makecache
+
+{{ end }}
+{{ end }}

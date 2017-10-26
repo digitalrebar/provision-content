@@ -1,0 +1,16 @@
+---
+Name: "discover"
+BootEnv: "sledgehammer"
+RunnerWait: true
+OptionalParams:
+  - "change-stage/map"
+  - "access-keys"
+  - "access-ssh-root-mode"
+Tasks:
+  - "gohai"
+  - "ssh-access"
+  - "change-stage"
+Meta:
+  icon: spinner
+  color: yellow
+  title: RackN Content

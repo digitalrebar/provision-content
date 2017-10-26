@@ -1,0 +1,12 @@
+---
+Name: "debian-9-install"
+BootEnv: "debian-9-install"
+RunnerWait: true
+OptionalParams:
+  - "change-stage/map"
+Tasks:
+  - "change-stage"
+Meta:
+  icon: download
+  color: yellow
+  title: RackN Content

@@ -1,0 +1,13 @@
+---
+Name: gohai
+Description: Get basic system inventory using Gohai
+Templates:
+  - Name: gohai
+    Contents: |
+      #!/usr/bin/env bash
+      drpcli machines set {{.Machine.UUID}} set gohai-inventory to "$(gohai)"
+Meta:
+  icon: search
+  color: blue
+  title: RackN Content
+  feature-flags: "sane-exit-codes"

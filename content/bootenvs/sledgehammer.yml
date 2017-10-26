@@ -2,7 +2,7 @@
 # Sledgehammer (the per machine bootenv)
 # This bootenv requires the start-up.sh file to be rendered by the discovery bootenv.
 # These two bootenvs are linked and should be used as a pair.
-Name: "ce-sledgehammer"
+Name: "sledgehammer"
 OS:
   Name: "sledgehammer/f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15"
   IsoFile: "sledgehammer-f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15.tar"
@@ -72,12 +72,7 @@ Templates:
       export PS4="${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): "
       cp /usr/share/zoneinfo/GMT /etc/localtime
 
-      {{template "ce-root-remote-access.tmpl" .}}
-
-      # Set up just enough infrastructure to let the jigs work.
-      # Allow client to pass http proxy environment variables
-      echo "AcceptEnv http_proxy https_proxy no_proxy" >> /etc/ssh/sshd_config
-      service sshd restart
+      {{template "runner.tmpl" .}}
 
       # The last line in this script must always be exit 0!!
       exit 0

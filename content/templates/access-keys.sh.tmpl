@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # This template populates the root's authorized keys file
 # and makes sure that the sshd config for PermitRootLogin is populated.
@@ -19,15 +20,34 @@
 # access-keys - empty
 # access-ssh-root-mode - defaults to "without-password" if unspecified
 #
+
 {{if .ParamExists "access-keys"}}
+echo "Putting ssh access keys for root in place"
 mkdir -p /root/.ssh
-cat >/root/.ssh/authorized_keys <<EOFSSHACCESS
-### BEGIN GENERATED CONTENT
+cat >>/root/.ssh/authorized_keys <<EOFSSHACCESS
+### BEGIN Access Keys GENERATED CONTENT
 {{range $key := .Param "access-keys"}}
 {{$key}}
 {{end}}
-### END GENERATED CONTENT
+### END Access Keys GENERATED CONTENT
 EOFSSHACCESS
+chmod 600 /root/.ssh/authorized_keys
+{{end}}
+
+echo "Updating SSHD default values"
 echo "PermitRootLogin {{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}" >> /etc/ssh/sshd_config
 echo "AcceptEnv http_proxy https_proxy no_proxy" >> /etc/ssh/sshd_config
-{{end}}
+
+# Restart sshd but os badness.
+. /etc/os-release
+# Ignore error because we may run in a place that doesn't have ssh installed
+if [[ "$ID" == "ubuntu" || "$ID" == "debian" ]] ; then
+    echo "Restarting ssh"
+    service ssh restart || true
+else
+    echo "Restarting sshd"
+    service sshd restart || true
+fi
+
+echo "Finished updating access keys successfully"
+exit 0

@@ -1,0 +1,57 @@
+# DigitalRebar Provision Centos-6 (and related distros) kickstart
+install
+url --url {{ .Env.InstallUrl }}
+# Add support for our local proxy.
+repo --name="CentOS"  --baseurl={{ .Env.InstallUrl }} {{if .ParamExists "proxy-servers"}} --proxy="{{index (.Param "proxy-servers") 0 "url"}}"{{end}} --cost=100
+key --skip
+lang en_US.UTF-8
+keyboard us
+# rebar
+rootpw --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{ .Param "provisioner-default-password-hash" }}{{else}}$6$rebar$HBaBj/uDmsQMEw4Si6eja9Yba3rhB73Na36hbrp9KxDHm6s5veeWyXlsUkoxRACtP47978iiidziRdsYUC7gC/{{end}}
+firewall --disabled
+authconfig --enableshadow --enablemd5
+selinux --disabled
+timezone --utc UTC
+bootloader --location=mbr {{if .ParamExists "operating-system-disk"}}--driveorder={{ .Param "operating-system-disk" }}{{end}} --append="rhgb quiet"
+zerombr
+{{if .ParamExists "operating-system-disk"}}ignoredisk --only-use={{ .Param "operating-system-disk" }}{{end}}
+clearpart --all {{if .ParamExists "operating-system-disk"}}--drives={{ .Param "operating-system-disk" }}{{end}}
+part /boot --fstype ext4 --size=512 {{if .ParamExists "operating-system-disk"}}--ondisk={{ .Param "operating-system-disk" }}{{end}}
+part /boot/efi --fstype vfat --size=512 {{if .ParamExists "operating-system-disk"}}--ondisk={{ .Param "operating-system-disk" }}{{end}}
+part swap --recommended
+part pv.6 --size=1 --grow {{if .ParamExists "operating-system-disk"}}--ondisk={{ .Param "operating-system-disk" }}{{end}}
+volgroup {{ .Machine.ShortName }} --pesize=32768 pv.6
+logvol / --fstype ext4 --name=lv_root --vgname={{ .Machine.ShortName }} --size=1 --grow --maxsize=10240
+text
+reboot
+
+%packages
+@base
+@core
+vim-enhanced
+keyutils
+trousers
+fipscheck
+device-mapper-multipath
+OpenIPMI
+OpenIPMI-tools
+emacs-nox
+openssh
+curl.x86_64
+ntp
+ntpdate
+tcpdump
+efibootmgr
+%post
+
+exec > /root/post-install.log 2>&1
+set -x
+export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+
+{{ template "centos-drp-only-repos.tmpl" . }}
+
+RUNNER_WAIT=false
+{{ template "runner.tmpl" . }}
+
+sync
+%end

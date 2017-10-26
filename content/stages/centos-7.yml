@@ -1,0 +1,12 @@
+---
+Name: "centos-7-install"
+BootEnv: "centos-7-install"
+RunnerWait: true
+OptionalParams:
+  - "change-stage/map"
+Tasks:
+  - "change-stage"
+Meta:
+  icon: download
+  color: yellow
+  title: RackN Content

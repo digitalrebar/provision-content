@@ -1,0 +1,12 @@
+---
+Name: "ubuntu-14.04-install"
+BootEnv: "ubuntu-14.04-install"
+RunnerWait: true
+OptionalParams:
+  - "change-stage/map"
+Tasks:
+  - "change-stage"
+Meta:
+  icon: download
+  color: yellow
+  title: RackN Content

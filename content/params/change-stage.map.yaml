@@ -1,0 +1,17 @@
+---
+Name: "change-stage/map"
+Description: "A map of current stage to next stage and reboot choices"
+Documentation: |
+  This map is used to select the next stage based upon the current stage.
+
+  The form is current stage as the key with the value being a string with a
+  colon seperated next stage and return action (success or reboot).
+
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+Meta:
+  icon: shuffle
+  color: blue
+  title: RackN Content

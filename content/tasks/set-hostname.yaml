@@ -1,0 +1,12 @@
+Description: A task to set the hostname
+Name: set-hostname
+OptionalParams: null
+RequiredParams: null
+Templates:
+  - ID: set-hostname.sh.tmpl
+    Name: Set the hostname on the machine
+    Path: ""
+Meta:
+  icon: key
+  color: blue
+  title: RackN Content

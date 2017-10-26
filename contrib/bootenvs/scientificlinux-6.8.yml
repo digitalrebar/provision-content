@@ -1,0 +1,31 @@
+---
+Name: "scientificlinux-6.8-install"
+OS:
+  Name: "scientificlinux-6.8"
+  IsoFile: "SL-68-x86_64-2016-06-29-DVD-DL.iso"
+  IsoSha256: "ada95b0e920612a5a9c56e268515a9965663377407a7897167be7a2efdade804"
+  IsoUrl: "http://ftp1.scientificlinux.org/linux/scientific/6.8/x86_64/iso/SL-68-x86_64-2016-06-29-DVD-DL.iso"
+Kernel: "images/pxeboot/vmlinuz"
+Initrds:
+  - "images/pxeboot/initrd.img"
+BootParams: "ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}} -- {{ if .ParamExists \"kernel_console\"}}{{.Param \"kernel_console\" }}{{ end }}"
+RequiredParams:
+OptionalParams:
+  - "ntp-servers"
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "proxy-servers"
+  - "access-keys"
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-elilo.tmpl"
+    Name: "elilo"
+    Path: "{{.Machine.HexAddress}}.conf"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "centos-6.ks.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"

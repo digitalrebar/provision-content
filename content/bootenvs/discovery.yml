@@ -1,5 +1,5 @@
 ---
-Name: "ce-discovery"
+Name: "discovery"
 Description: "The boot environment to use to have unknown machines boot to Sledgehammer"
 OnlyUnknown: true
 OS:
@@ -109,8 +109,7 @@ Templates:
           # Add the default noderoles we will need, and
           # Let the annealer do its thing.
           while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                               \"Address\": \"$IP\",
-                                               \"BootEnv\": \"ce-sledgehammer\"}")"; do
+                                               \"Address\": \"$IP\"}")"; do
               echo "We could not create a node for ourself, trying again."
               sleep 5
           done

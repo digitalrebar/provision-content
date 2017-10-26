@@ -1,0 +1,19 @@
+---
+Name: "access-ssh-root-mode"
+Description: "Defines the root login policy"
+Documentation: |
+  This string defines the login policy for the root user.
+
+  Possible values are:
+    without-password - default
+    yes
+    no
+    forced-commands-only
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: unlock
+  color: blue
+  title: RackN Content

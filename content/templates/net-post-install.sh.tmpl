@@ -27,8 +27,8 @@ export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
 
 wget "{{.Machine.Url}}/seed" -O /var/log/provision.seed
 
-{{template "ce-root-remote-access.tmpl" .}}
-{{template "ce-update-drp-local.tmpl" .}}
+RUNNER_WAIT=false
+{{template "runner.tmpl" .}}
 
 EOF2341
 

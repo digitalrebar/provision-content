@@ -1,0 +1,7 @@
+---
+Name: gohai-inventory
+Description: System inventory as reported by Gohai
+Meta:
+  icon: search
+  color: blue
+  title: RackN Content
