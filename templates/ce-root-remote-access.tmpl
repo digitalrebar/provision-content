@@ -28,6 +28,6 @@ cat >/root/.ssh/authorized_keys <<EOFSSHACCESS
 {{end}}
 ### END GENERATED CONTENT
 EOFSSHACCESS
-echo "PermitRootLogin {{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}" >> /etc/ssh/sshd_config
+sed --in-place -r -e '/^#?PermitRootLogin/ s/^#//' -e '/^#?PermitRootLogin/ s/prohibit-password/{{if .ParamExists "access_ssh_root_mode"}}{{.Param "access_ssh_root_mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
 echo "AcceptEnv http_proxy https_proxy no_proxy" >> /etc/ssh/sshd_config
 {{end}}
