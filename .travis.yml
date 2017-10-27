@@ -5,6 +5,8 @@ branches:
 sudo: false
 go:
 - 1.9
+git:
+  depth: 500
 addons:
   apt:
     packages:
