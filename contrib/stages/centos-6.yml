@@ -1,6 +1,6 @@
 ---
-Name: "centos-6.8-install"
-BootEnv: "centos-6.8-install"
+Name: "centos-6-install"
+BootEnv: "centos-6.9-install"
 RunnerWait: true
 OptionalParams:
   - "change-stage/map"
