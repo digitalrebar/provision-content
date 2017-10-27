@@ -1,0 +1,31 @@
+---
+Name: "centos-6-install"
+OS:
+  Name: "centos-6"
+  IsoFile: "CentOS-6.9-x86_64-minimal.iso"
+  IsoSha256: "422af57b493b8af49d485885a730c5a1d955f803fac85aa51311c393168b9080"
+  IsoUrl: "http://mirrors.kernel.org/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-minimal.iso"
+Kernel: "images/pxeboot/vmlinuz"
+Initrds:
+  - "images/pxeboot/initrd.img"
+BootParams: "ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}} -- {{ if .ParamExists \"kernel_console\"}}{{.Param \"kernel_console\" }}{{ end }}"
+RequiredParams:
+OptionalParams:
+  - "ntp-servers"
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "proxy-servers"
+  - "access-keys"
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-elilo.tmpl"
+    Name: "elilo"
+    Path: "{{.Machine.HexAddress}}.conf"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "centos-6.ks.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"
