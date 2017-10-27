@@ -35,8 +35,7 @@ chmod 600 /root/.ssh/authorized_keys
 {{end}}
 
 echo "Updating SSHD default values"
-echo "PermitRootLogin {{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}" >> /etc/ssh/sshd_config
-echo "AcceptEnv http_proxy https_proxy no_proxy" >> /etc/ssh/sshd_config
+sed --in-place -r -e '/^#?PermitRootLogin/ s/^#//' -e '/^#?PermitRootLogin/ s/prohibit-password/{{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
 
 # Restart sshd but os badness.
 . /etc/os-release
