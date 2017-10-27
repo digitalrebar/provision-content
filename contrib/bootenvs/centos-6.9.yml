@@ -2,9 +2,9 @@
 Name: "centos-6.9-install"
 OS:
   Name: "centos-6.9"
-  IsoFile: "CentOS-6.9-x86_64-minimal.iso"
-  IsoSha256: "422af57b493b8af49d485885a730c5a1d955f803fac85aa51311c393168b9080"
-  IsoUrl: "http://mirrors.kernel.org/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-minimal.iso"
+  IsoFile: "CentOS-6.9-x86_64-bin-DVD1.iso"
+  IsoSha256: "d27cf37a40509c17ad70f37bc743f038c1feba00476fe6b69682aa424c399ea6"
+  IsoUrl: "http://mirrors.kernel.org/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-bin-DVD1.iso"
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
