@@ -1,3 +1,4 @@
+---
 Name: "root-access-example"
 Description: "Example profile for setting the access-keys and access-ssh-root-mode parameters"
 Params:
@@ -6,4 +7,6 @@ Params:
   # access-ssh-root-mode can be specified to change how Root can be accessed
   # Values: "without-password|yes|no|forced-commands-only"
   access-ssh-root-mode: without-password
-
+Meta:
+  color: "blue"
+  icon: "key"
