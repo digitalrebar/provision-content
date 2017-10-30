@@ -1,5 +1,6 @@
 ---
 Name: "debian-9-install"
+Description: "Debian 9 install BootEnv"
 OS:
   Name: "debian-9"
   Family: "debian"

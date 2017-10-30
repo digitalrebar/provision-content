@@ -1,5 +1,6 @@
 ---
 Name: "debian-8-install"
+Description: "Debian 8 install BootEnv"
 OS:
   Name: "debian-8"
   Family: "debian"
