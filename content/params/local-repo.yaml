@@ -1,0 +1,14 @@
+---
+Name: "local-repo"
+Description: "Indicates that the install should use the local exploded iso as the install repo"
+Documentation: |
+  Boolean value that tells the install steps to only use the local exploded iso on the 
+  DRP server as the only installation repo.
+
+Schema:
+  type: "boolean"
+
+Meta:
+  icon: "greg"
+  color: "blue"
+  title: "Digital Rebar Community Content"

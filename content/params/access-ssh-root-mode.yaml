@@ -14,6 +14,6 @@ Schema:
   type: "string"
 
 Meta:
-  icon: unlock
-  color: blue
-  title: RackN Content
+  icon: "unlock"
+  color: "blue"
+  title: "Digital Rebar Community Content"

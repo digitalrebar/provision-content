@@ -10,6 +10,6 @@ Schema:
   type: "string"
 
 Meta:
-  icon: desktop
-  color: blue
-  title: RackN Content
+  icon: "desktop"
+  color: "blue"
+  title: "Digital Rebar Community Content"

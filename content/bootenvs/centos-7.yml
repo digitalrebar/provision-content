@@ -1,5 +1,6 @@
 ---
 Name: "centos-7-install"
+Description: "CentOS-7 installer that points to the latest CentOS 7 release."
 OS:
   Name: "centos-7"
   IsoFile: "CentOS-7-x86_64-Minimal-1708.iso"
@@ -8,13 +9,19 @@ OS:
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
-BootParams: "ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}} inst.geoloc=0 -- {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
+BootParams:
+  ksdevice=bootif
+  ks={{.Machine.Url}}/compute.ks
+  method={{.Env.InstallUrl}}
+  inst.geoloc=0
+  --
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"
   - "provisioner-default-password-hash"
-  - "access-keys"
   - "kernel-console"
+  - "proxy-servers"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"

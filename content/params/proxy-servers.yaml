@@ -1,0 +1,17 @@
+---
+Name: "proxy-servers"
+Description: "Defines the set of HTTP proxy servers to apply to the system."
+Documentation: |
+  This is an array of URLs where each string is an HTTP proxy server to references.
+
+  The URLs can be names or IPs with ports and schemas.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+
+Meta:
+  icon: "browser"
+  color: "blue"
+  title: "Digital Rebar Community Content"

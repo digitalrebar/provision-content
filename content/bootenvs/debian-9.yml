@@ -39,8 +39,12 @@ OptionalParams:
   - "provisioner-default-fullname"
   - "provisioner-default-uid"
   - "provisioner-default-password-hash"
-  - "access-keys"
   - "kernel-console"
+  - "proxy-servers"
+  - "dns-domain"
+  - "local-repo"
+  - "proxy-servers"
+  - "ntp-servers"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"

@@ -1,5 +1,6 @@
 ---
 Name: "ubuntu-16.04-install"
+Description: "Ubuntu-16.04 install points to the latest release version"
 OS:
   Name: "ubuntu-16.04"
   Family: "ubuntu"
@@ -10,21 +11,34 @@ OS:
 Initrds:
   - "install/netboot/ubuntu-installer/amd64/initrd.gz"
 Kernel: "install/netboot/ubuntu-installer/amd64/linux"
-BootParams: "debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
-  netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
-  root=/dev/ram rw quiet {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}} --
-  {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
+BootParams: >-
+  debian-installer/locale=en_US.utf8
+  console-setup/layoutcode=us
+  keyboard-configuration/layoutcode=us
+  netcfg/dhcp_timeout=120
+  netcfg/choose_interface=auto
+  url={{.Machine.Url}}/seed
+  netcfg/get_hostname={{.Machine.Name}}
+  root=/dev/ram
+  rw
+  quiet
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  --
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
   - "part-scheme"
   - "operating-system-disk"
-  - "provisioner-default-password-hash"
   - "provisioner-default-user"
-  - "access-keys"
+  - "provisioner-default-fullname"
+  - "provisioner-default-uid"
+  - "provisioner-default-password-hash"
   - "kernel-console"
   - "proxy-servers"
-  - "ntp-servers"
   - "dns-domain"
+  - "local-repo"
+  - "proxy-servers"
+  - "ntp-servers"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"

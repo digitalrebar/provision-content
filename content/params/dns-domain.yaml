@@ -1,0 +1,14 @@
+---
+Name: "dns-domain"
+Description: "DNS Domain to append to hostname."
+Documentation: |
+  This is used currently in the Ubuntu/Debian preseed file to specify the DNS Domain Name of the host.
+
+  This may be in flux.
+
+Schema:
+  type: "string"
+Meta:
+  icon: "tag"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -1,5 +1,6 @@
 ---
 Name: "scientificlinux-6.8-install"
+Description: "Scientific Linux 6.8 install bootenv"
 OS:
   Name: "scientificlinux-6.8"
   IsoFile: "SL-68-x86_64-2016-06-29-DVD-DL.iso"
@@ -8,14 +9,17 @@ OS:
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
-BootParams: "ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}} -- {{ if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\" }}{{ end }}"
-RequiredParams:
+BootParams: >-
+  ksdevice=bootif
+  ks={{.Machine.Url}}/compute.ks
+  method={{.Env.InstallUrl}}
+  --
+  {{ if .ParamExists "kernel-console"}}{{.Param "kernel-console" }}{{ end }}
 OptionalParams:
-  - "ntp-servers"
   - "operating-system-disk"
   - "provisioner-default-password-hash"
   - "proxy-servers"
-  - "access-keys"
+  - "kernel-console"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"

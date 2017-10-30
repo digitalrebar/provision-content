@@ -12,6 +12,6 @@ Schema:
   additionalProperties:
     type: "string"
 Meta:
-  icon: key
-  color: blue
-  title: RackN Content
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

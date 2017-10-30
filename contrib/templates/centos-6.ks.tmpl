@@ -3,7 +3,7 @@
 install
 url --url {{ .Env.InstallUrl }}
 # Add support for our local proxy.
-repo --name="CentOS"  --baseurl={{ .Env.InstallUrl }} {{if .ParamExists "proxy-servers"}} --proxy="{{index (.Param "proxy-servers") 0 "url"}}"{{end}} --cost=100
+repo --name="CentOS"  --baseurl={{ .Env.InstallUrl }} {{if .ParamExists "proxy-servers"}} --proxy="{{index (.Param "proxy-servers") 0}}"{{end}} --cost=100
 key --skip
 lang en_US.UTF-8
 keyboard us

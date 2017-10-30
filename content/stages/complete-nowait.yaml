@@ -1,8 +1,8 @@
 ---
 Name: "complete-nowait"
+Descrption: "Stage that represents workflow completion to local disk.  Does NOT change stages"
 BootEnv: "local"
 Meta:
-  icon: checkmark
-  color: green
-  title: RackN Content
-
+  icon: "checkmark"
+  color: "green"
+  title: "Digital Rebar Community Content"

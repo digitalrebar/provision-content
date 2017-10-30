@@ -1,6 +1,6 @@
 ---
 Name: "discovery"
-Description: "The boot environment to use to have unknown machines boot to Sledgehammer"
+Description: "The boot environment to use to have unknown machines boot to default Stage/BootEnv"
 OnlyUnknown: true
 OS:
   Name: "sledgehammer/f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15"
@@ -9,7 +9,21 @@ OS:
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
-BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.api={{.ApiURL}} -- {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
+BootParams: >-
+  rootflags=loop
+  root=live:/sledgehammer.iso
+  rootfstype=auto
+  ro
+  liveimg
+  rd_NO_LUKS
+  rd_NO_MD
+  rd_NO_DM
+  provisioner.web={{.ProvisionerURL}}
+  rs.api={{.ApiURL}}
+  --
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+OptionalParams:
+  - "kernel-console"
 Templates:
   - Name: "pxelinux"
     Path: "pxelinux.cfg/default"

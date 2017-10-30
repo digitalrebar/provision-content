@@ -4,6 +4,6 @@ Description: "Wait for more tasks in sledgehammer - useful for debugging"
 BootEnv: "sledgehammer"
 RunnerWait: true
 Meta:
-  icon: hand paper
-  color: yellow
-  title: RackN Content
+  icon: "hand paper"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

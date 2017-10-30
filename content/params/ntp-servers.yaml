@@ -1,0 +1,16 @@
+---
+Name: "ntp-servers"
+Description: "Defines the set of NTP servers to apply to the system."
+Documentation: |
+  This is an array of strings where each string an IP address or Name of
+  an NTP server.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+
+Meta:
+  icon: "time"
+  color: "blue"
+  title: "Digital Rebar Community Content"

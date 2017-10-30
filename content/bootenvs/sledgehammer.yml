@@ -3,6 +3,7 @@
 # This bootenv requires the start-up.sh file to be rendered by the discovery bootenv.
 # These two bootenvs are linked and should be used as a pair.
 Name: "sledgehammer"
+Description: "Ram-Only image loaded with tools to allow for discovery and maintenance"
 OS:
   Name: "sledgehammer/f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15"
   IsoFile: "sledgehammer-f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15.tar"
@@ -10,10 +11,22 @@ OS:
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
-BootParams: "rootflags=loop root=live:/sledgehammer.iso rootfstype=auto ro liveimg rd_NO_LUKS rd_NO_MD rd_NO_DM provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}} rs.api={{.ApiURL}} -- {{if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\"}}{{end}}"
+BootParams: >-
+  rootflags=loop
+  root=live:/sledgehammer.iso
+  rootfstype=auto
+  ro
+  liveimg
+  rd_NO_LUKS
+  rd_NO_MD
+  rd_NO_DM
+  provisioner.web={{.ProvisionerURL}}
+  rs.uuid={{.Machine.UUID}}
+  rs.api={{.ApiURL}}
+  --
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
-  - "access-keys"
   - "kernel-console"
 Templates:
   - Name: "pxelinux"

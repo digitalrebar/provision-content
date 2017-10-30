@@ -1,0 +1,20 @@
+---
+Name: "part-scheme"
+Description: "Defines a string that references a template for partitioning during installation."
+Documentation: |
+  This string contains the name of a template that holds the Debian installer partitioning
+  commands for use during installation.
+
+  The string will be expanded into this template name:
+
+    part-seed-<string>.tmpl
+
+  e.g. softraid
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "disk outline"
+  color: "blue"
+  title: "Digital Rebar Community Content"

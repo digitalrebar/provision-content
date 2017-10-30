@@ -1,0 +1,13 @@
+---
+Name: "provisioner-default-fullname"
+Description: "Defines full name of the default user"
+Documentation: |
+  Used in the Debian/Ubuntu installers to specify the full name of the default user.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "Digital Rebar Community Content"

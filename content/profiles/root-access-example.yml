@@ -1,4 +1,5 @@
-Name: root-access-example
+Name: "root-access-example"
+Description: "Example profile for setting the access-keys and access-ssh-root-mode parameters"
 Params:
   access-keys:
     greg: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDvqrpVfs9MXwjleLNPICcjAMviF3FJq85sMAe/4ejNDLMOcjDIFz4aQxrZx6sPlaqWADdy9XADaKgaYZwNssE9s6GNGJVORXl+vacLslwcrWo7aThzfKSlkn6wul3PcVjvIINQGiH/sUznLT8zUGR0hWX2Pds80iSxaQhIoFC8+DEVPSr5CIlliaCiYmwBB2FjBvR6ryltqxx3PIjJ4RwiP77DV6kdkG2khdY2XB7WLJptlgrg2U20TKG/9LrBqPFcM/m0BEmp01xN60A/O5Iw+vTXQoR3CX0mlNIzQIeAbtqau+uPkzd2TPzNOZebEvOnw1MxJPLjLqvxXRw54Bt9 galthaus@Gregs-MacBook-Pro.local

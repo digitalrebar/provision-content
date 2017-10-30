@@ -1,14 +1,13 @@
 ---
 Name: "ubuntu-14.04-install"
+Description: "Ubuntu 14.04 install stage that references latest release"
 BootEnv: "ubuntu-14.04-install"
 RunnerWait: true
-OptionalParams:
-  - "change-stage/map"
 Tasks:
   - "ubuntu-drp-only-repos"
   - "ssh-access"
   - "change-stage"
 Meta:
-  icon: download
-  color: yellow
-  title: RackN Content
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

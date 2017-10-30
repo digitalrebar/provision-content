@@ -1,13 +1,13 @@
-Description: A task to force the node to switch DRP hosted-only repos.
-Name: ubuntu-drp-only-repos
+---
+Description: "A task to force the node to switch to DRP hosted-only ubuntu repos."
+Name: "ubuntu-drp-only-repos"
 OptionalParams:
-  - local-repo
-RequiredParams: null
+  - "local-repo"
 Templates:
-  - ID: ubuntu-drp-only-repos.sh.tmpl
-    Name: Force node to install from drp hosted repos
+  - ID: "ubuntu-drp-only-repos.sh.tmpl"
+    Name: "Force node to install from drp hosted repos"
     Path: ""
 Meta:
-  icon: key
-  color: blue
-  title: RackN Content
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

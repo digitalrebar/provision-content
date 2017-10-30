@@ -1,0 +1,15 @@
+---
+Name: "provisioner-default-uid"
+Description: "Defines uid to use for the default user"
+Documentation: |
+  Used in the Debian/Ubuntu installers to specify the uid of the default user.
+
+  The value is a string for of the integer value.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -1,14 +1,13 @@
 ---
 Name: "debian-9-install"
+Description: "Debian 9 install stage.  References the latest Debian 9 image"
 BootEnv: "debian-9-install"
 RunnerWait: true
-OptionalParams:
-  - "change-stage/map"
 Tasks:
   - "ubuntu-drp-only-repos"
   - "ssh-access"
   - "change-stage"
 Meta:
-  icon: download
-  color: yellow
-  title: RackN Content
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

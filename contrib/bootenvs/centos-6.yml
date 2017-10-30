@@ -1,5 +1,6 @@
 ---
 Name: "centos-6-install"
+Description: "CentOS 6 install bootenv that references the latest release"
 OS:
   Name: "centos-6"
   IsoFile: "CentOS-6.9-x86_64-bin-DVD1.iso"
@@ -8,14 +9,17 @@ OS:
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
-BootParams: "ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}} -- {{ if .ParamExists \"kernel-console\"}}{{.Param \"kernel-console\" }}{{ end }}"
-RequiredParams:
+BootParams: >-
+  ksdevice=bootif
+  ks={{.Machine.Url}}/compute.ks
+  method={{.Env.InstallUrl}}
+  --
+  {{ if .ParamExists "kernel-console"}}{{.Param "kernel-console" }}{{ end }}
 OptionalParams:
-  - "ntp-servers"
   - "operating-system-disk"
   - "provisioner-default-password-hash"
   - "proxy-servers"
-  - "access-keys"
+  - "kernel-console"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"

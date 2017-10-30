@@ -1,22 +1,22 @@
 #!/bin/bash
-{{ if .ParamExists "local_repo" }}
-{{ if eq (.Param "local_repo") true }}
+{{ if .ParamExists "local-repo" }}
+{{ if eq (.Param "local-repo") true }}
 #
 # This template forces a yum-based install
 # to use only the local DRP provided repo.
 #
 # Runs as part of a shell script for kickstart
-# The template does is only functional if local_repo is true.
+# The template does is only functional if local-repo is true.
 #
-# Required Parameters: local_repo
+# Required Parameters: local-repo
 # Optional Parameters:
 #
 # Parameter YAML format:
 #
-# local_repo: true
+# local-repo: true
 #
 # Defaults:
-# local_repo - Function is enabled if and only local_repo is true
+# local-repo - Function is enabled if and only local-repo is true
 #
 (cd /etc/yum.repos.d; rm -f * || :)
 
