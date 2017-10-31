@@ -85,6 +85,10 @@ Templates:
       export PS4="${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): "
       cp /usr/share/zoneinfo/GMT /etc/localtime
 
+      # This will contain a token appropriate for the path being
+      # used below.  Reset the token to the longer machine token.
+      export RS_TOKEN="{{.GenerateToken}}"
+
       {{template "runner.tmpl" .}}
 
       # The last line in this script must always be exit 0!!
