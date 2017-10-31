@@ -9,7 +9,7 @@ OS:
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
-BootParams:
+BootParams: >-
   ksdevice=bootif
   ks={{.Machine.Url}}/compute.ks
   method={{.Env.InstallUrl}}

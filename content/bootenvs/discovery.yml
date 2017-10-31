@@ -78,6 +78,7 @@ Templates:
       host_re='rs\.uuid=([^ ]+)'
       api_re='rs\.api=([^ ]+)'
       hostname_re='option host-name "([^"]+)'
+      fixed_ip='fixed-address ([0-9a-f.:]+)'
       uuid_re='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
       netname_re='"network":"([^ ]+)"'
 
@@ -91,6 +92,13 @@ Templates:
               HOSTNAME="${dhcp_hostname}.${DOMAIN}"
           else
               HOSTNAME="$dhcp_hostname"
+          fi
+      else
+          dhcp_ip="$(dhcp_param "$fixed_ip")"
+          lookup_1=$(getent hosts $dhcp_ip | awk '{print $2}')
+          lookup_2=$(getent hosts $dhcp_ip | awk '{print $2}')
+          if [ ! -z $lookup_1 ] && [ $lookup_1 == $lookup_2 ]; then
+              HOSTNAME=$lookup_1
           fi
       fi
       export RS_ENDPOINT="$(get_param "$api_re")"
