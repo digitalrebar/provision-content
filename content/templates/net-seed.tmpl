@@ -28,9 +28,7 @@ d-i mirror/country string manual
 d-i mirror/protocol string http
 d-i mirror/http/hostname string http.us.debian.org
 d-i mirror/http/directory string /debian
-{{if (eq "debian-8" .Env.OS.Name) -}}
-d-i apt-setup/security_host string security.debian.org/debian-security
-{{end -}}
+d-i apt-setup/security_host string security.debian.org
 {{else -}}
 {{if .ParamExists "local-repo" -}}
 {{if eq (.Param "local-repo") true}}
