@@ -1,7 +1,7 @@
 ---
 Description: "A task to change stages"
 Name: "change-stage"
-RequiredParams:
+OptionalParams:
 - "change-stage/map"
 Templates:
 - ID: "change-stage.sh.tmpl"
