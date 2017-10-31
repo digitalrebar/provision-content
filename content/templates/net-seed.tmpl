@@ -24,35 +24,34 @@ d-i netcfg/get_domain string {{.Param "dns-domain"}}
 
 # Mirror Configuration
 d-i mirror/country string manual
-{{if (eq "debian" .Env.OS.Family) -}}
-d-i mirror/protocol string http
-d-i mirror/http/hostname string http.us.debian.org
-d-i mirror/http/directory string /debian
-d-i apt-setup/security_host string security.debian.org
-{{else -}}
 {{if .ParamExists "local-repo" -}}
-{{if eq (.Param "local-repo") true}}
+{{if eq (.Param "local-repo") true -}}
 d-i mirror/protocol string {{.ParseUrl "scheme" .Env.InstallUrl}}
 d-i mirror/http/hostname string {{.ParseUrl "host" .Env.InstallUrl}}
 d-i mirror/http/directory string {{.ParseUrl "path" .Env.InstallUrl}}
 {{else -}}
-d-i mirror/http/hostname string archive.ubuntu.com
-d-i mirror/http/directory string /ubuntu
-d-i apt-setup/security_host string archive.ubuntu.com
-d-i apt-setup/security_path string /ubuntu
-{{end -}}
+d-i mirror/protocol string http
+{{if (eq "debian" .Env.OS.Family) -}}
+d-i mirror/http/hostname string http.us.debian.org
+d-i mirror/http/directory string /debian
 {{else -}}
 d-i mirror/http/hostname string archive.ubuntu.com
 d-i mirror/http/directory string /ubuntu
+{{end -}}
+{{end -}}
+
+{{if (eq "debian" .Env.OS.Family) -}}
+d-i apt-setup/security_host string security.debian.org
+{{else -}}
 d-i apt-setup/security_host string archive.ubuntu.com
 d-i apt-setup/security_path string /ubuntu
 {{end -}}
-{{end -}}
-{{if .ParamExists "proxy-servers"}}
+
+{{if .ParamExists "proxy-servers" -}}
 d-i mirror/http/proxy string {{index (.Param "proxy-servers") 0}}
-{{else}}
+{{else -}}
 d-i mirror/http/proxy string
-{{end}}
+{{end -}}
 
 # Clock
 d-i clock-setup/utc boolean true
