@@ -34,17 +34,26 @@ d-i mirror/protocol string http
 {{if (eq "debian" .Env.OS.Family) -}}
 d-i mirror/http/hostname string http.us.debian.org
 d-i mirror/http/directory string /debian
+d-i apt-setup/security_host string security.debian.org
 {{else -}}
 d-i mirror/http/hostname string archive.ubuntu.com
 d-i mirror/http/directory string /ubuntu
-{{end -}}
-{{end -}}
-
-{{if (eq "debian" .Env.OS.Family) -}}
-d-i apt-setup/security_host string security.debian.org
-{{else -}}
 d-i apt-setup/security_host string archive.ubuntu.com
 d-i apt-setup/security_path string /ubuntu
+{{end -}}
+{{end -}}
+{{else -}}
+d-i mirror/protocol string http
+{{if (eq "debian" .Env.OS.Family) -}}
+d-i mirror/http/hostname string http.us.debian.org
+d-i mirror/http/directory string /debian
+d-i apt-setup/security_host string security.debian.org
+{{else -}}
+d-i mirror/http/hostname string archive.ubuntu.com
+d-i mirror/http/directory string /ubuntu
+d-i apt-setup/security_host string archive.ubuntu.com
+d-i apt-setup/security_path string /ubuntu
+{{end -}}
 {{end -}}
 
 {{if .ParamExists "proxy-servers" -}}
