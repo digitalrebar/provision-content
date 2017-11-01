@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Make sure we have a drpcli somewhere
+ProvURL="{{.ProvisionerURL}}"
+(mkdir -p /usr/local/bin; cd /usr/local/bin; curl -s -f -L -o drpcli "$ProvURL/files/drpcli.amd64.linux"; chmod 755 drpcli)
+
+# Get a Machine token that we can use for drpcli actions
+export RS_TOKEN="{{.GenerateToken}}"
+
+# Get API endpoint
+export RS_ENDPOINT="{{.ApiURL}}"
+
+
+# Create a temp workspace
+temp_dir="$(mktemp -d)"
+cd "$temp_dir"
+
+/usr/local/bin/drpcli machines processjobs "{{.Machine.UUID}}"
+
+rm -rf "$temp_dir"
+

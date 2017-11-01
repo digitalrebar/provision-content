@@ -1,0 +1,14 @@
+---
+Name: "scientificlinux-6.8-install"
+Description: "Scientific Linux 6.8 install stage"
+BootEnv: "scientificlinux-6.8-install"
+RunnerWait: true
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+  - "change-stage"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

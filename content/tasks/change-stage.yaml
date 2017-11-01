@@ -1,0 +1,14 @@
+---
+Description: "A task to change stages"
+Name: "change-stage"
+OptionalParams:
+- "change-stage/map"
+Templates:
+- ID: "change-stage.sh.tmpl"
+  Name: "Change stage"
+  Path: ""
+Meta:
+  icon: "shuffle"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

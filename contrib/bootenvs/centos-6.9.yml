@@ -1,0 +1,35 @@
+---
+Name: "centos-6.9-install"
+Description: "CentOS-6.9 install bootenv"
+OS:
+  Name: "centos-6.9"
+  IsoFile: "CentOS-6.9-x86_64-bin-DVD1.iso"
+  IsoSha256: "d27cf37a40509c17ad70f37bc743f038c1feba00476fe6b69682aa424c399ea6"
+  IsoUrl: "http://mirrors.kernel.org/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-bin-DVD1.iso"
+Kernel: "images/pxeboot/vmlinuz"
+Initrds:
+  - "images/pxeboot/initrd.img"
+BootParams: >-
+  ksdevice=bootif
+  ks={{.Machine.Url}}/compute.ks
+  method={{.Env.InstallUrl}}
+  --
+  {{ if .ParamExists "kernel-console"}}{{.Param "kernel-console" }}{{ end }}
+OptionalParams:
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "proxy-servers"
+  - "kernel-console"
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-elilo.tmpl"
+    Name: "elilo"
+    Path: "{{.Machine.HexAddress}}.conf"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "centos-6.ks.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"

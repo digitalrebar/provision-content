@@ -1,0 +1,11 @@
+---
+Name: "gohai-inventory"
+Description: "System inventory as reported by Gohai"
+Documentation: | 
+  This provides an untyped dictionary of values from Gohai.
+
+  This is fairly raw data.  Other parameters are distilled from this.
+Meta:
+  icon: "search"
+  color: "blue"
+  title: "Digital Rebar Community Content"

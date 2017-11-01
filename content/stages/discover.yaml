@@ -1,0 +1,13 @@
+---
+Name: "discover"
+Description: "Discovery stage used to inventory and baseline new machines"
+BootEnv: "sledgehammer"
+RunnerWait: true
+Tasks:
+  - "gohai"
+  - "ssh-access"
+  - "change-stage"
+Meta:
+  icon: "spinner"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

@@ -1,0 +1,37 @@
+#!/bin/sh
+# Copyright 2016, RackN
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+set -x
+exec >>/target/root/post-install.log
+exec 2>&1
+
+mount /proc /target/proc
+
+cat > /target/update_system2.sh <<'EOF2341'
+#!/bin/bash
+set -x
+export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+
+wget "{{.Machine.Url}}/seed" -O /var/log/provision.seed
+
+RUNNER_WAIT=false
+{{template "runner.tmpl" .}}
+
+EOF2341
+
+chmod +x /target/update_system2.sh
+chroot /target /update_system2.sh
+sync

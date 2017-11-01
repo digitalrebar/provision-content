@@ -1,0 +1,14 @@
+---
+Description: "A task to put root ssh keys in place"
+Name: "ssh-access"
+OptionalParams:
+  - "access-keys"
+  - "access-ssh-root-mode"
+Templates:
+  - ID: "access-keys.sh.tmpl"
+    Name: "Put access keys in place for root user"
+    Path: ""
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -1,0 +1,15 @@
+---
+Name: "kernel-console"
+Description: "Defines the console string to use for boot environments"
+Documentation: |
+  This string defines the console tty string for the kernel boot string.
+
+  e.g. console=ttyS1,115200
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "desktop"
+  color: "blue"
+  title: "Digital Rebar Community Content"

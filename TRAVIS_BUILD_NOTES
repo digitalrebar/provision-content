@@ -1,0 +1,23 @@
+
+This is some notes to remind Greg about how this gets built in travis.
+
+e-info.tgz.enc is an encrypted tar ball that contains the following files:
+  cicd
+  cicd.pub
+  dr_info
+
+cicd and cicd.pub are private/public keys that are registered with RackN to be injected into the 
+created nodes in packet.  all the test commands use those keys.
+
+dr_info is the packet variables needed to drive packet - API key and Project key
+
+These are tarred up and encrypt by travis with a key in travis land.
+
+.travis.yaml uses the key in travis and the encrypted tarball to run unit tests if enabled.
+
+On Greg's laptop there are unencrypyt files and the base travis keys.
+
+If this needs to be updated, travis command from cli can be used to re-encrypt the file.
+This would be accompanied with an update to .travis.yaml to make sure we use the correct
+key in travis.  This is non-obvious and a little tricky.
+

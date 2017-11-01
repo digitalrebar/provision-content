@@ -1,0 +1,17 @@
+---
+Name: "operating-system-disk"
+Description: "Defines the disk the installer should use"
+Documentation: |
+  Defines the disk the installer should use for OS installation.  The usage of this
+  parameter inside a template should add a /dev/ if required.  The value should just
+  be the disk simple name.
+
+  e.g. sda
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "disk outline"
+  color: "blue"
+  title: "Digital Rebar Community Content"

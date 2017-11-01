@@ -1,0 +1,13 @@
+---
+Name: "provisioner-default-user"
+Description: "Defines the username of the default user"
+Documentation: |
+  Used in the Debian/Ubuntu installers to specify the username of the default user.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "Digital Rebar Community Content"

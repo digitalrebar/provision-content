@@ -1,0 +1,171 @@
+---
+Name: "discovery"
+Description: "The boot environment to use to have unknown machines boot to default Stage/BootEnv"
+OnlyUnknown: true
+OS:
+  Name: "sledgehammer/f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15"
+  IsoFile: "sledgehammer-f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15.tar"
+  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15/sledgehammer-f5ffd3ed10ba403ffff40c3621f1e31ada0c7e15.tar"
+Kernel: "vmlinuz0"
+Initrds:
+  - "stage1.img"
+BootParams: >-
+  rootflags=loop
+  root=live:/sledgehammer.iso
+  rootfstype=auto
+  ro
+  liveimg
+  rd_NO_LUKS
+  rd_NO_MD
+  rd_NO_DM
+  provisioner.web={{.ProvisionerURL}}
+  rs.api={{.ApiURL}}
+  --
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+OptionalParams:
+  - "kernel-console"
+Templates:
+  - Name: "pxelinux"
+    Path: "pxelinux.cfg/default"
+    Contents: |
+      DEFAULT discovery
+      PROMPT 0
+      TIMEOUT 10
+      LABEL discovery
+        KERNEL {{.Env.PathFor "tftp" .Env.Kernel}}
+        INITRD {{.Env.JoinInitrds "tftp"}}
+        APPEND {{.BootParams}}
+        IPAPPEND 2
+  - Name: "elilo"
+    Path: "elilo.conf"
+    Contents: |
+      delay=2
+      timeout=20
+      verbose=5
+      image={{.Env.PathFor "tftp" .Env.Kernel}}
+      initrd={{.Env.JoinInitrds "tftp"}}
+      append={{.BootParams}}
+  - Name: "ipxe"
+    Path: "default.ipxe"
+    Contents: |
+      #!ipxe
+      chain tftp://{{.ProvisionerAddress}}/${netX/ip}.ipxe && exit || goto sledgehammer
+      :sledgehammer
+      kernel {{.Env.PathFor "http" .Env.Kernel}} {{.BootParams}} BOOTIF=01-${netX/mac:hexhyp}
+      initrd {{.Env.PathFor "http" (index .Env.Initrds 0)}}
+      boot
+  - Name: "start-up.sh"
+    Path: "machines/start-up.sh"
+    Contents: |
+      #!/bin/bash
+
+      export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+      set -x
+      set -e
+      shopt -s extglob
+
+      get_param() {
+          [[ $(cat /proc/cmdline) =~ $1 ]] && echo "${BASH_REMATCH[1]}"
+      }
+
+      dhcp_param() {
+          [[ $(cat /var/lib/dhclient/dhclient.leases) =~ $1 ]] && echo "${BASH_REMATCH[1]}"
+      }
+
+      # Stuff from sledgehammer file that makes this command debuggable
+      # Some useful boot parameter matches
+      ip_re='([0-9a-f.:]+/[0-9]+)'
+      host_re='rs\.uuid=([^ ]+)'
+      api_re='rs\.api=([^ ]+)'
+      hostname_re='option host-name "([^"]+)'
+      fixed_ip='fixed-address ([0-9a-f.:]+)'
+      uuid_re='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+      netname_re='"network":"([^ ]+)"'
+
+      # Assume nothing about the hostname.
+      unset HOSTNAME
+
+      # Check for DHCP set host name.  Expand it to a FQDN if needed.
+      if dhcp_hostname="$(dhcp_param "$hostname_re")"; then
+          echo "Hostname set by DHCP to $dhcp_hostname"
+          if [[ ${dhcp_hostname%%.*} == $dhcp_hostname ]]; then
+              HOSTNAME="${dhcp_hostname}.${DOMAIN}"
+          else
+              HOSTNAME="$dhcp_hostname"
+          fi
+      else
+          dhcp_ip="$(dhcp_param "$fixed_ip")"
+          lookup_1=$(getent hosts $dhcp_ip | awk '{print $2}')
+          lookup_2=$(getent hosts $dhcp_ip | awk '{print $2}')
+          if [ ! -z $lookup_1 ] && [ $lookup_1 == $lookup_2 ]; then
+              HOSTNAME=$lookup_1
+          fi
+      fi
+      export RS_ENDPOINT="$(get_param "$api_re")"
+      if ! [[ -x /usr/bin/drpcli ]]; then
+          curl -s -f -L -o /usr/bin/drpcli "$PROVISIONER_WEB/files/drpcli.amd64.linux"
+          chmod 755 /usr/bin/drpcli
+      fi
+
+      # This will contain a token appropriate for the path being
+      # used below.  Either a create or update/show token
+      export RS_TOKEN="{{.GenerateToken}}"
+
+      # See if we have already been created.
+      if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
+          RS_UUID="${BASH_REMATCH[1]}"
+          # If we did not get a hostname from DHCP, get it from DigitalRebar Provision.
+          if [[ ! $HOSTNAME ]]; then
+              HOSTNAME="$(drpcli machines show "$RS_UUID" |jq -r '.Name')"
+          fi
+      else
+          # If we did not get a hostname from DHCP, generate one for ourselves.
+          [[ $HOSTNAME ]] || HOSTNAME="d${MAC//:/-}.${DOMAIN}"
+          IP=""
+          bootdev_ip_re='inet ([0-9.]+)/([0-9]+)'
+          if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip_re ]]; then
+              IP="${BASH_REMATCH[1]}"
+          fi
+
+          # Create a new node for us,
+          # Add the default noderoles we will need, and
+          # Let the annealer do its thing.
+          while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
+                                               \"Address\": \"$IP\"}")"; do
+              echo "We could not create a node for ourself, trying again."
+              sleep 5
+          done
+          RS_UUID="$(jq -r '.Uuid' <<< "$json")"
+
+          dhclient -r && \
+              rm /var/lib/dhclient/dhclient.leases && \
+              sleep 5 && \
+              dhclient --no-pid "$BOOTDEV"
+      fi
+      echo "${RS_UUID}" > /etc/rs-uuid
+      # Set our hostname for everything else.
+      if [ -f /etc/sysconfig/network ] ; then
+          sed -i -e "s/HOSTNAME=.*/HOSTNAME=${HOSTNAME}/" /etc/sysconfig/network
+      fi
+      echo "${HOSTNAME#*.}" >/etc/domainname
+      hostname "$HOSTNAME"
+
+      # Force reliance on DNS
+      echo '127.0.0.1 localhost' >/etc/hosts
+
+      if ! curl -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
+          grep -q '^exit 0$' /tmp/control.sh && \
+          head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
+          echo "Could not load our control.sh!"
+          exit 1
+      fi
+      chmod 755 /tmp/control.sh
+
+      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME
+
+      echo "transfer from start-up to control script"
+
+      [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
+
+      echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
+      exit 1

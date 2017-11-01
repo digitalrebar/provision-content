@@ -1,0 +1,17 @@
+---
+Name: "access-keys"
+Description: "A map of ssh public keys to install for the root user"
+Documentation: |
+  This map is used to put ssh public keys in place for the root user.
+
+  The key of the map is a arbritary name and the value is the ssh
+  public key for that name.
+
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

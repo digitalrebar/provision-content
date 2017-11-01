@@ -1,0 +1,14 @@
+---
+Name: "centos-6.9-install"
+Description: "CentOS 6.9 install stage"
+BootEnv: "centos-6.9-install"
+RunnerWait: true
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+  - "change-stage"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

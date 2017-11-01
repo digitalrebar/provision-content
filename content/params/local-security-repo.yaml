@@ -1,0 +1,15 @@
+---
+Name: "local-security-repo"
+Description: "Specifies the security repo to use for Debian/Ubuntu OSes"
+Documentation: |
+  The string value is either a URL for Ubuntu systems or a host/path string
+  for Debian systems.  This will override the default security repos if 
+  specified.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "database"
+  color: "blue"
+  title: "Digital Rebar Community Content"

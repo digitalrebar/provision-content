@@ -1,0 +1,36 @@
+---
+Name: "centos-7.3.1611-install"
+Description: "CentOS 7.3.1611 install bootenv"
+OS:
+  Name: "centos-7.3.1611"
+  IsoFile: "CentOS-7-x86_64-Minimal-1611.iso"
+  IsoSha256: "27bd866242ee058b7a5754e83d8ee8403e216b93d130d800852a96f41c34d86a"
+  IsoUrl: "http://mirrors.kernel.org/centos/7.3.1611/isos/x86_64/CentOS-7-x86_64-Minimal-1611.iso"
+Kernel: "images/pxeboot/vmlinuz"
+Initrds:
+  - "images/pxeboot/initrd.img"
+BootParams: >-
+  ksdevice=bootif
+  ks={{.Machine.Url}}/compute.ks
+  method={{.Env.InstallUrl}}
+  inst.geoloc=0
+  --
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+OptionalParams:
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "proxy-servers"
+  - "kernel-console"
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-elilo.tmpl"
+    Name: "elilo"
+    Path: "{{.Machine.HexAddress}}.conf"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "centos-7.ks.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"
