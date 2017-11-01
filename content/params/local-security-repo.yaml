@@ -1,0 +1,13 @@
+---
+Name: "local-security-repo"
+Description: "Indicates that the install should not specify a security repo"
+Documentation: |
+  Boolean value that tells the install steps to not specify a security repo if true.
+
+Schema:
+  type: "boolean"
+
+Meta:
+  icon: "database"
+  color: "blue"
+  title: "Digital Rebar Community Content"
