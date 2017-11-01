@@ -1,11 +1,13 @@
 ---
 Name: "local-security-repo"
-Description: "Indicates that the install should not specify a security repo"
+Description: "Specifies the security repo to use for Debian/Ubuntu OSes"
 Documentation: |
-  Boolean value that tells the install steps to not specify a security repo if true.
+  The string value is either a URL for Ubuntu systems or a host/path string
+  for Debian systems.  This will override the default security repos if 
+  specified.
 
 Schema:
-  type: "boolean"
+  type: "string"
 
 Meta:
   icon: "database"
