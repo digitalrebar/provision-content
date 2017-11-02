@@ -113,7 +113,7 @@ d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 #Partitioning Scheme
 {{if .ParamExists "part-scheme" -}}
-{{$templateName := (printf "part-seed-%s.tmpl" (.Param "part-scheme")) -}}
+{{$templateName := (printf "part-scheme-%s.tmpl" (.Param "part-scheme")) -}}
 {{.CallTemplate $templateName .}}
 {{else -}}
 {{template "part-scheme-default.tmpl" .}}
