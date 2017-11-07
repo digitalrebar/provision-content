@@ -5,5 +5,5 @@ BootEnv: "sledgehammer"
 RunnerWait: true
 Meta:
   icon: "hand paper"
-  color: "yellow"
+  color: "blue"
   title: "Digital Rebar Community Content"
