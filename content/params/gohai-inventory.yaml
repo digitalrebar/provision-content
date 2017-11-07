@@ -9,3 +9,4 @@ Meta:
   icon: "search"
   color: "blue"
   title: "Digital Rebar Community Content"
+  readonly: "yes"
