@@ -49,7 +49,7 @@ Templates:
     Path: "default.ipxe"
     Contents: |
       #!ipxe
-      chain tftp://{{.ProvisionerAddress}}/${netX/ip}.ipxe && exit || goto sledgehammer
+      chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit || goto sledgehammer
       :sledgehammer
       kernel {{.Env.PathFor "http" .Env.Kernel}} {{.BootParams}} BOOTIF=01-${netX/mac:hexhyp}
       initrd {{.Env.PathFor "http" (index .Env.Initrds 0)}}
