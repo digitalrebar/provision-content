@@ -27,7 +27,7 @@ export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
 
 wget "{{.Machine.Url}}/seed" -O /var/log/provision.seed
 
-RUNNER_WAIT=false
+{{template "reset-workflow.tmpl" .}}
 {{template "runner.tmpl" .}}
 
 EOF2341

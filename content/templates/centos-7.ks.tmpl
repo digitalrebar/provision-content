@@ -47,7 +47,7 @@ exec > /root/post-install.log 2>&1
 set -x
 export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
 
-RUNNER_WAIT=false
+{{template "reset-workflow.tmpl" .}}
 {{template "runner.tmpl" .}}
 
 sync
