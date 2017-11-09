@@ -1,0 +1,140 @@
+---
+Name: "package-repositories"
+Description: "Repositories to use to install packages from"
+Documentation: |
+  This provides a list of repositories to install packages from.
+  It includes dedicated OS installation repositories and more general ones.
+
+  An example:
+    - tag: "centos-7-install" # Every repository needs a unique tag.
+      # A repository can be used by multiple operating systems.
+      # The usual example of this is the EPEL repository, which
+      # can be used by all of the RHEL variants of a given generation.
+      os:
+        - "centos-7"
+      # If installSource is true, then the URL points directly
+      # to the location we should use for all OS install purposes
+      # save for fetching kernel/initrd pairs from (for now, we will
+      # still assume that they will live on the DRP server).
+      # When installSounrce is true, the os field must contain a single
+      # entry that is an exact match for the bootenv's OS.Name field.
+      installSource: true
+      # For redhat-ish distros when installSource is true,
+      # this URL must contain distro, component, and arch components,
+      # and as such they do not need to be further specified.
+      url: "http://mirrors.kernel.org/centos/7/os/x86_64"
+    - tag: "centos-7-everything"
+      # Since installSource is not true here,
+      # we can define several package sources at once by
+      # providing a distribution and a components section,
+      # and having the URL point at the top-level directory
+      # where everything is housed.
+      # DRP knows how to expand repo definitions for CentOS and
+      # ScientificLinux provided that they follow the standard
+      # mirror directory layout for each distro.
+      os:
+        - centos-7
+      url: "http://mirrors.kernel.org/centos"
+      distribution: "7"
+      components:
+        - atomic
+        - centosplus
+        - cloud
+        - configmanagement
+        - cr
+        - dotnet
+        - extras
+        - fasttrack
+        - opstools
+        - os
+        - paas
+        - rt
+        - sclo
+        - storage
+        - updates
+    - tag: "debian-9-install"
+      os:
+        - "debian-9"
+      installSource: true
+      # Debian URLs always follow the same rules, no matter
+      # whether the OS install flag is set.  As such,
+      # you must always also specify the distribution and
+      # at least the main component, although you can also
+      # specify other components.
+      url: "http://mirrors.kernel.org/debian"
+      distribution: stretch
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-9-backports"
+      os:
+        - "debian-9"
+      url: "http://mirrors.kernel.org/debian"
+      distribution: stretch-updates
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-9-security"
+      os:
+        - "debian-9"
+      url: "http://security.debian.org/debian-security/"
+      securitySource: true
+      distribution: stretch/updates
+      components:
+        - contrib
+        - main
+        - non-free
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    required:
+      - tag
+      - os
+      - url
+    properties:
+      # tag is a unique-ish identifier for this repository.
+      # The Repos() method available during template expansion.
+      # accepts a list of tags, which is used to pick the list
+      # of repos to work on.
+      tag:
+        type: string
+      # os is the list of operating systems this repository can be used
+      # by. All entries must be in the format of "osName-release"
+      os:
+        type: array
+        items:
+          type: string
+      # url is the URL of the package repository.
+      url:
+        type: string
+        format: uri
+      # packageType is the type of packages this URL contains (deb/rpm/etc).
+      # It should only be specified if we cannot infer it from the OS name.
+      packageType:
+        type: string
+      # repoType is the type of repository (apt/yum/etc).
+      # It should only be specified if we cannopt infer it from the OS name.
+      repoType:
+        type: string
+      # installSource should be set to true if this repo should be used by
+      # DRP instead of the locally extracted filesystem.
+      installSource:
+        type: boolean
+      # securitySource should be set if this repo houses security updates
+      # that should be applied during OS installation.
+      securitySource:
+        type: boolean
+      # Distribution is the name of the OS release.  It corresponds
+      # to the version major number for redhat-ish distros, and to the release
+      # codename for debianoids.
+      distribution:
+        type: string
+      # Components indicate what repositories to pull in.  What that precisely means
+      # varies from OS to OS.
+      components:
+        type: array
+        items:
+          type: string
