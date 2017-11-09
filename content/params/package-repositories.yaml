@@ -138,3 +138,7 @@ Schema:
         type: array
         items:
           type: string
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Digital Rebar Community Content"
