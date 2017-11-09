@@ -4,7 +4,6 @@ Description: "Stage that installs SSH keys and configure SSH access policy"
 RunnerWait: true
 Tasks:
   - "ssh-access"
-  - "change-stage"
 Meta:
   icon: "key"
   color: "yellow"
