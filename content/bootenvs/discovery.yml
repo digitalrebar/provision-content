@@ -95,10 +95,12 @@ Templates:
           fi
       else
           dhcp_ip="$(dhcp_param "$fixed_ip")"
-          lookup_1=$(getent hosts $dhcp_ip | awk '{print $2}')
-          lookup_2=$(getent hosts $dhcp_ip | awk '{print $2}')
-          if [[ $lookup_1 && $lookup_1 == $lookup_2 && $lookup_1 != localhost* ]]; then
-              HOSTNAME=$lookup_1
+          if [[ $dhcp_ip != "" ]]  ; then
+              lookup_1=$(getent hosts $dhcp_ip | awk '{print $2}')
+              lookup_2=$(getent hosts $dhcp_ip | awk '{print $2}')
+              if [[ $lookup_1 && $lookup_1 == $lookup_2 && $lookup_1 != localhost* ]]; then
+                  HOSTNAME=$lookup_1
+              fi
           fi
       fi
       export RS_ENDPOINT="$(get_param "$api_re")"
