@@ -97,7 +97,7 @@ Templates:
           dhcp_ip="$(dhcp_param "$fixed_ip")"
           lookup_1=$(getent hosts $dhcp_ip | awk '{print $2}')
           lookup_2=$(getent hosts $dhcp_ip | awk '{print $2}')
-          if [ ! -z $lookup_1 ] && [ $lookup_1 == $lookup_2 ]; then
+          if [[ $lookup_1 && $lookup_1 == $lookup_2 && $lookup_1 != localhost* ]]; then
               HOSTNAME=$lookup_1
           fi
       fi
