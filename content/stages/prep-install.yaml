@@ -1,0 +1,9 @@
+---
+Name: prep-install
+Description: |
+  Prepares system for OS install by zeroing out any data on the disks
+  that might confuse the OS install process.
+BootEnv: "sledgehammer"
+Tasks:
+  - erase-hard-disks-for-os-install
+  - change-stage
