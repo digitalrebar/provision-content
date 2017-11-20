@@ -1,0 +1,12 @@
+---
+Name: "discover-no-gohai"
+Description: "Discovery stage used to discover new machines - no inventory"
+BootEnv: "sledgehammer"
+RunnerWait: true
+Tasks:
+  - "ssh-access"
+  - "change-stage"
+Meta:
+  icon: "spinner"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
