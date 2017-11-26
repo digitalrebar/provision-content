@@ -33,3 +33,5 @@ Templates:
   - ID: "centos-6.ks.tmpl"
     Name: "compute.ks"
     Path: "{{.Machine.Path}}/compute.ks"
+Meta:
+  feature-flags: "sane-exit-codes"

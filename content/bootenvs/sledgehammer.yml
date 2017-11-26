@@ -94,3 +94,5 @@ Templates:
 
       # The last line in this script must always be exit 0!!
       exit 0
+Meta:
+  feature-flags: "change-stage-v2"

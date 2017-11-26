@@ -62,3 +62,5 @@ Templates:
   - ID: "net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
+Meta:
+  feature-flags: "change-stage-v2"

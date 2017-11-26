@@ -171,3 +171,5 @@ Templates:
 
       echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
       exit 1
+Meta:
+  feature-flags: "change-stage-v2"
