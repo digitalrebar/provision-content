@@ -1,0 +1,25 @@
+# This template allows the operator to use the stock 'net-seed.tmpl'
+# by default, or to specify an alternate seed file to use for local
+# customizations.
+#
+# To use, simply create a Param called "select-seed" with the value
+# set to the template you wish to use.
+#
+# Required Paramters:  none
+# Optional Paramters:  select-seed
+#
+# Defaults:
+# select-seed:  empty
+#
+# Example:
+# drpcli profiles update global ' { "Params": { "select-seed": "my-net-seed.tmpl" } } '
+#
+# Globally sets a custom seed template to 'my-net-seed.tmpl'
+#
+  
+{{if .ParamExists "select-seed"}}
+  {{$templateSeed := (printf "%s" (.Param "select-seed")) -}}
+  {{.CallTemplate $templateSeed .}}
+{{else}}
+  {{template "net-seed.tmpl" .}}
+{{end}}
