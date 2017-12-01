@@ -89,7 +89,10 @@ Templates:
       # used below.  Reset the token to the longer machine token.
       export RS_TOKEN="{{.GenerateToken}}"
 
+      {{template "reset-workflow.tmpl" .}}
       {{template "runner.tmpl" .}}
 
       # The last line in this script must always be exit 0!!
       exit 0
+Meta:
+  feature-flags: "change-stage-v2"

@@ -6,7 +6,6 @@ RunnerWait: true
 Tasks:
   - "gohai"
   - "ssh-access"
-  - "change-stage"
 Meta:
   icon: "spinner"
   color: "yellow"

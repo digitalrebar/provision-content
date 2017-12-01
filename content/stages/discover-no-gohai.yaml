@@ -5,7 +5,6 @@ BootEnv: "sledgehammer"
 RunnerWait: true
 Tasks:
   - "ssh-access"
-  - "change-stage"
 Meta:
   icon: "spinner"
   color: "yellow"

@@ -2,8 +2,6 @@
 Name: "finish-install"
 Description: "Used with the STOP runner action to leave a stage that will have a task on machine boot"
 BootEnv: "local"
-Tasks:
-  - "change-stage"
 Meta:
   icon: "checkmark"
   color: "yellow"

@@ -2,6 +2,18 @@
 
 set -e
 
+. tools/version.sh
+version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH"
+
+DOIT=0
+if [[ $version =~ ^v || $version =~ ^tip ]] ; then
+    DOIT=1
+fi
+if [[ $DOIT == 0 ]] ;then
+    echo "Not a publishing branch."
+    exit 0
+fi
+
 [[ $GOPATH ]] || export GOPATH="$HOME/go"
 fgrep -q "$GOPATH/bin" <<< "$PATH" || export PATH="$PATH:$GOPATH/bin"
 

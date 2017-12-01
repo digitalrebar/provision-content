@@ -1,6 +1,6 @@
 ---
 Name: "complete-nowait"
-Description: "Stage that represents workflow completion to local disk.  Does NOT change stages"
+Description: "Stage that represents workflow completion to local disk.  Does NOT wait in the runner."
 BootEnv: "local"
 Meta:
   icon: "checkmark"
