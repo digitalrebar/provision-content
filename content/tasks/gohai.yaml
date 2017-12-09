@@ -5,7 +5,7 @@ Templates:
   - Name: "gohai"
     Contents: |
       #!/usr/bin/env bash
-      drpcli machines set {{.Machine.UUID}} set gohai-inventory to "$(gohai)"
+      gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
 Meta:
   icon: "search"
   color: "blue"
