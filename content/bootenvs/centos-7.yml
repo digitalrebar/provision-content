@@ -2,6 +2,7 @@
 Name: "centos-7-install"
 Description: "CentOS-7 installer that points to the latest CentOS 7 release."
 OS:
+  Family: "redhat"
   Name: "centos-7"
   IsoFile: "CentOS-7-x86_64-Minimal-1708.iso"
   IsoSha256: "bba314624956961a2ea31dd460cd860a77911c1e0a56e4820a12b9c5dad363f5"

@@ -27,6 +27,7 @@
   {{$selectKickSeed := (printf "%s" (.Param "select-kickseed")) -}}
   {{.CallTemplate $selectKickSeed .}}
 {{else -}}
+  {{if (eq "redhat" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
   {{if (eq "centos" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
   {{if (eq "debian" .Env.OS.Family) -}} {{template "net-seed.tmpl" .}} {{end -}}
   {{if (eq "ubuntu" .Env.OS.Family) -}} {{template "net-seed.tmpl" .}} {{end -}}

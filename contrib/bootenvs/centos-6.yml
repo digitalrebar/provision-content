@@ -2,6 +2,7 @@
 Name: "centos-6-install"
 Description: "CentOS 6 install bootenv that references the latest release"
 OS:
+  Family: "redhat"
   Name: "centos-6"
   IsoFile: "CentOS-6.9-x86_64-bin-DVD1.iso"
   IsoSha256: "d27cf37a40509c17ad70f37bc743f038c1feba00476fe6b69682aa424c399ea6"
