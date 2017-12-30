@@ -1,0 +1,14 @@
+---
+Name: "select-seed"
+Description: "Use an alternate Debian preseed for Debian/Ubuntu based installs"
+Documentation: |
+  The name of a custom preseed template to use for a Debian/Ubuntu install.  If
+  not defined, the default 'net-seed.tmpl' will be used. 
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "disk outline"
+  color: "blue"
+  title: "Digital Rebar Community Content"
