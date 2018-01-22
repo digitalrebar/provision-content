@@ -38,6 +38,7 @@ OptionalParams:
   - "local-repo"
   - "proxy-servers"
   - "ntp-servers"
+  - "select-kickseed"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"
@@ -48,7 +49,7 @@ Templates:
   - ID: "default-ipxe.tmpl"
     Name: "ipxe"
     Path: "{{.Machine.Address}}.ipxe"
-  - ID: "net-seed.tmpl"
+  - ID: "select-kickseed.tmpl"
     Name: "seed"
     Path: "{{.Machine.Path}}/seed"
   - ID: "net-post-install.sh.tmpl"

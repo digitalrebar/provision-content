@@ -1,0 +1,34 @@
+{{/*
+#
+# This template allows the operator to use the default Kickstart or
+# Preseed installation configuration file, or the operator may specify
+# an alternate kickstart/preseed file to use for local customizations.
+#
+# To use, simply create a Param called "select-kickseed" with the value
+# set to the template you wish to use.  You must specify the correct
+# template file and type for your Operating System install.  For example,
+# for CentOS, select a Kickstart; and for Ubuntu, a preseed.
+#
+# The param ('select-kickseed') can be applied to a Machine, or to a Profile
+# which is subsequently applied to a machine.  Remember the 'global' profile
+# applies to all machines provisioned by Digital Rebar Provision.
+#
+# Required Paramters:  none
+# Optional Paramters:  select-kickseed
+#
+# Defaults:
+#   select-seed:  empty
+#
+# Example (applies globally to all Machines):
+#   drpcli profiles set global param select-kickseed to "my-net-seed.tmpl"
+#
+*/}}
+{{if .ParamExists "select-kickseed" -}}
+  {{$selectKickSeed := (printf "%s" (.Param "select-kickseed")) -}}
+  {{.CallTemplate $selectKickSeed .}}
+{{else -}}
+  {{if (eq "redhat" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
+  {{if (eq "centos" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
+  {{if (eq "debian" .Env.OS.Family) -}} {{template "net-seed.tmpl" .}} {{end -}}
+  {{if (eq "ubuntu" .Env.OS.Family) -}} {{template "net-seed.tmpl" .}} {{end -}}
+{{end -}}

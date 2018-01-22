@@ -2,6 +2,7 @@
 Name: "centos-7.4.1708-install"
 Description: "CentOS-7.4.1708 install bootenv"
 OS:
+  Family: "redhat"
   Name: "centos-7.4.1708"
   IsoFile: "CentOS-7-x86_64-Minimal-1708.iso"
   IsoSha256: "bba314624956961a2ea31dd460cd860a77911c1e0a56e4820a12b9c5dad363f5"
@@ -22,6 +23,7 @@ OptionalParams:
   - "provisioner-default-password-hash"
   - "kernel-console"
   - "proxy-servers"
+  - "select-kickseed"
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"
@@ -32,7 +34,7 @@ Templates:
   - ID: "default-ipxe.tmpl"
     Name: "ipxe"
     Path: "{{.Machine.Address}}.ipxe"
-  - ID: "centos-7.ks.tmpl"
+  - ID: "select-kickseed.tmpl"
     Name: "compute.ks"
     Path: "{{.Machine.Path}}/compute.ks"
 Meta:

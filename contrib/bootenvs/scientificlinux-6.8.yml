@@ -2,6 +2,7 @@
 Name: "scientificlinux-6.8-install"
 Description: "Scientific Linux 6.8 install bootenv"
 OS:
+  Family: "redhat"
   Name: "scientificlinux-6.8"
   IsoFile: "SL-68-x86_64-2016-06-29-DVD-DL.iso"
   IsoSha256: "ada95b0e920612a5a9c56e268515a9965663377407a7897167be7a2efdade804"
