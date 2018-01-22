@@ -2,7 +2,7 @@
 Name: "select-kickseed"
 Description: "Use an alternate Kickstart or Preseed install configuration file."
 Documentation: |
-  The name of a custom kickstart or preseed template to use.  If not defined, the 
+  The name of a custom kickstart or preseed template to use.  If not defined, the
   default for each platform will be used, as follows
 
     'net-seed.tmpl' for Debian/Ubuntu platforms
