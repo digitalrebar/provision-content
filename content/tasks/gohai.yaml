@@ -5,7 +5,11 @@ Templates:
   - Name: "gohai"
     Contents: |
       #!/usr/bin/env bash
-      gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+      if drpcli gohai --help >/dev/null 2>/dev/null ; then
+        drpcli gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+      else
+        gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+      fi
 Meta:
   icon: "search"
   color: "blue"
