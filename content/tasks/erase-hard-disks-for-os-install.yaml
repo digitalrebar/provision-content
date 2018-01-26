@@ -6,6 +6,9 @@ Description: |
   and the first and last megabyte of any partitions and disks.
 Meta:
   feature-flags: "sane-exit-codes"
+  icon: "erase"
+  color: "blue"
+  title: "Digital Rebar Community Content"
 Templates:
   - Name: "erase-disks"
     Contents: |

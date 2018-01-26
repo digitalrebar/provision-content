@@ -9,3 +9,4 @@ Meta:
   icon: "key"
   color: "blue"
   title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
