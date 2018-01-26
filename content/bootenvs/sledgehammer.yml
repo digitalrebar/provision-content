@@ -97,3 +97,6 @@ Templates:
       exit 0
 Meta:
   feature-flags: "change-stage-v2"
+  icon: "microchip"
+  color: "green"
+  title: "Digital Rebar Community Content"

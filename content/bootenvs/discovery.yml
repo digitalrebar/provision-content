@@ -174,3 +174,6 @@ Templates:
       exit 1
 Meta:
   feature-flags: "change-stage-v2"
+  icon: "binoculars"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -65,3 +65,6 @@ Templates:
     Path: "{{.Machine.Path}}/post-install.sh"
 Meta:
   feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "black"
+  title: "Digital Rebar Community Content"
