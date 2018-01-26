@@ -38,3 +38,6 @@ Templates:
     Path: "{{.Machine.Path}}/compute.ks"
 Meta:
   feature-flags: "sane-exit-codes"
+  icon: "linux"
+  color: "blue"
+  title: "Digital Rebar Community Content"
