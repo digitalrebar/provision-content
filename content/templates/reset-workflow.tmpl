@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 
-# Make sure we have a drpcli somewhere
-if [[ ! -e /usr/local/bin/drpcli ]] ; then
-  ProvURL="{{.ProvisionerURL}}"
-  (mkdir -p /usr/local/bin; cd /usr/local/bin; curl -s -f -L -o drpcli "$ProvURL/files/drpcli.amd64.linux"; chmod 755 drpcli)
-fi
-
-# Get a Machine token that we can use for drpcli actions
-export RS_TOKEN="{{.GenerateToken}}"
-
-# Get API endpoint
-export RS_ENDPOINT="{{.ApiURL}}"
+{{template setup.tmpl .}}
 
 # One day Reset the workflow chain here as well
 
