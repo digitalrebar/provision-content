@@ -27,12 +27,15 @@ Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"
     Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
-  - ID: "default-elilo.tmpl"
-    Name: "elilo"
-    Path: "{{.Machine.HexAddress}}.conf"
   - ID: "default-ipxe.tmpl"
     Name: "ipxe"
     Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
   - ID: "select-kickseed.tmpl"
     Name: "compute.ks"
     Path: "{{.Machine.Path}}/compute.ks"
