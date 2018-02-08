@@ -19,8 +19,8 @@ case $(uname -s) in
         exit 1;;
 esac
 
-go get -u github.com/digitalrebar/provision/cmds/drbundler
 PATH=$PATH:$GOPATH/bin
+which drbundler || go get -u github.com/digitalrebar/provision/cmds/drbundler
 
 . tools/version.sh
 

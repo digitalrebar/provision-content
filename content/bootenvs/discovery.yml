@@ -37,19 +37,12 @@ Templates:
         INITRD {{.Env.JoinInitrds "tftp"}}
         APPEND {{.BootParams}}
         IPAPPEND 2
-  - Name: "elilo"
-    Path: "elilo.conf"
-    Contents: |
-      delay=2
-      timeout=20
-      verbose=5
-      image={{.Env.PathFor "tftp" .Env.Kernel}}
-      initrd={{.Env.JoinInitrds "tftp"}}
-      append={{.BootParams}}
   - Name: "ipxe"
     Path: "default.ipxe"
     Contents: |
       #!ipxe
+      chain {{.ProvisionerURL}}/${netX/mac}.ipxe && exit || goto chainip
+      :chainip
       chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit || goto sledgehammer
       :sledgehammer
       kernel {{.Env.PathFor "http" .Env.Kernel}} {{.BootParams}} BOOTIF=01-${netX/mac:hexhyp}
@@ -71,6 +64,16 @@ Templates:
 
       dhcp_param() {
           [[ $(cat /var/lib/dhclient/dhclient.leases) =~ $1 ]] && echo "${BASH_REMATCH[1]}"
+      }
+
+      get_macs() {
+          local maclist=""
+          local nic=""
+          for nic in /sys/class/net/*; do
+              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
+              maclist="$maclist,\"$(cat "$nic/address")\""
+          done
+          printf '[%s]', "${maclist#,}"
       }
 
       # Stuff from sledgehammer file that makes this command debuggable
@@ -134,7 +137,8 @@ Templates:
           # Add the default noderoles we will need, and
           # Let the annealer do its thing.
           while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                               \"Address\": \"$IP\"}")"; do
+                                               \"Address\": \"$IP\",
+                                               \"HardwareAddrs\": $(get_macs)}")"; do
               echo "We could not create a node for ourself, trying again."
               sleep 5
           done
