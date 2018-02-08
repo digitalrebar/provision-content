@@ -106,11 +106,7 @@ d-i partman-lvm/device_remove_lvm boolean true
 d-i partman-lvm/device_remove_lvm_span boolean true
 d-i partman-lvm/confirm_nochanges boolean true
 d-i partman-lvm/confirm_nooverwrite boolean true
-d-i partman/confirm_write_new_label boolean true
 d-i partman-basicfilesystems/no_swap boolean false
-d-i partman/choose_partition select finish
-d-i partman/confirm boolean true
-d-i partman/confirm_nooverwrite boolean true
 #Partitioning Scheme
 {{if .ParamExists "part-scheme" -}}
 {{$templateName := (printf "part-seed-%s.tmpl" (.Param "part-scheme")) -}}
@@ -118,6 +114,10 @@ d-i partman/confirm_nooverwrite boolean true
 {{else -}}
 {{template "part-scheme-default.tmpl" .}}
 {{end -}}
+d-i partman/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
 
 {{if (and (eq "ubuntu" .Env.OS.Family)  (lt "12.10" .Env.OS.Version)) -}}
 d-i live-installer/net-image string {{.Env.InstallUrl}}/install/filesystem.squashfs
