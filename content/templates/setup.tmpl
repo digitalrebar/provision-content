@@ -1,0 +1,36 @@
+
+###
+#  This is a BASH script snippet intended to be run inside other BASH templates.
+#  
+#  Simple helper to prep a system with DRPCLI and JQ.  If not already installed,
+#  download and install the `drpcli` and `jq` binaries in /usr/local/bin and then
+#  source our `helper` tools
+#
+#  To use this in other templates, simply specify:
+#
+#         {{template "setup.tmpl" .}}
+###
+
+set -e
+
+# Install drpcli into the correct place
+if [[ ! -e /usr/local/bin/drpcli ]] ; then
+    echo "Installing DRPCLI in /usr/local/bin"
+    mkdir -p /usr/local/bin
+    curl -s -f -L -o /usr/local/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
+    chmod +x /usr/local/bin/drpcli
+fi
+if [[ ! -e /usr/local/bin/jq ]] ; then
+    echo "Installing jq in /usr/local/bin"
+    curl -s -f -L -o /usr/local/bin/jq "{{.ProvisionerURL}}/files/jq"
+    chmod +x /usr/local/bin/jq
+fi
+
+function _helper(){ echo "Loading helper script"; source ./helper; }
+[[ -r ./helper ]] && _helper || echo "No ./helper script found ... skipping"
+
+# Get a Machine token that we can use for drpcli actions
+export RS_TOKEN="{{.GenerateToken}}"
+
+# Get API endpoint
+export RS_ENDPOINT="{{.ApiURL}}"
