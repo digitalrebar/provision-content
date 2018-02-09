@@ -20,7 +20,6 @@ BootParams: >-
   rd_NO_MD
   rd_NO_DM
   provisioner.web={{.ProvisionerURL}}
-  rs.api={{.ApiURL}}
   --
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:

@@ -23,7 +23,6 @@ BootParams: >-
   rd_NO_DM
   provisioner.web={{.ProvisionerURL}}
   rs.uuid={{.Machine.UUID}}
-  rs.api={{.ApiURL}}
   --
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
