@@ -108,15 +108,7 @@ Templates:
               fi
           fi
       fi
-      export RS_ENDPOINT="$(get_param "$api_re")"
-      if ! which drpcli; then
-          curl -s -f -L -o /usr/local/bin/drpcli "$PROVISIONER_WEB/files/drpcli.amd64.linux"
-          chmod 755 /usr/local/bin/drpcli
-      fi
-
-      # This will contain a token appropriate for the path being
-      # used below.  Either a create or update/show token
-      export RS_TOKEN="{{.GenerateToken}}"
+      {{template "setup.tmpl" .}}
 
       # See if we have already been created.
       if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
