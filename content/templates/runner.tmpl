@@ -6,7 +6,7 @@
 temp_dir="$(mktemp -d)"
 cd "$temp_dir"
 
-/usr/local/bin/drpcli machines processjobs "{{.Machine.UUID}}"
+drpcli machines processjobs "{{.Machine.UUID}}"
 
 rm -rf "$temp_dir"
 

@@ -3,12 +3,7 @@
 # This will contain a token appropriate for the path being
 # used below.  Either a create or update/show token
 export RS_UUID="{{.Machine.UUID}}"
-export RS_TOKEN="{{.GenerateToken}}"
-
-# Make sure we have a drpcli and jq somewhere
-ProvURL="{{.ProvisionerURL}}"
-(mkdir -p /usr/local/bin; cd /usr/local/bin; curl -s -f -L -o jq "$ProvURL/files/jq"; chmod 755 jq)
-PATH=$PATH:/usr/local/bin
+{{template "setup.tmpl" .}}
 
 drpcli info get | jq .features | grep -q '"sane-exit-codes"'
 if [[ $? == 0 ]] ; then

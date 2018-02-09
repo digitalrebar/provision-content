@@ -5,5 +5,5 @@
 # One day Reset the workflow chain here as well
 
 # Reset the current task list and mark the machine runnable.
-/usr/local/bin/drpcli machines update "{{.Machine.UUID}}" '{ "Runnable": true, "CurrentTask": -1 }'
+drpcli machines update "{{.Machine.UUID}}" '{ "Runnable": true, "CurrentTask": -1 }'
 

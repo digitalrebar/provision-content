@@ -20,7 +20,6 @@ BootParams: >-
   rd_NO_MD
   rd_NO_DM
   provisioner.web={{.ProvisionerURL}}
-  rs.api={{.ApiURL}}
   --
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
@@ -54,6 +53,7 @@ Templates:
       #!/bin/bash
 
       export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
       set -x
       set -e
       shopt -s extglob
@@ -80,7 +80,6 @@ Templates:
       # Some useful boot parameter matches
       ip_re='([0-9a-f.:]+/[0-9]+)'
       host_re='rs\.uuid=([^ ]+)'
-      api_re='rs\.api=([^ ]+)'
       hostname_re='option host-name "([^"]+)'
       fixed_ip='fixed-address ([0-9a-f.:]+)'
       uuid_re='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
@@ -107,15 +106,7 @@ Templates:
               fi
           fi
       fi
-      export RS_ENDPOINT="$(get_param "$api_re")"
-      if ! [[ -x /usr/bin/drpcli ]]; then
-          curl -s -f -L -o /usr/bin/drpcli "$PROVISIONER_WEB/files/drpcli.amd64.linux"
-          chmod 755 /usr/bin/drpcli
-      fi
-
-      # This will contain a token appropriate for the path being
-      # used below.  Either a create or update/show token
-      export RS_TOKEN="{{.GenerateToken}}"
+      {{template "setup.tmpl" .}}
 
       # See if we have already been created.
       if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
