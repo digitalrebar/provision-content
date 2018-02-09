@@ -54,6 +54,7 @@ Templates:
       #!/bin/bash
 
       export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
       set -x
       set -e
       shopt -s extglob
@@ -108,9 +109,9 @@ Templates:
           fi
       fi
       export RS_ENDPOINT="$(get_param "$api_re")"
-      if ! [[ -x /usr/bin/drpcli ]]; then
-          curl -s -f -L -o /usr/bin/drpcli "$PROVISIONER_WEB/files/drpcli.amd64.linux"
-          chmod 755 /usr/bin/drpcli
+      if ! which drpcli; then
+          curl -s -f -L -o /usr/local/bin/drpcli "$PROVISIONER_WEB/files/drpcli.amd64.linux"
+          chmod 755 /usr/local/bin/drpcli
       fi
 
       # This will contain a token appropriate for the path being

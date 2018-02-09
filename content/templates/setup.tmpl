@@ -1,4 +1,4 @@
-
+#!/usr/local/bin/env bash
 ###
 #  This is a BASH script snippet intended to be run inside other BASH templates.
 #  
@@ -13,24 +13,28 @@
 
 set -e
 
-# Install drpcli into the correct place
-if [[ ! -e /usr/local/bin/drpcli ]] ; then
-    echo "Installing DRPCLI in /usr/local/bin"
-    mkdir -p /usr/local/bin
-    curl -s -f -L -o /usr/local/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
-    chmod +x /usr/local/bin/drpcli
-fi
-if [[ ! -e /usr/local/bin/jq ]] ; then
-    echo "Installing jq in /usr/local/bin"
-    curl -s -f -L -o /usr/local/bin/jq "{{.ProvisionerURL}}/files/jq"
-    chmod +x /usr/local/bin/jq
-fi
-
-function _helper(){ echo "Loading helper script"; source ./helper; }
-[[ -r ./helper ]] && _helper || echo "No ./helper script found ... skipping"
-
 # Get a Machine token that we can use for drpcli actions
 export RS_TOKEN="{{.GenerateToken}}"
 
 # Get API endpoint
 export RS_ENDPOINT="{{.ApiURL}}"
+
+mkdir -p /usr/local/bin
+grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
+for tool in drpcli jq; do
+    which "$tool" &>/dev/null && continue
+    echo "Installing $tool in /usr/local/bin"
+    case $tool in
+        drpcli) curl -s -f -L -o /usr/local/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
+        jq)     curl -s -f -L -o /usr/local/bin/jq "{{.ProvisionerURL}}/files/jq";;
+    esac
+    chmod 755 "/usr/local/bin/$tool"
+done
+unset tool
+
+if [[ -r ./helper ]]; then
+    echo "Loading helper script"
+    source ./helper
+else
+    echo "No ./helper script found ... skipping"
+fi

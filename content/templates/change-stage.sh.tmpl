@@ -7,8 +7,13 @@ export RS_TOKEN="{{.GenerateToken}}"
 
 # Make sure we have a drpcli and jq somewhere
 ProvURL="{{.ProvisionerURL}}"
-(mkdir -p /usr/local/bin; cd /usr/local/bin; curl -s -f -L -o jq "$ProvURL/files/jq"; chmod 755 jq)
-PATH=$PATH:/usr/local/bin
+grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
+if ! which jq; then
+    mkdir -p /usr/local/bin
+    curl -s -f -L -o /usr/local/bin/jq "$ProvURL/files/jq"
+    chmod 755 /usr/local/bin/jq
+fi
+
 
 drpcli info get | jq .features | grep -q '"sane-exit-codes"'
 if [[ $? == 0 ]] ; then
