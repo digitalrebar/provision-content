@@ -109,7 +109,7 @@ d-i partman-lvm/confirm_nooverwrite boolean true
 d-i partman-basicfilesystems/no_swap boolean false
 #Partitioning Scheme
 {{if .ParamExists "part-scheme" -}}
-{{$templateName := (printf "part-seed-%s.tmpl" (.Param "part-scheme")) -}}
+{{$templateName := (printf "part-scheme-%s.tmpl" (.Param "part-scheme")) -}}
 {{.CallTemplate $templateName .}}
 {{else -}}
 {{template "part-scheme-default.tmpl" .}}
