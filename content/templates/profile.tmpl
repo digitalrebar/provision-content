@@ -1,0 +1,21 @@
+#!/usr/local/bin/env bash
+###
+#  This is a BASH script snippet intended to be run inside other BASH templates.
+#
+#  This relies upon /etc/rs-uuid set during sledgehammer bring up.  Using
+#  this file allows for the script to work with known and unknown machines.
+#  
+#  Simple helper to add an /etc/profile.d/drpcli.sh helper variables.
+#
+#         \{\{template "profile.tmpl" .\}\}
+#
+#  without the backslashes.
+###
+
+set -e
+
+cat > /etc/profile.d/drpcli.sh  <<EOF
+export RS_ENDPOINT="{{.ApiURL}}"
+export RS_MACHINE="`cat /etc/rs-uuid`"
+EOF
+
