@@ -4,9 +4,9 @@ Description: "The boot environment to use to have unknown machines boot to defau
 OnlyUnknown: true
 OS:
   Family: "redhat"
-  Name: "sledgehammer/7e10ff105c92c8d5eac6f1548cd8b28b6bcbf134"
-  IsoFile: "sledgehammer-7e10ff105c92c8d5eac6f1548cd8b28b6bcbf134.tar"
-  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/7e10ff105c92c8d5eac6f1548cd8b28b6bcbf134/sledgehammer-7e10ff105c92c8d5eac6f1548cd8b28b6bcbf134.tar"
+  Name: "sledgehammer/9743e672ff33179cd5218d8fe506c03cf2a31d18"
+  IsoFile: "sledgehammer-9743e672ff33179cd5218d8fe506c03cf2a31d18.tar"
+  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9743e672ff33179cd5218d8fe506c03cf2a31d18/sledgehammer-9743e672ff33179cd5218d8fe506c03cf2a31d18.tar"
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
@@ -147,6 +147,8 @@ Templates:
       fi
       echo "${HOSTNAME#*.}" >/etc/domainname
       hostname "$HOSTNAME"
+
+      {{template "profile.tmpl" .}}
 
       # Force reliance on DNS
       echo '127.0.0.1 localhost' >/etc/hosts
