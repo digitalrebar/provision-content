@@ -16,6 +16,6 @@ set -e
 
 cat > /etc/profile.d/drpcli.sh  <<EOF
 export RS_ENDPOINT="{{.ApiURL}}"
-export RS_MACHINE="`cat /etc/rs-uuid`"
+export RS_UUID="$(cat /etc/rs-uuid)"
 EOF
 
