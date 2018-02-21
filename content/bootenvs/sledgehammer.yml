@@ -100,6 +100,24 @@ Templates:
       # used below.  Reset the token to the longer machine token.
       export RS_TOKEN="{{.GenerateToken}}"
 
+      # If we do not have hardware addresses set on the machine, set them now.
+      get_macs() {
+          local maclist=""
+          local nic=""
+          for nic in /sys/class/net/*; do
+              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
+              maclist="$maclist,\"$(cat "$nic/address")\""
+          done
+          printf '[%s]' "${maclist#,}"
+      }
+
+      json="$(drpcli machines show "$RS_UUID")"
+      # The machine does not have hardware addresses set, so set them
+      if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
+          drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}"
+      fi
+      unset get_macs json
+
       {{template "reset-workflow.tmpl" .}}
       {{template "runner.tmpl" .}}
 
