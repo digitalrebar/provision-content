@@ -1,0 +1,10 @@
+Description: Stage to assign the machine icon and color
+Meta:
+  color: yellow
+  icon: info
+Name: machine-meta
+Reboot: false
+RunnerWait: true
+Tasks:
+- machine-meta-setter
+

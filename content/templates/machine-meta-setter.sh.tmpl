@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Set the Machine Meta: Icon and Color
+
+set -e
+
+export RS_UUID="{{.Machine.UUID}}"
+
+{{template "setup.tmpl" .}}
+
+{{if .ParamExists "machine-meta/color" -}}
+COLOR={{.Param "machine-meta/color"}}
+{{else -}}
+COLOR="black"
+{{end -}}
+
+{{if .ParamExists "machine-meta/icon" -}}
+ICON={{.Param "machine-meta/icon"}}
+{{else -}}
+ICON="server"
+{{end -}}
+
+echo "Setting the Color to $COLOR and Icon to $ICON"
+
+# do work!
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"$COLOR\", \"icon\": \"$ICON\"}}" | jq .Meta
+
+echo "Finished successfully"
+exit 0
+
