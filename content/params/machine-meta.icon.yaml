@@ -1,0 +1,8 @@
+Description: The icon for machines icon
+Meta:
+  color: blue
+  icon: info
+  title: RackN Content
+Name: machine-meta/icon
+Schema:
+  type: string

@@ -1,0 +1,14 @@
+Description: A task to set the color and icon for a machine
+Meta:
+  color: blue
+  icon: info
+Name: machine-meta-setter
+OptionalParams: 
+  - "machine-meta/color"
+  - "machine-meta/icon"
+Templates:
+- Contents: ""
+  ID: machine-meta-setter.sh.tmpl
+  Name: "Set Icons"
+  Path: ""
+
