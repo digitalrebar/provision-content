@@ -2,6 +2,7 @@ Description: A task to set the color and icon for a machine
 Meta:
   color: blue
   icon: info
+  feature-flags: "sane-exit-codes"
 Name: machine-meta-setter
 OptionalParams: 
   - "machine-meta/color"
