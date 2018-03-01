@@ -1,14 +1,31 @@
+# Partitioner Label Default (GPT)
+d-i partman/choose_label string gpt
+d-i partman/default_label string gpt
+d-i partman/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+d-i partman/confirm boolean true
+d-i partman/confirm_nooverwrite boolean true
+d-i partman-basicfilesystems/choose_label string gpt
+d-i partman-basicfilesystems/default_label string gpt
+d-i partman-basicfilesystems/no_swap boolean false
+d-i partman-partitioning/choose_label string gpt
+d-i partman-partitioning/default_label string gpt
+# Partitioner Prompt Confirmations
+d-i partman-md/confirm boolean true
+d-i partman-md/device_remove_md boolean true
+d-i partman-md/confirm_nochanges boolean true
+d-i partman-md/confirm_nooverwrite boolean true
+d-i partman-lvm/confirm boolean true
+d-i partman-lvm/device_remove_lvm boolean true
+d-i partman-lvm/device_remove_lvm_span boolean true
+d-i partman-lvm/confirm_nochanges boolean true
+d-i partman-lvm/confirm_nooverwrite boolean true
+d-i partman-auto-lvm/guided_size string max
 {{if .ParamExists "operating-system-disk" -}}
 d-i partman-auto/disk string /dev/{{.Param "operating-system-disk"}}
-d-i grub-installer/choose_bootdev select /dev/{{.Param "operating-system-disk"}}
-d-i grub-installer/bootdev string /dev/{{.Param "operating-system-disk"}}
 {{else -}}
 d-i partman-auto/disk string /dev/sda
-d-i grub-installer/choose_bootdev select /dev/sda
-d-i grub-installer/bootdev string /dev/sda
 {{end -}}
-d-i partman-auto/method string lvm
-d-i partman-auto-lvm/guided_size string max
-d-i partman-auto-lvm/new_vg_name string {{.Machine.ShortName}}
+d-i partman-auto/purge_lvm_from_device boolean true
 d-i partman-auto/choose_recipe select atomic
-d-i grub-installer/only_debian boolean true
+d-i partman-auto/method string lvm
