@@ -29,6 +29,7 @@ BootParams: >-
   url={{.Machine.Url}}/seed
   netcfg/get_hostname={{.Machine.Name}}
   root=/dev/ram
+  numa=off
   rw
   quiet
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
