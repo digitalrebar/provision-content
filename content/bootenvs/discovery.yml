@@ -76,6 +76,27 @@ Templates:
           printf '[%s]' "${maclist#,}"
       }
 
+      # Since we are not using normal networking, make sure that
+      # dhclient will stick around forever even if we exit
+      cat >"/etc/systemd/system/dhclient-$BOOTDEV.service" << EOF
+      [Unit]
+      Description=dhclient for $BOOTDEV.service
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=simple
+      ExecStart=/sbin/dhclient -d $BOOTDEV
+
+      [Install]
+      WantedBy=multi-user.target
+      EOF
+
+      systemctl daemon-reload
+      dhclient -x
+      systemctl start "dhclient-$BOOTDEV"
+      sleep 5
+
       # Stuff from sledgehammer file that makes this command debuggable
       # Some useful boot parameter matches
       ip_re='([0-9a-f.:]+/[0-9]+)'
@@ -136,10 +157,6 @@ Templates:
           done
           RS_UUID="$(jq -r '.Uuid' <<< "$json")"
 
-          dhclient -r && \
-              rm /var/lib/dhclient/dhclient.leases && \
-              sleep 5 && \
-              dhclient --no-pid "$BOOTDEV"
       fi
       echo "${RS_UUID}" > /etc/rs-uuid
       # Set our hostname for everything else.
