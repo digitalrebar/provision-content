@@ -86,7 +86,7 @@ Templates:
 
       [Service]
       Type=simple
-      ExecStart=/sbin/dhclient -d $BOOTDEV
+      ExecStart=/sbin/dhclient --no-pid -d $BOOTDEV
 
       [Install]
       WantedBy=multi-user.target
