@@ -1,0 +1,22 @@
+---
+Name: "rs-debug-enable"
+Description: "Enables bash debugging ('set -x') in the 'setup.tmpl'."
+Documentation: |
+  Boolean value that enables Bash Script debugging - essentially
+  by turning on 'set -x' globally.  Scripts can (and probably do)
+  enable/disable this flags in various sections.  In those cases
+  we are not overriding those values. 
+
+  Additionally, the shell variable 'RS_DEBUG_ENABLE' is set to 1 (on)
+  for Script authors to use.  This allows a construct like
+
+    (( $RS_DEBUG_ENABLE )) && run_debug_function
+
+Schema:
+  type: "boolean"
+  default: false
+
+Meta:
+  icon: "bug"
+  color: "red"
+  title: "Digital Rebar Community Content"

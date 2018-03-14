@@ -16,15 +16,37 @@
 ###
 
 set -e
+###
+#  if we want debugging of our scripts, set the Param to true
+#  also set shell variable for script reuse if desired for further
+#  debugging
+###
+RS_DEBUG_ENABLE=0
+{{ if .ParamExists "rs-debug-enable" }}
+{{ if eq (.Param "rs-debug-enable") true }}
+# use in shell as: (( $RS_DEBUG_ENABLE )) && echo "debugging" 
+RS_DEBUG_ENABLE=1
+set -x
+{{ end }}
+{{ end }}
 
 # Get a Machine token that we can use for drpcli actions
-export RS_TOKEN="{{.GenerateToken}}"
+# setting NO_RS_TOKEN to 'false' (or any value) will skip 
+# token generating
+[[ -z "$NO_RS_TOKEN" ]] && export RS_TOKEN="{{.GenerateToken}}" \
+    || echo "No RS_TOKEN set by request ... (NO_RS_TOKEN: $NO_RS_TOKEN)"
 
 # Get API endpoint
-export RS_ENDPOINT="{{.ApiURL}}"
+# setting NO_RS_ENDPOINT to 'false' (or any value) will skip 
+# setting the endpoint info
+[[ -z "$NO_RS_ENDPOINT" ]] && export RS_ENDPOINT="{{.ApiURL}}" \
+    || echo "No RS_ENDPOINT set by request ... (NO_RS_ENDPOINT: $NO_RS_ENDPOINT)"
 
 mkdir -p /usr/local/bin
 grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
+
+# TODO: we need to make drpcli/jq grab smarter to be a little
+#       more tolerant of OS arch/type - and grab the right one
 for tool in drpcli jq; do
     which "$tool" &>/dev/null && continue
     echo "Installing $tool in /usr/local/bin"
@@ -35,6 +57,29 @@ for tool in drpcli jq; do
     chmod 755 "/usr/local/bin/$tool"
 done
 unset tool
+
+if [[ -n "$RS_TOKEN" ]]
+then
+    drpcli info get | jq .features | grep -q '"sane-exit-codes"'
+    X=$?
+else
+    X=1
+fi
+
+# support proper RS_ prefix for our var names; but support old way too
+if [[ $X == 0 ]] ; then
+    echo "DRP supports 'sane-exit-codes' using them ..."
+    RS_SUCCESS_CODE=0 SUCCESS_CODE=0
+    RS_FAIL_CODE=1    FAIL_CODE=1
+    RS_REBOOT_CODE=64 REBOOT_CODE=64
+    RS_STOP_CODE=16   STOP_CODE=16
+else
+    echo "DRP does NOT support 'sane-exit-codes' using old codes ..."
+    RS_SUCCESS_CODE=0 SUCCESS_CODE=0
+    RS_FAIL_CODE=4    FAIL_CODE=4
+    RS_REBOOT_CODE=1  REBOOT_CODE=1
+    RS_STOP_CODE=4    STOP_CODE=4
+fi
 
 if [[ -r ./helper ]]; then
     echo "Loading helper script"
