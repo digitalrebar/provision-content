@@ -1,0 +1,11 @@
+---
+Name: "machine-plugin"
+Description: "The plugin that should manage this machine"
+Documentation: |
+  The plugin that should manage this machine.
+Schema:
+  type: "string"
+Meta:
+  icon: "user circle"
+  color: "blue"
+  title: "Digital Rebar Community Content"
