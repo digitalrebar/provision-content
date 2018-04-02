@@ -7,5 +7,5 @@ Tasks:
   - "ssh-access"
 Meta:
   icon: "spinner"
-  color: "yellow"
+  color: "purple"
   title: "Digital Rebar Community Content"
