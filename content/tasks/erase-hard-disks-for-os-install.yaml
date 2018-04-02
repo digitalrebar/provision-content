@@ -23,12 +23,12 @@ Templates:
       # Zap any volume groups that may be lying around.
       vgscan --ignorelockingfailure -P
       while read vg; do
-          vgremove -f "$vg" || :
+          vgremove -ff -y "$vg" || :
       done < <(vgs --noheadings -o vg_name)
       # Wipe out any LVM metadata that the kernel may have detected.
       pvscan --ignorelockingfailure
       while read pv; do
-          pvremove -f -y "$pv" || :
+          pvremove -ff -y "$pv" || :
       done < <(pvs --noheadings -o pv_name)
       # Now zap any partitions along with any RAID metadata that may exist.
       while read maj min blocks name; do
