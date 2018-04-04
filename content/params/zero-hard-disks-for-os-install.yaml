@@ -1,0 +1,14 @@
+---
+Name: zero-hard-disks-for-os-install
+Description: "Whether to zero entire hard disks when erasing before install"
+Documentation: |
+  By default, the erase disks for os install task tries to only erase
+  any metadata on the disks that may confuse a next OS install, along with
+  (optionally) attempting to discard all sectors on devices that support
+  discard.  If this is set to true, the task will also zero all sectors
+  on any non-SSD drives.
+Schema:
+  type: boolean
+  default: false
+Meta:
+  title: Digital Rebar Community Content
