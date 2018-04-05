@@ -98,7 +98,7 @@ Templates:
 
       # This will contain a token appropriate for the path being
       # used below.  Reset the token to the longer machine token.
-      export RS_TOKEN="{{.GenerateToken}}"
+      export RS_TOKEN="{{.GenerateInfiniteToken}}"
 
       # If we do not have hardware addresses set on the machine, set them now.
       get_macs() {
