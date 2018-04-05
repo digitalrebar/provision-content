@@ -11,7 +11,7 @@ echo "Machine's current stage: $CURRENT_STAGE"
 
 declare -A DATA
 
-cs() { drpcli machines stage "${RS_UUID}" "$1" || exit $? }
+cs() { drpcli machines stage "${RS_UUID}" "$1" --force || exit $? }
 
 {{if .ParamExists "change-stage/map"}}
 {{ range $key, $value := (.Param "change-stage/map")}}
