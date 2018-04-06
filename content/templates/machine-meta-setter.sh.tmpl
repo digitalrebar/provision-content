@@ -3,8 +3,6 @@
 
 set -e
 
-export RS_UUID="{{.Machine.UUID}}"
-
 {{template "setup.tmpl" .}}
 
 {{if .ParamExists "machine-meta/color" -}}
