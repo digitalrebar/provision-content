@@ -1,0 +1,51 @@
+---
+Description: "Make sure that the EFI BootOrder variable has the NIC we installed from first."
+Documentation: |
+  Certian Linux distributions reorder the UEFI boot options to always
+  locally boot from their install first, which is not generally what
+  dr-provision wants, as it makes regaining control of the machine by
+  PXE booting it to Sledgehammer harder.  This task rewrites the UEFI
+  boot order to have whatever device we booted from be the first.
+Name: always-pxe-in-uefi-first
+Templates:
+  - Name: munge-boot-order-with-efibootmgr
+    Contents: |
+      #!/bin/bash
+      {{ template "setup.tmpl" .}}
+      set -x
+      umount_things() {
+          if [[ $efiVarsMounted ]]; then
+              umount /sys/firmware/efi/efivars || :
+          fi
+          if [[ $sysMounted ]]; then
+              umount /sys || :
+          fi
+      }
+      trap umount_things EXIT
+      if [[ ! -d /sys/firmware ]]; then
+          mount -t sysfs sysfs /sys
+          sysMounted=true
+      fi
+      if [[ ! -d /sys/firmware/efi ]]; then
+          echo "No EFI firmware, nothing to do"
+          exit 1
+      fi
+      if [[ $(echo /sys/firmware/efi/efivars/*) = '/sys/firmware/efi/efivars/*' ]]; then
+          mkdir -p /sys/firmware/efi/efivars
+          mount -t efivarfs efivarfs /sys/firmware/efi/efivars
+          efiVarsMounted=true
+      fi
+      if ! which efibootmgr; then
+          echo "Missing efibootmgr, please install it as part of your OS install"
+          exit 1
+      fi
+      efibootmgr -v || :
+      current="$(efibootmgr |awk '/^BootCurrent/ {print $2}')"
+      order="$(efibootmgr |awk '/^BootOrder/ {print $2}')"
+      if [[ ! $order ]]; then
+          efibootmgr -o "$current"
+      else
+          efibootmgr -o "${current},${order}"
+      fi
+      efibootmgr -D || :
+      efivootmgr -v || :
