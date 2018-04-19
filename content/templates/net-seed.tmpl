@@ -20,56 +20,11 @@ d-i netcfg/dhcp_timeout string 120
 d-i netcfg/get_hostname string {{.Machine.ShortName}}
 {{if .ParamExists "dns-domain" -}}
 d-i netcfg/get_domain string {{.Param "dns-domain"}}
-{{end -}}
+{{end}}
 
-# Mirror Configuration
 d-i mirror/country string manual
-{{if .ParamExists "local-repo" -}}
-{{if eq (.Param "local-repo") true -}}
-d-i mirror/protocol string {{.ParseUrl "scheme" .Env.InstallUrl}}
-d-i mirror/http/hostname string {{.ParseUrl "host" .Env.InstallUrl}}
-d-i mirror/http/directory string {{.ParseUrl "path" .Env.InstallUrl}}
-{{else -}}
-d-i mirror/protocol string http
-{{if (eq "debian" .Env.OS.Family) -}}
-d-i mirror/http/hostname string http.us.debian.org
-d-i mirror/http/directory string /debian
-{{else -}}
-d-i mirror/http/hostname string archive.ubuntu.com
-d-i mirror/http/directory string /ubuntu
-{{end -}}
-{{end -}}
-{{else -}}
-d-i mirror/protocol string http
-{{if (eq "debian" .Env.OS.Family) -}}
-d-i mirror/http/hostname string http.us.debian.org
-d-i mirror/http/directory string /debian
-{{else -}}
-d-i mirror/http/hostname string archive.ubuntu.com
-d-i mirror/http/directory string /ubuntu
-{{end -}}
-{{end -}}
-
-{{if .ParamExists "local-security-repo" -}}
-{{if (eq "debian" .Env.OS.Family) -}}
-d-i apt-setup/security_host string {{.Param "local-security-repo"}}
-{{else -}}
-d-i apt-setup/security_host string {{.ParseUrl "host" (.Param "local-security-repo")}}
-d-i apt-setup/security_path string {{.ParseUrl "path" (.Param "local-security-repo")}}
-{{end -}}
-{{else -}}
-{{if .ParamExists "local-repo" -}}
-{{if eq (.Param "local-repo") true -}}
-# Using local-repo and !local-security-repo - no security repo specified
-{{else -}}
-{{if (eq "debian" .Env.OS.Family) -}}
-d-i apt-setup/security_host string security.debian.org
-{{else -}}
-d-i apt-setup/security_host string archive.ubuntu.com
-d-i apt-setup/security_path string /ubuntu
-{{end -}}
-{{end -}}
-{{end -}}
+{{range .InstallRepos -}}
+{{ .Install }}
 {{end -}}
 
 {{if .ParamExists "proxy-servers" -}}

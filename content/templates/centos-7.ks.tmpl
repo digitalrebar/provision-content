@@ -1,9 +1,8 @@
 # DigitalRebar Provision Centos-7 (and related distros) kickstart
 
-install
-url --url {{.Env.InstallUrl}}
-# Add support for our local proxy.
-repo --name="CentOS"  --baseurl={{.Env.InstallUrl}} {{if .ParamExists "proxy-servers"}} --proxy="{{index (.Param "proxy-servers") 0}}"{{end}} --cost=100
+{{range .InstallRepos}}
+{{ .Install }}
+{{end}}
 # key --skip
 # Disable geolocation for language and timezone
 # Currently broken by https://bugzilla.redhat.com/show_bug.cgi?id=1111717
