@@ -1,0 +1,6 @@
+---
+Name: reorder-uefi-bootorder
+Description: Reorder the UEFI bootorder during OS install to make the current boot device the first one.
+RunnerWait: true
+Tasks:
+  - always-pxe-in-uefi-first
