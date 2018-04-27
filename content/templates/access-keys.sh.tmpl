@@ -22,16 +22,20 @@
 #
 
 {{if .ParamExists "access-keys"}}
+KEYS=/root/.ssh/authorized_keys
+TMP_KEYS=$(mktemp /tmp/authorized_keys.tmp.XXXXXXX)
 echo "Putting ssh access keys for root in place"
 mkdir -p /root/.ssh
-cat >>/root/.ssh/authorized_keys <<EOFSSHACCESS
-### BEGIN Access Keys GENERATED CONTENT
-{{range $key := .Param "access-keys"}}
-{{$key}}
+cat >>$KEYS <<EOFSSHACCESS
+{{range $key := .Param "access-keys" -}}
+{{$key -}}
 {{end}}
-### END Access Keys GENERATED CONTENT
 EOFSSHACCESS
-chmod 600 /root/.ssh/authorized_keys
+# if the we are called multiple times we get duplicate keys, lets fix that
+cat $KEYS | sort -u > $TMP_KEYS
+[[ -s "$TMP_KEYS" ]] && cp $TMP_KEYS $KEYS
+[[ -f "$TMP_KEYS" ]] && rm -f $TMP_KEYS
+chmod 600 $KEYS
 {{end}}
 
 echo "Updating SSHD default values"
