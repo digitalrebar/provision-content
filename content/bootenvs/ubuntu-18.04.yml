@@ -1,9 +1,9 @@
-Name: ubuntu-18.04-beta-install
+Name: ubuntu-18.04-install
 BootParams: debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
   netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
   root=/dev/ram rw quiet {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
   -- {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
-Description: (BETA) Ubuntu-18.04 install points to the Daily ISOS Builds.
+Description: Ubuntu-18.04 install
 Errors: []
 Initrds:
   - install/netboot/ubuntu-installer/amd64/initrd.gz
@@ -16,10 +16,10 @@ Meta:
 OS:
   Codename: "Bionic Beaver"
   Family: ubuntu
-  IsoFile: bionic-server-amd64.iso
-  IsoSha256: ""
-  IsoUrl: http://cdimage.ubuntu.com/ubuntu-server/daily/current/bionic-server-amd64.iso
-  Name: ubuntu-18.04-beta
+  IsoFile: ubuntu-18.04-server-amd64.iso
+  IsoSha256: "a7f5c7b0cdd0e9560d78f1e47660e066353bb8a79eb78d1fc3f4ea62a07e6cbc"
+  IsoUrl: http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-amd64.iso
+  Name: ubuntu-18.04
   Version: "18.04"
 OnlyUnknown: false
 OptionalParams:

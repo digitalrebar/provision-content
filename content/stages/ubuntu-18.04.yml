@@ -1,11 +1,11 @@
-BootEnv: ubuntu-18.04-beta-install
-Description: (BETA) Ubuntu 18.04 installation stage.  References Beta BootEnv.
+BootEnv: ubuntu-18.04-install
+Description: Ubuntu 18.04 installation stage.
 Errors: []
 Meta:
   color: yellow
   icon: download
   title: Digital Rebar Community Content
-Name: ubuntu-18.04-beta-install
+Name: ubuntu-18.04-install
 OptionalParams: []
 Profiles: []
 ReadOnly: true
