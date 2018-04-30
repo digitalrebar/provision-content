@@ -89,7 +89,7 @@ d-i user-setup/encrypt-home boolean false
 
 d-i debian-installer/allow_unauthenticated string true
 tasksel tasksel/first multiselect standard, server
-d-i pkgsel/include string openssh-server curl efibootmgr
+d-i pkgsel/include string openssh-server curl efibootmgr {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
 d-i pkgsel/update-policy select none
 
 {{if .ParamExists "kernel-console"}}d-i debian-installer/add-kernel-opts string {{.Param "kernel-console"}}{{end}}

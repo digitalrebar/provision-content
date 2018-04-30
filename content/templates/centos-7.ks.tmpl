@@ -38,6 +38,11 @@ openssh
 curl.x86_64
 efibootmgr
 tar
+{{if .ParamExists "extra-packages" -}}
+{{ range $index, $element := (.Param "extra-packages") -}}
+{{$element}}
+{{end -}}
+{{end -}}
 %end
 
 %post
