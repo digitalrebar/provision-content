@@ -1,0 +1,16 @@
+---
+Name: "extra-packages"
+Description: "Add extra packages to the initial install path"
+Documentation: |
+  This is an array of strings where each string is an additional package to
+  install during the initial OS install.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+
+Meta:
+  icon: "present"
+  color: "blue"
+  title: "Digital Rebar Community Content"
