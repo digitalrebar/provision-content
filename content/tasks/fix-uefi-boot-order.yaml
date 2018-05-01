@@ -28,7 +28,7 @@ Templates:
       fi
       if [[ ! -d /sys/firmware/efi ]]; then
           echo "No EFI firmware, nothing to do"
-          exit 1
+          exit 0
       fi
       if [[ $(echo /sys/firmware/efi/efivars/*) = '/sys/firmware/efi/efivars/*' ]]; then
           mkdir -p /sys/firmware/efi/efivars
