@@ -12,3 +12,5 @@ Schema:
   default: false
 Meta:
   title: Digital Rebar Community Content
+  icon: "disk outline"
+  color: "blue"

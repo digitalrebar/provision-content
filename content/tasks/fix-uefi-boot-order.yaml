@@ -7,6 +7,10 @@ Documentation: |
   PXE booting it to Sledgehammer harder.  This task rewrites the UEFI
   boot order to have whatever device we booted from be the first.
 Name: always-pxe-in-uefi-first
+Meta:
+  title: Digital Rebar Community Content
+  icon: "disk outline"
+  color: "blue"
 Templates:
   - Name: munge-boot-order-with-efibootmgr
     Contents: |

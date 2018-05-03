@@ -4,3 +4,7 @@ Description: Reorder the UEFI bootorder during OS install to make the current bo
 RunnerWait: true
 Tasks:
   - always-pxe-in-uefi-first
+Meta:
+  title: Digital Rebar Community Content
+  icon: "disk outline"
+  color: "blue"
