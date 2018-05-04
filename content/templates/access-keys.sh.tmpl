@@ -28,8 +28,8 @@ echo "Putting ssh access keys for root in place"
 mkdir -p /root/.ssh
 cat >>$KEYS <<EOFSSHACCESS
 {{range $key := .Param "access-keys" -}}
-{{$key -}}
-{{end}}
+{{$key}}
+{{end -}}
 EOFSSHACCESS
 # if the we are called multiple times we get duplicate keys, lets fix that
 cat $KEYS | sort -u > $TMP_KEYS
