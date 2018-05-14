@@ -1,9 +1,9 @@
 ---
-Name: "centos-7.4.1804-install"
-Description: "CentOS-7.4.1804 install bootenv"
+Name: "centos-7.5.1804-install"
+Description: "CentOS-7.5.1804 install bootenv"
 OS:
   Family: "redhat"
-  Name: "centos-7.4.1804"
+  Name: "centos-7.5.1804"
   IsoFile: "CentOS-7-x86_64-Minimal-1804.iso"
   IsoSha256: "714acc0aefb32b7d51b515e25546835e55a90da9fb00417fbee2d03a62801efd"
   IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso"
