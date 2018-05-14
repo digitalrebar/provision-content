@@ -4,9 +4,9 @@ Description: "CentOS-7 installer that points to the latest CentOS 7 release."
 OS:
   Family: "redhat"
   Name: "centos-7"
-  IsoFile: "CentOS-7-x86_64-Minimal-1708.iso"
-  IsoSha256: "bba314624956961a2ea31dd460cd860a77911c1e0a56e4820a12b9c5dad363f5"
-  IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1708.iso"
+  IsoFile: "CentOS-7-x86_64-Minimal-1804.iso"
+  IsoSha256: "714acc0aefb32b7d51b515e25546835e55a90da9fb00417fbee2d03a62801efd"
+  IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso"
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
