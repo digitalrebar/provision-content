@@ -1,7 +1,7 @@
 ---
-Name: "centos-7.4.1708-install"
-Description: "CentOS 7.4.1708 install stage."
-BootEnv: "centos-7.4.1708-install"
+Name: "centos-7.4.1804-install"
+Description: "CentOS 7.4.1804 install stage."
+BootEnv: "centos-7.4.1804-install"
 RunnerWait: true
 Tasks:
   - "set-hostname"
