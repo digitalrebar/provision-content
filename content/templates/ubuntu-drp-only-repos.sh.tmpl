@@ -1,33 +1,11 @@
 #!/bin/bash
-{{ if .ParamExists "local-repo" }}
-{{ if eq (.Param "local-repo") true }}
-#
-# This template forces a apt-based install
-# to use only the local DRP provided repo.
-#
-# Runs as part of a shell script for preseed
-# The template does is only functional if local-repo is true.
-#
-# Required Parameters: local-repo
-# Optional Parameters:
-#
-# Parameter YAML format:
-#
-# local-repo: true
-#
-# Defaults:
-# local-repo - Function is enabled if and only local-repo is true
-#
 
 export LC_ALL=C LANGUAGE=C LANG=C
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
-repofile=/etc/apt/sources.list
-repocontents=()
-if wget -O - {{.Env.InstallUrl}}/dists/stable/Release &>/dev/null; then
-    repocontents+=('deb {{.Env.InstallUrl}} stable restricted')
-fi
+cat >/etc/apt/sources.list <<"EOFLOCALREPO"
+{{range .MachineRepos }}
+{{ .Lines }}
+{{end}}
+EOFLOCALREPO
 
-printf "%s\n" "${repocontents[@]}" > "$repofile"
 apt-get -y --force-yes update
-{{ end }}
-{{ end }}
