@@ -87,6 +87,212 @@ Documentation: |
         - main
         - non-free
 Schema:
+  default:
+    - tag: centos-7
+      os:
+        - centos-7
+      url: http://mirrors.edge.kernel.org/centos/7/os/x86_64/
+      installSource: true
+    - tag: centos-7.5.1804
+      os:
+        - centos-7.5.1804
+      url: http://mirrors.edge.kernel.org/centos/7.5.1804/os/x86_64/
+      installSource: true
+    - tag: centos-7-everything
+      os:
+        - centos-7
+        - centos-7.3.1611
+        - centos-7.4.1708
+        - centos-7.5.1804
+      url: "http://mirrors.edge.kernel.org/centos"
+      distribution: "7"
+      components:
+        - atomic
+        - centosplus
+        - cr
+        - dotnet
+        - extras
+        - fasttrack
+        - os
+        - rt
+        - updates
+    - tag: epel-7
+      os:
+        - centos-7
+        - centos-7.3.1611
+        - centos-7.4.1708
+        - centos-7.5.1804
+      url: http://mirrors.kernel.org/fedora-epel
+      distribution: "7"
+    - tag: ubuntu-16.04
+      os:
+        - ubuntu-16.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "xenial"
+      installSource: true
+      bootloc: http://mirrors.edge.kernel.org/ubuntu/dists/xenial/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/
+      components:
+        - main
+        - restricted
+        - multiverse
+        - universe
+    - tag: ubuntu-16.04-backports
+      os:
+        - ubuntu-16.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "xenial-backports"
+      components:
+        - main
+        - restricted
+        - universe
+        - multiverse
+    - tag: ubuntu-16.04-updates
+      os:
+        - ubuntu-16.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "xenial-updates"
+      components:
+        - main
+        - restricted
+        - universe
+        - multiverse
+    - tag: ubuntu-16.04-security
+      os:
+        - ubuntu-16.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "xenial-security"
+      securitySource: true
+      components:
+        - main
+        - restricted
+        - universe
+        - multiverse
+    - tag: ubuntu-18.04
+      os:
+        - ubuntu-18.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "bionic"
+      installSource: true
+      bootloc: http://mirrors.edge.kernel.org/ubuntu/dists/bionic/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/
+      components:
+        - main
+        - restricted
+        - multiverse
+        - universe
+    - tag: ubuntu-18.04-backports
+      os:
+        - ubuntu-18.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "bionic-backports"
+      components:
+        - main
+        - restricted
+        - universe
+        - multiverse
+    - tag: ubuntu-18.04-updates
+      os:
+        - ubuntu-18.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "bionic-updates"
+      securitySource: true
+      components:
+        - main
+        - restricted
+        - universe
+        - multiverse
+    - tag: ubuntu-18.04-security
+      os:
+        - ubuntu-18.04
+      url: http://mirrors.edge.kernel.org/ubuntu/
+      distribution: "bionic-security"
+      components:
+        - main
+        - restricted
+        - universe
+        - multiverse
+    - tag: debian-9-install
+      os:
+        - "debian-9"
+      installSource: true
+      url: "http://mirrors.kernel.org/debian"
+      distribution: stretch
+      bootloc: http://mirrors.kernel.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/debian-installer/amd64/
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-9-updates"
+      os:
+        - "debian-9"
+      url: "http://mirrors.kernel.org/debian"
+      distribution: stretch-updates
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-9-backports"
+      os:
+        - "debian-9"
+      url: "http://mirrors.kernel.org/debian"
+      distribution: stretch-backports
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-9-security"
+      os:
+        - "debian-9"
+      url: "http://security.debian.org/debian-security/"
+      securitySource: true
+      distribution: stretch/updates
+      components:
+        - contrib
+        - main
+        - non-free
+    - tag: debian-8-install
+      os:
+        - "debian-8"
+      installSource: true
+      url: "http://mirrors.kernel.org/debian"
+      distribution: jessie
+      bootloc: http://mirrors.kernel.org/debian/dists/jessie/main/installer-amd64/current/images/netboot/debian-installer/amd64/
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-8-updates"
+      os:
+        - "debian-8"
+      url: "http://mirrors.kernel.org/debian"
+      distribution: jessie-updates
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-8-backports"
+      os:
+        - "debian-8"
+      url: "http://mirrors.kernel.org/debian"
+      distribution: jessie-backports
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-8-security"
+      os:
+        - "debian-8"
+      url: "http://security.debian.org/debian-security/"
+      securitySource: true
+      distribution: jessie/updates
+      components:
+        - contrib
+        - main
+        - non-free
+    - tag: sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc
+      os:
+        - sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc
+      url: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc/"
+      installSource: true
   type: "array"
   items:
     type: "object"
@@ -138,6 +344,10 @@ Schema:
         type: array
         items:
           type: string
+      # BootLoc points to where the kernel and initrd are at, if
+      # they are not at url + bootenv value.
+      bootloc:
+        type: string
 Meta:
   icon: "book"
   color: "blue"
