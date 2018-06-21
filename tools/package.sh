@@ -21,12 +21,14 @@ esac
 
 PATH=$PATH:$GOPATH/bin
 which drbundler || go get -u github.com/digitalrebar/provision/cmds/drbundler
+which drpcli || go get -u github.com/digitalrebar/provision/cmds/drpcli
 
 . tools/version.sh
 
 for dir in content contrib ; do
     echo -n "$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" > $dir/._Version.meta
     drbundler $dir drp-community-$dir.yaml
+    drpcli contents document drp-community-$dir.yaml > drp-community-$dir.rst
     $shasum drp-community-$dir.yaml > drp-community-$dir.sha256
 done
 
