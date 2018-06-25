@@ -10,6 +10,7 @@ RunnerWait: true
 Tasks:
   - "ssh-access"
 Meta:
-  icon: "spinner"
-  color: "purple"
+  deprecated: "25 June 2018"
+  icon: "ban"
+  color: "gray"
   title: "Digital Rebar Community Content"
