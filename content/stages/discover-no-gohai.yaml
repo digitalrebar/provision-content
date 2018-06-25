@@ -1,6 +1,10 @@
 ---
 Name: "discover-no-gohai"
-Description: "Discovery stage used to discover new machines - no inventory"
+Description: "DEPRECATED - Discovery stage used to discover new machines - no inventory"
+Documentation: |
+  DEPRECATED! Use the discover Stage with gohai/skip Param instead.
+
+  Pre gohai/skip Parameter, used to run discovery without gohai action.
 BootEnv: "sledgehammer"
 RunnerWait: true
 Tasks:

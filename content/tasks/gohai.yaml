@@ -1,8 +1,19 @@
 ---
 Name: "gohai"
 Description: "Get basic system inventory using Gohai"
+Documentation: |
+  Sets Param: gohai-inventory
+
+  Collect inventory from machines using drpcli gohai command
+  and store the result in the gohai-inventory Param on the machine.
+
+  If you want to disable this behavior, set the gohai/skip Param to true.
+
+  Hint: this can be A LOT of data added to the machine param!  You may
+  want to use ?slim in the API to skip returning it on list requests.
 OptionalParams:
   - gohai/skip
+  - gohai-inventory
 Templates:
   - Name: "gohai"
     Contents: |
