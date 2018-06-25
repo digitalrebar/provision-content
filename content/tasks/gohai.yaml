@@ -1,16 +1,22 @@
 ---
 Name: "gohai"
 Description: "Get basic system inventory using Gohai"
+OptionalParams:
+  - gohai/skip
 Templates:
   - Name: "gohai"
     Contents: |
       #!/usr/bin/env bash
-      drpcli machines set {{.Machine.UUID}} param gohai-inventory to '{}'
-      if drpcli gohai --help >/dev/null 2>/dev/null ; then
-        drpcli gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
-      else
-        gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
-      fi
+      {{if .Param "gohai/skip" -}}
+        echo "Skipping drpcli gohai because Param gohai/skip is true"
+      {{else -}}
+        echo "Running drpcli gohai (skip by setting gohai/skip to true)"
+        if drpcli gohai --help >/dev/null 2>/dev/null ; then
+          drpcli gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+        else
+          gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+        fi
+      {{end -}}
 Meta:
   icon: "search"
   color: "blue"
