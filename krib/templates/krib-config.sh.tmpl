@@ -5,7 +5,6 @@ set -x
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
-{{template "krib-lib.sh.tmpl" .}}
 
 echo "Configure kubeadm master and minions..."
 
@@ -17,6 +16,8 @@ PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
 echo "Missing krib/cluster-profile on the machine!"
 exit 1
 {{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
 
 echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
 if free | grep -q Swap ; then
