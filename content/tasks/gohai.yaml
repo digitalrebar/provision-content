@@ -1,16 +1,33 @@
 ---
 Name: "gohai"
 Description: "Get basic system inventory using Gohai"
+Documentation: |
+  Sets Param: gohai-inventory
+
+  Collect inventory from machines using drpcli gohai command
+  and store the result in the gohai-inventory Param on the machine.
+
+  If you want to disable this behavior, set the gohai/skip Param to true.
+
+  Hint: this can be A LOT of data added to the machine param!  You may
+  want to use ?slim in the API to skip returning it on list requests.
+OptionalParams:
+  - gohai/skip
+  - gohai-inventory
 Templates:
   - Name: "gohai"
     Contents: |
       #!/usr/bin/env bash
-      drpcli machines set {{.Machine.UUID}} param gohai-inventory to '{}'
-      if drpcli gohai --help >/dev/null 2>/dev/null ; then
-        drpcli gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
-      else
-        gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
-      fi
+      {{if .Param "gohai/skip" -}}
+        echo "Skipping drpcli gohai because Param gohai/skip is true"
+      {{else -}}
+        echo "Running drpcli gohai (skip by setting gohai/skip to true)"
+        if drpcli gohai --help >/dev/null 2>/dev/null ; then
+          drpcli gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+        else
+          gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
+        fi
+      {{end -}}
 Meta:
   icon: "search"
   color: "blue"

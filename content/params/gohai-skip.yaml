@@ -1,0 +1,13 @@
+---
+Name: "gohai/skip"
+Description: "Skips gohai run during discovery"
+Documentation: |
+  Allows machines to stop using the discover-nogohai stage.
+  When true, the gohai part of the discovery stage will be skipped
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  icon: "search minus"
+  color: "blue"
+  title: "Digital Rebar Community Content"
