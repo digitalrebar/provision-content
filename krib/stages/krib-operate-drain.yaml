@@ -1,0 +1,40 @@
+---
+Name: "krib-operate-drain"
+Description: "Drain operation on a given KRIB built Kubernetes node"
+Documentation: |
+  This stage runs an Drain operation on a given KRIB built Kubernetes
+  node.  It uses the 'krib-operate-drain' Profile
+
+  In addition - you may set the following Params on a Machine object
+  to override the default behaviors of this stage:
+
+    krib/operate-action     - action to take (drain or uncordon)
+    krib/operate-on-node    - a Kubernetes node name to operate on
+    krib/operate-options    - command line arguments to pass to the
+                              'kubectl' command for the action
+
+  If the 'krib/operate-on-node' Param is empty, the node that is
+  currently running the Stage will be operated on.  Otherwise,
+  specifying an alternate Node allows remote draining a node.
+
+  DRAIN NOTES: this Stage does a few things that MAY BE VERY BAD !!
+
+  1. service pods are ignored for the drain operation
+  2. --delete-local-data is used to evict pods using local storage
+
+  Default options are '--ignore-daemonsets --delete-local-data' to
+  the drain operation.  If you override these values (by setting
+  'krib/operate-options') you MAY NEED to re-specify these values,
+  otherwise, the Node will NOT be drained properly.
+
+  These options may mean your data might be nuked.
+
+Profiles:
+  - "krib-operate-drain"
+RunnerWait: true
+Tasks:
+  - "krib-operate"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

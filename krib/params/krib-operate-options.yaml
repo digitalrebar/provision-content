@@ -1,0 +1,34 @@
+---
+Name: "krib/operate-options"
+Description: "Space separted list of command line flags to pass to 'kubectl' operations specified in 'krib/operate-action' ...'"
+Documentation: |
+  This Param can be used to pass additional flag options to the
+  'kubectl' operation that is specified by the 'krib/operate-action'
+  Param.  By default, the 'drain' operation will be called if no
+  action is defined on the Machine.
+
+  This Param provides some customization to how the operate operation
+  functions.
+
+  For 'kubectl drain' documentation, see the following URL:
+    https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#drain
+  For 'kubectl uncordin' doc, see the URL:
+    https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#uncordon
+
+  NOTE NOTE the following flags are set as default options in the
+  Template for drain operations:
+
+    --ignore-daemonsets --delete-local-data
+
+  For 'drain' operations, if you override these defaults, you MOST LIKELY
+  need to specify them for the drain operation to be successful.  You have
+  been warned.
+
+  No defaults provdided for 'uncordon' operations (you shouldn't need any).
+
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

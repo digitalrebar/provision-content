@@ -1,0 +1,15 @@
+---
+Description: "A task to configure kubernetes via kubeadm"
+Name: "krib-config"
+Templates:
+  - ID: "krib-kubeadm.cfg.tmpl"
+    Name: "Kubeadm config file"
+    Path: "/tmp/kubeadm.cfg"
+  - ID: "krib-config.sh.tmpl"
+    Name: "Config Kubernetes via Kubeadm"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

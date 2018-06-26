@@ -1,0 +1,16 @@
+BootEnv: "local"
+Description: "KRIB cluster install-to-disk is complete."
+Errors: []
+Meta:
+  color: "green"
+  icon: "check circle outline"
+  title: "KRIB Install Complete"
+Name: "krib-install-complete"
+OptionalParams: []
+Profiles: []
+ReadOnly: true
+Reboot: false
+RequiredParams: []
+RunnerWait: true
+Tasks: []
+Templates: []

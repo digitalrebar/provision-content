@@ -1,0 +1,9 @@
+---
+Name: "etcd/peer-ca-name"
+Description: "Name of the certificate root for the etcd peer certs"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

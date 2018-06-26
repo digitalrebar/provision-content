@@ -1,0 +1,10 @@
+---
+Name: "etcd/peer-ca-pw"
+Description: "Password to access the etcd peer CA"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

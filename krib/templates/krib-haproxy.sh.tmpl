@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+{{template "krib-lib.sh.tmpl" .}}
+
+install haproxy
+
+systemctl enable haproxy
+systemctl start haproxy
+
+echo "Finished successfully"
+exit 0
+

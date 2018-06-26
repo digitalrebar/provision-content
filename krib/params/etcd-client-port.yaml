@@ -1,0 +1,10 @@
+---
+Name: "etcd/client-port"
+Description: "Port clients use to talk to etcd servers"
+Schema:
+  type: "integer"
+  default: 2379
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

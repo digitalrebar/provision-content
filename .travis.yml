@@ -33,6 +33,9 @@ deploy:
   - drp-community-contrib.rst
   - drp-community-contrib.yaml
   - drp-community-contrib.sha256
+  - krib.rst
+  - krib.yaml
+  - krib.sha256
   skip_cleanup: true
   on:
     repo: digitalrebar/provision-content

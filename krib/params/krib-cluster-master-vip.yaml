@@ -1,0 +1,9 @@
+---
+Name: "krib/cluster-master-vip"
+Description: "Virtual IP for the Master Servers"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

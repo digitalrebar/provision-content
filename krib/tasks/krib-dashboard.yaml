@@ -1,0 +1,12 @@
+---
+Description: "A task to setup dashboard"
+Name: "krib-dashboard"
+Templates:
+  - ID: "krib-dashboard.sh.tmpl"
+    Name: "Setup Dashboard"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

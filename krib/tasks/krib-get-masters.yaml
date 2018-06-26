@@ -1,0 +1,12 @@
+---
+Description: "A task to collect kubernetes masters"
+Name: "krib-get-masters"
+Templates:
+  - ID: "krib-get-masters.sh.tmpl"
+    Name: "Collect Kubernetes Masters"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

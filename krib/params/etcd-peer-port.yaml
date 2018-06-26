@@ -1,0 +1,10 @@
+---
+Name: "etcd/peer-port"
+Description: "Port peers use to talk to each other"
+Schema:
+  type: "integer"
+  default: 2380
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

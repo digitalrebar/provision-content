@@ -1,0 +1,12 @@
+---
+Description: "A task to install docker"
+Name: "docker-install"
+Templates:
+  - ID: "docker-install.sh.tmpl"
+    Name: "Install Docker from internet repo"
+    Path: ""
+Meta:
+  icon: "pocket"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

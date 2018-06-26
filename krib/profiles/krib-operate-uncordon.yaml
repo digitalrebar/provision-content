@@ -1,0 +1,16 @@
+Name: "krib-operate-uncordon"
+Description: "Contains Params that set the krib-operate-uncordon Stage values."
+Documentation: |
+  This profile contians the default krib-operate task parameters to drive
+  an uncordon operation.  This profile can be added to a node or stage to
+  allow the krib-operate task to do an uncordon operation.
+
+  This profile is used by the krib-uncordon stage to allow a machine to
+  be uncordoned without altering the parameters on the machine.
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "Community Content"
+Params:
+  krib/operate-action: "uncordon"
+  krib/operate-options-drain: ""

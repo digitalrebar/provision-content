@@ -32,3 +32,10 @@ for dir in content contrib ; do
     $shasum drp-community-$dir.yaml > drp-community-$dir.sha256
 done
 
+for dir in krib ; do
+    echo -n "$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" > $dir/._Version.meta
+    drbundler $dir $dir.yaml
+    drpcli contents document $dir.yaml > $dir.rst
+    $shasum $dir.yaml > $dir.sha256
+done
+

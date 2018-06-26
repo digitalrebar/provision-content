@@ -1,0 +1,16 @@
+Description: "KRIB built kubernetes live boot demo cluster"
+Errors: []
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "kubernetes live boot demo cluster"
+Name: "krib-live-cluster"
+ReadOnly: false
+Stages:
+  - "ssh-access"
+  - "mount-local-disks"
+  - "docker-install"
+  - "kubernetes-install"
+  - "etcd-config"
+  - "krib-config"
+  - "krib-live-wait"

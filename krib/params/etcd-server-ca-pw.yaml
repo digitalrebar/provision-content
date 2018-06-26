@@ -1,0 +1,10 @@
+---
+Name: "etcd/server-ca-pw"
+Description: "Password to access the etcd server CA"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+{{template "krib-lib.sh.tmpl" .}}
+
+echo "Configure kubeadm master and minions..."
+
+CLUSTER_NAME={{.Param "krib/cluster-name"}}
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing krib/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
+if free | grep -q Swap ; then
+  swapoff -a
+fi
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  echo "I am master - run kubeadm"
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    # set of Params to wipe from the krib/cluster-profile if we are
+    # NOT in production mode
+    declare -a WIPE_PARAMS=('krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs')
+
+    # If we are already ran, don't run again.
+    JC=$(get_param "krib/cluster-join-command" | jq -r .)
+    if [[ $JC != "" && $JC != null ]] ; then
+{{ if eq (.Param "krib/cluster-is-production") true -}}
+      echo "Cluster is marked as a PRODUCTION cluster... "
+      echo "Already run this on the master!  Can not run kubeadm twice!"
+      echo "Suggested Fix: clear cluster configuration from profile"
+      drpcli machines update $RS_UUID '{"Meta":{"color":"red", "icon": "anchor"}}'
+      exit 1
+{{else -}}
+      echo "This cluster is NOT MARKED PRODUCTION, the following Params"
+      echo "will be reset and overwritten:"
+      echo
+      echo "    krib/cluster-admin-conf"
+      echo "    krib/cluster-join-command"
+      echo "    krib/cluster-master-certs"
+      echo
+{{if .ParamExists "krib/cluster-admin-conf" -}}
+      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "krib/cluster-admin-conf" | jq -r '.'
+{{end -}}
+{{if .ParamExists "krib/cluster-join-command" -}}
+      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "krib/cluster-join-command" | jq -r '.'
+{{end -}}
+{{if .ParamExists "krib/cluster-master-certs" -}}
+      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "krib/cluster-master-certs" | jq -r '.'
+{{end -}}
+{{end -}}
+    fi
+
+    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
+
+    tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
+    base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
+    rm /tmp/cert.tgz /tmp/cert.b64
+
+    JOIN_CMD=$(cat /tmp/kubeadm.init.log | grep "kubeadm join")
+
+    # echo "Starting calico networking..."
+    # kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+
+    echo "Starting flannel networking..."
+    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
+
+  else
+    wait_for_variable $KRIB_MASTER_CERTS_PARAM
+
+    cd /
+    get_param $KRIB_MASTER_CERTS_PARAM | jq -r . | base64 -d - | tar -zxvf -
+    cd -
+
+    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
+
+  fi
+
+  MAX_WAIT_SECONDS=300
+  INCREMENT_SECONDS=10
+  N=0
+  READY=false
+
+  while [ "$READY" != "true" ]; do
+    READY=true
+
+    if [ $N -gt ${MAX_WAIT_SECONDS} ]; then
+      echo "All masters did not come up!"
+      exit 1
+    else
+      N=$(expr $N + ${INCREMENT_SECONDS})
+    fi
+
+    OLD_IFS=$IFS
+    IFS=" " ; while read name ; do
+        if kubectl get nodes | egrep -q "^$name[ \t]*Ready"; then
+                echo "Node $name is ready."
+        else
+                echo "Node $name is not yet ready."
+                READY=false
+        fi
+    done <<< $(get_param $KRIB_MASTERS_PARAM | jq -r '.[].Name' )
+    IFS=$OLD_IFS
+
+    if [ "$READY" != "true" ]; then
+      sleep ${INCREMENT_SECONDS}s
+    fi
+  done
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    echo "Recording cluster admin config ..."
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to "$(cat /etc/kubernetes/admin.conf)"
+
+    echo "Recording cluster join script ..."
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$JOIN_CMD"
+
+    drpcli machines tasks add {{.Machine.UUID}} at 0 krib-settings krib-dashboard
+
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\"}}" | jq .Meta
+  else
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
+  fi
+
+else
+
+  echo "I am a worker - run kubeadm join when defined"
+
+  JC=$(wait_for_variable $KRIB_JOIN_PARAM)
+
+  echo "Running: $JC"
+  $JC
+
+  # Set machine icon and color for KRIB cluster building
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\"}}" | jq .Meta
+
+fi
+
+while [ ! -f /etc/kubernetes/kubelet.conf ] ;
+do
+      sleep 2
+done
+
+# Fix kubelet to use the vip/lb
+MASTER_VIP={{.Param "krib/cluster-master-vip"}}
+MASTER_COUNT={{.Param "krib/cluster-master-count"}}
+API_PORT=6443
+if [[ $MASTER_COUNT -gt 1 ]] ; then
+  API_PORT=8443
+fi
+sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
+systemctl restart kubelet
+
+# Clean up
+rm -f /tmp/kubeadm.cfg
+
+echo "Finished successfully"
+exit 0
+

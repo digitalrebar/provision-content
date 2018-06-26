@@ -1,0 +1,12 @@
+---
+Description: "A task to install kubernetes and kubeadm"
+Name: "kubernetes-install"
+Templates:
+  - ID: "kubernetes-install.sh.tmpl"
+    Name: "Install Kubernetes and Kubeadm"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

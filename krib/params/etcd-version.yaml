@@ -1,0 +1,10 @@
+---
+Name: "etcd/version"
+Description: "Version of the etcd to use in cluster"
+Schema:
+  type: "string"
+  default: "3.2.15"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

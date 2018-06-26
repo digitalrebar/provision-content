@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Docker Install
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+[[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
+
+{{if .ParamExists "docker/working-dir" -}}
+echo "Linking the docker working directory into place."
+ln -s {{.Param "docker/working-dir"}} /var/lib/docker
+{{end -}}
+
+case $OS_FAMILY in
+  debian)
+    DOCKER_PKG=docker.io
+    DOCKER_SVC_NAME=docker
+    ;;
+  rhel)
+    DOCKER_PKG=docker
+    DOCKER_SVC_NAME=docker
+    ;;
+esac
+
+install $DOCKER_PKG
+service $DOCKER_SVC_NAME enable
+service $DOCKER_SVC_NAME start
+
+echo "Docker installed successfully"
+exit 0
+
