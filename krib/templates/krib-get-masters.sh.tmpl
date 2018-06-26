@@ -9,8 +9,6 @@ set -x
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
-{{template "krib-lib.sh.tmpl" .}}
-
 echo "Elect and wait for the masters"
 
 CLUSTER_NAME={{.Param "krib/cluster-name"}}
@@ -21,6 +19,8 @@ PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
 echo "Missing krib/cluster-profile on the machine!"
 exit 1
 {{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
 
 MASTER_ON_ETCDS={{.Param "krib/cluster-masters-on-etcds"}}
 ETCD_COUNT={{.Param "etcd/server-count"}}
