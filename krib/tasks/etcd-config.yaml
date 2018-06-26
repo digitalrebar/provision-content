@@ -1,0 +1,12 @@
+---
+Description: "A task to configure etcd"
+Name: "etcd-config"
+Templates:
+  - ID: "etcd-config.sh.tmpl"
+    Name: "Config Etcd"
+    Path: ""
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

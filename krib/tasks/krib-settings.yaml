@@ -1,0 +1,12 @@
+---
+Description: "A task to setup general HA Settings"
+Name: "krib-settings"
+Templates:
+  - ID: "krib-settings.sh.tmpl"
+    Name: "Setup Settings"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

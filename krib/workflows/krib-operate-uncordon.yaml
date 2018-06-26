@@ -1,0 +1,9 @@
+Name: "krib-operate-uncordon"
+Description: "Run 'kubectl' operate to Uncordon on KRIB built Kubernetes node."
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "krib operate uncordon"
+Stages:
+  - "krib-operate-uncordon"
+

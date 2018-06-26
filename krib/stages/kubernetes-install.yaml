@@ -1,0 +1,10 @@
+---
+Name: "kubernetes-install"
+Description: "Install Kubernetes and Kubeadm Packages"
+RunnerWait: true
+Tasks:
+  - "kubernetes-install"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

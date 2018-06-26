@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+{{template "krib-lib.sh.tmpl" .}}
+export RS_UUID="{{.Machine.UUID}}"
+
+echo "Start all the cluster services."
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+MASTER_COUNT={{.Param "krib/cluster-master-count"}}
+MASTER_VIP={{.Param "krib/cluster-master-vip"}}
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  echo "Up the DNS replica count"
+  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/kube-dns
+
+  API_PORT=6443
+  if [[ $MASTER_COUNT -gt 1 ]] ; then
+    API_PORT=8443
+  fi
+  echo "Point the Kube-Proxy at $API_PORT"
+  kubectl get configmap -n kube-system kube-proxy -o yaml >/tmp/kube-proxy-cm.yaml
+  sed -i "s/server: *https:\/\/.*:6443/server: https:\/\/${MASTER_VIP}:${API_PORT}/" /tmp/kube-proxy-cm.yaml
+  kubectl apply -f /tmp/kube-proxy-cm.yaml --force
+  rm -f /tmp/kube-proxy-cm.yaml
+  kubectl delete pod -n kube-system -l k8s-app=kube-proxy
+
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"blue\", \"icon\": \"anchor\"} }" | jq .Meta
+fi
+
+echo "Finished successfully"
+exit 0
+

@@ -23,7 +23,7 @@ go get -u github.com/stevenroose/remarshal
 version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH"
 
 TOKEN=R0cketSk8ts
-for i in drp-community-content drp-community-contrib ; do
+for i in drp-community-content drp-community-contrib krib ; do
     echo "Publishing $i to cloud"
     CONTENT=$i
     remarshal -i $CONTENT.yaml -o $CONTENT.json -if yaml -of json

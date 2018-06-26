@@ -1,0 +1,9 @@
+---
+Name: "krib/cluster-profile"
+Description: "Name of the profile for this kubernetes cluster"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

@@ -1,0 +1,9 @@
+Name: "krib-operate-drain"
+Description: "Run 'kubectl' operate to Drain KRIB built Kubernetes node."
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "krib operate drain"
+Stages:
+  - "krib-operate-drain"
+

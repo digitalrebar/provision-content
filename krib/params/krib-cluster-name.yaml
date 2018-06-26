@@ -1,0 +1,10 @@
+---
+Name: "krib/cluster-name"
+Description: "Name of Kubernetes cluster"
+Schema:
+  type: "string"
+  default: "k8s-cluster"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

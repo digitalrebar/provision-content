@@ -1,0 +1,10 @@
+---
+Name: "etcd/name"
+Description: "Name of the etcd cluster"
+Schema:
+  type: "string"
+  default: "etcd-cluster"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

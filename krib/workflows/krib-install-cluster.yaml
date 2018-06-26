@@ -1,0 +1,17 @@
+Description: "KRIB built kubernetes install-to-disk demo cluster"
+Errors: []
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "kubernetes install-to-disk demo cluster"
+Name: "krib-install-cluster"
+ReadOnly: false
+Stages:
+  - "centos-7-install"
+  - "runner-service"
+  - "finish-install"
+  - "docker-install"
+  - "kubernetes-install"
+  - "etcd-config"
+  - "krib-config"
+  - "krib-install-complete"

@@ -1,0 +1,31 @@
+---
+Name: "krib/cluster-is-production"
+Description: "Set the KRIB cluster to production mode."
+Documentation: |
+  By default the KRIB cluster mode will be set to dev/test/lab
+  (whatever you wanna call it).  If you set this Param to true
+  then the cluster will be tagged as in Production use.
+
+  If the cluster is in Production mode, then the state of the
+  various Params for new clusters will be preserved, preventing
+  the cluster from being overwritten.
+
+  If NOT in Production mode, the following Params will be wiped
+  clean before building the cluster.  This is essentially a
+  destructive pattern.
+
+    krib/cluster-admin-conf - the admin.conf file Param will be wiped
+    krib/cluster-join       - the Join token will be destroyed
+
+  This allows for "fast reuse" patterns with building KRIB
+  clusters, while also allowing a cluster to be marked Production
+  and require manual intervention to wipe the Params to rebuild
+  the cluster.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

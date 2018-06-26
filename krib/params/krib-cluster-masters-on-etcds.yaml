@@ -1,0 +1,10 @@
+---
+Name: "krib/cluster-masters-on-etcds"
+Description: "Should the masters run on the etcd servers"
+Schema:
+  type: "boolean"
+  default: true
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

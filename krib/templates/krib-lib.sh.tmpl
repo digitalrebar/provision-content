@@ -1,0 +1,133 @@
+#
+# Library of common sync/control functions
+#
+# Assumes PROFILE_TOKEN and CLUSTER_PROFILE are set
+#
+# Also assumes that setup.tmpl has been include to get the task functions
+#   - get_param
+# which assumes that RS_UUID and RS_KEY or RS_TOKEN are set.
+#
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit $XIT; }
+
+[[ -z "$PROFILE_TOKEN" ]] && xiterr 1 "required PROFILE_TOKEN not set"
+[[ -z "$CLUSTER_PROFILE" ]] && xiterr 1 "required CLUSTER_PROFILE not set"
+
+wait_for_variable() {
+  local varname=$1
+  local var=$(get_param "$varname" | jq -r .)
+  local sleep_time=1
+  local timer_count=0
+  local timer_expire=600
+
+  while [[ $var == null ]] ; do
+    sleep $sleep_time
+    var=$(get_param "$varname" | jq -r .)
+    (( timer_count = timer_count + sleep_time ))
+    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
+  done
+  echo $var
+}
+
+wait_for_count() {
+  local varname=$1
+  local count=$2
+  local sleep_time=1
+  local timer_count=0
+  local timer_expire=600
+
+  local cl=$(get_param "$varname")
+  while [[ $(jq length <<< "$cl") -lt $count ]]; do
+    # we're good!
+    sleep $sleep_time
+    cl=$(get_param "$varname")
+    (( timer_count = timer_count + sleep_time ))
+    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
+  done
+}
+
+#
+# add_me_if_not_count will add to the list if not in the list and not too many in the list.
+#
+# This assumes that the varname is of type array of objects (with Name, Uuid, and Address fields)
+#
+# Args:
+#  - varname
+#  - count
+#
+# Returns "notme" if not added or the index in the list if added.
+#
+add_me_if_not_count() {
+  local varname=$1
+  local count=$2
+
+  local me_uuid={{.Machine.Uuid}}
+  local me_ip={{.Machine.Address}}
+  local me_name={{.Machine.Name}}
+
+  local index="notme"
+
+  local cl=$(get_param $varname)
+  while [[ $(jq length <<< "$cl") -lt $count ]]; do
+    # we're good!
+    if [[ $(jq "map(.Uuid) | index(\"${me_uuid}\")" <<< "$cl") != null ]] ; then
+      index=$(jq "map(.Uuid) | index(\"${me_uuid}\")" <<< "$cl")
+      break
+    fi
+    NEW_LEADERS=$(jq ". += [{\"Name\": \"${me_name}\", \"Uuid\": \"${me_uuid}\", \"Address\": \"${me_ip}\"}]" <<< "$cl")
+    drpcli -r "$cl" -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param $varname to "$NEW_LEADERS" 2>/dev/null >/dev/null && break
+    # sleep is is a hack but it allows for backoffs
+    sleep 1
+    # get the current cluster leaders
+    cl=$(get_param $varname)
+  done
+  cl=$(get_param $varname)
+  if [[ $(jq "map(.Uuid) | index(\"${me_uuid}\")" <<< "$cl") != null ]] ; then
+    index=$(jq "map(.Uuid) | index(\"${me_uuid}\")" <<< "$cl")
+  fi
+  echo $index
+}
+
+#
+# find_me looks for me specified by a field and value on varname.
+#
+# This assumes that the varname is of type array of objects (with Name, Uuid, and Address fields)
+#
+# Args:
+#  - varname
+#  - field
+#  - value of field
+#
+# Returns "notme" if not added or the index in the list
+#
+find_me() {
+  local varname=$1
+  local field=$2
+  local me=$3
+
+  local index="notme"
+
+  val=$(get_param "$varname" | jq "map(.$field) | index(\"${me}\")")
+  if [[ $val != null ]] ; then
+    index=$val
+  fi
+  echo $index
+}
+
+# Common parameters that are used.
+KRIB_PROFILE_PARAM="krib/cluster-profile"
+KRIB_NAME_PARAM="krib/cluster-name"
+KRIB_MASTERS_PARAM="krib/cluster-masters"
+KRIB_MASTER_VIP_PARAM="krib/cluster-master-vip"
+KRIB_MASTER_COUNT_PARAM="krib/cluster-master-count"
+KRIB_MASTER_ON_ETCDS_PARAM="krib/cluster-masters-on-etcds"
+KRIB_MASTER_CERTS_PARAM="krib/cluster-master-certs"
+KRIB_ADMIN_CONF_PARAM="krib/cluster-admin-conf"
+KRIB_JOIN_PARAM="krib/cluster-join-command"
+
+ETCD_PROFILE_PARAM="etcd/cluster-profile"
+ETCD_SERVERS_PARAM="etcd/servers"
+ETCD_SERVER_CA_PARAM="etcd/server-ca-name"
+ETCD_CLIENT_CA_PARAM="etcd/client-ca-name"
+ETCD_CLIENT_CA_PW_PARAM="etcd/client-ca-pw"
+ETCD_CLIENT_PORT_PARAM="etcd/client-port"
+

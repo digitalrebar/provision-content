@@ -1,0 +1,12 @@
+---
+Description: "Create and Mount Docker filesystem"
+Name: "mount-disks"
+Templates:
+  - ID: "mount-disks.sh.tmpl"
+    Name: "Create and mount docker filesystem"
+    Path: ""
+Meta:
+  icon: "disk outline"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

@@ -1,0 +1,11 @@
+---
+Name: "mount-local-disks"
+Description: "Mount first local disk as /docker"
+RunnerWait: true
+Tasks:
+  - "erase-hard-disks-for-os-install"
+  - "mount-disks"
+Meta:
+  icon: "disk outline"
+  color: "yellow"
+  title: "Community Content"

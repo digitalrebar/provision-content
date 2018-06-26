@@ -1,0 +1,12 @@
+---
+Description: "A task to 'kubectl' operate on KRIB built Kubernetes node."
+Name: "krib-operate"
+Templates:
+  - ID: "krib-operate.sh.tmpl"
+    Name: "Operate on a KRIB built Kubernetes node"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

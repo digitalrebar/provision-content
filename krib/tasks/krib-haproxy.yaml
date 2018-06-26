@@ -1,0 +1,15 @@
+---
+Description: "A task to setup haproxy"
+Name: "krib-haproxy"
+Templates:
+  - ID: "krib-haproxy.cfg.tmpl"
+    Name: "HA Proxy Config file"
+    Path: "/etc/haproxy/haproxy.cfg"
+  - ID: "krib-haproxy.sh.tmpl"
+    Name: "Setup HA Proxy"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

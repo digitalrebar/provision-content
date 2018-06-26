@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# Operate on a KRIB built Kubernetes node. Supports 'drain' and 'uncordon' ops.
+
+# if we exit, remove sensitive temporary config files
+trap cleanup EXIT SIGINT SIGTERM SIGQUIT
+set -e
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit $XIT; }
+function cleanup() {
+  echo '>>> in cleanup'
+{{ if eq (.Param "rs-debug-enable") true -}}
+  echo "DEBUG mode enabled, not cleaning up after ourselves"
+  echo "CFG FILE:  $CFG"
+{{else -}}
+  rm -f $CFG
+{{end -}}
+}
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+[[ $RS_UUID ]] && export RS_UUID='{{.Machine.UUID}}'
+
+echo ">>> KRIB operation on Kubernetes node starting at date: $(date)"
+
+# get the Operation we want to run
+{{if .ParamExists "krib/operate-action" -}}
+export OP='{{.Param "krib/operate-action"}}'
+{{else -}}
+xiterr 1 "Required 'krib/operate-action' action not specified"
+{{end -}}
+
+MSG=">>> Operation '$OP' is starting ..."
+case $OP in
+  drain)      echo "$MSG"
+              OPTIONS="--ignore-daemonsets --delete-local-data"
+    ;;
+  uncordon)   echo "$MSG"
+              OPTIONS=""
+    ;;
+  *) xiterr 1 "Operation not supported ('$OP'): only support 'drain' and 'uncordon'"
+    ;;
+esac
+
+_kubectl=$(which kubectl)
+[[ -z "$_kubectl" ]] && xiterr 1 "Unable to find 'kubectl' in PATH ($PATH)"
+[[ -z "$RS_ENDPOINT" ]] && xiterr 1 "RS_ENDPOINT not defined ... "
+
+{{if .ParamExists "krib/operate-on-node" -}}
+export NODE='{{.Param "krib/operate-on-node"}}'
+echo ">>> Attempting to run '$OP' on specified node '$NODE' ... "
+{{else -}}
+export NODE="{{.Machine.Name}}"
+echo ">>> No operate-on-node specified ('krib/operate-on-node') ... "
+echo ">>> Assuming operation '$OP' for current Machine ('$NODE')..."
+{{end -}}
+
+[[ -z "$NODE" ]] && xiterr "Somehow our 'NODE' to operate on is empty"
+
+###
+#  Override the default OPTIONS specified in the case statement
+#  above, if the Operator defines the 'krib/operate-options' Param
+#  on a Machine object, it'll replace the default Profile in the Stage
+#
+#  drain options documentation:
+#  https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#drain
+#  uncordon options documentation:
+#  https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#uncordon
+###
+{{if .ParamExists "krib/operate-options" -}}
+export OPTIONS='{{.Param "krib/operate-options"}}'
+{{end -}}
+echo ">>> Operate options have been set to '$OPTIONS' ... "
+
+CFG=$(mktemp /tmp/.XXXXXXXXXXX.conf)
+chmod 600 $CFG
+
+{{if .ParamExists "krib/cluster-admin-conf" -}}
+
+cat > $CFG << 'EOFCFG'
+{{.ParamAsJSON "krib/cluster-admin-conf"}}
+EOFCFG
+
+{{else -}}
+drpcli machines update $RS_UUID '{"Meta":{"color":"red", "icon": "exclamation triangle"}}'
+xiterr 1 "Required 'krib/cluster-admin-conf' Param not set - is this a KRIB cluster ???"
+{{end -}}
+
+[[ ! -s "$CFG" ]] && xiterr 1 "generated admin config file has zero size"
+export KUBECONFIG=$CFG
+
+echo ">>> NODES in this cluster ... "
+kubectl get nodes -o wide
+
+kubectl describe node $NODE > /dev/null 2>&1 \
+  && echo ">>> Node '$NODE' is valid cluster member ... " \
+  || xiterr 1 "Node '$NODE' does not appear to exist in the cluster"
+
+echo ">>>"
+echo ">>> PRIOR TO OPERATE ACTION ($OP):"
+kubectl get pods -o wide
+
+echo ">>>"
+###
+#  drain:
+#    blocks and waits to safely drain a node, respecting any PodDisruptionBudgets
+#    can be overriden by setting additonal 'drain' options - we require the
+#    'ignore-daemonsets' option because of calico and kube-proxy managed pods
+#    the defaults for OPTIONS includes '--delete-local-data --ignore-daemonsets'
+#    and if overridden, the drain operation may not succeed.
+#  uncordon:
+#    adds the node back in to the cluster, does not require additional options
+###
+case $OP in
+  drain|uncordon)
+    kubectl $OP $NODE $OPTIONS \
+      && echo ">>> Node '$NODE' successfully operated ('$OP') on ... " \
+      || xiterr 1 "Node '$NODE' FAILED action $OP"
+    ;;
+  *) xiterr 1 "unknown action '$OP'" ;;
+esac
+
+echo ">>>"
+echo ">>> AFTER OPERATE ACTION ($OP):"
+kubectl get pods -o wide
+
+echo
+echo "Finished action ($OP) successfully on '$NODE' at $(date)"
+exit 0

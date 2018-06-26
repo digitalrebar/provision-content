@@ -1,0 +1,25 @@
+apiVersion: kubeadm.k8s.io/v1alpha1
+kind: MasterConfiguration
+api:
+  advertiseAddress: {{.Param "krib/cluster-master-vip"}}
+  controlPlaneEndpoint: {{.Param "krib/cluster-master-vip"}}
+etcd:
+  endpoints:
+{{$port := .Param "etcd/client-port" -}}
+{{range $elem := .Param "etcd/servers" }}
+  - https://{{$elem.Address}}:{{$port}}
+{{end }}
+  caFile: /etc/kubernetes/pki/etcd/server-ca.pem
+  certFile: /etc/kubernetes/pki/etcd/client.pem
+  keyFile: /etc/kubernetes/pki/etcd/client-key.pem
+networking:
+  podSubnet: 10.244.0.0/16
+apiServerCertSANs:
+- 127.0.0.1
+- {{.Param "krib/cluster-master-vip"}}
+{{range $elem := .Param "krib/cluster-masters" -}}
+- {{$elem.Address}}
+- {{$elem.Name}}
+{{end -}}
+apiServerExtraArgs:
+  endpoint-reconciler-type: "lease"

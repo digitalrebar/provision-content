@@ -1,0 +1,25 @@
+---
+Name: "krib/operate-on-node"
+Description: "Specify a Kubernetes node to drain from the cluster Master"
+Documentation: |
+  This Param specifies a Node in a Kubernetes cluster that should be
+  operated on. Currently supported operations are 'drain' and 'uncordon'.
+
+  The drain operation will by default maintain the contracts specified
+  by PodDisruptionBudgets.
+
+  Options can be specified to override the default actions by use
+  of the 'krib/operate-options' Param.  This Param will be passed
+  directly to the 'kubectl' command that has been specified by
+  the 'krib/operate-action' Param setting (defaults to 'drain'
+  operation if nothing specified).
+
+  The Node name must be a valid cluster member name, which by default
+  in a KRIB built cluster; the fully qualified value of the Machine
+  object 'Name' value.
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

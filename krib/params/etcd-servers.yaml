@@ -1,0 +1,18 @@
+---
+Name: "etcd/servers"
+Description: "List of the server UUIDs in the cluster"
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    properties:
+      Address:
+        type: string
+      Name:
+        type: string
+      Uuid:
+        type: string
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

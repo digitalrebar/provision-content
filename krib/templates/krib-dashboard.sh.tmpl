@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+{{template "krib-lib.sh.tmpl" .}}
+export RS_UUID="{{.Machine.UUID}}"
+
+cloneHeapster() {
+  if [ -d heapster ]; then
+    cd heapster || return 1
+    git reset --hard HEAD || return 1
+    git pull || return 1
+  else
+    git clone https://github.com/kubernetes/heapster.git || return 1
+  fi
+}
+
+echo "Start Dashboard"
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+MASTER_COUNT={{.Param "krib/cluster-master-count"}}
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  install rsync git
+
+  wget -O /tmp/kubernetes-dashboard.yaml https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+
+  sed -i "s/      targetPort: 8443/      targetPort: 8443\n      nodePort: 30443\n  type: NodePort/" /tmp/kubernetes-dashboard.yaml
+
+  OPWD=$(pwd)
+  cd /tmp
+  if ! cloneHeapster; then
+    rm -rf heapster
+    cloneHeapster
+  fi
+  cd $OPWD
+
+  sed -i 's/^\( *\)# *type: *NodePort/\1type: NodePort/' /tmp/heapster/deploy/kube-config/influxdb/grafana.yaml
+
+  mkdir -p /root/setup/dashboard
+  cp /tmp/kubernetes-dashboard.yaml /root/setup/dashboard/kubernetes-dashboard.yaml
+
+  cat > /root/setup/dashboard/dashboard-serviceaccount.yaml << EOFSA
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kube-system
+EOFSA
+
+  cat >/root/setup/dashboard/dashboard-admin.yaml <<EOFDA
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kube-system
+EOFDA
+
+  cp -r /tmp/heapster /root/setup/dashboard
+
+  kubectl apply -f /root/setup/dashboard/kubernetes-dashboard.yaml
+  kubectl apply -f /root/setup/dashboard/dashboard-serviceaccount.yaml
+  kubectl apply -f /root/setup/dashboard/dashboard-admin.yaml
+  kubectl apply -f /root/setup/dashboard/heapster/deploy/kube-config/influxdb/
+  kubectl apply -f /root/setup/dashboard/heapster/deploy/kube-config/rbac/heapster-rbac.yaml
+  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/kubernetes-dashboard
+  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/heapster
+  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-grafana
+  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-influxdb
+
+  rm -rf /root/setup
+
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
+fi
+
+echo "Finished successfully"
+exit 0
+

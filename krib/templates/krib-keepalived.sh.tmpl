@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+{{template "krib-lib.sh.tmpl" .}}
+export RS_UUID="{{.Machine.UUID}}"
+
+MASTER_VIP={{.Param "krib/cluster-master-vip"}}
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+
+echo "My Master index is $MASTER_INDEX"
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    STATE="MASTER"
+    PRIOR=101
+  else
+    {{if .ParamExists "packet/uuid"}}
+      echo "Skipping for now if packet - don't have a good story for vip"
+      echo "The master 0 has the VIP through elastic IP."
+      echo "Need failover strategy. for it. Don't turn on other nodes"
+      exit 0
+    {{ end }}
+    STATE="BACKUP"
+    PRIOR=100
+  fi
+  INTF=$(ip -o a | awk '/inet {{.Machine.Address}}\// { print $2 }')
+
+  all_ips=()
+  OLD_IFS=$IFS
+  IFS=" " ; while read ip
+  do
+    all_ips+=($ip)
+    if [[ $RS_IP != $ip ]] ; then
+      not_me_ips+=($ip)
+    fi
+  done <<< $(drpcli machines get "$RS_UUID" param "$KRIB_MASTERS_PARAM" --aggregate | jq -r '.[].Address' )
+  IFS=$OLD_IFS
+
+  install keepalived psmisc
+  cat >/etc/keepalived/keepalived.conf <<EOFKEEP
+vrrp_script haproxy-check {
+    script "killall -0 haproxy"
+    interval 2
+    weight 20
+}
+
+vrrp_instance haproxy-vip {
+    state $STATE
+    priority $PRIOR
+    interface $INTF
+    virtual_router_id 47
+    advert_int 3
+
+    authentication {
+        auth_type PASS
+        auth_pass 4be37dc3b4c90194d1600c483e10ad1d
+    }
+
+    virtual_ipaddress {
+        $MASTER_VIP
+    }
+
+    track_script {
+        haproxy-check weight 20
+    }
+}
+EOFKEEP
+  systemctl enable keepalived
+  systemctl start keepalived
+
+fi
+
+echo "Finished successfully"
+exit 0
+

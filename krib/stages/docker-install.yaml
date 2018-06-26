@@ -1,0 +1,10 @@
+---
+Name: "docker-install"
+Description: "Install Docker from Internet Repos"
+RunnerWait: true
+Tasks:
+  - "docker-install"
+Meta:
+  icon: "pocket"
+  color: "yellow"
+  title: "Community Content"

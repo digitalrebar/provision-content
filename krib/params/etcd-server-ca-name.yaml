@@ -1,0 +1,9 @@
+---
+Name: "etcd/server-ca-name"
+Description: "Name of the certificate root for the etcd server certs"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

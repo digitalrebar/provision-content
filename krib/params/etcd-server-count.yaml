@@ -1,0 +1,10 @@
+---
+Name: "etcd/server-count"
+Description: "Number of servers to expected"
+Schema:
+  type: "integer"
+  default: 1
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

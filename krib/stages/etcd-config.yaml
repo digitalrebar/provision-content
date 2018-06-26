@@ -1,0 +1,10 @@
+---
+Name: "etcd-config"
+Description: "Configure an etcd cluster."
+RunnerWait: true
+Tasks:
+  - "etcd-config"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

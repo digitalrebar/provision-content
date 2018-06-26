@@ -1,0 +1,12 @@
+---
+Description: "A task to setup keepalived"
+Name: "krib-keepalived"
+Templates:
+  - ID: "krib-keepalived.sh.tmpl"
+    Name: "Setup Keepalived"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

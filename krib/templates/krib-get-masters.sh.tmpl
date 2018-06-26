@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Build Select K8S masters
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+{{template "krib-lib.sh.tmpl" .}}
+
+echo "Elect and wait for the masters"
+
+CLUSTER_NAME={{.Param "krib/cluster-name"}}
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing krib/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+MASTER_ON_ETCDS={{.Param "krib/cluster-masters-on-etcds"}}
+ETCD_COUNT={{.Param "etcd/server-count"}}
+
+# Get the number of servers to create
+KRIB_MASTER_COUNT={{.Param "krib/cluster-master-count"}}
+echo "Creating $KRIB_MASTER_COUNT k8s masters"
+
+if [[ $MASTER_ON_ETCDS == true ]] ; then
+  if (( $KRIB_MASTER_COUNT >= $ETCD_COUNT )) ; then
+    # If we have the same or more masters than etcd, start with the etcd list.
+    ETCD_MASTERS=$(get_param $ETCD_SERVERS_PARAM)
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$KRIB_MASTERS_PARAM" to "$ETCD_MASTERS" || true
+  else
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$KRIB_MASTERS_PARAM" to "[]" || true
+  fi
+
+  # Need a subset of the ETCD members - let them through one at a time
+  ETCD_INDEX=$(find_me $ETCD_SERVERS_PARAM "Uuid" $RS_UUID)
+  if [[ $ETCD_INDEX == notme ]] ; then
+    echo "I am not a master server.  Move on."
+
+    # Set machine icon and color for KRIB cluster building
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"ship\"} }" | jq .Meta
+
+    exit 0
+  fi
+else
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$KRIB_MASTERS_PARAM" to "[]" || true
+
+  ETCD_INDEX=$(find_me $ETCD_SERVERS_PARAM "Uuid" $RS_UUID)
+  if [[ $ETCD_INDEX != notme ]] ; then
+    echo "I am not a master server.  Move on."
+
+    # Set machine icon and color for KRIB cluster building
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"ship\"} }" | jq .Meta
+
+    exit 0
+  fi
+fi
+
+echo "Electing Members to $CLUSTER_PROFILE"
+MASTER_INDEX=$(add_me_if_not_count "$KRIB_MASTERS_PARAM" $KRIB_MASTER_COUNT)
+if [[ $MASTER_INDEX == notme ]] ; then
+  echo "I am not a master server.  Move on."
+
+  # Set machine icon and color for KRIB cluster building
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"ship\"} }" | jq .Meta
+
+  exit 0
+fi
+
+if (( $KRIB_MASTER_COUNT > 1 )) ; then
+  {{if .ParamExists "krib/cluster-master-vip" -}}
+    MASTER_VIP={{.Param "krib/cluster-master-vip"}}
+  {{else -}}
+    echo "Missing krib/cluster-master-vip on the machine!"
+    exit 1
+  {{end -}}
+
+  drpcli machines tasks add {{.Machine.UUID}} at 0 krib-keepalived krib-haproxy
+else
+  # If we are single machine, don't setup VIP.
+  {{if .ParamExists "krib/cluster-master-vip" -}}
+    drpcli -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param "$KRIB_MASTER_VIP_PARAM" to {{.Machine.Address}} || true
+  {{else -}}
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$KRIB_MASTER_VIP_PARAM" to {{.Machine.Address}} || true
+  {{end -}}
+fi
+
+echo "Wait for all the masters to show up"
+wait_for_count "$KRIB_MASTERS_PARAM" $KRIB_MASTER_COUNT
+
+echo "Masters are here.  Let's go!"
+
+# Set machine icon and color for KRIB cluster building
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"anchor\"} }" | jq .Meta
+
+exit 0
+

@@ -1,0 +1,10 @@
+---
+Name: "krib/cluster-master-count"
+Description: "Number of masters to create"
+Schema:
+  type: "integer"
+  default: 1
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

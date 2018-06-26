@@ -1,0 +1,10 @@
+---
+Name: "docker/working-dir"
+Description: "The docker working directory."
+Schema:
+  type: "string"
+  default: "/docker"
+Meta:
+  color: "blue"
+  icon: "pocket"
+  title: "Community Content"

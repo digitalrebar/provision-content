@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Mount Disks
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+[[ $RS_UUID ]] || export RS_UUID="{{.Machine.UUID}}"
+
+# Set machine icon and color for KRIB cluster building
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"ship\"}}" | jq .Meta
+
+# This will test for sledgehammer and if found use the first disk
+# as docker filesystem.
+
+BE=$(/usr/local/bin/drpcli machines show $RS_UUID | jq -r .BootEnv)
+if [[ $BE != sledgehammer ]] ; then
+    echo "Not in sledgehammer - do not do anything"
+    exit 0
+fi
+
+
+GETDISK=$(lsblk | grep "disk" | awk '{ print $1 }' | head -1)
+echo "Found /dev/$GETDISK - using ..."
+
+echo "Making partitions"
+echo "
+n
+
+
+
+
+w
+" | fdisk /dev/$GETDISK || true
+
+partprobe
+
+echo "Make filesystem - xfs - docker likes it"
+
+mkfs.xfs /dev/${GETDISK}1
+
+echo "Mount filesystem - put it in place, put not permanently"
+
+mkdir -p /docker
+mount /dev/${GETDISK}1 /docker
+
+echo "Record docker working directory for future users"
+set_param docker/working-dir /docker
+
+echo "Mounted directory for docker successful."
+exit 0
+

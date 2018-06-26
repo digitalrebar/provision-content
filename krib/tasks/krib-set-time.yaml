@@ -1,0 +1,13 @@
+---
+Description: "A task to force time setting for now"
+Name: "krib-set-time"
+Templates:
+  - Contents: |
+      #!/bin/bash
+      ntpdate -s time.apple.com
+    Name: "Set Time"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

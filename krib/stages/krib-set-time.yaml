@@ -1,0 +1,10 @@
+---
+Name: "krib-set-time"
+Description: "Helper stage to set time on the machine - DEV"
+Documentation: "Helper stage to set time on the machine - DEV"
+Tasks:
+  - "krib-set-time"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

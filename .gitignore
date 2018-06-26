@@ -4,8 +4,12 @@ drp-community-content.rst
 drp-community-contrib.sha256
 drp-community-contrib.yaml
 drp-community-contrib.rst
+krib.sha256
+krib.yaml
+krib.rst
 content/._Version.meta
 contrib/._Version.meta
+krib/._Version.meta
 key1*
 key2*
 e-info.tgz

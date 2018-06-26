@@ -1,0 +1,10 @@
+---
+Description: Example HA Krib Profile - Clone Me!
+Meta:
+  color: blue
+  icon: ship
+  title: Community Content
+Name: example-ha-krib
+Params:
+  etcd/cluster-profile: example-ha-krib
+  krib/cluster-profile: example-ha-krib
