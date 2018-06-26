@@ -7,7 +7,7 @@ set -e
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
-# these need to be before krib-lib template 
+# these need to be before krib-lib template
 {{if .ParamExists "etcd/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
