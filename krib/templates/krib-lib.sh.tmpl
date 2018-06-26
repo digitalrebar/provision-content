@@ -43,6 +43,7 @@ wait_for_count() {
     (( timer_count = timer_count + sleep_time ))
     [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
   done
+  echo "Done"
 }
 
 #

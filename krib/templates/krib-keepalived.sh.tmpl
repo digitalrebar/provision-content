@@ -5,6 +5,16 @@ set -x
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
+
+# these need to be before krib-lib template
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing etcd/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
 {{template "krib-lib.sh.tmpl" .}}
 export RS_UUID="{{.Machine.UUID}}"
 
