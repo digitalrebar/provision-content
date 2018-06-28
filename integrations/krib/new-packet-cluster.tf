@@ -1,7 +1,17 @@
+variable "api_url" { 
+  default = "https://127.0.0.1:8092"
+}
+variable "api_user" { 
+  default = "rocketskates"
+}
+variable "api_password" { 
+  default = "r0cketsk8ts"
+}
+
 provider "drp" {
-  api_user     = "rocketskates"
-  api_password = "r0cketsk8ts"
-  api_url      = "https://147.75.64.249:8092"
+  api_user     = "${var.api_user}"
+  api_password = "${var.api_password}"
+  api_url      = "${var.api_url}"
 }
 
 resource "drp_profile" "krib-auto" {
@@ -15,6 +25,7 @@ resource "drp_profile" "krib-auto" {
   Meta {
   	icon = "ship"
   	color = "blue"
+  	render = "kubernetes"
   }
 }
 

@@ -1,6 +1,22 @@
 ---
 Description: "A task to install kubernetes and kubeadm"
 Name: "kubernetes-install"
+Documentation: |
+  Sets Param: krib/cluster-join, krib/cluster-admin-conf
+RequredParams:
+  - krib/cluster-profile
+OptionalParams:
+  - krib/cluster-name
+  - krib/cluster-is-production
+  - krib/cluster-join
+  - krib/cluster-master-certs
+  - krib/cluster-master-count
+  - krib/cluster-master-vip
+  - krib/cluster-master-on-etcds    
+  - krib/cluster-masters
+  - krib/operate-action  
+  - krib/operate-on-node
+  - krib/operate-options
 Templates:
   - ID: "kubernetes-install.sh.tmpl"
     Name: "Install Kubernetes and Kubeadm"

@@ -1,6 +1,22 @@
 ---
 Description: "A task to configure etcd"
 Name: "etcd-config"
+Documentation: |
+  Sets Param: etcd/servers
+RequredParams:
+  - etcd/cluster-profile
+OptionalParams:
+  - etcd/client-ca-name
+  - etcd/client-ca-pw
+  - etcd/client-port
+  - etcd/name
+  - etcd/peer-ca-name
+  - etcd/peer-ca-pw
+  - etcd/peer-port
+  - etcd/server-ca-name
+  - etcd/server-ca-pw
+  - etcd/server-count
+  - etcd/version
 Templates:
   - ID: "etcd-config.sh.tmpl"
     Name: "Config Etcd"
