@@ -25,7 +25,7 @@ resource "drp_workflow" "discover-krib-live-cluster" {
   Description = "Terraform Added"
   Stages = [
   	"discover", "packet-discover", "ssh-access", "mount-local-disks", "docker-install", 
-  	"kubernetes-install", "etcd-config", "krib-config", "krib-live-wait"
+  	"kubernetes-install", "krib-config", "krib-live-wait"
   ]
   Meta {
   	icon = "ship"
