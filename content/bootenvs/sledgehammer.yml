@@ -6,9 +6,9 @@ Name: "sledgehammer"
 Description: "Ram-Only image loaded with tools to allow for discovery and maintenance"
 OS:
   Family: "redhat"
-  Name: "sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc"
-  IsoFile: "sledgehammer-6122f34b46b5b74b668d6779e33f5fcd0f44a8cc.tar"
-  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc/sledgehammer-6122f34b46b5b74b668d6779e33f5fcd0f44a8cc.tar"
+  Name: "sledgehammer/9c1ad5cb7483928e6aba1d93ba363de929169f37"
+  IsoFile: "sledgehammer-9c1ad5cb7483928e6aba1d93ba363de929169f37.tar"
+  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9c1ad5cb7483928e6aba1d93ba363de929169f37/sledgehammer-9c1ad5cb7483928e6aba1d93ba363de929169f37.tar"
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
