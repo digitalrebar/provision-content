@@ -1,6 +1,10 @@
 ---
 Name: "etcd/cluster-profile"
 Description: "Name of the profile for this etcd cluster"
+Documentation: |
+  Part of the Digital Rebar Cluster pattern, this parameter is used
+  to identify the machines used in the etcd cluster
+  This parameter is REQUIRED for KRIB and etcd cluster contruction
 Schema:
   type: "string"
 Meta:

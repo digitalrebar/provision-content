@@ -1,6 +1,8 @@
 ---
 Name: "etcd/servers-done"
 Description: "List of the servers in the cluster that are complete"
+Documentation: |
+  Param is set (output) by the etcd cluster building process
 Schema:
   type: "array"
   items:

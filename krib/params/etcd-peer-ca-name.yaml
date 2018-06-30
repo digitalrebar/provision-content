@@ -1,6 +1,9 @@
 ---
 Name: "etcd/peer-ca-name"
 Description: "Name of the certificate root for the etcd peer certs"
+Documentation: |
+  Allows operators to set the CA name for the peer certificate
+  Requires Cert Plugin
 Schema:
   type: "string"
 Meta:

@@ -1,6 +1,8 @@
 ---
 Name: "etcd/servers"
 Description: "List of the server UUIDs in the cluster"
+Documentation: |
+  Param is set (output) by the etcd cluster building process
 Schema:
   type: "array"
   items:

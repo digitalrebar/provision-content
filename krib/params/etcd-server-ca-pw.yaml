@@ -1,6 +1,9 @@
 ---
 Name: "etcd/server-ca-pw"
 Description: "Password to access the etcd server CA"
+Documentation: |
+  Allows operators to set the CA password for the server certificate
+  Requires Cert Plugin
 Schema:
   type: "string"
 Meta:

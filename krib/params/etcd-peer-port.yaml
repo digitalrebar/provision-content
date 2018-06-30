@@ -1,6 +1,8 @@
 ---
 Name: "etcd/peer-port"
 Description: "Port peers use to talk to each other"
+Documentation: |
+  Allows operators to set the port for the cluster peers
 Schema:
   type: "integer"
   default: 2380

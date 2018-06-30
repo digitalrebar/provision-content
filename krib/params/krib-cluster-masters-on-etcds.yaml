@@ -1,6 +1,10 @@
 ---
 Name: "krib/cluster-masters-on-etcds"
 Description: "Should the masters run on the etcd servers"
+Documentation: |
+  For development clusters, allows running etcd on the same
+  machines as the Kubernetes masters
+  RECOMMENDED: set to false for production clusters
 Schema:
   type: "boolean"
   default: true

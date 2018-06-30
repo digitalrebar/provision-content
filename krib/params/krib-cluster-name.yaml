@@ -1,6 +1,8 @@
 ---
 Name: "krib/cluster-name"
 Description: "Name of Kubernetes cluster"
+Documentation: |
+  Allows operators to set the Kubernetes cluster name
 Schema:
   type: "string"
   default: "k8s-cluster"

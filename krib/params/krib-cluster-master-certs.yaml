@@ -1,6 +1,8 @@
 ---
 Name: "krib/cluster-master-certs"
 Description: "Kubeadm requires the master to have the same ca that it generates. Base 64 tgz string"
+Documentation: |
+  Requires Cert Plugin
 Schema:
   type: "string"
 Meta:

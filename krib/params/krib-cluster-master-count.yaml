@@ -1,6 +1,11 @@
 ---
 Name: "krib/cluster-master-count"
 Description: "Number of masters to create"
+Documentation: |
+  Allows operators to set the number of machines required for the
+  Kubernetes cluster.
+  Machines will be automatically added until the number is met.
+  NOTE: should be an odd number
 Schema:
   type: "integer"
   default: 1

@@ -1,6 +1,8 @@
 ---
 Name: "krib/cluster-join-command"
 Description: "kubeadm command to join the cluster"
+Documentation: |
+  Param is set (output) by the cluster building process
 Schema:
   type: "string"
 Meta:
