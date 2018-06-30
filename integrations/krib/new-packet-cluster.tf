@@ -7,6 +7,15 @@ variable "api_user" {
 variable "api_password" { 
   default = "r0cketsk8ts"
 }
+variable "cluster_profile" { 
+  default = "krib-auto"
+}
+variable "cluster_count" { 
+  default = 4
+}
+variable "workflow" { 
+  default = "discover-krib-live-cluster"
+}
 
 provider "drp" {
   api_user     = "${var.api_user}"
@@ -15,22 +24,22 @@ provider "drp" {
 }
 
 resource "drp_profile" "krib-auto" {
-  count = 1	
-  Name = "krib-auto"
+  count = 1
+  Name = "${var.cluster_profile}"
   Description = "Terraform Added"
   Params {
-  	"etcd/cluster-profile" = "krib-auto"
-  	"krib/cluster-profile" = "krib-auto"
+  	"etcd/cluster-profile" = "${var.cluster_profile}"
+  	"krib/cluster-profile" = "${var.cluster_profile}"
   }
   Meta {
   	icon = "ship"
-  	color = "blue"
+  	color = "green"
   	render = "kubernetes"
   }
 }
 
 resource "drp_workflow" "discover-krib-live-cluster" {
-  count = 1	
+  count = 1
   depends_on = ["drp_profile.krib-auto"]
   Name = "discover-krib-live-cluster"
   Description = "Terraform Added"
@@ -45,7 +54,7 @@ resource "drp_workflow" "discover-krib-live-cluster" {
 }
 
 resource "drp_raw_machine" "packet-machines" {
-  count = 3
+  count = "${var.cluster_count}"
   Description = "Terraform Added RAW"
   Workflow = "discover"
   Name = "tfkrib${count.index}"
@@ -56,19 +65,21 @@ resource "drp_raw_machine" "packet-machines" {
   	"terraform/allocated" = "false"
   }
   Meta {
-  	icon = "rocket"
-  	color = "yellow"
+  	icon = "map"
+  	color = "purple"
   }
 }
 
 resource "drp_machine" "krib-machines" {
-  count = 3
+  count = "${var.cluster_count}"
   depends_on = ["drp_workflow.discover-krib-live-cluster", "drp_raw_machine.packet-machines"]
-  Description = "KRIB via TF"
-  Workflow = "discover-krib-live-cluster"
-  add_profiles = ["krib-auto"]
+  Description = "KRIB via Terraform"
+  Workflow = "${var.workflow}"
   Meta {
-  	icon = "rocket"
-  	color = "green"
+  	icon = "map"
+  	color = "yellow"
   }
+  add_profiles = ["${var.cluster_profile}"]
+  decommission_color = "purple"
+  decommission_icon = "server"
 }
