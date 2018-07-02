@@ -72,6 +72,9 @@ add_me_if_not_count() {
     # we're good!
     if [[ $(jq "map(.Uuid) | index(\"${me_uuid}\")" <<< "$cl") != null ]] ; then
       index=$(jq "map(.Uuid) | index(\"${me_uuid}\")" <<< "$cl")
+      # set the machine icon for troubleshooting
+      drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"chess queen\"} }" || true
+      echo "   Selected ${me_name} (${me_uuid})"
       break
     fi
     NEW_LEADERS=$(jq ". += [{\"Name\": \"${me_name}\", \"Uuid\": \"${me_uuid}\", \"Address\": \"${me_ip}\"}]" <<< "$cl")

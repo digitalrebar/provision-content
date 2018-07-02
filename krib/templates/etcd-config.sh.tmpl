@@ -46,7 +46,7 @@ drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/servers-d
 ETCD_SERVER_COUNT={{.Param "etcd/server-count"}}
 echo "Creating $ETCD_SERVER_COUNT servers"
 
-echo "Electing Members to $CLUSTER_PROFILE"
+echo "Electing etcd members to cluster profile: $CLUSTER_PROFILE"
 ETCD_INDEX=$(add_me_if_not_count "etcd/servers" $ETCD_SERVER_COUNT)
 if [[ $ETCD_INDEX == notme ]] ; then
   echo "I am not an ETCD server.  Move on."
@@ -58,17 +58,22 @@ CLIENT_CA=${ETCD_CLUSTER_NAME}-client-ca
 SERVER_CA=${ETCD_CLUSTER_NAME}-server-ca
 PEER_CA=${ETCD_CLUSTER_NAME}-peer-ca
 
+{{if .ParamExists "certs/root" -}}
 # If we are INDEX=0, let's setup the root certs for building keys
 if [[ $ETCD_INDEX == "0" ]] ; then
+  echo "We are first machine in cluster, setting up the root certs..."
   # Are certs built yet?
   if ! drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA 2>/dev/null >/dev/null ; then
     CLIENT_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $CLIENT_CA | jq -r .)
+    echo "  Client CA created as $CLIENT_CA and now adding to profile: $CLUSTER_PROFILE"
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-name" to "$CLIENT_CA" || true
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
   else
     if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-      echo "Client CA Exists, but we didn't set password.  Need to reset!!"
+      echo "  Client CA Exists, but we did not set password.  Need to reset!!"
       exit 1
+    else
+      echo "  Client CA $CLIENT_CA configured"
     fi
   fi
 
@@ -78,7 +83,7 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-pw" to "$SERVER_CA_PW" || true
   else
     if [[ $(get_param "etcd/server-ca-pw") == null ]] ; then
-      echo "SERVER CA Exists, but we didn't set password.  Need to reset!!"
+      echo "  SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
       exit 1
     fi
   fi
@@ -89,11 +94,16 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-pw" to "$PEER_CA_PW" || true
   else
     if [[ $(get_param "etcd/peer-ca-pw") == null ]] ; then
-      echo "PEER CA Exists, but we didn't set password.  Need to reset!!"
+      echo "  PEER CA Exists, but we didn't set password.  Need to reset!!"
       exit 1
     fi
   fi
 fi
+{{else -}}
+  echo "STAGE REQUIRES CERT PLUGIN!!  Contact RackN for access."
+  exit 1
+{{end}}
+
 
 wait_for_count "etcd/servers" $ETCD_SERVER_COUNT
 

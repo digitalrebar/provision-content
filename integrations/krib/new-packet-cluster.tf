@@ -83,3 +83,7 @@ resource "drp_machine" "krib-machines" {
   decommission_color = "purple"
   decommission_icon = "server"
 }
+
+output "admin.conf" {
+  value = "drpcli -E ${var.api_url} profiles params ${var.cluster_profile} krib/cluster-admin-conf > admin.conf"
+}
