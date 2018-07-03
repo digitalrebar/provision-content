@@ -11,3 +11,4 @@ Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
+  render: "profile"

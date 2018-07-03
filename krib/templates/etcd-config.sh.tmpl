@@ -59,6 +59,8 @@ SERVER_CA=${ETCD_CLUSTER_NAME}-server-ca
 PEER_CA=${ETCD_CLUSTER_NAME}-peer-ca
 
 {{if .ParamExists "certs/root" -}}
+
+echo "Certs plugin detected....setting up CA"
 # If we are INDEX=0, let's setup the root certs for building keys
 if [[ $ETCD_INDEX == "0" ]] ; then
   echo "We are first machine in cluster, setting up the root certs..."
@@ -99,11 +101,11 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     fi
   fi
 fi
-{{else -}}
-  echo "STAGE REQUIRES CERT PLUGIN!!  Contact RackN for access."
-  exit 1
-{{end}}
 
+{{else -}}
+echo "STAGE REQUIRES CERT PLUGIN!!  Contact RackN for access."
+exit 1
+{{end}}
 
 wait_for_count "etcd/servers" $ETCD_SERVER_COUNT
 
@@ -132,6 +134,7 @@ IFS=" " ; while read ip ; do
 done <<< $(get_param "etcd/servers" | jq -r '.[].Address')
 IFS=$OLD_IFS
 
+echo "Installing etcd v{{.Param "etcd/version"}} (set in Param etcd/version)"
 curl -sSL https://github.com/coreos/etcd/releases/download/v{{.Param "etcd/version"}}/etcd-v{{.Param "etcd/version"}}-linux-amd64.tar.gz | tar -xz --strip-components=1 -C /usr/local/bin/
 rm -rf etcd-v{{.Param "etcd/version"}}-linux-amd64*
 

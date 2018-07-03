@@ -23,3 +23,4 @@ Meta:
   color: "blue"
   icon: "ship"
   title: "Community Content"
+  render: "machine"
