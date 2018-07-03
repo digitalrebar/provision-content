@@ -1,10 +1,14 @@
 ---
 Name: "etcd/version"
 Description: "Version of the etcd to use in cluster"
+Documentation: |
+  Allows operators to determine the version of etcd to install
+  Note: Changes should be coordinate with KRIB Kubernetes version
 Schema:
   type: "string"
-  default: "3.2.17"
+  default: "3.3.8"
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
+  render: "semver"

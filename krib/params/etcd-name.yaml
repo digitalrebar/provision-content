@@ -1,6 +1,8 @@
 ---
 Name: "etcd/name"
 Description: "Name of the etcd cluster"
+Documentation: |
+  Allows operators to set a name for the etcd cluster
 Schema:
   type: "string"
   default: "etcd-cluster"

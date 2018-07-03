@@ -1,6 +1,9 @@
 ---
 Name: "krib/cluster-master-vip"
 Description: "Virtual IP for the Master Servers"
+Documentation: |
+  For High Availability (HA) configurations, a floating IP is required
+  by the load balancer.
 Schema:
   type: "string"
 Meta:

@@ -1,6 +1,8 @@
 ---
 Name: "etcd/client-port"
 Description: "Port clients use to talk to etcd servers"
+Documentation: |
+  Allows operators to set the port used by etcd clients
 Schema:
   type: "integer"
   default: 2379

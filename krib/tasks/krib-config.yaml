@@ -1,6 +1,14 @@
 ---
 Description: "A task to configure kubernetes via kubeadm"
 Name: "krib-config"
+Documentation: |
+  Configure Kubernetes using Kubeadm
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set
+RequiredParams:
+  - krib/cluster-profile
+OptionalParams:
+  - krib/cluster-name
+  - krib/cluster-is-production
 Templates:
   - ID: "krib-kubeadm.cfg.tmpl"
     Name: "Kubeadm config file"

@@ -1,6 +1,9 @@
 ---
 Name: "krib/cluster-masters"
 Description: "Masters of Kubernetes cluster"
+Documentation: |
+  List of the machine(s) assigned as cluster master(s).
+  If not set, the automation will elect leaders and populate the list automatically.
 Schema:
   type: "array"
   items:
@@ -16,3 +19,4 @@ Meta:
   color: "blue"
   icon: "ship"
   title: "Community Content"
+  render: "machines_map"

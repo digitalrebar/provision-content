@@ -1,6 +1,10 @@
 ---
 Name: "etcd/peer-ca-pw"
 Description: "Password to access the etcd peer CA"
+Documentation: |
+  Allows operators to set the CA password for the peer certificate
+  If missing, will be generated
+  Requires Cert Plugin
 Schema:
   type: "string"
 Meta:

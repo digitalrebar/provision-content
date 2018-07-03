@@ -1,6 +1,9 @@
 ---
 Name: "etcd/server-ca-name"
 Description: "Name of the certificate root for the etcd server certs"
+Documentation: |
+  Allows operators to set the CA name for the server certificate
+  Requires Cert Plugin
 Schema:
   type: "string"
 Meta:

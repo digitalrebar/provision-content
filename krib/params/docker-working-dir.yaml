@@ -1,6 +1,8 @@
 ---
 Name: "docker/working-dir"
 Description: "The docker working directory."
+Documentation: |
+  Allows operators to change the Docker working directory
 Schema:
   type: "string"
   default: "/docker"

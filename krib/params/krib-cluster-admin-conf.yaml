@@ -1,6 +1,8 @@
 ---
 Name: "krib/cluster-admin-conf"
 Description: "Admin config file"
+Documentation: |
+  Param is set (output) by the cluster building process
 Meta:
   color: "blue"
   icon: "ship"
