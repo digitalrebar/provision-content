@@ -27,7 +27,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
   echo "Up the DNS replica count"
-  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/kube-dns
+  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/coredns
 
   API_PORT=6443
   if [[ $MASTER_COUNT -gt 1 ]] ; then
