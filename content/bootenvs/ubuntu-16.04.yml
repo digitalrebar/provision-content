@@ -9,8 +9,8 @@ OS:
   IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.4-server-amd64.iso"
   Version: "16.04"
 Initrds:
-  - "install/netboot/ubuntu-installer/amd64/initrd.gz"
-Kernel: "install/netboot/ubuntu-installer/amd64/linux"
+  - '{{if .ParamExists "custom-initrd"}}{{.Param "custom-initrd"}}{{else}}install/netboot/ubuntu-installer/amd64/initrd.gz{{end}}'
+Kernel: '{{if .ParamExists "custom-kernel"}}{{.Param "custom-kernel"}}{{else}}install/netboot/ubuntu-installer/amd64/linux{{end}}' 
 BootParams: >-
   debian-installer/locale=en_US.utf8
   console-setup/layoutcode=us
@@ -22,11 +22,14 @@ BootParams: >-
   root=/dev/ram
   rw
   quiet
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
   --
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
+  {{.Param "kernel-options"}}
 RequiredParams:
 OptionalParams:
+  - "custom-initrd"
+  - "custom-kernel"
   - "part-scheme"
   - "operating-system-disk"
   - "provisioner-default-user"
@@ -34,6 +37,7 @@ OptionalParams:
   - "provisioner-default-uid"
   - "provisioner-default-password-hash"
   - "kernel-console"
+  - "kernel-options"
   - "proxy-servers"
   - "dns-domain"
   - "local-repo"

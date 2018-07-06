@@ -1,0 +1,18 @@
+---
+Name: "custom-initrd"
+Description: "Specify an alternate custom initrd to use for the BootEnv"
+Documentation: |
+  Overrides the default bootenv initrd to use for the machine. 
+  The initrd path is relative to the exploded ISO image in the 
+  DRP data 'tftpboot/<bootenv>' directory structure.
+  
+  No default is provided as the presence of any value on the 
+  Machine will use the Param specified value.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "desktop"
+  color: "blue"
+  title: "Digital Rebar Community Content"

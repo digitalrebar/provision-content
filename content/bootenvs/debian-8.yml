@@ -9,8 +9,8 @@ OS:
   IsoUrl: "http://mirrors.kernel.org/debian/dists/jessie/main/installer-amd64/current/images/netboot/mini.iso"
   Version: "8.10"
 Initrds:
-  - "initrd.gz"
-Kernel: "linux"
+  - '{{if .ParamExists "custom-initrd"}}{{.Param "custom-initrd"}}{{else}}initrd.gz{{end}}'
+Kernel: '{{if .ParamExists "custom-kernel"}}{{.Param "custom-kernel"}}{{else}}linux{{end}}' 
 BootParams: >-
   priority=critical
   console-tools/archs=at
@@ -32,9 +32,12 @@ BootParams: >-
   numa=off
   rw
   quiet
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
+  {{.Param "kernel-options"}}
 RequiredParams:
 OptionalParams:
+  - "custom-kernel"
+  - "custom-initrd"
   - "part-scheme"
   - "operating-system-disk"
   - "provisioner-default-user"
@@ -42,6 +45,7 @@ OptionalParams:
   - "provisioner-default-uid"
   - "provisioner-default-password-hash"
   - "kernel-console"
+  - "kernel-options"
   - "proxy-servers"
   - "dns-domain"
   - "local-repo"

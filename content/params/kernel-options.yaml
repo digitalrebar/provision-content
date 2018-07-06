@@ -1,0 +1,17 @@
+---
+Name: "kernel-options"
+Description: "Additional kernel options for boot environments"
+Documentation: |
+  This string defines additional options to append to the 
+  the kernel boot process.
+
+  e.g. debug noapic
+
+Schema:
+  type: "string"
+  default: ""
+
+Meta:
+  icon: "desktop"
+  color: "blue"
+  title: "Digital Rebar Community Content"

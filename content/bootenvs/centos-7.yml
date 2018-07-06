@@ -7,21 +7,25 @@ OS:
   IsoFile: "CentOS-7-x86_64-Minimal-1804.iso"
   IsoSha256: "714acc0aefb32b7d51b515e25546835e55a90da9fb00417fbee2d03a62801efd"
   IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso"
-Kernel: "images/pxeboot/vmlinuz"
+Kernel: '{{if .ParamExists "custom-kernel"}}{{.Param "custom-kernel"}}{{else}}images/pxeboot/vmlinuz{{end}}'
 Initrds:
-  - "images/pxeboot/initrd.img"
+  - '{{if .ParamExists "custom-initrd"}}{{.Param "custom-initrd"}}{{else}}images/pxeboot/initrd.img{{end}}'
 BootParams: >-
   ksdevice=bootif
   ks={{.Machine.Url}}/compute.ks
   method={{.Env.InstallUrl}}
   inst.geoloc=0
   --
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
+  {{.Param "kernel-options"}}
 RequiredParams:
 OptionalParams:
+  - "custom-initrd"
+  - "custom-kernel"
   - "operating-system-disk"
   - "provisioner-default-password-hash"
   - "kernel-console"
+  - "kernel-options"
   - "proxy-servers"
   - "select-kickseed"
 Templates:

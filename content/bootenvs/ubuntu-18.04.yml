@@ -1,66 +1,81 @@
-Name: ubuntu-18.04-install
-BootParams: debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
-  netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
-  root=/dev/ram rw quiet {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
-  -- {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
-Description: Ubuntu-18.04 install
+---
+Name: "ubuntu-18.04-install"
+BootParams: >-
+  debian-installer/locale=en_US.utf8 
+  console-setup/layoutcode=us 
+  keyboard-configuration/layoutcode=us
+  netcfg/dhcp_timeout=120 
+  netcfg/choose_interface=auto 
+  url={{.Machine.Url}}/seed 
+  netcfg/get_hostname={{.Machine.Name}}
+  root=/dev/ram 
+  rw 
+  quiet 
+  {{.Param "kernel-console"}}
+  --
+  {{.Param "kernel-console"}}
+  {{.Param "kernel-options"}}
+Description: "Ubuntu-18.04 install"
 Errors: []
 Initrds:
-  - install/netboot/ubuntu-installer/amd64/initrd.gz
-Kernel: install/netboot/ubuntu-installer/amd64/linux
+  - '{{if .ParamExists "custom-initrd"}}{{.Param "custom-initrd"}}{{else}}install/netboot/ubuntu-installer/amd64/initrd.gz{{end}}'
+Kernel: '{{if .ParamExists "custom-kernel"}}{{.Param "custom-kernel"}}{{else}}install/netboot/ubuntu-installer/amd64/linux{{end}}' 
 Meta:
-  color: orange
-  feature-flags: change-stage-v2
-  icon: linux
-  title: Digital Rebar Community Content
+  color: "orange"
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  title: "Digital Rebar Community Content"
 OS:
   Codename: "Bionic Beaver"
-  Family: ubuntu
-  IsoFile: ubuntu-18.04-server-amd64.iso
+  Family: "ubuntu"
+  IsoFile: "ubuntu-18.04-server-amd64.iso"
   IsoSha256: "a7f5c7b0cdd0e9560d78f1e47660e066353bb8a79eb78d1fc3f4ea62a07e6cbc"
-  IsoUrl: http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-amd64.iso
-  Name: ubuntu-18.04
+  IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-amd64.iso"
+  Name: "ubuntu-18.04"
   Version: "18.04"
 OnlyUnknown: false
 OptionalParams:
-  - part-scheme
-  - operating-system-disk
-  - provisioner-default-user
-  - provisioner-default-fullname
-  - provisioner-default-uid
-  - provisioner-default-password-hash
-  - kernel-console
-  - proxy-servers
-  - dns-domain
-  - local-repo
-  - proxy-servers
-  - ntp-servers
-  - select-kickseed
+  - "custom-initrd"
+  - "custom-kernel"
+  - "part-scheme"
+  - "operating-system-disk"
+  - "provisioner-default-user"
+  - "provisioner-default-fullname"
+  - "provisioner-default-uid"
+  - "provisioner-default-password-hash"
+  - "kernel-console"
+  - "kernel-options"
+  - "proxy-servers"
+  - "dns-domain"
+  - "local-repo"
+  - "proxy-servers"
+  - "ntp-servers"
+  - "select-kickseed"
 ReadOnly: true
 RequiredParams: []
 Templates:
   - Contents: ""
-    ID: default-pxelinux.tmpl
-    Name: pxelinux
-    Path: pxelinux.cfg/{{.Machine.HexAddress}}
+    ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
   - Contents: ""
-    ID: default-ipxe.tmpl
-    Name: ipxe
+    ID: "default-ipxe.tmpl"
+    Name: "ipxe"
     Path: '{{.Machine.Address}}.ipxe'
   - Contents: ""
-    ID: default-pxelinux.tmpl
-    Name: pxelinux-mac
-    Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
+    ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
   - Contents: ""
-    ID: default-ipxe.tmpl
-    Name: ipxe-mac
+    ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
     Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
   - Contents: ""
-    ID: select-kickseed.tmpl
-    Name: seed
+    ID: "select-kickseed.tmpl"
+    Name: "seed"
     Path: '{{.Machine.Path}}/seed'
   - Contents: ""
-    ID: net-post-install.sh.tmpl
-    Name: net-post-install.sh
-    Path: '{{.Machine.Path}}/post-install.sh'
+    ID: "net-post-install.sh.tmpl"
+    Name: "net-post-install.sh"
+    Path: "{{.Machine.Path}}/post-install.sh"
 

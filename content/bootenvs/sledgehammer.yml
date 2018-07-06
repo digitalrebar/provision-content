@@ -9,9 +9,9 @@ OS:
   Name: "sledgehammer/9c1ad5cb7483928e6aba1d93ba363de929169f37"
   IsoFile: "sledgehammer-9c1ad5cb7483928e6aba1d93ba363de929169f37.tar"
   IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9c1ad5cb7483928e6aba1d93ba363de929169f37/sledgehammer-9c1ad5cb7483928e6aba1d93ba363de929169f37.tar"
-Kernel: "vmlinuz0"
+  Kernel: '{{if .ParamExists "custom-kernel"}}{{.Param "custom-kernel"}}{{else}}vmlinuz0{{end}}'
 Initrds:
-  - "stage1.img"
+  - '{{if .ParamExists "custom-initrd"}}{{.Param "custom-initrd"}}{{else}}stage1.img{{end}}'
 BootParams: >-
   rootflags=loop
   root=live:/sledgehammer.iso
@@ -24,10 +24,14 @@ BootParams: >-
   provisioner.web={{.ProvisionerURL}}
   rs.uuid={{.Machine.UUID}}
   --
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
+  {{.Param "kernel-options"}}
 RequiredParams:
 OptionalParams:
+  - "custom-initrd"
+  - "custom-kernel"
   - "kernel-console"
+  - "kernel-options"
 Templates:
   - Name: "pxelinux"
     Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
