@@ -19,4 +19,4 @@ Meta:
   color: "blue"
   icon: "ship"
   title: "Community Content"
-  render: "machines_map"
+  render: "machines-map"

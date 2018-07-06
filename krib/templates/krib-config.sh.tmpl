@@ -101,6 +101,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     if [ $N -gt ${MAX_WAIT_SECONDS} ]; then
       echo "All masters did not come up!"
+      echo "DEBUG: review /tmp/kubeadm.init.log:"
+      echo "$(cat /tmp/kubeadm.init.log)"
       exit 1
     else
       N=$(expr $N + ${INCREMENT_SECONDS})
@@ -112,6 +114,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
                 echo "Node $name is ready."
         else
                 echo "Node $name is not yet ready."
+                echo "$(kubectl get nodes)"
                 READY=false
         fi
     done <<< $(get_param $KRIB_MASTERS_PARAM | jq -r '.[].Name' )

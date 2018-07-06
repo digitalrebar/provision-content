@@ -2,7 +2,10 @@
 Description: "A task to install kubernetes and kubeadm"
 Name: "kubernetes-install"
 Documentation: |
-  Sets Param: krib/cluster-join, krib/cluster-admin-conf
+  Downloads Kubernetes installation components from repos
+  This task relies on the O/S packages being updated
+  and accessible.
+  NOTE: Access to update repos is required!
 RequredParams:
   - krib/cluster-profile
 OptionalParams:
