@@ -26,12 +26,22 @@ Templates:
     {{end -}}
     {{template "setup.tmpl" .}}
     {{template "krib-dev-reset.sh.tmpl" .}}
-    echo "YOU MUST RESET THE CA BY HAND!"
-    echo "==========================================================================="
-    echo "drpcli plugins runaction certs deleteroot certs/root etcd-cluster-client-ca"
-    echo "drpcli plugins runaction certs deleteroot certs/root etcd-cluster-server-ca"
-    echo "drpcli plugins runaction certs deleteroot certs/root etcd-cluster-peer-ca"
-    echo "==========================================================================="
+    echo "Checking CA"
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca) || true
+    if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
+      echo "CA contains $CA_TEST"
+      echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
+      echo "==========================================================================="
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
+      echo "==========================================================================="
+      sleep 1
+      exit 1
+    else
+      echo "  No CA root detected"
+    fi
     echo "done CA params reset"
   Name: CA clear
 - Contents: |-
@@ -65,6 +75,7 @@ Templates:
     exit 1
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"black\", \"icon\": \"server\"}}" | jq .Meta
     echo "done KRIB params reset"
   Name: KRIB clear
 Meta:
