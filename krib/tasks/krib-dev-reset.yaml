@@ -65,6 +65,7 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done KRIB params reset"
+    exit 0
   Name: KRIB clear
 Meta:
   icon: "ship"
