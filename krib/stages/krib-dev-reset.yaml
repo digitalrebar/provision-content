@@ -1,0 +1,10 @@
+---
+Name: "krib-dev-reset"
+Description: "DEV: Clear the Profile to Reset before test run"
+RunnerWait: true
+Tasks:
+  - "krib-dev-reset"
+Meta:
+  icon: "ship"
+  color: "red"
+  title: "Community Content"
