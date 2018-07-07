@@ -13,6 +13,9 @@ Templates:
     #!/bin/bash
     # Reset CA params
     set -e
+    # we need a random backoff for races
+    SLEEP=$[ ( $RANDOM % 5 ) ]
+    sleep $SLEEP
     declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw')
     {{if .ParamExists "etcd/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
@@ -30,7 +33,6 @@ Templates:
     echo "drpcli plugins runaction certs deleteroot certs/root etcd-cluster-peer-ca"
     echo "==========================================================================="
     echo "done CA params reset"
-    exit 0
   Name: CA clear
 - Contents: |-
     #!/bin/bash
@@ -48,7 +50,6 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done etcd params reset"
-    exit 0
   Name: etcd-reset  
 - Contents: |-
     #!/bin/bash
@@ -65,7 +66,6 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done KRIB params reset"
-    exit 0
   Name: KRIB clear
 Meta:
   icon: "ship"

@@ -4,6 +4,7 @@ Meta:
   color: blue
   icon: ship
   title: Community Content
+  render: krib
 Name: example-ha-krib
 Params:
   etcd/cluster-profile: example-ha-krib
