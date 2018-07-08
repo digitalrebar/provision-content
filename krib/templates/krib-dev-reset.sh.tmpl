@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+# this snippet is called by the krib-dev-reset task
 
 {{if .Param "krib/cluster-is-production" -}}
   echo "CANNOT USE RESET WHEN CLUSTER IS PRODUCTION"
