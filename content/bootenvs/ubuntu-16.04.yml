@@ -1,6 +1,10 @@
 ---
 Name: "ubuntu-16.04-install"
 Description: "Ubuntu-16.04 install points to the latest release version"
+Documentation: |
+  NOTE: Default Ubuntu ISOs will attempt to check internet repositories, 
+  this can cause problems during provisioning if your environment does not have outbound access.
+  Workaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.
 OS:
   Name: "ubuntu-16.04"
   Family: "ubuntu"

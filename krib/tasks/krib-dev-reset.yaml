@@ -1,0 +1,85 @@
+---
+Description: "DEV: Reset Profile values between Test Runs"
+Name: "krib-dev-reset"
+Documentation: |
+  Clears Created Params: krib/*, etcd/*
+RequiredParams:
+  - krib/cluster-profile
+  - etcd/cluster-profile
+OptionalParams:
+  - krib/cluster-is-production
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # Reset CA params
+    set -e
+    # we need a random backoff for races
+    SLEEP=$[ ( $RANDOM % 5 ) ]
+    sleep $SLEEP
+    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw')
+    {{if .ParamExists "etcd/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing etcd/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "setup.tmpl" .}}
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "Checking CA"
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca) || true
+    if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
+      echo "CA contains $CA_TEST"
+      echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
+      echo "==========================================================================="
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
+      echo "==========================================================================="
+      sleep 1
+      exit 1
+    else
+      echo "  No CA root detected"
+    fi
+    echo "done CA params reset"
+  Name: CA clear
+- Contents: |-
+    #!/bin/bash
+    # Reset etcd params
+    set -e
+    declare -a WIPE_PARAMS=('etcd/servers' 'etcd/servers-done')
+    declare CLUSTER_TYPE="etcd"
+    {{template "setup.tmpl" .}}
+    {{if .ParamExists "etcd/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing etcd/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done etcd params reset"
+  Name: etcd-reset  
+- Contents: |-
+    #!/bin/bash
+    # Reset KRIB params
+    set -e
+    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-master-vip' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs')
+    {{template "setup.tmpl" .}}
+    {{if .ParamExists "krib/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing krib/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"black\", \"icon\": \"server\"}}" | jq .Meta
+    echo "done KRIB params reset"
+  Name: KRIB clear
+Meta:
+  icon: "ship"
+  color: "red"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

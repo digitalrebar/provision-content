@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+# this snippet is called by the krib-dev-reset task
+
+{{if .Param "krib/cluster-is-production" -}}
+  echo "CANNOT USE RESET WHEN CLUSTER IS PRODUCTION"
+  exit 1
+{{else -}}
+
+  for p in "${WIPE_PARAMS[@]}"; do
+
+    echo "=== clearing $p : value was ==========================="
+    JC=$(get_param "$p" | jq -r .)
+    if [[ $JC != "" && $JC != null ]] ; then
+      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "$p" | jq -r '.'
+    else
+      echo "  skipping $p, was not set"
+    fi
+
+  done
+  echo "==================================================="
+
+{{end -}}

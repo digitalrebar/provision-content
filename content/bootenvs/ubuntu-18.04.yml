@@ -4,6 +4,10 @@ BootParams: debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keybo
   root=/dev/ram rw quiet {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
   -- {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 Description: Ubuntu-18.04 install
+Documentation: |
+  NOTE: Default Ubuntu ISOs will attempt to check internet repositories, 
+  this can cause problems during provisioning if your environment does not have outbound access.
+  Workaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.
 Errors: []
 Initrds:
   - install/netboot/ubuntu-installer/amd64/initrd.gz

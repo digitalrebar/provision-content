@@ -1,0 +1,10 @@
+Description: "KRIB Developer Reset Cluster Profile"
+Errors: []
+Meta:
+  color: "red"
+  icon: "ship"
+  title: "kubernetes reset cluster"
+Name: "krib-reset-cluster"
+ReadOnly: false
+Stages:
+  - "krib-dev-reset"

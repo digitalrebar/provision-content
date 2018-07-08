@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
 set -e
-set -x
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
@@ -32,38 +31,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
   if [[ $MASTER_INDEX == 0 ]] ; then
-    # set of Params to wipe from the krib/cluster-profile if we are
-    # NOT in production mode
-    declare -a WIPE_PARAMS=('krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs')
-
-    # If we are already ran, don't run again.
-    JC=$(get_param "krib/cluster-join-command" | jq -r .)
-    if [[ $JC != "" && $JC != null ]] ; then
-{{ if eq (.Param "krib/cluster-is-production") true -}}
-      echo "Cluster is marked as a PRODUCTION cluster... "
-      echo "Already run this on the master!  Can not run kubeadm twice!"
-      echo "Suggested Fix: clear cluster configuration from profile"
-      drpcli machines update $RS_UUID '{"Meta":{"color":"red", "icon": "anchor"}}'
-      exit 1
-{{else -}}
-      echo "This cluster is NOT MARKED PRODUCTION, the following Params"
-      echo "will be reset and overwritten:"
-      echo
-      echo "    krib/cluster-admin-conf"
-      echo "    krib/cluster-join-command"
-      echo "    krib/cluster-master-certs"
-      echo
-{{if .ParamExists "krib/cluster-admin-conf" -}}
-      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "krib/cluster-admin-conf" | jq -r '.'
-{{end -}}
-{{if .ParamExists "krib/cluster-join-command" -}}
-      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "krib/cluster-join-command" | jq -r '.'
-{{end -}}
-{{if .ParamExists "krib/cluster-master-certs" -}}
-      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "krib/cluster-master-certs" | jq -r '.'
-{{end -}}
-{{end -}}
-    fi
 
     kubeadm init --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
 
@@ -101,6 +68,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     if [ $N -gt ${MAX_WAIT_SECONDS} ]; then
       echo "All masters did not come up!"
+      echo "DEBUG: review /tmp/kubeadm.init.log:"
+      echo "$(cat /tmp/kubeadm.init.log)"
       exit 1
     else
       N=$(expr $N + ${INCREMENT_SECONDS})
@@ -112,6 +81,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
                 echo "Node $name is ready."
         else
                 echo "Node $name is not yet ready."
+                echo "$(kubectl get nodes)"
                 READY=false
         fi
     done <<< $(get_param $KRIB_MASTERS_PARAM | jq -r '.[].Name' )

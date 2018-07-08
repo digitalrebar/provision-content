@@ -18,4 +18,4 @@ Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  render: "machines_map"
+  render: "machines-map"
