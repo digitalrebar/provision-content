@@ -23,8 +23,15 @@ if free | grep -q Swap ; then
   swapoff -a
 fi
 
-echo "Make sure that bridge-nf-call-iptables is 1 - kubeadm requirement"
-echo 1 > /proc/sys/net/bridge/bridge-nf-call-iptables
+echo "MAKE SURE bridge-nf-call-iptables CONTAINS 1 - kubeadm requirement"
+if [ ! -f /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables ]; then
+  cat <<EOF >/etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables
+net.bridge.bridge-nf-call-iptables=1
+EOF
+  sysctl -p /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables
+fi
+VALUE=$(sysctl -n net.bridge.bridge-nf-call-iptables)
+[ $VALUE != 1 ] && sysctl -w net.bridge.bridge-nf-call-iptables=1
 
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
