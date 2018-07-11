@@ -1,0 +1,12 @@
+---
+Name: "rose/source"
+Description: "Sets Git Clone Source for DevStack"
+Documentation: |
+  Required source location
+Schema:
+  type: "string"
+  default: "https://git.openstack.org/openstack-dev/devstack"
+Meta:
+  color: "blue"
+  icon: "github"
+  title: "Community Content"

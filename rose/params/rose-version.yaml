@@ -1,0 +1,12 @@
+---
+Name: "rose/version"
+Description: "Sets Git Checkout Version for DevStack"
+Documentation: |
+  Version to checkout from clone
+Schema:
+  type: "string"
+  default: "queens"
+Meta:
+  color: "blue"
+  icon: "github"
+  title: "Community Content"

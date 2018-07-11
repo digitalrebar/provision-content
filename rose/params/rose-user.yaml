@@ -1,0 +1,12 @@
+---
+Name: "rose/user"
+Description: "Sets O/S user for Cluster"
+Documentation: |
+  Required user account
+Schema:
+  type: "string"
+  default: "stack"
+Meta:
+  color: "blue"
+  icon: "user"
+  title: "Community Content"
