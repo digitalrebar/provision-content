@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Build Select OpenStack Controllers
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Reuse this library (likely some should move to setup)
+{{template "krib-lib.sh.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+echo "Elect and wait for the masters"
+
+{{if .ParamExists "rose/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "rose/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "rose/cluster-profile") 7200}}
+{{else -}}
+echo "Missing rose/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+# Get the number of servers to create
+ROSE_CONTROLLER_COUNT=1
+echo "Creating $ROSE_CONTROLLER_COUNT controllers"
+
+ROSE_CONTROLLERS_PARAM="rose/cluster-controllers"
+
+echo "Electing Members to $CLUSTER_PROFILE"
+CONTROLLER_INDEX=$(add_me_if_not_count "$ROSE_CONTROLLERS_PARAM" $ROSE_CONTROLLER_COUNT)
+if [[ $CONTROLLER_INDEX == notme ]] ; then
+  echo "I am not a controller.  Move on."
+
+  # Set machine icon and color for ROSE cluster building
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"shower\"} }" | jq .Meta
+
+  exit 0
+fi
+
+echo "Wait for all the controllers to show up"
+wait_for_count "$ROSE_CONTROLLERS_PARAM" $ROSE_CONTROLLER_COUNT
+
+echo "Controllers are here.  Let us go!"
+
+# Set machine icon and color for ROSE cluster building
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"cloud\"} }" | jq .Meta
+
+exit 0

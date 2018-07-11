@@ -1,0 +1,31 @@
+---
+Description: "A task to configure OpenStack via DevStack"
+Documentation: |
+  Uses the DRP Cluster Building Logic
+  At present, only 1 controller is allowed
+  Sets Param: rose/service-token
+Name: "rose-config"
+Templates:
+  - ID: "rose-controller.cfg.tmpl"
+    Name: "DevStack Controller config file"
+    Path: "/tmp/controller.local.conf"
+  - ID: "rose-compute.cfg.tmpl"
+    Name: "DevStack Compute config file"
+    Path: "/tmp/compute.local.conf"
+  - ID: "rose-config.sh.tmpl"
+    Name: "Configure OpenStack"
+    Path: ""
+RequiredParams:
+  - rose/cluster-profile
+  - rose/cluster-controllers
+OptionalParams:
+  - rose/user
+  - rose/source
+  - rose/version
+  - rose/default-password
+  - rose/service-token
+Meta:
+  icon: "cloud"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

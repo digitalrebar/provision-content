@@ -1,0 +1,11 @@
+---
+Name: "rose-config"
+Description: "ROSE configures an OpenStack cluster control and compute nodes"
+RunnerWait: true
+Tasks:
+  - "rose-get-controllers"
+  - "rose-config"
+Meta:
+  icon: "cloud"
+  color: "yellow"
+  title: "Community Content"

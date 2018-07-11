@@ -1,0 +1,14 @@
+---
+Description: Example OpenStack Profile - Clone Me!
+Documentation: |
+  Assign this a clone of profile to machines to be used
+  for the OpenStack cluster.
+  The profile must be writable
+  You must set the rose/cluster-profile to be the name of the profile! 
+Meta:
+  color: blue
+  icon: cloud
+  title: Community Content
+Name: example-rose
+Params:
+  rose/cluster-profile: example-rose

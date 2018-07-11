@@ -1,0 +1,24 @@
+# Rebar OpenStack Environment (ROSE) Installer
+# Controller configuration
+[[local|localrc]]
+
+SERVICE_TOKEN={{.Param "rose/service-token" -}}
+ADMIN_PASSWORD={{.Param "rose/default-password" -}}
+MYSQL_PASSWORD={{.Param "rose/default-password" -}}
+SERVICE_PASSWORD={{.Param "rose/default-password" -}}
+DATABASE_PASSWORD={{.Param "rose/default-password" -}}
+RABBIT_PASSWORD={{.Param "rose/default-password" -}}
+
+SERVICE_HOST={{.Param "rose/cluster-controllers" -}}
+HOST_IP={{.MachineAddress}}
+PUBLIC_INTERFACE=ens0
+
+MULTI_HOST=True
+
+MYSQL_HOST={{.Param "rose/cluster-controller" -}}
+RABBIT_HOST={{.Param "rose/cluster-controller" -}}
+CINDER_SERVICE_HOST={{.Param "rose/cluster-controller" -}}
+GLANCE_HOSTPORT={{.Param "rose/cluster-controller" -}}:9292
+DATABASE_TYPE=mysql
+
+ENABLED_SERVICES=n-cpu,n-net
