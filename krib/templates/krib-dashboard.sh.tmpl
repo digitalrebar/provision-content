@@ -35,7 +35,7 @@ MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
-  install rsync git
+  install rsync git wget
 
   wget -O /tmp/kubernetes-dashboard.yaml https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 
@@ -96,4 +96,3 @@ fi
 
 echo "Finished successfully"
 exit 0
-
