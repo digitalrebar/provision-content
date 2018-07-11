@@ -22,6 +22,7 @@ Templates:
         echo "Skipping drpcli gohai because Param gohai/skip is true"
       {{else -}}
         echo "Running drpcli gohai (skip by setting gohai/skip to true)"
+        drpcli machines set {{.Machine.UUID}} param gohai-inventory to '{}'
         if drpcli gohai --help >/dev/null 2>/dev/null ; then
           drpcli gohai | drpcli machines set {{.Machine.UUID}} param gohai-inventory to -
         else
