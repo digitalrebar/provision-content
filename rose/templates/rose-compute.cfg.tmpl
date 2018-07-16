@@ -1,19 +1,20 @@
 # Rebar OpenStack Environment (ROSE) Installer
-# Controller configuration
+# Compute Node configuration (NOT CONTROLLER)
 [[local|localrc]]
 
-SERVICE_TOKEN={{.Param "rose/service-token" }}
-ADMIN_PASSWORD={{.Param "rose/default-password" }}
-MYSQL_PASSWORD={{.Param "rose/default-password" }}
-SERVICE_PASSWORD={{.Param "rose/default-password" }}
-DATABASE_PASSWORD={{.Param "rose/default-password" }}
-RABBIT_PASSWORD={{.Param "rose/default-password" }}
+SERVICE_TOKEN={{.Param "rose/service-token"}}
+ADMIN_PASSWORD={{.Param "rose/default-password"}}
+MYSQL_PASSWORD={{.Param "rose/default-password"}
+SERVICE_PASSWORD={{.Param "rose/default-password"}}
+DATABASE_PASSWORD={{.Param "rose/default-password"}}
+RABBIT_PASSWORD={{.Param "rose/default-password"}}
 
 {{range $index, $controller := .Param "rose/cluster-controllers"}}
 SERVICE_HOST={{$controller.Address }}
 {{end}}
 HOST_IP={{.Machine.Address}}
 PUBLIC_INTERFACE=eth0
+FLAT_INTERFACE=eth0
 
 MULTI_HOST=1
 
