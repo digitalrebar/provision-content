@@ -5,13 +5,10 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
-# Reuse this library (likely some should move to setup)
-{{template "krib-lib.sh.tmpl" .}}
-
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
-echo "Elect and wait for the masters"
+echo "Elect and wait for the controllers"
 
 {{if .ParamExists "rose/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "rose/cluster-profile"}}
@@ -27,23 +24,21 @@ echo "Creating $ROSE_CONTROLLER_COUNT controllers"
 
 ROSE_CONTROLLERS_PARAM="rose/cluster-controllers"
 
-echo "Electing Members to $CLUSTER_PROFILE"
-CONTROLLER_INDEX=$(add_me_if_not_count "$ROSE_CONTROLLERS_PARAM" $ROSE_CONTROLLER_COUNT)
-if [[ $CONTROLLER_INDEX == notme ]] ; then
-  echo "I am not a controller.  Move on."
+echo "Electing Controllers to $CLUSTER_PROFILE"
 
-  # Set machine icon and color for ROSE cluster building
-  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"shower\"} }" | jq .Meta
-
-  exit 0
-fi
-
-echo "Wait for all the controllers to show up"
-wait_for_count "$ROSE_CONTROLLERS_PARAM" $ROSE_CONTROLLER_COUNT
-
-echo "Controllers are here.  Let us go!"
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$ROSE_CONTROLLERS_PARAM" to "[]" || true
+CL=$(get_param $ROSE_CONTROLLERS_PARAM)
+while [[ $(jq length <<< "$CL") -lt ${ROSE_CONTROLLER_COUNT} ]]; do
+  echo "electing a leader..."
+  NEW_LEADERS=$(jq ". += [{\"Name\": \"{{.Machine.Name}}\", \"Uuid\": \"{{.Machine.Uuid}}\", \"Address\": \"{{.Machine.Address}}\"}]" <<< "$CL")
+  drpcli -r "$CL" -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param "$ROSE_CONTROLLERS_PARAM" to "$NEW_LEADERS" 2>/dev/null >/dev/null && break
+  # sleep is is a hack but it allows for backoffs
+  sleep 1
+  # get the current cluster leaders
+  CL=$(get_param $ROSE_CONTROLLERS_PARAM)
+done
 
 # Set machine icon and color for ROSE cluster building
-drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"cloud\"} }" | jq .Meta
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"shower\"} }" | jq .Meta
 
 exit 0

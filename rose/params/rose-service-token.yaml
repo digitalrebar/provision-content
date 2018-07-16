@@ -7,6 +7,7 @@ Documentation: |
   Existance of token is used by compute notes to synchronize install
 Schema:
   type: "string"
+  default: "THISISNOTSECURE"
 Meta:
   color: "blue"
   icon: "book"

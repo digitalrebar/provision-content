@@ -2,17 +2,18 @@
 # Controller configuration
 [[local|localrc]]
 
-SERVICE_TOKEN={{.Param "rose/service-token" -}}
-ADMIN_PASSWORD={{.Param "rose/default-password" -}}
-MYSQL_PASSWORD={{.Param "rose/default-password" -}}
-SERVICE_PASSWORD={{.Param "rose/default-password" -}}
-DATABASE_PASSWORD={{.Param "rose/default-password" -}}
-RABBIT_PASSWORD={{.Param "rose/default-password" -}}
+SERVICE_TOKEN={{.Param "rose/service-token"}}
+ADMIN_PASSWORD={{.Param "rose/default-password"}}
+MYSQL_PASSWORD={{.Param "rose/default-password"}}
+SERVICE_PASSWORD={{.Param "rose/default-password"}}
+DATABASE_PASSWORD={{.Param "rose/default-password"}}
+RABBIT_PASSWORD={{.Param "rose/default-password"}}
 
-HOST_IP={{.MachineAddress}}
-PUBLIC_INTERFACE=ens0
+HOST_IP={{.Machine.Address}}
+PUBLIC_INTERFACE=eth0
+FLAT_INTERFACE=eth0
 
-MULTI_HOST=True
+MULTI_HOST=1
 
 disable_service c-vol
 disable_service n-cpu

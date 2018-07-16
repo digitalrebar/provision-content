@@ -2,23 +2,27 @@
 # Controller configuration
 [[local|localrc]]
 
-SERVICE_TOKEN={{.Param "rose/service-token" -}}
-ADMIN_PASSWORD={{.Param "rose/default-password" -}}
-MYSQL_PASSWORD={{.Param "rose/default-password" -}}
-SERVICE_PASSWORD={{.Param "rose/default-password" -}}
-DATABASE_PASSWORD={{.Param "rose/default-password" -}}
-RABBIT_PASSWORD={{.Param "rose/default-password" -}}
+SERVICE_TOKEN={{.Param "rose/service-token" }}
+ADMIN_PASSWORD={{.Param "rose/default-password" }}
+MYSQL_PASSWORD={{.Param "rose/default-password" }}
+SERVICE_PASSWORD={{.Param "rose/default-password" }}
+DATABASE_PASSWORD={{.Param "rose/default-password" }}
+RABBIT_PASSWORD={{.Param "rose/default-password" }}
 
-SERVICE_HOST={{.Param "rose/cluster-controllers" -}}
-HOST_IP={{.MachineAddress}}
-PUBLIC_INTERFACE=ens0
+{{range $index, $controller := .Param "rose/cluster-controllers"}}
+SERVICE_HOST={{$controller.Address }}
+{{end}}
+HOST_IP={{.Machine.Address}}
+PUBLIC_INTERFACE=eth0
 
-MULTI_HOST=True
+MULTI_HOST=1
 
-MYSQL_HOST={{.Param "rose/cluster-controller" -}}
-RABBIT_HOST={{.Param "rose/cluster-controller" -}}
-CINDER_SERVICE_HOST={{.Param "rose/cluster-controller" -}}
-GLANCE_HOSTPORT={{.Param "rose/cluster-controller" -}}:9292
+{{range $index, $controller := .Param "rose/cluster-controllers"}}
+MYSQL_HOST={{$controller.Address }}
+RABBIT_HOST={{$controller.Address }}
+CINDER_SERVICE_HOST={{$controller.Address }}
+GLANCE_HOSTPORT={{$controller.Address -}}:9292
+{{end}}
 DATABASE_TYPE=mysql
 
 ENABLED_SERVICES=n-cpu,n-net

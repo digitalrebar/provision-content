@@ -15,74 +15,55 @@ echo "Missing rose/cluster-profile on the machine!"
 exit 1
 {{end -}}
 
-# devstack common setup
-STACK_CONFIG="./local.conf"
-if [[ -e $STACK_CONFIG ]]; then
+echo "creating user: {{.Param "rose/user"}}"
+EXISTS=$(getent passwd {{.Param "rose/user"}} || true)
+if [ -z "$EXISTS" ]; then
+  echo "  creating and elevating {{.Param "rose/user"}} user"
+  groupadd {{.Param "rose/user"}}
+  useradd -g {{.Param "rose/user"}} -s /bin/bash -d /opt/{{.Param "rose/user"}} -m {{.Param "rose/user"}}
+  echo "{{.Param "rose/user"}} ALL=(ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/{{.Param "rose/user"}}
+else
+  echo "  {{.Param "rose/user"}} user exists, skipping create"
+fi
+su - {{.Param "rose/user"}}
+echo "user {{.Param "rose/user"}} ready"
 
+echo "installing code into devstack"
+STACK_DIR="/opt/{{.Param "rose/user"}}/devstack"
+if [ -d "$STACK_DIR" ]; then
+  echo "  skipping {{.Param "rose/user" -}} user create and git clone"
+else
   drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"cloud\"}}" | jq .Meta
 
-  echo "creating and elevating {{.Param "rose/user" -}} user"
-  sudo useradd -s /bin/bash -d /opt/stack -m {{.Param "rose/user" -}}
-  echo "{{.Param "rose/user" -}} ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/{{.Param "rose/user" -}}
-  sudo su - {{.Param "rose/user" -}}
-
-  echo "cloning {{.Param "rose/source" -}}"
-  git clone {{.Param "rose/source" -}}
-  cd devstack
-
-  cat $STACK_CONFIG
-else
-  echo "skipping {{.Param "rose/user" -}} user create and git clone, $STACK_CONFIG exists "
+  echo "  cloning {{.Param "rose/source" -}}"
+  install git
+  git clone {{.Param "rose/source"}} $STACK_DIR
 fi
 
-{{template "krib-lib.sh.tmpl" .}}
-ROSE_CONTROLLERS_PARAM="rose/cluster-controllers"
+cd $STACK_DIR
+echo "checking out {{.Param "rose/branch"}}"
+git checkout {{.Param "rose/branch"}}
 
-CONTROLLER_INDEX=$(find_me $ROSE_CONTROLLERS_PARAM "Uuid" $RS_UUID)
-echo "My Controller index is $CONTROLLER_INDEX"
-if [[ $CONTROLLER_INDEX != notme ]] ; then
-
-  echo "I am controller - run devstack"
-  SERVICE_TOKEN="NOTSECURE"
-
-  if [[ $CONTROLLER_INDEX == 0 ]] ; then
-
-    echo "INSTALL ME SOME OPENSTACK CONTROLLER!"
-
-  fi
-
-  MAX_WAIT_SECONDS=300
-  INCREMENT_SECONDS=10
-  N=0
-  READY=false
-
-  while [ "$READY" != "true" ]; do
-    READY=true
-    if [ "$READY" != "true" ]; then
-      sleep ${INCREMENT_SECONDS}s
-    fi
-  done
-
-  if [[ $CONTROLLER_INDEX == 0 ]] ; then
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param rose/service-token to "$SERVICE_TOKEN"
-    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"cloud\"}}" | jq .Meta
-  else
-    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"cloud upload\"}}" | jq .Meta
-  fi
-
+{{range $index, $controller := .Param "rose/cluster-controllers"}}
+if [[ "$RS_UUID" == "{{$controller.Uuid}}" ]] ; then
+  echo "!!! I AM THE CONTROLLER !!!"
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"cloud\"}}" | jq .Meta
+  mv /tmp/controller.local.conf $STACK_DIR/local.conf
 else
-
-  echo "I am a compute node - waitrun kubeadm join when defined"
-
-  JC=$(wait_for_variable $ROSE_JOIN_PARAM)
-
-  echo "Running: $JC"
-  $JC
-
-  # Set machine icon and color for ROSE cluster building
-  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"cloud download\"}}" | jq .Meta
-
+  echo "... I AM A COMPUTE NODE ..."
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yelow\", \"icon\": \"cloud upload\"}}" | jq .Meta
+  mv /tmp/compute.local.conf $STACK_DIR/local.conf
 fi
+{{end}}
+
+echo "\nREVIEW CONF FILE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+cat $STACK_DIR/local.conf
+echo "\nREVIEW CONF FILE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+
+echo "Staring install..."
+su - {{.Param "rose/user"}} -c "cd ${STACK_DIR} && ./stack.sh"
+
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\"}}" | jq .Meta
 
 echo "Finished successfully"
-exit 0
+exit 1
