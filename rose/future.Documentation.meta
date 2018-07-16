@@ -1,0 +1,24 @@
+Rebar OpenStack Environment (ROSE)
+==================================
+
+ROSE runs OpenStack DevStack to setup a single master, multinode cluster as per https://docs.openstack.org/devstack/latest/; consequently, the install uses the same superuser grants that are required by DevStack.
+
+THIS IS NOT A PRODUCTION INSTALLATION 
+
+The ROSE content follows other Digital Rebar cluster installation patterns: a shared profile must be created with the name of the profile defined in the Param 'rose/profile-name' and then machines must have that profile to use a ROSE workflow.  A sample workflow and profile are provided as examples.
+
+The system is designed for testing use so Sledgehammer is the base install.
+
+Limitations
+-----------
+
+* The current system is hardwired to use eth0
+* DevStack only supports a single master
+
+Todo:
+-----
+
+* Compute notes should wait for Controller to finish
+* Send final output from DevStack run
+* Support for floating networks has been enabled
+* Explicit fixed network range has been added
