@@ -1,0 +1,12 @@
+---
+Name: "rose/python-verson"
+Description: "Installs prefered python version"
+Documentation: |
+  Installs desired python version
+Schema:
+  type: "string"
+  default: "python36u"
+Meta:
+  color: "blue"
+  icon: "github"
+  title: "Community Content"

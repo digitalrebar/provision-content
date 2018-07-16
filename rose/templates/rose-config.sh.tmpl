@@ -7,6 +7,9 @@ set -e
 
 echo "Configure OpenStack controller and compute..."
 
+echo "we want python 3.6, install it"
+install {{.Param "rose/python-verson"}}
+
 {{if .ParamExists "rose/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "rose/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "rose/cluster-profile") 7200}}
