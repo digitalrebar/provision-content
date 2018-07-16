@@ -67,4 +67,3 @@ su - {{.Param "rose/user"}} -c "cd ${STACK_DIR} && ./stack.sh"
 drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\"}}" | jq .Meta
 
 echo "Finished successfully"
-exit 1
