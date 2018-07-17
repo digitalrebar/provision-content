@@ -8,3 +8,4 @@ Name: "krib-reset-cluster"
 ReadOnly: false
 Stages:
   - "krib-dev-reset"
+  - "sledgehammer-wait"
