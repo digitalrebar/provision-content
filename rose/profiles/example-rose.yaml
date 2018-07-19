@@ -9,6 +9,7 @@ Meta:
   color: blue
   icon: cloud
   title: Community Content
+  reset: "rose/cluster-profile"
 Name: example-rose
 Params:
   rose/cluster-profile: example-rose

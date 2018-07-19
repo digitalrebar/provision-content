@@ -5,6 +5,7 @@ Meta:
   icon: ship
   title: Community Content
   render: krib
+  reset: "krib/cluster-profile,etcd/cluster-profile"
 Name: example-ha-krib
 Params:
   etcd/cluster-profile: example-ha-krib

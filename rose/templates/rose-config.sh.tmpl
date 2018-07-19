@@ -54,6 +54,13 @@ else
   echo "... I AM A COMPUTE NODE ..."
   drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yelow\", \"icon\": \"cloud upload\"}}" | jq .Meta
   mv /tmp/compute.local.conf $STACK_DIR/local.conf
+  WAIT=$(get_param "rose/start-computes")
+  while [[ $WAIT ]]; do
+    echo "waiting 10 seconds for controller to set rose/start-computes to true..."
+    sleep 10
+    WAIT=$(get_param "rose/start-computes")
+  done
+  echo "Let's go...controller ready (rose/start-computes = true)!"
 fi
 {{end}}
 
@@ -65,6 +72,14 @@ echo "Staring install..."
 su - {{.Param "rose/user"}} -c "cd ${STACK_DIR} && ./stack.sh"
 
 drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\"}}" | jq .Meta
+
+{{range $index, $controller := .Param "rose/cluster-controllers"}}
+if [[ "$RS_UUID" = "{{$controller.Uuid}}" ]] ; then
+  echo "Finished!  Release Compute Nodes"
+  drpcli -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param krib/start-computes to true
+fi
+{{end}}
+
 
 echo "Finished successfully"
 exit 0

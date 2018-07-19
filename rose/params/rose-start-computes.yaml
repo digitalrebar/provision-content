@@ -1,0 +1,13 @@
+---
+Name: "rose/start-computes"
+Description: "Allow compute node installs to start"
+Documentation: |
+  Allows sequential or parallel installation of compute nodes
+  Compute node install will wait until this flag is true
+Schema:
+  type: "boolean"
+  default: true
+Meta:
+  color: "blue"
+  icon: "cloud"
+  title: "Community Content"
