@@ -56,7 +56,7 @@ else
   mv /tmp/compute.local.conf $STACK_DIR/local.conf
   WAIT=$(get_param "rose/start-computes")
   while [[ $WAIT ]]; do
-    echo "waiting 10 seconds for controller to set rose/start-computes to true..."
+    echo "waiting 10 seconds for controller to set rose/start-computes to true...(is $WAIT)"
     sleep 10
     WAIT=$(get_param "rose/start-computes")
   done
