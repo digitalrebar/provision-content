@@ -57,7 +57,7 @@ resource "drp_raw_machine" "packet-machines" {
   count = "${var.cluster_count}"
   Description = "Terraform Added RAW"
   Workflow = "discover"
-  Name = "krib-{count.index}.terraform.local"
+  Name = "krib-${count.index}.terraform.local"
   Params {
   	"machine-plugin" = "packet-ipmi"
   	"packet/plan" ="baremetal_0"
