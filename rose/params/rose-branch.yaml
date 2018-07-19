@@ -2,10 +2,11 @@
 Name: "rose/branch"
 Description: "Sets Git Branch for DevStack"
 Documentation: |
-  Required branch location (use master for latest code)
+  Required branch location (default to master for latest code)
+  Use "stable/pike" for last release
 Schema:
   type: "string"
-  default: "stable/pike"
+  default: "master"
 Meta:
   color: "blue"
   icon: "github"

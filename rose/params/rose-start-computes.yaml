@@ -6,7 +6,7 @@ Documentation: |
   Compute node install will wait until this flag is true
 Schema:
   type: "boolean"
-  default: true
+  default: false
 Meta:
   color: "blue"
   icon: "cloud"
