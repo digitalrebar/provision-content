@@ -1,0 +1,15 @@
+---
+Name: "custom-ipxe"
+Description: "Custom iPXE boot script"
+Documentation: |
+  You can use this whenever you need a custom iPXE boot action,
+  such as booting from a remote URL, booting to an iPXE prompt for
+  troubleshooting, or simply playing around with different ipxe
+  tools.  This param defaults to launching an iPXE shell.
+Schema:
+  type: "string"
+  default: "shell"
+Meta:
+  icon: "tag"
+  color: "blue"
+  title: "Digital Rebar Community Content"
