@@ -1,0 +1,18 @@
+---
+Description: "A task to collect OpenStack controllers"
+Documentation: |
+  Uses the DRP Cluster Building Logic
+  At present, only 1 controller is allowed
+  Sets Param: rose/cluster-controllers
+Name: "rose-get-controllers"
+Templates:
+  - ID: "rose-get-controllers.sh.tmpl"
+    Name: "Collect OpenStack Controllers"
+    Path: ""
+RequiredParams:
+  - rose/cluster-profile
+Meta:
+  icon: "cloud"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
