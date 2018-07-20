@@ -25,7 +25,6 @@ Templates:
     exit 1
     {{end -}}
     {{template "setup.tmpl" .}}
-    {{template "krib-dev-reset.sh.tmpl" .}}
     echo "Checking CA"
     echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca"
     CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca) || true
@@ -42,6 +41,7 @@ Templates:
     else
       echo "  No CA root detected"
     fi
+    {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
   Name: CA clear
 - Contents: |-

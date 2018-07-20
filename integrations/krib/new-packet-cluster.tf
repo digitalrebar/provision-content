@@ -1,20 +1,29 @@
-variable "api_url" { 
+variable "api_url" {
   default = "https://127.0.0.1:8092"
 }
-variable "api_user" { 
+variable "api_user" {
   default = "rocketskates"
 }
-variable "api_password" { 
+variable "api_password" {
   default = "r0cketsk8ts"
 }
-variable "cluster_profile" { 
+variable "cluster_profile" {
   default = "krib-auto"
 }
-variable "cluster_count" { 
+variable "cluster_count" {
   default = 4
 }
-variable "workflow" { 
+variable "master_count" {
+  default = 1
+}
+variable "workflow" {
   default = "discover-krib-live-cluster"
+}
+variable "pool" {
+  default = "tf-krib"
+}
+variable "packet_plan" {
+  default = "baremetal_0"
 }
 
 provider "drp" {
@@ -30,11 +39,12 @@ resource "drp_profile" "krib-auto" {
   Params {
   	"etcd/cluster-profile" = "${var.cluster_profile}"
   	"krib/cluster-profile" = "${var.cluster_profile}"
+    "krib/cluster-master-count" = "${var.master_count}"
   }
   Meta {
   	icon = "ship"
   	color = "green"
-  	render = "kubernetes"
+  	render = "krib"
   }
 }
 
@@ -44,8 +54,8 @@ resource "drp_workflow" "discover-krib-live-cluster" {
   Name = "discover-krib-live-cluster"
   Description = "Terraform Added"
   Stages = [
-  	"discover", "packet-discover", "ssh-access", "mount-local-disks", "docker-install", 
-  	"kubernetes-install", "krib-config", "krib-live-wait"
+  	"discover", "packet-discover", "ssh-access", "mount-local-disks",
+    "docker-install", "kubernetes-install", "etcd-config", "krib-config", "krib-live-wait"
   ]
   Meta {
   	icon = "ship"
@@ -60,9 +70,10 @@ resource "drp_raw_machine" "packet-machines" {
   Name = "krib-${count.index}.terraform.local"
   Params {
   	"machine-plugin" = "packet-ipmi"
-  	"packet/plan" ="baremetal_0"
+  	"packet/plan" ="${var.packet_plan}"
   	"terraform/managed" = "true"
   	"terraform/allocated" = "false"
+    "terraform/pool" = "${var.pool}"
   }
   Meta {
   	icon = "map"
@@ -79,11 +90,16 @@ resource "drp_machine" "krib-machines" {
   	icon = "map"
   	color = "yellow"
   }
+  completion_stage = "krib-live-wait"
   add_profiles = ["${var.cluster_profile}"]
   decommission_color = "purple"
   decommission_icon = "server"
+  pool = "${var.pool}"
 }
 
 output "admin.conf" {
-  value = "drpcli -E ${var.api_url} profiles params ${var.cluster_profile} krib/cluster-admin-conf > admin.conf"
+  value = "drpcli -E ${var.api_url} profiles get ${var.cluster_profile} params krib/cluster-admin-conf > admin.conf"
+}
+output "kubectl" {
+  value = "kubectl --kubeconfig admin.conf get nodes"
 }
