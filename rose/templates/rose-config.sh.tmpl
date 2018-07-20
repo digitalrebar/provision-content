@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Rebar OpenStack Environment (ROSE) Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+echo "Configure OpenStack controller and compute..."
+
+{{if .ParamExists "rose/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "rose/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "rose/cluster-profile") 7200}}
+{{else -}}
+echo "Missing rose/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+echo "creating user: {{.Param "rose/user"}}"
+EXISTS=$(getent passwd {{.Param "rose/user"}} || true)
+if [ -z "$EXISTS" ]; then
+  echo "  creating and elevating {{.Param "rose/user"}} user"
+  groupadd {{.Param "rose/user"}}
+  useradd -g {{.Param "rose/user"}} -s /bin/bash -d /opt/{{.Param "rose/user"}} -m {{.Param "rose/user"}}
+  echo "{{.Param "rose/user"}} ALL=(ALL) NOPASSWD: ALL" | tee /etc/sudoers.d/{{.Param "rose/user"}}
+else
+  echo "  {{.Param "rose/user"}} user exists, skipping create"
+fi
+su - {{.Param "rose/user"}}
+echo "user {{.Param "rose/user"}} ready"
+
+echo "installing code into devstack"
+STACK_DIR="/opt/{{.Param "rose/user"}}/devstack"
+if [ -d "$STACK_DIR" ]; then
+  echo "  skipping {{.Param "rose/user" -}} user create and git clone"
+else
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"cloud\"}}" | jq .Meta
+
+  echo "  cloning {{.Param "rose/source" -}}"
+  install git
+  git clone {{.Param "rose/source"}} $STACK_DIR
+fi
+
+cd $STACK_DIR
+echo "checking out {{.Param "rose/branch"}}"
+git checkout {{.Param "rose/branch"}}
+
+rm $STACK_DIR/local.conf || true
+{{range $index, $controller := .Param "rose/cluster-controllers"}}
+if [[ "$RS_UUID" = "{{$controller.Uuid}}" ]] ; then
+  echo "!!! I AM THE CONTROLLER !!!"
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"cloud\"}}" | jq .Meta
+  mv /tmp/controller.local.conf $STACK_DIR/local.conf
+else
+  echo "... I AM A COMPUTE NODE ..."
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yelow\", \"icon\": \"cloud upload\"}}" | jq .Meta
+  mv /tmp/compute.local.conf $STACK_DIR/local.conf
+  WAIT=$(get_param "rose/start-computes")
+  while [ "$WAIT" = "false" ]; do
+    echo "waiting 10 seconds for controller to set rose/start-computes to true...(last check: $WAIT)"
+    sleep 10
+    WAIT=$(get_param "rose/start-computes")
+  done
+  echo "Let's go...controller ready (rose/start-computes = true)!"
+fi
+{{end}}
+
+echo "REVIEW CONF FILE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+cat $STACK_DIR/local.conf
+echo "REVIEW CONF FILE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+
+echo "Staring install..."
+su - {{.Param "rose/user"}} -c "cd ${STACK_DIR} && ./stack.sh"
+
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\"}}" | jq .Meta
+
+{{range $index, $controller := .Param "rose/cluster-controllers"}}
+if [[ "$RS_UUID" = "{{$controller.Uuid}}" ]] ; then
+  echo "Finished!  Release Compute Nodes"
+  drpcli -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param krib/start-computes to true
+fi
+{{end}}
+
+
+echo "Finished successfully"
+exit 0

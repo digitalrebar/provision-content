@@ -1,0 +1,34 @@
+---
+Name: custom-ipxe
+Description: "Boot system using a custom ipxe config file"
+OS:
+  Name: "ipxe"
+Kernel: ../ipxe.pxe
+Templates:
+  - Name: "pxelinux"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+    Contents: |
+      DEFAULT discovery
+      PROMPT 0
+      TIMEOUT 10
+      LABEL discovery
+        KERNEL ipxe.pxe
+  - Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+    Contents: |
+      DEFAULT discovery
+      PROMPT 0
+      TIMEOUT 10
+      LABEL discovery
+        KERNEL ipxe.pxe
+  - Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+    Contents: |
+      #!ipxe
+      {{.Param "custom-ipxe"}}
+  - Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+    Contents: |
+      #!ipxe
+      {{.Param "custom-ipxe"}}

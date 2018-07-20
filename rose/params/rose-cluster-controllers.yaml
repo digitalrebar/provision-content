@@ -1,0 +1,23 @@
+---
+Name: "rose/cluster-controllers"
+Description: "Controllers of OpenStack cluster"
+Documentation: |
+  For now, only 1 controller is allowed, but keeping format generic for future
+  List of the machine(s) assigned as cluster controller(s).
+  If not set, the automation will elect leaders and populate the list automatically.
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    properties:
+      Address:
+        type: string
+      Name:
+        type: string
+      Uuid:
+        type: string
+Meta:
+  color: "blue"
+  icon: "cloud"
+  title: "Community Content"
+  render: "machines-map"
