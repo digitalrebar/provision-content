@@ -1,12 +1,3 @@
-variable "api_url" {
-  default = "https://127.0.0.1:8092"
-}
-variable "api_user" {
-  default = "rocketskates"
-}
-variable "api_password" {
-  default = "r0cketsk8ts"
-}
 variable "cluster_profile" {
   default = "krib-auto"
 }
@@ -24,12 +15,6 @@ variable "pool" {
 }
 variable "packet_plan" {
   default = "baremetal_0"
-}
-
-provider "drp" {
-  api_user     = "${var.api_user}"
-  api_password = "${var.api_password}"
-  api_url      = "${var.api_url}"
 }
 
 resource "drp_profile" "krib-auto" {
@@ -98,8 +83,5 @@ resource "drp_machine" "krib-machines" {
 }
 
 output "admin.conf" {
-  value = "drpcli -E ${var.api_url} profiles get ${var.cluster_profile} params krib/cluster-admin-conf > admin.conf"
-}
-output "kubectl" {
-  value = "kubectl --kubeconfig admin.conf get nodes"
+  value = "export KUBECONFIG=admin.conf && drpcli profiles get ${var.cluster_profile} params krib/cluster-admin-conf > admin.conf"
 }
