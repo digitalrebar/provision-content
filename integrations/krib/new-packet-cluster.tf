@@ -1,3 +1,6 @@
+variable "machine_prefix" {
+  default = "krib"
+}
 variable "cluster_profile" {
   default = "krib-auto"
 }
@@ -52,7 +55,7 @@ resource "drp_raw_machine" "packet-machines" {
   count = "${var.cluster_count}"
   Description = "Terraform Added RAW"
   Workflow = "discover"
-  Name = "krib-${count.index}.terraform.local"
+  Name = "${var.machine_prefix}-${count.index}.terraform.local"
   Params {
   	"machine-plugin" = "packet-ipmi"
   	"packet/plan" ="${var.packet_plan}"
