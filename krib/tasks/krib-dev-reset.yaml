@@ -38,9 +38,19 @@ Templates:
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
       sleep 1
-      exit 1
+      {{if .ParamExists "unsafe/rs-password"}}
+        PASSWORD="{{.Param "unsafe/rs-password"}}"
+      {{else}}
+        PASSWORD="r0cketsk8ts"
+      {{end}}
+      HOLD_TOKEN=$RS_TOKEN
+      unset RS_TOKEN
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
+      RS_TOKEN=$HOLD_TOKEN
     else
-      echo "  No CA root detected"
+      echo "  No CA root detected - no reset required"
     fi
     echo "done CA params reset"
   Name: CA clear
