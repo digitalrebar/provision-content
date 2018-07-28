@@ -20,9 +20,9 @@ Meta:
 OS:
   Codename: "Bionic Beaver"
   Family: ubuntu
-  IsoFile: ubuntu-18.04-server-amd64.iso
-  IsoSha256: "a7f5c7b0cdd0e9560d78f1e47660e066353bb8a79eb78d1fc3f4ea62a07e6cbc"
-  IsoUrl: http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04-server-amd64.iso
+  IsoFile: ubuntu-18.04.1-server-amd64.iso
+  IsoSha256: "a5b0ea5918f850124f3d72ef4b85bda82f0fcd02ec721be19c1a6952791c8ee8"
+  IsoUrl: http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.1-server-amd64.iso
   Name: ubuntu-18.04
   Version: "18.04"
 OnlyUnknown: false
