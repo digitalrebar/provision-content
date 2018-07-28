@@ -136,6 +136,7 @@ do
 done
 
 # Fix kubelet to use the vip/lb
+{{if .ParamExists "krib/cluster-master-vip" -}}
 MASTER_VIP={{.Param "krib/cluster-master-vip"}}
 MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 API_PORT=6443
@@ -144,6 +145,10 @@ if [[ $MASTER_COUNT -gt 1 ]] ; then
 fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet
+{{else -}}
+echo "Missing required krib/cluster-master-vip"
+exit 1
+{{end -}}
 
 # Clean up
 rm -f /tmp/kubeadm.cfg

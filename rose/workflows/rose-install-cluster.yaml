@@ -1,0 +1,16 @@
+Description: "Build OpenStack via DevStack Cluster"
+Errors: []
+Meta:
+  color: "yellow"
+  icon: "cloud"
+  title: "OpenStack on Ubuntu 18-04 cluster"
+Name: "rose-install-cluster"
+ReadOnly: false
+Stages:
+  - "ubuntu-18.04-install"
+  - "runner-service"
+  - "finish-install"
+  - "ssh-access"
+  - "packet-ssh-keys"
+  - "rose-config"
+  - "complete"

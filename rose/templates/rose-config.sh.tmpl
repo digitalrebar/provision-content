@@ -68,7 +68,10 @@ echo "REVIEW CONF FILE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 cat $STACK_DIR/local.conf
 echo "REVIEW CONF FILE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 
-echo "Staring install..."
+echo "Staring install...pass #1 - always fails at Rabbit"
+su - {{.Param "rose/user"}} -c "cd ${STACK_DIR} && ./stack.sh || true"
+
+echo "Staring install...pass #2"
 su - {{.Param "rose/user"}} -c "cd ${STACK_DIR} && ./stack.sh"
 
 drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\"}}" | jq .Meta
@@ -76,7 +79,7 @@ drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\"}}" | jq .Meta
 {{range $index, $controller := .Param "rose/cluster-controllers"}}
 if [[ "$RS_UUID" = "{{$controller.Uuid}}" ]] ; then
   echo "Finished!  Release Compute Nodes"
-  drpcli -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param krib/start-computes to true
+  drpcli -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param rose/start-computes to true
 fi
 {{end}}
 
