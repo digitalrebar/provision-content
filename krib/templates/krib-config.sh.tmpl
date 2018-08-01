@@ -41,8 +41,16 @@ if [[ $MASTER_INDEX != notme ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
   if [[ $MASTER_INDEX == 0 ]] ; then
+    
+{{ if eq (.Param "krib/kubeadm-service-dns-domain") true -}}
+    DOM="{{ .Param "krib/kubeadm-service-dns-domain" }}"
+{{ end -}}
+{{ if eq (.Param "krib/kubeadm-service-cidr") true -}}
+    CIDR="{{ .Param "krib/kubeadm-service-cidr" }}"
+{{ end -}}
+    COREDNS="--feature-gates CoreDNS=true $DOM $CIDR"
 
-    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
+    kubeadm init ${COREDNS} --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
 
     tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
@@ -51,11 +59,20 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     JOIN_CMD=$(cat /tmp/kubeadm.init.log | grep "kubeadm join")
 
-    # echo "Starting calico networking..."
-    # kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+    NET_TYPE={{ .Param "krib/set-networking-provider" }}
 
-    echo "Starting flannel networking..."
-    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
+    # O.M.G. we need to do better than this with the YAML config files.... 
+    case $NET_TYPE in 
+      calico) 
+        echo "Starting calico networking..."
+        kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+        ;;
+
+      flannel)
+        echo "Starting flannel networking..."
+        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
+        ;;
+    esac
 
   else
     wait_for_variable $KRIB_MASTER_CERTS_PARAM

@@ -1,0 +1,17 @@
+---
+Name: "krib/kubeadm-service-dns-domain"
+Description: "Define the cluster Service DNS Domain via 'kubeadm init' process"
+Documentation: |
+  Allows operators to specify the Service DNS Domain that will be
+  used by CoreDNS during the 'kubeadm init' process of the cluster
+  creation.
+
+  By default we do not override the setting from kubeadm default
+  behavior.
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
