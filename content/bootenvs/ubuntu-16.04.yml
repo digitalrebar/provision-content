@@ -8,9 +8,9 @@ Documentation: |
 OS:
   Name: "ubuntu-16.04"
   Family: "ubuntu"
-  IsoFile: "ubuntu-16.04.4-server-amd64.iso"
-  IsoSha256: "0a03608988cfd2e50567990dc8be96fb3c501e198e2e6efcb846d89efc7b89f2"
-  IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.4-server-amd64.iso"
+  IsoFile: "ubuntu-16.04.5-server-amd64.iso"
+  IsoSha256: "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8"
+  IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.5-server-amd64.iso"
   Version: "16.04"
 Initrds:
   - "install/netboot/ubuntu-installer/amd64/initrd.gz"
