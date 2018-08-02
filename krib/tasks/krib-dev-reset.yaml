@@ -8,6 +8,7 @@ RequiredParams:
   - etcd/cluster-profile
 OptionalParams:
   - krib/cluster-is-production
+  - unsafe/rs-password
 Templates:
 - Contents: |-
     #!/bin/bash
