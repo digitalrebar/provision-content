@@ -42,16 +42,14 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
   if [[ $MASTER_INDEX == 0 ]] ; then
     
-{{ if eq (.Param "krib/kubeadm-service-dns-domain") true -}}
-    DOM="{{ .Param "krib/kubeadm-service-dns-domain" }}"
-{{ end -}}
-{{ if eq (.Param "krib/kubeadm-service-cidr") true -}}
-    CIDR="{{ .Param "krib/kubeadm-service-cidr" }}"
-{{ end -}}
-    COREDNS="--feature-gates CoreDNS=true $DOM $CIDR"
+    echo "Starting Master kubeadm init process."
+    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
 
-    kubeadm init ${COREDNS} --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
+    # example of appending a featureGate to cluster after initial
+    # init - example does CoreDNS (if it's not defined in /tmp/kubeadm.cfg):
+    # kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
 
+    echo "Building certificate file."
     tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
@@ -61,7 +59,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     NET_TYPE={{ .Param "krib/set-networking-provider" }}
 
-    # O.M.G. we need to do better than this with the YAML config files.... 
+    # we need to do better than this with the YAML config files.... 
     case $NET_TYPE in 
       calico) 
         echo "Starting calico networking..."
@@ -120,6 +118,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   if [[ $MASTER_INDEX == 0 ]] ; then
+    echo "Recording 'kubeadm' bootstrap config ..."
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
+
     echo "Recording cluster admin config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to "$(cat /etc/kubernetes/admin.conf)"
 
@@ -156,9 +157,9 @@ done
 {{if .ParamExists "krib/cluster-master-vip" -}}
 MASTER_VIP={{.Param "krib/cluster-master-vip"}}
 MASTER_COUNT={{.Param "krib/cluster-master-count"}}
-API_PORT=6443
+API_PORT={{.Param "krib/cluster-api-port"}}
 if [[ $MASTER_COUNT -gt 1 ]] ; then
-  API_PORT=8443
+  API_PORT={{.Param "krib/cluster-api-vip-port"}}
 fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet

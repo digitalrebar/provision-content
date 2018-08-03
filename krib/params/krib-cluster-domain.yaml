@@ -1,0 +1,15 @@
+---
+Name: "krib/cluster-domain"
+Description: "Define the cluster Domain"
+Documentation: |
+  Defines the cluster domain for kublets to operate
+  in by default. 
+  Default is 'cluster.local'.
+
+Schema:
+  type: "string"
+  default: "cluster.local"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

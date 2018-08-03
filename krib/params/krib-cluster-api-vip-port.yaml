@@ -1,0 +1,18 @@
+---
+Name: "krib/cluster-api-vip-port"
+Description: "VIP API port for multi-master clusters (default 8443)"
+Documentation: |
+  The VIP API port to use for multi-master clusters. Each
+  master will bind to 'krib/cluster-api-port' (6443 by default),
+  but HA services for the API will be services by this port 
+  number.
+
+  Defaults to '8443'.
+
+Schema:
+  type: "number"
+  default: 8443
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

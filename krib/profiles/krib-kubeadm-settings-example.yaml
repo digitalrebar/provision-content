@@ -1,0 +1,55 @@
+---
+Name: "krib-kubeadm-settings-example"
+Description: "Example 'kubeadm' config file customizations settings."
+Documentatioin: |
+  This Profile contains a set of Params that can be used to customize
+  a KRIB Kubernetes cluster.  These values are used in the 'kubeadm.cfg'
+  file that is used by kubeadm to build the Kubernetes cluster.
+
+  This exists purely for ease of use.  If you wish to customize your
+  cluster deployment, clone this Profile and add it to your Machines
+  that will be in the Kubernetes cluster.  This does not need to be
+  the same Profile as used by 'etcd/cluster-profile' or 
+  'krib/cluster-profile'.  
+
+  For operational seaparation of duties (config separated from running
+  cluster state), you might choose to keep them separate.
+
+  Please see each individual Param Documentation for details on what
+  they do.  IT MAY BE NECESSARY to delete Params that you do not want
+  to override.  If they are defined here with a default or temporary
+  value, but you do not want to change the KRIB deaults behavior,
+  you must delete the Param from the Profile before use. 
+
+  An example - 'krib/cluster-master-vip' - will be set by default in 
+  Single Master setups to that single master.  No VIP is necessarily
+  necessary in that case.  The default behavior only works correcly
+  if this value is unset - so delete it. 
+
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Digital Rebar Community Content"
+Params:
+  etcd/client-port: 2379
+  etcd/servers:
+    - server-01
+    - server-02
+    - server-03
+  docker/working-dir: "/docker"
+  krib/cluster-api-port: 6443
+  krib/cluster-api-vip-port: 8443
+  krib/cluster-bootstrap-token: "fedcba.fedcba9876543210"
+  krib/cluster-bootstrap-ttl: "96h0m0s"
+  krib/cluster-dns: "10.96.0.10"
+  krib/cluster-domain: "cluster.local"
+  krib/cluster-image-repository: "k8s.gcr.io"
+  krib/cluster-kubernetes-version: "v1.11.1"
+  krib/cluster-master-vip: "set_to_vip_value1"
+  krib/cluster-name: "tiger"
+  krib/cluster-pod-subnet: "10.112.0.0/12"
+  krib/cluster-service-dns-domain: "unspecified.domain.local"
+  krib/cluster-service-subnet: "10.96.0.0/12"
+
+ReadOnly: true
+

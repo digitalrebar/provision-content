@@ -1,5 +1,5 @@
 ---
-Name: "krib/kubeadm-service-dns-domain"
+Name: "krib/cluster-service-dns-domain"
 Description: "Define the cluster Service DNS Domain via 'kubeadm init' process"
 Documentation: |
   Allows operators to specify the Service DNS Domain that will be

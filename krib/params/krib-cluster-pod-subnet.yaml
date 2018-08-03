@@ -1,0 +1,15 @@
+---
+Name: "krib/cluster-pod-subnet"
+Description: "Define the cluster podSugnetvia 'kubeadm init' process"
+Documentation: |
+  Allows operators to specify the podSubnet that will be
+  used by CoreDNS during the 'kubeadm init' process of the cluster
+  creation.
+
+Schema:
+  type: "string"
+  default: "10.112.0.0/12"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
