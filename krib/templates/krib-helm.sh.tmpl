@@ -33,6 +33,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
       exit 1
     fi
 
+    echo "Getting Latest Repos"
+    helm repo update
+
     echo "Running Helm Install for all helm/charts"
     {{range $index, $chart := .Param "helm/charts"}}
       echo "...installing {{$chart}}"

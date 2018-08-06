@@ -10,10 +10,12 @@ OptionalParams:
   - helm/charts
   - helm/version
 Templates:
+  - ID: "krib-helm.cfg.tmpl"
+    Name: "Service Account for Tiller"
+    Path: "tiller-rbac.yaml"
   - ID: "krib-helm-init.sh.tmpl"
     Name: "Bringing up Helm and Tiller on Master"
     Path: ""
-Templates:
   - ID: "krib-helm.sh.tmpl"
     Name: "Running Helm Charts on Master"
     Path: ""

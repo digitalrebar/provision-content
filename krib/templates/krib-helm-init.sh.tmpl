@@ -30,6 +30,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     set +e
     if [[ ! -z $(kubectl get pods --namespace kube-system | grep tiller) ]] ; then
       echo "Tiller already installed - exiting"
+      helm version
       exit 0
     fi
     set -e
@@ -39,7 +40,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
     chmod 700 get_helm.sh
     ./get_helm.sh -v {{.Param "helm/version"}}
 
-    helm init
+    echo "Create tiller service account"
+    kubectl create -f tiller-rbac.yaml
+
+    echo "Helm initialize"
+    helm init --service-account tiller
 
     set +e
     echo "Wait until Tiller is running"
