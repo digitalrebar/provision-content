@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+echo "Configure helm on the master (skip for minions)..."
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing krib/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+
+    echo "I am the elected leader - install helm and helm init"
+
+    # help requires the admin config
+    export KUBECONFIG="/etc/kubernetes/admin.conf"
+    set +e
+    if [[ ! -z $(kubectl get pods --namespace kube-system | grep tiller) ]] ; then
+      echo "Tiller already installed - exiting"
+      exit 0
+    fi
+    set -e
+
+    # todo: provide more options for installing helm
+    curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
+    chmod 700 get_helm.sh
+    ./get_helm.sh -v {{.Param "helm/version"}}
+
+    helm init
+
+    set +e
+    echo "Wait until Tiller is running"
+    CNT=$(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller)
+    ESCAPE=0
+    while [[ -z $CNT && $ESCAPE -lt 20 ]] ; do
+      echo "Waiting for Tiller...$(kubectl get pods --namespace kube-system | grep tiller)"
+      sleep 5
+      CNT=$(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller)
+      ((ESCAPE=ESCAPE+1))
+    done
+    set -e
+
+    echo "Check versions....(includes 5 second wait for Tiller initialize)"
+    # we need some extra time for Tiller to actually initialize
+    sleep 5
+    helm version
+    rm ./get_helm.sh
+
+  else
+
+    echo "I was not the leader, skipping helm init"
+
+  fi
+
+else
+
+  echo "I am a worker - no helm actions"
+
+fi
+
+echo "Finished successfully"
+exit 0
+
