@@ -1,6 +1,16 @@
 ---
 Name: "krib-helm"
 Description: "KRIB install helm and tiller on the cluster"
+Documentation: |
+  Installs and runs Helm Charts after a cluster has been constructed.
+  This stage is idempotent and can be run multiple times.
+  This allows operators to create workflows with multiple instances of this stage.
+  The charts to run are determined by the helm/charts parameter.
+
+  Due to helm downloads, this stage requires internet access.
+
+  This stage also creats a tiller service account.  For advanced security, this
+  configuration may not be desirable.
 RunnerWait: true
 Tasks:
   - "krib-helm"
