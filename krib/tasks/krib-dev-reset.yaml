@@ -8,6 +8,7 @@ RequiredParams:
   - etcd/cluster-profile
 OptionalParams:
   - krib/cluster-is-production
+  - unsafe/rs-password
 Templates:
 - Contents: |-
     #!/bin/bash
@@ -47,7 +48,7 @@ Templates:
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
-      RS_TOKEN=$HOLD_TOKEN
+      export RS_TOKEN=$HOLD_TOKEN
     else
       echo "  No CA root detected - no reset required"
     fi

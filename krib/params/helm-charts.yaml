@@ -1,0 +1,15 @@
+---
+Name: "helm/charts"
+Description: "List charts to run on cluster"
+Documentation: |
+  Allows operators to install Charts using Helm stage
+  For example, using ["stable/mysql"] will install mysql.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "map"
+  title: "Community Content"

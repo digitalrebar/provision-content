@@ -1,0 +1,10 @@
+---
+Name: "krib-helm"
+Description: "KRIB install helm and tiller on the cluster"
+RunnerWait: true
+Tasks:
+  - "krib-helm"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+echo "Run helm install on the master (skip for minions)..."
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing krib/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+
+    echo "I am the elected leader - I can run helm for the cluster"
+
+    # help requires the admin config
+    export KUBECONFIG="/etc/kubernetes/admin.conf"
+    echo "Making sure Tiller is running"
+    if [[ -z $(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller) ]] ; then
+      echo "Tiller NOT running - something went wrong with helm init"
+      exit 1
+    fi
+
+    echo "Getting Latest Repos"
+    helm repo update
+
+    echo "Running Helm Install for all helm/charts"
+    {{range $index, $chart := .Param "helm/charts"}}
+      echo "...installing {{$chart}}"
+      helm install {{$chart}}
+    {{else}}
+      echo "No charts included in helm/charts to install"
+    {{end}}
+
+  else
+
+    echo "I was not the leader, skipping helm install"
+
+  fi
+
+else
+
+  echo "I am a worker - no helm actions"
+
+fi
+
+echo "Finished successfully"
+exit 0
+

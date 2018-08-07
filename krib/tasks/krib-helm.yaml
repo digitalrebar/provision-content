@@ -1,0 +1,26 @@
+---
+Description: "A task to install Helm and Tiller"
+Name: "krib-helm"
+Documentation: |
+  Installs Helm and runs helm init (which installs Tiller)
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set
+RequiredParams:
+  - krib/cluster-profile
+OptionalParams:
+  - helm/charts
+  - helm/version
+Templates:
+  - ID: "krib-helm.cfg.tmpl"
+    Name: "Service Account for Tiller"
+    Path: "tiller-rbac.yaml"
+  - ID: "krib-helm-init.sh.tmpl"
+    Name: "Bringing up Helm and Tiller on Master"
+    Path: ""
+  - ID: "krib-helm.sh.tmpl"
+    Name: "Running Helm Charts on Master"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
