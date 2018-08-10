@@ -1,0 +1,121 @@
+---
+Name: "erase-hard-disk-set"
+Description: |
+  Erases any data on the specified hard disk that might confuse the OS install
+  process.  This includes LVM metadata, partition tables, software RAID signatures,
+  and the first and last megabyte of any partitions and disks.
+Meta:
+  feature-flags: "sane-exit-codes"
+  icon: "erase"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+RequiredParams:
+  - zero-hard-disks-for-os-install
+OptionalParams:
+  - erase-hard-disk-set
+Templates:
+  - Name: "erase-disk"
+    Contents: |
+      #!/bin/bash
+      . helper
+
+      # Clear functional data - assumes /dev/sda or the like
+      function clear_disk() {
+          local disk
+          disk=$1
+          diskbase=${disk/\/dev\/}
+
+          # Deactivate all known lvm and dm devices first, unmounting filesystems as needed.
+          echo "Deactivating all known volume groups on $disk"
+          blkdeactivate -u -d force,retry -l retry,wholevg $disk || :
+          # Nuke it all.
+          declare vg pv maj min blocks name
+          # Make sure that the kernel knows about all the partitions
+          echo "Probing for all partitions on $disk.  Failures are OK."
+          partprobe "$disk" || :
+
+          # Zap any volume groups that may be lying around.
+          vgscan --ignorelockingfailure -P
+          while read vg; do
+              echo "Forcibly removing volume group $vg"
+              vgremove -ff -y "$vg" || :
+          done < <(vgs --noheadings -o vg_name,pv_name | grep $disk | awk '{ print $1 }' | sort -u)
+
+          # Wipe out any LVM metadata that the kernel may have detected.
+          pvscan --ignorelockingfailure
+          while read pv; do
+              echo "Forcibly removing physical volume $pv"
+              pvremove -ff -y "$pv" || :
+          done < <(pvs --noheadings -o pv_name | grep $disk)
+
+          # Now zap any partitions along with any RAID metadata that may exist.
+          while read maj min blocks name; do
+              [[ -b /dev/$name && -w /dev/$name && $name != name ]] || continue
+              echo "Forcibly removing any RAID metadata on /dev/$name. Failures are OK if readonly"
+              mdadm --misc --zero-superblock --force /dev/$name || :
+              if (( blocks >= 4096)); then
+                  echo "Zeroing the first and last 2 megs of /dev/$name. Failures are OK if readonly"
+                  dd "if=/dev/zero" "of=/dev/$name" "bs=512" "count=4096" || :
+                  dd "if=/dev/zero" "of=/dev/$name" "bs=512" "count=4096" "seek=$(($blocks - 4096))" || :
+              else
+                  echo "Zeroing small device /dev/$name.  Failures are OK if readonly"
+                  dd "if=/dev/zero" "of=/dev/$name" "bs=512" "count=$blocks" || :
+              fi
+          done < <(tac /proc/partitions | grep $diskbase)
+      }
+
+      # Wipe disk assumes /dev/sda or the like
+      function wipe_disk() {
+          local disk bd dev spinner want_zero skip_zero
+          disk=$1
+          bd=/sys/block/${disk/\/dev\/}
+          dev="/dev/${bd##*/}"
+
+          [[ -b $dev ]] || continue
+          grep -q 'devices/virtual' < <(readlink "$bd") && continue
+          spinner=$(cat "$bd/queue/rotational")
+          want_zero="{{.Param "zero-hard-disks-for-os-install"}}"
+          skip_zero=$(cat "$bd/queue/discard_zeroes_data")
+          if [[ $want_zero = true && $skip_zero != 1 && $spinner = 1 ]]; then
+              # blkdiscard -z does the same job as dd if=/dev/zero,
+              # except the kernel does all the work and it uses
+              # the SCSI command WRITE_SAME if the device supports
+              # it, which can greatly speed up the zeroing process.
+              echo "Zeroing $dev"
+              blkdiscard -z "$dev" || :
+          fi
+          # if discard_max_bytes is zero, then blkdiscard will not work anyways.
+          if [[ $(cat "$bd/queue/discard_max_bytes") != 0 ]]; then
+              # Try secure erase first, then regular discard.
+              echo "Attempting to secure discard $dev."
+              echo "This may fail if the device does not support secure discard."
+              if blkdiscard -s "$dev"; then
+                  echo "Secure discard of $dev finished"
+              else
+                  echo "Sercure discard of $dev failed, attempting normal discard"
+                  if blkdiscard "$dev"; then
+                      echo "Normal discard of $dev finished"
+                  else
+                      echo "Normal discard of $dev failed"
+                  fi
+              fi
+          fi
+      }
+
+      {{if .ParamExists "erase-hard-disk-set" }}
+      disks="{{.Param "erase-hard-disk-set"}}"
+      # fill out disks
+      for bd in $disks; do
+          clear_disk $bd
+      done
+      # For paranoia's sake, try to discard all blocks on the remaining
+      # top-level block devices in parallel.
+      for bd in $disks; do
+        ( wipe_disk $bd ) &
+      done
+      wait
+      partprobe
+      {{else}}
+      echo "No disks to erase. Skipping..."
+      {{end}}
+      exit 0
