@@ -9,8 +9,8 @@ Documentatioin: |
   This exists purely for ease of use.  If you wish to customize your
   cluster deployment, clone this Profile and add it to your Machines
   that will be in the Kubernetes cluster.  This does not need to be
-  the same Profile as used by 'etcd/cluster-profile' or 
-  'krib/cluster-profile'.  
+  the same Profile as used by 'etcd/cluster-profile' or
+  'krib/cluster-profile'.
 
   For operational seaparation of duties (config separated from running
   cluster state), you might choose to keep them separate.
@@ -19,12 +19,12 @@ Documentatioin: |
   they do.  IT MAY BE NECESSARY to delete Params that you do not want
   to override.  If they are defined here with a default or temporary
   value, but you do not want to change the KRIB deaults behavior,
-  you must delete the Param from the Profile before use. 
+  you must delete the Param from the Profile before use.
 
-  An example - 'krib/cluster-master-vip' - will be set by default in 
+  An example - 'krib/cluster-master-vip' - will be set by default in
   Single Master setups to that single master.  No VIP is necessarily
   necessary in that case.  The default behavior only works correcly
-  if this value is unset - so delete it. 
+  if this value is unset - so delete it.
 
 Meta:
   color: "blue"

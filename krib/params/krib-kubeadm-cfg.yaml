@@ -3,9 +3,9 @@ Name: "krib/kubeadm-cfg"
 Description: "The 'kubeadm.cfg' bootstrap config will be recorded on this param."
 Documentation: |
   The KRIB config task will record the bootstrap configuration used
-  by 'kubeadm' to build the Kubernetes cluster.  This provides 
+  by 'kubeadm' to build the Kubernetes cluster.  This provides
   for reference going forward on the cluster configurations when it
-  was created. 
+  was created.
 
 Schema:
   type: "string"

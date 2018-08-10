@@ -3,7 +3,7 @@ Name: "krib/cluster-domain"
 Description: "Define the cluster Domain"
 Documentation: |
   Defines the cluster domain for kublets to operate
-  in by default. 
+  in by default.
   Default is 'cluster.local'.
 
 Schema:

@@ -5,9 +5,9 @@ Documentation: |
   Allows operators to specify the DNS address for the cluster
   name resolution services.
 
-  Set by default to "10.96.0.10".  
+  Set by default to "10.96.0.10".
 
-  WARNING: This IP Address must be in the same range as the 
+  WARNING: This IP Address must be in the same range as the
            "krib/cluster-service-cidr" specified addresses.
 
 Schema:

@@ -71,7 +71,7 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done etcd params reset"
-  Name: etcd-reset  
+  Name: etcd-reset
 - Contents: |-
     #!/bin/bash
     # Reset KRIB params

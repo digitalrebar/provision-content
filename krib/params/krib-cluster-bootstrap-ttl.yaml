@@ -2,7 +2,7 @@
 Name: "krib/cluster-bootstrap-ttl"
 Description: "Define the cluster BootStrap Token TTL value"
 Documentation: |
-  How long BootStrap tokens for the cluster should live. 
+  How long BootStrap tokens for the cluster should live.
   Default is '24h0m0s'.
 
   Must use a format similar to the default.

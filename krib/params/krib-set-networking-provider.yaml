@@ -4,7 +4,7 @@ Description: "Switch between supported network provider types (eg 'flannel', 'ca
 Documentation: |
   This Param can be used to specify either 'flannel' or 'calico'
   network providers for the Kubernetes cluster.  This is completed
-  using the provider specific YAML definition file. 
+  using the provider specific YAML definition file.
 
   The only supported providers are:
 

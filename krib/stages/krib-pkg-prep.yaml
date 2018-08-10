@@ -4,7 +4,7 @@ Description: "Helper stage to install prereqs prior to Kubernetes install."
 Documentation: |
   Simple helper stage to install prereq packages prior to doing
   the kubernetes package installation.  This just helps us get a
-  Live Boot set of hosts (eg Sledgehammer Discovered) prepped a 
+  Live Boot set of hosts (eg Sledgehammer Discovered) prepped a
   little faster with packages in some use cases.
 Tasks:
   - "krib-pkg-prep"

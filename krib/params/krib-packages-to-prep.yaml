@@ -5,9 +5,9 @@ Documentation: |
   List of packages to install for preparation of KRIB install
   process.  Designed to be used in some processes where pre-prep
   of the packages will accelerate the KRIB install process.  More
-  specifically, in Sledgehammer Discover for Live Boot cluster 
+  specifically, in Sledgehammer Discover for Live Boot cluster
   install, the 'docker' install requires several minutes to run
-  through selinux context changes. 
+  through selinux context changes.
 
   Simple space separated String list.
 
