@@ -63,7 +63,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     JOIN_CMD=$(cat /tmp/kubeadm.init.log | grep "kubeadm join")
 
-    NET_TYPE={{ .Param "krib/set-networking-provider" }}
+    NET_TYPE={{ .Param "krib/networking-provider" }}
 
     # we need to do better than this with the YAML config files....
     case $NET_TYPE in
