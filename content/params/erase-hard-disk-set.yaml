@@ -1,0 +1,15 @@
+---
+Name: "erase-hard-disk-set"
+Description: "Defines the set of disks to erase"
+Documentation: |
+  This string defines the set of disks to erase.  Space separated dev names.
+
+  e.g. "/dev/sda /dev/sdb"
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "disk outline"
+  color: "blue"
+  title: "Digital Rebar Community Content"
