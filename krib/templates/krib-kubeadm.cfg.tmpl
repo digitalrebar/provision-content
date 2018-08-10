@@ -29,14 +29,15 @@ certificatesDir: /etc/kubernetes/pki
 clusterName: {{.Param "krib/cluster-name"}}
 imageRepository: {{.Param "krib/cluster-image-repository"}}
 etcd:
-  endpoints:
+  external:
+    caFile: /etc/kubernetes/pki/etcd/server-ca.pem
+    certFile: /etc/kubernetes/pki/etcd/client.pem
+    keyFile: /etc/kubernetes/pki/etcd/client-key.pem
+    endpoints:
 {{$port := .Param "etcd/client-port"-}}
 {{range $elem := .Param "etcd/servers"-}}
-  - https://{{$elem.Address}}:{{$port}}
+    - https://{{$elem.Address}}:{{$port}}
 {{end-}}
-  caFile: /etc/kubernetes/pki/etcd/server-ca.pem
-  certFile: /etc/kubernetes/pki/etcd/client.pem
-  keyFile: /etc/kubernetes/pki/etcd/client-key.pem
 kubeProxy:
   config:
     bindAddress: 0.0.0.0

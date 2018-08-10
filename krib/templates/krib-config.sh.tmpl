@@ -41,8 +41,14 @@ if [[ $MASTER_INDEX != notme ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
   if [[ $MASTER_INDEX == 0 ]] ; then
-    
+
     echo "Starting Master kubeadm init process."
+
+    # generate a cluster bootstrap token, then store it on the Param
+    # for the kubeadm.cfg file
+    TOKEN=$(kubeadm token generate)
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_BOOTSTRAP_TOKEN to "$TOKEN"
+
     kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
 
     # example of appending a featureGate to cluster after initial
@@ -59,9 +65,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     NET_TYPE={{ .Param "krib/set-networking-provider" }}
 
-    # we need to do better than this with the YAML config files.... 
-    case $NET_TYPE in 
-      calico) 
+    # we need to do better than this with the YAML config files....
+    case $NET_TYPE in
+      calico)
         echo "Starting calico networking..."
         kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
         ;;
