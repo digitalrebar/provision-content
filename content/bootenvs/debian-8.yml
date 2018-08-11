@@ -5,9 +5,9 @@ OS:
   Name: "debian-8"
   Family: "debian"
   IsoFile: "debian-8-amd64-mini.iso"
-  IsoSha256: "a8f37f10aefa72e2379214bec7f2c5b472d157923680a093c0e1ac06d8b19b2d"
+  IsoSha256: "61a852072514c385d3a22005bafeb083a2da40efa816a115c4acfa682d112b2b"
   IsoUrl: "http://mirrors.kernel.org/debian/dists/jessie/main/installer-amd64/current/images/netboot/mini.iso"
-  Version: "8.10"
+  Version: "8.11"
 Initrds:
   - "initrd.gz"
 Kernel: "linux"
