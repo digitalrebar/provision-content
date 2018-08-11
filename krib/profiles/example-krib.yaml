@@ -1,12 +1,16 @@
 ---
-Description: Example HA Krib Profile - Clone Me!
+Name: example-krib
+Description: Example Krib Profile - No HA - CLONE ME!
+Documentation: |
+  Example of the absolute minimum required Params for a non-HA
+  KRIB Kubernetes cluster.
+
 Meta:
   color: blue
   icon: ship
   title: Community Content
   render: krib
   reset-keeps: "krib/cluster-profile,etcd/cluster-profile"
-Name: example-ha-krib
 Params:
-  etcd/cluster-profile: example-ha-krib
-  krib/cluster-profile: example-ha-krib
+  etcd/cluster-profile: example-krib
+  krib/cluster-profile: example-krib

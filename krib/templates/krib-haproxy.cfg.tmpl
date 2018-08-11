@@ -47,7 +47,7 @@ listen stats
   stats   auth      Admin:Password
 
 frontend k8s-api
-  bind *:{{.Param "krib/cluster-api-vip-port"}}
+  bind *:{{ .Param "krib/cluster-api-vip-port" }}
   mode tcp
   option tcplog
   tcp-request inspect-delay 5s
@@ -61,7 +61,7 @@ backend k8s-api
   option tcp-check
   balance roundrobin
   default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
-{{range $index, $elem := .Param "krib/cluster-masters" -}}
-  server k8s-api-{{$index}} {{$elem.Address}}:{{.Param "krib/cluster-api-port"}} check
-{{end -}}
-
+{{ $port := .Param "krib/cluster-api-port" -}}
+{{ range $index, $elem := .Param "krib/cluster-masters" }}
+  server k8s-api-{{ $index }} {{ $elem.Address }}:{{ $port }} check
+{{ end -}}

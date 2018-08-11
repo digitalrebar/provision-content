@@ -1,43 +1,43 @@
 apiVersion: kubeadm.k8s.io/v1alpha2
 kind: MasterConfiguration
 api:
-  bindPort: {{.Param "krib/cluster-api-port"}}
-  advertiseAddress: {{.Param "krib/cluster-master-vip"}}
-  controlPlaneEndpoint: {{.Param "krib/cluster-master-vip"}}
+  bindPort: {{ .Param "krib/cluster-api-port" }}
+  advertiseAddress: {{ .Param "krib/cluster-master-vip" }}
+  controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}
 auditPolicy:
   logDir: /var/log/kubernetes/audit
   logMaxAge: 2
   path: ""
 apiServerCertSANs:
 - 127.0.0.1
-- {{.Param "krib/cluster-master-vip"}}
-{{range $elem := .Param "krib/cluster-masters" -}}
-- {{$elem.Address}}
-- {{$elem.Name}}
-{{end -}}
+- {{ .Param "krib/cluster-master-vip" }}
+{{ range $elem := .Param "krib/cluster-masters" }}
+- {{ $elem.Address }}
+- {{ $elem.Name }}
+{{ end -}}
 apiServerExtraArgs:
   endpoint-reconciler-type: "lease"
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
-  token: {{.Param "krib/cluster-bootstrap-token"}}
-  ttl: {{.Param "krib/cluster-bootstrap-ttl"}}
+  token: {{ .Param "krib/cluster-bootstrap-token" }}
+  ttl: {{ .Param "krib/cluster-bootstrap-ttl" }}
   usages:
   - signing
   - authentication
 certificatesDir: /etc/kubernetes/pki
-clusterName: {{.Param "krib/cluster-name"}}
-imageRepository: {{.Param "krib/cluster-image-repository"}}
+clusterName: {{ .Param "krib/cluster-name" }}
+imageRepository: {{ .Param "krib/cluster-image-repository" }}
 etcd:
   external:
     caFile: /etc/kubernetes/pki/etcd/server-ca.pem
     certFile: /etc/kubernetes/pki/etcd/client.pem
     keyFile: /etc/kubernetes/pki/etcd/client-key.pem
     endpoints:
-{{$port := .Param "etcd/client-port" -}}
-{{range $elem := .Param "etcd/servers" -}}
-    - https://{{$elem.Address}}:{{$port}}
-{{end -}}
+{{ $port := .Param "etcd/client-port" -}}
+{{ range $elem := .Param "etcd/servers" }}
+    - https://{{ $elem.Address }}:{{ $port }}
+{{ end -}}
 kubeProxy:
   config:
     bindAddress: 0.0.0.0
@@ -94,8 +94,8 @@ kubeletConfiguration:
     cgroupDriver: cgroupfs
     cgroupsPerQOS: true
     clusterDNS:
-    - {{.Param "krib/cluster-dns"}}
-    clusterDomain: {{.Param "krib/cluster-domain"}}
+    - {{ .Param "krib/cluster-dns" }}
+    clusterDomain: {{ .Param "krib/cluster-domain" }}
     containerLogMaxFiles: 5
     containerLogMaxSize: 10Mi
     contentType: application/vnd.kubernetes.protobuf
@@ -144,17 +144,15 @@ kubeletConfiguration:
     streamingConnectionIdleTimeout: 4h0m0s
     syncFrequency: 1m0s
     volumeStatsAggPeriod: 1m0s
-kubernetesVersion: {{.Param "krib/cluster-kubernetes-version"}}
+kubernetesVersion: {{ .Param "krib/cluster-kubernetes-version" }}
 networking:
-  dnsDomain: "{{.Param "krib/cluster-service-dns-domain"}}"
+  dnsDomain: "{{ .Param "krib/cluster-service-dns-domain" }}"
   podSubnet: "{{ .Param "krib/cluster-pod-subnet" }}"
   serviceSubnet: "{{ .Param "krib/cluster-service-subnet" }}"
 nodeRegistration:
-  criSocket: /var/run/dockershim.sock
-  name: krib-test-03.unspecified.domain.local
+  criSocket: "{{ .Param "krib/cluster-cri-socket" }}"
+  name: {{ .Machine.Name }}
   taints:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
 unifiedControlPlaneImage: ""
-featureGates:
-  CoreDNS: true

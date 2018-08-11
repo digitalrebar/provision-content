@@ -1,0 +1,14 @@
+---
+Name: "provider/flannel-config"
+Description: "Flannel config YAML to apply if using Flannel Network Provider"
+Documentation: |
+  Set this string to an HTTP or HTTPS reference for a YAML configuration to
+  use for the Flannel network provider.  If Flannel is not installed, this
+  Param will have no effect on the cluster.
+Schema:
+  type: "string"
+  default: "https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/  kube-flannel.yml"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

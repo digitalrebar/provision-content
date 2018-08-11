@@ -3,20 +3,20 @@
 set -e
 
 # Get access and who we are.
-{{template "setup.tmpl" .}}
+{{ template "setup.tmpl" .}}
 
 echo "Configure kubeadm master and minions..."
 
-CLUSTER_NAME={{.Param "krib/cluster-name"}}
-{{if .ParamExists "krib/cluster-profile" -}}
-CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
-PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
-{{else -}}
+CLUSTER_NAME={{ .Param "krib/cluster-name" }}
+{{ if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
+PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
+{{ else -}}
 echo "Missing krib/cluster-profile on the machine!"
 exit 1
-{{end -}}
+{{ end -}}
 
-{{template "krib-lib.sh.tmpl" .}}
+{{ template "krib-lib.sh.tmpl" .}}
 
 echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
 if free | grep -q Swap ; then
@@ -51,10 +51,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
 
-    # example of appending a featureGate to cluster after initial
-    # init - example does CoreDNS (if it's not defined in /tmp/kubeadm.cfg):
-    # kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
-
     echo "Building certificate file."
     tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
@@ -65,16 +61,18 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     NET_TYPE={{ .Param "krib/networking-provider" }}
 
-    # we need to do better than this with the YAML config files....
+    # example of appending a featureGate to cluster after initial init
+    #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
+
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
-        kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+        kubectl apply -f {{ .Param "provider/calico-config" }}
         ;;
 
       flannel)
         echo "Starting flannel networking..."
-        kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
+        kubectl apply -f {{ .Param "provider/flannel-config" }}
         ;;
     esac
 
@@ -133,11 +131,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "Recording cluster join script ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$JOIN_CMD"
 
-    drpcli machines tasks add {{.Machine.UUID}} at 0 krib-settings krib-dashboard
+    drpcli machines tasks add {{ .Machine.UUID }} at 0 krib-settings krib-dashboard
 
-    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\"}}" | jq .Meta
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\" }}" | jq .Meta
   else
-    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\" }}" | jq .Meta
   fi
 
 else
@@ -150,7 +148,7 @@ else
   $JC
 
   # Set machine icon and color for KRIB cluster building
-  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\"}}" | jq .Meta
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\" }}" | jq .Meta
 
 fi
 
@@ -160,19 +158,19 @@ do
 done
 
 # Fix kubelet to use the vip/lb
-{{if .ParamExists "krib/cluster-master-vip" -}}
-MASTER_VIP={{.Param "krib/cluster-master-vip"}}
-MASTER_COUNT={{.Param "krib/cluster-master-count"}}
-API_PORT={{.Param "krib/cluster-api-port"}}
+{{ if .ParamExists "krib/cluster-master-vip" -}}
+MASTER_VIP={{ .Param "krib/cluster-master-vip" }}
+MASTER_COUNT={{ .Param "krib/cluster-master-count" }}
+API_PORT={{ .Param "krib/cluster-api-port" }}
 if [[ $MASTER_COUNT -gt 1 ]] ; then
-  API_PORT={{.Param "krib/cluster-api-vip-port"}}
+  API_PORT={{ .Param "krib/cluster-api-vip-port" }}
 fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet
-{{else -}}
+{{ else -}}
 echo "Missing required krib/cluster-master-vip"
 exit 1
-{{end -}}
+{{ end -}}
 
 # Clean up
 rm -f /tmp/kubeadm.cfg

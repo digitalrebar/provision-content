@@ -7,8 +7,6 @@ Documentation: |
   for reference going forward on the cluster configurations when it
   was created.
 
-Schema:
-  type: "string"
 Meta:
   color: "blue"
   icon: "ship"

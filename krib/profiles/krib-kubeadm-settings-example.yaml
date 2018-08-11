@@ -26,17 +26,32 @@ Documentatioin: |
   necessary in that case.  The default behavior only works correcly
   if this value is unset - so delete it.
 
+  Setting 'etcd/servers' does require filling out all three fields 
+  (Address, Name, and Uuid).
+
 Meta:
   color: "blue"
   icon: "book"
   title: "Digital Rebar Community Content"
 Params:
-  etcd/client-port: 2379
-  etcd/servers:
-    - server-01
-    - server-02
-    - server-03
   docker/working-dir: "/docker"
+  etcd/server-count: 3
+  etcd/version: "3.3.8"
+  etcd/peer-ca-pw: "f00b4r"
+  etcd/server-ca-pw: "m0r3_f00b4r"
+  etcd/client-port: 2379
+  etcd/peer-port: 2380
+  etcd/servers:
+    - Address: 10.10.10.101
+      Name: master01.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f901
+    - Address: 10.10.10.102
+      Name: master02.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f900
+    - Address: 10.10.10.103
+      Name: master03.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f900
+  krib/cluster-cri-socket: "/var/run/dockershim.sock"
   krib/cluster-api-port: 6443
   krib/cluster-api-vip-port: 8443
   krib/cluster-bootstrap-token: "fedcba.fedcba9876543210"
@@ -44,12 +59,15 @@ Params:
   krib/cluster-dns: "10.96.0.10"
   krib/cluster-domain: "cluster.local"
   krib/cluster-image-repository: "k8s.gcr.io"
-  krib/cluster-kubernetes-version: "v1.11.1"
-  krib/cluster-master-vip: "set_to_vip_value1"
+  krib/cluster-kubernetes-version: "v1.11.2"
+  krib/cluster-master-vip: "10.10.10.100"
   krib/cluster-name: "tiger"
   krib/cluster-pod-subnet: "10.112.0.0/12"
   krib/cluster-service-dns-domain: "unspecified.domain.local"
   krib/cluster-service-subnet: "10.96.0.0/12"
+  krib/dashboard-config: "https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml"
+  provider/calico-config: "https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml"
+  provider/flannel-config: "https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml"
 
 ReadOnly: true
 
