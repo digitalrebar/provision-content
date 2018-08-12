@@ -26,8 +26,8 @@ Documentatioin: |
   necessary in that case.  The default behavior only works correcly
   if this value is unset - so delete it.
 
-  Setting 'etcd/servers' does require filling out all three fields 
-  (Address, Name, and Uuid).
+  Setting 'krib/cluster-masters' and/or 'etcd/servers' does require 
+  filling out all three fields (Address, Name, and Uuid).
 
 Meta:
   color: "blue"
@@ -43,13 +43,13 @@ Params:
   etcd/peer-port: 2380
   etcd/servers:
     - Address: 10.10.10.101
-      Name: master01.unspecified.domain.local
+      Name: etcd01.unspecified.domain.local
       Uuid: d155b77f-00e9-456b-9b61-f5934b45f901
     - Address: 10.10.10.102
-      Name: master02.unspecified.domain.local
+      Name: etcd02.unspecified.domain.local
       Uuid: d155b77f-00e9-456b-9b61-f5934b45f900
     - Address: 10.10.10.103
-      Name: master03.unspecified.domain.local
+      Name: etcd03.unspecified.domain.local
       Uuid: d155b77f-00e9-456b-9b61-f5934b45f900
   krib/cluster-cri-socket: "/var/run/dockershim.sock"
   krib/cluster-api-port: 6443
@@ -60,6 +60,17 @@ Params:
   krib/cluster-domain: "cluster.local"
   krib/cluster-image-repository: "k8s.gcr.io"
   krib/cluster-kubernetes-version: "v1.11.2"
+  krib/cluster-masters-on-etcds: false
+  krib/cluster-masters:
+    - Address: 10.10.10.201
+      Name: master01.unspecified.domain.local
+      Uuid: r153b77f-00e9-200b-9b61-f5942b45f901
+    - Address: 10.10.10.202
+      Name: master02.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f723
+    - Address: 10.10.10.203
+      Name: master03.unspecified.domain.local
+      Uuid: d155b72f-10e9-550c-7b62-c5932a45a659
   krib/cluster-master-vip: "10.10.10.100"
   krib/cluster-name: "tiger"
   krib/cluster-pod-subnet: "10.112.0.0/12"
