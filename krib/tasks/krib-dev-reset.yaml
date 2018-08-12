@@ -76,7 +76,7 @@ Templates:
     #!/bin/bash
     # Reset KRIB params
     set -e
-    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-master-vip' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/kubeadm-cfg')
+    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-master-vip' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
     {{template "setup.tmpl" .}}
     {{if .ParamExists "krib/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}

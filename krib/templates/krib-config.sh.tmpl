@@ -49,6 +49,17 @@ if [[ $MASTER_INDEX != notme ]] ; then
     TOKEN=$(kubeadm token generate)
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_BOOTSTRAP_TOKEN to "$TOKEN"
 
+    {{ if .ParamExists "krib/kubeadm-cfg" -}}
+    echo "Using specified 'kubeadm.cfg' instead of DRP template (krib-kubeadm.cfg.sh.tmpl)."
+    KC={{ .Param "krib/kubeadm-cfg" }}
+    echo "($KC)"
+    echo "# externally defined template specified by 'krib/kubeadm-cfg'" > /tmp/kubeadm.cfg
+    echo "# source: '$KC'" >> /tmp/kubeadm.cfg
+    T=$(mktemp /tmp/kube.cfg.XXXXXXXXX)
+    curl -fsSL -o $T $KC
+    cat $T >> /tmp/kubeadm.cfg && rm -f $T
+    {{ end -}}
+
     kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
 
     echo "Building certificate file."
@@ -123,7 +134,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
   if [[ $MASTER_INDEX == 0 ]] ; then
     echo "Recording 'kubeadm' bootstrap config ..."
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
 
     echo "Recording cluster admin config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to "$(cat /etc/kubernetes/admin.conf)"

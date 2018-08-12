@@ -1,12 +1,17 @@
 ---
 Name: "krib/kubeadm-cfg"
-Description: "The 'kubeadm.cfg' bootstrap config will be recorded on this param."
+Description: "Use an alternate 'kubeadm.cfg' for 'kubeadm init'"
 Documentation: |
-  The KRIB config task will record the bootstrap configuration used
-  by 'kubeadm' to build the Kubernetes cluster.  This provides
-  for reference going forward on the cluster configurations when it
-  was created.
+  Set this string to an HTTP or HTTPS reference for a YAML configuration to
+  use for the 'kubeadm.cfg' used during the 'kubeadm init' process.
 
+  The default behavior is to use the Parameterized 'kubeadm.cfg' from the
+  template named 'krib-kubeadm.cfg.tmpl'.  This config file is used in 
+  the 'krib-config.sh.tmpl' which is the main template script that drives
+  the 'kubeadm' cluster init and configuration.
+
+Schema:
+  type: "string"
 Meta:
   color: "blue"
   icon: "ship"
