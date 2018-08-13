@@ -29,13 +29,13 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   echo "Up the DNS replica count"
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/coredns
 
-  API_PORT=6443
+  API_PORT={{.Param "krib/cluster-api-port"}}
   if [[ $MASTER_COUNT -gt 1 ]] ; then
-    API_PORT=8443
+    API_PORT={{.Param "krib/cluster-api-vip-port"}}
   fi
   echo "Point the Kube-Proxy at $API_PORT"
   kubectl get configmap -n kube-system kube-proxy -o yaml >/tmp/kube-proxy-cm.yaml
-  sed -i "s/server: *https:\/\/.*:6443/server: https:\/\/${MASTER_VIP}:${API_PORT}/" /tmp/kube-proxy-cm.yaml
+  sed -i "s/server: *https:\/\/.*:{{.Param "krib/cluster-api-port"}}/server: https:\/\/${MASTER_VIP}:${API_PORT}/" /tmp/kube-proxy-cm.yaml
   kubectl apply -f /tmp/kube-proxy-cm.yaml --force
   rm -f /tmp/kube-proxy-cm.yaml
   kubectl delete pod -n kube-system -l k8s-app=kube-proxy

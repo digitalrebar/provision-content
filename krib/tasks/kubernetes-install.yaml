@@ -15,9 +15,9 @@ OptionalParams:
   - krib/cluster-master-certs
   - krib/cluster-master-count
   - krib/cluster-master-vip
-  - krib/cluster-master-on-etcds    
+  - krib/cluster-master-on-etcds
   - krib/cluster-masters
-  - krib/operate-action  
+  - krib/operate-action
   - krib/operate-on-node
   - krib/operate-options
 Templates:

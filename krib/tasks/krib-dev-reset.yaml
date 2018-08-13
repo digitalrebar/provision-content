@@ -71,12 +71,12 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done etcd params reset"
-  Name: etcd-reset  
+  Name: etcd-reset
 - Contents: |-
     #!/bin/bash
     # Reset KRIB params
     set -e
-    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-master-vip' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs')
+    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-master-vip' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
     {{template "setup.tmpl" .}}
     {{if .ParamExists "krib/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
@@ -91,6 +91,6 @@ Templates:
   Name: KRIB clear
 Meta:
   icon: "ship"
-  color: "red"
+  color: "orange"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

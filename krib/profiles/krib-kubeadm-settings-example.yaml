@@ -1,0 +1,84 @@
+---
+Name: "krib-kubeadm-settings-example"
+Description: "Example 'kubeadm' config file customizations settings."
+Documentatioin: |
+  This Profile contains a set of Params that can be used to customize
+  a KRIB Kubernetes cluster.  These values are used in the 'kubeadm.cfg'
+  file that is used by kubeadm to build the Kubernetes cluster.
+
+  This exists purely for ease of use.  If you wish to customize your
+  cluster deployment, clone this Profile and add it to your Machines
+  that will be in the Kubernetes cluster.  This does not need to be
+  the same Profile as used by 'etcd/cluster-profile' or
+  'krib/cluster-profile'.
+
+  For operational seaparation of duties (config separated from running
+  cluster state), you might choose to keep them separate.
+
+  Please see each individual Param Documentation for details on what
+  they do.  IT MAY BE NECESSARY to delete Params that you do not want
+  to override.  If they are defined here with a default or temporary
+  value, but you do not want to change the KRIB deaults behavior,
+  you must delete the Param from the Profile before use.
+
+  An example - 'krib/cluster-master-vip' - will be set by default in
+  Single Master setups to that single master.  No VIP is necessarily
+  necessary in that case.  The default behavior only works correcly
+  if this value is unset - so delete it.
+
+  Setting 'krib/cluster-masters' and/or 'etcd/servers' does require 
+  filling out all three fields (Address, Name, and Uuid).
+
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Digital Rebar Community Content"
+Params:
+  docker/working-dir: "/docker"
+  etcd/server-count: 3
+  etcd/version: "3.3.8"
+  etcd/peer-ca-pw: "f00b4r"
+  etcd/server-ca-pw: "m0r3_f00b4r"
+  etcd/client-port: 2379
+  etcd/peer-port: 2380
+  etcd/servers:
+    - Address: 10.10.10.101
+      Name: etcd01.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f901
+    - Address: 10.10.10.102
+      Name: etcd02.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f900
+    - Address: 10.10.10.103
+      Name: etcd03.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f900
+  krib/cluster-cri-socket: "/var/run/dockershim.sock"
+  krib/cluster-api-port: 6443
+  krib/cluster-api-vip-port: 8443
+  krib/cluster-bootstrap-token: "fedcba.fedcba9876543210"
+  krib/cluster-bootstrap-ttl: "96h0m0s"
+  krib/cluster-dns: "10.96.0.10"
+  krib/cluster-domain: "cluster.local"
+  krib/cluster-image-repository: "k8s.gcr.io"
+  krib/cluster-kubernetes-version: "v1.11.2"
+  krib/cluster-masters-on-etcds: false
+  krib/cluster-masters:
+    - Address: 10.10.10.201
+      Name: master01.unspecified.domain.local
+      Uuid: r153b77f-00e9-200b-9b61-f5942b45f901
+    - Address: 10.10.10.202
+      Name: master02.unspecified.domain.local
+      Uuid: d155b77f-00e9-456b-9b61-f5934b45f723
+    - Address: 10.10.10.203
+      Name: master03.unspecified.domain.local
+      Uuid: d155b72f-10e9-550c-7b62-c5932a45a659
+  krib/cluster-master-vip: "10.10.10.100"
+  krib/cluster-name: "tiger"
+  krib/cluster-pod-subnet: "10.112.0.0/12"
+  krib/cluster-service-dns-domain: "unspecified.domain.local"
+  krib/cluster-service-subnet: "10.96.0.0/12"
+  krib/dashboard-config: "https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml"
+  provider/calico-config: "https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml"
+  provider/flannel-config: "https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml"
+
+ReadOnly: true
+

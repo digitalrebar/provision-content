@@ -1,0 +1,14 @@
+---
+Name: "krib/cluster-cri-socket"
+Description: "Specify the CRI Socket for Kubernetes."
+Documentation: |
+  This Param defines which Socket to use for the Container Runtime
+  Interface.  By default KRIB content uses Docker as the CRI, however
+  our goal is to support multiple container CRI formats. 
+Schema:
+  type: "string"
+  default: "/var/run/dockershim.sock"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

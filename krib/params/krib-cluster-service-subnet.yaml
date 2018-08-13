@@ -1,0 +1,16 @@
+---
+Name: "krib/cluster-service-subnet"
+Description: "Define the cluster Service subnet CIDR via 'kubeadm init' process"
+Documentation: |
+  Allows operators to specify the service subnet CIDR that will be
+  used during the 'kubeadm init' process of the cluster creation.
+
+  Defaults to "10.96.0.0/12".
+
+Schema:
+  type: "string"
+  default: "10.96.0.0/12"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

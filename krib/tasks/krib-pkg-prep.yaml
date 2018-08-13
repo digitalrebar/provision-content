@@ -1,0 +1,54 @@
+---
+Description: "Prep a cluster with prerequisite packages."
+Name: "krib-pkg-prep"
+Documentation: |
+  Installs prerequisite OS packages prior to starting KRIB
+  install process.  In some use cases this may be a faster
+  pattern than performing the steps in the standard templates.
+
+  For example - Sledgehammer Discover nodes, add 'krib-prep-pkgs'
+  stage.  As machine is finishing prep - you can move to setting
+  up other things, before kicking off the KRIB workflow.
+
+  Uses packages listed in the 'default' Schema section of the
+  Param 'krib/packages-to-prep'.  You can override this list
+  by setting the Param in a Profile or directly on the Machines
+  to apply this to.
+
+  Packages MUST exist in the repositories on the Machines already.
+
+OptionalParams:
+  - krib/packages-to-prep
+Templates:
+  - Name: krib-pkg-prep
+    Contents: |-
+      #!/bin/bash
+      # Install prerequisite OS packages prior to KRIB workflow run
+      set -e
+
+      {{template "setup.tmpl"}}
+
+      # only execute the package install if we are have a KRIB
+      # cluster profile set - this is a weak check to verify it
+      # we're going to becmoe a KRIB cluster
+      {{if .ParamExists "krib/cluster-profile"}}
+      PKGS="{{.Param "krib/packages-to-prep"}}"
+      if [[ -z "$PKGS" ]]; then
+        echo "'krib/packates-to-prep' empty - no prep completed."
+        exit 0
+      else
+        echo "Installing prereq packages:  $PKGS"
+        install $PKGS
+      fi
+      {{else}}
+      echo "The 'krib/cluster-profile' not found on Machine. Skipping prep."
+      exit 0
+      {{end}}
+
+      exit 0
+
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

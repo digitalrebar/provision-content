@@ -109,7 +109,7 @@ The basic outline for configuring KRIB follows the below steps:
 #. change the Workflow on the Machines to ``krib-live-cluster`` for memory booting or ``krib-install-cluster`` to install to Centos.  You may clone these reference workflows to build custom actions.
 #. installation will start as soon as the Workflow has been set.
 
-There are many configuration options available, review the ``krib/*`` and ``etcd/*`` parameters to learn more.  
+There are many configuration options available, review the ``krib/*`` and ``etcd/*`` parameters to learn more.
 
 Configure with Terraform
 ========================

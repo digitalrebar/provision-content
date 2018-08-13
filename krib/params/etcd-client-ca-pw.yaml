@@ -3,7 +3,7 @@ Name: "etcd/client-ca-pw"
 Description: "Password to access the etcd client CA"
 Documentation: |
   Allows operators to set the CA password for the client certificate
-  Requires Cert Plugin  
+  Requires Cert Plugin
 Schema:
   type: "string"
 Meta:

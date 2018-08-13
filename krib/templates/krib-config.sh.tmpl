@@ -3,20 +3,20 @@
 set -e
 
 # Get access and who we are.
-{{template "setup.tmpl" .}}
+{{ template "setup.tmpl" .}}
 
 echo "Configure kubeadm master and minions..."
 
-CLUSTER_NAME={{.Param "krib/cluster-name"}}
-{{if .ParamExists "krib/cluster-profile" -}}
-CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
-PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
-{{else -}}
+CLUSTER_NAME={{ .Param "krib/cluster-name" }}
+{{ if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
+PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
+{{ else -}}
 echo "Missing krib/cluster-profile on the machine!"
 exit 1
-{{end -}}
+{{ end -}}
 
-{{template "krib-lib.sh.tmpl" .}}
+{{ template "krib-lib.sh.tmpl" .}}
 
 echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
 if free | grep -q Swap ; then
@@ -42,8 +42,27 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
   if [[ $MASTER_INDEX == 0 ]] ; then
 
-    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
+    echo "Starting Master kubeadm init process."
 
+    # generate a cluster bootstrap token, then store it on the Param
+    # for the kubeadm.cfg file
+    TOKEN=$(kubeadm token generate)
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_BOOTSTRAP_TOKEN to "$TOKEN"
+
+    {{ if .ParamExists "krib/kubeadm-cfg" -}}
+    echo "Using specified 'kubeadm.cfg' instead of DRP template (krib-kubeadm.cfg.sh.tmpl)."
+    KC={{ .Param "krib/kubeadm-cfg" }}
+    echo "($KC)"
+    echo "# externally defined template specified by 'krib/kubeadm-cfg'" > /tmp/kubeadm.cfg
+    echo "# source: '$KC'" >> /tmp/kubeadm.cfg
+    T=$(mktemp /tmp/kube.cfg.XXXXXXXXX)
+    curl -fsSL -o $T $KC
+    cat $T >> /tmp/kubeadm.cfg && rm -f $T
+    {{ end -}}
+
+    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
+
+    echo "Building certificate file."
     tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
@@ -51,11 +70,22 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     JOIN_CMD=$(cat /tmp/kubeadm.init.log | grep "kubeadm join")
 
-    # echo "Starting calico networking..."
-    # kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+    NET_TYPE={{ .Param "krib/networking-provider" }}
 
-    echo "Starting flannel networking..."
-    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
+    # example of appending a featureGate to cluster after initial init
+    #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
+
+    case $NET_TYPE in
+      calico)
+        echo "Starting calico networking..."
+        kubectl apply -f {{ .Param "provider/calico-config" }}
+        ;;
+
+      flannel)
+        echo "Starting flannel networking..."
+        kubectl apply -f {{ .Param "provider/flannel-config" }}
+        ;;
+    esac
 
   else
     wait_for_variable $KRIB_MASTER_CERTS_PARAM
@@ -103,17 +133,20 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   if [[ $MASTER_INDEX == 0 ]] ; then
+    echo "Recording 'kubeadm' bootstrap config ..."
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
+
     echo "Recording cluster admin config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to "$(cat /etc/kubernetes/admin.conf)"
 
     echo "Recording cluster join script ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$JOIN_CMD"
 
-    drpcli machines tasks add {{.Machine.UUID}} at 0 krib-settings krib-dashboard
+    drpcli machines tasks add {{ .Machine.UUID }} at 0 krib-settings krib-dashboard
 
-    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\"}}" | jq .Meta
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\" }}" | jq .Meta
   else
-    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
+    drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\" }}" | jq .Meta
   fi
 
 else
@@ -126,7 +159,7 @@ else
   $JC
 
   # Set machine icon and color for KRIB cluster building
-  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\"}}" | jq .Meta
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\" }}" | jq .Meta
 
 fi
 
@@ -136,19 +169,19 @@ do
 done
 
 # Fix kubelet to use the vip/lb
-{{if .ParamExists "krib/cluster-master-vip" -}}
-MASTER_VIP={{.Param "krib/cluster-master-vip"}}
-MASTER_COUNT={{.Param "krib/cluster-master-count"}}
-API_PORT=6443
+{{ if .ParamExists "krib/cluster-master-vip" -}}
+MASTER_VIP={{ .Param "krib/cluster-master-vip" }}
+MASTER_COUNT={{ .Param "krib/cluster-master-count" }}
+API_PORT={{ .Param "krib/cluster-api-port" }}
 if [[ $MASTER_COUNT -gt 1 ]] ; then
-  API_PORT=8443
+  API_PORT={{ .Param "krib/cluster-api-vip-port" }}
 fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet
-{{else -}}
+{{ else -}}
 echo "Missing required krib/cluster-master-vip"
 exit 1
-{{end -}}
+{{ end -}}
 
 # Clean up
 rm -f /tmp/kubeadm.cfg

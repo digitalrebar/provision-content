@@ -11,8 +11,9 @@
 
     echo "=== clearing $p : value was ==========================="
     JC=$(get_param "$p" | jq -r .)
-    if [[ $JC != "" && $JC != null ]] ; then
-      drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "$p" | jq -r '.'
+#    if [[ $JC != "" && $JC != null ]] ; then
+    if [[ $JC != null ]] ; then
+        drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "$p" | jq -r '.'
     else
       echo "  skipping $p, was not set"
     fi

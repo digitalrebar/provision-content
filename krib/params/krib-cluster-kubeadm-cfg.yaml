@@ -1,0 +1,13 @@
+---
+Name: "krib/cluster-kubeadm-cfg"
+Description: "The 'kubeadm.cfg' bootstrap config will be recorded on this param."
+Documentation: |
+  Once the cluster initial master has completed startup, then the
+  KRIB config task will record the bootstrap configuration used
+  by 'kubeadm init'.  This provides a reference going forward on
+  the cluster configurations when it was created.
+
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

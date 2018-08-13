@@ -1,0 +1,19 @@
+---
+Name: "krib/cluster-dns"
+Description: "Define the cluster DNS Address"
+Documentation: |
+  Allows operators to specify the DNS address for the cluster
+  name resolution services.
+
+  Set by default to "10.96.0.10".
+
+  WARNING: This IP Address must be in the same range as the
+           "krib/cluster-service-cidr" specified addresses.
+
+Schema:
+  type: "string"
+  default: "10.96.0.10"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

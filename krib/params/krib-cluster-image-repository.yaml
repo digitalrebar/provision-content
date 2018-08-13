@@ -1,0 +1,14 @@
+---
+Name: "krib/cluster-image-repository"
+Description: "Define where to pull Kubernetes container images from."
+Documentation: |
+  Allows operators to specify the location to pull images from for
+  Kubernetes.  Defaults to 'k8s.gcr.io'.
+
+Schema:
+  type: "string"
+  default: "k8s.gcr.io"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
