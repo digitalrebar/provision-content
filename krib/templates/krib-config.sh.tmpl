@@ -119,6 +119,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     IFS=" " ; while read name ; do
         if kubectl get nodes | egrep -q "^$name[ \t]*Ready"; then
                 echo "Node $name is ready."
+                HOSTNAME=$name
         else
                 echo "Node $name is not yet ready."
                 echo "$(kubectl get nodes)"
@@ -131,6 +132,20 @@ if [[ $MASTER_INDEX != notme ]] ; then
       sleep ${INCREMENT_SECONDS}s
     fi
   done
+
+  # set labels for nodes
+  echo "Adding builder=lron label to machine $HOSTNAME"
+  kubectl label nodes $HOSTNAME builder=krib
+  echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
+  kubectl label nodes $HOSTNAME env={{.Param "krib/label-env"}}
+  {{if .ParamExists "inventory/data" -}}
+    {{range $key, $value := .Param "inventory/data" -}}
+      echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME"
+      kubectl label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+    {{end }}
+  {{else -}}
+    echo "use of inventory/data to create machine specific labels"
+  {{end -}}
 
   if [[ $MASTER_INDEX == 0 ]] ; then
     echo "Recording 'kubeadm' bootstrap config ..."
