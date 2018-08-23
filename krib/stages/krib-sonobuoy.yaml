@@ -1,0 +1,20 @@
+---
+Name: "krib-sonobuoy"
+Description: "KRIB install Sonobuoy and conformance test the cluster"
+Documentation: |
+  Installs and runs Sonobuoy after a cluster has been constructed.
+  This stage is idempotent and can be run multiple times.
+  The purpose is to ensure that the KRIB cluster is conformant with standards
+
+  If credentials are required so that the results of the run are pushed back to DRP files.
+
+  Roadmap items:
+  * eliminate need for DRPCLI credentials
+  * make "am I running" detection smarter
+RunnerWait: true
+Tasks:
+  - "krib-sonobuoy"
+Meta:
+  icon: "sound"
+  color: "blue"
+  title: "Community Content"

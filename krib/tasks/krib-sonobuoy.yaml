@@ -1,0 +1,25 @@
+---
+Description: "A task to install Sonobuoy"
+Name: "krib-sonobuoy"
+Documentation: |
+  Installs Sonobuoy and runs it against the cluster on the leader.
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set.
+
+  NOTE: Sonobuoy may take over an HOUR to complete.  The task will be in process during this time.
+
+  The tasks only run on the leader so it must be included in the workflow.  All other
+  machines will be skipped so it is acceptable to run the task on all machines
+  in the cluster.
+RequiredParams:
+  - krib/cluster-profile
+OptionalParams:
+  - sonobuoy/binary
+Templates:
+  - ID: "krib-sonobuoy.sh.tmpl"
+    Name: "Running Sonobuoy on Master"
+    Path: ""
+Meta:
+  icon: "sound"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

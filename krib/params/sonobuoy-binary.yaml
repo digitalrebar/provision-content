@@ -1,0 +1,13 @@
+---
+Name: "sonobuoy/binary"
+Description: "Go binary with Sonobuoy tooling for test"
+Documentation: |
+  Downloads tgz with compiled sonobuoy executable.
+  The full path is included so that operators can choose the correct version and archtiecture
+Schema:
+  type: "string"
+  default: "https://github.com/heptio/sonobuoy/releases/download/v0.11.6/sonobuoy_0.11.6_linux_amd64.tar.gz"
+Meta:
+  color: "blue"
+  icon: "sound"
+  title: "Community Content"
