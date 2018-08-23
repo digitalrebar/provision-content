@@ -1,0 +1,12 @@
+---
+Name: "krib/label-env"
+Description: "Value set for env label"
+Documentation: |
+  Used for node specification, labels should be set.
+Schema:
+  type: "string"
+  default: "dev"
+Meta:
+  color: "blue"
+  icon: "tag"
+  title: "Community Content"
