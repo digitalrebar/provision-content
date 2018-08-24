@@ -33,26 +33,48 @@ if [[ $MASTER_INDEX != notme ]] ; then
     ./sonobuoy run || true
 
     # needs some time to resolve before we can check status
-    sleep 5
-
     set +e
-    echo "Wait upto {{.Param "sonobuoy/wait-mins"}} minutes until sonobuoy is complete"
-    CNT=$(./sonobuoy status | egrep "^e2e(\s*)complete")
-    ESCAPE={{.Param "sonobuoy/wait-mins" | mul 4}}
+    echo "waiting for sonobuoy namespace to be active..."
+    CNT=$(kubectl get ns | egrep "^heptio-sonobuoy(\s*)Active")
+    ESCAPE=30
     while [[ -z $CNT && $ESCAPE -gt 0 ]] ; do
-      echo "Iteration $ESCAPE: 15s loop for sonobuoy status...$(./sonobuoy status)"
-      sleep 15
-      CNT=$(./sonobuoy status | egrep "^e2e(\s*)complete")
+      echo "Namespace $ESCAPE: 2s loop for sonobuoy namespace..."
+      sleep 2
+      CNT=$(kubectl get ns | egrep "^heptio-sonobuoy(\s*)Active")
       ((ESCAPE=ESCAPE-1))
     done
+    echo "sonobuoy namespace active"
+
+    sleep 5
+    echo "checking status (first time)"
+    ./sonobuoy status
+
+    CNT=$(./sonobuoy status | egrep "^e2e(\s*)complete")
+    if [[ {{.Param "sonobuoy/wait-mins"}} -gt 0 ]] ; then
+      echo "Wait up to {{.Param "sonobuoy/wait-mins"}} minutes until sonobuoy is complete"
+      ESCAPE={{.Param "sonobuoy/wait-mins" | mul 4}}
+      while [[ -z $CNT && $ESCAPE -gt 0 ]] ; do
+        echo "Iteration $ESCAPE: 15s loop for sonobuoy status...$(./sonobuoy status)"
+        sleep 15
+        CNT=$(./sonobuoy status | egrep "^e2e(\s*)complete")
+        ((ESCAPE=ESCAPE-1))
+      done
+      echo "exiting loop - $ESCAPE iterations remain"
+    else
+      echo "skipping wait loop (sonobuoy/wait-mins < 0)"
+    fi
     set -e
-    echo "exiting loop...$ESCAPE iterations remaining"
 
-    echo "!!!!!!!!!!!!!!!!!!!!!! start copy the logs into DRP log !!!!!!!!!!!!!!!!!!!!!!!!!"
-    ./sonobuoy logs
-    echo "!!!!!!!!!!!!!!!!!!!!!! end copy the logs into DRP log !!!!!!!!!!!!!!!!!!!!!!!!!!!"
 
-    if [[ -z $CNT ]] ; then
+    # REMOVED FOR NOW - status hangs the job
+    #echo "!!!!!!!!!!!!!!!!!!!!!! start copy the logs into DRP log !!!!!!!!!!!!!!!!!!!!!!!!!"
+    #./sonobuoy logs
+    #echo "!!!!!!!!!!!!!!!!!!!!!! end copy the logs into DRP log !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+    echo "checking status (last time)"
+    ./sonobuoy status
+
+    if [[ ! -z $CNT ]] ; then
       echo "Retrieving Results"
       ./sonobuoy retrieve .
       OUTPUT=$(ls | grep _sonobuoy_)
@@ -61,7 +83,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
       {{else}}
         PASSWORD="r0cketsk8ts"
       {{end}}
-      echo "attempting to upload $OUTPUT results fDRP/files (required admin access)"
+      echo "attempting to upload $OUTPUT results DRP/files (required admin access)"
       HOLD_TOKEN=$RS_TOKEN
       unset RS_TOKEN
       drpcli -U "rocketskates" -P "$PASSWORD" files upload $OUTPUT as $OUTPUT
