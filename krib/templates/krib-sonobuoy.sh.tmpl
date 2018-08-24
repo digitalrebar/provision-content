@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+echo "Configure Sonobuoy on the master (skip for minions)..."
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing krib/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+
+    echo "I am the elected leader - install and run sonobuoy"
+
+    # help requires the admin config
+    export KUBECONFIG="/etc/kubernetes/admin.conf"
+    wget -q -O "sonobuoy.tar.gz" {{.Param "sonobuoy/binary"}}
+    tar --extract --file=sonobuoy.tar.gz sonobuoy
+    echo "starting sonobuoy run - will fail if already started, that OK"
+    ./sonobuoy run || true
+
+    # needs some time to resolve before we can check status
+    set +e
+    echo "waiting for sonobuoy namespace to be active..."
+    CNT=$(kubectl get ns | egrep "^heptio-sonobuoy(\s*)Active")
+    ESCAPE=30
+    while [[ -z $CNT && $ESCAPE -gt 0 ]] ; do
+      echo "Namespace $ESCAPE: 2s loop for sonobuoy namespace..."
+      sleep 2
+      CNT=$(kubectl get ns | egrep "^heptio-sonobuoy(\s*)Active")
+      ((ESCAPE=ESCAPE-1))
+    done
+    echo "sonobuoy namespace active"
+
+    sleep 5
+    echo "checking status (first time)"
+    ./sonobuoy status
+
+    CNT=$(./sonobuoy status | egrep "^e2e(\s*)complete")
+    if [[ {{.Param "sonobuoy/wait-mins"}} -gt 0 ]] ; then
+      echo "Wait up to {{.Param "sonobuoy/wait-mins"}} minutes until sonobuoy is complete"
+      ESCAPE={{.Param "sonobuoy/wait-mins" | mul 4}}
+      while [[ -z $CNT && $ESCAPE -gt 0 ]] ; do
+        echo "Iteration $ESCAPE: 15s loop for sonobuoy status...$(./sonobuoy status)"
+        sleep 15
+        CNT=$(./sonobuoy status | egrep "^e2e(\s*)complete")
+        ((ESCAPE=ESCAPE-1))
+      done
+      echo "exiting loop - $ESCAPE iterations remain"
+    else
+      echo "skipping wait loop (sonobuoy/wait-mins < 0)"
+    fi
+    set -e
+
+
+    # REMOVED FOR NOW - status hangs the job
+    #echo "!!!!!!!!!!!!!!!!!!!!!! start copy the logs into DRP log !!!!!!!!!!!!!!!!!!!!!!!!!"
+    #./sonobuoy logs
+    #echo "!!!!!!!!!!!!!!!!!!!!!! end copy the logs into DRP log !!!!!!!!!!!!!!!!!!!!!!!!!!!"
+
+    echo "checking status (last time)"
+    ./sonobuoy status
+
+    if [[ ! -z $CNT ]] ; then
+      echo "Retrieving Results"
+      ./sonobuoy retrieve .
+      OUTPUT=$(ls | grep _sonobuoy_)
+      {{if .ParamExists "unsafe/rs-password"}}
+        PASSWORD="{{.Param "unsafe/rs-password"}}"
+      {{else}}
+        PASSWORD="r0cketsk8ts"
+      {{end}}
+      echo "attempting to upload $OUTPUT results DRP/files (required admin access)"
+      HOLD_TOKEN=$RS_TOKEN
+      unset RS_TOKEN
+      drpcli -U "rocketskates" -P "$PASSWORD" files upload $OUTPUT as $OUTPUT
+      export RS_TOKEN=$HOLD_TOKEN
+      echo "success: removing sonobuoy"
+      ./sonobuoy delete
+    else
+      echo "Sonobuoy is not complete"
+      if [[ {{.Param "sonobuoy/wait-mins"}} -lt 0 ]] ; then
+        echo "Check back latter...stage is idempotent"
+        exit 0
+      else
+        echo "ERROR: Wait time ({{.Param "sonobuoy/wait-mins"}} mins) expired."
+        exit 1
+      fi
+    fi
+
+  else
+
+    echo "I was not the leader, skipping helm init"
+
+  fi
+
+else
+
+  echo "I am a worker - no helm actions"
+
+fi
+
+echo "Finished successfully"
+exit 0
+

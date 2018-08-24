@@ -1,0 +1,17 @@
+---
+Name: "sonobuoy/wait-mins"
+Description: "Minutes to wait for Sonobuoy run to complete"
+Documentation: |
+  Default is -1 so that stages do not wait for complete.
+
+  Typical runs may take 60 minutes.
+
+  If <0 then code does wait and assumes you will run it again to retrieve the results.
+  Task is idempotent so you can re-start a run after you have started to check on results.
+Schema:
+  type: "number"
+  default: -1
+Meta:
+  color: "black"
+  icon: "time"
+  title: "Community Content"
