@@ -40,6 +40,9 @@ OptionalParams:
   - "ntp-servers"
   - "select-kickseed"
 Templates:
+  - Name: "kexec"
+    ID: "kexec.tmpl"
+    Path: "{{.Machine.Path}}/kexec"
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"
     Path: "pxelinux.cfg/{{.Machine.HexAddress}}"

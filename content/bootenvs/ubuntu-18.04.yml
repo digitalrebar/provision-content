@@ -43,28 +43,25 @@ OptionalParams:
 ReadOnly: true
 RequiredParams: []
 Templates:
-  - Contents: ""
-    ID: default-pxelinux.tmpl
+  - Name: "kexec"
+    ID: "kexec.tmpl"
+    Path: "{{.Machine.Path}}/kexec"
+  - ID: default-pxelinux.tmpl
     Name: pxelinux
     Path: pxelinux.cfg/{{.Machine.HexAddress}}
-  - Contents: ""
-    ID: default-ipxe.tmpl
+  - ID: default-ipxe.tmpl
     Name: ipxe
     Path: '{{.Machine.Address}}.ipxe'
-  - Contents: ""
-    ID: default-pxelinux.tmpl
+  - ID: default-pxelinux.tmpl
     Name: pxelinux-mac
     Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
-  - Contents: ""
-    ID: default-ipxe.tmpl
+  - ID: default-ipxe.tmpl
     Name: ipxe-mac
     Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
-  - Contents: ""
-    ID: select-kickseed.tmpl
+  - ID: select-kickseed.tmpl
     Name: seed
     Path: '{{.Machine.Path}}/seed'
-  - Contents: ""
-    ID: net-post-install.sh.tmpl
+  - ID: net-post-install.sh.tmpl
     Name: net-post-install.sh
     Path: '{{.Machine.Path}}/post-install.sh'
 

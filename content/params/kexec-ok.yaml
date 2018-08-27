@@ -1,0 +1,15 @@
+---
+Name: kexec-ok
+Description: "Allows the machine agent to kexec instead of rebooting"
+Documentation: |
+  Allows the machine agent to call kexec to switch boot environments
+  as long as the machine is currently running Linux, and the new
+  environment has a template named 'kexec' that contains the
+  kernel, initrds, and command line to use.
+Schema:
+  type: boolean
+  default: false
+Meta:
+  icon: "bolt"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

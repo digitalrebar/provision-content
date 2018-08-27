@@ -1,0 +1,5 @@
+kernel {{.Env.PathFor "http" .Env.Kernel}}
+{{range $initrd := .Env.Initrds}}
+initrd {{$.Env.PathFor "http" $initrd}}
+{{end}}
+params {{.BootParams}}

@@ -1,0 +1,8 @@
+---
+Name: last-boot-macaddr
+Description: "The MAC address the system most recently used to PXE boot"
+Documentation: |
+  Keeps track of the MAC address (in PXELINUX format) that the system
+  most recently PXE booted from.
+Schema:
+  type: string

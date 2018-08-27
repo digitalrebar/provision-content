@@ -29,6 +29,9 @@ RequiredParams:
 OptionalParams:
   - "kernel-console"
 Templates:
+  - Name: "kexec"
+    ID: "kexec.tmpl"
+    Path: "{{.Machine.Path}}/kexec"
   - Name: "pxelinux"
     Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
     Contents: |
@@ -110,7 +113,10 @@ Templates:
           done
           printf '[%s]' "${maclist#,}"
       }
-
+      mac_re='BOOTIF=([^ ]+)'
+      if [[ $(cat /proc/cmdline) =~ $mac_re ]]; then
+          drpcli machines set "$RS_UUID" param last-boot-macaddr to "\"${BASH_REMATCH[1]}\""
+      fi
       json="$(drpcli machines show "$RS_UUID")"
       # The machine does not have hardware addresses set, so set them
       if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
