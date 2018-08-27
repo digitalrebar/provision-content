@@ -1,0 +1,9 @@
+Name: "krib-operate-cordon"
+Description: "Run 'kubectl' operate to Cordin KRIB built Kubernetes node."
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "krib operate cordon"
+Stages:
+  - "krib-operate-cordon"
+

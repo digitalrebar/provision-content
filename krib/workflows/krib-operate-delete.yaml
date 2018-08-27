@@ -1,0 +1,9 @@
+Name: "krib-operate-delete"
+Description: "Run 'kubectl' operate to Delete KRIB built Kubernetes node. (DESTROYS NODE!!)"
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "krib operate delete"
+Stages:
+  - "krib-operate-delete"
+

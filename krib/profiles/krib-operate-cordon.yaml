@@ -1,0 +1,16 @@
+---
+Name: "krib-operate-cordon"
+Description: "Contains Params that set the krib-operate-cordon Stage values."
+Documentation: |
+  This profile contians the default krib-operate task parameters to drive
+  a 'cordon' operation.  This profile can be added to a node or stage to
+  allow the krib-operate task to do a cordon operation.
+
+  This profile is used by the krib-cordon stage to allow a machine to
+  be cordoned without changing the parameters on the machine.
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "Community Content"
+Params:
+  krib/operate-action: "cordon"

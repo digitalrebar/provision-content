@@ -1,13 +1,15 @@
 ---
 Name: "krib/operate-action"
-Description: "Operational action to take on KRIB cluster (drain or uncordon)"
+Description: "Operational action to take on KRIB cluster"
 Documentation: |
-  This Param can be used to 'drain' or to 'uncordon' a node in a KRIB
-  built Kubernetes cluster. If this parameter is not defined on the
-  Machine, the default action will be to 'drain' the node.
+  This Param can be used to:
 
-  The only supported actions are 'drain' and 'uncordon'.  Each action
-  can be passed custom arguments via the use of the 'krib/operate-options'
+    'drain', 'delete', 'cordon', or 'uncordon'
+
+  a node in a KRIB built Kubernetes cluster. If this parameter is not
+  defined on the Machine, the default action will be to 'drain' the node.
+
+  Each action can be passed custom arguments via use of the 'krib/operate-options'
   Param.
 
 Schema:
@@ -15,6 +17,8 @@ Schema:
   default: "drain"
   enum:
     - drain
+    - delete
+    - cordon
     - uncordon
 Meta:
   color: "blue"

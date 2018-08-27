@@ -1,0 +1,34 @@
+---
+Name: "krib-operate-delete"
+Description: "Delete Node operation on a given KRIB built Kubernetes node"
+Documentation: |
+  This stage runs an Delete node operation on a given KRIB built Kubernetes
+  node.  It uses the 'krib-operate-delete' Profile
+
+  In addition - you may set the following Params on a Machine object
+  to override the default behaviors of this stage:
+
+    krib/operate-action     - action to take
+    krib/operate-on-node    - a Kubernetes node name to operate on
+    krib/operate-options    - command line arguments to pass to the
+                              'kubectl' command for the action
+
+  If the 'krib/operate-on-node' Param is empty, the node that is
+  currently running the Stage will be operated on.  Otherwise,
+  specifying an alternate Node allows remote delete a node.
+
+  WARNING: THIS OPERATE DESTROYS A KUBERNETES NODE!
+
+  Presumably, you want to 'krib-operate-drain' the node first to
+  remove it from the cluster and drain it's workload to other cluster
+  workers prior to deleting the node.
+
+Profiles:
+  - "krib-operate-delete"
+RunnerWait: true
+Tasks:
+  - "krib-operate"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"
