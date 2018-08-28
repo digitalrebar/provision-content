@@ -27,7 +27,7 @@ part pv.6 --size=1 --grow {{if .ParamExists "operating-system-disk"}}--ondisk={{
 volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
 logvol / --fstype ext4 --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
 text
-reboot
+reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 
 %packages
 @core
