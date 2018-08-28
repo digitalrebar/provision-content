@@ -1,0 +1,28 @@
+---
+Name: "krib-operate-cordon"
+Description: "Cordon operation on a given KRIB built Kubernetes node"
+Documentation: |
+  This stage runs a Cordon operation on a given KRIB built Kubernetes
+  node.  It uses the 'krib-operate-cordon' Profile.
+
+  In addition - you may set the following Params on a Machine object
+  to override the default behaviors of this stage:
+
+    krib/operate-action     - action to take (cordon or uncordon)
+    krib/operate-on-node    - a Kubernetes node name to operate on
+    krib/operate-options    - command line arguments to pass to the
+                              'kubectl' command for the action
+
+  If the 'krib/operate-on-node' Param is empty, the node that is
+  currently running the Stage will be operated on.  Otherwise,
+  specifying an alternate Node allows remote cordon a node.
+
+Profiles:
+  - "krib-operate-cordon"
+RunnerWait: true
+Tasks:
+  - "krib-operate"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

@@ -1,0 +1,20 @@
+---
+Name: "krib-operate-delete"
+Description: "Contains Params that set the krib-operate-delete Stage values to DESTROY a k8s Node."
+Documentation: |
+  This profile contains the default krib-operate task parameters to drive
+  a 'delete' operation.  This profile can be added to a node or stage to
+  allow the krib-operate task to do a delete operation.
+
+  This profile is used by the krib-delete stage to allow a machine to
+  be deleted without changing the parameters on the machine. 
+
+  WARNING: This pattern destroys a kubernetes node.
+
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "Community Content"
+Params:
+  krib/operate-action: "delete"
+
