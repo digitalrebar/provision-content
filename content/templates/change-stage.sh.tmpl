@@ -1,9 +1,10 @@
 #!/bin/bash
+# DEPRECATED - do not use after v3.9
+echo "{{ "this is deprecated!" | upper | repeat 5 }}"
 
 # This will contain a token appropriate for the path being
 # used below.  Either a create or update/show token
 {{template "setup.tmpl" .}}
-
 
 # Get current stage
 CURRENT_STAGE=$(drpcli machines show ${RS_UUID} | jq .Stage -r)
