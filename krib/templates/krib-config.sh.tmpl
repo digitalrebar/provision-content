@@ -29,6 +29,7 @@ if [ ! -f /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables ]; then
 net.bridge.bridge-nf-call-iptables=1
 EOF
   sysctl -p /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables
+
 fi
 VALUE=$(sysctl -n net.bridge.bridge-nf-call-iptables)
 [ $VALUE != 1 ] && sysctl -w net.bridge.bridge-nf-call-iptables=1
@@ -117,7 +118,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     OLD_IFS=$IFS
     IFS=" " ; while read name ; do
-        if kubectl get nodes | egrep -q "^$name[ \t]*Ready"; then
+        # desensitize get nodes to case, if hostname has mix or upper case
+        if kubectl get nodes | tr '[:upper:]' '[:lower:]' | egrep -qi "^$name[ \t]*ready"; then
                 echo "Node $name is ready."
                 HOSTNAME=$name
         else
