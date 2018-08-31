@@ -134,18 +134,27 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   # set labels for nodes
-  echo "Adding builder=lron label to machine $HOSTNAME"
-  kubectl label nodes $HOSTNAME builder=krib
   echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
   kubectl label nodes $HOSTNAME env={{.Param "krib/label-env"}}
+  # using adhoc labels
+  {{if .ParamExists "krib/labels" -}}
+    {{range $key, $value := .Param "krib/labels" -}}
+      echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
+      kubectl label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+    {{end }}
+  {{else -}}
+    echo "use of krib/labels to create adhoc labels"
+  {{end -}}
+  # using inventory
   {{if .ParamExists "inventory/data" -}}
     {{range $key, $value := .Param "inventory/data" -}}
-      echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME"
+      echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from inventory/data"
       kubectl label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
     {{end }}
   {{else -}}
     echo "use of inventory/data to create machine specific labels"
   {{end -}}
+  kubectl get node $HOSTNAME --show-labels
 
   if [[ $MASTER_INDEX == 0 ]] ; then
     echo "Recording 'kubeadm' bootstrap config ..."
@@ -157,7 +166,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "Recording cluster join script ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$JOIN_CMD"
 
-    drpcli machines tasks add {{ .Machine.UUID }} at 0 krib-settings krib-dashboard
+    drpcli machines tasks add {{ .Machine.UUID }} at 0 krib-settings krib-dashboard | jq .Tasks
 
     drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\" }}" | jq .Meta
   else
