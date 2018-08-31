@@ -1,0 +1,20 @@
+---
+Name: "krib/directives"
+Description: "Hash providing additional Helm install directives"
+Documentation: |
+  Used to inject additional control flags into helm install instructions
+  including namespace, wait for up, and extra kubectl commands
+
+  NOTES:
+  * Use krib/label-env to set the env label!
+  * Use inventory/data to set physical characteristics
+Schema:
+  type: "object"
+  items:
+    type: "string"
+  default:
+    builder: "krib"
+  Meta:
+  color: "blue"
+  icon: "tags"
+  title: "Community Content"
