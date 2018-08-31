@@ -133,29 +133,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
     fi
   done
 
-  # set labels for nodes
-  echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
-  kubectl label nodes $HOSTNAME env={{.Param "krib/label-env"}}
-  # using adhoc labels
-  {{if .ParamExists "krib/labels" -}}
-    {{range $key, $value := .Param "krib/labels" -}}
-      echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
-      kubectl label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
-    {{end }}
-  {{else -}}
-    echo "use of krib/labels to create adhoc labels"
-  {{end -}}
-  # using inventory
-  {{if .ParamExists "inventory/data" -}}
-    {{range $key, $value := .Param "inventory/data" -}}
-      echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from inventory/data"
-      kubectl label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
-    {{end }}
-  {{else -}}
-    echo "use of inventory/data to create machine specific labels"
-  {{end -}}
-  kubectl get node $HOSTNAME --show-labels
-
   if [[ $MASTER_INDEX == 0 ]] ; then
     echo "Recording 'kubeadm' bootstrap config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
@@ -191,6 +168,31 @@ while [ ! -f /etc/kubernetes/kubelet.conf ] ;
 do
       sleep 2
 done
+
+# set labels for nodes / runs on all nodes
+drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM > label.conf
+echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
+kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-env"}}
+# using adhoc labels
+{{if .ParamExists "krib/labels" -}}
+  {{range $key, $value := .Param "krib/labels" -}}
+    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
+    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+  {{end }}
+{{else -}}
+  echo "use of krib/labels to create adhoc labels"
+{{end -}}
+# using inventory
+{{if .ParamExists "inventory/data" -}}
+  {{range $key, $value := .Param "inventory/data" -}}
+    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from inventory/data"
+    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+  {{end }}
+{{else -}}
+  echo "use of inventory/data to create machine specific labels"
+{{end -}}
+kubectl --kubeconfig=label.conf get node $HOSTNAME --show-labels
+rm label.conf
 
 # Fix kubelet to use the vip/lb
 {{ if .ParamExists "krib/cluster-master-vip" -}}
