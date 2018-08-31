@@ -1,0 +1,19 @@
+---
+Name: "krib/labels"
+Description: "Hash of labels: values to add to nodes"
+Documentation: |
+  Used for adhoc node specification, labels should be set.
+
+  NOTES:
+  * Use krib/label-env to set the env label!
+  * Use inventory/data to set physical characteristics
+Schema:
+  type: "object"
+  items:
+    type: "string"
+  default:
+    builder: "krib"
+  Meta:
+  color: "blue"
+  icon: "tags"
+  title: "Community Content"
