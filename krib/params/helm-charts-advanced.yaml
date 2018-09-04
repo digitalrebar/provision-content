@@ -1,7 +1,9 @@
 ---
-Name: "helm/directives"
-Description: "Hash providing additional Helm install directives"
+Name: "helm/charts-advanced"
+Description: "Advanced Install for Helm Charts"
 Documentation: |
+  List charts to install via Helm
+
   Used to inject additional control flags into helm install instructions
   including name, namespace, wait (for service up), and extra kubectl commands
 
@@ -9,8 +11,9 @@ Documentation: |
 
     ::
 
-      { "istio":
+      [
         {
+          "chart": "install/kubernetes/helm/istio",
           "params": {
             "name": "istio",
             "namespace": "istio-system",
@@ -21,17 +24,21 @@ Documentation: |
             "name",
             "namespace"
           ],
-          "kubectl-before": [],
-          "kubectl-after": []
+          "kubectl-before": ["get nodes"],
+          "kubectl-after": ["get nodes"]
         }
-      }    
+      ]
 
 Schema:
-  type: "object"
-  properties:
+  type: "array"
+  default: []
+  items:
     type: "object"
-    default: {}
+    required:
+      - "chart"
     properties:
+      chart:
+        type: "string"
       params:
         type: "object"
         default: {}
@@ -66,5 +73,5 @@ Schema:
           type: "string"
 Meta:
   color: "blue"
-  icon: "tags"
+  icon: "map"
   title: "Community Content"

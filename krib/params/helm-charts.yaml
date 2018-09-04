@@ -1,9 +1,12 @@
 ---
 Name: "helm/charts"
-Description: "List charts to run on cluster"
+Description: "List basic charts to run on cluster"
 Documentation: |
   Allows operators to install Charts using Helm stage
   For example, using ["stable/mysql"] will install mysql.
+
+  For advanced control of charts, use helm/charts-advanced!
+
 Schema:
   type: "array"
   items:

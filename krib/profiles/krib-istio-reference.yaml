@@ -13,10 +13,8 @@ Meta:
   render: krib
   reset-keeps: "krib/cluster-profile,etcd/cluster-profile"
 Params:
-  helm/charts: 
-    - install/kubernetes/helm/istio
-  helm/directives:
-    "install/kubernetes/helm/istio":
+  helm/charts-advanced:
+    - chart: "install/kubernetes/helm/istio"
       params:
         name: "istio"
         namespace: "istio-system"
