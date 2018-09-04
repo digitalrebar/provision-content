@@ -9,56 +9,61 @@ Documentation: |
 
     ::
 
-      {
-        "params": {
-          "name": "istio",
-          "namespace": "istio-system",
-          "set": "sidecarInjectorWebhook.enabled=true"
-        },
-        "sleep": 10,
-        "wait": [
-          "name",
-          "namespace"
-        ],
-        "kubectl-before": [],
-        "kubectl-after": []
+      { "istio":
+        {
+          "params": {
+            "name": "istio",
+            "namespace": "istio-system",
+            "set": "sidecarInjectorWebhook.enabled=true"
+          },
+          "sleep": 10,
+          "wait": [
+            "name",
+            "namespace"
+          ],
+          "kubectl-before": [],
+          "kubectl-after": []
+        }
       }    
 
 Schema:
   type: "object"
   properties:
-    params:
-      type: "object"
-      properties:
-        name:
+    type: "object"
+    default: {}
+    properties:
+      params:
+        type: "object"
+        default: {}
+        properties:
+          name:
+            type: "string"
+          repo:
+            type: "string"
+          namespace:
+            type: "string"
+          values:
+            type: "string"
+          set:
+            type: "string"
+      sleep:
+        type: "integer"
+        default: 10
+      wait:
+        type: "array"
+        default: []
+        items:
           type: "string"
-        repo:
+      kubectl-before:
+        type: "array"
+        default: []
+        items:
           type: "string"
-        namespace:
+      kubectl-after:
+        type: "array"
+        default: []
+        items:
           type: "string"
-        values:
-          type: "string"
-        set:
-          type: "string"
-      default: {}
-    sleep:
-      type: "integer"
-      default: 10
-    wait:
-      type: "array"
-      items:
-        type: "string"
-      default: []
-    kubectl-before:
-      type: "array"
-      items:
-        type: "string"
-      default: []
-    kubectl-after:
-      type: "array"
-      items:
-        type: "string"
-      default: []
 Meta:
   color: "blue"
   icon: "tags"
