@@ -1,0 +1,30 @@
+---
+Name: krib-istio-reference
+Description: Reference Istio Helm Profiles
+Documentation: |
+  To be included in Helm-Istio Stage
+  Preforms a typical Istio install via Helm
+  
+  Note: Clone for custom installers
+Meta:
+  color: blue
+  icon: grid layout
+  title: Community Content
+  render: krib
+  reset-keeps: "krib/cluster-profile,etcd/cluster-profile"
+Params:
+  helm/charts: 
+    - install/kubernetes/helm/istio
+  helm/directives: 
+    params:
+      name: "istio"
+      namespace: "istio-system"
+      set: "sidecarInjectorWebhook.enabled=true"
+    sleep: 10
+    wait:
+      - "name"
+      - "namespace"
+    kubectl-before:
+      - "get nodes"
+    kubectl-after:
+      - "get nodes"
