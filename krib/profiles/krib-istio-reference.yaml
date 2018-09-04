@@ -23,7 +23,3 @@ Params:
       wait:
         - "name"
         - "namespace"
-      kubectl-before:
-        - "get nodes"
-      kubectl-after:
-        - "get nodes"

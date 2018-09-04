@@ -34,14 +34,35 @@ if [[ $MASTER_INDEX != notme ]] ; then
     fi
 
     echo "Getting Latest Repos"
+    helm init --client-only
     helm repo update
 
-    echo "Running Helm Install for all helm/charts"
+    echo "Running Simple Helm Install for all helm/charts"
     {{range $index, $chart := .Param "helm/charts"}}
       echo "...installing {{$chart}}"
       helm install {{$chart}}
+      sleep 10
     {{else}}
       echo "No charts included in helm/charts to install"
+    {{end}}
+
+    echo "Running Advanced Helm Install for all helm/charts-advanced"
+    {{range $index, $chart := .Param "helm/charts-advanced"}}
+      echo "...installing {{$chart.chart}} (ADVANCED INSTALL)"
+
+      {{range $index, $before := $chart.kubectlbefore}}
+        kubectl {{$before}}
+      {{end}}
+
+      helm install {{$chart.chart}} {{range $param, $value := $chart.params}}--{{$param}} {{$value}} {{end}}
+      sleep {{$chart.sleep}}
+
+      {{range $index, $after := $chart.kubectlafter}}
+        kubectl {{$after}}
+      {{end}}
+
+    {{else}}
+      echo "No charts included in helm/charts-advanced to install"
     {{end}}
 
   else

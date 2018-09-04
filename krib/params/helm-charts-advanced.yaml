@@ -24,8 +24,8 @@ Documentation: |
             "name",
             "namespace"
           ],
-          "kubectl-before": ["get nodes"],
-          "kubectl-after": ["get nodes"]
+          "kubectlbefore": ["get nodes"],
+          "kubectlafter": ["get nodes"]
         }
       ]
 
@@ -61,12 +61,12 @@ Schema:
         default: []
         items:
           type: "string"
-      kubectl-before:
+      kubectlbefore:
         type: "array"
         default: []
         items:
           type: "string"
-      kubectl-after:
+      kubectlafter:
         type: "array"
         default: []
         items:
