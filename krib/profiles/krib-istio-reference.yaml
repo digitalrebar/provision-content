@@ -14,12 +14,12 @@ Meta:
   reset-keeps: "krib/cluster-profile,etcd/cluster-profile"
 Params:
   helm/charts-advanced:
-    - chart: "install/kubernetes/helm/istio"
+    - chart: istio-1.0.1/install/kubernetes/helm/istio
+      targz: https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz
       params:
         name: "istio"
         namespace: "istio-system"
         set: "sidecarInjectorWebhook.enabled=true"
       sleep: 10
-      wait:
-        - "name"
-        - "namespace"
+      waitname: "istio"
+      waitnamespace: "istio-system"
