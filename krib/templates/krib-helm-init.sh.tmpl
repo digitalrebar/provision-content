@@ -58,9 +58,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
     done
     set -e
 
-    echo "Check versions....(includes 5 second wait for Tiller initialize)"
+    echo "Check versions....(includes 10 second wait for Tiller initialize)"
     # we need some extra time for Tiller to actually initialize
-    sleep 5
+    sleep 10
     helm version
     rm ./get_helm.sh
 

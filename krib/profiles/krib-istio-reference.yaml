@@ -15,11 +15,8 @@ Meta:
 Params:
   helm/charts-advanced:
     - chart: istio-1.0.1/install/kubernetes/helm/istio
+      name: "istio"
       targz: https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz
+      namespace: "istio-system"
       params:
-        name: "istio"
-        namespace: "istio-system"
         set: "sidecarInjectorWebhook.enabled=true"
-      sleep: 10
-      waitname: "istio"
-      waitnamespace: "istio-system"

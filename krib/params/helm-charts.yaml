@@ -5,7 +5,9 @@ Documentation: |
   Allows operators to install Charts using Helm stage
   For example, using ["stable/mysql"] will install mysql.
 
-  For advanced control of charts, use helm/charts-advanced!
+  WARNING: THIS QUICK APPROACH IS NOT IDEPOTENT!
+
+  For advanced & idepotent control of charts, use helm/charts-advanced!
 
 Schema:
   type: "array"
