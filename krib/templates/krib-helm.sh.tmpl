@@ -54,16 +54,18 @@ if [[ $MASTER_INDEX != notme ]] ; then
       curl -L "{{$chart.targz}}" | tar xz
       {{end}}
 
-      helm install {{$chart.chart}} {{range $param, $value := $chart.params}}--{{$param}} {{$value}} {{end}}
+      helm install {{$chart.chart}} --name {{$chart.name}} \
+        {{if $chart.namespace}} --namespace {{$chart.namespace}}{{end}} \
+        {{range $param, $value := $chart.params}} --{{$param}} {{$value}}{{end}}
       sleep {{$chart.sleep}}
 
-      {{if $chart.waitname}}
-      echo "waiting for {{$chart.waitname}}"
+      {{if $chart.name}}
+      echo "waiting for {{$chart.name}}"
       sleep {{$chart.sleep}}
       {{end}}
 
-      {{if $chart.waitnamespace}}
-      echo "waiting for {{$chart.waitnamespace}}"
+      {{if $chart.namespace}}
+      echo "waiting for {{$chart.namespace}}"
       sleep {{$chart.sleep}}
       {{end}}
 
@@ -75,7 +77,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
       echo "No charts included in helm/charts-advanced to install"
     {{end}}
 
-    exit 1
   else
 
     echo "I was not the leader, skipping helm install"

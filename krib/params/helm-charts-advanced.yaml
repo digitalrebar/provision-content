@@ -15,14 +15,12 @@ Documentation: |
         {
           "targz": "https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz",
           "chart": "istio-1.0.1/install/kubernetes/helm/istio",
+          "name": "istio",
+          "namespace": "istio-system",
           "params": {
-            "name": "istio",
-            "namespace": "istio-system",
             "set": "sidecarInjectorWebhook.enabled=true"
           },
           "sleep": 10,
-          "waitname": "istio",
-          "waitnamespace": "istio-system",
           "kubectlbefore": ["get nodes"],
           "kubectlafter": ["get nodes"]
         }
@@ -35,20 +33,21 @@ Schema:
     type: "object"
     required:
       - "chart"
+      - "name"
     properties:
       targz:
         type: "string"
       chart:
         type: "string"
+      name:
+        type: "string"
+      namespace:
+        type: "string"
       params:
         type: "object"
         default: {}
         properties:
-          name:
-            type: "string"
           repo:
-            type: "string"
-          namespace:
             type: "string"
           values:
             type: "string"
