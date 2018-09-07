@@ -33,18 +33,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
       exit 1
     fi
 
-    echo "Running Simple Helm Install for all helm/charts"
+    echo "Running Helm Install for all helm/charts"
     {{range $index, $chart := .Param "helm/charts"}}
-      echo "...installing {{$chart}}"
-      helm install {{$chart}}
-      sleep 10
-    {{else}}
-      echo "No charts included in helm/charts to install"
-    {{end}}
-
-    echo "Running Advanced Helm Install for all helm/charts-advanced"
-    {{range $index, $chart := .Param "helm/charts-advanced"}}
-      echo "...installing {{$chart.chart}} (ADVANCED INSTALL)"
+      echo "...installing {{$chart.name}} (from {{$chart.chart}})"
 
       if [[ -z $(helm list {{$chart.name}}) ]] ; then
 
