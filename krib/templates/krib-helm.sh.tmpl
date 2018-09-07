@@ -33,15 +33,68 @@ if [[ $MASTER_INDEX != notme ]] ; then
       exit 1
     fi
 
-    echo "Getting Latest Repos"
-    helm repo update
-
-    echo "Running Helm Install for all helm/charts"
+    echo "Running Simple Helm Install for all helm/charts"
     {{range $index, $chart := .Param "helm/charts"}}
       echo "...installing {{$chart}}"
       helm install {{$chart}}
+      sleep 10
     {{else}}
       echo "No charts included in helm/charts to install"
+    {{end}}
+
+    echo "Running Advanced Helm Install for all helm/charts-advanced"
+    {{range $index, $chart := .Param "helm/charts-advanced"}}
+      echo "...installing {{$chart.chart}} (ADVANCED INSTALL)"
+
+      if [[ -z $(helm list {{$chart.name}}) ]] ; then
+
+        {{range $index, $before := $chart.kubectlbefore}}
+        kubectl {{$before}}
+        {{end}}
+
+        {{if $chart.targz}}
+        curl -L "{{$chart.targz}}" | tar xz
+        {{end}}
+
+        helm install {{$chart.chart}} --name {{$chart.name}} \
+          {{if $chart.namespace}} --namespace {{$chart.namespace}}{{end}} \
+          {{range $param, $value := $chart.params}} --{{$param}} {{$value}}{{end}}
+
+        {{if $chart.sleep}}
+          echo "sleep {{$chart.sleep}}"
+          sleep {{$chart.sleep}}
+        {{else}}
+          sleep 10s
+        {{end}}
+
+        {{if $chart.name}}
+          echo "FUTURE waiting for {{$chart.name}}"
+          {{if $chart.sleep}}
+            sleep {{$chart.sleep}}
+          {{else}}
+            sleep 10
+          {{end}}
+        {{end}}
+
+        {{if $chart.namespace}}
+          echo "FUTURE waiting for {{$chart.namespace}}"
+          {{if $chart.sleep}}
+            sleep {{$chart.sleep}}
+          {{else}}
+            sleep 10
+          {{end}}
+        {{end}}
+
+        {{range $index, $after := $chart.kubectlafter}}
+        kubectl {{$after}}
+        {{end}}
+
+      else
+        echo "skipping {{$chart.name}}.  It is already installed"
+      fi
+
+    {{else}}
+      echo "No charts included in helm/charts-advanced to install"
     {{end}}
 
   else
