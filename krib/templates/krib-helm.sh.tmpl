@@ -62,6 +62,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
           set +e
           ESCAPE=0
           while [[ $ESCAPE -lt 30 && -z $(helm list {{$chart.name}} | grep DEPLOYED) ]] ; do
+            echo "helm list {{$chart.name}} is not deployed. $ESCAPE"
             {{if $chart.sleep}}
               sleep {{$chart.sleep}}
             {{else}}
@@ -78,6 +79,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
           set +e
           ESCAPE=0
           while [[ $ESCAPE -lt 30 && ! -z $(kubectl get pods --namespace={{$chart.namespace}} | grep ContainerCreating) ]] ; do
+            echo "kubectl get pods --namespace={{$chart.namespace}} is still creating containers. $ESCAPE"
             {{if $chart.sleep}}
               sleep {{$chart.sleep}}
             {{else}}
