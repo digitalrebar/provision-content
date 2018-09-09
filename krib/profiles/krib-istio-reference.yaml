@@ -2,21 +2,18 @@
 Name: krib-istio-reference
 Description: Reference Istio Helm Profiles
 Documentation: |
-  To be included in Helm-Istio Stage
-  Preforms a typical Istio install via Helm
-  
-  Note: Clone for custom installers
+  DO NOT USE THIS PROFILE!
+  Copy the contents of the helm/charts param into the Cluster!
 Meta:
   color: blue
   icon: grid layout
   title: Community Content
-  render: krib
-  reset-keeps: "krib/cluster-profile,etcd/cluster-profile"
 Params:
-  helm/charts-advanced:
+  helm/charts:
     - chart: istio-1.0.1/install/kubernetes/helm/istio
       name: "istio"
       targz: https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz
       namespace: "istio-system"
+      wait: true
       params:
         set: "sidecarInjectorWebhook.enabled=true"

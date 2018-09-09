@@ -33,18 +33,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
       exit 1
     fi
 
-    echo "Running Simple Helm Install for all helm/charts"
+    echo "Running Helm Install for all helm/charts"
     {{range $index, $chart := .Param "helm/charts"}}
-      echo "...installing {{$chart}}"
-      helm install {{$chart}}
-      sleep 10
-    {{else}}
-      echo "No charts included in helm/charts to install"
-    {{end}}
-
-    echo "Running Advanced Helm Install for all helm/charts-advanced"
-    {{range $index, $chart := .Param "helm/charts-advanced"}}
-      echo "...installing {{$chart.chart}} (ADVANCED INSTALL)"
+      echo "Installing {{$chart.name}} (from {{$chart.chart}})..."
 
       if [[ -z $(helm list {{$chart.name}}) ]] ; then
 
@@ -67,34 +58,50 @@ if [[ $MASTER_INDEX != notme ]] ; then
           sleep 10s
         {{end}}
 
-        {{if $chart.name}}
-          echo "FUTURE waiting for {{$chart.name}}"
-          {{if $chart.sleep}}
-            sleep {{$chart.sleep}}
-          {{else}}
-            sleep 10
-          {{end}}
+        {{if $chart.wait}}
+          set +e
+          ESCAPE=0
+          while [[ $ESCAPE -lt 30 && -z $(helm list {{$chart.name}} | grep DEPLOYED) ]] ; do
+            echo "helm list {{$chart.name}} is not deployed. $ESCAPE"
+            {{if $chart.sleep}}
+              sleep {{$chart.sleep}}
+            {{else}}
+              sleep 10
+            {{end}}
+            ((ESCAPE=ESCAPE+1))
+          done
+          set -e
+        {{else}}
+          echo "let's go! I'm not waiting for chart to be ready"
         {{end}}
 
-        {{if $chart.namespace}}
-          echo "FUTURE waiting for {{$chart.namespace}}"
-          {{if $chart.sleep}}
-            sleep {{$chart.sleep}}
-          {{else}}
-            sleep 10
-          {{end}}
+        {{if and $chart.wait $chart.namespace}}
+          set +e
+          ESCAPE=0
+          while [[ $ESCAPE -lt 30 && ! -z $(kubectl get pods --namespace={{$chart.namespace}} | grep ContainerCreating) ]] ; do
+            echo "kubectl get pods --namespace={{$chart.namespace}} is still creating containers. $ESCAPE"
+            {{if $chart.sleep}}
+              sleep {{$chart.sleep}}
+            {{else}}
+              sleep 10
+            {{end}}
+            ((ESCAPE=ESCAPE+1))
+          done
+          set -e
         {{end}}
 
         {{range $index, $after := $chart.kubectlafter}}
         kubectl {{$after}}
         {{end}}
 
+        echo "========= done {{$chart.name}} ==========="
+
       else
         echo "skipping {{$chart.name}}.  It is already installed"
       fi
 
     {{else}}
-      echo "No charts included in helm/charts-advanced to install"
+      echo "No charts included in helm/charts to install"
     {{end}}
 
   else
