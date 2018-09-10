@@ -11,7 +11,9 @@ KRIB uses the `kubeadm <https://kubernetes.io/docs/setup/independent/create-clus
 
 KRIB does also support production, highly available (HA) deployments, with multiple masters.  To enable this configuration, we've chosen to manage the TLS certificates and etcd installation in the Workflow instead of using the kubeadm process.
 
-This document assumes you have your Digital Rebar Provisioning endpoint fully configured, tested, and working.  We assume that you are able to properly provision Machines in your environment as a base level requirement for use of the KRIB content add-on use.
+This document assumes you have your Digital Rebar Provisioning endpoint fully configured, tested, and working.  We assume that you are able to properly provision Machines in your environment as a base level requirement for use of the KRIB content add-on use.  See :ref:`_rs_krib` for step by step instructions.
+
+.. note:: documentation source: https://github.com/digitalrebar/provision-content/blob/master/krib/._Documentation.meta
 
 KRIB Video References
 ---------------------
@@ -67,10 +69,21 @@ Install KRIB
 
 KRIB is a Content Pack and is installed in the standard method as any other Contents.   We need the ``krib.json`` content pack to fully support KRIB and install the helper utility contents for stage changes.
 
+Please review :ref:`_rs_krib` for step by step instructions.
 
 CLI Install
 ===========
 
+KRIB uses the Certs plugin to build TLS, you can install that from the RackN library
+
+  ::
+
+    # download cert plugin provider (installs the plugin autmatically)
+    curl -o certs https://s3-us-west-2.amazonaws.com/rebar-catalog/certs/v2.4.0-0-02301d35f9f664d6c81d904c92a9c81d3fd41d2c/amd64/linux/certs
+    # install plugin provider
+    drpcli plugin_providers upload certs from certs
+    # verify it worked - should return true
+    drpcli plugins show certs | jq .Available
 
 Using the Command Line (`drpcli`) utility configured to your endpoint, use this process:
 
@@ -83,6 +96,8 @@ Using the Command Line (`drpcli`) utility configured to your endpoint, use this 
     # KRIB content install
     drpcli contents bundle krib.yaml
     drpcli contents upload krib.yaml
+
+If KRIB is already installed, you should replace the upload with `drpcli contents update krib krib.yaml`
 
 UX Install
 ==========
@@ -238,12 +253,24 @@ Once the Kubernetes cluster build has been completed, you may use the ``kubectl`
     export KUBECONFIG=`pwd`/admin.conf
     kubectl get nodes
 
-Ingress/Egress Traffic and Dashboard Access
-===========================================
+Advanced Stages - Helm and Sonobuoy
+===================================
+
+KRIB includes stages for advanced Kubernetes operating support.
+
+The reference workflows already install Helm using the `krib-helm` stage.  To leverage this utility simply define the required JSON syntax for your charts as shown in :ref:`krib_helm`.
+
+Sonobuoy can be used to validate that the cluster conforms to community specification.  Adding the `krib-sonobuoy` stage will start a test run.  It can be rerun to collect the results or configured to wait for them.  Storing test results in the `files` path requires setting the `unsafe/password` parameter and is undesirable for production clusters.
+
+
+Ingress/Egress Traffic, Dashboard Access, Istio
+===============================================
 
 The Kubernetes dashboard is enabled within a default KRIB built cluster.  However no Ingress traffic rules are set up.  As such, you must access services from external connections by making changes to Kubernetes, or via the :ref:`rs_k8s_proxy`.
 
 These are all issues relating to managing, operating, and running a Kubernetes cluster, and not restrictions that are imposed by Digital Rebar Provision.  Please see the appropriate Kubernetes documentation on questions regarding operating, running, and administering Kubernetes (https://kubernetes.io/docs/home/).
+
+For Istio via Helm, please consult :ref:`krib_helm` for a reference install
 
 .. _rs_k8s_proxy:
 
