@@ -1,0 +1,6 @@
+menuentry "{{.Env.Name}}" {
+    linux (tftp)/{{.Env.PathFor "tftp" .Env.Kernel}} {{.Env.BootParams}} IPAPPEND=01-${net_default_mac}
+{{range $initrd := .Env.Initrds}}
+    initrd (tftp)/{{$.Env.PathFor "tftp" $initrd}}
+{{end}}
+}

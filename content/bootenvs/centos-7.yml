@@ -4,19 +4,36 @@ Description: "CentOS-7 installer that points to the latest CentOS 7 release."
 OS:
   Family: "redhat"
   Name: "centos-7"
-  IsoFile: "CentOS-7-x86_64-Minimal-1804.iso"
-  IsoSha256: "714acc0aefb32b7d51b515e25546835e55a90da9fb00417fbee2d03a62801efd"
-  IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso"
-Kernel: "images/pxeboot/vmlinuz"
-Initrds:
-  - "images/pxeboot/initrd.img"
-BootParams: >-
-  ksdevice=bootif
-  ks={{.Machine.Url}}/compute.ks
-  method={{.Env.InstallUrl}}
-  inst.geoloc=0
-  --
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  SupportedArchitectures:
+    x86_64:
+      IsoFile: "CentOS-7-x86_64-Minimal-1804.iso"
+      IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1804.iso"
+      Sha256: "714acc0aefb32b7d51b515e25546835e55a90da9fb00417fbee2d03a62801efd"
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    aarch64:
+      Loader: "grubarm64.efi"
+      IsoFile: CentOS-7-aarch64-Minimal-1804.iso
+      Sha256: "c376ac10f3ca4fad28100eb7cb12673b47d6013a32fff721791c2b85b95f88a3"
+      IsoUrl: http://mirror.centos.org/altarch/7/isos/aarch64/CentOS-7-aarch64-Minimal-1804.iso
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"
@@ -40,6 +57,12 @@ Templates:
   - ID: "default-ipxe.tmpl"
     Name: "ipxe-mac"
     Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - ID: "select-kickseed.tmpl"
     Name: "compute.ks"
     Path: "{{.Machine.Path}}/compute.ks"

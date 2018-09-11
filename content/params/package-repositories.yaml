@@ -12,6 +12,11 @@ Documentation: |
       # can be used by all of the RHEL variants of a given generation.
       os:
         - "centos-7"
+      # We also need to know what system architecture this repo is for.
+      # If this repo is valid for all arches (like a Debian or Ubuntu
+      # mirror), this can be set to "any", although it cannot be
+      # an installSource if that is the case
+      arch: x86_64
       # If installSource is true, then the URL points directly
       # to the location we should use for all OS install purposes
       # save for fetching kernel/initrd pairs from (for now, we will
@@ -34,6 +39,7 @@ Documentation: |
       # mirror directory layout for each distro.
       os:
         - centos-7
+      arch: x86_64
       url: "http://mirrors.kernel.org/centos"
       distribution: "7"
       components:
@@ -55,6 +61,7 @@ Documentation: |
     - tag: "debian-9-install"
       os:
         - "debian-9"
+      arch: amd64
       installSource: true
       # Debian URLs always follow the same rules, no matter
       # whether the OS install flag is set.  As such,
@@ -70,6 +77,7 @@ Documentation: |
     - tag: "debian-9-backports"
       os:
         - "debian-9"
+      arch: any
       url: "http://mirrors.kernel.org/debian"
       distribution: stretch-updates
       components:
@@ -79,6 +87,7 @@ Documentation: |
     - tag: "debian-9-security"
       os:
         - "debian-9"
+      arch: any
       url: "http://security.debian.org/debian-security/"
       securitySource: true
       distribution: stretch/updates
@@ -91,11 +100,13 @@ Schema:
     - tag: centos-7
       os:
         - centos-7
+      arch: x86_64
       url: http://mirrors.edge.kernel.org/centos/7/os/x86_64/
       installSource: true
     - tag: centos-7.5.1804
       os:
         - centos-7.5.1804
+      arch: x86_64
       url: http://mirrors.edge.kernel.org/centos/7.5.1804/os/x86_64/
       installSource: true
     - tag: centos-7-everything
@@ -104,6 +115,7 @@ Schema:
         - centos-7.3.1611
         - centos-7.4.1708
         - centos-7.5.1804
+      arch: x86_64
       url: "http://mirrors.edge.kernel.org/centos"
       distribution: "7"
       components:
@@ -122,11 +134,13 @@ Schema:
         - centos-7.3.1611
         - centos-7.4.1708
         - centos-7.5.1804
+      arch: x86_64
       url: http://mirrors.kernel.org/fedora-epel
       distribution: "7"
     - tag: ubuntu-16.04
       os:
         - ubuntu-16.04
+      arch: amd64
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "xenial"
       installSource: true
@@ -139,6 +153,7 @@ Schema:
     - tag: ubuntu-16.04-backports
       os:
         - ubuntu-16.04
+      arch: any
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "xenial-backports"
       components:
@@ -149,6 +164,7 @@ Schema:
     - tag: ubuntu-16.04-updates
       os:
         - ubuntu-16.04
+      arch: any
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "xenial-updates"
       components:
@@ -159,6 +175,7 @@ Schema:
     - tag: ubuntu-16.04-security
       os:
         - ubuntu-16.04
+      arch: any
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "xenial-security"
       securitySource: true
@@ -170,6 +187,7 @@ Schema:
     - tag: ubuntu-18.04
       os:
         - ubuntu-18.04
+      arch: amd64
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "bionic"
       installSource: true
@@ -182,6 +200,7 @@ Schema:
     - tag: ubuntu-18.04-backports
       os:
         - ubuntu-18.04
+      arch: any
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "bionic-backports"
       components:
@@ -192,6 +211,7 @@ Schema:
     - tag: ubuntu-18.04-updates
       os:
         - ubuntu-18.04
+      arch: any
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "bionic-updates"
       securitySource: true
@@ -203,6 +223,7 @@ Schema:
     - tag: ubuntu-18.04-security
       os:
         - ubuntu-18.04
+      arch: any
       url: http://mirrors.edge.kernel.org/ubuntu/
       distribution: "bionic-security"
       components:
@@ -213,6 +234,7 @@ Schema:
     - tag: debian-9-install
       os:
         - "debian-9"
+      arch: amd64
       installSource: true
       url: "http://mirrors.kernel.org/debian"
       distribution: stretch
@@ -224,6 +246,7 @@ Schema:
     - tag: "debian-9-updates"
       os:
         - "debian-9"
+      arch: any
       url: "http://mirrors.kernel.org/debian"
       distribution: stretch-updates
       components:
@@ -233,6 +256,7 @@ Schema:
     - tag: "debian-9-backports"
       os:
         - "debian-9"
+      arch: any
       url: "http://mirrors.kernel.org/debian"
       distribution: stretch-backports
       components:
@@ -242,6 +266,7 @@ Schema:
     - tag: "debian-9-security"
       os:
         - "debian-9"
+      arch: any
       url: "http://security.debian.org/debian-security/"
       securitySource: true
       distribution: stretch/updates
@@ -252,6 +277,7 @@ Schema:
     - tag: debian-8-install
       os:
         - "debian-8"
+      arch: amd64
       installSource: true
       url: "http://mirrors.kernel.org/debian"
       distribution: jessie
@@ -263,6 +289,7 @@ Schema:
     - tag: "debian-8-updates"
       os:
         - "debian-8"
+      arch: any
       url: "http://mirrors.kernel.org/debian"
       distribution: jessie-updates
       components:
@@ -272,6 +299,7 @@ Schema:
     - tag: "debian-8-backports"
       os:
         - "debian-8"
+      arch: any
       url: "http://mirrors.kernel.org/debian"
       distribution: jessie-backports
       components:
@@ -281,6 +309,7 @@ Schema:
     - tag: "debian-8-security"
       os:
         - "debian-8"
+      arch: any
       url: "http://security.debian.org/debian-security/"
       securitySource: true
       distribution: jessie/updates
@@ -291,6 +320,7 @@ Schema:
     - tag: sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc
       os:
         - sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc
+      arch: amd64
       url: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/6122f34b46b5b74b668d6779e33f5fcd0f44a8cc/"
       installSource: true
   type: "array"
@@ -300,6 +330,7 @@ Schema:
       - tag
       - os
       - url
+      - arch
     properties:
       # tag is a unique-ish identifier for this repository.
       # The Repos() method available during template expansion.
@@ -313,6 +344,11 @@ Schema:
         type: array
         items:
           type: string
+      # arch is the system architecture this release should be used for.
+      # It should be specified using whatever arch naming scheme is correct
+      # for the OS distribution.
+      arch:
+        type: string
       # url is the URL of the package repository.
       url:
         type: string

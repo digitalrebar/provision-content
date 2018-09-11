@@ -44,9 +44,75 @@ Templates:
       :chainip
       chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit || goto sledgehammer
       :sledgehammer
-      kernel {{.Env.PathFor "http" .Env.Kernel}} {{.BootParams}} BOOTIF=01-${netX/mac:hexhyp}
-      initrd {{.Env.PathFor "http" (index .Env.Initrds 0)}}
+      chain {{.ProvisionerURL}}/${builtin/buildarch}.ipxe
+  - Name: "ipxe-i386"
+    Path: "i386.ipxe"
+    Contents: |
+      #!ipxe
+      kernel {{.Env.PathForArch "http" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${netX/mac:hexhyp}
+      {{range $initrd := .Env.InitrdsFor "amd64"}}
+      initrd {{.Env.PathForArch "http" $initrd "amd64"}}
+      {{end}}
       boot
+  - Name: "ipxe-x86_64"
+    Path: "x86_64.ipxe"
+    Contents: |
+      #!ipxe
+      kernel {{.Env.PathForArch "http" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${netX/mac:hexhyp}
+      {{range $initrd := .Env.InitrdsFor "amd64"}}
+      initrd {{.Env.PathForArch "http" $initrd "amd64"}}
+      {{end}}
+      boot
+  - Name: "ipxe-arm64"
+    Path: "arm64.ipxe"
+    Contents: |
+      #!ipxe
+      kernel {{.Env.PathForArch "http" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${netX/mac:hexhyp}
+      {{range $initrd := .Env.InitrdsFor "arm64"}}
+      initrd {{.Env.PathForArch "http" $initrd "arm64"}}
+      {{end}}
+      boot
+  - Name: "grub"
+    Path: "grub/grub.cfg"
+    Contents: |
+      if test -s (tftp)/grub/${net_default_mac}.cfg; then
+        echo "Booting via MAC"
+        source (tftp)/grub/${net_default_mac}.cfg
+      elif test -s (tftp)/grub/${net_default_ip}.cfg; then
+        echo "Booting via IP"
+        source (tftp)/grub/${net_default_ip}.cfg
+      else
+        echo "Booting discovery for ${grub_cpu}"
+        source (tftp)/grub/${grub_cpu}.cfg
+      fi
+      boot
+  - Name: "grub-i386"
+    Path: "grub/i386.cfg"
+    Contents: |
+      menuentry "Discovery i386" {
+        linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
+        {{range $initrd := .Env.InitrdsFor "amd64"}}
+        initrd (tftp)/{{.Env.PathForArch "tftp" $initrd "amd64"}}
+        {{end}}
+      }
+  - Name: "grub-x86_64"
+    Path: "grub/x86_64.cfg"
+    Contents: |
+      menuentry "Discovery x86_64" {
+        linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
+        {{range $initrd := .Env.InitrdsFor "amd64"}}
+        initrd (tftp)/{{.Env.PathForArch "tftp" $initrd "amd64"}}
+        {{end}}
+      }
+  - Name: "grub-arm64"
+    Path: "grub/arm64.cfg"
+    Contents: |
+      menuentry "Discovery arm64" {
+        linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
+        {{range $initrd := .Env.InitrdsFor "arm64"}}
+        initrd (tftp)/{{.Env.PathForArch "tftp" $initrd "arm64"}}
+        {{end}}
+      }
   - Name: "start-up.sh"
     Path: "machines/start-up.sh"
     Contents: |
