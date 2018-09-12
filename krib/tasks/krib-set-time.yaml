@@ -4,6 +4,9 @@ Name: "krib-set-time"
 Templates:
   - Contents: |
       #!/bin/bash
+      {{ template "setup.tmpl" }}
+      set -e
+      test ! $(which ntpdate > /dev/null 2>&1) && install ntpdate
       ntpdate -s time.apple.com
     Name: "Set Time"
 Meta:
