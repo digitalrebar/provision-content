@@ -1,0 +1,17 @@
+---
+Name: "rook/data-dir-host-path"
+Description: "Location of Ceph Storage"
+Documentation: |
+  This should be set to match the desired location
+  for Ceph storage.
+
+  Default: /docker
+
+  In future versions, this should be calculated or inferred based on the system inventory
+Schema:
+  type: "string"
+  default: "/docker"
+Meta:
+  color: "blue"
+  icon: "chess rock"
+  title: "Community Content"

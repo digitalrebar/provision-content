@@ -1,6 +1,6 @@
 ---
-Name: krib-istio-reference
-Description: Reference Istio Helm Profiles
+Name: helm-reference
+Description: Reference Helm Profiles (Istio, Rook, etc)
 Documentation: |
   DO NOT USE THIS PROFILE!
   Copy the contents of the helm/charts param into the Cluster!
@@ -19,8 +19,12 @@ Params:
       wait: true
       params:
         set: "sidecarInjectorWebhook.enabled=true"
-    - chart: "rook-beta/rook-ceph"
+    - chart: "rook-ceph"
       name: "rook-ceph"
       namespace: "rook-ceph-system"
-      repo: "rook-beta https://charts.rook.io/beta"
       wait: true
+      targz: "https://charts.rook.io/beta/rook-ceph-v0.8.1.tgz"
+      templates:
+        cluster: helm-rook.cfg.tmpl
+      kubectlafter:
+        - "create -f cluster.yaml"
