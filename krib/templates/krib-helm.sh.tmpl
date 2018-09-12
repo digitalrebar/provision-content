@@ -44,7 +44,13 @@ if [[ $MASTER_INDEX != notme ]] ; then
         {{end}}
 
         {{if $chart.targz}}
+        echo "retrieving chart from {{$chart.targz}}"
         curl -L "{{$chart.targz}}" | tar xz
+        {{end}}
+
+        {{if $chart.repo}}
+        echo "adding chart repo {{$chart.repo}}"
+        helm repo add {{$chart.repo}}
         {{end}}
 
         helm install {{$chart.chart}} --name {{$chart.name}} \

@@ -10,10 +10,17 @@ Meta:
   title: Community Content
 Params:
   helm/charts:
-    - chart: istio-1.0.1/install/kubernetes/helm/istio
+    - chart: "stable/mysql"
+      name: "mysql"
+    - chart: "istio-1.0.1/install/kubernetes/helm/istio"
       name: "istio"
       targz: https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz
       namespace: "istio-system"
       wait: true
       params:
         set: "sidecarInjectorWebhook.enabled=true"
+    - chart: "rook-beta/rook-ceph"
+      name: "rook-ceph"
+      namespace: "rook-ceph-system"
+      repo: "rook-beta https://charts.rook.io/beta"
+      wait: true
