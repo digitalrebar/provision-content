@@ -35,8 +35,17 @@ set -x
 [[ $RS_ENDPOINT ]] || export RS_ENDPOINT="{{.ApiURL}}"
 [[ $RS_UUID ]] || export RS_UUID="{{.Machine.UUID}}"
 
-mkdir -p /usr/local/bin
-grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
+function fixup_path() {
+  local _add_path
+  for _add_path in $(echo $* | sed 's/[:,]/ /g')
+  do
+    mkdir -p $_add_path
+    # inject colons to avoid partial match failures
+    grep -q ":$_add_path" <<< ":$FOO:" || export FOO="$FOO:$_add_path"
+  done
+}
+
+fixup_path /usr/local/bin /usr/sbin /sbin
 
 # TODO: we need to make drpcli/jq grab smarter to be a little
 #       more tolerant of OS arch/type - and grab the right one
