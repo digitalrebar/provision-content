@@ -4,24 +4,45 @@ Description: "The boot environment to use to have unknown machines boot to defau
 OnlyUnknown: true
 OS:
   Family: "redhat"
-  Name: "sledgehammer/a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a"
-  IsoFile: "sledgehammer-a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a.tar"
-  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a/sledgehammer-a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a.tar"
-Kernel: "vmlinuz0"
-Initrds:
-  - "stage1.img"
-BootParams: >-
-  rootflags=loop
-  root=live:/sledgehammer.iso
-  rootfstype=auto
-  ro
-  liveimg
-  rd_NO_LUKS
-  rd_NO_MD
-  rd_NO_DM
-  provisioner.web={{.ProvisionerURL}}
-  --
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  Name: "sledgehammer"
+  SupportedArchitectures:
+    amd64:
+      IsoFile: "sledgehammer-88cf8470e24e0e64e792a46ee424a9486edd1785.amd64.tar"
+      IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-88cf8470e24e0e64e792a46ee424a9486edd1785.amd64.tar"
+      Kernel: "88cf8470e24e0e64e792a46ee424a9486edd1785/vmlinuz0"
+      Initrds:
+        - "88cf8470e24e0e64e792a46ee424a9486edd1785/stage1.img"
+      BootParams: >-
+        rootflags=loop
+        root=live:/sledgehammer.iso
+        rootfstype=auto
+        ro
+        liveimg
+        rd_NO_LUKS
+        rd_NO_MD
+        rd_NO_DM
+        provisioner.web={{.ProvisionerURL}}
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    arm64:
+      Loader: grubarm64.efi
+      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
+      IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
+      Kernel: "9b5276ac5826520829aa73c149fe672fe2363656/vmlinuz0"
+      Initrds:
+        - "9b5276ac5826520829aa73c149fe672fe2363656/stage1.img"
+      BootParams: >-
+        rootflags=loop
+        root=live:/sledgehammer.iso
+        rootfstype=auto
+        ro
+        liveimg
+        rd_NO_LUKS
+        rd_NO_MD
+        rd_NO_DM
+        provisioner.web={{.ProvisionerURL}}
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
   - "kernel-console"
 Templates:
@@ -51,7 +72,7 @@ Templates:
       #!ipxe
       kernel {{.Env.PathForArch "http" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${netX/mac:hexhyp}
       {{range $initrd := .Env.InitrdsFor "amd64"}}
-      initrd {{.Env.PathForArch "http" $initrd "amd64"}}
+      initrd {{$.Env.PathForArch "http" $initrd "amd64"}}
       {{end}}
       boot
   - Name: "ipxe-x86_64"
@@ -60,7 +81,7 @@ Templates:
       #!ipxe
       kernel {{.Env.PathForArch "http" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${netX/mac:hexhyp}
       {{range $initrd := .Env.InitrdsFor "amd64"}}
-      initrd {{.Env.PathForArch "http" $initrd "amd64"}}
+      initrd {{$.Env.PathForArch "http" $initrd "amd64"}}
       {{end}}
       boot
   - Name: "ipxe-arm64"
@@ -68,8 +89,8 @@ Templates:
     Contents: |
       #!ipxe
       kernel {{.Env.PathForArch "http" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${netX/mac:hexhyp}
-      {{range $initrd := .Env.InitrdsFor "arm64"}}
-      initrd {{.Env.PathForArch "http" $initrd "arm64"}}
+      {{range $initrd := (.Env.InitrdsFor "arm64")}}
+      initrd {{$.Env.PathForArch "http" $initrd "arm64"}}
       {{end}}
       boot
   - Name: "grub"
@@ -92,7 +113,7 @@ Templates:
       menuentry "Discovery i386" {
         linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
         {{range $initrd := .Env.InitrdsFor "amd64"}}
-        initrd (tftp)/{{.Env.PathForArch "tftp" $initrd "amd64"}}
+        initrd (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
         {{end}}
       }
   - Name: "grub-x86_64"
@@ -101,7 +122,7 @@ Templates:
       menuentry "Discovery x86_64" {
         linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
         {{range $initrd := .Env.InitrdsFor "amd64"}}
-        initrd (tftp)/{{.Env.PathForArch "tftp" $initrd "amd64"}}
+        initrd (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
         {{end}}
       }
   - Name: "grub-arm64"
@@ -110,7 +131,7 @@ Templates:
       menuentry "Discovery arm64" {
         linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
         {{range $initrd := .Env.InitrdsFor "arm64"}}
-        initrd (tftp)/{{.Env.PathForArch "tftp" $initrd "arm64"}}
+        initrd (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
         {{end}}
       }
   - Name: "start-up.sh"
@@ -191,6 +212,14 @@ Templates:
               fi
           fi
       fi
+      ARCH="$(uname -m)"
+      case $ARCH in
+          amd64|x86_64) ARCH=amd64;;
+          arm64|aarch64) ARCH=arm64;;
+          *)
+              echo "Unknown arch $ARCH"
+              exit 1;;
+      esac
       # Perform minimal required bootstrapping for discovery
       export RS_TOKEN="{{.GenerateToken}}"
       export RS_ENDPOINT="{{.ApiURL}}"
@@ -200,7 +229,7 @@ Templates:
           which "$tool" &>/dev/null && continue
           echo "Installing $tool in /usr/local/bin"
           case $tool in
-              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
+              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
               jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
           esac
           chmod 755 "/usr/local/bin/$tool"
@@ -234,6 +263,7 @@ Templates:
           # Let the annealer do its thing.
           while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
                                                \"Address\": \"$IP\",
+                                               \"Arch\": \"$ARCH\",
                                                \"HardwareAddrs\": $(get_macs)}")"; do
               echo "We could not create a node for ourself, trying again."
               sleep 5

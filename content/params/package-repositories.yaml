@@ -103,6 +103,12 @@ Schema:
       arch: x86_64
       url: http://mirrors.edge.kernel.org/centos/7/os/x86_64/
       installSource: true
+    - tag: centos-7
+      os:
+        - centos-7
+      arch: aarch64
+      url: http://mirror.centos.org/altarch/7/os/aarch64/
+      installSource: true
     - tag: centos-7.5.1804
       os:
         - centos-7.5.1804
@@ -128,14 +134,30 @@ Schema:
         - os
         - rt
         - updates
+    - tag: centos-7-everything
+      os:
+        - centos-7
+        - centos-7.3.1611
+        - centos-7.4.1708
+        - centos-7.5.1804
+      arch: aarch64
+      url: "http://mirror.centos.org/altarch"
+      distribution: "7"
+      components:
+        - centosplus
+        - cr
+        - extras
+        - fasttrack
+        - os
+        - updates
     - tag: epel-7
       os:
         - centos-7
         - centos-7.3.1611
         - centos-7.4.1708
         - centos-7.5.1804
-      arch: x86_64
-      url: http://mirrors.kernel.org/fedora-epel
+      arch: any
+      url: http://mirrors.kernel.org/fedora-epel/7/$basearch
       distribution: "7"
     - tag: ubuntu-16.04
       os:
