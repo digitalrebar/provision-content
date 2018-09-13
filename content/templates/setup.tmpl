@@ -41,7 +41,7 @@ function fixup_path() {
   do
     mkdir -p $_add_path
     # inject colons to avoid partial match failures
-    grep -q ":$_add_path" <<< ":$FOO:" || export FOO="$FOO:$_add_path"
+    grep -q ":$_add_path" <<< ":$PATH:" || export PATH="$PATH:$_add_path"
   done
 }
 
