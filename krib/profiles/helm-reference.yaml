@@ -1,0 +1,30 @@
+---
+Name: helm-reference
+Description: Reference Helm Profiles (Istio, Rook, etc)
+Documentation: |
+  DO NOT USE THIS PROFILE!
+  Copy the contents of the helm/charts param into the Cluster!
+Meta:
+  color: blue
+  icon: grid layout
+  title: Community Content
+Params:
+  helm/charts:
+    - chart: "stable/mysql"
+      name: "mysql"
+    - chart: "istio-1.0.1/install/kubernetes/helm/istio"
+      name: "istio"
+      targz: https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz
+      namespace: "istio-system"
+      wait: true
+      params:
+        set: "sidecarInjectorWebhook.enabled=true"
+    - chart: "rook-ceph"
+      name: "rook-ceph"
+      namespace: "rook-ceph-system"
+      wait: true
+      targz: "https://charts.rook.io/beta/rook-ceph-v0.8.1.tgz"
+      templates:
+        cluster: helm-rook.cfg.tmpl
+      kubectlafter:
+        - "create -f cluster.yaml"

@@ -24,6 +24,8 @@ Documentation: |
   * prekubectl (optional) array of kubectl [request] commands to run before the helm install
   * postkubectl (optional) array of kubectl [request] commands to run after the helm install
   * targz (optional) provides a location for a tar.gz file containing charts to install. Path is relative.
+  * templates (optional) map of DRP templates keyed to the desired names (must be uploaded!) to render before doing other work.
+  * repo (optional) adds the requested repo to the helm using `helm repo add` before installing helm.  syntax is `[repo name] [repo path]`.
 
   example:
 
@@ -65,6 +67,8 @@ Schema:
         type: "string"
       namespace:
         type: "string"
+      repo:
+        type: "string"
       params:
         type: "object"
         default: {}
@@ -81,6 +85,8 @@ Schema:
       wait:
         type: "boolean"
         default: false
+      templates:
+        type: object
       kubectlbefore:
         type: "array"
         default: []

@@ -34,17 +34,33 @@ if [[ $MASTER_INDEX != notme ]] ; then
     fi
 
     echo "Running Helm Install for all helm/charts"
+    {{$render := .}}
     {{range $index, $chart := .Param "helm/charts"}}
       echo "Installing {{$chart.name}} (from {{$chart.chart}})..."
 
       if [[ -z $(helm list {{$chart.name}}) ]] ; then
 
+        {{ range $name, $template := $chart.templates }}
+        echo "expanding template {{$template}} as {{$name}}.yaml"
+        cat > {{$name}}.yaml << EOF
+{{ $render.CallTemplate $template $render }}
+EOF
+        {{end}}
+
         {{range $index, $before := $chart.kubectlbefore}}
+        echo "running kubectl {{$before}} ({{$index}})"
         kubectl {{$before}}
         {{end}}
 
         {{if $chart.targz}}
+        echo "retrieving chart from {{$chart.targz}}"
         curl -L "{{$chart.targz}}" | tar xz
+        {{end}}
+
+        {{if $chart.repo}}
+        echo "adding chart repo {{$chart.repo}}"
+        helm repo add {{$chart.repo}}
+        helm init
         {{end}}
 
         helm install {{$chart.chart}} --name {{$chart.name}} \
@@ -91,6 +107,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
         {{end}}
 
         {{range $index, $after := $chart.kubectlafter}}
+        echo "running kubectl {{$after}} ({{$index}})"
         kubectl {{$after}}
         {{end}}
 
