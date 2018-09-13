@@ -15,6 +15,38 @@ Limitations
 * The current system is hardwired to use eth0
 * DevStack only supports a single master
 
+Installing via the CLI
+----------------------
+
+Before running ROSE, you must install the `Ubuntu 18.04` bootenv (see :ref:`rs_quickstart`)
+
+The following steps will install the required content for ROSE
+
+  ::
+
+    # Get code
+    git clone https://github.com/digitalrebar/provision-content
+    cd provision-content/rose
+
+    # KRIB content install
+    drpcli contents bundle rose.yaml
+    drpcli contents upload rose.yaml
+
+The contents include the `rose-install-cluster` workflow.  Changing a discovered machine's workflow to that workflow will result in an OpenStack deployment.
+
+To set the workflow via the CLI, use `drpcli machines update [machine uuid] '{"Workflow":"rose-install-cluster"}'` with the `[machine uuid]` set correctly.
+
+For more details, please review https://www.youtube.com/watch?v=FbxeYNk3spo.
+
+.. note:: The machine MUST have internet access and sufficient resources (32 Gb RAM) to run DevStack.
+
+Terraform
+---------
+
+You can run ROSE via Terraform on Digital Rebar Provision.  To use Terraform with Digital Rebar, consult :ref:`component_terraform`.
+
+The reference plan can be found at https://github.com/digitalrebar/provision-content/tree/master/integrations/rose
+
 Todo:
 -----
 
