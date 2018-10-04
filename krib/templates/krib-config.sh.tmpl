@@ -57,7 +57,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "# externally defined template specified by 'krib/kubeadm-cfg'" > /tmp/kubeadm.cfg
     echo "# source: '$KC'" >> /tmp/kubeadm.cfg
     T=$(mktemp /tmp/kube.cfg.XXXXXXXXX)
-    curl -fsSL -o $T $KC
+    curl -gfsSL -o $T $KC
     cat $T >> /tmp/kubeadm.cfg && rm -f $T
     {{ end -}}
 
