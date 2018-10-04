@@ -4,9 +4,9 @@ Description: "The boot environment to use to have unknown machines boot to defau
 OnlyUnknown: true
 OS:
   Family: "redhat"
-  Name: "sledgehammer/0ac44f5ec55444cc505312f6dbc85dfc443053d5"
-  IsoFile: "sledgehammer-0ac44f5ec55444cc505312f6dbc85dfc443053d5.tar"
-  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/0ac44f5ec55444cc505312f6dbc85dfc443053d5/sledgehammer-0ac44f5ec55444cc505312f6dbc85dfc443053d5.tar"
+  Name: "sledgehammer/a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a"
+  IsoFile: "sledgehammer-a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a.tar"
+  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a/sledgehammer-a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a.tar"
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
