@@ -4,9 +4,9 @@ Description: "The boot environment to use to have unknown machines boot to defau
 OnlyUnknown: true
 OS:
   Family: "redhat"
-  Name: "sledgehammer/9c1ad5cb7483928e6aba1d93ba363de929169f37"
-  IsoFile: "sledgehammer-9c1ad5cb7483928e6aba1d93ba363de929169f37.tar"
-  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9c1ad5cb7483928e6aba1d93ba363de929169f37/sledgehammer-9c1ad5cb7483928e6aba1d93ba363de929169f37.tar"
+  Name: "sledgehammer/a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a"
+  IsoFile: "sledgehammer-a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a.tar"
+  IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a/sledgehammer-a6ea7c254acdbf7050fcd1b2d756471ceb4b2b1a.tar"
 Kernel: "vmlinuz0"
 Initrds:
   - "stage1.img"
@@ -134,8 +134,8 @@ Templates:
           which "$tool" &>/dev/null && continue
           echo "Installing $tool in /usr/local/bin"
           case $tool in
-              drpcli) curl -sfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
-              jq)     curl -sfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
+              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
+              jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
           esac
           chmod 755 "/usr/local/bin/$tool"
       done
@@ -153,9 +153,14 @@ Templates:
           # If we did not get a hostname from DHCP, generate one for ourselves.
           [[ $HOSTNAME ]] || HOSTNAME="d${MAC//:/-}.${DOMAIN}"
           IP=""
-          bootdev_ip_re='inet ([0-9.]+)/([0-9]+)'
-          if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip_re ]]; then
+          bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
+          bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
+          if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
               IP="${BASH_REMATCH[1]}"
+          else
+              if [[ $(ip -6 -o addr show dev $BOOTDEV) =~ $bootdev_ip6_re ]]; then
+                  IP="${BASH_REMATCH[1]}"
+              fi
           fi
 
           # Create a new node for us,
@@ -183,7 +188,7 @@ Templates:
       # Force reliance on DNS
       echo '127.0.0.1 localhost' >/etc/hosts
 
-      if ! curl -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
+      if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
           grep -q '^exit 0$' /tmp/control.sh && \
           head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
           echo "Could not load our control.sh!"

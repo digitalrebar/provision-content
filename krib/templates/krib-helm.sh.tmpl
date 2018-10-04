@@ -54,7 +54,7 @@ EOF
 
         {{if $chart.targz}}
         echo "retrieving chart from {{$chart.targz}}"
-        curl -L "{{$chart.targz}}" | tar xz
+        curl -gL "{{$chart.targz}}" | tar xz
         {{end}}
 
         {{if $chart.repo}}

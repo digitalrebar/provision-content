@@ -53,8 +53,8 @@ for tool in drpcli jq; do
     which "$tool" &>/dev/null && continue
     echo "Installing $tool in /usr/local/bin"
     case $tool in
-        drpcli) curl -sfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
-        jq)     curl -sfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
+        drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
+        jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
     esac
     chmod 755 "/usr/local/bin/$tool"
 done
