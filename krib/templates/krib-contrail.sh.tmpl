@@ -5,23 +5,7 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
-
-# TEMPORARY HACK ON ALL MACHINES- inkect the registery
-cat <<EOF >>/etc/docker/daemon.json
-{
-"insecure-registries": ["{{.Param "contrail/docker-registery"}}"]
-}
-EOF
-service docker restart
-
-#K8S_MASTER_IP=x.x.x.x;
-#sed "s/{{ K8S_MASTER_IP }}/$K8S_MASTER_IP/g"
-# on master only
-mkdir -pm 777 /var/lib/contrail/kafka-logs;
-kubectl apply -f contrail-single-step-cni-install-centos.yaml
-
-
-echo "Run helm install on the master (skip for minions)..."
+echo "Run Contrail install on the master (skip for minions)..."
 
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
@@ -33,109 +17,36 @@ exit 1
 
 {{template "krib-lib.sh.tmpl" .}}
 
+# TEMPORARY SUPER HACK ON ALL MACHINES- inject the registery
+cat <<EOF >>/etc/docker/daemon.json
+{
+"insecure-registries": ["{{.Param "contrail/docker-registery"}}"]
+}
+EOF
+# THIS REALLY SHOULD BE DONE INSIDE DOCKER INSTALL TO AVOID RESTART!!!
+service docker restart
+sleep 10
+
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX != notme ]] ; then
 
   if [[ $MASTER_INDEX == 0 ]] ; then
 
-    echo "I am the elected leader - I can run helm for the cluster"
+    echo "I am the elected leader - I can run Contrail install for the cluster"
 
     # help requires the admin config
     export KUBECONFIG="/etc/kubernetes/admin.conf"
-    echo "Making sure Tiller is running"
-    if [[ -z $(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller) ]] ; then
-      echo "Tiller NOT running - something went wrong with helm init"
-      exit 1
-    fi
 
-    echo "Running Helm Install for all helm/charts"
-    {{$render := .}}
-    {{range $index, $chart := .Param "helm/charts"}}
-      echo "Installing {{$chart.name}} (from {{$chart.chart}})..."
+    # TODO check if exists first
+    mkdir -pm 777 /var/lib/contrail/kafka-logs;
+    kubectl apply -f contrail-single-step-cni-install-centos.yaml
 
-      if [[ -z $(helm list {{$chart.name}}) ]] ; then
+    # WAIT FOR A LITTLE
+    sleep 10
 
-        {{ range $name, $template := $chart.templates }}
-        echo "expanding template {{$template}} as {{$name}}.yaml"
-        cat > {{$name}}.yaml << EOF
-{{ $render.CallTemplate $template $render }}
-EOF
-        {{end}}
-
-        {{range $index, $before := $chart.kubectlbefore}}
-        echo "running kubectl {{$before}} ({{$index}})"
-        kubectl {{$before}}
-        {{end}}
-
-        {{if $chart.targz}}
-        echo "retrieving chart from {{$chart.targz}}"
-        curl -gL "{{$chart.targz}}" | tar xz
-        {{end}}
-
-        {{if $chart.repo}}
-        echo "adding chart repo {{$chart.repo}}"
-        helm repo add {{$chart.repo}}
-        helm init
-        {{end}}
-
-        helm install {{$chart.chart}} --name {{$chart.name}} \
-          {{if $chart.namespace}} --namespace {{$chart.namespace}}{{end}} \
-          {{range $param, $value := $chart.params}} --{{$param}} {{$value}}{{end}}
-
-        {{if $chart.sleep}}
-          echo "sleep {{$chart.sleep}}"
-          sleep {{$chart.sleep}}
-        {{else}}
-          sleep 10s
-        {{end}}
-
-        {{if $chart.wait}}
-          set +e
-          ESCAPE=0
-          while [[ $ESCAPE -lt 30 && -z $(helm list {{$chart.name}} | grep DEPLOYED) ]] ; do
-            echo "helm list {{$chart.name}} is not deployed. $ESCAPE"
-            {{if $chart.sleep}}
-              sleep {{$chart.sleep}}
-            {{else}}
-              sleep 10
-            {{end}}
-            ((ESCAPE=ESCAPE+1))
-          done
-          set -e
-        {{else}}
-          echo "let's go! I'm not waiting for chart to be ready"
-        {{end}}
-
-        {{if and $chart.wait $chart.namespace}}
-          set +e
-          ESCAPE=0
-          while [[ $ESCAPE -lt 30 && ! -z $(kubectl get pods --namespace={{$chart.namespace}} | grep ContainerCreating) ]] ; do
-            echo "kubectl get pods --namespace={{$chart.namespace}} is still creating containers. $ESCAPE"
-            {{if $chart.sleep}}
-              sleep {{$chart.sleep}}
-            {{else}}
-              sleep 10
-            {{end}}
-            ((ESCAPE=ESCAPE+1))
-          done
-          set -e
-        {{end}}
-
-        {{range $index, $after := $chart.kubectlafter}}
-        echo "running kubectl {{$after}} ({{$index}})"
-        kubectl {{$after}}
-        {{end}}
-
-        echo "========= done {{$chart.name}} ==========="
-
-      else
-        echo "skipping {{$chart.name}}.  It is already installed"
-      fi
-
-    {{else}}
-      echo "No charts included in helm/charts to install"
-    {{end}}
+    # CHECK STATUS - really should loop and check
+    contrail-status
 
   else
 

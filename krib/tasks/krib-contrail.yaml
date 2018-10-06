@@ -4,6 +4,7 @@ Name: "krib-contrail"
 Documentation: |
   Installs Contrail via kubectl from the contrail.cfg template.
   Runs on the master only.
+  Template replies on the cluster VIP as the master IP address
 RequiredParams:
 OptionalParams:
 Templates:
