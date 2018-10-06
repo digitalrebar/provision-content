@@ -40,7 +40,8 @@ kind: ConfigMap
 metadata:
   name: nodemgr-config
   namespace: kube-system
-data:
+data:echo "Hacking Docker to add registery {{.Param "contrail/docker-registery"}}"
+
   DOCKER_HOST: "unix://mnt/docker.sock"
 ---
 apiVersion: v1
