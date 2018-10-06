@@ -8,7 +8,7 @@ Documentation: |
 RequiredParams:
 OptionalParams:
 Templates:
-  - ID: "krib-contrail.cfg.tmpl"
+  - ID: "contrail.cfg.tmpl"
     Name: "Contrail Config"
     Path: "contrail-single-step-cni-install-centos.yaml"
   - ID: "krib-contrail.sh.tmpl"

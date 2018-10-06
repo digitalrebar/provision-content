@@ -40,7 +40,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     # TODO check if exists first
     mkdir -pm 777 /var/lib/contrail/kafka-logs;
-    kubectl apply -f contrail-single-step-cni-install-centos.yaml
+    kubectl apply -f ./contrail-single-step-cni-install-centos.yaml
 
     # WAIT FOR A LITTLE
     sleep 10
