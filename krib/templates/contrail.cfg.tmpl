@@ -33,15 +33,13 @@ metadata:
   namespace: kube-system
 data:
   ZOOKEEPER_PORT: "2182"
-
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nodemgr-config
   namespace: kube-system
-data:echo "Hacking Docker to add registery {{.Param "contrail/docker-registery"}}"
-
+data:
   DOCKER_HOST: "unix://mnt/docker.sock"
 ---
 apiVersion: v1
