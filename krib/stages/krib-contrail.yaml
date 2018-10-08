@@ -10,6 +10,6 @@ RunnerWait: true
 Tasks:
   - "krib-contrail"
 Meta:
-  icon: "grid"
+  icon: "plane"
   color: "blue"
   title: "Community Content"

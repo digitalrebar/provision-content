@@ -15,7 +15,7 @@ Templates:
     Name: "kubectl Contrail"
     Path: ""
 Meta:
-  icon: "grid"
+  icon: "plane"
   color: "blue"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

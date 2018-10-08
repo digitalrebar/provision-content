@@ -9,6 +9,6 @@ Schema:
   default: "ci-repo.englab.juniper.net:5010"
 Meta:
   color: "blue"
-  icon: "book"
+  icon: "plane"
   title: "Community Content"
   render: "semver"
