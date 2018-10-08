@@ -17,18 +17,6 @@ exit 1
 
 {{template "krib-lib.sh.tmpl" .}}
 
-# TEMPORARY SUPER HACK ON ALL MACHINES- inject the registery
-echo "Hacking Docker to add registery {{.Param "contrail/docker-registery"}}"
-cat <<EOF >>/etc/docker/daemon.json
-{
-"insecure-registries": ["{{.Param "contrail/docker-registery"}}"]
-}
-EOF
-# THIS REALLY SHOULD BE DONE INSIDE DOCKER INSTALL TO AVOID RESTART!!!
-service docker restart
-sleep 10
-echo "Docker Bounced"
-
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX != notme ]] ; then
