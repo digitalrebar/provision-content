@@ -1,0 +1,15 @@
+---
+Name: "krib-contrail"
+Description: "KRIB install Contrail on the cluster"
+Documentation: |
+  Installs and runs Contrail kubectl install
+
+  CURRENTLY CENTOS ONLY
+  see: https://github.com/Juniper/contrail-kubernetes-docs/blob/master/install/kubernetes/standalone-kubernetes-centos.md
+RunnerWait: true
+Tasks:
+  - "krib-contrail"
+Meta:
+  icon: "plane"
+  color: "blue"
+  title: "Community Content"

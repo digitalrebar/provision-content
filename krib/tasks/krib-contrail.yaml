@@ -1,0 +1,21 @@
+---
+Description: "A task to install Contrail"
+Name: "krib-contrail"
+Documentation: |
+  Installs Contrail via kubectl from the contrail.cfg template.
+  Runs on the master only.
+  Template replies on the cluster VIP as the master IP address
+RequiredParams:
+OptionalParams:
+Templates:
+  - ID: "contrail.cfg.tmpl"
+    Name: "Contrail Config"
+    Path: "contrail-single-step-cni-install-centos.yaml"
+  - ID: "krib-contrail.sh.tmpl"
+    Name: "kubectl Contrail"
+    Path: ""
+Meta:
+  icon: "plane"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

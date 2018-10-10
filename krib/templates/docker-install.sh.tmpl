@@ -23,6 +23,18 @@ case $OS_FAMILY in
 esac
 
 install $DOCKER_PKG
+
+{{if .ParamExists "docker/daemon"}}
+echo "Creating /etc/docker/daemon.json file from Param docker/daemon"
+cat <<EOF >/etc/docker/daemon.json
+{{.ParamAsJSON "docker/daemon"}}
+EOF
+cat /etc/docker/daemon.json
+{{else}}
+echo "Skipping custom etc/docker/daemon.json: No docker/daemon defined"
+{{end}}
+
+echo "Starting Docker Service"
 service $DOCKER_SVC_NAME enable
 service $DOCKER_SVC_NAME start
 
