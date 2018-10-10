@@ -4,11 +4,11 @@ Description: "Special Docker Config Values"
 Documentation: |
   Provide a custom /etc/docker/daemon.json
   See https://docs.docker.com/engine/reference/commandline/dockerd/
+  For example:
+    ::
+      {"insecure-registries":["ci-repo.englab.juniper.net:5010"]}
 Schema:
   type: "object"
-  default:
-    insecure-registries:
-      - "ci-repo.englab.juniper.net:5010"
   properties:
     insecure-registries:
       type: "array"

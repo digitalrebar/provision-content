@@ -17,6 +17,10 @@ exit 1
 
 {{template "krib-lib.sh.tmpl" .}}
 
+echo "test pull contrail-nodemgr..."
+sudo docker pull docker.io/opencontrailnightly/contrail-nodemgr:latest
+# TODO: ENSURE CONTRAIL REGISTERY IS AVAILABLE
+
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX != notme ]] ; then
@@ -36,17 +40,18 @@ if [[ $MASTER_INDEX != notme ]] ; then
     sleep 10
 
     # CHECK STATUS - really should loop and check
-    contrail-status
+    # TODO download contrail-status CLI
+    # contrail-status
 
   else
 
-    echo "I was not the leader, skipping helm install"
+    echo "I was not the leader, skipping contrail install"
 
   fi
 
 else
 
-  echo "I am a worker - no helm actions"
+  echo "I am a worker - no contrail actions"
 
 fi
 
