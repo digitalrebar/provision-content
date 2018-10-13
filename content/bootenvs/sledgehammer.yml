@@ -9,7 +9,7 @@ OS:
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-958745f088207052846423e755093d2ac7c7986.amd64.tar"
+      IsoFile: "sledgehammer-958745f088207052846423e755093d2ac7c7986b.amd64.tar"
       IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/958745f088207052846423e755093d2ac7c7986b/sledgehammer-958745f088207052846423e755093d2ac7c7986b.amd64.tar"
       Kernel: "958745f088207052846423e755093d2ac7c7986b/vmlinuz0"
       Initrds:
