@@ -47,13 +47,22 @@ function fixup_path() {
 
 fixup_path /usr/local/bin /usr/sbin /sbin
 
+arch=$(uname -m)
+case $arch in
+    x86_64|amd64) arch="amd64";;
+    arm64|aarch64) arch="arm64";;
+    *)
+        echo "Unknown arch $(uname -m)"
+        exit 1;;
+esac
+
 # TODO: we need to make drpcli/jq grab smarter to be a little
 #       more tolerant of OS arch/type - and grab the right one
 for tool in drpcli jq; do
     which "$tool" &>/dev/null && continue
     echo "Installing $tool in /usr/local/bin"
     case $tool in
-        drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.amd64.linux";;
+        drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$arch.linux";;
         jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
     esac
     chmod 755 "/usr/local/bin/$tool"

@@ -8,6 +8,7 @@ Documentation: |
 
 Schema:
   type: "string"
+  default: 'console=ttyS0,115200 console=tty0'
 
 Meta:
   icon: "desktop"
