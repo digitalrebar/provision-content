@@ -1,0 +1,11 @@
+---
+Name: "cloud/instance-id"
+Description: "Cloud Instance ID"
+Documentation: |
+  The ID reference from cloud provider
+Schema:
+  type: "string"
+Meta:
+  icon: "hashtag"
+  color: "blue"
+  title: "Digital Rebar Community Content"
