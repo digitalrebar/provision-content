@@ -1,0 +1,41 @@
+---
+Name:  "aws-discover"
+Description: "A task to discover AWS metadata of a node automatically."
+Documentation: |
+  Collect information about AWS cloud
+Templates:
+  - Name: "Discover packet metadata"
+    Path: "aws-discover-metadata.sh"
+    Contents: |
+      #!/bin/bash
+
+      # This will contain a token appropriate for the path being
+      # used below.  Either a create or update/show token
+      export RS_UUID="{{.Machine.UUID}}"
+      export RS_TOKEN="{{.GenerateToken}}"
+
+      # Ubuntu Path is different than Centos Path - fix it.
+      export PATH=$PATH:/usr/bin:/usr/sbin:/bin:/sbin
+
+      INSTANCEID=$(curl -sfL http://169.254.169.254/latest/meta-data/instance-id)
+      echo "Looking for AWS Instance ID, found \"$INSTANCEID\""
+
+      if [[ $INSTANCEID != "" && $INSTANCEID != "null" ]] ; then
+          drpcli machines set $RS_UUID param cloud/provider to "AWS" 
+          drpcli machines set $RS_UUID param cloud/instance-id to "$INSTANCEID" 
+
+          for key in public-ipv4 public-ipv6 instance-type placement/availability-zone; do
+              echo "Getting cloud/$key from API"
+              value=$(curl -sfL http://169.254.169.254/latest/meta-data/${key})
+              drpcli machines set $RS_UUID param cloud/$key to "$value" 
+          done
+          unset key
+      else
+          echo "Could not find a AWS Instance ID - Skipping"
+      fi
+      exit 0
+Meta:
+  icon: "cloud"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

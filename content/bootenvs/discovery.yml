@@ -194,7 +194,7 @@ Templates:
           echo "Machine $HOSTNAME exists with UUID $RS_UUID"
       else
           echo "Machine $HOSTNAME not found.  Adding..."
-          MYIP="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+          MYIP="$(curl http://169.254.169.254/latest/meta-data/private-ipv4)"
           MAC="$(curl http://169.254.169.254/latest/meta-data/mac)"
           CLOUD="aws"
           INSTANCEID="$(curl http://169.254.169.254/latest/meta-data/instance-id)"
@@ -206,11 +206,6 @@ Templates:
                                                \"Address\": \"$MYIP\",
                                                \"Arch\": \"$ARCH\",
                                                \"Meta\": {\"icon\":\"cloud\"},
-                                               \"Params\": {
-                                                \"cloud/provider\":\"$CLOUD\",
-                                                \"cloud/instance-type\":\"$INSTANCETYPE\",
-                                                \"cloud/instance-id\":\"$INSTANCEID\"
-                                              },
                                                \"HardwareAddrs\": [\"$MAC\"]}")"; do
               echo "We could not create a node for ourself, trying again."
               sleep 5
