@@ -139,7 +139,7 @@ Templates:
     Contents: |
       #!/bin/bash
       # Register Cloud Machines into Digital Rebar
-      # Copyright 2017, RackN
+      # Copyright 2018, RackN
       #
       # Licensed under the Apache License, Version 2.0 (the "License");
       # you may not use this file except in compliance with the License.
@@ -155,8 +155,19 @@ Templates:
       #
 
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-      PROVISIONER_WEB="{{.ProvisionerURL}}"
 
+      # to be generic, we do NOT assume access to cloud provider APIs to determine things
+      get_macs() {
+          local maclist=""
+          local nic=""
+          for nic in /sys/class/net/*; do
+              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
+              maclist="$maclist,\"$(cat "$nic/address")\""
+          done
+          printf '[%s]' "${maclist#,}"
+      }
+
+      PROVISIONER_WEB="{{.ProvisionerURL}}"
       ARCH="$(uname -m)"
       case $ARCH in
           amd64|x86_64) ARCH=amd64;;
@@ -181,39 +192,36 @@ Templates:
       done
       unset tool
 
-      # This only works for AWS - add other cloud types!!
-      HOSTNAME="$(curl http://169.254.169.254/latest/meta-data/public-hostname)"
-
-      # Lookup UUID
-      echo "$(drpcli machines list)"
-      JSON="$(drpcli machines list Name=\"${HOSTNAME}\")"
-
-      # See if we have already been created (array has 1 element).
-      if [[ $(jq length==1 <<< $JSON) == "true" ]]; then
-          RS_UUID="$(jq -r '.[0].Uuid' <<< "$JSON")"
-          echo "Machine $HOSTNAME exists with UUID $RS_UUID"
+      # Code assumes provider has set HOSTNAME correctly!!
+      # See if we have already been created based on dropping uuid file
+      if [[ -f ~/.digital-rebar.uuid ]]; then
+          RS_UUID="$(tail -n 1 ~/.digital-rebar.uuid)"
+          echo "Machine $HOSTNAME using UUID $RS_UUID based on ~/.digital-rebar.uuid file"
       else
-          echo "Machine $HOSTNAME not found.  Adding..."
-          MYIP="$(curl http://169.254.169.254/latest/meta-data/private-ipv4)"
-          MAC="$(curl http://169.254.169.254/latest/meta-data/mac)"
-          CLOUD="aws"
-          INSTANCEID="$(curl http://169.254.169.254/latest/meta-data/instance-id)"
-          INSTANCETYPE="$(curl http://169.254.169.254/latest/meta-data/instance-type)"
+          echo "Machine UUID file not found.  Adding $HOSTNAME..."
+          IP=""
+          bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
+          bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
+          if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
+              IP="${BASH_REMATCH[1]}"
+          else
+              if [[ $(ip -6 -o addr show dev $BOOTDEV) =~ $bootdev_ip6_re ]]; then
+                  IP="${BASH_REMATCH[1]}"
+              fi
+          fi
           # Create a new node for us,
-          # Add the default noderoles we will need, and
-          # Let the annealer do its thing.
           while ! JSON="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                               \"Address\": \"$MYIP\",
+                                               \"Address\": \"$IP\",
                                                \"Arch\": \"$ARCH\",
                                                \"Meta\": {\"icon\":\"cloud\"},
-                                               \"HardwareAddrs\": [\"$MAC\"]}")"; do
+                                               \"HardwareAddrs\": $(get_macs)}")"; do
               echo "We could not create a node for ourself, trying again."
               sleep 5
           done
           RS_UUID="$(jq -r '.Uuid' <<< "$JSON")"
+          echo "${RS_UUID}" > ~/.digital-rebar.uuid
           echo "Machine $HOSTNAME added with UUID $RS_UUID"
       fi
-      echo "${RS_UUID}" > /etc/rs-uuid
 
       {{template "profile.tmpl" .}}
 
@@ -359,8 +367,6 @@ Templates:
           fi
 
           # Create a new node for us,
-          # Add the default noderoles we will need, and
-          # Let the annealer do its thing.
           while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
                                                \"Address\": \"$IP\",
                                                \"Arch\": \"$ARCH\",

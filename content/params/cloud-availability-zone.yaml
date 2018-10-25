@@ -1,6 +1,6 @@
 ---
-Name: "cloud/region"
-Description: "Cloud Region / Availability Zone"
+Name: "cloud/placement/availability-zone"
+Description: "Cloud Availability Zone"
 Documentation: |
   The location of resource assigned by the cloud provider
 Schema:
