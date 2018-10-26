@@ -1,0 +1,16 @@
+---
+Name: start-over
+Description: "Tells sledgehammer to reset the task list on startup."
+Documentation: |
+  Allows the operator to control if booting into sledgehammer should
+  reset the task list on boot up.  This allows things like
+  bios update scripts to set the start-over flag to false and
+  issue a reboot command and start over either at the
+  current task or the next one.
+Schema:
+  type: boolean
+  default: true
+Meta:
+  icon: "repeat"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
