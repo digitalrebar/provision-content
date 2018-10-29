@@ -192,14 +192,17 @@ Templates:
       done
       unset tool
 
+      set -x
+
       # Code assumes provider has set HOSTNAME correctly!!
       # See if we have already been created based on dropping uuid file
-      if [[ -f ~/.digital-rebar.uuid ]]; then
-          RS_UUID="$(tail -n 1 ~/.digital-rebar.uuid)"
-          echo "Machine $HOSTNAME using UUID $RS_UUID based on ~/.digital-rebar.uuid file"
+      if [[ -f /etc/rs-uuid ]]; then
+          RS_UUID="$(tail -n 1 /etc/rs-uuid)"
+          echo "Machine $HOSTNAME using UUID $RS_UUID based on /etc/rs-uuid file"
       else
           echo "Machine UUID file not found.  Adding $HOSTNAME..."
           IP=""
+          BOOTDEV="eth0"
           bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
           bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
           if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
@@ -219,7 +222,7 @@ Templates:
               sleep 5
           done
           RS_UUID="$(jq -r '.Uuid' <<< "$JSON")"
-          echo "${RS_UUID}" > ~/.digital-rebar.uuid
+          echo "${RS_UUID}" > /etc/rs-uuid
           echo "Machine $HOSTNAME added with UUID $RS_UUID"
       fi
 

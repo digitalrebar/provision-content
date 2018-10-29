@@ -1,11 +1,11 @@
 ---
 Name: "cloud/public-ipv4"
-Description: "Cloud Public IPv4 Address"
+Description: "Cloud Public IP Address"
 Documentation: |
   Address assigned by the Cloud Provider
 Schema:
   type: "string"
 Meta:
-  icon: "address"
+  icon: "map pin"
   color: "blue"
   title: "Digital Rebar Community Content"
