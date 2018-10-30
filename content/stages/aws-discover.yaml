@@ -1,0 +1,12 @@
+---
+Name: "aws-discover"
+Description: "Stage to dynamically determine if machine is in AWS and record metadata"
+Documentation: |
+  Collect information about AWS cloud
+RunnerWait: true
+Tasks:
+  - "aws-discover"
+Meta:
+  icon: "cloud"
+  color: "yellow"
+  title: "RackN Content"
