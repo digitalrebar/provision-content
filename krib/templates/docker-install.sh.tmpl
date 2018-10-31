@@ -11,18 +11,8 @@ echo "Linking the docker working directory into place."
 ln -s {{.Param "docker/working-dir"}} /var/lib/docker
 {{end -}}
 
-case $OS_FAMILY in
-  debian)
-    DOCKER_PKG=docker.io
-    DOCKER_SVC_NAME=docker
-    ;;
-  rhel)
-    DOCKER_PKG=docker
-    DOCKER_SVC_NAME=docker
-    ;;
-esac
-
-install $DOCKER_PKG
+# Get latest docker...
+curl -fsSL https://get.docker.com/ | sh
 
 {{if .ParamExists "docker/daemon"}}
 echo "Creating /etc/docker/daemon.json file from Param docker/daemon"
@@ -35,8 +25,8 @@ echo "Skipping custom etc/docker/daemon.json: No docker/daemon defined"
 {{end}}
 
 echo "Starting Docker Service"
-service $DOCKER_SVC_NAME enable
-service $DOCKER_SVC_NAME start
+service docker enable
+service docker start
 
 echo "Docker installed successfully"
 exit 0
