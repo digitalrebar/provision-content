@@ -45,7 +45,7 @@ function fixup_path() {
   done
 }
 
-fixup_path /usr/local/bin /usr/sbin /sbin
+fixup_path /usr/local/bin /usr/sbin /sbin /opt/bin
 
 arch=$(uname -m)
 case $arch in
@@ -56,18 +56,25 @@ case $arch in
         exit 1;;
 esac
 
+INSTALL_DIR=/usr/local/bin
+if grep -q coreos /etc/os-release ; then
+  INSTALL_DIR=/opt/bin
+fi
+mkdir -p $INSTALL_DIR
+
 # TODO: we need to make drpcli/jq grab smarter to be a little
 #       more tolerant of OS arch/type - and grab the right one
 for tool in drpcli jq; do
     which "$tool" &>/dev/null && continue
-    echo "Installing $tool in /usr/local/bin"
+    echo "Installing $tool in $INSTALL_DIR"
     case $tool in
-        drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$arch.linux";;
-        jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
+        drpcli) curl -gsfLo "$INSTALL_DIR/$tool" "{{.ProvisionerURL}}/files/drpcli.$arch.linux";;
+        jq)     curl -gsfLo "$INSTALL_DIR/$tool" "{{.ProvisionerURL}}/files/jq";;
     esac
-    chmod 755 "/usr/local/bin/$tool"
+    chmod 755 "$INSTALL_DIR/$tool"
 done
 unset tool
+unset INSTALL_DIR
 
 if [[ -r ./helper ]]; then
     . ./helper

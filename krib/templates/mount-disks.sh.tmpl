@@ -12,12 +12,17 @@ drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"sh
 # This will test for sledgehammer and if found use the first disk
 # as docker filesystem.
 
-BE=$(/usr/local/bin/drpcli machines show $RS_UUID | jq -r .BootEnv)
-if [[ $BE != sledgehammer ]] ; then
-    echo "Not in sledgehammer - do not do anything"
+BE=$(drpcli machines show $RS_UUID | jq -r .BootEnv)
+case $BE in
+  sledgehammer)
+    ;;
+  coreos-*-live)
+    ;;
+  *)
+    echo "Not in valid operating system - do not do anything"
     exit 0
-fi
-
+    ;;
+esac
 
 GETDISK=$(lsblk | grep "disk" | awk '{ print $1 }' | head -1)
 echo "Found /dev/$GETDISK - using ..."

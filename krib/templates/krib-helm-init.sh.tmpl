@@ -38,7 +38,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
     # todo: provide more options for installing helm
     curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
     chmod 700 get_helm.sh
-    ./get_helm.sh -v {{.Param "helm/version"}}
+    INSTALL_DIR=/usr/local/bin
+    if [[ $OS_FAMILY == coreos ]] ; then
+      INSTALL_DIR=/opt/bin
+    fi
+    HELM_INSTALL_DIR=$INSTALL_DIR ./get_helm.sh -v {{.Param "helm/version"}}
 
     echo "Create tiller service account"
     kubectl create -f tiller-rbac.yaml

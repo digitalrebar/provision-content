@@ -11,8 +11,10 @@ echo "Linking the docker working directory into place."
 ln -s {{.Param "docker/working-dir"}} /var/lib/docker
 {{end -}}
 
-# Get latest docker...
-curl -fsSL https://get.docker.com/ | sh
+if ! which docker ; then
+  # Get latest docker...
+  curl -fsSL https://get.docker.com/ | sh
+fi
 
 {{if .ParamExists "docker/daemon"}}
 echo "Creating /etc/docker/daemon.json file from Param docker/daemon"
