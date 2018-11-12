@@ -7,12 +7,18 @@ set -e
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
 {{if .ParamExists "docker/working-dir" -}}
-echo "Linking the docker working directory into place."
-ln -s {{.Param "docker/working-dir"}} /var/lib/docker
+# Only do this if it exists.
+# if it isn't setup, don't use it.
+if [[ -e {{.Param "docker/working-dir"}} ]] ; then
+  echo "Linking the docker working directory into place."
+  ln -s {{.Param "docker/working-dir"}} /var/lib/docker
+fi
 {{end -}}
 
-# Get latest docker...
-curl -fsSL https://get.docker.com/ | sh
+if ! which docker ; then
+  # Get latest docker...
+  curl -fsSL https://get.docker.com/ | VERSION={{.Param "docker/version"}} sh
+fi
 
 {{if .ParamExists "docker/daemon"}}
 echo "Creating /etc/docker/daemon.json file from Param docker/daemon"

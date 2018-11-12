@@ -1,0 +1,14 @@
+---
+Name: "krib/cluster-cni-version"
+Description: "Define what version of Kubernetes CNI utilities to install."
+Documentation: |
+  Allows operators to specify the version of the Kubernetes CNI utilities to
+  install.
+
+Schema:
+  type: "string"
+  default: "v0.6.0"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

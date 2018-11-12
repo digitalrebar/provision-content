@@ -6,46 +6,30 @@ set -e
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
+CNI_VERSION="{{ .Param "krib/cluster-cni-version" }}"
+CRICTL_VERSION="{{ .Param "krib/cluster-crictl-version" }}"
+RELEASE="{{ .Param "krib/cluster-kubernetes-version" }}"
+
 echo "Install kubelet, kubeadm, and kubectl ... "
 
-# needs investigating before being used
-## crictl is a dependency for Kubernetes now - but it's not available in
-## any pkg repos as of June 6 2018
-## yeah, this should be a param ... but ... really it should be in the pkg repos
-#SRC="https://github.com/kubernetes-incubator/cri-tools/releases/download"
-#CRICTL="v1.0.0-beta.1/crictl-v1.0.0-beta.1-linux-amd64.tar.gz"
-#MY_CRI="/tmp/crictl.tar.gz"
-#
-#curl -fSL -o $MY_CRI $SRC/$CRICTL
-#cd /usr/local/bin/
-#tar -xzvf $MY_CRI
-#chmod 755 ./crictl
-#rm -f $MY_CRI
+INSTALL_DIR=/usr/bin
 
 case $OS_FAMILY in
   debian)
-    apt-get update && apt-get install -y apt-transport-https
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-    cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-deb http://apt.kubernetes.io/ kubernetes-xenial main
-EOF
-    apt-get update
-    apt-get install -y kubelet kubeadm kubectl
+    if ! which socat ; then
+      install socat
+    fi
     ;;
   rhel)
-    cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
+    # Fix kernel config ref for kubeadm if missing
+    if [[ ! -e /boot/config-$(uname -r) ]] ; then
+      yum install -y kernel-devel
+      ln -s /usr/src/kernels/$(uname -r)/.config /boot/config-$(uname -r)
+    fi
 
-    # Fix kernel config ref for kubeadm
-    yum install -y kernel-devel
-    ln -s /usr/src/kernels/$(uname -r)/.config /boot/config-$(uname -r)
+    if ! which socat ; then
+      install socat
+    fi
 
     # Fix hostname lookup
     echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
@@ -55,10 +39,31 @@ EOF
     else
         setenforce 0
     fi
-    yum install -y kubelet kubeadm kubectl
-    systemctl enable kubelet && systemctl start kubelet
+    ;;
+  coreos)
+    # Fix hostname lookup
+    echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
+
+    INSTALL_DIR=/opt/bin
     ;;
 esac
+
+mkdir -p ${INSTALL_DIR}
+mkdir -p /opt/cni/bin
+
+curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
+
+curl -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" | tar -C ${INSTALL_DIR} -xz
+
+cd ${INSTALL_DIR}
+curl -L --remote-name-all https://storage.googleapis.com/kubernetes-release/release/${RELEASE}/bin/linux/amd64/{kubeadm,kubelet,kubectl}
+chmod +x {kubeadm,kubelet,kubectl}
+
+curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/build/debs/kubelet.service" | sed "s:/usr/bin:$INSTALL_DIR:g" > /etc/systemd/system/kubelet.service
+mkdir -p /etc/systemd/system/kubelet.service.d
+curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/build/debs/10-kubeadm.conf" | sed "s:/usr/bin:$INSTALL_DIR:g" > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+systemctl enable kubelet && systemctl start kubelet
 
 echo "Finished successfully"
 exit 0

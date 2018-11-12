@@ -134,8 +134,13 @@ IFS=" " ; while read ip ; do
 done <<< $(get_param "etcd/servers" | jq -r '.[].Address')
 IFS=$OLD_IFS
 
+INSTALL_DIR=/usr/local/bin
+if [[ $OS_FAMILY == coreos ]] ; then
+  INSTALL_DIR=/opt/bin
+fi
+
 echo "Installing etcd v{{.Param "etcd/version"}} (set in Param etcd/version)"
-curl -sSL https://github.com/coreos/etcd/releases/download/v{{.Param "etcd/version"}}/etcd-v{{.Param "etcd/version"}}-linux-amd64.tar.gz | tar -xz --strip-components=1 -C /usr/local/bin/
+curl -sSL https://github.com/coreos/etcd/releases/download/v{{.Param "etcd/version"}}/etcd-v{{.Param "etcd/version"}}-linux-amd64.tar.gz | tar -xz --strip-components=1 -C ${INSTALL_DIR}
 rm -rf etcd-v{{.Param "etcd/version"}}-linux-amd64*
 
 touch /etc/etcd.env
@@ -157,7 +162,7 @@ RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
 
-  ExecStart=/usr/local/bin/etcd --name ${ETCD_NAME} --data-dir /docker/etcd --listen-client-urls https://{{.Machine.Address}}:${ETCD_CLIENT_PORT},http://127.0.0.1:${ETCD_CLIENT_PORT} --advertise-client-urls https://{{.Machine.Address}}:${ETCD_CLIENT_PORT} --listen-peer-urls https://{{.Machine.Address}}:${ETCD_PEER_PORT},http://127.0.0.1:${ETCD_PEER_PORT} --initial-advertise-peer-urls https://{{.Machine.Address}}:${ETCD_PEER_PORT} --cert-file=/etc/kubernetes/pki/etcd/server.pem --key-file=/etc/kubernetes/pki/etcd/server-key.pem --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem --initial-cluster ${ETCD_URLS} --initial-cluster-token my-etcd-token --initial-cluster-state new
+  ExecStart=${INSTALL_DIR}/etcd --name ${ETCD_NAME} --data-dir /docker/etcd --listen-client-urls https://{{.Machine.Address}}:${ETCD_CLIENT_PORT},http://127.0.0.1:${ETCD_CLIENT_PORT} --advertise-client-urls https://{{.Machine.Address}}:${ETCD_CLIENT_PORT} --listen-peer-urls https://{{.Machine.Address}}:${ETCD_PEER_PORT},http://127.0.0.1:${ETCD_PEER_PORT} --initial-advertise-peer-urls https://{{.Machine.Address}}:${ETCD_PEER_PORT} --cert-file=/etc/kubernetes/pki/etcd/server.pem --key-file=/etc/kubernetes/pki/etcd/server-key.pem --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem --initial-cluster ${ETCD_URLS} --initial-cluster-token my-etcd-token --initial-cluster-state new
 
 [Install]
 WantedBy=multi-user.target

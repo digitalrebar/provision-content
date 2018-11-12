@@ -1,16 +1,6 @@
-BootEnv: "sledgehammer"
 Description: "Mark KRIB Live Boot cluster completed and wait for jobs."
-Errors: []
 Meta:
   color: "green"
   icon: "hand paper"
   title: "KRIB Demo Content - krib-live-wait"
 Name: "krib-live-wait"
-OptionalParams: []
-Profiles: []
-ReadOnly: true
-Reboot: false
-RequiredParams: []
-RunnerWait: true
-Tasks: []
-Templates: []

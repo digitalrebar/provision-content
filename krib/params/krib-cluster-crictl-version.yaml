@@ -1,0 +1,14 @@
+---
+Name: "krib/cluster-crictl-version"
+Description: "Define what version of Kubernetes CRICTL utility to install."
+Documentation: |
+  Allows operators to specify the version of the Kubernetes CRICTL utility to
+  install.
+
+Schema:
+  type: "string"
+  default: "v1.11.1"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
