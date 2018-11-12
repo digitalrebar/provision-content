@@ -16,12 +16,20 @@ INSTALL_DIR=/usr/bin
 
 case $OS_FAMILY in
   debian)
-    # Nothing special for debian
+    if ! which socat ; then
+      install socat
+    fi
     ;;
   rhel)
-    # Fix kernel config ref for kubeadm
-    yum install -y kernel-devel
-    ln -s /usr/src/kernels/$(uname -r)/.config /boot/config-$(uname -r)
+    # Fix kernel config ref for kubeadm if missing
+    if [[ ! -e /boot/config-$(uname -r) ]] ; then
+      yum install -y kernel-devel
+      ln -s /usr/src/kernels/$(uname -r)/.config /boot/config-$(uname -r)
+    fi
+
+    if ! which socat ; then
+      install socat
+    fi
 
     # Fix hostname lookup
     echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
