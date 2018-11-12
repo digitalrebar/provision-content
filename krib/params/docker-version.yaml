@@ -1,0 +1,12 @@
+---
+Name: "docker/version"
+Description: "Docker Version to use for Kubernetes"
+Documentation: |
+  "Docker Version to use for Kubernetes"
+Schema:
+  type: "string"
+  default: "18.06-ce"
+Meta:
+  color: "blue"
+  icon: "pocket"
+  title: "Community Content"

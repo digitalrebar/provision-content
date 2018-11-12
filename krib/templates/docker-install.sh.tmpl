@@ -17,7 +17,7 @@ fi
 
 if ! which docker ; then
   # Get latest docker...
-  curl -fsSL https://get.docker.com/ | sh
+  curl -fsSL https://get.docker.com/ | VERSION={{.Param "docker/version"}} sh
 fi
 
 {{if .ParamExists "docker/daemon"}}
