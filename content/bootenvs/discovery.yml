@@ -7,11 +7,11 @@ OS:
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-8940e1b4f8e0a649c34e9ac7432dbc7a3dfb7573.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/8940e1b4f8e0a649c34e9ac7432dbc7a3dfb7573/sledgehammer-8940e1b4f8e0a649c34e9ac7432dbc7a3dfb7573.amd64.tar"
-      Kernel: "8940e1b4f8e0a649c34e9ac7432dbc7a3dfb7573/vmlinuz0"
+      IsoFile: "sledgehammer-fe5b0dc9c4a89c186d9827da6d045a58a8800a6b.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/fe5b0dc9c4a89c186d9827da6d045a58a8800a6b/sledgehammer-fe5b0dc9c4a89c186d9827da6d045a58a8800a6b.amd64.tar"
+      Kernel: "fe5b0dc9c4a89c186d9827da6d045a58a8800a6b/vmlinuz0"
       Initrds:
-        - "8940e1b4f8e0a649c34e9ac7432dbc7a3dfb7573/stage1.img"
+        - "fe5b0dc9c4a89c186d9827da6d045a58a8800a6b/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -364,7 +364,7 @@ Templates:
           if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
               IP="${BASH_REMATCH[1]}"
           else
-              if [[ $(ip -6 -o addr show dev $BOOTDEV) =~ $bootdev_ip6_re ]]; then
+              if [[ $(ip -6 -o addr show dev $BOOTDEV | grep "scope global" | head -1) =~ $bootdev_ip6_re ]]; then
                   IP="${BASH_REMATCH[1]}"
               fi
           fi
