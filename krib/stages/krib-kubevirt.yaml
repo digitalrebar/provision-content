@@ -1,0 +1,16 @@
+---
+Name: "krib-kubevirt"
+Description: "KRIB install KubeVirt.io on the cluster"
+Documentation: |
+  Installs KubeVirt.io using the chosen release from the cluster leader.
+  This stage is idempotent and can be run multiple times.
+  This allows operators to create workflows with multiple instances of this stage.
+
+  Due to yaml and container downloads, this stage requires internet access.
+RunnerWait: true
+Tasks:
+  - "krib-kubevirt"
+Meta:
+  icon: "cloud"
+  color: "blue"
+  title: "Community Content"
