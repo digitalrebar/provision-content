@@ -5,12 +5,9 @@ Documentation: |
   Installs KubeVirt on the leader.
   This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set.
 
-  SUPPORTED FOR CENTOS ONLY AT THIS TIME
+  The install checks to see if KubeVirt is running and may skip initialization.
 
-  The install checks
-  #. to make sure ALL nodes in system are virtualization capable
-  #. to see if KubeVirt is running and may skip initialization. 
-  #. you may need to add `intel_iommu=on` to the kernel-console param
+  Recommend: you may want to add `intel_iommu=on` to the kernel-console param
 
   The Config is provided from the kubevirt-configmap.cfg.tmpl template 
   instead of being downloaded from github.  Version updates should be reflected in the template.
