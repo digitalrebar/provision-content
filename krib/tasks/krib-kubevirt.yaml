@@ -36,17 +36,7 @@ Templates:
       # Get access and who we are.
       {{template "setup.tmpl" .}}
 
-      # make sure that we can run qemu
-      {{if (eq "centos" .Env.OS.Family) -}}
-      echo "CentOS ONLY at this time!"
-      exit 1
-      {{end -}}
-      for v in virt-install virt-top libguestfs-tools; do
-        echo "------------ Installing $v ----------------"
-        yum install -y $v
-      done
-      systemctl start libvirtd
-      systemctl enable chronyd && systemctl start chronyd
+      echo "Attempting to Virt Validate Host"
       echo "YOU MAY NEED TO add `intel_iommu=on` to your kernel-console param"
       # this is for information only, we do NOT fail if the tests fail
       virt-host-validate qemu && true
