@@ -1,0 +1,86 @@
+---
+Description: "A task to install KubeVirt"
+Name: "krib-kubevirt"
+Documentation: |
+  Installs KubeVirt on the leader.
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set.
+
+  The install checks to see if KubeVirt is running and may skip initialization.
+
+  Recommend: you may want to add `intel_iommu=on` to the kernel-console param
+
+  The Config is provided from the kubevirt-configmap.cfg.tmpl template 
+  instead of being downloaded from github.  Version updates should be reflected in the template.
+  This approach allows for parameterization of the configuration map.
+
+  The kubectl tasks only run on the leader so it must be included in the workflow.  All other
+  machines will run virt-host-validate so it is important to run the task on all machines
+  in the cluster.
+
+  At this time, virtctl is NOT installed on cluster
+RequiredParams:
+  - krib/cluster-profile
+OptionalParams:
+Templates:
+  - Name: "Config for KubeVirt"
+    ID: "kubevirt.cfg.tmpl"
+    Path: "kubevirt.yaml"
+  - Name: krib-kubevirt
+    Contents: |-
+      #!/bin/bash
+      set -e
+
+      # Get access and who we are.
+      {{template "setup.tmpl" .}}
+
+      echo "Attempting to Virt Validate Host"
+      echo "YOU MAY NEED TO add `intel_iommu=on` to your kernel-console param"
+      # this is for information only, we do NOT fail if the tests fail
+      virt-host-validate qemu && true
+
+      # create the pods required
+      echo "Configure KubeVirt on the leader (skip for workers)..."
+
+      {{if .ParamExists "krib/cluster-profile" -}}
+      CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+      PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+      {{else -}}
+      echo "Missing krib/cluster-profile on the machine!"
+      exit 1
+      {{end -}}
+
+      {{template "krib-lib.sh.tmpl" .}}
+
+      MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+      echo "My Master index is $MASTER_INDEX"
+      if [[ $MASTER_INDEX != notme ]] ; then
+
+        if [[ $MASTER_INDEX == 0 ]] ; then
+
+          echo "I am the elected leader - install KubeVirt"
+          export KUBECONFIG="/etc/kubernetes/admin.conf"
+
+          # is KubeVirt running?
+          STAT=$(kubectl get pods -n kube-system -l=kubevirt.io=virt-handler --field-selector=status.phase=Running)
+          ESCAPE=0
+
+          # install KubeVirt
+          while [[ $ESCAPE -lt 30 && -z $STAT ]] ; do
+            kubectl apply -f kubevirt.yaml
+            STAT=$(kubectl get pods -n kube-system -l=kubevirt.io=virt-handler --field-selector=status.phase=Running)
+            echo "...waiting 10s for KubeVirt.io Handler to be running ($ESCAPE of 30)"
+            kubectl get pods -n kube-system -l=kubevirt.io=virt-handler
+            sleep 10
+            ((ESCAPE=ESCAPE+1))
+          done
+
+          echo "KubeVirt installed"
+
+        fi
+
+      fi
+Meta:
+  icon: "cloud"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
