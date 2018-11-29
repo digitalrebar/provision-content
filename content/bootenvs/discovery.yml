@@ -165,6 +165,9 @@ Templates:
       # To use this script start your machine with:
       #   #!/bin/bash
       #   curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
+      #
+      # This comment allows this script to function as a Cumulus ZTP script.
+      # CUMULUS-AUTOPROVISIONING
 
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
