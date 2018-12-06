@@ -7,7 +7,7 @@ Documentation: |
 
 Schema:
   type: "string"
-  default: "v1.12.2"
+  default: "v1.12.3"
 Meta:
   color: "blue"
   icon: "book"
