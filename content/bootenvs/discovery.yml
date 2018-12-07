@@ -16,11 +16,11 @@ OS:
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-fe5b0dc9c4a89c186d9827da6d045a58a8800a6b.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/fe5b0dc9c4a89c186d9827da6d045a58a8800a6b/sledgehammer-fe5b0dc9c4a89c186d9827da6d045a58a8800a6b.amd64.tar"
-      Kernel: "fe5b0dc9c4a89c186d9827da6d045a58a8800a6b/vmlinuz0"
+      IsoFile: "sledgehammer-fb0acd4a69aaf525ad6c0c99c3f8630fef2fddc0.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/fb0acd4a69aaf525ad6c0c99c3f8630fef2fddc0/sledgehammer-fb0acd4a69aaf525ad6c0c99c3f8630fef2fddc0.amd64.tar"
+      Kernel: "fb0acd4a69aaf525ad6c0c99c3f8630fef2fddc0/vmlinuz0"
       Initrds:
-        - "fe5b0dc9c4a89c186d9827da6d045a58a8800a6b/stage1.img"
+        - "fb0acd4a69aaf525ad6c0c99c3f8630fef2fddc0/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
