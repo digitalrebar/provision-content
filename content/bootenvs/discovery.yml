@@ -209,11 +209,20 @@ Templates:
 
       set -x
 
-      # Code assumes provider has set HOSTNAME correctly!!
-      RS_UUID=$(drpcli machines list Name=$HOSTNAME | jq -r .[0].Uuid)
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        RS_UUID=$(drpcli machines show Name:$HOSTNAME | jq -r .Uuid)
+      # Check just in case we pxe booted.
+      host_re='rs\.uuid=([^ ]+)'
+      if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
+        RS_UUID="${BASH_REMATCH[1]}"
       fi
+
+      # Check Hostname to find us
+      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
+        RS_UUID=$(drpcli machines list Name=$HOSTNAME | jq -r .[0].Uuid)
+        if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
+          RS_UUID=$(drpcli machines show Name:$HOSTNAME | jq -r .Uuid)
+        fi
+      fi
+
       # If no uuid, check to see if we have one stored from before
       if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
         # See if we have already been created based on dropping uuid file
