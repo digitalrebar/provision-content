@@ -4,9 +4,9 @@ Description: "CentOS 6 install bootenv that references the latest release"
 OS:
   Family: "redhat"
   Name: "centos-6"
-  IsoFile: "CentOS-6.9-x86_64-bin-DVD1.iso"
-  IsoSha256: "d27cf37a40509c17ad70f37bc743f038c1feba00476fe6b69682aa424c399ea6"
-  IsoUrl: "http://mirrors.kernel.org/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-bin-DVD1.iso"
+  IsoFile: "CentOS-6.10-x86_64-bin-DVD1.iso"
+  IsoSha256: "a68e46970678d4d297d46086ae2efdd3e994322d6d862ff51dcce25a0759e41c"
+  IsoUrl: "http://mirrors.edge.kernel.org/centos/6.10/isos/x86_64/CentOS-6.10-x86_64-bin-DVD1.iso"
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
