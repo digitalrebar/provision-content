@@ -79,6 +79,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
+        kubectl apply -f {{ .Param "provider/calico-etcd-config" }}
         kubectl apply -f {{ .Param "provider/calico-config" }}
         ;;
 
@@ -216,4 +217,3 @@ rm -f /tmp/kubeadm.cfg
 
 echo "Finished successfully"
 exit 0
-

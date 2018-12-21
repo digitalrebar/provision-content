@@ -1,13 +1,13 @@
 ---
-Name: "provider/calico-config"
-Description: "Calico config YAML to apply if using Calico Network Provider"
+Name: "provider/calico-etcd-config"
+Description: "Calico etcd config YAML to apply if using Calico Network Provider"
 Documentation: |
   Set this string to an HTTP or HTTPS reference for a YAML configuration to
   use for the Calico network provider.  If Calico is not installed, this
   Param will have no effect on the cluster.
 Schema:
   type: "string"
-  default: "https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml"
+  default: "https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/etcd.yaml"
 Meta:
   color: "blue"
   icon: "ship"
