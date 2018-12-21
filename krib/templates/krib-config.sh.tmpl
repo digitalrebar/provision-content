@@ -79,7 +79,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
-        kubectl apply -f {{ .Param "provider/calico-etcd-config" }}
+        curl -gfsSL {{ .Param "provider/calico-etcd-config" }} | sed "s/clusterIP: 10.96.232.136/clusterIP: ${{ .Param "provider/calico-etcd-clusterip" }}/g" | kubectl apply -f -
         kubectl apply -f {{ .Param "provider/calico-config" }}
         ;;
 
