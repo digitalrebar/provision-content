@@ -2,7 +2,7 @@
 Description: "A task to force the machine to switch to DRP hosted-only centos repos."
 Name: "centos-drp-only-repos"
 OptionalParams:
-  - "local-repo"
+  - "package-repositories"
 Templates:
   - ID: "centos-drp-only-repos.sh.tmpl"
     Name: "Force node to install from drp hosted repos"
