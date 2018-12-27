@@ -78,17 +78,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     case $NET_TYPE in
       calico)
-        {{ if .Param "provider/calico-etcd-clusterip" -}}
-        echo "Substituting calico etcd cluster ip address..."
+        echo "Starting calico networking..."
         curl -gfsSL {{ .Param "provider/calico-etcd-config" }} | sed "s/clusterIP: 10.96.232.136/clusterIP: {{ .Param "provider/calico-etcd-clusterip" }}/g" | kubectl apply -f -
-        echo "Starting calico networking..."
-        curl -gfsSL {{ .Param "provider/calico-config" }} | sed "s#etcd_endpoints: \"http://10.96.232.136:6666\"#etcd_endpoints: \"http://{{ .Param "provider/calico-etcd-clusterip" }}:6666\"#g" | kubectl apply -f -
-        {{else -}}
-        echo "Starting calico networking..."
-        kubectl apply -f {{ .Param "provider/calico-config" }}
-        {{ end -}}
-        ;;
-
+        curl -gfsSL {{ .Param "provider/calico-config" }} | sed "s#etcd_endpoints: \"http://10.96.232.136:6666\"#etcd_endpoints: \"http://{{ .Param "provider/calico-etcd-clusterip" }}:6666\"#g; s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" | kubectl apply -f -
       flannel)
         echo "Starting flannel networking..."
         kubectl apply -f {{ .Param "provider/flannel-config" }}
@@ -182,7 +174,7 @@ AC=$(wait_for_variable $KRIB_ADMIN_CONF_PARAM)
 # set labels for nodes / runs on all nodes
 drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM > label.conf
 # Re-set HOSTNAME to kubernetes node name
-HOSTNAME=$(kubectl --kubeconfig=label.conf get nodes | cut -d" " -f1 | grep -i $(hostname -s) )
+HOSTNAME=$(kubectl --kubeconfig=label.conf get nodes | cut -d" " -f1 | grep -i $(hostname -s))
 echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
 kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-env"}} --overwrite=true
 # using adhoc labels
