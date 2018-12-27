@@ -1,0 +1,15 @@
+---
+Name: "metallb/limits-cpu"
+Description: "CPU resource limits for MetalLB"
+Documentation: |
+  This should be set to match the cpu 
+  resource limits for MetalLB
+  
+  Default: 100m
+Schema:
+  type: "string"
+  default: 100m  
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"
