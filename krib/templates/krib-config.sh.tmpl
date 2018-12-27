@@ -80,7 +80,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
       calico)
         echo "Starting calico networking..."
         curl -gfsSL {{ .Param "provider/calico-config" }} | sed "s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" | kubectl apply -f -
-        kubectl apply -f {{ .Param "provider/calicoctl-config" }}
         ;;
       flannel)
         echo "Starting flannel networking..."
