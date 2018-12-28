@@ -277,6 +277,13 @@ For Istio via Helm, please consult :ref:`krib_helm` for a reference install
 Kubernetes Dashboard via Proxy
 ==============================
 
+You can get the admin-user security token with the following command:
+  ::
+  
+    kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
+    
+Now copy the token from the token part printed on-screen so you can paste it into the ``Enter token`` field of the dashboard log in screen.    
+
 Once you have obtained the ``admin.conf`` configuration file and security tokens, you may use ``kubectl`` in Proxy mode to the Master.  Simply open a separate terminal/console session to dedicate to the Proxy connection, and do:
   ::
 
@@ -284,7 +291,7 @@ Once you have obtained the ``admin.conf`` configuration file and security tokens
 
 Now, in a local web browser (on the same machine you executed the Proxy command) open the following URL:
 
-    https://127.0.0.1:8001/ui
+    http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
 
 
 Multiple Clusters
