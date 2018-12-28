@@ -136,8 +136,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
   if [[ $MASTER_INDEX == 0 ]] ; then
 {{if eq (.Param "krib/cluster-masters-untainted") true}}
-	echo "Removing taint from master nodes ..."
-	kubectl taint nodes --all node-role.kubernetes.io/master-
+    echo "Removing taint from master nodes ..."
+    kubectl taint nodes --all node-role.kubernetes.io/master-
 	
 {{end}}    
     echo "Recording 'kubeadm' bootstrap config ..."
