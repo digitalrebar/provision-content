@@ -209,7 +209,7 @@ MASTER_VIP={{ .Param "krib/cluster-master-vip" }}
 MASTER_COUNT={{ .Param "krib/cluster-master-count" }}
 API_PORT={{ .Param "krib/cluster-api-port" }}
 if [[ $MASTER_COUNT -gt 1 ]] ; then
-  API_PORT={{ .Param "krib/cluster-api-vip-port" }}   
+  API_PORT={{ .Param "krib/cluster-api-vip-port" }}
 fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet
