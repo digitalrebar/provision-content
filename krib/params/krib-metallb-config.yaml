@@ -1,0 +1,13 @@
+---
+Name: "krib/metallb-config"
+Description: "Specifies the YAML config file url to use for MetalLB install."
+Documentation: |
+  Set this string to an HTTP or HTTPS reference for a YAML configuration to
+  use for MetalLB install.  
+Schema:
+  type: "string"
+  default: "https://raw.githubusercontent.com/google/metallb/master/manifests/metallb.yaml"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

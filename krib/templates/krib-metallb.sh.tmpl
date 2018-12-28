@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Install MetalLB
+set -e
+set -x
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# these need to be before krib-lib template
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing etcd/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+  if ! which wget ; then
+    install wget
+  fi
+  
+  wget -O /tmp/metallb.yaml {{ .Param "krib/metallb-config" }}
+{{$port := .Param "metallb/monitoring-port"}}
+  sed -i 's/prometheus.io\/port: "7472"/prometheus.io\/port: "{{$port}}"/' /tmp/metallb.yaml
+  sed -i 's/- --port=7472/- --port={{$port}}/' /tmp/metallb.yaml
+  sed -i 's/containerPort: 7472/containerPort: {{$port}}/' /tmp/metallb.yaml
+{{$cpu := .Param "metallb/limits-cpu"}}  
+  sed -i 's/cpu: 100m/cpu: {{$cpu}}/' /tmp/metallb.yaml
+{{$memory := .Param "metallb/limits-memory"}}  
+  sed -i 's/memory: 100Mi/memory: {{$memory}}/' /tmp/metallb.yaml  
+
+{{$l2_ip_range := .Param "metallb/l2-ip-range"}} 
+  cat >/tmp/metallb-config.yaml <<EOFCONFIG
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: loadbalanced
+      protocol: layer2
+      addresses:
+      - {{$l2_ip_range}}  
+EOFCONFIG
+
+  kubectl apply -f /tmp/metallb.yaml
+  kubectl apply -f /tmp/metallb-config.yaml
+fi
+
+echo "Finished successfully"
+exit 0

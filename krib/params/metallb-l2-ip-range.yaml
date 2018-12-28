@@ -1,0 +1,13 @@
+---
+Name: "metallb/l2-ip-range"
+Description: "IP range for MetalLB L2 config"
+Documentation: |
+  This should be set to match the IP range 
+  you have allocated to L2 MetalLB
+  ex: 192.168.1.240-192.168.1.250
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"
