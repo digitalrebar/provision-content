@@ -79,9 +79,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
-        kubectl apply -f {{ .Param "provider/calico-config" }}
+        curl -gfsSL {{ .Param "provider/calico-config" }} | sed "s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" | kubectl apply -f -
         ;;
-
       flannel)
         echo "Starting flannel networking..."
         kubectl apply -f {{ .Param "provider/flannel-config" }}
@@ -171,15 +170,18 @@ do
       sleep 2
 done
 
+AC=$(wait_for_variable $KRIB_ADMIN_CONF_PARAM)
 # set labels for nodes / runs on all nodes
 drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM > label.conf
+# Re-set HOSTNAME to kubernetes node name
+HOSTNAME=$(kubectl --kubeconfig=label.conf get nodes | cut -d" " -f1 | grep -i $(hostname -s))
 echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
-kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-env"}}
+kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-env"}} --overwrite=true
 # using adhoc labels
 {{if .ParamExists "krib/labels" -}}
   {{range $key, $value := .Param "krib/labels" -}}
     echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
-    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
   {{end }}
 {{else -}}
   echo "use of krib/labels to create adhoc labels"
@@ -188,7 +190,7 @@ kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-e
 {{if .ParamExists "inventory/data" -}}
   {{range $key, $value := .Param "inventory/data" -}}
     echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from inventory/data"
-    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
   {{end }}
 {{else -}}
   echo "use of inventory/data to create machine specific labels"
@@ -216,4 +218,3 @@ rm -f /tmp/kubeadm.cfg
 
 echo "Finished successfully"
 exit 0
-
