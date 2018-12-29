@@ -57,6 +57,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   fi
   cd $OPWD
 
+  sed -i 's/name: system:heapster/name: cluster-admin/' /tmp/heapster/deploy/kube-config/rbac/heapster-rbac.yaml
+  sed -i 's#source=kubernetes:https://kubernetes.default$#source=kubernetes:https://kubernetes.default?useServiceAccount=true\&kubeletHttps=true\&kubeletPort=10250\&insecure=true#' /tmp/heapster/deploy/kube-config/influxdb/heapster.yaml
   sed -i 's/^\( *\)# *type: *NodePort/\1type: NodePort/' /tmp/heapster/deploy/kube-config/influxdb/grafana.yaml
 
   mkdir -p /root/setup/dashboard
