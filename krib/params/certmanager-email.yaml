@@ -1,0 +1,12 @@
+---
+Name: "certmanager/email"
+Description: "certmanager email address"
+Documentation: |
+  cert-manager ClusterIssuer configuration
+  See https://cert-manager.readthedocs.io/en/latest/reference/issuers.html#issuers
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

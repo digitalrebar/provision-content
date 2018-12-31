@@ -1,0 +1,14 @@
+---
+Name: "krib-ingress-nginx"
+Description: "KRIB install/config ingress-nginx and optional cert-manager"
+Documentation: |
+  Install/config ingress-nginx and optional cert-manager
+  Requires a cloud LoadBalancer or MetalLB to provide Service ingress.ip
+  must run after krib-helm stage
+RunnerWait: true
+Tasks:
+  - "krib-ingress-nginx"
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"

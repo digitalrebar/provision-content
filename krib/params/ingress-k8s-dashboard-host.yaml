@@ -1,0 +1,14 @@
+Name: "ingress/k8s-dashboard-hostname"
+Description: "kubernetes dashboard hostname"
+Documentation: |
+  Hostname to use for the kubernetes dashboard. You
+  will need to manually configure your DNS to point
+  to the ingress ingress/ip-address.
+
+  If no hostname is provided a {{"ingress/ip-address"}}.xip.io hostname will be assigned
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

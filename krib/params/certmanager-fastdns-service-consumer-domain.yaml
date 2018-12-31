@@ -1,0 +1,12 @@
+---
+Name: "certmanager/fastdns-service-consumer-domain"
+Description: "certmanager fastdns service consumer domain"
+Documentation: |
+  DNS01 Challenge Provider Configuration data
+  See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#akamai-fastdns
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

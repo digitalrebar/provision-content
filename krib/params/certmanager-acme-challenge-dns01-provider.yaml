@@ -1,0 +1,13 @@
+---
+Name: "certmanager/acme-challenge-dns01-provider"
+Description: "certmanager acme challenge dns01 provider"
+Documentation: |
+  cert-manager DNS01 Challenge Provider Name
+  Only route53, cloudflare, akamai, and rfc2136 are currently supported
+  See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#supported-dns01-providers
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
