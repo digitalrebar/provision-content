@@ -135,6 +135,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   if [[ $MASTER_INDEX == 0 ]] ; then
+{{if eq (.Param "krib/cluster-masters-untainted") true}}
+    echo "Removing taint from master nodes ..."
+    kubectl taint nodes --all node-role.kubernetes.io/master-
+	
+{{end}}    
     echo "Recording 'kubeadm' bootstrap config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
 
@@ -182,7 +187,7 @@ kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-e
   {{range $key, $value := .Param "krib/labels" -}}
     echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
     kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
-  {{end }}
+  {{end -}}
 {{else -}}
   echo "use of krib/labels to create adhoc labels"
 {{end -}}
