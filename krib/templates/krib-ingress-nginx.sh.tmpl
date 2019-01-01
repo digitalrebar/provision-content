@@ -129,7 +129,7 @@ spec:
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
   - host: "{{.Param "ingress/k8s-dashboard-hostname"}}"
 {{- else}}
-  - host: "$INGRESSIP.xip.io"
+  - host: "k8s-dashboard.$INGRESSIP.xip.io"
 {{- end}}
     http:
       paths:
@@ -141,7 +141,7 @@ spec:
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     - "{{.Param "ingress/k8s-dashboard-hostname"}}"
 {{- else}}
-    - "$INGRESSIP.xip.io"
+    - "k8s-dashboard.$INGRESSIP.xip.io"
 {{- end}}
 {{- if .ParamExists "certmanager/email"}}
     secretName: k8s-db-cloud-tls
