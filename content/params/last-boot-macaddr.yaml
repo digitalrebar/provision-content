@@ -6,3 +6,7 @@ Documentation: |
   most recently PXE booted from.
 Schema:
   type: string
+Meta:
+  icon: "microchip"
+  color: "blue"
+  title: "Digital Rebar Community Content"
