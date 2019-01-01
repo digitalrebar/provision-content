@@ -45,10 +45,6 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     install wget
   fi
 
-  wget -O /tmp/kubernetes-dashboard.yaml {{ .Param "krib/dashboard-config" }}
-{{$port := .Param "krib/cluster-api-vip-port"}}
-  sed -i "s/      targetPort: {{$port}}/      targetPort: {{$port}}\n      nodePort: 30443\n  type: NodePort/" /tmp/kubernetes-dashboard.yaml
-
   OPWD=$(pwd)
   cd /tmp
   if ! cloneHeapster; then
@@ -59,7 +55,6 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   sed -i 's/name: system:heapster/name: cluster-admin/' /tmp/heapster/deploy/kube-config/rbac/heapster-rbac.yaml
   sed -i 's#source=kubernetes:https://kubernetes.default$#source=kubernetes:https://kubernetes.default?useServiceAccount=true\&kubeletHttps=true\&kubeletPort=10250\&insecure=true#' /tmp/heapster/deploy/kube-config/influxdb/heapster.yaml
-  sed -i 's/^\( *\)# *type: *NodePort/\1type: NodePort/' /tmp/heapster/deploy/kube-config/influxdb/grafana.yaml
 
   mkdir -p /root/setup/dashboard
   cp /tmp/kubernetes-dashboard.yaml /root/setup/dashboard/kubernetes-dashboard.yaml
@@ -96,7 +91,6 @@ EOFDA
   kubectl apply -f /root/setup/dashboard/heapster/deploy/kube-config/rbac/heapster-rbac.yaml
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/kubernetes-dashboard
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/heapster
-  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-grafana
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-influxdb
 
   rm -rf /root/setup
