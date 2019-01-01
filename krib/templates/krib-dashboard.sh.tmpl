@@ -45,6 +45,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     install wget
   fi
 
+  wget -O /tmp/kubernetes-dashboard.yaml {{ .Param "krib/dashboard-config" }}
+
   OPWD=$(pwd)
   cd /tmp
   if ! cloneHeapster; then
