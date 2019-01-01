@@ -111,15 +111,41 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
     INGRESSIP=$(waitForIngressIp)
 
-    echo "Recording ingress ip address ..."
-{{- if .ParamExists "ingress/ip-address"}}
-    drpcli -T $PROFILE_TOKEN profiles remove $CLUSTER_PROFILE param "ingress/ip-address"
-{{- end}}
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "ingress/ip-address" to "$INGRESSIP"
-
-    echo "expanding template k8s-dashboard-ingress.cfg.tmpl as /tmp/k8s-dashboard-ingress.yaml"
+    echo "expanding inline template to /tmp/k8s-dashboard-ingress.yaml"
     cat > /tmp/k8s-dashboard-ingress.yaml << EOF
-{{ $render.CallTemplate "k8s-dashboard-ingress.cfg.tmpl" $render }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: k8s-dashboard
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+{{- if .ParamExists "certmanager/email"}}
+    kubernetes.io/tls-acme: "true"
+{{- end}}
+spec:
+  rules:
+{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
+  - host: "{{.Param "ingress/k8s-dashboard-hostname"}}"
+{{- else}}
+  - host: "$INGRESSIP.xip.io"
+{{- end}}
+    http:
+      paths:
+      - backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 443
+  tls:
+  - hosts:
+{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
+    - "{{.Param "ingress/k8s-dashboard-hostname"}}"
+{{- else}}
+    - "$INGRESSIP.xip.io"
+{{- end}}
+{{- if .ParamExists "certmanager/email"}}
+    secretName: k8s-db-cloud-tls
+{{- end}}
 EOF
 
     if [[ $(kubectl get -n kube-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"k8s-dashboard"}}])') == "true" ]] ; then
@@ -128,6 +154,10 @@ EOF
     fi
     echo "Creating k8s-dashboard Ingress"
     kubectl apply -f /tmp/k8s-dashboard-ingress.yaml
+
+{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
+    echo "Ensure dns record for {{.Param "ingress/k8s-dashboard-hostname"}} points to $INGRESSIP"
+{{- end}}
 
     # Clean up
     rm -f /tmp/certmanager-provider-secret.yaml
