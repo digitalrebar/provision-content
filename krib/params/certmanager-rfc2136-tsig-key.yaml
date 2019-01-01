@@ -1,0 +1,13 @@
+---
+Name: "certmanager/rfc2136-tsig-key"
+Description: "certmanager rfc2136 tsig key"
+Documentation: |
+  DNS01 Challenge Provider Configuration data
+  See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#rfc2136
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

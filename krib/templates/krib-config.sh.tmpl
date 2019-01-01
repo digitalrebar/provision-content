@@ -138,8 +138,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
 {{if eq (.Param "krib/cluster-masters-untainted") true}}
     echo "Removing taint from master nodes ..."
     kubectl taint nodes --all node-role.kubernetes.io/master-
-	
-{{end}}    
+{{end}}
+
     echo "Recording 'kubeadm' bootstrap config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
 

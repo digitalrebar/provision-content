@@ -5,7 +5,7 @@ Documentation: |
   For development clusters, allows nodes to run
   on the same machines as the Kubernetes masters.
   NOTE: If you have only master nodes helm/tiller
-  install will fail if set to false. 
+  install will fail if set to false.
   RECOMMENDED: set to false for production clusters
   and have non-master nodes in the cluster
 Schema:

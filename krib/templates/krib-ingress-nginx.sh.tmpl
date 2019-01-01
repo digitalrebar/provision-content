@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) nginx-ingress Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+echo "Run helm install on the master (skip for minions)..."
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+echo "Missing krib/cluster-profile on the machine!"
+exit 1
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+
+getIngressIp() {
+	echo $(kubectl get svc nginx-ingress-controller \
+	  --namespace kube-system \
+	  -o=go-template --template='{{`{{(index .status.loadBalancer.ingress 0 ).ip}}`}}')
+}
+
+waitForIngressIp() {
+  local var=$(getIngressIp)
+  local sleep_time=1
+  local timer_count=0
+  local timer_expire=6
+  while [[ $var == "<no value>" ]] ; do
+    sleep $sleep_time
+    var=$(getIngressIp)
+    (( timer_count = timer_count + sleep_time ))
+    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
+  done
+  echo $var
+}
+
+{{$render := .}}
+
+if [[ $MASTER_INDEX != notme ]] ; then
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    export KUBECONFIG=/etc/kubernetes/admin.conf
+
+    echo "Making sure Tiller is running"
+    if [[ -z $(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller) ]] ; then
+      echo "Tiller NOT running - something went wrong with helm init"
+      exit 1
+    fi
+
+    echo "Helm initialize"
+    helm init -c --service-account tiller
+
+    echo "Start NGINX Ingress Install"
+
+    if [[ -n $(helm list nginx-ingress) ]] ; then
+      echo "Purging existing nginx-ingress helm install"
+      helm del --purge nginx-ingress
+    fi
+
+    helm install \
+     --name nginx-ingress \
+     --namespace kube-system \
+     --set controller.extraArgs.sort-backends="" \
+     --set service.externalTrafficPolicy="Local" \
+     stable/nginx-ingress
+
+{{if .ParamExists "certmanager/email"}}
+    if [[ -n $(helm list cert-manager) ]] ; then
+      echo "Purging existing cert-manager helm install"
+      helm del --purge cert-manager
+      kubectl delete customresourcedefinitions certificates.certmanager.k8s.io
+      kubectl delete customresourcedefinitions clusterissuers.certmanager.k8s.io
+      kubectl delete customresourcedefinitions issuers.certmanager.k8s.io
+    fi
+
+    helm install \
+     --name cert-manager \
+     --namespace kube-system \
+     --set ingressShim.defaultIssuerName="letsencrypt-prod" \
+     --set ingressShim.defaultIssuerKind="ClusterIssuer" \
+{{- if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
+     --set ingressShim.defaultACMEChallengeType="dns01" \
+     --set ingressShim.defaultACMEDNS01ChallengeProvider="{{.Param "certmanager/acme-challenge-dns01-provider"}}" \
+{{- end}}
+     stable/cert-manager
+
+{{if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
+    if [[ -n $(kubectl -n kube-system get secrets | grep -w certmanager-provider) ]] ; then
+      echo "Removing existing certmanager-provider Secret"
+      kubectl delete -f /tmp/certmanager-provider-secret.yaml
+    fi
+    echo "Creating certmanager-provider Secret"
+    kubectl apply -f /tmp/certmanager-provider-secret.yaml
+
+{{end}}
+    if [[ -n $(kubectl get customresourcedefinitions | grep -w clusterissuers.certmanager.k8s.io) ]] ; then
+      if [[ $(kubectl get clusterissuers -o json | jq -r '.items | contains([{"metadata":{"name":"letsencrypt-prod"}}])') == "true" ]] ; then
+        echo "Removing existing letsencrypt-prod ClusterIssuer"
+        kubectl delete -f /tmp/certmanager-clusterissuer.yaml
+      fi
+      echo "Creating letsencrypt-prod ClusterIssuer"
+      kubectl apply -f /tmp/certmanager-clusterissuer.yaml
+    fi
+
+{{end}}
+    echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
+    INGRESSIP=$(waitForIngressIp)
+
+    echo "expanding inline template to /tmp/k8s-dashboard-ingress.yaml"
+    cat > /tmp/k8s-dashboard-ingress.yaml << EOF
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: k8s-dashboard
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+{{- if .ParamExists "certmanager/email"}}
+    kubernetes.io/tls-acme: "true"
+{{- end}}
+spec:
+  rules:
+{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
+  - host: "{{.Param "ingress/k8s-dashboard-hostname"}}"
+{{- else}}
+  - host: "k8s-dashboard.$INGRESSIP.xip.io"
+{{- end}}
+    http:
+      paths:
+      - backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 443
+  tls:
+  - hosts:
+{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
+    - "{{.Param "ingress/k8s-dashboard-hostname"}}"
+{{- else}}
+    - "k8s-dashboard.$INGRESSIP.xip.io"
+{{- end}}
+{{- if .ParamExists "certmanager/email"}}
+    secretName: k8s-db-tls
+{{- end}}
+EOF
+
+    if [[ $(kubectl get -n kube-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"k8s-dashboard"}}])') == "true" ]] ; then
+      echo "Removing existing k8s-dashboard Ingress"
+      kubectl delete -f /tmp/k8s-dashboard-ingress.yaml
+    fi
+    echo "Creating k8s-dashboard Ingress"
+    kubectl apply -f /tmp/k8s-dashboard-ingress.yaml
+
+{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
+    echo "Ensure dns record for {{.Param "ingress/k8s-dashboard-hostname"}} points to $INGRESSIP"
+{{- end}}
+
+    # Clean up
+    rm -f /tmp/certmanager-provider-secret.yaml
+    rm -f /tmp/certmanager-clusterissuer.yaml
+    rm -f /tmp/k8s-dashboard-ingress.yaml
+  fi
+fi
+
+echo "Finished successfully"
+exit 0

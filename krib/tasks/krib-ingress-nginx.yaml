@@ -1,0 +1,40 @@
+---
+Description: "A task to install/config ingress-nginx and optional cert-manager"
+Name: "krib-ingress-nginx"
+Documentation: |
+  Sets Param: ingress/ip-address
+  Install/config ingress-nginx and optional cert-manager
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set
+RequiredParams:
+  - krib/cluster-profile
+OptionalParams:
+  - ingress/k8s-dashboard-host.yaml
+  - certmanager/acme-challenge-dns01-provider
+  - certmanager/cloudflare-api-key
+  - certmanager/cloudflare-email
+  - certmanager/email
+  - certmanager/fastdns-access-token
+  - certmanager/fastdns-client-secret
+  - certmanager/fastdns-client-token
+  - certmanager/fastdns-service-consumer-domain
+  - certmanager/rfc2136-nameserver
+  - certmanager/rfc2136-tsig-alg
+  - certmanager/rfc2136-tsig-key
+  - certmanager/rfc2136-tsig-key-name
+  - certmanager/route53-access-key
+  - certmanager/route53-region
+Templates:
+  - ID: "certmanager-clusterissuer.cfg.tmpl"
+    Name: "cert-manager ClusterIssuer config file"
+    Path: "/tmp/certmanager-clusterissuer.yaml"
+  - ID: "certmanager-provider-secret.cfg.tmpl"
+    Name: "cert-manager Provider Secret config file"
+    Path: "/tmp/certmanager-provider-secret.yaml"
+  - ID: "krib-ingress-nginx.sh.tmpl"
+    Name: "Install/config ingress-nginx and optional cert-manager"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
