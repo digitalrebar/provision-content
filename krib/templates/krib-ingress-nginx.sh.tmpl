@@ -144,7 +144,7 @@ spec:
     - "k8s-dashboard.$INGRESSIP.xip.io"
 {{- end}}
 {{- if .ParamExists "certmanager/email"}}
-    secretName: k8s-db-cloud-tls
+    secretName: k8s-db-tls
 {{- end}}
 EOF
 
