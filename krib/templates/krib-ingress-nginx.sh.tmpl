@@ -40,8 +40,6 @@ waitForIngressIp() {
   echo $var
 }
 
-{{$render := .}}
-
 if [[ $MASTER_INDEX != notme ]] ; then
   if [[ $MASTER_INDEX == 0 ]] ; then
     export KUBECONFIG=/etc/kubernetes/admin.conf
@@ -157,6 +155,8 @@ EOF
 
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     echo "Ensure dns record for {{.Param "ingress/k8s-dashboard-hostname"}} points to $INGRESSIP"
+{{- else}}
+      echo "K8S dashboard ingress at https://k8s-dashboard.$INGRESSIP.xip.io"
 {{- end}}
 
     # Clean up

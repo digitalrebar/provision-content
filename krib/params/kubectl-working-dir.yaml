@@ -1,0 +1,12 @@
+---
+Name: "kubectl/working-dir"
+Description: "The kubectl working directory."
+Documentation: |
+  Allows operators to change the kubectl working directory
+Schema:
+  type: "string"
+  default: "/mnt/hdd/kubectl"
+Meta:
+  color: "blue"
+  icon: "pocket"
+  title: "Community Content"

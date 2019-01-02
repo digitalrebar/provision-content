@@ -34,7 +34,8 @@ Meta:
   icon: "book"
   title: "Digital Rebar Community Content"
 Params:
-  docker/working-dir: "/docker"
+  docker/working-dir: "/mnt/hdd/docker"
+  kubectl/working-dir: "/mnt/hdd/kubectl"
   etcd/server-count: 3
   etcd/version: "3.3.8"
   etcd/peer-ca-pw: "f00b4r"

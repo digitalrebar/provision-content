@@ -45,12 +45,17 @@ mkfs.xfs /dev/${GETDISK}1
 
 echo "Mount filesystem - put it in place, put not permanently"
 
-mkdir -p /docker
-mount /dev/${GETDISK}1 /docker
+mkdir -p /mnt/hdd
+mount /dev/${GETDISK}1 /mnt/hdd
+mkdir -p /mnt/hdd/docker
+mkdir -p /mnt/hdd/kubectl
 
 echo "Record docker working directory for future users"
-set_param docker/working-dir /docker
+set_param docker/working-dir /mnt/hdd/docker
 
-echo "Mounted directory for docker successful."
+echo "Record kubectl working directory for future users"
+set_param kubectl/working-dir /mnt/hdd/kubectl
+
+echo "Mounted directory for docker and kubectl successful."
 exit 0
 
