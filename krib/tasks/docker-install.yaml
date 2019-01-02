@@ -5,6 +5,7 @@ Documentation: |
   Installs Docker using O/S packages
 OptionalParams:
   - docker/working-dir
+  - kubectl/working-dir
 Templates:
   - ID: "docker-install.sh.tmpl"
     Name: "Install Docker from internet repo"
