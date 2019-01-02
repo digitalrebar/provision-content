@@ -47,6 +47,18 @@ Documentation: |
           "wait": true,
           "kubectlbefore": ["get nodes"],
           "kubectlafter": ["get nodes"]
+        }, {
+          "chart": "rook-ceph",
+          "kubectlafter": [
+            "create -f cluster.yaml"
+          ],
+          "name": "rook-ceph",
+          "namespace": "rook-ceph-system",
+          "targz": "https://charts.rook.io/stable/rook-ceph-v0.9.0.tgz",
+          "templates": {
+          "cluster": "helm-rook.cfg.tmpl"
+          },
+          "wait": true
         }
       ]
 
