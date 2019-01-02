@@ -1,0 +1,13 @@
+---
+Name: "krib/longhorn-config"
+Description: "Specifies the YAML config file to use for the Rancher Longhorn install."
+Documentation: |
+  Set this string to an HTTP or HTTPS reference for a YAML configuration to
+  use for the Rancher Longhorn install.
+Schema:
+  type: "string"
+  default: "https://raw.githubusercontent.com/rancher/longhorn/master/deploy/longhorn.yaml"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

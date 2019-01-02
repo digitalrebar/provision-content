@@ -15,6 +15,15 @@ if [[ -e {{.Param "docker/working-dir"}} ]] ; then
 fi
 {{end -}}
 
+{{if .ParamExists "kubectl/working-dir" -}}
+# Only do this if it exists.
+# if it isn't setup, don't use it.
+if [[ -e {{.Param "kubectl/working-dir"}} ]] ; then
+  echo "Linking the kubectl working directory into place."
+  ln -s {{.Param "kubectl/working-dir"}} /var/lib/kubectl
+fi
+{{end -}}
+
 if ! which docker ; then
   # Get latest docker...
   curl -fsSL https://get.docker.com/ | VERSION={{.Param "docker/version"}} sh

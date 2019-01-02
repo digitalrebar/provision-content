@@ -1,0 +1,16 @@
+---
+Description: "A task to install and setup Rancher Longhorn"
+Name: "krib-longhorn"
+Templates:
+  - ID: "krib-longhorn.sh.tmpl"
+    Name: "Install Rancher Longhorn"
+    Path: ""
+RequiredParams:
+  - krib/cluster-profile
+OptionalParams:
+  - ingress/longhorn-dashboard-hostname
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

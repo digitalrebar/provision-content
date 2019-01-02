@@ -5,7 +5,7 @@ Documentation: |
   Allows operators to change the Docker working directory
 Schema:
   type: "string"
-  default: "/docker"
+  default: "/mnt/hdd/docker"
 Meta:
   color: "blue"
   icon: "pocket"
