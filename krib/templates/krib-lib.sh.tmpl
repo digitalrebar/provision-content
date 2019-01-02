@@ -117,6 +117,26 @@ find_me() {
   echo $index
 }
 
+get_ingress_ip() {
+	echo $(kubectl get svc nginx-ingress-controller \
+	  --namespace kube-system \
+	  -o=go-template --template='{{`{{(index .status.loadBalancer.ingress 0 ).ip}}`}}')
+}
+
+wait_for_ingress() {
+  local var=$(get_ingress_ip)
+  local sleep_time=1
+  local timer_count=0
+  local timer_expire=6
+  while [[ $var == "<no value>" ]] ; do
+    sleep $sleep_time
+    var=$(getIngressIp)
+    (( timer_count = timer_count + sleep_time ))
+    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
+  done
+  echo $var
+}
+
 # Common parameters that are used.
 KRIB_BOOTSTRAP_TOKEN="krib/cluster-bootstrap-token"
 KRIB_PROFILE_PARAM="krib/cluster-profile"

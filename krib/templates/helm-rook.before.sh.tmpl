@@ -1,0 +1,4 @@
+{{- if .ParamExists "rook/data-dir-host-path"}}
+        echo "Creating rook/data-dir-host-path if it doesn't exist"
+        mkdir -p {{.Param "rook/data-dir-host-path"}}
+{{- end}}

@@ -176,3 +176,26 @@ spec:
     config:
       databaseSizeMB: "1024"
       journalSizeMB: "1024"
+---
+#################################################################################
+# The Ceph Manager Dashboard Service
+#################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: rook-ceph-mgr-db
+  namespace: rook-ceph
+  labels:
+    app: rook-ceph-mgr
+    rook_cluster: rook-ceph
+spec:
+  ports:
+  - name: dashboard
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    app: rook-ceph-mgr
+    rook_cluster: rook-ceph
+  sessionAffinity: None
+  type: ClusterIP

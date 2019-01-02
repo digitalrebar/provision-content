@@ -5,12 +5,12 @@ Documentation: |
   This should be set to match the desired location
   for Ceph storage.
 
-  Default: /docker
+  Default: /mnt/hdd/rook
 
   In future versions, this should be calculated or inferred based on the system inventory
 Schema:
   type: "string"
-  default: "/docker"
+  default: "/mnt/hdd/rook"
 Meta:
   color: "blue"
   icon: "chess rock"
