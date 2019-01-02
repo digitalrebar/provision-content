@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
 set -e
-set -x
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
@@ -86,4 +85,3 @@ fi
 
 echo "Finished successfully"
 exit 0
-
