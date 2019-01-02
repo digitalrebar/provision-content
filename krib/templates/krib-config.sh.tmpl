@@ -135,10 +135,15 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   if [[ $MASTER_INDEX == 0 ]] ; then
-{{if eq (.Param "krib/cluster-masters-untainted") true}}
-    echo "Removing taint from master nodes ..."
-    kubectl taint nodes --all node-role.kubernetes.io/master-
-{{end}}
+    while read master ; do
+      {{ if eq (.Param "krib/cluster-masters-untainted") true }}
+      echo "Removing taint from master node: $master"
+      kubectl taint nodes $master node-role.kubernetes.io/master- || true
+      {{ else -}}
+      echo "Ensure taint on master: $master"
+      kubectl taint nodes $master node-role.kubernetes.io/master=NoSchedule || true
+      {{end}}
+    done <<< $(get_param $KRIB_MASTERS_PARAM | jq -r '.[].Name' )
 
     echo "Recording 'kubeadm' bootstrap config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
