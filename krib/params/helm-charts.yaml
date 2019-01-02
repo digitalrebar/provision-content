@@ -54,7 +54,7 @@ Documentation: |
           ],
           "name": "rook-ceph",
           "namespace": "rook-ceph-system",
-          "targz": "https://charts.rook.io/stable/rook-ceph-v0.9.0.tgz",
+          "targz": "https://charts.rook.io/stable/rook-ceph-v0.9.1.tgz",
           "templates": {
           "cluster": "helm-rook.cfg.tmpl"
           },
