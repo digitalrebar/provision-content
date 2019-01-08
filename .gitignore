@@ -6,11 +6,16 @@ drp-community-contrib.yaml
 drp-community-contrib.rst
 krib.sha256
 krib.yaml
-rose.yaml
 krib.rst
+sledgehammer-builder.sha256
+sledgehammer-builder.yaml
+sledgehammer-builder.rst
+*.json
+rose.yaml
 content/._Version.meta
 contrib/._Version.meta
 krib/._Version.meta
+sledgehammer-builder/._Version.meta
 key1*
 key2*
 e-info.tgz
