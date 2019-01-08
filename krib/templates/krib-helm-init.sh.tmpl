@@ -45,7 +45,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     HELM_INSTALL_DIR=$INSTALL_DIR ./get_helm.sh -v {{.Param "helm/version"}}
 
     echo "Create tiller service account"
-    kubectl create -f tiller-rbac.yaml
+    kubectl apply -f tiller-rbac.yaml
 
     echo "Helm initialize"
     helm init --service-account tiller
@@ -82,4 +82,3 @@ fi
 
 echo "Finished successfully"
 exit 0
-
