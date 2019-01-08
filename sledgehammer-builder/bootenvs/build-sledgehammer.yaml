@@ -1,0 +1,177 @@
+---
+Name: "sledgehammer-install"
+Description: "Install bootenv for building Sledgehammer images"
+OS:
+  Family: "redhat"
+  Name: "centos-7"
+  SupportedArchitectures:
+    x86_64:
+      IsoFile: "CentOS-7-x86_64-Minimal-1810.iso"
+      IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1810.iso"
+      Sha256: "38d5d51d9d100fd73df031ffd6bd8b1297ce24660dc8c13a3b8b4534a4bd291c"
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/sledgehammer.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    aarch64:
+      Loader: "grubarm64.efi"
+      IsoFile: CentOS-7-aarch64-Minimal-1810.iso
+      Sha256: "864596b2fb971c8d8c0f3618981cca4725f6c2347f6eb2f130e0aefa3413c0ef"
+      IsoUrl: http://mirror.centos.org/altarch/7/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/sledgehammer.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+  - Name: "sledgehammer.ks"
+    Path: "{{.Machine.Path}}/sledgehammer.ks"
+    Contents: |
+      lang en_US.UTF-8
+      keyboard us
+      timezone UTC
+      auth --useshadow --enablemd5
+      # rebar1
+      rootpw --iscrypted $1$UwJdGUMy$ORqjDQIW//wt7sWY.xG9M0
+      selinux --permissive
+      firewall --disabled
+      {{range .MachineRepos}}
+      {{.Install}}
+      {{end}}
+      bootloader --location=mbr
+      zerombr
+      clearpart --all
+      part /boot --fstype ext4 --size=512
+      part /boot/efi --fstype vfat --size=512
+      part / --fstype ext4 --size=1 --grow
+      text
+      poweroff
+      %packages
+      OpenIPMI
+      OpenIPMI-tools
+      aic94xx-firmware
+      audit
+      authconfig
+      banner
+      basesystem
+      bash
+      bsdtar
+      bzip2
+      coreutils
+      cpio
+      curl
+      dhclient
+      dmidecode
+      dosfstools
+      e2fsprogs
+      efibootmgr
+      file
+      filesystem
+      firewalld
+      fuse
+      fuse-libs
+      fuse-ntfs-3g
+      gdisk
+      glibc
+      gzip
+      hostname
+      initscripts
+      iproute
+      iprutils
+      iptables
+      iputils
+      jq
+      kbd
+      kernel
+      kernel-tools
+      kexec-tools
+      less
+      libsysfs
+      linux-firmware
+      lshw
+      lvm2
+      man-db
+      mdadm
+      {{if (eq .Machine.Arch "amd64")}}
+      microcode_ctl
+      {{end}}
+      mktemp
+      ncurses
+      ntfs-3g
+      ntfsprogs
+      ntp
+      openssh-clients
+      openssh-server
+      openssl-libs
+      parted
+      passwd
+      pciutils
+      policycoreutils
+      procps-ng
+      rootfiles
+      rpm
+      rsyslog
+      selinux-policy-minimum
+      setup
+      shadow-utils
+      squashfs-tools
+      stress
+      stress-ng
+      sudo
+      systemd
+      systemd-resolved
+      systemd-networkd
+      tar
+      unzip
+      util-linux
+      vim-enhanced
+      wget
+      which
+      xfsdump
+      xfsprogs
+      xz
+      yum
+      zlib
+      %end
+
+      %pre
+      #dhclient --no-pid enp0s8
+      %end
+
+      %post
+      cat >/etc/selinux/config <<EOF
+      SELINUX=permissive
+      SELINUXTYPE=minimum
+      EOF
+      {{template "reset-workflow.tmpl" .}}
+      {{template "runner.tmpl" .}}
+      %end
