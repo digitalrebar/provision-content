@@ -47,6 +47,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
 EOF
         {{end}}
 
+        {{- if $chart.templatebefore}}
+        echo "expanding templatebefore"
+{{ $render.CallTemplate $chart.templatebefore $render }}
+        {{- end}}
+
         {{range $index, $before := $chart.kubectlbefore}}
         echo "running kubectl {{$before}} ({{$index}})"
         kubectl {{$before}}
@@ -110,6 +115,11 @@ EOF
         echo "running kubectl {{$after}} ({{$index}})"
         kubectl {{$after}}
         {{end}}
+
+        {{- if $chart.templateafter}}
+        echo "expanding templateafter"
+{{ $render.CallTemplate $chart.templateafter $render }}
+        {{- end}}
 
         echo "========= done {{$chart.name}} ==========="
 

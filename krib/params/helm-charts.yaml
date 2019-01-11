@@ -56,8 +56,9 @@ Documentation: |
           "namespace": "rook-ceph-system",
           "targz": "https://charts.rook.io/stable/rook-ceph-v0.9.1.tgz",
           "templates": {
-          "cluster": "helm-rook.cfg.tmpl"
+            "cluster": "helm-rook.cfg.tmpl"
           },
+          "templatebefore": "helm-rook.sh.tmpl"
           "wait": true
         }
       ]
@@ -109,6 +110,10 @@ Schema:
         default: []
         items:
           type: "string"
+      templatebefore:
+        type: "string"
+      templateafter:
+        type: "string"
 Meta:
   color: "blue"
   icon: "map"
