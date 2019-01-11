@@ -48,8 +48,9 @@ EOF
         {{end}}
 
         {{- if $chart.templatebefore}}
-        echo "expanding templatebefore"
+        echo "expanding templatebefore {{$chart.templatebefore}}"
 {{ $render.CallTemplate $chart.templatebefore $render }}
+        echo "========= done {{$chart.templatebefore}} ==========="
         {{- end}}
 
         {{range $index, $before := $chart.kubectlbefore}}
@@ -117,8 +118,9 @@ EOF
         {{end}}
 
         {{- if $chart.templateafter}}
-        echo "expanding templateafter"
+        echo "expanding templateafter {{$chart.templateafter}}"
 {{ $render.CallTemplate $chart.templateafter $render }}
+        echo "========= done {{$chart.templateafter}} ==========="
         {{- end}}
 
         echo "========= done {{$chart.name}} ==========="

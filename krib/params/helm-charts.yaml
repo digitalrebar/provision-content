@@ -26,6 +26,8 @@ Documentation: |
   * targz (optional) provides a location for a tar.gz file containing charts to install. Path is relative.
   * templates (optional) map of DRP templates keyed to the desired names (must be uploaded!) to render before doing other work.
   * repo (optional) adds the requested repo to the helm using `helm repo add` before installing helm.  syntax is `[repo name] [repo path]`.
+  * templatebefore (optional) expands the provided template file inline before the helm install happens
+  * templateafter (optional) expands the provided template file inline after the helm install happens
 
   example:
 
@@ -50,7 +52,7 @@ Documentation: |
         }, {
           "chart": "rook-ceph",
           "kubectlafter": [
-            "create -f cluster.yaml"
+            "apply -f cluster.yaml"
           ],
           "name": "rook-ceph",
           "namespace": "rook-ceph-system",
@@ -58,7 +60,7 @@ Documentation: |
           "templates": {
             "cluster": "helm-rook.cfg.tmpl"
           },
-          "templatebefore": "helm-rook.sh.tmpl"
+          "templatebefore": "helm-rook.before.sh.tmpl"
           "wait": true
         }
       ]
