@@ -5,7 +5,7 @@
 
         if [[ $(kubectl -n kube-system get services -o json | jq -r '.items | contains([{"metadata":{"name":"nginx-ingress-controller"}}])') == "true" ]] ; then
           echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
-          INGRESSIP=$(waitForIngressIp)
+          INGRESSIP=$(wait_for_ingress)
 
           echo "expanding inline template to /tmp/rook-ceph-mgr-db-ingress.yaml"
           cat > /tmp/rook-ceph-mgr-db-ingress.yaml << EOF
