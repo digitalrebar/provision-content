@@ -1,0 +1,18 @@
+---
+Name: example-rook-db-ingress
+Description: Example Profile for custom Rook Dashboard ingress - CLONE ME!
+Documentation: |
+  Example Profile for custom Rook Ceph Manager Dashboard ingress.
+
+Meta:
+  color: blue
+  icon: ship
+  title: Community Content
+  render: krib
+  reset-keeps: "certmanager/email,certmanager/acme-challenge-dns01-provider,certmanager/cloudflare-api-key,certmanager/cloudflare-email,ingress/rook-dashboard-hostname"
+Params:
+  certmanager/email: "me@here.com"
+  certmanager/acme-challenge-dns01-provider: "cloudflare"
+  certmanager/cloudflare-api-key: "BASE64-encoded-cloudflare-api-key"
+  certmanager/cloudflare-email: "me@here.com"
+  ingress/rook-dashboard-hostname: "rook.cloud.mydomain.com"
