@@ -1,0 +1,58 @@
+{{- if .ParamExists "rook/data-dir-host-path"}}
+        echo "Creating rook/data-dir-host-path if it doesn't exist"
+        mkdir -p {{.Param "rook/data-dir-host-path"}}
+{{- end}}
+
+        if [[ $(kubectl -n kube-system get services -o json | jq -r '.items | contains([{"metadata":{"name":"nginx-ingress-controller"}}])') == "true" ]] ; then
+          echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
+          INGRESSIP=$(waitForIngressIp)
+
+          echo "expanding inline template to /tmp/rook-ceph-mgr-db-ingress.yaml"
+          cat > /tmp/rook-ceph-mgr-db-ingress.yaml << EOF
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rook-ceph-mgr-db
+  namespace: rook-ceph
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/rook-dashboard-hostname"}}
+    kubernetes.io/tls-acme: "true"
+{{- end}}{{- end}}
+spec:
+  rules:
+{{- if .ParamExists "ingress/rook-dashboard-hostname"}}
+  - host: "{{.Param "ingress/rook-dashboard-hostname"}}"
+{{- else}}
+  - host: "rook-db.$INGRESSIP.xip.io"
+{{- end}}
+    http:
+      paths:
+      - backend:
+          serviceName: rook-ceph-mgr-db
+          servicePort: 8443
+  tls:
+  - hosts:
+{{- if .ParamExists "ingress/rook-dashboard-hostname"}}
+    - "{{.Param "ingress/rook-dashboard-hostname"}}"
+{{- else}}
+    - "rook-db.$INGRESSIP.xip.io"
+{{- end}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/rook-dashboard-hostname"}}
+    secretName: rook-ceph-mgr-db-tls
+{{- end}}{{- end}}
+EOF
+
+          if [[ $(kubectl get -n rook-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"rook-ceph-mgr-db"}}])') == "true" ]] ; then
+            echo "Removing existing rook-ceph-mgr-db Ingress"
+            kubectl delete -f /tmp/rook-ceph-mgr-db-ingress.yaml
+          fi
+          echo "Creating rook-ceph-mgr-db Ingress"
+          kubectl apply -f /tmp/rook-ceph-mgr-db-ingress.yaml
+{{- if .ParamExists "ingress/rook-dashboard-hostname"}}
+          echo "Ensure dns record for {{.Param "ingress/rook-dashboard-hostname"}} points to $INGRESSIP"
+{{- else}}
+          echo "Rook dashboard ingress at https://rook-db.$INGRESSIP.xip.io"
+{{- end}}
+        fi

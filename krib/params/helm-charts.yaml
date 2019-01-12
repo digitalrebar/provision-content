@@ -61,6 +61,7 @@ Documentation: |
             "cluster": "helm-rook.cfg.tmpl"
           },
           "templatebefore": "helm-rook.before.sh.tmpl"
+          "templateafter": "helm-rook.after.sh.tmpl"
           "wait": true
         }
       ]
