@@ -1,8 +1,3 @@
-{{- if .ParamExists "rook/data-dir-host-path"}}
-        echo "Creating rook/data-dir-host-path if it doesn't exist"
-        mkdir -p {{.Param "rook/data-dir-host-path"}}
-{{- end}}
-
         if [[ $(kubectl -n kube-system get services -o json | jq -r '.items | contains([{"metadata":{"name":"nginx-ingress-controller"}}])') == "true" ]] ; then
           echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
           INGRESSIP=$(wait_for_ingress)

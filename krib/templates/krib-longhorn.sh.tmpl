@@ -67,9 +67,9 @@ metadata:
   namespace: longhorn-system
   annotations:
     kubernetes.io/ingress.class: nginx
-{{- if .ParamExists "certmanager/email"}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/longhorn-dashboard-hostname"}}
     kubernetes.io/tls-acme: "true"
-{{- end}}
+{{- end}}{{- end}}
 spec:
   rules:
 {{- if .ParamExists "ingress/longhorn-dashboard-hostname"}}
@@ -89,9 +89,9 @@ spec:
 {{- else}}
     - "longhorn-db.$INGRESSIP.xip.io"
 {{- end}}
-{{- if .ParamExists "certmanager/email"}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/longhorn-dashboard-hostname"}}
     secretName: longhorn-db-tls
-{{- end}}
+{{- end}}{{- end}}
 EOF
 
       if [[ $(kubectl get -n longhorn-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"longhorn-db"}}])') == "true" ]] ; then

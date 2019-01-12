@@ -99,9 +99,9 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-{{- if .ParamExists "certmanager/email"}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     kubernetes.io/tls-acme: "true"
-{{- end}}
+{{- end}}{{- end}}
 spec:
   rules:
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
@@ -121,9 +121,9 @@ spec:
 {{- else}}
     - "k8s-dashboard.$INGRESSIP.xip.io"
 {{- end}}
-{{- if .ParamExists "certmanager/email"}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     secretName: k8s-db-tls
-{{- end}}
+{{- end}}{{- end}}
 EOF
 
     if [[ $(kubectl get -n kube-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"k8s-dashboard"}}])') == "true" ]] ; then
