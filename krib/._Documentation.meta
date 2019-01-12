@@ -320,6 +320,11 @@ Rook Ceph Manager Dashboard
 ===========================
 If you install the rook via the `krib-helm` chart template and have ``krib-ingress-nginx`` stage in your workflow an ingress will be created so you can access the Ceph Manager Dashboard at ``https://rook-db.LOADBALANCER_IP.xip.io``.  The access url and cert-manager tls can also be configured by setting the appropriate params in your profile.   See ``example-rook-db-ingress`` profile.
 
+The default username is ``admin`` and you can get the generated password with the with the following command:
+  ::
+
+    kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode
+
 Multiple Clusters
 -----------------
 
