@@ -52,7 +52,7 @@ Documentation: |
         }, {
           "chart": "rook-ceph",
           "kubectlafter": [
-            "create --save-config -f cluster.yaml"
+            "apply -f cluster.yaml"
           ],
           "name": "rook-ceph",
           "namespace": "rook-ceph-system",

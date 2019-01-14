@@ -23,8 +23,10 @@ Params:
       name: "rook-ceph"
       namespace: "rook-ceph-system"
       wait: true
-      targz: "https://charts.rook.io/beta/rook-ceph-v0.8.1.tgz"
+      targz: "https://charts.rook.io/beta/rook-ceph-v0.9.1.tgz"
       templates:
         cluster: helm-rook.cfg.tmpl
       kubectlafter:
-        - "create -f cluster.yaml"
+        - "apply -f cluster.yaml"
+      templatebefore: "helm-rook.before.sh.tmpl"
+      templateafter: "helm-rook.after.sh.tmpl"
