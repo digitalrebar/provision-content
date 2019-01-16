@@ -1,0 +1,17 @@
+Name: "centos-basic"
+Description: "Simplest CentOS Install Workflow"
+Documentation: |
+  This workflow is the most basic CentOS provisioning process for DRP.
+
+  After the install completes, the complete Stage leaves the runner
+  in a waiting state so that DRP will automatically detect and start a
+  new workflow if the Machine.Workflow is updated.
+
+  NOTE: To enable, upload the CentOS ISO as per the centos-7 BootEnv
+Stages:
+  - centos-7-install
+  - complete
+Meta:
+  color: yellow
+  icon: download
+  title: Digital Rebar Community Content
