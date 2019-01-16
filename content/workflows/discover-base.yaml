@@ -1,4 +1,4 @@
-Name: "discover-basic"
+Name: "discover-base"
 Description: "Simplest Sledgehammer Discovery Workflow"
 Documentation: |
   This workflow is the most basic provisioning process for DRP.

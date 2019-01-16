@@ -1,15 +1,15 @@
-Name: "ubuntu-basic"
-Description: "Simplest Ubuntu Install Workflow"
+Name: "centos-base"
+Description: "Simplest CentOS Install Workflow"
 Documentation: |
-  This workflow is the most basic Ubuntu provisioning process for DRP.
+  This workflow is the most basic CentOS provisioning process for DRP.
 
   After the install completes, the complete Stage leaves the runner
   in a waiting state so that DRP will automatically detect and start a
   new workflow if the Machine.Workflow is updated.
 
-  NOTE: To enable, upload the Ubuntu-18.04 ISO as per the ubuntu-18.04 BootEnv
+  NOTE: To enable, upload the CentOS ISO as per the centos-7 BootEnv
 Stages:
-  - ubuntu-18.04-install
+  - centos-7-install
   - complete
 Meta:
   color: yellow
