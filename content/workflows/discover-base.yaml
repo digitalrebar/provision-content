@@ -1,0 +1,18 @@
+Name: "discover-base"
+Description: "Simplest Sledgehammer Discovery Workflow"
+Documentation: |
+  This workflow is the most basic provisioning process for DRP.
+
+  It starts the discover Stage which sets up the sledgehammer BootEnv.
+  After Sledgehammer starts, it leaves the DRP runner in a waiting
+  state so that DRP will automatically detect and start a new workflow
+  if the Machine.Workflow is updated.
+
+  NOTE: To enable, upload Sledgehammer as per the sledgehammer BootEnv
+Stages:
+  - "discover"
+  - "sledgehammer-wait"
+Meta:
+  color: "spinner"
+  icon: "purple"
+  title: "Digital Rebar Community Content"
