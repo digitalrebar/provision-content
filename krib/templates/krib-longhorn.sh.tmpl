@@ -20,26 +20,6 @@ exit 1
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 
-getIngressIp() {
-	echo $(kubectl get svc nginx-ingress-controller \
-	  --namespace kube-system \
-	  -o=go-template --template='{{`{{(index .status.loadBalancer.ingress 0 ).ip}}`}}')
-}
-
-waitForIngressIp() {
-  local var=$(getIngressIp)
-  local sleep_time=1
-  local timer_count=0
-  local timer_expire=6
-  while [[ $var == "<no value>" ]] ; do
-    sleep $sleep_time
-    var=$(getIngressIp)
-    (( timer_count = timer_count + sleep_time ))
-    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
-  done
-  echo $var
-}
-
 echo "Linking the Rancher Longhorn working directory into place."
 mkdir -p /var/lib/rancher
 mkdir -p /mnt/hdd/rancher/longhorn
@@ -76,7 +56,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     if [[ $(kubectl -n kube-system get services -o json | jq -r '.items | contains([{"metadata":{"name":"nginx-ingress-controller"}}])') == "true" ]] ; then
       echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
-      INGRESSIP=$(waitForIngressIp)
+      INGRESSIP=$(wait_for_ingress)
 
       echo "expanding inline template to /tmp/longhorn-db-ingress.yaml"
       cat > /tmp/longhorn-db-ingress.yaml << EOF
@@ -87,9 +67,9 @@ metadata:
   namespace: longhorn-system
   annotations:
     kubernetes.io/ingress.class: nginx
-{{- if .ParamExists "certmanager/email"}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/longhorn-dashboard-hostname"}}
     kubernetes.io/tls-acme: "true"
-{{- end}}
+{{- end}}{{- end}}
 spec:
   rules:
 {{- if .ParamExists "ingress/longhorn-dashboard-hostname"}}
@@ -109,9 +89,9 @@ spec:
 {{- else}}
     - "longhorn-db.$INGRESSIP.xip.io"
 {{- end}}
-{{- if .ParamExists "certmanager/email"}}
+{{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/longhorn-dashboard-hostname"}}
     secretName: longhorn-db-tls
-{{- end}}
+{{- end}}{{- end}}
 EOF
 
       if [[ $(kubectl get -n longhorn-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"longhorn-db"}}])') == "true" ]] ; then
