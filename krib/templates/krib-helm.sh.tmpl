@@ -33,6 +33,13 @@ if [[ $MASTER_INDEX != notme ]] ; then
       exit 1
     fi
 
+    mkdir -p .helm
+    export HELM_HOME=$(cd .helm && pwd)
+
+    echo "Helm initialize"
+    helm init -c --service-account tiller
+    helm repo update
+
     echo "Running Helm Install for all helm/charts"
     {{$render := .}}
     {{range $index, $chart := .Param "helm/charts"}}
@@ -63,10 +70,12 @@ EOF
         curl -gL "{{$chart.targz}}" | tar xz
         {{end}}
 
-        {{if $chart.repo}}
-        echo "adding chart repo {{$chart.repo}}"
-        helm repo add {{$chart.repo}}
-        helm init
+        {{if $chart.repos}}
+        {{range $name, $url := $chart.repos}}
+        echo "adding chart repo {{$name}}"
+        helm repo add {{$name}} {{$url}}
+        {{end}}
+        helm repo update
         {{end}}
 
         helm install {{$chart.chart}} --name {{$chart.name}} \

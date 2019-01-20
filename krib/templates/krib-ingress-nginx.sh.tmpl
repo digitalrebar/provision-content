@@ -76,7 +76,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     kubectl apply -f /tmp/certmanager-provider-secret.yaml
 
 {{end}}
-    if [[ -n $(kubectl get customresourcedefinitions | grep -w clusterissuers.certmanager.k8s.io) ]] ; then
+    if [[ -n $(kubectl get crd -n app=cert-manager | grep -w clusterissuers.certmanager.k8s.io) ]] ; then
       if [[ $(kubectl get clusterissuers -o json | jq -r '.items | contains([{"metadata":{"name":"letsencrypt-prod"}}])') == "true" ]] ; then
         echo "Removing existing letsencrypt-prod ClusterIssuer"
         kubectl delete -f /tmp/certmanager-clusterissuer.yaml
@@ -89,12 +89,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
     INGRESSIP=$(wait_for_ingress)
 
-    echo "expanding inline template to /tmp/k8s-dashboard-ingress.yaml"
-    cat > /tmp/k8s-dashboard-ingress.yaml << EOF
+    echo "expanding inline template to /tmp/k8s-db-ingress.yaml"
+    cat > /tmp/k8s-db-ingress.yaml << EOF
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: k8s-dashboard
+  name: k8s-db
   namespace: kube-system
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -107,7 +107,7 @@ spec:
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
   - host: "{{.Param "ingress/k8s-dashboard-hostname"}}"
 {{- else}}
-  - host: "k8s-dashboard.$INGRESSIP.xip.io"
+  - host: "k8s-db.$INGRESSIP.xip.io"
 {{- end}}
     http:
       paths:
@@ -119,30 +119,30 @@ spec:
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     - "{{.Param "ingress/k8s-dashboard-hostname"}}"
 {{- else}}
-    - "k8s-dashboard.$INGRESSIP.xip.io"
+    - "k8s-db.$INGRESSIP.xip.io"
 {{- end}}
 {{- if .ParamExists "certmanager/email"}}{{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     secretName: k8s-db-tls
 {{- end}}{{- end}}
 EOF
 
-    if [[ $(kubectl get -n kube-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"k8s-dashboard"}}])') == "true" ]] ; then
-      echo "Removing existing k8s-dashboard Ingress"
-      kubectl delete -f /tmp/k8s-dashboard-ingress.yaml
+    if [[ $(kubectl get -n kube-system ingress -o json | jq -r '.items | contains([{"metadata":{"name":"k8s-db"}}])') == "true" ]] ; then
+      echo "Removing existing k8s-db Ingress"
+      kubectl delete -f /tmp/k8s-db-ingress.yaml
     fi
-    echo "Creating k8s-dashboard Ingress"
-    kubectl apply -f /tmp/k8s-dashboard-ingress.yaml
+    echo "Creating k8s-db Ingress"
+    kubectl apply -f /tmp/k8s-db-ingress.yaml
 
 {{- if .ParamExists "ingress/k8s-dashboard-hostname"}}
     echo "Ensure dns record for {{.Param "ingress/k8s-dashboard-hostname"}} points to $INGRESSIP"
 {{- else}}
-      echo "K8S dashboard ingress at https://k8s-dashboard.$INGRESSIP.xip.io"
+      echo "K8S dashboard ingress at https://k8s-db.$INGRESSIP.xip.io"
 {{- end}}
 
     # Clean up
     rm -f /tmp/certmanager-provider-secret.yaml
     rm -f /tmp/certmanager-clusterissuer.yaml
-    rm -f /tmp/k8s-dashboard-ingress.yaml
+    rm -f /tmp/k8s-db-ingress.yaml
   fi
 fi
 

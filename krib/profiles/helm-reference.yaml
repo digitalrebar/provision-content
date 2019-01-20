@@ -19,11 +19,12 @@ Params:
       wait: true
       params:
         set: "sidecarInjectorWebhook.enabled=true"
-    - chart: "rook-ceph"
+    - chart: "rook-stable/rook-ceph"
       name: "rook-ceph"
       namespace: "rook-ceph-system"
       wait: true
-      targz: "https://charts.rook.io/beta/rook-ceph-v0.9.1.tgz"
+      repos:
+        rook-stable: "https://charts.rook.io/stable"
       templates:
         cluster: helm-rook.cfg.tmpl
       kubectlafter:
