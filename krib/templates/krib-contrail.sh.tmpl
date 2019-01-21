@@ -11,8 +11,7 @@ echo "Run Contrail install on the master (skip for minions)..."
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
 {{else -}}
-echo "Missing krib/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
