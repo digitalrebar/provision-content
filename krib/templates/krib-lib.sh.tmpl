@@ -7,7 +7,7 @@
 #   - get_param
 # which assumes that RS_UUID and RS_KEY or RS_TOKEN are set.
 #
-function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit $XIT; }
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit_stop; }
 
 [[ -z "$PROFILE_TOKEN" ]] && xiterr 1 "required PROFILE_TOKEN not set"
 [[ -z "$CLUSTER_PROFILE" ]] && xiterr 1 "required CLUSTER_PROFILE not set"

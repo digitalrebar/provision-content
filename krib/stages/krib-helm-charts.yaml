@@ -1,0 +1,17 @@
+---
+Name: "krib-helm-charts"
+Description: "KRIB install helm charts on the cluster"
+Documentation: |
+  Installs and runs Helm Charts after a cluster has been constructed.
+  This stage is idempotent and can be run multiple times.
+  This allows operators to create workflows with multiple instances of this stage.
+  The charts to run are determined by the helm/charts parameter.
+
+  Due to helm downloads, this stage requires internet access.
+RunnerWait: true
+Tasks:
+  - "krib-helm-charts"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"

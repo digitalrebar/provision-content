@@ -3,8 +3,7 @@
 # this snippet is called by the krib-dev-reset task
 
 {{if .Param "krib/cluster-is-production" -}}
-  echo "CANNOT USE RESET WHEN CLUSTER IS PRODUCTION"
-  exit 1
+  xiterr 1 "CANNOT USE RESET WHEN CLUSTER IS PRODUCTION"
 {{else -}}
 
   for p in "${WIPE_PARAMS[@]}"; do

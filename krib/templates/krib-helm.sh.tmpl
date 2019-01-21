@@ -5,155 +5,196 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
-echo "Run helm install on the master (skip for minions)..."
-
-{{if .ParamExists "krib/cluster-profile" -}}
+{{ if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
-{{else -}}
-echo "Missing krib/cluster-profile on the machine!"
-exit 1
-{{end -}}
+{{ else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{ end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
 
+CFG=$(mktemp /tmp/.XXXXXXXXXXX.conf)
+chmod 600 $CFG
+{{ if .ParamExists "krib/cluster-admin-conf" -}}
+cat > $CFG << 'EOFCFG'
+{{.ParamAsJSON "krib/cluster-admin-conf"}}
+EOFCFG
+{{ else -}}
+drpcli machines update $RS_UUID '{"Meta":{"color":"red", "icon": "exclamation triangle"}}'
+xiterr 1 "Required 'krib/cluster-admin-conf' Param not set - is this a KRIB cluster ???"
+{{ end -}}
+
+[[ ! -s "$CFG" ]] && xiterr 1 "generated admin config file has zero size"
+export KUBECONFIG=$CFG
+
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
-if [[ $MASTER_INDEX != notme ]] ; then
 
-  if [[ $MASTER_INDEX == 0 ]] ; then
+{{$render := .}}
 
-    echo "I am the elected leader - I can run helm for the cluster"
+{{- range $index, $chart := .Param "helm/charts" -}}
 
-    # help requires the admin config
-    export KUBECONFIG="/etc/kubernetes/admin.conf"
-    echo "Making sure Tiller is running"
-    if [[ -z $(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller) ]] ; then
-      echo "Tiller NOT running - something went wrong with helm init"
-      exit 1
-    fi
-
-    mkdir -p .helm
-    export HELM_HOME=$(cd .helm && pwd)
-
-    echo "Helm initialize"
-    helm init -c --service-account tiller
-    helm repo update
-
-    echo "Running Helm Install for all helm/charts"
-    {{$render := .}}
-    {{range $index, $chart := .Param "helm/charts"}}
-      echo "Installing {{$chart.name}} (from {{$chart.chart}})..."
-
-      if [[ -z $(helm list {{$chart.name}}) ]] ; then
-
-        {{ range $name, $template := $chart.templates }}
-        echo "expanding template {{$template}} as {{$name}}.yaml"
-        cat > {{$name}}.yaml << EOF
-{{ $render.CallTemplate $template $render }}
-EOF
-        {{end}}
-
-        {{- if $chart.templatebefore}}
-        echo "expanding templatebefore {{$chart.templatebefore}}"
-{{ $render.CallTemplate $chart.templatebefore $render }}
-        echo "========= done {{$chart.templatebefore}} ==========="
-        {{- end}}
-
-        {{range $index, $before := $chart.kubectlbefore}}
-        echo "running kubectl {{$before}} ({{$index}})"
-        kubectl {{$before}}
-        {{end}}
-
-        {{if $chart.targz}}
-        echo "retrieving chart from {{$chart.targz}}"
-        curl -gL "{{$chart.targz}}" | tar xz
-        {{end}}
-
-        {{if $chart.repos}}
-        {{range $name, $url := $chart.repos}}
-        echo "adding chart repo {{$name}}"
-        helm repo add {{$name}} {{$url}}
-        {{end}}
-        helm repo update
-        {{end}}
-
-        helm install {{$chart.chart}} --name {{$chart.name}} \
-          {{if $chart.namespace}} --namespace {{$chart.namespace}}{{end}} \
-          {{range $param, $value := $chart.params}} --{{$param}} {{$value}}{{end}}
-
-        {{if $chart.sleep}}
-          echo "sleep {{$chart.sleep}}"
-          sleep {{$chart.sleep}}
-        {{else}}
-          sleep 10s
-        {{end}}
-
-        {{if $chart.wait}}
-          set +e
-          ESCAPE=0
-          while [[ $ESCAPE -lt 30 && -z $(helm list {{$chart.name}} | grep DEPLOYED) ]] ; do
-            echo "helm list {{$chart.name}} is not deployed. $ESCAPE"
-            {{if $chart.sleep}}
-              sleep {{$chart.sleep}}
-            {{else}}
-              sleep 10
-            {{end}}
-            ((ESCAPE=ESCAPE+1))
-          done
-          set -e
-        {{else}}
-          echo "let's go! I'm not waiting for chart to be ready"
-        {{end}}
-
-        {{if and $chart.wait $chart.namespace}}
-          set +e
-          ESCAPE=0
-          while [[ $ESCAPE -lt 30 && ! -z $(kubectl get pods --namespace={{$chart.namespace}} | grep ContainerCreating) ]] ; do
-            echo "kubectl get pods --namespace={{$chart.namespace}} is still creating containers. $ESCAPE"
-            {{if $chart.sleep}}
-              sleep {{$chart.sleep}}
-            {{else}}
-              sleep 10
-            {{end}}
-            ((ESCAPE=ESCAPE+1))
-          done
-          set -e
-        {{end}}
-
-        {{range $index, $after := $chart.kubectlafter}}
-        echo "running kubectl {{$after}} ({{$index}})"
-        kubectl {{$after}}
-        {{end}}
-
-        {{- if $chart.templateafter}}
-        echo "expanding templateafter {{$chart.templateafter}}"
-{{ $render.CallTemplate $chart.templateafter $render }}
-        echo "========= done {{$chart.templateafter}} ==========="
-        {{- end}}
-
-        echo "========= done {{$chart.name}} ==========="
-
-      else
-        echo "skipping {{$chart.name}}.  It is already installed"
-      fi
-
-    {{else}}
-      echo "No charts included in helm/charts to install"
-    {{end}}
-
-  else
-
-    echo "I was not the leader, skipping helm install"
-
-  fi
-
-else
-
-  echo "I am a worker - no helm actions"
-
+# check if it's installed without using helm
+INSTALLED=false
+if [[ ! -z $(kubectl --all-namespaces=true -n heritage=Tiller -o name get all | grep {{$chart.name}}) ]] ; then
+  INSTALLED=true
 fi
 
+if [[ $MASTER_INDEX != notme ]] ; then
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    if [[ "$INSTALLED" == false ]] ; then
+      echo "I am the elected leader - I can run helm for the cluster"
+
+      echo "Making sure Tiller is running"
+      if [[ -z $(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0 | grep success) ]] ; then
+        xiterr 1 "Tiller NOT running - something went wrong with helm init"
+      fi
+
+      mkdir -p .helm
+      export HELM_HOME=$(cd .helm && pwd)
+
+      echo "Helm initialize"
+      helm init -c --service-account tiller
+      helm repo update
+
+      echo "Installing {{$chart.name}} (from {{$chart.chart}})..."
+
+      {{ range $name, $template := $chart.templates -}}
+      echo "expanding template {{$template}} as {{$name}}.yaml"
+      cat > {{$name}}.yaml << EOF
+{{ $render.CallTemplate $template $render }}
+EOF
+    {{ end -}}
+
+    fi
+    {{ range $index, $tmpl := $chart.templatesbefore -}}{{ if eq ($tmpl.nodes) "leader" -}}
+    if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
+      echo "expanding {{$chart.name}} templatebefore {{$tmpl.name}}"
+{{ $render.CallTemplate $tmpl.name $render }}
+      echo "========= done {{$chart.name}} templatebefore {{$tmpl}} ==========="
+    fi
+    {{- end }}{{ end }}
+  fi
+  {{ range $index, $tmpl := $chart.templatesbefore -}}{{ if eq ($tmpl.nodes) "masters" -}}
+  if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
+    echo "expanding {{$chart.name}} templatebefore {{$tmpl.name}}"
+{{ $render.CallTemplate $tmpl.name $render }}
+    echo "========= done {{$chart.name}} templatebefore {{$tmpl}} ==========="
+  fi
+  {{- end }}{{ end }}
+fi
+
+{{ range $index, $tmpl := $chart.templatesbefore -}}{{ if eq ($tmpl.nodes) "all" -}}
+if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
+  echo "expanding {{$chart.name}} templatebefore {{$tmpl.name}}"
+{{ $render.CallTemplate $tmpl.name $render }}
+  echo "========= done {{$chart.name}} templatebefore {{$tmpl}} ==========="
+fi
+{{- end }}{{ end }}
+
+if [[ $MASTER_INDEX != notme ]] ; then
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    if [[ "$INSTALLED" == false ]] ; then
+      {{ range $index, $before := $chart.kubectlbefore -}}
+      echo "running kubectl {{$before}} ({{$index}})"
+      kubectl {{$before}}
+      {{ end -}}
+
+      {{ if $chart.targz }}
+      echo "retrieving chart from {{$chart.targz}}"
+      curl -gL "{{$chart.targz}}" | tar xz
+      {{ end -}}
+
+      {{ if $chart.repos }}
+      {{ range $name, $url := $chart.repos -}}
+      echo "adding chart repo {{$name}}"
+      helm repo add {{$name}} {{$url}}
+      {{ end -}}
+      helm repo update
+      {{ end -}}
+
+      helm install {{$chart.chart}} --name {{$chart.name}}{{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
+        {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
+
+      {{ if $chart.sleep }}
+      echo "sleep {{$chart.sleep}}"
+      sleep {{$chart.sleep}}
+      {{ else -}}
+      sleep 10s
+      {{ end -}}
+
+      {{ if $chart.wait }}
+      set +e
+      ESCAPE=0
+      while [[ $ESCAPE -lt 30 && -z $(helm list {{$chart.name}} | grep DEPLOYED) ]] ; do
+        echo "helm list {{$chart.name}} is not deployed. $ESCAPE"
+        {{ if $chart.sleep -}}
+        sleep {{$chart.sleep}}
+        {{ else -}}
+        sleep 10
+        {{ end -}}
+        ((ESCAPE=ESCAPE+1))
+      done
+      set -e
+      {{ else -}}
+      echo "let's go! I'm not waiting for chart to be ready"
+      {{ end -}}
+
+      {{ if and $chart.wait $chart.namespace }}
+      set +e
+      ESCAPE=0
+      while [[ $ESCAPE -lt 30 && ! -z $(kubectl get pods --namespace={{$chart.namespace}} | grep ContainerCreating) ]] ; do
+        echo "kubectl get pods --namespace={{$chart.namespace}} is still creating containers. $ESCAPE"
+        {{ if $chart.sleep -}}
+        sleep {{$chart.sleep}}
+        {{ else -}}
+        sleep 10
+        {{ end -}}
+        ((ESCAPE=ESCAPE+1))
+      done
+      set -e
+      {{ end -}}
+
+      {{ range $index, $after := $chart.kubectlafter }}
+      echo "running kubectl {{$after}} ({{$index}})"
+      kubectl {{$after}}
+      {{ end -}}
+
+    fi
+
+    {{ range $index, $tmpl := $chart.templatesafter }}{{ if eq ($tmpl.nodes) "leader" -}}
+    if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
+      echo "expanding {{$chart.name}} templateafter {{$tmpl.name}}"
+{{ $render.CallTemplate $tmpl.name $render }}
+      echo "========= done {{$chart.name}} templateafter {{$tmpl}} ==========="
+    fi
+    {{- end }}{{ end }}
+  else
+    echo "I was not the leader, skipping helm install"
+  fi
+
+  {{ range $index, $tmpl := $chart.templatesafter }}{{ if eq ($tmpl.nodes) "masters" -}}
+  if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
+    echo "expanding {{$chart.name}} templateafter {{$tmpl.name}}"
+{{ $render.CallTemplate $tmpl.name $render }}
+    echo "========= done {{$chart.name}} templateafter {{$tmpl}} ==========="
+  fi
+  {{- end }}{{ end }}
+else
+  echo "I am a worker - no helm actions"
+fi
+
+{{ range $index, $tmpl := $chart.templatesafter }}{{ if eq ($tmpl.nodes) "all" -}}
+if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
+  echo "expanding {{$chart.name}} templateafter {{$tmpl.name}}"
+{{ $render.CallTemplate $tmpl.name $render }}
+  echo "========= done {{$chart.name}} templateafter {{$tmpl}} ==========="
+fi
+{{- end }}{{ end }}
+echo "========= done {{$chart.name}} ==========="
+{{ else -}}
+echo "No charts included in helm/charts to install"
+{{ end -}}
 echo "Finished successfully"
 exit 0
-

@@ -12,8 +12,7 @@ export RS_IP="{{.Machine.Address}}"
 CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
 {{else -}}
-echo "Missing etcd/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing etcd/cluster-profile on the machine!"
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
@@ -72,8 +71,7 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
   else
     if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-      echo "  Client CA Exists, but we did not set password.  Need to reset!!"
-      exit 1
+      xiterr 1 "Client CA Exists, but we did not set password.  Need to reset!!"
     else
       echo "  Client CA $CLIENT_CA configured"
     fi
@@ -85,8 +83,7 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-pw" to "$SERVER_CA_PW" || true
   else
     if [[ $(get_param "etcd/server-ca-pw") == null ]] ; then
-      echo "  SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
-      exit 1
+      xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
     fi
   fi
 
@@ -96,15 +93,13 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-pw" to "$PEER_CA_PW" || true
   else
     if [[ $(get_param "etcd/peer-ca-pw") == null ]] ; then
-      echo "  PEER CA Exists, but we didn't set password.  Need to reset!!"
-      exit 1
+      xiterr 1 " PEER CA Exists, but we didn't set password.  Need to reset!!"
     fi
   fi
 fi
 
 {{else -}}
-echo "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
-exit 1
+xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
 {{end}}
 
 wait_for_count "etcd/servers" $ETCD_SERVER_COUNT

@@ -25,9 +25,9 @@ Documentation: |
   * postkubectl (optional) array of kubectl [request] commands to run after the helm install
   * targz (optional) provides a location for a tar.gz file containing charts to install. Path is relative.
   * templates (optional) map of DRP templates keyed to the desired names (must be uploaded!) to render before doing other work.
-  * repo (optional) adds the requested repo to the helm using `helm repo add` before installing helm.  syntax is `[repo name] [repo path]`.
-  * templatebefore (optional) expands the provided template file inline before the helm install happens
-  * templateafter (optional) expands the provided template file inline after the helm install happens
+  * repos (optional) adds the requested repos to helm using `helm repo add` before installing helm.  syntax is `[repo name]: [repo path]`.
+  * templatesbefore (optional) expands the provided template files inline before the helm install happens.
+  * templatesafter (optional) expands the provided template files inline after the helm install happens
 
   example:
 
@@ -59,8 +59,15 @@ Documentation: |
           "repos": {
             "rook-stable": "https://charts.rook.io/stable"
           },
-          "templateafter": "helm-rook.after.sh.tmpl",
-          "templatebefore": "helm-rook.before.sh.tmpl",
+          "templatesafter": [{
+            "name": "helm-rook.after.sh.tmpl"
+            "nodes": "leader",
+          }],
+          "templatesbefore": [{
+            "name": "helm-rook.before.sh.tmpl",
+            "nodes": "all",
+            "runIfInstalled": true
+          }],
           "templates": {
             "cluster": "helm-rook.cfg.tmpl"
           },
@@ -69,56 +76,74 @@ Documentation: |
       ]
 
 Schema:
-  type: "array"
   default: []
   items:
-    type: "object"
-    required:
-      - "chart"
-      - "name"
     properties:
-      targz:
-        type: "string"
       chart:
-        type: "string"
+        type: string
+      kubectlafter:
+        default: []
+        items:
+          type: string
+        type: array
+      kubectlbefore:
+        default: []
+        items:
+          type: string
+        type: array
       name:
-        type: "string"
+        type: string
       namespace:
-        type: "string"
-      repos:
-        type: "object"
+        type: string
       params:
-        type: "object"
         default: {}
         properties:
           repo:
-            type: "string"
-          values:
-            type: "string"
+            type: string
           set:
-            type: "string"
+            type: string
+          values:
+            type: string
+        type: object
+      repos:
+        type: object
       sleep:
-        type: "integer"
         default: 10
-      wait:
-        type: "boolean"
-        default: false
+        type: integer
+      targz:
+        type: string
       templates:
         type: object
-      kubectlbefore:
-        type: "array"
+      templatesafter:
         default: []
         items:
-          type: "string"
-      kubectlafter:
-        type: "array"
+          type: object
+        type: array
+      templatesbefore:
         default: []
         items:
-          type: "string"
-      templatebefore:
-        type: "string"
-      templateafter:
-        type: "string"
+          properties:
+            name:
+              type: string
+            nodes:
+              type: string
+              values:
+                - all
+                - masters
+                - leader
+            runIfInstalled:
+              default: false
+              type: boolean
+          type: object
+        type: array
+      wait:
+        default: false
+        type: boolean
+    required:
+      - chart
+      - name
+    type: object
+  type: array
 Meta:
   color: "blue"
   icon: "map"
