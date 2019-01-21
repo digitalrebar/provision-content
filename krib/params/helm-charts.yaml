@@ -50,20 +50,22 @@ Documentation: |
           "kubectlbefore": ["get nodes"],
           "kubectlafter": ["get nodes"]
         }, {
-          "chart": "rook-ceph",
+          "chart": "rook-stable/rook-ceph",
           "kubectlafter": [
             "apply -f cluster.yaml"
           ],
           "name": "rook-ceph",
           "namespace": "rook-ceph-system",
-          "targz": "https://charts.rook.io/stable/rook-ceph-v0.9.1.tgz",
+          "repos": {
+            "rook-stable": "https://charts.rook.io/stable"
+          },
+          "templateafter": "helm-rook.after.sh.tmpl",
+          "templatebefore": "helm-rook.before.sh.tmpl",
           "templates": {
             "cluster": "helm-rook.cfg.tmpl"
           },
-          "templatebefore": "helm-rook.before.sh.tmpl"
-          "templateafter": "helm-rook.after.sh.tmpl"
           "wait": true
-        }
+       }
       ]
 
 Schema:
@@ -83,8 +85,8 @@ Schema:
         type: "string"
       namespace:
         type: "string"
-      repo:
-        type: "string"
+      repos:
+        type: "object"
       params:
         type: "object"
         default: {}
