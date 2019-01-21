@@ -13,6 +13,6 @@ Stages:
   - "discover"
   - "sledgehammer-wait"
 Meta:
-  color: "spinner"
-  icon: "purple"
+  color: "purple"
+  icon: "spinner"
   title: "Digital Rebar Community Content"
