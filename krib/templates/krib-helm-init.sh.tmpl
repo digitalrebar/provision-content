@@ -11,8 +11,7 @@ echo "Configure helm on the master (skip for minions)..."
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
 {{else -}}
-echo "Missing krib/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
@@ -27,13 +26,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     # help requires the admin config
     export KUBECONFIG="/etc/kubernetes/admin.conf"
-    set +e
-    if [[ ! -z $(kubectl get pods --namespace kube-system | grep tiller) ]] ; then
+
+    if [[ ! -z $(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0 | grep success) ]] ; then
       echo "Tiller already installed - exiting"
       helm version
       exit 0
     fi
-    set -e
 
     # todo: provide more options for installing helm
     curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
@@ -52,12 +50,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     set +e
     echo "Wait until Tiller is running"
-    CNT=$(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller)
+    CNT=$(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0 | grep success)
     ESCAPE=0
     while [[ -z $CNT && $ESCAPE -lt 20 ]] ; do
-      echo "Waiting for Tiller...$(kubectl get pods --namespace kube-system | grep tiller)"
+      echo $(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0)
       sleep 5
-      CNT=$(kubectl get pods --namespace kube-system --field-selector=status.phase==Running | grep tiller)
+      CNT=$(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0 | grep success)
       ((ESCAPE=ESCAPE+1))
     done
     set -e

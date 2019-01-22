@@ -15,8 +15,7 @@ CLUSTER_NAME={{.Param "krib/cluster-name"}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
 {{else -}}
-echo "Missing krib/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
@@ -76,8 +75,7 @@ if (( $KRIB_MASTER_COUNT > 1 )) ; then
   {{if .ParamExists "krib/cluster-master-vip" -}}
     MASTER_VIP={{.Param "krib/cluster-master-vip"}}
   {{else -}}
-    echo "Missing krib/cluster-master-vip on the machine!"
-    exit 1
+    xiterr 1 "Missing krib/cluster-master-vip on the machine!"
   {{end -}}
 
   drpcli machines tasks add {{.Machine.UUID}} at 0 krib-keepalived krib-haproxy

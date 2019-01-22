@@ -12,8 +12,7 @@ CLUSTER_NAME={{ .Param "krib/cluster-name" }}
 CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
 PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
 {{ else -}}
-echo "Missing krib/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{ end -}}
 
 {{ template "krib-lib.sh.tmpl" .}}
@@ -175,7 +174,7 @@ fi
 
 while [ ! -f /etc/kubernetes/kubelet.conf ] ;
 do
-      sleep 2
+  sleep 2
 done
 
 AC=$(wait_for_variable $KRIB_ADMIN_CONF_PARAM)
@@ -188,7 +187,7 @@ kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-e
 # using adhoc labels
 {{if .ParamExists "krib/labels" -}}
   {{range $key, $value := .Param "krib/labels" -}}
-    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
+    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_" -}}\" label to machine $HOSTNAME from krib/labels"
     kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
   {{end -}}
 {{else -}}
@@ -197,7 +196,7 @@ kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-e
 # using inventory
 {{if .ParamExists "inventory/data" -}}
   {{range $key, $value := .Param "inventory/data" -}}
-    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from inventory/data"
+    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_" -}}\" label to machine $HOSTNAME from inventory/data"
     kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
   {{end }}
 {{else -}}
@@ -217,8 +216,7 @@ fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet
 {{ else -}}
-echo "Missing required krib/cluster-master-vip"
-exit 1
+xiterr 1 "Missing required krib/cluster-master-vip"
 {{ end -}}
 
 # Clean up
