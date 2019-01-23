@@ -8,5 +8,5 @@ Schema:
   default: "/mnt/hdd/docker"
 Meta:
   color: "blue"
-  icon: "pocket"
+  icon: "boxes"
   title: "Community Content"
