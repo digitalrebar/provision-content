@@ -1,4 +1,4 @@
-Name: "centos-base"
+Name: "centos-min"
 Description: "Simplest CentOS Install Workflow"
 Documentation: |
   This workflow is the most basic CentOS provisioning process for DRP.
@@ -10,6 +10,7 @@ Documentation: |
   NOTE: To enable, upload the CentOS ISO as per the centos-7 BootEnv
 Stages:
   - centos-7-install
+  - finish-install
   - complete
 Meta:
   color: yellow

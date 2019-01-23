@@ -1,4 +1,4 @@
-Name: "ubuntu-base"
+Name: "ubuntu-min"
 Description: "Simplest Ubuntu Install Workflow"
 Documentation: |
   This workflow is the most basic Ubuntu provisioning process for DRP.
@@ -10,6 +10,7 @@ Documentation: |
   NOTE: To enable, upload the Ubuntu-18.04 ISO as per the ubuntu-18.04 BootEnv
 Stages:
   - ubuntu-18.04-install
+  - finish-install
   - complete
 Meta:
   color: yellow
