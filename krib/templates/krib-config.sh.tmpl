@@ -177,8 +177,10 @@ do
   sleep 2
 done
 
-AC=$(wait_for_variable $KRIB_ADMIN_CONF_PARAM)
-# set labels for nodes / runs on all nodes
+# Wait for KRIB config to be updated from bootstrap node
+wait_for_variable $KRIB_ADMIN_CONF_PARAM > label.conf
+
+# Set labels for nodes / runs on all nodes
 drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM > label.conf
 # Re-set HOSTNAME to kubernetes node name
 HOSTNAME=$(kubectl --kubeconfig=label.conf get nodes | cut -d" " -f1 | grep -i $(hostname -s))
