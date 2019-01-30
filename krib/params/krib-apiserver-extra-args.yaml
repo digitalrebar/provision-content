@@ -1,0 +1,12 @@
+---
+Name: "krib/apiserver-extra-args"
+Description: "Kubeadm apiServerExtraArgs"
+Documentation: |
+  Array of apiServerExtraArgs that you want added to the kubeadm configuration.
+Schema:
+  type: "object"
+  default: {}
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

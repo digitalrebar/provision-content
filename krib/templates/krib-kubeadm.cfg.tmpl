@@ -17,6 +17,11 @@ apiServerCertSANs:
 {{ end -}}
 apiServerExtraArgs:
   endpoint-reconciler-type: "lease"
+{{ if .ParamExists "krib/apiserver-extra-args" }}
+{{ range $key, $value  := .Param "krib/apiserver-extra-args" }}
+  {{ $key }}: {{ $value }}
+{{ end -}}
+{{ end -}}
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token

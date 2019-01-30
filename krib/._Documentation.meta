@@ -312,7 +312,7 @@ This stage includes support for cert-manager if your profile is properly configu
 Kubernetes Dashboard via NGINX Ingress
 ======================================
 
-If your workflow includes the :ref:`rs_nginx_ingress` stage the kubernetes dashboard will be accessable via ``https://k8s-dashboard.LOADBALANCER_IP.xip.io``.  The access url and cert-manager tls can also be configured by setting the appropriate params in your profile.  See ``example-k8s-db-ingress`` profile.
+If your workflow includes the :ref:`rs_nginx_ingress` stage the kubernetes dashboard will be accessable via ``https://k8s-db.LOADBALANCER_IP.xip.io``.  The access url and cert-manager tls can also be configured by setting the appropriate params in your profile.  See ``example-k8s-db-ingress`` profile.
 
 Please consult :ref:`rs_k8s_proxy` for information on getting the login token
 

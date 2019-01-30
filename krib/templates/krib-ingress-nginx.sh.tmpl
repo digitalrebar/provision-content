@@ -46,17 +46,25 @@ if [[ $MASTER_INDEX != notme ]] ; then
      stable/nginx-ingress
 
 {{if .ParamExists "certmanager/email"}}
+    echo "Start cert-manager install"
+    wget -O /tmp/certmanager-crds.yaml {{ .Param "certmanager/crds" }}
+
     if [[ -n $(helm list cert-manager) ]] ; then
       echo "Purging existing cert-manager helm install"
       helm del --purge cert-manager
-      kubectl delete customresourcedefinitions certificates.certmanager.k8s.io
-      kubectl delete customresourcedefinitions clusterissuers.certmanager.k8s.io
-      kubectl delete customresourcedefinitions issuers.certmanager.k8s.io
+      kubectl delete -f /tmp/certmanager-crds.yaml
     fi
 
+    echo "Adding  cert-manager crds"
+    kubectl apply -f /tmp/certmanager-crds.yaml
+    kubectl create namespace cert-manager
+    kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
+
+    # --set webhook.enabled=false currently required because of cert issue described here https://github.com/jetstack/cert-manager/issues/1302
     helm install \
      --name cert-manager \
-     --namespace kube-system \
+     --namespace cert-manager \
+     --set webhook.enabled=false \
      --set ingressShim.defaultIssuerName="letsencrypt-prod" \
      --set ingressShim.defaultIssuerKind="ClusterIssuer" \
 {{- if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
@@ -140,6 +148,7 @@ EOF
     # Clean up
     rm -f /tmp/certmanager-provider-secret.yaml
     rm -f /tmp/certmanager-clusterissuer.yaml
+    rm -f /tmp/certmanager-crds.yaml
     rm -f /tmp/k8s-db-ingress.yaml
   fi
 fi
