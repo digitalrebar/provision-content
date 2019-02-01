@@ -22,9 +22,11 @@ build_cert() {
   local ca_name=$2
   local ca_pw=$3
   local myname=$4
+  local myip=$5
 
+  echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
   drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/etcd/${profile}-ca.pem
-  drpcli certs csr $ca_name $myname $RS_IP $(hostname) > tmp.csr
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) > tmp.csr
   drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/etcd/$profile.pem
   jq -r .Key tmp.csr > /etc/kubernetes/pki/etcd/$profile-key.pem
   rm tmp.csr
@@ -35,6 +37,11 @@ echo "Configure the etcd cluster"
 ETCD_CLUSTER_NAME={{.Param "etcd/name"}}
 ETCD_PEER_PORT={{.Param "etcd/peer-port"}}
 ETCD_CLIENT_PORT={{.Param "etcd/client-port"}}
+{{ if .ParamExists "etcd/ip" -}}
+ETCD_IP={{ .Param "etcd/ip" }}
+{{ else -}}
+ETCD_IP={{ .Machine.Address }}
+{{ end -}}
 
 # add server management params if missing
 echo "Add initial variables to track members."
@@ -46,7 +53,10 @@ ETCD_SERVER_COUNT={{.Param "etcd/server-count"}}
 echo "Creating $ETCD_SERVER_COUNT servers"
 
 echo "Electing etcd members to cluster profile: $CLUSTER_PROFILE"
-ETCD_INDEX=$(add_me_if_not_count "etcd/servers" $ETCD_SERVER_COUNT)
+ETCD_INDEX=$(add_me_if_not_count "etcd/servers" $ETCD_SERVER_COUNT $ETCD_IP)
+
+echo "Added myself to cluster profile, my index is ${ETCD_INDEX}"
+
 if [[ $ETCD_INDEX == notme ]] ; then
   echo "I am not an ETCD server.  Move on."
   wait_for_count "etcd/servers-done" $ETCD_SERVER_COUNT
@@ -97,12 +107,14 @@ if [[ $ETCD_INDEX == "0" ]] ; then
     fi
   fi
 fi
-
 {{else -}}
 xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
 {{end}}
 
+echo "Waiting for ${ETCD_SERVER_COUNT} servers to start"
 wait_for_count "etcd/servers" $ETCD_SERVER_COUNT
+
+echo "${ETCD_SERVER_COUNT} servers started!"
 
 CLIENT_CA_PW=$(wait_for_variable "etcd/client-ca-pw")
 SERVER_CA_PW=$(wait_for_variable "etcd/server-ca-pw")
@@ -113,9 +125,9 @@ mkdir -p /etc/kubernetes/pki/etcd
 
 ETCD_NAME="etcd$ETCD_INDEX"
 
-build_cert "client" $CLIENT_CA $CLIENT_CA_PW $ETCD_NAME
-build_cert "server" $SERVER_CA $SERVER_CA_PW $ETCD_NAME
-build_cert "peer" $PEER_CA $PEER_CA_PW $ETCD_NAME
+build_cert "client" $CLIENT_CA $CLIENT_CA_PW $ETCD_NAME $ETCD_IP
+build_cert "server" $SERVER_CA $SERVER_CA_PW $ETCD_NAME $ETCD_IP
+build_cert "peer" $PEER_CA $PEER_CA_PW $ETCD_NAME $ETCD_IP
 
 ETCD_URLS=""
 INDEX=0
@@ -138,9 +150,13 @@ echo "Installing etcd v{{.Param "etcd/version"}} (set in Param etcd/version)"
 curl -sSL https://github.com/coreos/etcd/releases/download/v{{.Param "etcd/version"}}/etcd-v{{.Param "etcd/version"}}-linux-amd64.tar.gz | tar -xz --strip-components=1 -C ${INSTALL_DIR}
 rm -rf etcd-v{{.Param "etcd/version"}}-linux-amd64*
 
-touch /etc/etcd.env
-echo "PEER_NAME=${ETCD_NAME}" >> /etc/etcd.env
-echo "PRIVATE_IP={{.Machine.Address}}" >> /etc/etcd.env
+cat << EOF > /etc/etcd.env
+PEER_NAME=${ETCD_NAME}
+ADVERTISE_IP=${ETCD_IP}
+CLIENT_PORT=${ETCD_CLIENT_PORT}
+PEER_PORT=${ETCD_PEER_PORT}
+URLS=${ETCD_URLS}
+EOF
 
 cat >/etc/systemd/system/etcd.service <<EOF
 [Unit]
@@ -157,7 +173,19 @@ RestartSec=5s
 LimitNOFILE=40000
 TimeoutStartSec=0
 
-  ExecStart=${INSTALL_DIR}/etcd --name ${ETCD_NAME} --data-dir /docker/etcd --listen-client-urls https://{{.Machine.Address}}:${ETCD_CLIENT_PORT},http://127.0.0.1:${ETCD_CLIENT_PORT} --advertise-client-urls https://{{.Machine.Address}}:${ETCD_CLIENT_PORT} --listen-peer-urls https://{{.Machine.Address}}:${ETCD_PEER_PORT},http://127.0.0.1:${ETCD_PEER_PORT} --initial-advertise-peer-urls https://{{.Machine.Address}}:${ETCD_PEER_PORT} --cert-file=/etc/kubernetes/pki/etcd/server.pem --key-file=/etc/kubernetes/pki/etcd/server-key.pem --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem --initial-cluster ${ETCD_URLS} --initial-cluster-token my-etcd-token --initial-cluster-state new
+ExecStart=${INSTALL_DIR}/etcd \
+  --name \${PEER_NAME} \
+  --data-dir /docker/etcd \
+  --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT},http://127.0.0.1:\${CLIENT_PORT} \
+  --advertise-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT} \
+  --listen-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT},http://127.0.0.1:\${PEER_PORT} \
+  --initial-advertise-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT} \
+  --cert-file=/etc/kubernetes/pki/etcd/server.pem \
+  --key-file=/etc/kubernetes/pki/etcd/server-key.pem \
+  --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem \
+  --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem \
+  --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem \
+  --initial-cluster \${URLS} --initial-cluster-token my-etcd-token --initial-cluster-state new
 
 [Install]
 WantedBy=multi-user.target
@@ -168,8 +196,10 @@ systemctl enable etcd
 systemctl start etcd
 systemctl status etcd
 
-add_me_if_not_count "etcd/servers-done" $ETCD_SERVER_COUNT
+echo "Etcd started, lets go!"
+add_me_if_not_count "etcd/servers-done" $ETCD_SERVER_COUNT $ETCD_IP
 
+echo "Waiting for ${ETCD_SERVER_COUNT} servers to complete etcd install"
 wait_for_count "etcd/servers-done" $ETCD_SERVER_COUNT
 
 exit 0

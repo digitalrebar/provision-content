@@ -23,6 +23,12 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 MASTER_ON_ETCDS={{.Param "krib/cluster-masters-on-etcds"}}
 ETCD_COUNT={{.Param "etcd/server-count"}}
 
+{{ if .ParamExists "krib/ip" -}}
+KRIB_IP={{ .Param "krib/ip" }}
+{{ else -}}
+KRIB_IP={{ .Machine.Address }}
+{{ end -}}
+
 # Get the number of servers to create
 KRIB_MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 echo "Creating $KRIB_MASTER_COUNT k8s masters"
@@ -61,7 +67,7 @@ else
 fi
 
 echo "Electing Members to $CLUSTER_PROFILE"
-MASTER_INDEX=$(add_me_if_not_count "$KRIB_MASTERS_PARAM" $KRIB_MASTER_COUNT)
+MASTER_INDEX=$(add_me_if_not_count "$KRIB_MASTERS_PARAM" $KRIB_MASTER_COUNT $KRIB_IP)
 if [[ $MASTER_INDEX == notme ]] ; then
   echo "I am not a master server.  Move on."
 
