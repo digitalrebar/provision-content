@@ -8,5 +8,5 @@ Schema:
   default: "/mnt/hdd/kubectl"
 Meta:
   color: "blue"
-  icon: "pocket"
+  icon: "docker"
   title: "Community Content"

@@ -11,7 +11,7 @@ Templates:
     Name: "Install Docker from internet repo"
     Path: ""
 Meta:
-  icon: "pocket"
+  icon: "docker"
   color: "blue"
   title: "Community Content"
   feature-flags: "sane-exit-codes"
