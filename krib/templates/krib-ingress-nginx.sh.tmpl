@@ -41,7 +41,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
     helm install \
      --name nginx-ingress \
      --namespace kube-system \
-     --set controller.extraArgs.sort-backends="" \
      --set service.externalTrafficPolicy="Local" \
      stable/nginx-ingress
 
