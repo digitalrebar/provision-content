@@ -1,0 +1,14 @@
+---
+Name: "krib/ip"
+Description: "InternalIP (--node-ip param to kubelet) used by Kubernetes hosts"
+Documentation: |
+  For configurations where kubelet does not correctly detect the IP
+  over which nodes should communicate.
+
+  If unset, will default to the Machine Address.
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
