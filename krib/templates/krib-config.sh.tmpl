@@ -33,6 +33,15 @@ fi
 VALUE=$(sysctl -n net.bridge.bridge-nf-call-iptables)
 [ $VALUE != 1 ] && sysctl -w net.bridge.bridge-nf-call-iptables=1
 
+{{ if .ParamExists "krib/ip" -}}
+KRIB_IP={{ .Param "krib/ip" }}
+{{ else -}}
+KRIB_IP={{ .Machine.Address }}
+{{ end -}}
+
+# Making sure I use the right cluster InternalIP
+echo "KUBELET_EXTRA_ARGS=--node-ip=${KRIB_IP}" > /etc/default/kubelet
+
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX != notme ]] ; then
@@ -68,7 +77,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
     rm /tmp/cert.tgz /tmp/cert.b64
 
-    JOIN_CMD=$(cat /tmp/kubeadm.init.log | grep "kubeadm join")
+    JOIN_CMD=$(kubeadm token create --print-join-command)
 
     NET_TYPE={{ .Param "krib/networking-provider" }}
 
@@ -143,10 +152,10 @@ if [[ $MASTER_INDEX != notme ]] ; then
     {{end}}
 
     echo "Recording 'kubeadm' bootstrap config ..."
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to - < /tmp/kubeadm.cfg
 
     echo "Recording cluster admin config ..."
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to "$(cat /etc/kubernetes/admin.conf)"
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to - < /etc/kubernetes/admin.conf
 
     echo "Recording cluster join script ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$JOIN_CMD"
@@ -177,8 +186,10 @@ do
   sleep 2
 done
 
-AC=$(wait_for_variable $KRIB_ADMIN_CONF_PARAM)
-# set labels for nodes / runs on all nodes
+# Wait for KRIB config to be updated from bootstrap node
+wait_for_variable $KRIB_ADMIN_CONF_PARAM > label.conf
+
+# Set labels for nodes / runs on all nodes
 drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM > label.conf
 # Re-set HOSTNAME to kubernetes node name
 HOSTNAME=$(kubectl --kubeconfig=label.conf get nodes | cut -d" " -f1 | grep -i $(hostname -s))

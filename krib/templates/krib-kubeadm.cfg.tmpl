@@ -22,14 +22,6 @@ apiServerExtraArgs:
   {{ $key }}: {{ $value }}
 {{ end -}}
 {{ end -}}
-bootstrapTokens:
-- groups:
-  - system:bootstrappers:kubeadm:default-node-token
-  token: {{ .Param "krib/cluster-bootstrap-token" }}
-  ttl: {{ .Param "krib/cluster-bootstrap-ttl" }}
-  usages:
-  - signing
-  - authentication
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
 imageRepository: {{ .Param "krib/cluster-image-repository" }}

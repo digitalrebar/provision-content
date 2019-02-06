@@ -7,7 +7,7 @@ Documentation: |
   Param will have no effect on the cluster.
 Schema:
   type: "string"
-  default: "https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/  kube-flannel.yml"
+  default: "https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml"
 Meta:
   color: "blue"
   icon: "ship"

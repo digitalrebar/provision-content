@@ -60,9 +60,9 @@ wait_for_count() {
 add_me_if_not_count() {
   local varname=$1
   local count=$2
+  local me_ip=$3
 
   local me_uuid={{.Machine.Uuid}}
-  local me_ip={{.Machine.Address}}
   local me_name={{.Machine.Name}}
 
   local index="notme"
