@@ -6,7 +6,7 @@ set -x
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
-{{ if eq ("krib/dashboard-enabled") true -}}
+{{ if eq (.Param "krib/dashboard-enabled") true -}}
 
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
