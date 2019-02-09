@@ -6,8 +6,6 @@ set -x
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
-{{ if eq (.Param "krib/dashboard-enabled") true -}}
-
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
@@ -18,6 +16,7 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{template "krib-lib.sh.tmpl" .}}
 export RS_UUID="{{.Machine.UUID}}"
 
+{{ if eq (.Param "krib/dashboard-enabled") true -}}
 cloneHeapster() {
   if [ -d heapster ]; then
     cd heapster || return 1
@@ -97,9 +96,8 @@ EOFDA
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-influxdb
 
   rm -rf /root/setup
-
-  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
 fi
-{{end -}}
 echo "Finished successfully"
+{{end -}}
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
 exit 0
