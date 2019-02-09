@@ -1,0 +1,11 @@
+---
+Name: "krib/dashboard-enabled"
+Description: "Enables install of Kubernetes dashboard"
+Documentation: Boolean value that enables Kubernetes dashboard install
+Schema:
+  type: "boolean"
+  default: true
+Meta:
+  icon: "dashboard"
+  color: "blue"
+  title: "Digital Rebar Community Content"

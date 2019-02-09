@@ -6,6 +6,8 @@ set -x
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+{{ if eq ("krib/dashboard-enabled") true -}}
+
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
@@ -98,6 +100,6 @@ EOFDA
 
   drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\"}}" | jq .Meta
 fi
-
+{{end -}}
 echo "Finished successfully"
 exit 0
