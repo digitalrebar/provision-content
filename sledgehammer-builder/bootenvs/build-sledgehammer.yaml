@@ -127,6 +127,7 @@ Templates:
       {{end}}
       mktemp
       ncurses
+      nfs-utils
       ntfs-3g
       ntfsprogs
       ntp
