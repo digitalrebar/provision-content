@@ -12,7 +12,8 @@ export RS_IP="{{.Machine.Address}}"
 CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
 {{else -}}
-xiterr 1 "Missing etcd/cluster-profile on the machine!"
+echo "Missing etcd/cluster-profile on the machine!"
+exit 1
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
