@@ -102,6 +102,7 @@ Templates:
       fuse-ntfs-3g
       gdisk
       glibc
+      glibc.i686
       gzip
       hostname
       initscripts
@@ -115,6 +116,7 @@ Templates:
       kernel-tools
       kexec-tools
       less
+      libstdc++.i686
       libsysfs
       linux-firmware
       lldpd
@@ -127,6 +129,7 @@ Templates:
       {{end}}
       mktemp
       ncurses
+      ncurses-libs.i686
       nfs-utils
       ntfs-3g
       ntfsprogs
