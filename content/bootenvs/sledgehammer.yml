@@ -4,6 +4,18 @@
 # These two bootenvs are linked and should be used as a pair.
 Name: "sledgehammer"
 Description: "Ram-Only image loaded with tools to allow for discovery and maintenance"
+Documentation: |
+  The Sledgehammer BootEnv is used in conjunction with Discovery to boot a
+  machine in to an in-memory (RAM only) operating system.  The Machine will
+  be enrolled in the DRP Endpoint via Sledgehammer.
+
+  Many maintenance and hardware related workflows require to be run from the
+  Sledgehammer BootEnv.
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "microchip"
+  color: "green"
+  title: "Digital Rebar Community Content"
 OS:
   Family: "redhat"
   Name: "sledgehammer"
@@ -25,10 +37,11 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     arm64:
-      Loader: grubarm64.efi
+      Loader: "grubarm64.efi"
       IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
       IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
       Kernel: "9b5276ac5826520829aa73c149fe672fe2363656/vmlinuz0"
@@ -45,6 +58,7 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
@@ -128,8 +142,3 @@ Templates:
 
       # The last line in this script must always be exit 0!!
       exit 0
-Meta:
-  feature-flags: "change-stage-v2"
-  icon: "microchip"
-  color: "green"
-  title: "Digital Rebar Community Content"

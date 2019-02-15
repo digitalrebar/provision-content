@@ -5,6 +5,11 @@ Documentation: |
   NOTE: Default Ubuntu ISOs will attempt to check internet repositories, 
   this can cause problems during provisioning if your environment does not have outbound access.
   Workaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "orange"
+  title: "Digital Rebar Community Content"
 OS:
   Name: "ubuntu-16.04"
   Family: "ubuntu"
@@ -26,7 +31,7 @@ BootParams: >-
   root=/dev/ram
   rw
   quiet
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
   --
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
@@ -66,8 +71,3 @@ Templates:
   - ID: "net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
-Meta:
-  feature-flags: "change-stage-v2"
-  icon: "linux"
-  color: "orange"
-  title: "Digital Rebar Community Content"

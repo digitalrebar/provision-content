@@ -1,6 +1,14 @@
 ---
 Name: "centos-7.6.1810-install"
 Description: "CentOS-7.6.1810 install bootenv"
+Documentation: |
+  This BootEnv installs the CentOS 7 Minimal operating system.  Both x86_64
+  and aarch64 architectures are supported.
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "blue"
+  title: "Digital Rebar Community Content"
 OS:
   Family: "redhat"
   Name: "centos-7.6.1810"
@@ -17,13 +25,14 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: CentOS-7-aarch64-Minimal-1810.iso
+      IsoFile: "CentOS-7-aarch64-Minimal-1810.iso"
       Sha256: "864596b2fb971c8d8c0f3618981cca4725f6c2347f6eb2f130e0aefa3413c0ef"
-      IsoUrl: http://dallas.tx.mirror.xygenhosting.com/centos-altarch/7.6.1810/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso
+      IsoUrl: "http://dallas.tx.mirror.xygenhosting.com/centos-altarch/7.6.1810/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -32,6 +41,7 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
@@ -66,8 +76,3 @@ Templates:
   - ID: "select-kickseed.tmpl"
     Name: "compute.ks"
     Path: "{{.Machine.Path}}/compute.ks"
-Meta:
-  feature-flags: "change-stage-v2"
-  icon: "linux"
-  color: "blue"
-  title: "Digital Rebar Community Content"

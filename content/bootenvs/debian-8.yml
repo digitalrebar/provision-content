@@ -1,6 +1,13 @@
 ---
 Name: "debian-8-install"
 Description: "Debian 8 install BootEnv"
+Documentation: |
+  This BootEnv installs Debian 8 via the "mini" ISO file.
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "black"
+  title: "Digital Rebar Community Content"
 OS:
   Name: "debian-8"
   Family: "debian"
@@ -32,6 +39,7 @@ BootParams: >-
   numa=off
   rw
   quiet
+  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
@@ -70,8 +78,3 @@ Templates:
   - ID: "net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
-Meta:
-  feature-flags: "change-stage-v2"
-  icon: "linux"
-  color: "black"
-  title: "Digital Rebar Community Content"

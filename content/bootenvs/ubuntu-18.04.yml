@@ -1,30 +1,97 @@
-Name: ubuntu-18.04-install
-BootParams: debian-installer/locale=en_US.utf8 console-setup/layoutcode=us keyboard-configuration/layoutcode=us
-  netcfg/dhcp_timeout=120 netcfg/choose_interface=auto url={{.Machine.Url}}/seed netcfg/get_hostname={{.Machine.Name}}
-  root=/dev/ram rw quiet {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
-  -- {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
-Description: Ubuntu-18.04 install
+Name: "ubuntu-18.04-install"
+Description: "Ubuntu-18.04 install"
 Documentation: |
-  NOTE: Default Ubuntu ISOs will attempt to check internet repositories, 
-  this can cause problems during provisioning if your environment does not have outbound access.
-  Workaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.
-Errors: []
-Initrds:
-  - install/netboot/ubuntu-installer/amd64/initrd.gz
-Kernel: install/netboot/ubuntu-installer/amd64/linux
+  Installs Ubuntu Bionic Beaver (18.04) LTS version.  By default this BootEnv
+  will install the General Available (GA) kernel.  If you wish to install the
+  HWE (Hardware Enablement) version, insure you set the "ubuntu-hwe-enable"
+  Param to "true", and apply it to the Machine (either in Global profile, a
+  specific profile, or the Param directly on the Machine).
+
+  Both amd64 and arm64 architectures are supported.
+
+  NOTE: Default Ubuntu ISOs will attempt to check internet repositories, this
+  can cause problems during provisioning if your environment does not have
+  outbound access.  Workaround this by defining Options 3 (Gateway) and 6 (DNS)
+  for your Subnet settings.
 Meta:
-  color: orange
-  feature-flags: change-stage-v2
-  icon: linux
-  title: Digital Rebar Community Content
+  color: "purple"
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  title: "Digital Rebar Community Content"
 OS:
+  Name: "ubuntu-18.04"
+  Family: "ubuntu"
   Codename: "Bionic Beaver"
-  Family: ubuntu
-  IsoFile: ubuntu-18.04.1-server-amd64.iso
-  IsoSha256: "a5b0ea5918f850124f3d72ef4b85bda82f0fcd02ec721be19c1a6952791c8ee8"
-  IsoUrl: http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.1-server-amd64.iso
-  Name: ubuntu-18.04
   Version: "18.04"
+  SupportedArchitectures:
+    x86_64:
+      IsoFile: "ubuntu-18.04.2-server-amd64.iso"
+      IsoSha256: "a2cb36dc010d98ad9253ea5ad5a07fd6b409e3412c48f1860536970b073c98f5"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.2-server-amd64.iso"
+      Kernel: "install/{{if .ParamExists "ubuntu-hwe-enable"}}{{if eq (.Param "ubuntu-hwe-enable") true }}hwe-{{end}}{{end}}netboot/ubuntu-installer/amd64/linux"
+      Initrds:
+        - "install/{{if .ParamExists "ubuntu-hwe-enable"}}{{if eq (.Param "ubuntu-hwe-enable") true }}hwe-{{end}}{{end}}netboot/ubuntu-installer/amd64/initrd.gz"
+      BootParams: >-
+        root=/dev/ram
+        debian-installer/locale=en_US.utf8
+        console-setup/layoutcode=us
+        keyboard-configuration/layoutcode=us
+        netcfg/dhcp_timeout=120
+        netcfg/choose_interface=auto
+        url={{.Machine.Url}}/seed
+        netcfg/get_hostname={{.Machine.Name}}
+        rw quiet
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    aarch64:
+      IsoFile: "ubuntu-18.04.2-server-arm64.iso"
+      IsoSha256: "22ffc947df8c699920582c6d446b4e32e8471c1684bdeab7c91e36c1ebb7f2ba"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.2-server-arm64.iso"
+      Kernel: "install/{{if .ParamExists "ubuntu-hwe-enable"}}{{if eq (.Param "ubuntu-hwe-enable") true }}hwe-{{end}}{{end}}netboot/ubuntu-installer/arm64/linux"
+      Loader: "bootnetaa64.efi"
+      Initrds:
+        - "install/{{if .ParamExists "ubuntu-hwe-enable"}}{{if eq (.Param "ubuntu-hwe-enable") true }}hwe-{{end}}{{end}}netboot/ubuntu-installer/arm64/initrd.gz"
+      BootParams: >-
+        root=/dev/ram
+        debian-installer/locale=en_US.utf8
+        console-setup/layoutcode=us
+        keyboard-configuration/layoutcode=us
+        netcfg/dhcp_timeout=120
+        netcfg/choose_interface=auto
+        url={{.Machine.Url}}/seed
+        netcfg/get_hostname={{.Machine.Name}}
+        rw quiet
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    SupportedArchitectures:
+    x86_64:
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    aarch64:
+      Loader: "grubarm64.efi"
+      IsoFile: CentOS-7-aarch64-Minimal-1810.iso
+      Sha256: "864596b2fb971c8d8c0f3618981cca4725f6c2347f6eb2f130e0aefa3413c0ef"
+      IsoUrl: http://dallas.tx.mirror.xygenhosting.com/centos-altarch/7.6.1810/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OnlyUnknown: false
 OptionalParams:
   - part-scheme
@@ -43,25 +110,24 @@ OptionalParams:
 ReadOnly: true
 RequiredParams: []
 Templates:
-  - Name: "kexec"
-    ID: "kexec.tmpl"
+  - ID: "kexec.tmpl"
+    Name: "kexec"
     Path: "{{.Machine.Path}}/kexec"
-  - ID: default-pxelinux.tmpl
-    Name: pxelinux
-    Path: pxelinux.cfg/{{.Machine.HexAddress}}
-  - ID: default-ipxe.tmpl
-    Name: ipxe
-    Path: '{{.Machine.Address}}.ipxe'
-  - ID: default-pxelinux.tmpl
-    Name: pxelinux-mac
-    Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
-  - ID: default-ipxe.tmpl
-    Name: ipxe-mac
-    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
-  - ID: select-kickseed.tmpl
-    Name: seed
-    Path: '{{.Machine.Path}}/seed'
-  - ID: net-post-install.sh.tmpl
-    Name: net-post-install.sh
-    Path: '{{.Machine.Path}}/post-install.sh'
-
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: "pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: "{{.Machine.MacAddr "ipxe"}}.ipxe"
+  - ID: "select-kickseed.tmpl"
+    Name: "seed"
+    Path: "{{.Machine.Path}}/seed"
+  - ID: "net-post-install.sh.tmpl"
+    Name: "net-post-install.sh"
+    Path: "{{.Machine.Path}}/post-install.sh"
