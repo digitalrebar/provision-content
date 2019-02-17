@@ -12,7 +12,7 @@ OS:
   Name: "debian-9"
   Family: "debian"
   IsoFile: "debian-9-amd64-mini.iso"
-  IsoSha256: "53fbdc4469216d7cf80023d58925d37add5a81817b43b7a36cd53dd7f606816d"
+  IsoSha256: "256ff4122bb57d234068c21b3c78380d5960cd90922e44125ddfc2a2cb597e0a"
   IsoUrl: "http://mirrors.kernel.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/mini.iso"
   Version: "9.6"
 Initrds:

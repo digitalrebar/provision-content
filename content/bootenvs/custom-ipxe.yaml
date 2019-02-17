@@ -1,12 +1,12 @@
 ---
-Name: custom-ipxe
+Name: "custom-ipxe"
 Description: "Boot system using a custom ipxe config file"
 Documentation: |
   This bootenv allows you to specify a custom iPXE config file to boot the
   system via.  You're PXE kernel file should be named "ipxe.pxe".
 OS:
   Name: "ipxe"
-Kernel: ../ipxe.pxe
+Kernel: "../ipxe.pxe"
 Templates:
   - Name: "pxelinux"
     Name: "pxelinux"

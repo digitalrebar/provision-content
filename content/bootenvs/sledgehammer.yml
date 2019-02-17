@@ -37,7 +37,6 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     arm64:
@@ -58,7 +57,6 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
