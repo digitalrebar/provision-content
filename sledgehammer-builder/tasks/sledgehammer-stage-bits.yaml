@@ -123,6 +123,20 @@ Templates:
           &&&&&&&&&
           &&&&&&&             (c) RackN, Inc.
 
+  - Name: sledgehammer-issue
+    Contents: |
+      #!/usr/bin/env bash
+
+      # /etc/sledgehammer-id should be created in the bootenv kickstart
+      ID=$(cat /etc/sledgehammer-id)
+      for file in "/etc/issue" "/etc/issue.net"; do
+      echo "
+      |              +--+   | Digital Rebar Sledgehammer
+      |  +==========={  }   | ID $ID
+      |              +--+   | Kernel \r on an \m
+      " > $file
+      done
+
   - Name: sledgehammer-ssh-config
     Path: /etc/ssh/sshd_config
     Contents: |
@@ -590,9 +604,11 @@ Templates:
     Contents: |
       #!/bin/bash
       {{ template "setup.tmpl" .}}
-      echo "Generating unique signature for Sledgehammer"
+      #echo "Generating unique signature for Sledgehammer"
       cd /IMAGE
-      signature="$(sha1sum <root.squashfs |awk '{print $1}')"
+      #signature="$(sha1sum <root.squashfs |awk '{print $1}')"
+      # signature should be created in the BootEnv kickstart %post section
+      signature="$(cat /etc/sledgehammer-id)"
       # make stage1.img
       cd initrd
       sed -i -e "s/::SIGNATURE::/$signature/" init

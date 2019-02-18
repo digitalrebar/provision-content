@@ -170,6 +170,12 @@ Templates:
       %end
 
       %post
+      N=10
+      ID=$(while (( N > 0 )); do uuidgen; (( N-- )); done | sha1sum | awk ' { print $1 } ')
+      echo "$ID" > /etc/sledgehammer-id
+      echo "SLEDGEHAMMER_VERSION=${ID}" > /etc/sledgehammer-release
+      echo "SLEDGEHAMMER_DATE=$(date)" >> /etc/sledgehammer-release
+
       cat >/etc/selinux/config <<EOF
       SELINUX=permissive
       SELINUXTYPE=minimum
