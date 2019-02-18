@@ -316,6 +316,11 @@ Templates:
       fi
       } > /newinitramfs/etc/systemd/network/20-bootif.network
 
+      echo "$SIGNATURE" > /newinitramfs/etc/sledgehammer-id
+      echo "SLEDGEHAMMER_VERSION=${SIGNATURE}" > /etc/sledgehammer-release
+      echo "SLEDGEHAMMER_DATE=${::BUILD_DATE::}" >> /etc/sledgehammer-release
+      echo "SLEDGEHAMMER_BUILDER_VERSION=${::SBV::}" >> /etc/sledgehammer-release
+
       echo "" >/proc/sys/kernel/hotplug
       if [[ "$ip6" == "" ]] ; then
           pkill udhcpc
@@ -604,14 +609,14 @@ Templates:
     Contents: |
       #!/bin/bash
       {{ template "setup.tmpl" .}}
-      #echo "Generating unique signature for Sledgehammer"
+      echo "Generating unique signature for Sledgehammer"
       cd /IMAGE
-      #signature="$(sha1sum <root.squashfs |awk '{print $1}')"
-      # signature should be created in the BootEnv kickstart %post section
-      signature="$(cat /etc/sledgehammer-id)"
+      signature="$(sha1sum <root.squashfs |awk '{print $1}')"
       # make stage1.img
       cd initrd
       sed -i -e "s/::SIGNATURE::/$signature/" init
+      sed -i -e "s/::BUILD_DATE::/$(date)/" init
+      sed -i -e "s/::SBV::/$(drpcli -U rocketskates -P r0cketsk8ts contents show sledgehammer-builder | jq .meta.Version -r)/" init
       find |sort |cpio -o -R 0:0 --format=newc |gzip -9 >../stage1.img
       cd ..
       # Tar it all up
