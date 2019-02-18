@@ -318,8 +318,8 @@ Templates:
 
       echo "$SIGNATURE" > /newinitramfs/etc/sledgehammer-id
       echo "SLEDGEHAMMER_VERSION=${SIGNATURE}" > /etc/sledgehammer-release
-      echo "SLEDGEHAMMER_DATE=${::BUILD_DATE::}" >> /etc/sledgehammer-release
-      echo "SLEDGEHAMMER_BUILDER_VERSION=${::SBV::}" >> /etc/sledgehammer-release
+      echo "SLEDGEHAMMER_DATE=\"::BUILD_DATE::\"" >> /etc/sledgehammer-release
+      echo "SLEDGEHAMMER_BUILDER_VERSION=::SBV::" >> /etc/sledgehammer-release
 
       echo "" >/proc/sys/kernel/hotplug
       if [[ "$ip6" == "" ]] ; then
