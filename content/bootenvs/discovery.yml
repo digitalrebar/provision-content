@@ -10,6 +10,11 @@ Documentation: |
 
       #!/bin/bash
       curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "binoculars"
+  color: "blue"
+  title: "Digital Rebar Community Content"
 OnlyUnknown: true
 OS:
   Family: "redhat"
@@ -31,10 +36,11 @@ OS:
         rd_NO_MD
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     arm64:
-      Loader: grubarm64.efi
+      Loader: "grubarm64.efi"
       IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
       IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
       Kernel: "9b5276ac5826520829aa73c149fe672fe2363656/vmlinuz0"
@@ -50,6 +56,7 @@ OS:
         rd_NO_MD
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
@@ -455,8 +462,3 @@ Templates:
 
       echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
       exit 1
-Meta:
-  feature-flags: "change-stage-v2"
-  icon: "binoculars"
-  color: "blue"
-  title: "Digital Rebar Community Content"

@@ -1,12 +1,8 @@
 ---
-Name: "ubuntu-18.04-install"
-Description: "Ubuntu-18.04 install"
+Name: "ubuntu-18.04-arm64-hwe-install"
+Description: "Ubuntu-18.04 ARM64 HWE kernel install"
 Documentation: |
-  Installs Ubuntu Bionic Beaver (18.04) LTS version.  This BootEnv will install
-  the General Available (GA) kernel.  If you wish to install the HWE (Hardware
-  Enablement) version, please use the Stage "ubuntu-18.04-hwe-install".
-
-  Both amd64 and arm64 architectures are supported.
+  Installs Ubuntu Bionic Beaver (18.04) HWE version for ARM64 architecture.
 
   NOTE - Default Ubuntu ISOs will attempt to check internet repositories, this
   can cause problems during provisioning if your environment does not have
@@ -23,34 +19,14 @@ OS:
   Codename: "Bionic Beaver"
   Version: "18.04"
   SupportedArchitectures:
-    amd64:
-      IsoFile: "ubuntu-18.04.2-server-amd64.iso"
-      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.2-server-amd64.iso"
-      IsoSha256: "a2cb36dc010d98ad9253ea5ad5a07fd6b409e3412c48f1860536970b073c98f5"
-      Kernel: "install/netboot/ubuntu-installer/amd64/linux"
-      Initrds:
-        - "install/netboot/ubuntu-installer/amd64/initrd.gz"
-      BootParams: >-
-        root=/dev/ram
-        debian-installer/locale=en_US.utf8
-        console-setup/layoutcode=us
-        keyboard-configuration/layoutcode=us
-        netcfg/dhcp_timeout=120
-        netcfg/choose_interface=auto
-        url={{.Machine.Url}}/seed
-        netcfg/get_hostname={{.Machine.Name}}
-        rw quiet
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
-        --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     arm64:
       IsoFile: "ubuntu-18.04.2-server-arm64.iso"
       IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.2-server-arm64.iso"
       IsoSha256: "22ffc947df8c699920582c6d446b4e32e8471c1684bdeab7c91e36c1ebb7f2ba"
-      Kernel: "install/netboot/ubuntu-installer/arm64/linux"
+      Kernel: "install/hwe-netboot/ubuntu-installer/arm64/linux"
       Loader: "bootnetaa64.efi"
       Initrds:
-        - "install/netboot/ubuntu-installer/arm64/initrd.gz"
+        - "install/hwe-netboot/ubuntu-installer/arm64/initrd.gz"
       BootParams: >-
         root=/dev/ram
         debian-installer/locale=en_US.utf8
