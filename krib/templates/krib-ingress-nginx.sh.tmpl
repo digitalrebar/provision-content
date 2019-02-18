@@ -91,6 +91,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     fi
 
 {{end}}
+{{ if eq (.Param "krib/dashboard-enabled") true -}}
     echo "Wait until nginx-ingress-controller gets a LoadBalancer IP"
     INGRESSIP=$(wait_for_ingress)
 
@@ -143,7 +144,7 @@ EOF
 {{- else}}
       echo "K8S dashboard ingress at https://k8s-db.$INGRESSIP.xip.io"
 {{- end}}
-
+{{end}}
     # Clean up
     rm -f /tmp/certmanager-provider-secret.yaml
     rm -f /tmp/certmanager-clusterissuer.yaml

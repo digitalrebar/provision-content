@@ -61,6 +61,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
       echo "Installing {{$chart.name}} (from {{$chart.chart}})..."
 
       {{ range $name, $template := $chart.templates -}}
+
       echo "expanding template {{$template}} as {{$name}}.yaml"
       cat > {{$name}}.yaml << EOF
 {{ $render.CallTemplate $template $render }}
@@ -69,34 +70,37 @@ EOF
 
     fi
     {{ range $index, $tmpl := $chart.templatesbefore -}}{{ if eq ($tmpl.nodes) "leader" -}}
+
     if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
       echo "expanding {{$chart.name}} templatebefore {{$tmpl.name}}"
 {{ $render.CallTemplate $tmpl.name $render }}
       echo "========= done {{$chart.name}} templatebefore {{$tmpl}} ==========="
     fi
-    {{- end }}{{ end }}
+    {{ end }}{{ end -}}
   fi
   {{ range $index, $tmpl := $chart.templatesbefore -}}{{ if eq ($tmpl.nodes) "masters" -}}
+
   if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
     echo "expanding {{$chart.name}} templatebefore {{$tmpl.name}}"
 {{ $render.CallTemplate $tmpl.name $render }}
     echo "========= done {{$chart.name}} templatebefore {{$tmpl}} ==========="
   fi
-  {{- end }}{{ end }}
+  {{ end }}{{ end -}}
 fi
-
 {{ range $index, $tmpl := $chart.templatesbefore -}}{{ if eq ($tmpl.nodes) "all" -}}
+
 if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
   echo "expanding {{$chart.name}} templatebefore {{$tmpl.name}}"
 {{ $render.CallTemplate $tmpl.name $render }}
   echo "========= done {{$chart.name}} templatebefore {{$tmpl}} ==========="
 fi
-{{- end }}{{ end }}
+{{ end }}{{ end -}}
 
 if [[ $MASTER_INDEX != notme ]] ; then
   if [[ $MASTER_INDEX == 0 ]] ; then
     if [[ "$INSTALLED" == false ]] ; then
       {{ range $index, $before := $chart.kubectlbefore -}}
+
       echo "running kubectl {{$before}} ({{$index}})"
       kubectl {{$before}}
       {{ end -}}
@@ -108,6 +112,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
       {{ if $chart.repos }}
       {{ range $name, $url := $chart.repos -}}
+
       echo "adding chart repo {{$name}}"
       helm repo add {{$name}} {{$url}}
       {{ end -}}
@@ -156,42 +161,43 @@ if [[ $MASTER_INDEX != notme ]] ; then
       set -e
       {{ end -}}
 
-      {{ range $index, $after := $chart.kubectlafter }}
+      {{ range $index, $after := $chart.kubectlafter -}}
+
       echo "running kubectl {{$after}} ({{$index}})"
       kubectl {{$after}}
       {{ end -}}
 
     fi
+    {{ range $index, $tmpl := $chart.templatesafter -}}{{ if eq ($tmpl.nodes) "leader" -}}
 
-    {{ range $index, $tmpl := $chart.templatesafter }}{{ if eq ($tmpl.nodes) "leader" -}}
     if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
       echo "expanding {{$chart.name}} templateafter {{$tmpl.name}}"
 {{ $render.CallTemplate $tmpl.name $render }}
       echo "========= done {{$chart.name}} templateafter {{$tmpl}} ==========="
     fi
-    {{- end }}{{ end }}
+    {{ end }}{{ end -}}
   else
     echo "I was not the leader, skipping helm install"
   fi
+  {{ range $index, $tmpl := $chart.templatesafter -}}{{ if eq ($tmpl.nodes) "masters" -}}
 
-  {{ range $index, $tmpl := $chart.templatesafter }}{{ if eq ($tmpl.nodes) "masters" -}}
   if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
     echo "expanding {{$chart.name}} templateafter {{$tmpl.name}}"
 {{ $render.CallTemplate $tmpl.name $render }}
     echo "========= done {{$chart.name}} templateafter {{$tmpl}} ==========="
   fi
-  {{- end }}{{ end }}
+  {{ end }}{{ end -}}
 else
   echo "I am a worker - no helm actions"
 fi
+{{ range $index, $tmpl := $chart.templatesafter -}}{{ if eq ($tmpl.nodes) "all" -}}
 
-{{ range $index, $tmpl := $chart.templatesafter }}{{ if eq ($tmpl.nodes) "all" -}}
 if [[ "$INSTALLED" == false ]] || [[ "$INSTALLED" == {{if not $tmpl.runIfInstalled}}false{{else}}{{$tmpl.runIfInstalled}}{{end}} ]] ; then
   echo "expanding {{$chart.name}} templateafter {{$tmpl.name}}"
 {{ $render.CallTemplate $tmpl.name $render }}
   echo "========= done {{$chart.name}} templateafter {{$tmpl}} ==========="
 fi
-{{- end }}{{ end }}
+{{ end }}{{ end -}}
 echo "========= done {{$chart.name}} ==========="
 {{ else -}}
 echo "No charts included in helm/charts to install"

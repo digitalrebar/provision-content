@@ -2,7 +2,7 @@
 Name: "krib/networking-provider"
 Description: "Set the network provider types (eg 'flannel', 'calico')."
 Documentation: |
-  This Param can be used to specify either 'flannel' or 'calico'
+  This Param can be used to specify either 'flannel', 'calico', or 'weave'
   network providers for the Kubernetes cluster.  This is completed
   using the provider specific YAML definition file. 
 
@@ -10,6 +10,7 @@ Documentation: |
 
     flannel
     calico
+    weave
 
   The default is 'flannel'.
 
@@ -19,6 +20,7 @@ Schema:
   enum:
     - "flannel"
     - "calico"
+    - "weave"
 Meta:
   color: "blue"
   icon: "ship"
