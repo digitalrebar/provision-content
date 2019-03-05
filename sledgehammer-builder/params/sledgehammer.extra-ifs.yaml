@@ -1,0 +1,16 @@
+---
+Name: "sledgehammer/extra-ifs"
+Description: "Extra interfaces to configure during sledgehammer builds"
+Documentation: |
+  Extra interfaces to configure during sledgehammer builds.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+
+Meta:
+  icon: "time"
+  color: "blue"
+  title: "Digital Rebar Community Content"
