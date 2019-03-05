@@ -166,7 +166,9 @@ Templates:
       %end
 
       %pre
-      #dhclient --no-pid enp0s8
+      {{ range $intf := .Param "sledgehammer/extra-ifs" }}
+      dhclient --no-pid {{ $intf }}
+      {{end}}
       %end
 
       %post
