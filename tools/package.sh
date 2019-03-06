@@ -25,17 +25,17 @@ which drpcli || go get -u github.com/digitalrebar/provision/cmds/drpcli
 
 . tools/version.sh
 
-for dir in content contrib ; do
+tools/pieces.sh | while read i ; do
+    dir=$i
+    if [[ $i == "drp-community-content" ]] ; then
+        dir="content"
+    fi
+    if [[ $i == "drp-community-contrib" ]] ; then
+        dir="contrib"
+    fi
     echo -n "$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" > $dir/._Version.meta
-    drbundler $dir drp-community-$dir.yaml
-    drpcli contents document drp-community-$dir.yaml > drp-community-$dir.rst
-    $shasum drp-community-$dir.yaml > drp-community-$dir.sha256
-done
-
-for dir in krib sledgehammer-builder ; do
-    echo -n "$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" > $dir/._Version.meta
-    drbundler $dir $dir.yaml
-    drpcli contents document $dir.yaml > $dir.rst
-    $shasum $dir.yaml > $dir.sha256
+    drbundler $dir $i.yaml
+    drpcli contents document $i.yaml > $i.rst
+    $shasum $i.yaml > $i.sha256
 done
 
