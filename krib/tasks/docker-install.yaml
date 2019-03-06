@@ -5,12 +5,13 @@ Documentation: |
   Installs Docker using O/S packages
 OptionalParams:
   - docker/working-dir
+  - kubectl/working-dir
 Templates:
   - ID: "docker-install.sh.tmpl"
     Name: "Install Docker from internet repo"
     Path: ""
 Meta:
-  icon: "pocket"
+  icon: "docker"
   color: "blue"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

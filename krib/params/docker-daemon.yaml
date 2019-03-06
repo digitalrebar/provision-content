@@ -14,5 +14,5 @@ Schema:
       type: "array"
 Meta:
   color: "blue"
-  icon: "pocket"
+  icon: "boxes"
   title: "Community Content"

@@ -1,0 +1,15 @@
+---
+Name: "metallb/limits-memory"
+Description: "Memory resource limits for MetalLB"
+Documentation: |
+  This should be set to match the memory 
+  resource limits for MetalLB
+  
+  Default: 100Mi
+Schema:
+  type: "string"
+  default: 100Mi  
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"

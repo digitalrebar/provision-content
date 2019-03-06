@@ -3,10 +3,10 @@ Name: "krib/dashboard-config"
 Description: "Specifies the YAML config file to use for the Dashboard."
 Documentation: |
   Set this string to an HTTP or HTTPS reference for a YAML configuration to
-  use for the Kubernetes Dashboard.  
+  use for the Kubernetes Dashboard.
 Schema:
   type: "string"
-  default: "https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml"
+  default: "https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml"
 Meta:
   color: "blue"
   icon: "ship"

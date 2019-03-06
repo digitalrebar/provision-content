@@ -2,15 +2,20 @@
 Name: "ubuntu-16.04-install"
 Description: "Ubuntu-16.04 install points to the latest release version"
 Documentation: |
-  NOTE: Default Ubuntu ISOs will attempt to check internet repositories, 
+  NOTE: Default Ubuntu ISOs will attempt to check internet repositories,
   this can cause problems during provisioning if your environment does not have outbound access.
-  Workaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines' Subnet.
+  Workaround this by defining Options 3 (Gateway) and 6 (DNS) for your machines defined Subnet.
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "orange"
+  title: "Digital Rebar Community Content"
 OS:
   Name: "ubuntu-16.04"
   Family: "ubuntu"
-  IsoFile: "ubuntu-16.04.5-server-amd64.iso"
-  IsoSha256: "c94de1cc2e10160f325eb54638a5b5aa38f181d60ee33dae9578d96d932ee5f8"
-  IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.5-server-amd64.iso"
+  IsoFile: "ubuntu-16.04.6-server-amd64.iso"
+  IsoSha256: "16afb1375372c57471ea5e29803a89a5a6bd1f6aabea2e5e34ac1ab7eb9786ac"
+  IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.6-server-amd64.iso"
   Version: "16.04"
 Initrds:
   - "install/netboot/ubuntu-installer/amd64/initrd.gz"
@@ -26,7 +31,7 @@ BootParams: >-
   root=/dev/ram
   rw
   quiet
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
   --
   {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
@@ -66,8 +71,3 @@ Templates:
   - ID: "net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
-Meta:
-  feature-flags: "change-stage-v2"
-  icon: "linux"
-  color: "orange"
-  title: "Digital Rebar Community Content"

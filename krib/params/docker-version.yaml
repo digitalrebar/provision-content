@@ -8,5 +8,5 @@ Schema:
   default: "18.06-ce"
 Meta:
   color: "blue"
-  icon: "pocket"
+  icon: "boxes"
   title: "Community Content"

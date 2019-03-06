@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
 set -e
-set -x
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
@@ -11,8 +10,7 @@ set -x
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
 {{else -}}
-echo "Missing etcd/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing etcd/cluster-profile on the machine!"
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
@@ -86,4 +84,3 @@ fi
 
 echo "Finished successfully"
 exit 0
-

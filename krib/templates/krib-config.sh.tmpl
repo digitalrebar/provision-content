@@ -12,8 +12,7 @@ CLUSTER_NAME={{ .Param "krib/cluster-name" }}
 CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
 PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
 {{ else -}}
-echo "Missing krib/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{ end -}}
 
 {{ template "krib-lib.sh.tmpl" .}}
@@ -21,6 +20,7 @@ exit 1
 echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
 if free | grep -q Swap ; then
   swapoff -a
+  sed -i /swap/d /etc/fstab
 fi
 
 echo "MAKE SURE bridge-nf-call-iptables CONTAINS 1 - kubeadm requirement"
@@ -33,6 +33,15 @@ EOF
 fi
 VALUE=$(sysctl -n net.bridge.bridge-nf-call-iptables)
 [ $VALUE != 1 ] && sysctl -w net.bridge.bridge-nf-call-iptables=1
+
+{{ if .ParamExists "krib/ip" -}}
+KRIB_IP={{ .Param "krib/ip" }}
+{{ else -}}
+KRIB_IP={{ .Machine.Address }}
+{{ end -}}
+
+# Making sure I use the right cluster InternalIP
+echo "KUBELET_EXTRA_ARGS=--node-ip=${KRIB_IP}" > /etc/default/kubelet
 
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
@@ -69,7 +78,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
     rm /tmp/cert.tgz /tmp/cert.b64
 
-    JOIN_CMD=$(cat /tmp/kubeadm.init.log | grep "kubeadm join")
+    JOIN_CMD=$(kubeadm token create --print-join-command)
 
     NET_TYPE={{ .Param "krib/networking-provider" }}
 
@@ -79,12 +88,15 @@ if [[ $MASTER_INDEX != notme ]] ; then
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
-        kubectl apply -f {{ .Param "provider/calico-config" }}
+        curl -gfsSL {{ .Param "provider/calico-config" }} | sed "s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" | kubectl apply -f -
         ;;
-
       flannel)
         echo "Starting flannel networking..."
-        kubectl apply -f {{ .Param "provider/flannel-config" }}
+        curl -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
+        ;;
+      weave)
+        echo "Starting weave networking..."
+        kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
         ;;
     esac
 
@@ -136,11 +148,19 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   if [[ $MASTER_INDEX == 0 ]] ; then
+    {{ if eq (.Param "krib/cluster-masters-untainted") true }}
+    echo "Removing taint from master nodes:"
+    kubectl taint nodes -l node-role.kubernetes.io/master node-role.kubernetes.io/master- || true
+    {{ else -}}
+    echo "Ensure taint on master nodes:"
+    kubectl taint nodes -l node-role.kubernetes.io/master node-role.kubernetes.io/master=:NoSchedule || true
+    {{end}}
+
     echo "Recording 'kubeadm' bootstrap config ..."
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to "$(cat /tmp/kubeadm.cfg)"
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to - < /tmp/kubeadm.cfg
 
     echo "Recording cluster admin config ..."
-    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to "$(cat /etc/kubernetes/admin.conf)"
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to - < /etc/kubernetes/admin.conf
 
     echo "Recording cluster join script ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$JOIN_CMD"
@@ -168,27 +188,32 @@ fi
 
 while [ ! -f /etc/kubernetes/kubelet.conf ] ;
 do
-      sleep 2
+  sleep 2
 done
 
-# set labels for nodes / runs on all nodes
+# Wait for KRIB config to be updated from bootstrap node
+wait_for_variable $KRIB_ADMIN_CONF_PARAM > label.conf
+
+# Set labels for nodes / runs on all nodes
 drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM > label.conf
+# Re-set HOSTNAME to kubernetes node name
+HOSTNAME=$(kubectl --kubeconfig=label.conf get nodes | cut -d" " -f1 | grep -i $(hostname -s))
 echo "Adding env={{.Param "krib/label-env"}} label to machine $HOSTNAME"
-kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-env"}}
+kubectl --kubeconfig=label.conf label nodes $HOSTNAME env={{.Param "krib/label-env"}} --overwrite=true
 # using adhoc labels
 {{if .ParamExists "krib/labels" -}}
   {{range $key, $value := .Param "krib/labels" -}}
-    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from krib/labels"
-    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
-  {{end }}
+    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_" -}}\" label to machine $HOSTNAME from krib/labels"
+    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
+  {{end -}}
 {{else -}}
   echo "use of krib/labels to create adhoc labels"
 {{end -}}
 # using inventory
 {{if .ParamExists "inventory/data" -}}
   {{range $key, $value := .Param "inventory/data" -}}
-    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_"  | -}}\" label to machine $HOSTNAME from inventory/data"
-    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" || true
+    echo "Adding {{$key}}=\"{{$value | toString | replace " " "_" -}}\" label to machine $HOSTNAME from inventory/data"
+    kubectl --kubeconfig=label.conf label nodes $HOSTNAME {{$key}}="{{$value | toString | replace " " "_" -}}" --overwrite=true || true
   {{end }}
 {{else -}}
   echo "use of inventory/data to create machine specific labels"
@@ -207,8 +232,7 @@ fi
 sed -i "s#server:.*#server: https://${MASTER_VIP}:${API_PORT}#g" /etc/kubernetes/kubelet.conf
 systemctl restart kubelet
 {{ else -}}
-echo "Missing required krib/cluster-master-vip"
-exit 1
+xiterr 1 "Missing required krib/cluster-master-vip"
 {{ end -}}
 
 # Clean up
@@ -216,4 +240,3 @@ rm -f /tmp/kubeadm.cfg
 
 echo "Finished successfully"
 exit 0
-

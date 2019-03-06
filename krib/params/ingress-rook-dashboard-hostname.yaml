@@ -1,0 +1,14 @@
+Name: "ingress/rook-dashboard-hostname"
+Description: "Rook Ceph Manager Dashboard Hostname"
+Documentation: |
+  Hostname to use for the Rook Ceph Manager Dashboard. You
+  will need to manually configure your DNS to point
+  to the ingress ingress/ip-address.
+
+  If no hostname is provided a rook-db.$INGRESSIP.xip.io hostname will be assigned
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

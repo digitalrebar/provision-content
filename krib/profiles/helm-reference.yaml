@@ -10,21 +10,35 @@ Meta:
   title: Community Content
 Params:
   helm/charts:
-    - chart: "stable/mysql"
-      name: "mysql"
-    - chart: "istio-1.0.1/install/kubernetes/helm/istio"
-      name: "istio"
-      targz: https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz
-      namespace: "istio-system"
-      wait: true
+    - chart: stable/mysql
+      name: mysql
+
+    - chart: istio-1.0.1/install/kubernetes/helm/istio
+      name: istio
+      targz: 'https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz'
+      namespace: istio-system
       params:
-        set: "sidecarInjectorWebhook.enabled=true"
-    - chart: "rook-ceph"
-      name: "rook-ceph"
-      namespace: "rook-ceph-system"
+        set: sidecarInjectorWebhook.enabled=true
+      sleep: 10
       wait: true
-      targz: "https://charts.rook.io/beta/rook-ceph-v0.8.1.tgz"
+      kubectlbefore:
+        - get nodes
+      kubectlafter:
+        - get nodes
+    - chart: rook-stable/rook-ceph
+      kubectlafter:
+        - apply -f cluster.yaml
+      name: rook-ceph
+      namespace: rook-ceph-system
+      repos:
+        rook-stable: 'https://charts.rook.io/stable'
+      templatesafter:
+        - name: helm-rook.after.sh.tmpl
+        - nodes: leader
+      templatesbefore:
+        - name: helm-rook.before.sh.tmpl
+          nodes: all
+          runIfInstalled: true
       templates:
         cluster: helm-rook.cfg.tmpl
-      kubectlafter:
-        - "create -f cluster.yaml"
+      wait: true

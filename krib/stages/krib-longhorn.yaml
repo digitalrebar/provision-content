@@ -1,0 +1,14 @@
+---
+Name: "krib-longhorn"
+Description: "KRIB installs and configures Rancher Longhorn on the cluster"
+Documentation: |
+  Installs and runs Rancher Longhorn kubectl install
+
+  see: https://github.com/rancher/longhorn
+RunnerWait: true
+Tasks:
+  - "krib-longhorn"
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"

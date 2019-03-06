@@ -36,6 +36,9 @@ deploy:
   - krib.rst
   - krib.yaml
   - krib.sha256
+  - sledgehammer-builder.rst
+  - sledgehammer-builder.yaml
+  - sledgehammer-builder.sha256
   skip_cleanup: true
   on:
     repo: digitalrebar/provision-content

@@ -1,0 +1,74 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+{{- if .ParamExists "certmanager/email"}}
+    email: "{{.Param "certmanager/email"}}"
+{{- end}}
+    privateKeySecretRef:
+      name: letsencrypt-prod
+{{- if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
+    dns01:
+      providers:
+        - name: {{.Param "certmanager/acme-challenge-dns01-provider"}}
+          {{.Param "certmanager/acme-challenge-dns01-provider"}}:
+{{- if .ParamExists "certmanager/cloudflare-email"}}
+            email: "{{.Param "certmanager/cloudflare-email"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/route53-region"}}
+            region: "{{.Param "certmanager/route53-region"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/fastdns-service-consumer-domain"}}
+            serviceConsumerDomain: "{{.Param "certmanager/fastdns-service-consumer-domain"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/rfc2136-nameserver"}}
+            nameserver: "{{.Param "certmanager/rfc2136-nameserver"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/rfc2136-tsig-key-name"}}
+            tsigKeyName: "{{.Param "certmanager/rfc2136-tsig-key-name"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/rfc2136-tsig-alg"}}
+            tsigAlgorithm: "{{.Param "certmanager/rfc2136-tsig-alg"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/route53-access-key"}}
+            secretAccessKeySecretRef:
+              name: certmanager-provider
+              namespace: kube-system
+              key: accessKey
+{{- end}}
+{{- if .ParamExists "certmanager/cloudflare-api-key"}}
+            apiKeySecretRef:
+              name: certmanager-provider
+              namespace: kube-system
+              key: apiKey
+{{- end}}
+{{- if .ParamExists "certmanager/fastdns-client-token"}}
+            clientTokenSecretRef:
+              name: certmanager-provider
+              namespace: kube-system
+              key: clientToken
+{{- end}}
+{{- if .ParamExists "certmanager/fastdns-client-secret"}}
+            clientSecretSecretRef:
+              name: certmanager-provider
+              namespace: kube-system
+              key: clientSecret
+{{- end}}
+{{- if .ParamExists "certmanager/fastdns-access-token"}}
+            accessTokenSecretRef:
+              name: certmanager-provider
+              namespace: kube-system
+              key: accessToken
+{{- end}}
+{{- if .ParamExists "certmanager/rfc2136-tsig-key"}}
+            tsigSecretSecretRef:
+              name: certmanager-provider
+              namespace: kube-system
+              key: tsigKey
+{{- end}}
+{{- else}}
+    http01: {}
+{{- end}}

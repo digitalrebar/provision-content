@@ -1,0 +1,22 @@
+---
+Name: "kernel-options"
+Description: "Defines extra options to pass to the kernel on PXE boot"
+Documentation: |
+  This string defines any extra options that the operator may need to
+  pass to the Kernel during the PXE boot process.
+
+  e.g. "acpi=off"
+
+  These options will be passed before the argument processing is disabled
+  (eg prior to "--").
+
+  The "kernel-console" option can be used to specify the Console to log to
+  (for example serial port), which is placed after the argument processing
+  (eg after the "--").
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  icon: "desktop"
+  color: "blue"
+  title: "Digital Rebar Community Content"

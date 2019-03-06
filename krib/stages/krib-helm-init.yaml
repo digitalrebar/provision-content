@@ -1,0 +1,17 @@
+---
+Name: "krib-helm-init"
+Description: "KRIB install helm and tiller on the cluster"
+Documentation: |
+  This stage is idempotent and can be run multiple times.
+  This allows operators to create workflows with multiple instances of this stage.
+  Due to helm downloads, this stage requires internet access.
+
+  This stage also creats a tiller service account.  For advanced security, this
+  configuration may not be desirable.
+RunnerWait: true
+Tasks:
+  - "krib-helm-init"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"

@@ -5,6 +5,6 @@ RunnerWait: true
 Tasks:
   - "docker-install"
 Meta:
-  icon: "pocket"
+  icon: "docker"
   color: "yellow"
   title: "Community Content"

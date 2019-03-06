@@ -1,0 +1,20 @@
+---
+Description: "A task to install and setup MetalLB"
+Name: "krib-metallb"
+Templates:
+  - ID: "krib-metallb.sh.tmpl"
+    Name: "Setup MetalLB"
+    Path: ""
+RequiredParams:
+  - krib/cluster-profile
+  - metallb/l2-ip-range  
+OptionalParams:
+  - krib/metallb-config
+  - metallb/monitoring-port
+  - metallb/limits-cpu 
+  - metallb/limits-memory
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

@@ -12,5 +12,5 @@ Tasks:
 Meta:
   deprecated: "25 June 2018"
   icon: "ban"
-  color: "gray"
+  color: "grey"
   title: "Digital Rebar Community Content"

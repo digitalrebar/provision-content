@@ -1,0 +1,15 @@
+---
+Name: "metallb/monitoring-port"
+Description: "Port for monitoring MetalLB with Prometheus"
+Documentation: |
+  This should be set to match the port you want to use
+  for MetalLB Prometheus monitoring
+  
+  Default: 7472
+Schema:
+  type: "number"
+  default: 7472  
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"
