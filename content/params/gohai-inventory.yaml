@@ -1,10 +1,16 @@
 ---
 Name: "gohai-inventory"
 Description: "System inventory as reported by Gohai"
-Documentation: | 
+Documentation: |
+  Gohai is the DRPCLI embedded JSON machine inventory format.
+  This param storage the result of that command when during discovery.
+  It is used by a number of downstream stages and workflows.
+
   This provides an untyped dictionary of values from Gohai.
 
-  This is fairly raw data.  Other parameters are distilled from this.
+  NOTE: This is raw data.  Other parameters are distilled from this.
+Schema:
+  type: "object"
 Meta:
   icon: "search"
   color: "blue"
