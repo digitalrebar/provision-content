@@ -2,17 +2,16 @@
 Name: "finish-install"
 Description: "Stage to indicate that all the install tasks are done and the system should complete the OS install"
 Documentation: |
-  Deprecated!
-
   Originally, this stage was used with the STOP runner action in the change-stage/map.
 
   Going forward, the STOP action is not required.  The changing of bootenv from something-install to
-  local will cause the runner to exit.
+  local will cause the runner to exit.  This stage will cause an install bootenv to reboot because the
+  bootenv is changed to local.
 
   The runner will also continue to run regardless of the RunnerWait flag.
 BootEnv: "local"
 RunnerWait: false
 Meta:
   icon: "checkmark"
-  color: "grey"
+  color: "yellow"
   title: "Digital Rebar Community Content"
