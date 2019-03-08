@@ -33,7 +33,7 @@ function with_backoff {
 
   if [[ $exitCode != 0 ]]
   then
-    echo "You've failed me for the last time! ($@)" 1>&2
+    echo "Execution failed for: $@" 1>&2
   fi
 
   return $exitCode
@@ -86,14 +86,14 @@ mkdir -p ${TMP_DIR}
 mkdir -p ${INSTALL_DIR}
 mkdir -p /opt/cni/bin
 
-echo "Downloading cni plugin version: ${CNI_VERSION}"
+echo "Download cni plugin version: ${CNI_VERSION}"
 download -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
-echo "Installing cni plugin version: ${CNI_VERSION}"
+echo "Install cni plugin version: ${CNI_VERSION}"
 tar -C /opt/cni/bin -xzf ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
 
-echo "Downloading crictl version: ${CRICTL_VERSION}"
+echo "Download crictl version: ${CRICTL_VERSION}"
 download -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" -o ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
-echo "Installing crictl version: ${CRICTL_VERSION}"
+echo "Install crictl version: ${CRICTL_VERSION}"
 tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
 
 cd ${INSTALL_DIR}
