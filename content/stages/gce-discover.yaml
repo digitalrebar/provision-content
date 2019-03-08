@@ -3,7 +3,6 @@ Name: "gce-discover"
 Description: "Stage to dynamically determine if machine is in GCE and record metadata"
 Documentation: |
   Collect information about Google cloud
-RunnerWait: true
 Tasks:
   - "gce-discover"
 Meta:

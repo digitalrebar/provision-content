@@ -3,7 +3,6 @@ Name: "erase-hard-disk-set"
 Description: |
   Erases a set of disks.
 BootEnv: "sledgehammer"
-RunnerWait: true
 Tasks:
   - "erase-hard-disk-set"
 Meta:

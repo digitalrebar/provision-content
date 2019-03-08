@@ -6,7 +6,6 @@ Documentation: |
 
   Pre gohai/skip Parameter, used to run discovery without gohai action.
 BootEnv: "sledgehammer"
-RunnerWait: true
 Tasks:
   - "ssh-access"
 Meta:
