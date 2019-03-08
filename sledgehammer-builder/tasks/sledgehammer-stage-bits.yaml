@@ -302,6 +302,20 @@ Templates:
       fi
       } > /newinitramfs/etc/systemd/network/20-bootif.network
 
+      echo "$SIGNATURE" > /newinitramfs/etc/sledgehammer-id
+      echo "SLEDGEHAMMER_VERSION=${SIGNATURE}" > /newinitramfs/etc/sledgehammer-release
+      echo "SLEDGEHAMMER_DATE=\"::BUILD_DATE::\"" >> /newinitramfs/etc/sledgehammer-release
+      echo "SLEDGEHAMMER_BUILDER_VERSION=::SBV::" >> /newinitramfs/etc/sledgehammer-release
+
+      SLEDGE_ID=$(cat /newinitramfs/etc/sledgehammer-id)
+      for file in "/newinitramfs/etc/issue" "/newinitramfs/etc/issue.net"; do
+      echo "
+      |              +--+   | Digital Rebar Sledgehammer
+      |  +==========={  }   | ID $SLEDGE_ID
+      |              +--+   | Kernel \r on an \m
+      " > $file
+      done
+
       echo "" >/proc/sys/kernel/hotplug
       if [[ "$ip6" == "" ]] ; then
           pkill udhcpc
@@ -596,6 +610,8 @@ Templates:
       # make stage1.img
       cd initrd
       sed -i -e "s/::SIGNATURE::/$signature/" init
+      sed -i -e "s/::BUILD_DATE::/$(date)/" init
+      sed -i -e "s/::SBV::/$(RS_TOKEN= drpcli -U rocketskates -P r0cketsk8ts contents show sledgehammer-builder | jq .meta.Version -r)/" init
       find |sort |cpio -o -R 0:0 --format=newc |gzip -9 >../stage1.img
       cd ..
       # Tar it all up

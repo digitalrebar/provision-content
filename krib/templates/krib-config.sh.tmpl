@@ -92,7 +92,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
         ;;
       flannel)
         echo "Starting flannel networking..."
-        kubectl apply -f {{ .Param "provider/flannel-config" }}
+        curl -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
+        ;;
+      weave)
+        echo "Starting weave networking..."
+        kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
         ;;
     esac
 

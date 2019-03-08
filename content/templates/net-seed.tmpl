@@ -92,6 +92,13 @@ tasksel tasksel/first multiselect standard, server
 d-i pkgsel/include string openssh-server curl efibootmgr {{if .ParamExists "extra-packages"}}{{ range $index, $element := (.Param "extra-packages") }}{{if $index}} {{end}}{{$element}}{{end}}{{end}}
 d-i pkgsel/update-policy select none
 
+{{if .ParamExists "ubuntu-hwe-kernel"}}{{if eq (.Param "ubuntu-hwe-kernel") true -}}
+{{$osver := (printf "%s" .Env.OS.Version) -}}
+# set the HWE kernel if requested via the Param "ubuntu-hwe-kernel" set to true
+# WARNING: verify that 'hwe-{{$osver}}' is valid HWE for selected Ubuntu version
+d-i  base-installer/kernel/altmeta   string hwe-{{$osver}}
+{{end}}{{end -}}
+
 {{if .ParamExists "kernel-console"}}d-i debian-installer/add-kernel-opts string {{.Param "kernel-console"}}{{end}}
 # Completion questions
 d-i cdrom-detect/eject boolean false
