@@ -2,7 +2,6 @@
 Name: "centos-7.6.1810-install"
 Description: "CentOS 7.6.1810 install stage."
 BootEnv: "centos-7.6.1810-install"
-RunnerWait: true
 Tasks:
   - "set-hostname"
   - "centos-drp-only-repos"

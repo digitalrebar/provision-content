@@ -8,9 +8,7 @@ Documentation: |
   Going forward, the STOP action is not required.  The changing of bootenv from something-install to
   local will cause the runner to exit.
 
-  The runner will also continue to run regardless of the RunnerWait flag.
 BootEnv: "local"
-RunnerWait: false
 Meta:
   icon: "checkmark"
   color: "yellow"
