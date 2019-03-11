@@ -20,7 +20,9 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
 if free | grep -q Swap ; then
   swapoff -a
-  sed -i /swap/d /etc/fstab
+  if [ -f /etc/fstab ]; then
+    sed -i /swap/d /etc/fstab
+  fi
 fi
 
 echo "MAKE SURE bridge-nf-call-iptables CONTAINS 1 - kubeadm requirement"
