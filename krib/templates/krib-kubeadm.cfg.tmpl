@@ -20,21 +20,7 @@ nodeRegistration:
 ---
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
-controllerManager:
-  extraVolumes:
-    - name: hyperkube
-      hostPath: /k8s/hyperkube
-      mountPath: /hyperkube
-scheduler:
-  extraVolumes:
-    - name: hyperkube
-      hostPath: /k8s/hyperkube
-      mountPath: /hyperkube
 apiServer:
-  extraVolumes:
-    - name: hyperkube
-      hostPath: /k8s/hyperkube
-      mountPath: /hyperkube
   extraArgs:
     audit-log-path: /var/log/kubernetes/audit
     audit-log-maxage: "2"
