@@ -31,17 +31,17 @@ apiServer:
     {{ end }}
     {{ end }}
   CertSANs:
-    - 127.0.0.1
-    - {{ .Param "krib/cluster-master-vip" }}
-    {{ range $elem := .Param "krib/cluster-masters" -}}
-    - {{ $elem.Address }}
-    - {{ $elem.Name }}
-    {{ end -}}
-    {{ if .ParamExists "krib/apiserver-extra-SANs" -}}
-    {{ range $san := .Param "krib/apiserver-extra-SANs" -}}
-    - {{ $san.SAN }}
-    {{ end }}
-    {{ end }}
+  - 127.0.0.1
+  - {{ .Param "krib/cluster-master-vip" }}
+  {{ range $elem := .Param "krib/cluster-masters" -}}
+  - {{ $elem.Address }}
+  - {{ $elem.Name }}
+  {{ end -}}
+  {{ if .ParamExists "krib/apiserver-extra-SANs" -}}
+  {{ range $san := .Param "krib/apiserver-extra-SANs" -}}
+  - {{ $san.SAN }}
+  {{ end }}
+  {{ end }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
 controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}
