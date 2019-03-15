@@ -6,6 +6,8 @@ set -e
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
+{{template "krib-lib.sh.tmpl" .}}
+
 CNI_VERSION="{{ .Param "krib/cluster-cni-version" }}"
 CRICTL_VERSION="{{ .Param "krib/cluster-crictl-version" }}"
 RELEASE="{{ .Param "krib/cluster-kubernetes-version" }}"
