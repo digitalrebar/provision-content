@@ -10,39 +10,6 @@ CNI_VERSION="{{ .Param "krib/cluster-cni-version" }}"
 CRICTL_VERSION="{{ .Param "krib/cluster-crictl-version" }}"
 RELEASE="{{ .Param "krib/cluster-kubernetes-version" }}"
 
-function with_backoff {
-  local max_attempts=${ATTEMPTS-5}
-  local timeout=${TIMEOUT-1}
-  local attempt=1
-  local exitCode=0
-
-  while (( $attempt < $max_attempts ))
-  do
-    if "$@"
-    then
-      return 0
-    else
-      exitCode=$?
-    fi
-
-    echo "Failure ($@)! Retrying in $timeout.." 1>&2
-    sleep $timeout
-    attempt=$(( attempt + 1 ))
-    timeout=$(( timeout * 2 ))
-  done
-
-  if [[ $exitCode != 0 ]]
-  then
-    echo "Execution failed for: $@" 1>&2
-  fi
-
-  return $exitCode
-}
-
-download() {
-  with_backoff curl --connect-timeout 10 --max-time 360 --retry 1 --retry-delay 1 --retry-max-time 40 -sS "$@"
-}
-
 TMP_DIR=/tmp/k8s-tmp
 INSTALL_DIR=/usr/bin
 

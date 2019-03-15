@@ -7,6 +7,8 @@ set -e
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
+ETCD_VERSION="{{ .Param "etcd/version" }}"
+
 # these need to be before krib-lib template
 {{if .ParamExists "etcd/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
@@ -142,14 +144,18 @@ IFS=" " ; while read ip ; do
 done <<< $(get_param "etcd/servers" | jq -r '.[].Address')
 IFS=$OLD_IFS
 
+TMP_DIR=/tmp/etcd-tmp
 INSTALL_DIR=/usr/local/bin
 if [[ $OS_FAMILY == coreos ]] ; then
   INSTALL_DIR=/opt/bin
 fi
 
-echo "Installing etcd v{{.Param "etcd/version"}} (set in Param etcd/version)"
-curl -sSL https://github.com/coreos/etcd/releases/download/v{{.Param "etcd/version"}}/etcd-v{{.Param "etcd/version"}}-linux-amd64.tar.gz | tar -xz --strip-components=1 -C ${INSTALL_DIR}
-rm -rf etcd-v{{.Param "etcd/version"}}-linux-amd64*
+mkdir -p ${TMP_DIR}
+
+echo "Download etcd version: v${ETCD_VERSION}"
+download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+echo "Install etcd version: ${ETCD_VERSION}"
+tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
 
 cat << EOF > /etc/etcd.env
 PEER_NAME=${ETCD_NAME}
@@ -202,5 +208,7 @@ add_me_if_not_count "etcd/servers-done" $ETCD_SERVER_COUNT $ETCD_IP
 
 echo "Waiting for ${ETCD_SERVER_COUNT} servers to complete etcd install"
 wait_for_count "etcd/servers-done" $ETCD_SERVER_COUNT
+
+rm -rf ${TMP_DIR}
 
 exit 0
