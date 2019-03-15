@@ -1,7 +1,6 @@
 ---
 Name: "ssh-access"
 Description: "Stage that installs SSH keys and configure SSH access policy"
-RunnerWait: true
 Tasks:
   - "ssh-access"
 Meta:

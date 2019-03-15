@@ -2,7 +2,6 @@
 Name: "debian-9-install"
 Description: "Debian 9 install stage.  References the latest Debian 9 image"
 BootEnv: "debian-9-install"
-RunnerWait: true
 Tasks:
   - "ubuntu-drp-only-repos"
   - "ssh-access"

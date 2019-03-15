@@ -5,6 +5,5 @@ Meta:
   icon: "info"
 Name: "machine-meta"
 Reboot: false
-RunnerWait: true
 Tasks:
   - "machine-meta-setter"
