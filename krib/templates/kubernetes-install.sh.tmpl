@@ -6,6 +6,14 @@ set -e
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
+CLUSTER_NAME={{.Param "krib/cluster-name"}}
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
 {{template "krib-lib.sh.tmpl" .}}
 
 CNI_VERSION="{{ .Param "krib/cluster-cni-version" }}"
