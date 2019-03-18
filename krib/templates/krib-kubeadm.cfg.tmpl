@@ -4,33 +4,23 @@ localAPIEndpoint:
   advertiseAddress: {{ .Param "krib/cluster-master-vip" }}
   bindPort: {{ .Param "krib/cluster-api-port" }}
 bootstrapTokens:
-  - groups:
+- groups:
     - system:bootstrappers:kubeadm:default-node-token
-    # token: ...
-    ttl: 24h0m0s
-    usages:
-    - signing
-    - authentication
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
 nodeRegistration:
   criSocket: "{{ .Param "krib/cluster-cri-socket" }}"
   name: {{ .Machine.Name }}
   taints:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/master
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/master
 ---
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
 apiServer:
-  extraArgs:
-    audit-log-path: /var/log/kubernetes/audit
-    audit-log-maxage: "2"
-    endpoint-reconciler-type: "lease"
-    {{ if .ParamExists "krib/apiserver-extra-args" -}}
-    {{ range $key, $value  := .Param "krib/apiserver-extra-args" -}}
-    {{ $key }}: {{ $value }}
-    {{ end }}
-    {{ end }}
-  CertSANs:
+  certSANs:
   - 127.0.0.1
   - {{ .Param "krib/cluster-master-vip" }}
   {{ range $elem := .Param "krib/cluster-masters" -}}
@@ -42,6 +32,15 @@ apiServer:
   - {{ $san.SAN }}
   {{ end }}
   {{ end }}
+  extraArgs:
+    audit-log-path: /var/log/kubernetes/audit
+    audit-log-maxage: "2"
+    endpoint-reconciler-type: "lease"
+    {{ if .ParamExists "krib/apiserver-extra-args" -}}
+    {{ range $key, $value  := .Param "krib/apiserver-extra-args" -}}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+    {{ end }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
 controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}
