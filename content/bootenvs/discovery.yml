@@ -61,6 +61,7 @@ OS:
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
   - "kernel-console"
+  - "kernel-options"
 Templates:
   - Name: "pxelinux"
     Path: "pxelinux.cfg/default"
