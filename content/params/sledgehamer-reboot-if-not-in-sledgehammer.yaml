@@ -1,0 +1,12 @@
+---
+Name: "sledgehammer/reboot-if-not-in-sledgehammer"
+Description: "Should the system reboot if not in sledgehammer"
+Documentation: |
+  Boolean parameter indicating if the enforce-sledgehammer task should reboot the system if not in sledgehammer.
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  icon: "search minus"
+  color: "blue"
+  title: "Digital Rebar Community Content"
