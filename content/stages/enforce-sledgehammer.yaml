@@ -1,0 +1,9 @@
+---
+Name: "enforce-sledgehammer"
+Description: "Ensure that the system is in sledgehammer"
+Tasks:
+  - "enforce-sledgehammer"
+Meta:
+  icon: "spinner"
+  color: "purple"
+  title: "Digital Rebar Community Content"

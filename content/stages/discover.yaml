@@ -3,6 +3,7 @@ Name: "discover"
 Description: "Discovery stage used to inventory and baseline new machines"
 BootEnv: "sledgehammer"
 Tasks:
+  - "enforce-sledgehammer"
   - "gohai"
   - "ssh-access"
 Meta:

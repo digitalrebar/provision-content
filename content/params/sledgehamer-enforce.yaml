@@ -1,0 +1,12 @@
+---
+Name: "sledgehammer/enforce"
+Description: "Should the system enforce being in sledgehammer"
+Documentation: |
+  Boolean parameter indicating if the enforce-sledgehammer task should ensure that the system is running in sledgehammer.
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  icon: "search minus"
+  color: "blue"
+  title: "Digital Rebar Community Content"
