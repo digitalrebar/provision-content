@@ -21,11 +21,11 @@ OS:
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-da126d7a0260a460579e31361d7be24756ef055c.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/da126d7a0260a460579e31361d7be24756ef055c/sledgehammer-da126d7a0260a460579e31361d7be24756ef055c.amd64.tar"
-      Kernel: "da126d7a0260a460579e31361d7be24756ef055c/vmlinuz0"
+      IsoFile: "sledgehammer-35a5e9effda83ee23094b8003a8d439b079fd3aa.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/35a5e9effda83ee23094b8003a8d439b079fd3aa/sledgehammer-35a5e9effda83ee23094b8003a8d439b079fd3aa.amd64.tar"
+      Kernel: "35a5e9effda83ee23094b8003a8d439b079fd3aa/vmlinuz0"
       Initrds:
-        - "da126d7a0260a460579e31361d7be24756ef055c/stage1.img"
+        - "35a5e9effda83ee23094b8003a8d439b079fd3aa/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -37,6 +37,7 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     arm64:
@@ -57,10 +58,12 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
   - "kernel-console"
+  - "kernel-options"
 Templates:
   - Name: "kexec"
     ID: "kexec.tmpl"
