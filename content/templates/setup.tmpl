@@ -16,6 +16,9 @@
 ###
 
 set -e
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*";  __exit $XIT; }
+
 ###
 #  if we want debugging of our scripts, set the Param to true
 #  also set shell variable for script reuse if desired for further
@@ -52,8 +55,7 @@ case $arch in
     x86_64|amd64) arch="amd64";;
     arm64|aarch64) arch="arm64";;
     *)
-        echo "Unknown arch $(uname -m)"
-        exit 1;;
+        xiterr 1 "Unknown arch $(uname -m)";;
 esac
 
 INSTALL_DIR=/usr/local/bin
