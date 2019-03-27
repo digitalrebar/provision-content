@@ -26,9 +26,9 @@ esac
 
 # Umount disk if already mounted
 if mount | grep /mnt/sda1 > /dev/null; then
-    umount /dev/sda1
-else
     echo "/dev/sda1 is not mounted"
+else
+    umount /dev/sda1
 fi
 
 GETDISK=$(lsblk | grep "disk" | awk '{ print $1 }' | head -1)
