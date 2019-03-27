@@ -24,6 +24,13 @@ case $BE in
     ;;
 esac
 
+# Umount disk if already mounted
+if mount | grep /mnt/sda1 > /dev/null; then
+    umount /dev/sda1
+else
+    echo "/dev/sda1 is not mounted"
+fi
+
 GETDISK=$(lsblk | grep "disk" | awk '{ print $1 }' | head -1)
 echo "Found /dev/$GETDISK - using ..."
 
