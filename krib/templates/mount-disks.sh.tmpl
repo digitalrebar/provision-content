@@ -48,7 +48,7 @@ partprobe
 
 echo "Make filesystem - xfs - docker likes it"
 
-mkfs.xfs /dev/${GETDISK}1
+mkfs.xfs -f /dev/${GETDISK}1
 
 echo "Mount filesystem - put it in place, put not permanently"
 
