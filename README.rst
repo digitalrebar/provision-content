@@ -8,7 +8,7 @@ Digital Rebar Provision Content
 
 .. image:: images/drp-content.png
 
-This repository contains the Community Content for used with Digital Rebar
+This repository contains the Community Content for use with Digital Rebar
 Provision (DRP).  Please see http://rebar.digital for more infomation on DRP.
 DRP is a project that is sponsored and maintained by RackN (https://rackn.com/).
 
