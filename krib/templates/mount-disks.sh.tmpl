@@ -25,10 +25,12 @@ case $BE in
 esac
 
 # Umount disk if already mounted
-if mount | grep /mnt/sda1 > /dev/null; then
-    echo "/dev/sda1 is not mounted"
+export MOUNT=/mnt/hdd
+
+if grep -qs $MOUNT /proc/mounts; then
+  umount /dev/sda1
 else
-    umount /dev/sda1
+    echo "/dev/sda1 is not mounted"
 fi
 
 GETDISK=$(lsblk | grep "disk" | awk '{ print $1 }' | head -1)
