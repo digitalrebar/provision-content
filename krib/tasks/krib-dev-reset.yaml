@@ -37,6 +37,8 @@ Templates:
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
+      echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
+      
       sleep 1
       {{if .ParamExists "unsafe/rs-password"}}
         PASSWORD="{{.Param "unsafe/rs-password"}}"
