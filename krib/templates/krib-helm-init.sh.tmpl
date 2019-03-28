@@ -46,6 +46,9 @@ if [[ $MASTER_INDEX != notme ]] ; then
       chmod 700 get_helm.sh
 
       HELM_INSTALL_DIR=$INSTALL_DIR ./get_helm.sh -v ${HELM_VERSION}
+      echo "When helm fail to get the latest version, please add param "helm/version" and re-run again"
+      echo "You can find the version release or tag on: https://github.com/helm/helm/releases/"
+      
     fi
 
     if [[ ! -z $(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0 | grep success) ]] ; then
