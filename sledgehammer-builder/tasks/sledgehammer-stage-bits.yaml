@@ -412,6 +412,16 @@ Templates:
       var/cache/yum/*
       usr/local/bin/*
       usr/share/doc
+  - Name: install-sipcalc
+    Contents: |
+      #!/bin/bash
+      # 'arch' is built for "x86_64", "aarch64, "armv7hl"
+      # for ARM arch types - not tested yet
+      # orig source location: https://koji.fedoraproject.org/koji/packageinfo?packageID=8762
+      arch=$(uname -p)
+      wget https://s3-us-west-2.amazonaws.com/rackn-sledgehammer/sipcalc-1.1.6-15.fc30.$arch.rpm -O /root/sipcalc.rpm
+      yum install -y /root/sipcalc.rpm
+      rm -rf /root/sipcalc.rpm
   - Name: update-systemd
     Contents: |
       #!/bin/bash
