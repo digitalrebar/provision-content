@@ -24,6 +24,15 @@ case $BE in
     ;;
 esac
 
+# Umount disk if already mounted
+export MOUNT=/mnt/hdd
+
+if grep -qs $MOUNT /proc/mounts; then
+  umount /dev/sda1
+else
+    echo "/dev/sda1 is not mounted"
+fi
+
 GETDISK=$(lsblk | grep "disk" | awk '{ print $1 }' | head -1)
 echo "Found /dev/$GETDISK - using ..."
 
@@ -41,7 +50,7 @@ partprobe
 
 echo "Make filesystem - xfs - docker likes it"
 
-mkfs.xfs /dev/${GETDISK}1
+mkfs.xfs -f /dev/${GETDISK}1
 
 echo "Mount filesystem - put it in place, put not permanently"
 
