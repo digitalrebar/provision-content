@@ -11,6 +11,7 @@ Documentation: |
   NOTE: This is raw data.  Other parameters are distilled from this.
 Schema:
   type: "object"
+  default: {}
 Meta:
   icon: "search"
   color: "blue"
