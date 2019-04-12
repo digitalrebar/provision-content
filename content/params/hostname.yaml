@@ -1,0 +1,20 @@
+---
+Name: "hostname"
+Description: "Allow setting a hostname."
+Documentation: |
+  Allow setting a hostname.  In some use cases, the DHCP provided
+  provisioning name (the templatized `.Machine.Name`) may not be
+  correct for final production personality of the Machine.
+
+  This value could be set as a Param/Profile on the machine either
+  by a human operator, or subsequent integration with IPAM, SoR, or
+  other services.
+
+  This is used in the VMware ESXi provisioning kickstarts.
+
+Schema:
+  type: "string"
+Meta:
+  icon: "tag"
+  color: "blue"
+  title: "Digital Rebar Community Content"
