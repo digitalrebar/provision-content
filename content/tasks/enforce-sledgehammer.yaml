@@ -21,7 +21,7 @@ Templates:
       . helper
       __sane_exit
 
-      {{if .Param "sledgehammer/enforce" -}}
+      {{if eq (.Param "sledgehammer/enforce") true -}}
         if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
           {{if .Param "sledgehammer/reboot-if-not-in-sledgehammer" -}}
             echo "System not in Sledgehammer, rebooting"
