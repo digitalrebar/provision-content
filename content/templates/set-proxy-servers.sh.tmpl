@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#  Set the proxy servers in the various places ...
+
+###
+#  This uses the stock "proxy-servers" Param but will only
+#  return the first proxy server in the array.
+###
+
+{{ if .ParamExists "proxy-servers" -}}
+PROXY="{{ index (.Param "proxy-servers") 0 }}"
+
+if [[ -n "$PROXY" && "$PROXY" != "nil" ]]
+then
+  export http_proxy="$PROXY"
+  export https_proxy="$PROXY"
+
+  if [[ -w "/etc/yum.conf" ]]
+  then
+    ( ! grep -q "^proxy=" /etc/yum.conf ) && echo "proxy=$https_proxy" >> /etc/yum.conf
+  fi
+
+  PFILE="/etc/apt/apt.conf.d/proxy.conf"
+  if [[ -d "$(dirname $PFILE)" ]]
+  then
+    echo "Acquire::http::proxy \"$PROXY\";"   > $PFILE
+    echo "Acquire::https::proxy \"$PROXY\";" >> $PFILE
+  fi
+
+fi
+{{ end -}}
