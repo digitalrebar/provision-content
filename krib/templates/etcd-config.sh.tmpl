@@ -197,7 +197,7 @@ fi
 mkdir -p ${TMP_DIR}
 
 echo "Download etcd version: v${ETCD_VERSION}"
-download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -O ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
 echo "Install etcd version: ${ETCD_VERSION}"
 tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
 
