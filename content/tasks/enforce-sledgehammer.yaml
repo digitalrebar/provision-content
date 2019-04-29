@@ -18,8 +18,8 @@ Templates:
   - Name: "enforce-sledgehammer"
     Contents: |
       #!/usr/bin/env bash
-      . helper
-      __sane_exit
+
+      {{ template "setup.tmpl" . }}
 
       {{if .Param "sledgehammer/enforce" -}}
         if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
@@ -32,6 +32,7 @@ Templates:
           {{end -}}
         fi
         echo "System in Sledgehammer, exiting"
+        drpcli machines update $RS_UUID '{ "OS": "centos-7" }'
       {{else -}}
         echo "Skipping sledgehammer enforcement"
       {{end -}}
