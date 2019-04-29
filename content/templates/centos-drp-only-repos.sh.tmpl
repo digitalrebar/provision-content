@@ -1,6 +1,7 @@
 #!/bin/bash
 (cd /etc/yum.repos.d; rm -f * || :)
 
+{{ if .MachineRepos }}
 # Use the install repo from the provisioner for local package installation
 cat >/etc/yum.repos.d/00-rebar.repo <<"EOFLOCALREPO"
 {{range .MachineRepos }}
@@ -9,3 +10,4 @@ cat >/etc/yum.repos.d/00-rebar.repo <<"EOFLOCALREPO"
 EOFLOCALREPO
 
 yum -y makecache
+{{end}}
