@@ -32,10 +32,10 @@ Templates:
           {{end -}}
         fi
         echo "System in Sledgehammer, exiting"
-        drpcli machines update $RS_UUID '{ "OS": "centos-7" }'
       {{else -}}
         echo "Skipping sledgehammer enforcement"
       {{end -}}
+      drpcli machines update $RS_UUID '{ "OS": "centos-7" }' 2>/dev/null >/dev/null
       exit 0
 Meta:
   icon: "search"
