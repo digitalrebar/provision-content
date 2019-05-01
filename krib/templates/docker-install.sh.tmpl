@@ -31,6 +31,7 @@ fi
 
 {{if .ParamExists "docker/daemon"}}
 echo "Creating /etc/docker/daemon.json file from Param docker/daemon"
+mkdir -p /etc/docker
 cat <<EOF >/etc/docker/daemon.json
 {{.ParamAsJSON "docker/daemon"}}
 EOF
