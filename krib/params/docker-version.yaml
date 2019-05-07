@@ -5,7 +5,7 @@ Documentation: |
   "Docker Version to use for Kubernetes"
 Schema:
   type: "string"
-  default: "18.06-ce"
+  default: "18.09"
 Meta:
   color: "blue"
   icon: "boxes"
