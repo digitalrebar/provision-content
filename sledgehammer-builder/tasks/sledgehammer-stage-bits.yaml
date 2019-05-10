@@ -170,6 +170,26 @@ Templates:
       }
 
       export PATH=/bin
+      ARCH={{.Machine.Arch}}
+      echo "Parsing kernel parameters required for booting"
+      bootif=$(grep -o 'BOOTIF=[^ ]*' /proc/cmdline)
+      bootif=${bootif#*01-}
+      bootif=${bootif//-/:}
+      nextone=$(grep -o 'provisioner.web=[^ ]*' /proc/cmdline)
+      portdelay=$(grep -o 'provisioner.portdelay=[^ ]*' /proc/cmdline)
+      postportdelay=$(grep -o 'provisioner.postportdelay=[^ ]*' /proc/cmdline)
+      routedelay=$(grep -o 'provisioner.routedelay=[^ ]*' /proc/cmdline)
+      wgetretrycount=$(grep -o 'provisioner.wgetretrycount=[^ ]*' /proc/cmdline)
+      test -z "$bootif" && fail "Missing required parameter BOOTIF"
+      test -z "$nextone" && fail "Missing required parameter provisioner.web"
+      ip6=$(echo $nextone | grep -o '\[[0-9a-fA-F:]*\]')
+      nextone=${nextone#*=}
+      portdelay=${portdelay#*=}
+      postportdelay=${postportdelay#*=}
+      routedelay=${routedelay#*=}
+      wgetretrycount=${wgetretrycount#*=}
+      wgetretrycount=${wgetretrycount:-10}
+      pxedev=""
       export SIGNATURE="::SIGNATURE::"
       echo "Stage1 $SIGNATURE in Busybox"
       echo "You can download a copy of the Busybox source for this version at:"
@@ -184,91 +204,82 @@ Templates:
       xz -d -c -f lib.cpio.xz |cpio -id
       test -d "lib/modules/$(uname -r)" || fail "Stage1 kernel modules do not match running kernel $(uname -r)" "We will fail to find network devices" "Make sure Sledgehammer $SIGNATURE was downloaded properly."
       rm lib.cpio.xz
-      touch /dev/mdev.log /dev/mdev.seq
-      echo "Loading drivers"
-      echo '$MODALIAS=.* 0:0 660 @/bin/modprobe "$MODALIAS"' >/etc/mdev.conf
-      echo /bin/mdev >/proc/sys/kernel/hotplug
-      mdev -s
-      # Load devices not loaded by mdev -s
-      for i in /sys/class/net/*/uevent; do
-          printf 'add' > "$i";
-      done 2>/dev/null;
-      unset i
-      for i in /sys/bus/usb/devices/*; do
-          case "${i##*/}" in
-              [0-9]*-[0-9]*)
-                  printf 'add' > "$i/uevent";;
-          esac
-      done; unset i
-      # Load kernel modules, run twice.
-      find /sys -name 'modalias' -type f -exec cat '{}' + | sort -u | xargs -n 1 modprobe  2>/dev/null
-      find /sys -name 'modalias' -type f -exec cat '{}' + | sort -u | xargs -n 1 modprobe  2>/dev/null
-      # If we loaded mlx4_core, also load mlx4_en
-      if test -d /sys/module/mlx4_core; then
-          modprobe mlx4_en
-          mdev -s
-      fi
-      echo "Parsing kernel parameters required for booting"
-      bootif=$(grep -o 'BOOTIF=[^ ]*' /proc/cmdline)
-      nextone=$(grep -o 'provisioner.web=[^ ]*' /proc/cmdline)
-      portdelay=$(grep -o 'provisioner.portdelay=[^ ]*' /proc/cmdline)
-      postportdelay=$(grep -o 'provisioner.postportdelay=[^ ]*' /proc/cmdline)
-      routedelay=$(grep -o 'provisioner.routedelay=[^ ]*' /proc/cmdline)
-      wgetretrycount=$(grep -o 'provisioner.wgetretrycount=[^ ]*' /proc/cmdline)
-      test -z "$bootif" && fail "Missing required parameter BOOTIF"
-      test -z "$nextone" && fail "Missing required parameter provisioner.web"
-      ip6=$(echo $nextone | grep -o '\[[0-9a-fA-F:]*\]')
-
-      bootif=${bootif#*01-}
-      bootif=${bootif//-/:}
-      nextone=${nextone#*=}
-      portdelay=${portdelay#*=}
-      postportdelay=${postportdelay#*=}
-      routedelay=${routedelay#*=}
-      wgetretrycount=${wgetretrycount#*=}
-      wgetretrycount=${wgetretrycount:-10}
-
-      pxedev=""
-      for dev in /sys/class/net/*; do
-          test -f "$dev/address" || continue
-          if test "$(cat "$dev/address")" = "$bootif"; then
-              pxedev=${dev##*/}
-              break
-          fi
-      done
-      test -z "$pxedev" && fail "Failed to find network device we booted from"
-      # if a port delay is sent - wait
-      test -z "$portdelay" || sleep $portdelay
-      echo "Configuring boot interface"
-      ip link set "$pxedev" up
-      # if a post port delay is sent - wait
-      test -z "$postportdelay" || sleep $postportdelay
-      if [[ "$ip6" == "" ]] ; then
-          udhcpc -b -R -a -i "$pxedev"
-      else
-          test -z "$routedelay" || sleep $routedelay
-          udhcpc6 -b -R -i "$pxedev"
-      fi
-      echo "Fetching second-stage initramfs"
-      ARCH={{.Machine.Arch}}
-      squashfs="$nextone/sledgehammer/$ARCH/$SIGNATURE/root.squashfs"
-      if [ $ARCH == amd64 ]; then
-          squashfs="$nextone/sledgehammer/$SIGNATURE/root.squashfs"
-      fi
-      # Loop because it can take some time to come up.
-      count=0
-      while [[ $count != $wgetretrycount ]]; do
-          (cd /newinitramfs; wget "$squashfs") && break
-          sleep 1
-          count=$(($count+1))
-          if [[ $count == $wgetretrycount ]] ; then
-              fail "Failed to download root.squashfs - exit to retry"
-              count=0
-          fi
-      done
-      echo "Switching to second-stage initramfs"
       modprobe loop
       modprobe squashfs
+      if test -f /root.squashfs; then
+          echo "Detected sledgehammer-on-disk, skipping network operations"
+          mv /root.squashfs /newinitramfs
+      else
+          echo "Configuring netowrk to download second stage"
+          touch /dev/mdev.log /dev/mdev.seq
+          echo "Loading drivers"
+          echo '$MODALIAS=.* 0:0 660 @/bin/modprobe "$MODALIAS"' >/etc/mdev.conf
+          echo /bin/mdev >/proc/sys/kernel/hotplug
+          mdev -s
+          # Load devices not loaded by mdev -s
+          for i in /sys/class/net/*/uevent; do
+              printf 'add' > "$i";
+          done 2>/dev/null;
+          unset i
+          for i in /sys/bus/usb/devices/*; do
+              case "${i##*/}" in
+                  [0-9]*-[0-9]*)
+                      printf 'add' > "$i/uevent";;
+              esac
+          done; unset i
+          # Load kernel modules, run twice.
+          find /sys -name 'modalias' -type f -exec cat '{}' + | sort -u | xargs -n 1 modprobe  2>/dev/null
+          find /sys -name 'modalias' -type f -exec cat '{}' + | sort -u | xargs -n 1 modprobe  2>/dev/null
+          # If we loaded mlx4_core, also load mlx4_en
+          if test -d /sys/module/mlx4_core; then
+              modprobe mlx4_en
+              mdev -s
+          fi
+          for dev in /sys/class/net/*; do
+              test -f "$dev/address" || continue
+              if test "$(cat "$dev/address")" = "$bootif"; then
+                  pxedev=${dev##*/}
+                  break
+              fi
+          done
+          test -z "$pxedev" && fail "Failed to find network device we booted from"
+          # if a port delay is sent - wait
+          test -z "$portdelay" || sleep $portdelay
+          echo "Configuring boot interface"
+          ip link set "$pxedev" up
+          # if a post port delay is sent - wait
+          test -z "$postportdelay" || sleep $postportdelay
+          if [[ "$ip6" == "" ]] ; then
+              udhcpc -b -R -a -i "$pxedev"
+          else
+              test -z "$routedelay" || sleep $routedelay
+              udhcpc6 -b -R -i "$pxedev"
+          fi
+          echo "Fetching second-stage initramfs"
+          squashfs="$nextone/sledgehammer/$ARCH/$SIGNATURE/root.squashfs"
+          if [ $ARCH == amd64 ]; then
+              squashfs="$nextone/sledgehammer/$SIGNATURE/root.squashfs"
+          fi
+          # Loop because it can take some time to come up.
+          count=0
+          while [[ $count != $wgetretrycount ]]; do
+              (cd /newinitramfs; wget "$squashfs") && break
+              sleep 1
+              count=$(($count+1))
+              if [[ $count == $wgetretrycount ]] ; then
+                  fail "Failed to download root.squashfs - exit to retry"
+                  count=0
+              fi
+          done
+            echo "" >/proc/sys/kernel/hotplug
+          if [[ "$ip6" == "" ]] ; then
+              pkill udhcpc
+          else
+              pkill udhcpc6
+          fi
+          ip link set "$pxedev" down
+      fi
+      echo "Switching to second-stage initramfs"
       mkdir /newinitramfs/.upper /newinitramfs/.work /newinitramfs/.lower
       mount -o ro -t squashfs "/newinitramfs/root.squashfs" /newinitramfs/.lower || \
           fail "Failed to mount root.squashfs as Stage2 initramfs"
@@ -318,14 +329,6 @@ Templates:
       |              +--+   | Kernel \r on an \m
       " > $file
       done
-
-      echo "" >/proc/sys/kernel/hotplug
-      if [[ "$ip6" == "" ]] ; then
-          pkill udhcpc
-      else
-          pkill udhcpc6
-      fi
-      ip link set "$pxedev" down
 
       exec switch_root /newinitramfs /sbin/init
       fail "Failed to switch to stage2 initramfs" "This should never happen"
