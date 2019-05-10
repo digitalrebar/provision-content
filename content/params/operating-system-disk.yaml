@@ -10,6 +10,7 @@ Documentation: |
 
 Schema:
   type: "string"
+  default: "sda"
 
 Meta:
   icon: "disk outline"

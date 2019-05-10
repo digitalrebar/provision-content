@@ -91,6 +91,7 @@ Templates:
       {{range $initrd := .Env.InitrdsFor "amd64"}}
       module {{$.Env.PathForArch "http" $initrd "amd64"}}
       {{end}}
+      boot
   - Name: "ipxe-x86_64"
     Path: "x86_64.ipxe"
     Contents: |
@@ -99,6 +100,7 @@ Templates:
       {{range $initrd := .Env.InitrdsFor "amd64"}}
       module {{$.Env.PathForArch "http" $initrd "amd64"}}
       {{end}}
+      boot
   - Name: "ipxe-arm64"
     Path: "arm64.ipxe"
     Contents: |
@@ -107,6 +109,7 @@ Templates:
       {{range $initrd := (.Env.InitrdsFor "arm64")}}
       module {{$.Env.PathForArch "http" $initrd "arm64"}}
       {{end}}
+      boot
   - Name: "grub"
     Path: "grub/grub.cfg"
     Contents: |
