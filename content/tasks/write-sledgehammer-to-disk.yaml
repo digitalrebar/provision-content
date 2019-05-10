@@ -1,0 +1,174 @@
+---
+Name: write-sledgehammer-to-disk
+Description: Writes the current Sledgehammer image to the local disk.
+Meta:
+  feature-flags: "sane-exit-codes"
+Prerequisites:
+  - erase-hard-disks-for-os-install
+RequiredParams:
+  - operating-system-disk
+Templates:
+  - Name: "prepare-simple-boot-partition"
+    Contents: |
+      #!/bin/bash
+      . helper
+      set -x
+      drive="/dev/{{.Param "operating-system-disk"}}"
+      [[ -L $drive ]] && drive="$(readlink -f "$drive")"
+      efi() { [[ -d /sys/firmware/efi ]]; }
+      parted() { command parted -a optimal -s "$drive" "$@"; }
+      if efi; then
+          parted mklabel gpt
+      else
+          parted mklabel msdos
+      fi
+      parted mkpart primary fat32 1 2GB
+      parted toggle 1 boot
+      partprobe "$drive"
+      mkfs.vfat "$drive"1
+      mount -o rw "$drive"1 /boot || exit 1
+  - Name: "place-sledgehammer-in-boot-partition"
+    Contents: |
+      #!/bin/bash
+      . helper
+      set -x
+      mkdir /tmp/sl1
+      kp="{{.Env.PathFor "http" .Env.Kernel}}"
+      cd /boot
+      curl -fgLO "$kp"
+      cd /tmp/sl1
+      {{range $initrd := .Env.Initrds}}
+      curl -fgL {{$.Env.PathFor "http" $initrd}} |gunzip |cpio -idm
+      {{end}}
+      curl -fgLO "${kp%/*}/root.squashfs"
+  - Name: "overwrite-sledgehammer-init"
+    Path: /tmp/sl1/init
+    Contents: |
+      #!/bin/ash
+
+      fail() {
+          printf '%s\n' "$@"
+          echo "Dropping into shell for debugging"
+          echo "Contact #community on rackn.slack.com channel for debugging"
+          echo "Exiting the shell will reboot the system"
+          /bin/ash -i
+          reboot
+      }
+
+      export PATH=/bin
+      ARCH={{.Machine.Arch}}
+      export SIGNATURE="::SIGNATURE::"
+      echo "Stage1 $SIGNATURE in Busybox"
+      echo "You can download a copy of the Busybox source for this version at:"
+      echo "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/busybox-1.29.3.tar.bz2"
+      mount -t proc proc /proc
+      mount -t sysfs sysfs /sys
+      mount -t devtmpfs dev /dev
+      mount -t tmpfs root /newinitramfs
+      mkdir /dev/pts
+      mount -t devpts devpts /dev/pts
+      echo "Parsing kernel parameters required for booting"
+      bootif=$(grep -o 'BOOTIF=[^ ]*' /proc/cmdline)
+      bootif=${bootif#*01-}
+      bootif=${bootif//-/:}
+      nextone=$(grep -o 'provisioner.web=[^ ]*' /proc/cmdline)
+      test -z "$bootif" && fail "Missing required parameter BOOTIF"
+      test -z "$nextone" && fail "Missing required parameter provisioner.web"
+      ip6=$(echo $nextone | grep -o '\[[0-9a-fA-F:]*\]')
+      pxedev=""
+      echo "Extracting drivers and other kernel modules"
+      xz -d -c -f lib.cpio.xz |cpio -id
+      test -d "lib/modules/$(uname -r)" || fail "Stage1 kernel modules do not match running kernel $(uname -r)" "We will fail to find network devices" "Make sure Sledgehammer $SIGNATURE was downloaded properly."
+      rm lib.cpio.xz
+      modprobe loop
+      modprobe squashfs
+      mv /root.squashfs /newinitramfs
+      echo "Switching to second-stage initramfs"
+      mkdir /newinitramfs/.upper /newinitramfs/.work /newinitramfs/.lower
+      mount -o ro -t squashfs "/newinitramfs/root.squashfs" /newinitramfs/.lower || \
+          fail "Failed to mount root.squashfs as Stage2 initramfs"
+      test -d "/newinitramfs/.lower/usr/lib/modules/$(uname -r)" || \
+          fail "Stage2 kernel modules do not match running kernel!"
+      # This is such a hack
+      (cd "/newinitramfs/.lower/usr/lib/modules/$(uname -r)/kernel/fs/overlayfs"; insmod overlay.ko*) || \
+          fail "Failed to load overlayfs kernel module"
+      mount -t overlay -olowerdir=/newinitramfs/.lower,upperdir=/newinitramfs/.upper,workdir=/newinitramfs/.work newroot /newinitramfs || \
+          fail "Failed to overlay a writeable filesystem over root.squashfs"
+
+      # Remove /etc/machine-id
+      rm -f /newinitramfs/etc/machine-id || :
+
+      for fs in /dev /dev/pts /proc /sys; do
+          mkdir -p "/newinitramfs$fs"
+          mount --bind "$fs" "/newinitramfs$fs"
+      done
+      mkdir -p /newinitramfs/etc/systemd/network
+      {
+      echo '[Match]'
+      printf 'MACAddress=%s\n\n' "$bootif"
+      echo '[Network]'
+      if [[ "$ip6" == "" ]] ; then
+          echo 'DHCP=ipv4'
+          echo
+          echo '[DHCP]'
+          echo 'ClientIdentifier=mac'
+      else
+          echo 'DHCP=ipv6'
+          echo
+          echo '[DHCP]'
+          echo 'ClientIdentifier=mac'
+      fi
+      } > /newinitramfs/etc/systemd/network/20-bootif.network
+
+      echo "$SIGNATURE" > /newinitramfs/etc/sledgehammer-id
+      echo "SLEDGEHAMMER_VERSION=${SIGNATURE}" > /newinitramfs/etc/sledgehammer-release
+      echo "SLEDGEHAMMER_DATE=\"::BUILD_DATE::\"" >> /newinitramfs/etc/sledgehammer-release
+      echo "SLEDGEHAMMER_BUILDER_VERSION=::SBV::" >> /newinitramfs/etc/sledgehammer-release
+
+      SLEDGE_ID=$(cat /newinitramfs/etc/sledgehammer-id)
+      for file in "/newinitramfs/etc/issue" "/newinitramfs/etc/issue.net"; do
+      echo "
+      |              +--+   | Digital Rebar Sledgehammer onna Disk
+      |  +==========={  }   | ID $SLEDGE_ID
+      |              +--+   | Kernel \r on an \m
+      " > $file
+      done
+
+      exec switch_root /newinitramfs /sbin/init
+      fail "Failed to switch to stage2 initramfs" "This should never happen"
+  - Name: repackage-sledgehammer-initramfs
+    Contents: |
+      #!/bin/bash
+      cd /tmp/sl1
+      chmod 755 init
+      find . |cpio -H newc -o |gzip -9 >/boot/initrd.img
+  - Name: grub-config-file
+    Path: /boot/grub2/grub.cfg
+    Contents: |
+      linux /vmlinuz0 {{.Env.BootParams}} sledgehammer.onnadisk=true BOOTIF={{.Param "last-boot-macaddr"}}
+      initrd /initrd.img
+      boot
+  - Name: systemd-loader-config-entry
+    Path: /boot/loader/entries/sledgehammer.conf
+    Contents: |
+      title Sledgehammer on a Disk
+      linux /vmlinuz0
+      initrd /initrd.img
+      options {{.Env.BootParams}} sledgehammer.onnadisk=true BOOTIF={{.Param "last-boot-macaddr"}}
+  - Name: systemd-loader-config
+    Path: /boot/loader/loader.conf
+    Contents: |
+      timeout 3
+      default sledgehammer
+  - Name: make-system-bootable
+    Contents: |
+      #!/bin/bash
+      . helper
+      drive="/dev/{{.Param "operating-system-disk"}}"
+      [[ -L $drive ]] && drive="$(readlink -f "$drive")"
+      if [[ -d /sys/firmware/efi ]]; then
+         bootctl --path=/boot install
+      else
+         grub2-install "$drive"
+      fi
+      umount /boot
