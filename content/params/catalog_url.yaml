@@ -1,5 +1,5 @@
 ---
-Name: "ux-catalog-url"
+Name: "catalog_url"
 Description: "The url to go and get the catalog from"
 Documentation: |
   The URL that the UX should use to get the catalog data.
