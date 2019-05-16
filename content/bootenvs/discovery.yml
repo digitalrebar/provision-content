@@ -78,9 +78,9 @@ Templates:
     Path: "default.ipxe"
     Contents: |
       #!ipxe
-      chain {{.ProvisionerURL}}/${netX/mac}.ipxe && exit || goto chainip
+      chain {{.ProvisionerURL}}/${netX/mac}.ipxe && exit 1 || goto chainip
       :chainip
-      chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit || goto sledgehammer
+      chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit 1 || goto sledgehammer
       :sledgehammer
       chain {{.ProvisionerURL}}/${builtin/buildarch}.ipxe
   - Name: "ipxe-i386"
