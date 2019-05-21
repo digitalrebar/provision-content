@@ -141,6 +141,12 @@ Templates:
       fi
       unset get_macs json
 
+      if [[ -d /sys/firmware/efi ]]; then
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"uefi"'
+      else
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"legacy-bios"'
+      fi
+
       {{template "reset-workflow.tmpl" .}}
       {{template "runner.tmpl" .}}
 
