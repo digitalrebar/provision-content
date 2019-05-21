@@ -1,0 +1,20 @@
+---
+Name: "detected-bios-mode"
+Description: "The BIOS mode that the machine has been detected to be booting in."
+Documentation: |
+  The BIOS mode that the machine was last detected to be operating in.  This can be
+  either unknown, legacy-bios, or uefi.
+
+  Other BIOS modes will be added on an as-needed basis, and will require a corresponding
+  update to Sledgehammer to set.
+Schema:
+  type: string
+  enum:
+    - unknown
+    - legacy-bios
+    - uefi
+  default: unknown
+Meta:
+  icon: meh
+  color: green
+  title: "Digital Rebar Community Content"
