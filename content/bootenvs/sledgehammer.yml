@@ -106,7 +106,7 @@ Templates:
       #
 
       # We get the following variables from start-up.sh
-      # MAC BOOTDEV ADMIN_IP DOMAIN HOSTNAME HOSTNAME_MAC MYIP
+      # MAC BOOTDEV ADMIN_IP DOMAIN HOSTNAME HOSTNAME_MAC
 
       set -x
       shopt -s extglob
@@ -136,7 +136,16 @@ Templates:
       if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
           drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}"
       fi
+      if [[ $IP && "$(jq -r '.Address' <<< "$json")" != $IP ]]; then
+          drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}"
+      fi
       unset get_macs json
+
+      if [[ -d /sys/firmware/efi ]]; then
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"uefi"'
+      else
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"legacy-bios"'
+      fi
 
       {{template "reset-workflow.tmpl" .}}
       {{template "runner.tmpl" .}}

@@ -78,9 +78,9 @@ Templates:
     Path: "default.ipxe"
     Contents: |
       #!ipxe
-      chain {{.ProvisionerURL}}/${netX/mac}.ipxe && exit || goto chainip
+      chain {{.ProvisionerURL}}/${netX/mac}.ipxe && exit 1 || goto chainip
       :chainip
-      chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit || goto sledgehammer
+      chain {{.ProvisionerURL}}/${netX/ip}.ipxe && exit 1 || goto sledgehammer
       :sledgehammer
       chain {{.ProvisionerURL}}/${builtin/buildarch}.ipxe
   - Name: "ipxe-i386"
@@ -89,7 +89,7 @@ Templates:
       #!ipxe
       kernel {{.Env.PathForArch "http" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${netX/mac:hexhyp}
       {{range $initrd := .Env.InitrdsFor "amd64"}}
-      initrd {{$.Env.PathForArch "http" $initrd "amd64"}}
+      module {{$.Env.PathForArch "http" $initrd "amd64"}}
       {{end}}
       boot
   - Name: "ipxe-x86_64"
@@ -98,7 +98,7 @@ Templates:
       #!ipxe
       kernel {{.Env.PathForArch "http" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${netX/mac:hexhyp}
       {{range $initrd := .Env.InitrdsFor "amd64"}}
-      initrd {{$.Env.PathForArch "http" $initrd "amd64"}}
+      module {{$.Env.PathForArch "http" $initrd "amd64"}}
       {{end}}
       boot
   - Name: "ipxe-arm64"
@@ -107,12 +107,21 @@ Templates:
       #!ipxe
       kernel {{.Env.PathForArch "http" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${netX/mac:hexhyp}
       {{range $initrd := (.Env.InitrdsFor "arm64")}}
-      initrd {{$.Env.PathForArch "http" $initrd "arm64"}}
+      module {{$.Env.PathForArch "http" $initrd "arm64"}}
       {{end}}
       boot
   - Name: "grub"
     Path: "grub/grub.cfg"
     Contents: |
+      set _kernel=linux
+      set _module=initrd
+      $_kernel
+      if test $? != 18; then
+          set _kernel=linuxefi
+          set _module=initrdefi
+      fi
+      function kernel { $_kernel "$@"; }
+      function module { $_module "$@"; }
       if test -s (tftp)/grub/${net_default_mac}.cfg; then
         echo "Booting via MAC"
         source (tftp)/grub/${net_default_mac}.cfg
@@ -127,30 +136,24 @@ Templates:
   - Name: "grub-i386"
     Path: "grub/i386.cfg"
     Contents: |
-      menuentry "Discovery i386" {
-        linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
-        {{range $initrd := .Env.InitrdsFor "amd64"}}
-        initrd (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
-        {{end}}
-      }
+      kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
+      {{range $initrd := .Env.InitrdsFor "amd64"}}
+      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
+      {{end}}
   - Name: "grub-x86_64"
     Path: "grub/x86_64.cfg"
     Contents: |
-      menuentry "Discovery x86_64" {
-        linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
-        {{range $initrd := .Env.InitrdsFor "amd64"}}
-        initrd (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
-        {{end}}
-      }
+      kernel linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
+      {{range $initrd := .Env.InitrdsFor "amd64"}}
+      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
+      {{end}}
   - Name: "grub-arm64"
     Path: "grub/arm64.cfg"
     Contents: |
-      menuentry "Discovery arm64" {
-        linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
-        {{range $initrd := .Env.InitrdsFor "arm64"}}
-        initrd (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
-        {{end}}
-      }
+      kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
+      {{range $initrd := .Env.InitrdsFor "arm64"}}
+      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
+      {{end}}
   - Name: "join-up.sh"
     Path: "machines/join-up.sh"
     Contents: |
@@ -291,7 +294,7 @@ Templates:
       fi
       chmod 755 /tmp/control.sh
 
-      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME MYIP
+      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
 
       echo "transfer from start-up to control script"
 
@@ -401,6 +404,16 @@ Templates:
       done
       unset tool
 
+      IP=""
+      bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
+      bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
+      if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
+          IP="${BASH_REMATCH[1]}"
+      else
+          if [[ $(ip -6 -o addr show dev $BOOTDEV | grep "scope global" | head -1) =~ $bootdev_ip6_re ]]; then
+              IP="${BASH_REMATCH[1]}"
+          fi
+      fi
       # See if we have already been created.
       if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
           RS_UUID="${BASH_REMATCH[1]}"
@@ -412,16 +425,6 @@ Templates:
       else
           # If we did not get a hostname from DHCP, generate one for ourselves.
           [[ $HOSTNAME ]] || HOSTNAME="d${MAC//:/-}.${DOMAIN}"
-          IP=""
-          bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
-          bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
-          if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
-              IP="${BASH_REMATCH[1]}"
-          else
-              if [[ $(ip -6 -o addr show dev $BOOTDEV | grep "scope global" | head -1) =~ $bootdev_ip6_re ]]; then
-                  IP="${BASH_REMATCH[1]}"
-              fi
-          fi
 
           # Create a new node for us,
           while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
@@ -455,7 +458,7 @@ Templates:
       fi
       chmod 755 /tmp/control.sh
 
-      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME
+      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
 
       echo "transfer from start-up to control script"
 
