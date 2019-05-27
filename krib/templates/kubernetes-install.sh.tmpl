@@ -64,7 +64,7 @@ mkdir -p ${INSTALL_DIR}
 mkdir -p /opt/cni/bin
 
 echo "Download cni plugin version: ${CNI_VERSION}"
-download -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
+download -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
 echo "Install cni plugin version: ${CNI_VERSION}"
 tar -C /opt/cni/bin -xzf ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
 
