@@ -8,7 +8,7 @@ Documentation: |
   override that default location on a machine-by-machine basis.  On
   Unix systems, it does this by setting the TMPDIR environment
   variable to the value if this parameter when the agent start up.  On
-  Windows.  it dues so by setting the TMP environment variable
+  Windows, it does so by setting the TMP environment variable
   instead.  If this parameter is left unset, then the machine agent
   will use whatever the default values for the system are.
 Schema:
