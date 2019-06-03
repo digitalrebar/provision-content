@@ -1,0 +1,20 @@
+---
+Name: runner-tmpdir
+Description: The temp directory the runner should keep scratch data in
+Documentation: |
+  Normally, when the machine agent runs tasks, it uses a hierarchy of
+  scratch directories underneath /tmp to hold temporary running data,
+  such as job logs, generated scripts, etc.  This param allows you to
+  override that default location on a machine-by-machine basis.  On
+  Unix systems, it does this by setting the TMPDIR environment
+  variable to the value if this parameter when the agent start up.  On
+  Windows.  it dues so by setting the TMP environment variable
+  instead.  If this parameter is left unset, then the machine agent
+  will use whatever the default values for the system are.
+Schema:
+  type: string
+  default: ''
+Meta:
+  icon: "folder"
+  color: "blue"
+  title: "Digital Rebar Community Content"
