@@ -21,11 +21,11 @@ OS:
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-da126d7a0260a460579e31361d7be24756ef055c.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/da126d7a0260a460579e31361d7be24756ef055c/sledgehammer-da126d7a0260a460579e31361d7be24756ef055c.amd64.tar"
-      Kernel: "da126d7a0260a460579e31361d7be24756ef055c/vmlinuz0"
+      IsoFile: "sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
+      Kernel: "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/vmlinuz0"
       Initrds:
-        - "da126d7a0260a460579e31361d7be24756ef055c/stage1.img"
+        - "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -37,6 +37,7 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     arm64:
@@ -57,10 +58,12 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 OptionalParams:
   - "kernel-console"
+  - "kernel-options"
 Templates:
   - Name: "kexec"
     ID: "kexec.tmpl"
@@ -103,7 +106,7 @@ Templates:
       #
 
       # We get the following variables from start-up.sh
-      # MAC BOOTDEV ADMIN_IP DOMAIN HOSTNAME HOSTNAME_MAC MYIP
+      # MAC BOOTDEV ADMIN_IP DOMAIN HOSTNAME HOSTNAME_MAC
 
       set -x
       shopt -s extglob
@@ -133,7 +136,16 @@ Templates:
       if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
           drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}"
       fi
+      if [[ $IP && "$(jq -r '.Address' <<< "$json")" != $IP ]]; then
+          drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}"
+      fi
       unset get_macs json
+
+      if [[ -d /sys/firmware/efi ]]; then
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"uefi"'
+      else
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"legacy-bios"'
+      fi
 
       {{template "reset-workflow.tmpl" .}}
       {{template "runner.tmpl" .}}

@@ -6,14 +6,24 @@ set -e
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
+CLUSTER_NAME={{.Param "krib/cluster-name"}}
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
 CNI_VERSION="{{ .Param "krib/cluster-cni-version" }}"
 CRICTL_VERSION="{{ .Param "krib/cluster-crictl-version" }}"
 RELEASE="{{ .Param "krib/cluster-kubernetes-version" }}"
 
-echo "Install kubelet, kubeadm, and kubectl ... "
-
+TMP_DIR=/tmp/k8s-tmp
 INSTALL_DIR=/usr/bin
 
+echo "Install prerequisite: socat"
 case $OS_FAMILY in
   debian)
     if ! which socat ; then
@@ -49,22 +59,37 @@ case $OS_FAMILY in
     ;;
 esac
 
+mkdir -p ${TMP_DIR}
 mkdir -p ${INSTALL_DIR}
 mkdir -p /opt/cni/bin
 
-curl -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-amd64-${CNI_VERSION}.tgz" | tar -C /opt/cni/bin -xz
+echo "Download cni plugin version: ${CNI_VERSION}"
+download -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
+echo "Install cni plugin version: ${CNI_VERSION}"
+tar -C /opt/cni/bin -xzf ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
 
-curl -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" | tar -C ${INSTALL_DIR} -xz
+echo "Download crictl version: ${CRICTL_VERSION}"
+download -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" -o ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
+echo "Install crictl version: ${CRICTL_VERSION}"
+tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
 
 cd ${INSTALL_DIR}
-curl -L --remote-name-all https://storage.googleapis.com/kubernetes-release/release/${RELEASE}/bin/linux/amd64/{kubeadm,kubelet,kubectl}
+echo "Download kubelet, kubeadm, and kubectl version: ${RELEASE}"
+download -L --remote-name-all https://storage.googleapis.com/kubernetes-release/release/${RELEASE}/bin/linux/amd64/{kubeadm,kubelet,kubectl}
 chmod +x {kubeadm,kubelet,kubectl}
 
-curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/build/debs/kubelet.service" | sed "s:/usr/bin:$INSTALL_DIR:g" > /etc/systemd/system/kubelet.service
+echo "Download kubelet systemd service unit file for version: ${RELEASE}"
+download -L "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/build/debs/kubelet.service" -o /etc/systemd/system/kubelet.service
+sed -i "s:/usr/bin:$INSTALL_DIR:g" /etc/systemd/system/kubelet.service
+
 mkdir -p /etc/systemd/system/kubelet.service.d
-curl -sSL "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/build/debs/10-kubeadm.conf" | sed "s:/usr/bin:$INSTALL_DIR:g" > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+echo "Download kubelet systemd service extension unit file for version: ${RELEASE}"
+download -L "https://raw.githubusercontent.com/kubernetes/kubernetes/${RELEASE}/build/debs/10-kubeadm.conf" -o /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+sed -i "s:/usr/bin:$INSTALL_DIR:g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 systemctl enable kubelet && systemctl start kubelet
+
+rm -rf ${TMP_DIR}
 
 echo "Finished successfully"
 exit 0

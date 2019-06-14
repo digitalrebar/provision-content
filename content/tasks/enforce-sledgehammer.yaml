@@ -1,0 +1,44 @@
+---
+Name: "enforce-sledgehammer"
+Description: "Make sure the system is in sledgehammer"
+Documentation: |
+  Sets Param: gohai-inventory
+
+  Collect inventory from machines using drpcli gohai command
+  and store the result in the gohai-inventory Param on the machine.
+
+  If you want to disable this behavior, set the gohai/skip Param to true.
+
+  Hint: this can be A LOT of data added to the machine param!  You may
+  want to use ?slim in the API to skip returning it on list requests.
+OptionalParams:
+  - sledgehammer/enforce
+  - sledgehammer/reboot-if-not-in-sledgehammer
+Templates:
+  - Name: "enforce-sledgehammer"
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{if .Param "sledgehammer/enforce" -}}
+        if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          {{if .Param "sledgehammer/reboot-if-not-in-sledgehammer" -}}
+            echo "System not in Sledgehammer, rebooting"
+            exit_reboot
+          {{else -}}
+            echo "System not in Sledgehammer, failing"
+            exit 1
+          {{end -}}
+        fi
+        echo "System in Sledgehammer, exiting"
+      {{else -}}
+        echo "Skipping sledgehammer enforcement"
+      {{end -}}
+      drpcli machines update $RS_UUID '{ "OS": "centos-7" }' 2>/dev/null >/dev/null
+      exit 0
+Meta:
+  icon: "search"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

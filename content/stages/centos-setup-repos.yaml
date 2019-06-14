@@ -1,0 +1,9 @@
+---
+Name: "centos-setup-repos"
+Description: "Setup repos based upon the package-repositories parameter on the machine"
+Tasks:
+  - "centos-drp-only-repos"
+Meta:
+  icon: "search"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

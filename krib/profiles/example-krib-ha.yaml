@@ -4,6 +4,9 @@ Description: Example HA Krib Profile - Clone Me!
 Documentation: |
   Minimum required Params to set on a KRIB Kubernetes
   cluster to define a Highly Available setup.
+  
+  Clone this profile as `krib-ha` and change the VIP to your needs.
+  
 Meta:
   color: blue
   icon: ship

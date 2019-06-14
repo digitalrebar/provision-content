@@ -1,0 +1,20 @@
+---
+Name: "lock-machine"
+Description: "Lock the machine to prevent further user changes"
+Documentation: |
+  Sets Field: Lock
+
+  Lock the machine so users can not alter the machine.
+  Current tasks and machine actions will continue to run.
+Templates:
+  - Name: "lock-me"
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      echo "Running drpcli command to lock machine"
+      drpcli machines update {{.Machine.UUID}} '{ "Locked": true }'
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

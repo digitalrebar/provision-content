@@ -1,0 +1,20 @@
+---
+Name: "catalog_url"
+Description: "The url to go and get the catalog from"
+Documentation: |
+  The URL that the UX should use to get the catalog data.
+
+  This can only be set on the global profile.
+
+  This defaults to `https://d1i21q4vxgce8j.cloudfront.net/rackn-catalog.json`.
+
+  Another option is `https://s3-us-west-2.amazonaws.com/rebar-catalog/rackn-catalog.json`.
+
+Schema:
+  type: "string"
+  default: "https://d1i21q4vxgce8j.cloudfront.net/rackn-catalog.json"
+
+Meta:
+  icon: "database"
+  color: "blue"
+  title: "Digital Rebar Community Content"

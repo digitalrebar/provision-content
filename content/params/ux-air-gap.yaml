@@ -1,0 +1,17 @@
+---
+Name: "ux-air-gap"
+Description: "Indicates that the UX should not talk to the SaaS"
+Documentation: |
+  Boolean value that tells the UX to not contact the SaaS because
+  it is not reachable.  This should only be set in the global profile.
+
+  This defaults to false.
+
+Schema:
+  type: "boolean"
+  default: false
+
+Meta:
+  icon: "database"
+  color: "blue"
+  title: "Digital Rebar Community Content"

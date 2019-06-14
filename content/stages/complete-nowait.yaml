@@ -5,7 +5,6 @@ Documentation: |
   This is deprectated and leaves the runner running, but will exit install bootenvs correctly.
   The use of this was to exit install workflows.  This will continue to work for that, but
   should be replaced by finish-install.
-RunnerWait: false
 BootEnv: "local"
 Meta:
   icon: "checkmark"

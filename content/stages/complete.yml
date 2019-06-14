@@ -2,7 +2,6 @@
 Name: "complete"
 Description: "Stage that represents workflow completion to local disk boot but leaves the runner running."
 BootEnv: "local"
-RunnerWait: true
 Meta:
   icon: "check circle outline"
   color: "green"

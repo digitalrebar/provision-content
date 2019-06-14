@@ -280,6 +280,9 @@ Templates:
       mount -t overlay -olowerdir=/newinitramfs/.lower,upperdir=/newinitramfs/.upper,workdir=/newinitramfs/.work newroot /newinitramfs || \
           fail "Failed to overlay a writeable filesystem over root.squashfs"
 
+      # Remove /etc/machine-id
+      rm -f /newinitramfs/etc/machine-id || :
+
       for fs in /dev /dev/pts /proc /sys; do
           mkdir -p "/newinitramfs$fs"
           mount --bind "$fs" "/newinitramfs$fs"
@@ -409,6 +412,32 @@ Templates:
       var/cache/yum/*
       usr/local/bin/*
       usr/share/doc
+  - Name: install-sipcalc
+    Contents: |
+      #!/bin/bash
+      # 'arch' is built for "x86_64", "aarch64, "armv7hl"
+      # for ARM arch types - not tested yet
+      # orig source location: https://koji.fedoraproject.org/koji/packageinfo?packageID=8762
+      arch=$(uname -p)
+      wget https://s3-us-west-2.amazonaws.com/rackn-sledgehammer/sipcalc-1.1.6-15.fc30.$arch.rpm -O /root/sipcalc.rpm
+      yum install -y /root/sipcalc.rpm
+      rm -rf /root/sipcalc.rpm
+  - Name: update-systemd
+    Contents: |
+      #!/bin/bash
+      # No updated systemd for things that are not x86_64
+      [[ $(uname -m) = x86_64 ]] || exit 0
+      wget https://copr.fedorainfracloud.org/coprs/jsynacek/systemd-backports-for-centos-7/repo/epel-7/jsynacek-systemd-backports-for-centos-7-epel-7.repo -O /etc/yum.repos.d/jsynacek-systemd-centos-7.repo
+      yum remove -y systemd-networkd systemd-resolved
+      yum update -y systemd
+      rm /etc/yum.repos.d/jsynacek-systemd-centos-7.repo
+      yum makecache -y
+  - Name: update-parted
+    Contents: |
+      #!/bin/bash
+      wget https://s3-us-west-2.amazonaws.com/rackn-sledgehammer/parted-3.2-35.el7.centos.x86_64.rpm -O /root/parted.rpm
+      yum install -y /root/parted.rpm
+      rm -rf /root/parted.rpm
   - Name: remove-unwanted-pkgs
     Contents: |
       #!/bin/bash
@@ -587,6 +616,8 @@ Templates:
       mkdir -p /run/systemd/resolve
       touch /run/systemd/resolve/resolv.conf
       ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+      # Remove /etc/machine-id
+      rm -f /etc/machine-id || :
       # Make stage2 first
       mkdir -p /IMAGE/rootfs
       grep -q IMAGE/rootfs /proc/self/mounts || mount --bind -o ro / /IMAGE/rootfs

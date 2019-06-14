@@ -8,9 +8,8 @@
 
   for p in "${WIPE_PARAMS[@]}"; do
 
+    JC=$(drpcli -T "$PROFILE_TOKEN" profiles get "$CLUSTER_PROFILE" param "$p" | jq -r .)
     echo "=== clearing $p : value was ==========================="
-    JC=$(get_param "$p" | jq -r .)
-#    if [[ $JC != "" && $JC != null ]] ; then
     if [[ $JC != null ]] ; then
         drpcli -T "$PROFILE_TOKEN" profiles remove "$CLUSTER_PROFILE" param "$p" | jq -r '.'
     else

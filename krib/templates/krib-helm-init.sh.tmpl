@@ -27,20 +27,35 @@ if [[ $MASTER_INDEX != notme ]] ; then
     # help requires the admin config
     export KUBECONFIG="/etc/kubernetes/admin.conf"
 
+    INSTALL_DIR=/usr/local/bin
+    if [[ $OS_FAMILY == coreos ]] ; then
+      INSTALL_DIR=/opt/bin
+    fi
+
+    if [[ ! -f "${INSTALL_DIR}/helm" ]]; then
+      # todo: provide more options for installing helm
+      {{ if eq (.Param "helm/version") "latest" -}}
+      # curl has exit code 23... meh
+      set +e
+      HELM_VERSION=$(curl -skX GET "https://api.github.com/repos/helm/helm/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]')
+      set -e
+      {{ else -}}
+      HELM_VERSION={{.Param "helm/version"}}
+      {{ end -}}
+      curl https://raw.githubusercontent.com/helm/helm/master/scripts/get > get_helm.sh
+      chmod 700 get_helm.sh
+
+      HELM_INSTALL_DIR=$INSTALL_DIR ./get_helm.sh -v ${HELM_VERSION}
+      echo "When helm fail to get the latest version, please add param "helm/version" and re-run again"
+      echo "You can find the version release or tag on: https://github.com/helm/helm/releases/"
+      
+    fi
+
     if [[ ! -z $(kubectl -n kube-system rollout status deploy/tiller-deploy -w=0 | grep success) ]] ; then
       echo "Tiller already installed - exiting"
       helm version
       exit 0
     fi
-
-    # todo: provide more options for installing helm
-    curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh
-    chmod 700 get_helm.sh
-    INSTALL_DIR=/usr/local/bin
-    if [[ $OS_FAMILY == coreos ]] ; then
-      INSTALL_DIR=/opt/bin
-    fi
-    HELM_INSTALL_DIR=$INSTALL_DIR ./get_helm.sh -v {{.Param "helm/version"}}
 
     echo "Create tiller service account"
     kubectl apply -f tiller-rbac.yaml

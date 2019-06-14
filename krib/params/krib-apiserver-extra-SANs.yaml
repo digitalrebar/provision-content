@@ -1,0 +1,17 @@
+---
+Name: "krib/apiserver-extra-SANs"
+Description: "extra SANs used for the Kubernetes API Server"
+Documentation: |
+  List of additional SANs (IP addresses or FQDNs) used in the certificate used for the API Server
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    properties:
+      SAN:
+        type: string
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
+  render: "machines-map"

@@ -7,13 +7,14 @@ set -e
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
+ETCD_VERSION="{{ .Param "etcd/version" }}"
+
 # these need to be before krib-lib template
 {{if .ParamExists "etcd/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
 {{else -}}
-echo "Missing etcd/cluster-profile on the machine!"
-exit 1
+xiterr 1 "Missing etcd/cluster-profile on the machine!"
 {{end -}}
 
 {{template "krib-lib.sh.tmpl" .}}
@@ -33,6 +34,43 @@ build_cert() {
   rm tmp.csr
 }
 
+{{if .ParamExists "etcd/servers" -}}
+get_endpoints() {
+  ENDPOINTS=""
+  {{ $port := .Param "etcd/client-port" -}}
+  {{- range $elem := .Param "etcd/servers"}}
+  ENDPOINTS="${ENDPOINTS},https://{{ $elem.Address }}:{{ $port }}"
+  {{ end -}}
+  ENDPOINTS="--endpoints=${ENDPOINTS:1}"
+  echo ${ENDPOINTS}
+}
+
+get_member_list() {
+  set +e
+  ENDPOINTS=$1
+  export ETCDCTL_API=3
+  echo `etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
+   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
+   --endpoints=${ENDPOINTS} \
+   member list 2>/dev/null`
+  set -e
+}
+
+get_member_id() {
+  set +e
+  ENDPOINTS=$1
+  export ETCDCTL_API=3
+  MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
+   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
+   --endpoints=${ENDPOINTS} \
+   member list | grep ${ETCD_IP} | awk -F', ' '{print $1}'`
+  set -e
+  echo ${MEMBER_ID}
+}
+{{ end -}}
+
 echo "Configure the etcd cluster"
 
 ETCD_CLUSTER_NAME={{.Param "etcd/name"}}
@@ -44,10 +82,15 @@ ETCD_IP={{ .Param "etcd/ip" }}
 ETCD_IP={{ .Machine.Address }}
 {{ end -}}
 
+{{if eq (.ParamExists "etcd/servers") false -}}
 # add server management params if missing
 echo "Add initial variables to track members."
 drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/servers" to "[]" || true
+{{ end -}}
+
+{{if eq (.ParamExists "etcd/servers-done") false -}}
 drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/servers-done" to "[]" || true
+{{ end -}}
 
 # Get the number of servers to create
 ETCD_SERVER_COUNT={{.Param "etcd/server-count"}}
@@ -68,49 +111,52 @@ CLIENT_CA=${ETCD_CLUSTER_NAME}-client-ca
 SERVER_CA=${ETCD_CLUSTER_NAME}-server-ca
 PEER_CA=${ETCD_CLUSTER_NAME}-peer-ca
 
-{{if .ParamExists "certs/root" -}}
+EXISTING_INDEX=$(find_me "etcd/servers-done" "Uuid" $RS_UUID)
+if [[ $EXISTING_INDEX == notme ]] ; then
+  {{if .ParamExists "certs/root" -}}
 
-echo "Certs plugin detected....setting up CA"
-# If we are INDEX=0, let's setup the root certs for building keys
-if [[ $ETCD_INDEX == "0" ]] ; then
-  echo "We are first machine in cluster, setting up the root certs..."
-  # Are certs built yet?
-  if ! drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA 2>/dev/null >/dev/null ; then
-    CLIENT_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $CLIENT_CA | jq -r .)
-    echo "  Client CA created as $CLIENT_CA and now adding to profile: $CLUSTER_PROFILE"
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-name" to "$CLIENT_CA" || true
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
-  else
-    if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-      xiterr 1 "Client CA Exists, but we did not set password.  Need to reset!!"
+  echo "Certs plugin detected....setting up CA"
+  # If we are INDEX=0, let's setup the root certs for building keys
+  if [[ $ETCD_INDEX == "0" ]] ; then
+    echo "We are first machine in cluster, setting up the root certs..."
+    # Are certs built yet?
+    if ! drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA 2>/dev/null >/dev/null ; then
+      CLIENT_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $CLIENT_CA | jq -r .)
+      echo "  Client CA created as $CLIENT_CA and now adding to profile: $CLUSTER_PROFILE"
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-name" to "$CLIENT_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
     else
-      echo "  Client CA $CLIENT_CA configured"
+      if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
+        xiterr 1 "Client CA Exists, but we did not set password.  Need to reset!!"
+      else
+        echo "  Client CA $CLIENT_CA configured"
+      fi
     fi
-  fi
 
-  if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
-    SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-name" to "$SERVER_CA" || true
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-pw" to "$SERVER_CA_PW" || true
-  else
-    if [[ $(get_param "etcd/server-ca-pw") == null ]] ; then
-      xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+    if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
+      SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-name" to "$SERVER_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-pw" to "$SERVER_CA_PW" || true
+    else
+      if [[ $(get_param "etcd/server-ca-pw") == null ]] ; then
+        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+      fi
     fi
-  fi
 
-  if ! drpcli machines runaction $RS_UUID getca certs/root $PEER_CA 2>/dev/null >/dev/null ; then
-    PEER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $PEER_CA | jq -r .)
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-name" to "$PEER_CA" || true
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-pw" to "$PEER_CA_PW" || true
-  else
-    if [[ $(get_param "etcd/peer-ca-pw") == null ]] ; then
-      xiterr 1 " PEER CA Exists, but we didn't set password.  Need to reset!!"
+    if ! drpcli machines runaction $RS_UUID getca certs/root $PEER_CA 2>/dev/null >/dev/null ; then
+      PEER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $PEER_CA | jq -r .)
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-name" to "$PEER_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-pw" to "$PEER_CA_PW" || true
+    else
+      if [[ $(get_param "etcd/peer-ca-pw") == null ]] ; then
+        xiterr 1 "PEER CA Exists, but we didn't set password.  Need to reset!!"
+      fi
     fi
   fi
+  {{else -}}
+  xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
+  {{end}}
 fi
-{{else -}}
-xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
-{{end}}
 
 echo "Waiting for ${ETCD_SERVER_COUNT} servers to start"
 wait_for_count "etcd/servers" $ETCD_SERVER_COUNT
@@ -142,14 +188,45 @@ IFS=" " ; while read ip ; do
 done <<< $(get_param "etcd/servers" | jq -r '.[].Address')
 IFS=$OLD_IFS
 
+TMP_DIR=/tmp/etcd-tmp
 INSTALL_DIR=/usr/local/bin
 if [[ $OS_FAMILY == coreos ]] ; then
   INSTALL_DIR=/opt/bin
 fi
 
-echo "Installing etcd v{{.Param "etcd/version"}} (set in Param etcd/version)"
-curl -sSL https://github.com/coreos/etcd/releases/download/v{{.Param "etcd/version"}}/etcd-v{{.Param "etcd/version"}}-linux-amd64.tar.gz | tar -xz --strip-components=1 -C ${INSTALL_DIR}
-rm -rf etcd-v{{.Param "etcd/version"}}-linux-amd64*
+mkdir -p ${TMP_DIR}
+
+echo "Download etcd version: v${ETCD_VERSION}"
+download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+echo "Install etcd version: ${ETCD_VERSION}"
+tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
+
+CLUSTER_STATE="new"
+if [[ $EXISTING_INDEX != notme ]] ; then
+  CLUSTER_STATE="existing"
+  ENDPOINTS=$(get_endpoints)
+
+  if [[ "$(get_member_list ${ENDPOINTS})" == "" ]] ; then
+    xiterr 1 "etcd/servers-done is not empty but no cluster members are up.  Did you forget to run krib-cluster-reset?"
+  fi
+
+  MEMBER_ID=$(get_member_id ${ENDPOINTS})
+  export ETCDCTL_API=3
+
+  if [[ "${MEMBER_ID}" != "" ]] ; then
+    etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
+     --key=/etc/kubernetes/pki/etcd/client-key.pem \
+     --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
+     --endpoints=${ENDPOINTS} \
+     member remove ${MEMBER_ID}
+  fi
+
+  etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
+   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
+   --endpoints=${ENDPOINTS} \
+   member add ${ETCD_NAME} --peer-urls https://${ETCD_IP}:${ETCD_PEER_PORT}
+fi
 
 cat << EOF > /etc/etcd.env
 PEER_NAME=${ETCD_NAME}
@@ -175,18 +252,18 @@ LimitNOFILE=40000
 TimeoutStartSec=0
 
 ExecStart=${INSTALL_DIR}/etcd \
-  --name \${PEER_NAME} \
-  --data-dir /docker/etcd \
-  --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT},http://127.0.0.1:\${CLIENT_PORT} \
-  --advertise-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT} \
-  --listen-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT},http://127.0.0.1:\${PEER_PORT} \
-  --initial-advertise-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT} \
-  --cert-file=/etc/kubernetes/pki/etcd/server.pem \
-  --key-file=/etc/kubernetes/pki/etcd/server-key.pem \
-  --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem \
-  --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem \
-  --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem \
-  --initial-cluster \${URLS} --initial-cluster-token my-etcd-token --initial-cluster-state new
+ --name \${PEER_NAME} \
+ --data-dir /docker/etcd \
+ --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT},http://127.0.0.1:\${CLIENT_PORT} \
+ --advertise-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT} \
+ --listen-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT},http://127.0.0.1:\${PEER_PORT} \
+ --initial-advertise-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT} \
+ --cert-file=/etc/kubernetes/pki/etcd/server.pem \
+ --key-file=/etc/kubernetes/pki/etcd/server-key.pem \
+ --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem \
+ --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem \
+ --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem \
+ --initial-cluster \${URLS} --initial-cluster-token my-etcd-token --initial-cluster-state ${CLUSTER_STATE}
 
 [Install]
 WantedBy=multi-user.target
@@ -202,5 +279,7 @@ add_me_if_not_count "etcd/servers-done" $ETCD_SERVER_COUNT $ETCD_IP
 
 echo "Waiting for ${ETCD_SERVER_COUNT} servers to complete etcd install"
 wait_for_count "etcd/servers-done" $ETCD_SERVER_COUNT
+
+rm -rf ${TMP_DIR}
 
 exit 0

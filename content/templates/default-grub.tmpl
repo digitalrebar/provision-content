@@ -1,6 +1,4 @@
-menuentry "{{.Env.Name}}" {
-    linux (tftp)/{{.Env.PathFor "tftp" .Env.Kernel}} {{.Env.BootParams}} BOOTIF=01-${net_default_mac}
+kernel (tftp)/{{.Env.PathFor "tftp" .Env.Kernel}} {{.Env.BootParams}} BOOTIF=01-${net_default_mac}
 {{range $initrd := .Env.Initrds}}
-    initrd (tftp)/{{$.Env.PathFor "tftp" $initrd}}
+module (tftp)/{{$.Env.PathFor "tftp" $initrd}}
 {{end}}
-}

@@ -1,0 +1,16 @@
+---
+Name: "dns-servers"
+Description: "Defines the set of DNS servers to apply to the system."
+Documentation: |
+  This is an array of strings where each string an IP address of a DNS
+  server.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+
+Meta:
+  icon: "time"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -5,9 +5,6 @@ set -e
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
-echo "Configure kubeadm master and minions..."
-
-CLUSTER_NAME={{ .Param "krib/cluster-name" }}
 {{ if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
 PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
@@ -17,10 +14,32 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 
 {{ template "krib-lib.sh.tmpl" .}}
 
+set_taint() {
+  {{ if eq (.Param "krib/cluster-masters-untainted") true -}}
+  echo "Removing taint from master nodes:"
+  kubectl taint nodes -l node-role.kubernetes.io/master node-role.kubernetes.io/master- || true
+  {{ else -}}
+  echo "Ensure taint on master nodes:"
+  kubectl taint nodes -l node-role.kubernetes.io/master node-role.kubernetes.io/master=:NoSchedule || true
+  {{ end -}}
+}
+
+echo "Configure kubeadm master and minions..."
+
+CLUSTER_NAME={{ .Param "krib/cluster-name" }}
+
 echo "MAKE SURE SWAP IS OFF!- kubeadm requirement"
 if free | grep -q Swap ; then
   swapoff -a
-  sed -i /swap/d /etc/fstab
+  if [ -f /etc/fstab ]; then
+    sed -i /swap/d /etc/fstab
+  fi
+fi
+
+echo "MAKE SURE kernel module br_netfilter is loaded - kubeadm requirement"
+if ! lsmod | grep ^br_netfilter > /dev/null ; then
+  modprobe br_netfilter
+  echo "br_netfilter" > /etc/modules-load.d/br_netfilter.conf
 fi
 
 echo "MAKE SURE bridge-nf-call-iptables CONTAINS 1 - kubeadm requirement"
@@ -28,11 +47,14 @@ if [ ! -f /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables ]; then
   cat <<EOF >/etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables
 net.bridge.bridge-nf-call-iptables=1
 EOF
-  sysctl -p /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables
 
+  sysctl -p /etc/sysctl.d/99-net.bridge.bridge-nf-call-iptables
 fi
+
 VALUE=$(sysctl -n net.bridge.bridge-nf-call-iptables)
 [ $VALUE != 1 ] && sysctl -w net.bridge.bridge-nf-call-iptables=1
+
+mkdir -p /etc/kubernetes/manifests
 
 {{ if .ParamExists "krib/ip" -}}
 KRIB_IP={{ .Param "krib/ip" }}
@@ -49,6 +71,14 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
   echo "I am master - run kubeadm"
   export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  # todo: why does this have a default value?
+  {{ if .ParamExists "krib/cluster-bootstrap-token" -}}{{ if ne (.Param "krib/cluster-bootstrap-token") "fedcba.fedcba9876543210" -}}
+  echo "looks like master recovery on existing cluster, just run kubeadm"
+  if [[ $MASTER_INDEX == 0 ]] ; then
+    MASTER_INDEX={{.Param "etcd/server-count"}}
+  fi
+  {{ end -}}{{ end -}}
 
   if [[ $MASTER_INDEX == 0 ]] ; then
 
@@ -122,24 +152,23 @@ if [[ $MASTER_INDEX != notme ]] ; then
     if [ $N -gt ${MAX_WAIT_SECONDS} ]; then
       echo "All masters did not come up!"
       echo "DEBUG: review /tmp/kubeadm.init.log:"
-      echo "$(cat /tmp/kubeadm.init.log)"
-      exit 1
+      xiterr 1 "$(cat /tmp/kubeadm.init.log)"
     else
       N=$(expr $N + ${INCREMENT_SECONDS})
     fi
 
     OLD_IFS=$IFS
     IFS=" " ; while read name ; do
-        # desensitize get nodes to case, if hostname has mix or upper case
-        if kubectl get nodes | tr '[:upper:]' '[:lower:]' | egrep -qi "^$name[ \t]*ready"; then
-                echo "Node $name is ready."
-                HOSTNAME=$name
-        else
-                echo "Node $name is not yet ready."
-                echo "$(kubectl get nodes)"
-                READY=false
-        fi
-    done <<< $(get_param $KRIB_MASTERS_PARAM | jq -r '.[].Name' )
+    # desensitize get nodes to case, if hostname has mix or upper case
+    if kubectl get nodes | tr '[:upper:]' '[:lower:]' | egrep -qi "^$name[ \t]*ready"; then
+      echo "Node $name is ready."
+      HOSTNAME=$name
+    else
+      echo "Node $name is not yet ready."
+      echo "$(kubectl get nodes)"
+      READY=false
+    fi
+  done <<< $(get_param $KRIB_MASTERS_PARAM | jq -r '.[].Name' )
     IFS=$OLD_IFS
 
     if [ "$READY" != "true" ]; then
@@ -148,13 +177,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
   done
 
   if [[ $MASTER_INDEX == 0 ]] ; then
-    {{ if eq (.Param "krib/cluster-masters-untainted") true }}
-    echo "Removing taint from master nodes:"
-    kubectl taint nodes -l node-role.kubernetes.io/master node-role.kubernetes.io/master- || true
-    {{ else -}}
-    echo "Ensure taint on master nodes:"
-    kubectl taint nodes -l node-role.kubernetes.io/master node-role.kubernetes.io/master=:NoSchedule || true
-    {{end}}
+    set_taint
 
     echo "Recording 'kubeadm' bootstrap config ..."
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_CLUSTER_KUBEADM_CFG_PARAM to - < /tmp/kubeadm.cfg
@@ -169,6 +192,10 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\" }}" | jq .Meta
   else
+    {{ if .ParamExists "krib/cluster-bootstrap-token" -}}{{ if ne (.Param "krib/cluster-bootstrap-token") "fedcba.fedcba9876543210" -}}
+    echo "remove taint during master recovery"
+    set_taint
+    {{ end -}}{{ end -}}
     drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\" }}" | jq .Meta
   fi
 

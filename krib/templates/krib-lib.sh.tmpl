@@ -7,8 +7,6 @@
 #   - get_param
 # which assumes that RS_UUID and RS_KEY or RS_TOKEN are set.
 #
-function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit_stop; }
-
 [[ -z "$PROFILE_TOKEN" ]] && xiterr 1 "required PROFILE_TOKEN not set"
 [[ -z "$CLUSTER_PROFILE" ]] && xiterr 1 "required CLUSTER_PROFILE not set"
 
@@ -138,6 +136,39 @@ wait_for_ingress() {
   set -e
 }
 
+with_backoff() {
+  local max_attempts=${ATTEMPTS-5}
+  local timeout=${TIMEOUT-1}
+  local attempt=1
+  local exitCode=0
+
+  while (( $attempt < $max_attempts ))
+  do
+    if "$@"
+    then
+      return 0
+    else
+      exitCode=$?
+    fi
+
+    echo "Failure ($@)! Retrying in $timeout.." 1>&2
+    sleep $timeout
+    attempt=$(( attempt + 1 ))
+    timeout=$(( timeout * 2 ))
+  done
+
+  if [[ $exitCode != 0 ]]
+  then
+    echo "Execution failed for: $@" 1>&2
+  fi
+
+  return $exitCode
+}
+
+download() {
+  with_backoff curl --connect-timeout 10 --max-time 360 --retry 1 --retry-delay 1 --retry-max-time 40 -sS "$@"
+}
+
 # Common parameters that are used.
 KRIB_BOOTSTRAP_TOKEN="krib/cluster-bootstrap-token"
 KRIB_PROFILE_PARAM="krib/cluster-profile"
@@ -157,4 +188,3 @@ ETCD_SERVER_CA_PARAM="etcd/server-ca-name"
 ETCD_CLIENT_CA_PARAM="etcd/client-ca-name"
 ETCD_CLIENT_CA_PW_PARAM="etcd/client-ca-pw"
 ETCD_CLIENT_PORT_PARAM="etcd/client-port"
-

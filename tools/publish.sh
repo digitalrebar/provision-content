@@ -9,6 +9,9 @@ DOIT=0
 if [[ $version =~ ^v || $version =~ ^tip ]] ; then
     DOIT=1
 fi
+if [[ $version =~ travis ]] ; then
+    DOIT=0
+fi
 if [[ $DOIT == 0 ]] ;then
     echo "Not a publishing branch."
     exit 0

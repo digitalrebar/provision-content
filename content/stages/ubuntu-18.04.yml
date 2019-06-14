@@ -20,7 +20,6 @@ Profiles: []
 ReadOnly: true
 Reboot: false
 RequiredParams: []
-RunnerWait: true
 Tasks:
 - ubuntu-drp-only-repos
 - ssh-access

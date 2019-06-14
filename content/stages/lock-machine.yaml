@@ -1,0 +1,9 @@
+---
+Description: "Stage to lock the machine"
+Meta:
+  color: "yellow"
+  icon: "key"
+Name: "lock-machine"
+Reboot: false
+Tasks:
+  - "lock-machine"

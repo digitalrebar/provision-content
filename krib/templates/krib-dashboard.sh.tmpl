@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
 set -e
-set -x
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
@@ -23,7 +22,7 @@ cloneHeapster() {
     git reset --hard HEAD || return 1
     git pull || return 1
   else
-    git clone https://github.com/kubernetes/heapster.git || return 1
+    git clone --depth 1 https://github.com/kubernetes/heapster.git || return 1
   fi
 }
 
@@ -95,7 +94,7 @@ EOFDA
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/heapster
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-influxdb
 
-  rm -rf /root/setup
+  rm -rf /root/setup /tmp/heapster
 fi
 echo "Finished successfully"
 {{end -}}
