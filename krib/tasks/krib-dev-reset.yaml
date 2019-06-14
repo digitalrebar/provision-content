@@ -91,6 +91,30 @@ Templates:
     drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"black\", \"icon\": \"server\"}}" | jq .Meta
     echo "done KRIB params reset"
   Name: KRIB clear
+- Contents: |-
+    #!/bin/bash
+
+    # We might want to re-initialize a cluster using this machine, but without any
+    # remanants of the old cluster. This script brutally removes any cluster-specific content,
+    # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
+ 
+    kubeadm reset -f
+    systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
+
+    # Whether we're using containerd or dockerd, kill either
+    pkill containerd || pkill dockerd
+    
+    # Wipe out any persistent content
+    rm -rf /var/lib/cni/
+    rm -rf /var/lib/kubelet/*
+    rm -rf /etc/cni/
+    rm -rf /docker/etcd/*
+    rm -rf /var/lib/containerd/*
+    rm -rf /var/lib/docker/*    
+
+    iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+    
+  Name: KRIB wipe machine for cluster reinstall  
 Meta:
   icon: "ship"
   color: "orange"
