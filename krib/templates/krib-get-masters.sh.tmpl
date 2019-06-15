@@ -8,6 +8,23 @@ set -e
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
+## Query optionals params which may explicitly indicate masters
+{{if .ParamExists "krib/selective-mastership" -}}SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" -}}{{end -}}
+{{if .ParamExists "krib/i-am-master" -}}I_AM_MASTER={{.Param "krib/i-am-master" -}}{{end -}}
+if [[ "$SELECTIVE_MASTERSHIP" == true]]; then
+  if [[ ! "$I_AM_MASTER" == true ]] ; then
+    echo "krib/selective-mastership is true but krib/i-am-master is not. I am denied mastership, so move on"
+    exit 0
+  fi
+fi
+
+{{if .ParamExists "krib/selective-mastership" -}}
+{{if eq (.ParamExists "krib/i-am-master") false -}}
+echo "krib/selective-mastership is true but krib/i-am-master is false. I am denied mastership, so move on"
+exit 0
+{{ end -}}
+{{ end -}}
+
 echo "Elect and wait for the masters"
 
 CLUSTER_NAME={{.Param "krib/cluster-name"}}
