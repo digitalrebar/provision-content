@@ -43,7 +43,7 @@ apiServer:
     {{ end }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
-controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}
+controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}:{{ .Param "krib/cluster-api-vip-port" }}
 imageRepository: {{ .Param "krib/cluster-image-repository" }}
 etcd:
   external:
