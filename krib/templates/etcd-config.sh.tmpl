@@ -4,6 +4,10 @@ set -e
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
@@ -28,7 +32,7 @@ build_cert() {
 
   echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
   drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/etcd/${profile}-ca.pem
-  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) > tmp.csr
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
   drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/etcd/$profile.pem
   jq -r .Key tmp.csr > /etc/kubernetes/pki/etcd/$profile-key.pem
   rm tmp.csr
@@ -69,6 +73,14 @@ get_member_id() {
   set -e
   echo ${MEMBER_ID}
 }
+{{ end -}}
+
+## Additional param to explicitly indicate masters
+{{if eq (.ParamExists "krib/selective-mastership") true -}}
+{{if eq (.ParamExists "krib/i-am-master") false -}}
+echo "krib/selective-mastership is true but krib/i-am-master is false. I am denied mastership, so move on"
+exit 0
+{{ end -}}
 {{ end -}}
 
 echo "Configure the etcd cluster"
