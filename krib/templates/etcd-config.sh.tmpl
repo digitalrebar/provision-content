@@ -4,6 +4,10 @@ set -e
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
@@ -69,6 +73,14 @@ get_member_id() {
   set -e
   echo ${MEMBER_ID}
 }
+{{ end -}}
+
+## Additional param to explicitly indicate masters
+{{if eq (.ParamExists "krib/selective-mastership") true -}}
+{{if eq (.ParamExists "krib/i-am-master") false -}}
+echo "krib/selective-mastership is true but krib/i-am-master is false. I am denied mastership, so move on"
+exit 0
+{{ end -}}
 {{ end -}}
 
 echo "Configure the etcd cluster"
