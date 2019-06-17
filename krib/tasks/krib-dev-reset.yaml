@@ -14,8 +14,8 @@ Templates:
     #!/bin/bash
     # Reset CA params
     set -e
-    # we need a random backoff for races
-    SLEEP=$[ ( $RANDOM % 5 ) ]
+    # we need a random backoff to avoid races.
+    SLEEP=$[ ( $RANDOM % 25 ) ]
     sleep $SLEEP
     declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw')
     {{if .ParamExists "etcd/cluster-profile" -}}
