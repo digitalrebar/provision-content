@@ -1,0 +1,13 @@
+---
+Name: "metallb/l3-ip-range"
+Description: "IP range for MetalLB L3 config"
+Documentation: |
+  This should be set to match the CIDR route 
+  you have allocated to L3 MetalLB
+  ex: 192.168.1.0/24 (currently only a single route supported)
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"
