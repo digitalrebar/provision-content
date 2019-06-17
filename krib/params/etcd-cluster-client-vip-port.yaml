@@ -1,0 +1,17 @@
+---
+Name: "etcd/cluster-client-vip-port"
+Description: "VIP etcd client port for multi-master etcd clusters (default 8379)"
+Documentation: |
+  The VIP client port to use for multi-master etcd clusters. Each
+  etcd instance will bind to 'etcd/client-port' (2379 by default),
+  but HA services will be serviced by this port number.
+
+  Defaults to '8379'.
+
+Schema:
+  type: "number"
+  default: 8379
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
