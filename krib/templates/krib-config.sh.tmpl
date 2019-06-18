@@ -62,6 +62,10 @@ KRIB_IP={{ .Param "krib/ip" }}
 KRIB_IP={{ .Machine.Address }}
 {{ end -}}
 
+# we need a random backoff to avoid races.
+SLEEP=$[ ( $RANDOM % 25 ) ]
+sleep $SLEEP
+
 # Making sure I use the right cluster InternalIP
 echo "KUBELET_EXTRA_ARGS=--node-ip=${KRIB_IP}" > /etc/default/kubelet
 
