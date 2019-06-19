@@ -20,8 +20,8 @@ case $(uname -s) in
 esac
 
 PATH=$PATH:$GOPATH/bin
-which drbundler || go get -u github.com/digitalrebar/provision/cmds/drbundler
-which drpcli || go get -u github.com/digitalrebar/provision/cmds/drpcli
+which drbundler || curl -o $GOPATH/bin/drbundler https://github.com/digitalrebar/provision/releases/download/tip/drbundler && chmod +x $GOPATH/bin/drbundler
+which drpcli || curl -o $GOPATH/bin/drpcli https://github.com/digitalrebar/provision/releases/download/tip/drpcli && chmod +x $GOPATH/bin/drpcli
 
 . tools/version.sh
 
