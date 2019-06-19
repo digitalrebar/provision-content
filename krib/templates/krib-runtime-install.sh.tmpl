@@ -4,7 +4,7 @@
 
 cr={{.Param "krib/container-runtime"}}
 case $cr in
-  docker) tasks="docker-install mount-docker";;
+  docker) tasks="docker-install";;
   containerd) tasks="containerd-install";;
   *) echo "No idea what to do with $cr"; exit 1;;
 esac
