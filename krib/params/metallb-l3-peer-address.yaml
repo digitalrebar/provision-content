@@ -1,0 +1,13 @@
+---
+Name: "metallb/l3-peer-address"
+Description: "IP range for MetalLB L3 peer address"
+Documentation: |
+  This should be set to match the IP of the
+  BGP-enabled router you want MetalLB to peer with
+  ex: 192.168.1.1 (currently only a single peer supported)
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"

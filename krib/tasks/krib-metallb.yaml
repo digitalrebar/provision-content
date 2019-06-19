@@ -7,12 +7,14 @@ Templates:
     Path: ""
 RequiredParams:
   - krib/cluster-profile
-  - metallb/l2-ip-range  
 OptionalParams:
   - krib/metallb-config
   - metallb/monitoring-port
   - metallb/limits-cpu 
   - metallb/limits-memory
+  - metallb/l2-ip-range 
+  - metallb/l3-ip-range
+  - metallb/l3-peer-address
 Meta:
   icon: "sitemap"
   color: "blue"
