@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+{{template "setup.tmpl" .}}
+
+cr={{.Param "krib/container-runtime"}}
+case $cr in
+  docker) tasks="docker-install mount-docker";;
+  containerd) tasks="containerd-install";;
+  *) echo "No idea what to do with $cr"; exit 1;;
+esac
+
+drpcli machines tasks add {{.Machine.UUID}} at 0 $tasks

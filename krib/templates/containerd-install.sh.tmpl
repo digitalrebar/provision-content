@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Docker Install
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+[[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
+
+ETCD_CONTROLLER_IP={{.Param "etcd/controller-ip"}}
+
+{{if .ParamExists "kubectl/working-dir" -}}
+# Only do this if it exists.
+# if it isn't setup, don't use it.
+if [[ -e {{.Param "kubectl/working-dir"}} ]] ; then
+  echo "Linking the kubectl working directory into place."
+  ln -s {{.Param "kubectl/working-dir"}} /var/lib/kubectl
+fi
+{{end -}}
+
+
+curl -L http://${ETCD_CONTROLLER_IP}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
+
+# Configure containerd
+
+{{if .ParamExists "containerd/config" -}}
+echo "Creating /etc/containerd/config.toml file from Param containerd/config"
+cat <<EOF >/etc/containerd/config.toml
+{{.Param "containerd/config"}}
+EOF
+cat /etc/containerd/config.toml
+{{else -}}
+echo "Skipping custom etc/containerd/config.toml: No containerd/config defined"
+{{end -}}
+
+# start containerd
+systemctl start containerd
+
+echo "Containerd installed successfully"
+exit 0

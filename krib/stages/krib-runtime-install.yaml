@@ -1,0 +1,24 @@
+---
+Available: true
+BootEnv: ""
+Bundle: Unspecified
+Description: Install a container runtime from Internet Repos
+Documentation: ""
+Endpoint: ""
+Errors: []
+Meta:
+  color: yellow
+  icon: docker
+  title: Community Content
+Name: krib-runtime-install
+OptionalParams: []
+Params: {}
+Profiles: []
+ReadOnly: true
+Reboot: false
+RequiredParams: []
+RunnerWait: true
+Tasks:
+- krib-runtime-install
+Templates: []
+Validated: true

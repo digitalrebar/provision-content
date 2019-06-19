@@ -1,0 +1,17 @@
+---
+Name: "krib/container-runtime"
+Description: "Container runtime employed in KRIB cluster"
+Documentation: |
+  The container runtime to be used for the KRIB cluster. This can be
+  either docker (the default) or containerd.
+
+Schema:
+  type: string
+  enum:
+    - docker
+    - containerd
+  default: docker
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
