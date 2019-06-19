@@ -17,9 +17,16 @@ if [[ -e {{.Param "kubectl/working-dir"}} ]] ; then
 fi
 {{end -}}
 
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
 
-curl -L http://${ETCD_CONTROLLER_IP}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
-
+if [[ -e $KRIB_REPO ]] ; then
+  curl -L ${{KRIB_REPO}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
+else
+  curl -L https://storage.googleapis.com/cri-containerd-release/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
+fi
 # Configure containerd
 
 {{if .ParamExists "containerd/config" -}}
