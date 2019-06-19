@@ -22,7 +22,7 @@ fi
 KRIB_REPO={{.Param "krib/package-repository"}}
 {{end -}}
 
-if [[ -e $KRIB_REPO ]] ; then
+if [[ ! -z "$KRIB_REPO" ]] ; then
   curl -L ${KRIB_REPO}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
 else
   curl -L https://storage.googleapis.com/cri-containerd-release/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
