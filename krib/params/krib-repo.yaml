@@ -1,0 +1,14 @@
+---
+Name: "krib/repo"
+Description: "URL path to a pre-prepared collection of necessary KRIB install files"
+Documentation: |
+  Allows operators to pre-prepare a URL (i.e., a local repository) of the installation packages necessary for KRIB. 
+  If this value is set, then tasks like containerd-install and etcd-config will source their installation files
+  from this repository, rather than attempting to download them from the internet (which may take longer, given
+  the amount of machines to be installed plus the capacity of the internet service)
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

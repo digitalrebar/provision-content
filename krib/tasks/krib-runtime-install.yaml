@@ -1,0 +1,11 @@
+---
+Description: "Installs container runtime"
+Name: "krib-runtime-install"
+Documentation: |
+  Installs a container runtime
+RequiredParams:
+  - krib/container-runtime
+Templates:
+  - ID: "krib-runtime-install.sh.tmpl"
+    Name: "Install a container runtime on a KRIB built Kubernetes node"
+    Path: ""  
