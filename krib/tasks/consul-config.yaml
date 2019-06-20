@@ -1,0 +1,20 @@
+---
+Description: "A task to configure etcd"
+Name: "etcd-config"
+Documentation: |
+  Installs a consul cluster, to be used as an HA backend to Vault
+OptionalParams:
+  - consul/server-count
+  - consul/version
+Templates:
+  - ID: "krib-consul.json.tmpl"
+    Name: "Consul configuration"
+    Path: "/tmp/consul.json"
+  - ID: "consul-config.sh.tmpl"
+    Name: "Config consul"
+    Path: ""
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

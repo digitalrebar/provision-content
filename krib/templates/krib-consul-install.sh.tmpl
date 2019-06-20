@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Immutable Boot (KRIB) Kubeadm Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+export RS_UUID="{{.Machine.UUID}}"
+
+CONSUL_VERSION="{{ .Param "consul/version" }}"
+
+TMP_DIR=/tmp/consul-tmp
+INSTALL_DIR=/usr/local/bin
+mkdir -p ${TMP_DIR}
+
+echo "Download consul version: v${CONSUL_VERSION}"
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+else
+  download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+fi
+
+echo "Install consul version: ${CONSUL_VERSION}"
+tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip --strip-components=1
+
+# clean up
+rm -rf ${TMP_DIR}
+
+# exit cleanly
+exit 0
