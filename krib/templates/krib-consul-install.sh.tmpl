@@ -28,13 +28,14 @@ KRIB_REPO={{.Param "krib/package-repository"}}
 {{end -}}
 
 if [[ ! -z "$KRIB_REPO" ]] ; then
-  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
 else
   download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
 fi
 
 echo "Install consul version: ${CONSUL_VERSION}"
-tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip --strip-components=1
+yum -y install unzip || echo "Unzip already installed"
+unzip ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
 
 # clean up
 rm -rf ${TMP_DIR}
