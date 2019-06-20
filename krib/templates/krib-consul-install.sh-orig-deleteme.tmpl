@@ -18,6 +18,44 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 {{template "krib-lib.sh.tmpl" .}}
 export RS_UUID="{{.Machine.UUID}}"
 
+{{if .ParamExists "consul/servers" -}}
+get_endpoints() {
+  ENDPOINTS=""
+  {{ $port := .Param "etcd/client-port" -}}
+  {{- range $elem := .Param "consul/servers"}}
+  PEERS="${ENDPOINTS},https://{{ $elem.Address }}:{{ $port }}"
+  {{ end -}}
+  ENDPOINTS="--endpoints=${ENDPOINTS:1}"
+  echo ${ENDPOINTS}
+}
+
+get_member_list() {
+  set +e
+  ENDPOINTS=$1
+  export ETCDCTL_API=3
+  echo `etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
+   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
+   --endpoints=${ENDPOINTS} \
+   member list 2>/dev/null`
+  set -e
+}
+
+get_member_id() {
+  set +e
+  ENDPOINTS=$1
+  export ETCDCTL_API=3
+  MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
+   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
+   --endpoints=${ENDPOINTS} \
+   member list | grep ${ETCD_IP} | awk -F', ' '{print $1}'`
+  set -e
+  echo ${MEMBER_ID}
+}
+{{ end -}}
+
+
 CONSUL_VERSION="{{ .Param "consul/version" }}"
 
 TMP_DIR=/tmp/consul-tmp
