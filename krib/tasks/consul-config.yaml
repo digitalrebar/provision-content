@@ -10,7 +10,7 @@ Templates:
   - ID: "krib-consul.json.tmpl"
     Name: "Consul configuration"
     Path: "/etc/consul.d/consul.json"
-  - ID: "krib-consul-install.sh.tmpl"
+  - ID: "consul-config.sh.tmpl"
     Name: "Config consul"
     Path: ""
 Meta:
