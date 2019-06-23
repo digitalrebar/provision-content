@@ -32,6 +32,21 @@ xiterr 1 "Missing consul/cluster-profile on the machine!"
 
 {{template "krib-lib.sh.tmpl" .}}
 
+build_cert() {
+  local profile=$1
+  local ca_name=$2
+  local ca_pw=$3
+  local myname=$4
+  local myip=$5
+
+  echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
+  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/consul/${profile}-ca.pem
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
+  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/consul/$profile.pem
+  jq -r .Key tmp.csr > /etc/kubernetes/pki/consul/$profile-key.pem
+  rm tmp.csr
+}
+
 {{if .ParamExists "consul/servers" -}}
 # construct the list of consul peers in json format for /etc/consul.d/consul-server.json
 get_peers() {
@@ -228,6 +243,11 @@ ExecStart=${INSTALL_DIR}/consul \
 [Install]
 WantedBy=multi-user.target
 EOF
+
+# Customize the config file
+PEERS=get_peers()
+
+sed 's/PEERLIST-REPLACE-ME-WITH-SED/$PEERS/' /etc/consul.d/consul.json 
 
 systemctl daemon-reload
 systemctl enable consul

@@ -62,6 +62,31 @@ TMP_DIR=/tmp/consul-tmp
 INSTALL_DIR=/usr/local/bin
 mkdir -p ${TMP_DIR}
 
+echo "Configure the consul cluster"
+
+CONSUL_DC_NAME={{.Param "consul/name"}}
+{{ if .ParamExists "consul/ip" -}}
+CONSUL_IP={{ .Param "consul/ip" }}
+{{ else -}}
+ETCD_IP={{ .Machine.Address }}
+{{ end -}}
+
+{{if eq (.ParamExists "etcd/servers") false -}}
+# add server management params if missing
+echo "Add initial variables to track members."
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/servers" to "[]" || true
+{{ end -}}
+
+{{if eq (.ParamExists "etcd/servers-done") false -}}
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/servers-done" to "[]" || true
+{{ end -}}
+
+# Get the number of servers to create
+ETCD_SERVER_COUNT={{.Param "etcd/server-count"}}
+echo "Creating $ETCD_SERVER_COUNT servers"
+
+
+
 echo "Download consul version: v${CONSUL_VERSION}"
 # Allow for a local repository for installation files
 {{if .ParamExists "krib/package-repository" -}}
