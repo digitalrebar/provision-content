@@ -7,7 +7,7 @@ OptionalParams:
   - consul/server-count
   - consul/version
 Templates:
-  - ID: "krib-consul.json.tmpl"
+  - ID: "consul.json.tmpl"
     Name: "Consul configuration"
     Path: "/etc/consul.d/consul.json"
   - ID: "consul-config.sh.tmpl"

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # notes - David on 21 June 2019
 # 
 # This script is a copy of etcd-config.sh.tmpl
@@ -7,7 +8,6 @@
 # [ ] I'm not sure what the workflow is re why we'd remove/add a member to an existing cluster. Looks dangerous
 # [ ] We should only complete this stage when the cluster has a leader
 
-#!/usr/bin/env bash
 # Build a consul cluster
 set -e
 
@@ -52,10 +52,9 @@ build_cert() {
 get_peers() {
   PEERS=""
   {{- range $elem := .Param "consul/servers"}}
-  PEERS="${PEERS},\"{{ $elem.Address }}\""
+  PEERS="${PEERS},{{ $elem.Address }}"
   {{ end -}}
-  PEERS="\"retry_join\": [${PEERS:1}],"
-  echo ${PEERS}
+  echo ${PEERS:1}
 }
 
 get_member_list() {
@@ -66,7 +65,7 @@ get_member_list() {
 
 get_member_id() {
   set +e
-  MEMBER_ID=`consul operator raft list-peers | grep ${CONSUL_IP} | awk -F' '  '{print $3}' | awk -F':' '{print $1}'
+  MEMBER_ID=`consul operator raft list-peers | grep ${CONSUL_IP} | awk -F' '  '{print $3}' | awk -F':' '{print $1}'`
   set -e
   echo ${MEMBER_ID}
 }
@@ -74,7 +73,7 @@ get_member_id() {
 
 echo "Configure the consul cluster"
 
-CONSUL_CLUSTER_NAME={{.Param "consul/name"}}
+CONSUL_CLUSTER_NAME={{.Param "consul/cluster-profile"}}
 {{ if .ParamExists "consul/ip" -}}
 CONSUL_IP={{ .Param "consul/ip" }}
 {{ else -}}
@@ -142,7 +141,7 @@ SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
 # Add the consul user if it doesn't exist
 id -u consul &>/dev/null || ( echo "Creating consul user"; useradd consul -d /var/lib/consul )
 
-mkdir -p /etc/consul/
+mkdir -p /etc/kubernetes/pki/consul/
 
 CONSUL_NAME="consul$CONSUL_INDEX"
 
@@ -203,51 +202,52 @@ if [[ $EXISTING_INDEX != notme ]] ; then
   echo "Problem here - not sure what to do - I'm expected to remove/re-add this member?"
 fi
 
-cat << EOF > /etc/consul.env
-PEER_NAME=${CONSUL_NAME}
-ADVERTISE_IP=${CONSUL_IP}
-CLIENT_PORT=${CONSUL_CLIENT_PORT}
-PEER_PORT=${CONSUL_PEER_PORT}
-URLS=${CONSUL_URLS}
-EOF
+# PEERS=$(get_peers)
+
+# Assemble list of peers
+PEERS=""
+{{- range $elem := .Param "consul/servers"}}
+PEERS="${PEERS},{{ $elem.Address }}"
+{{ end -}}
 
 cat >/etc/systemd/system/consul.service <<EOF
+### BEGIN INIT INFO
+# Provides:          consul
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Consul agent
+# Description:       Consul service discovery framework
+### END INIT INFO
+
 [Unit]
-Description=consul
-Documentation=https://github.com/coreos/consul
-Conflicts=consul.service
-Conflicts=consul2.service
+Description=Consul server agent
+Requires=network-online.target
+After=network-online.target
 
 [Service]
-EnvironmentFile=/etc/consul.env
-Type=notify
-Restart=always
-RestartSec=5s
-LimitNOFILE=40000
-TimeoutStartSec=0
-
-ExecStart=${INSTALL_DIR}/consul \
- --name \${PEER_NAME} \
- --data-dir /docker/consul \
- --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT},http://127.0.0.1:\${CLIENT_PORT} \
- --advertise-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT} \
- --listen-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT},http://127.0.0.1:\${PEER_PORT} \
- --initial-advertise-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT} \
- --cert-file=/etc/kubernetes/pki/consul/server.pem \
- --key-file=/etc/kubernetes/pki/consul/server-key.pem \
- --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/consul/client-ca.pem \
- --peer-cert-file=/etc/kubernetes/pki/consul/peer.pem --peer-key-file=/etc/kubernetes/pki/consul/peer-key.pem \
- --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/consul/peer-ca.pem \
- --initial-cluster \${URLS} --initial-cluster-token my-consul-token --initial-cluster-state ${CLUSTER_STATE}
+User=consul
+Group=consul
+PIDFile=/var/run/consul/consul.pid
+PermissionsStartOnly=true
+ExecStartPre=-/bin/mkdir -p /var/run/consul
+ExecStartPre=/bin/chown -R consul:consul /var/run/consul
+ExecStart=/usr/local/bin/consul agent \
+    -retry-join=${PEERS:1}  \
+    -config-file=/etc/consul.d/consul.json \
+    -pid-file=/var/run/consul/consul.pid
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=42s
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Customize the config file
-PEERS=get_peers()
-
-sed 's/PEERLIST-REPLACE-ME-WITH-SED/$PEERS/' /etc/consul.d/consul.json 
+echo $PEERS > /tmp/debug.log
 
 systemctl daemon-reload
 systemctl enable consul
