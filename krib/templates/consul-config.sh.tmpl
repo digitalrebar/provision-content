@@ -41,7 +41,7 @@ build_cert() {
 
   echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
   drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/consul/${profile}-ca.pem
-  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) server.dc1.consul {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
   drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/consul/$profile.pem
   jq -r .Key tmp.csr > /etc/kubernetes/pki/consul/$profile-key.pem
   rm tmp.csr
@@ -204,11 +204,26 @@ fi
 
 # PEERS=$(get_peers)
 
+echo "Consul started, lets go!"
+add_me_if_not_count "consul/servers-done" $CONSUL_SERVER_COUNT $CONSUL_IP
+
+echo "Waiting for ${CONSUL_SERVER_COUNT} servers to complete consul install"
+wait_for_count "consul/servers-done" $CONSUL_SERVER_COUNT
+
+
+
 # Assemble list of peers
+{{if .ParamExists "consul/servers" -}}
 PEERS=""
 {{- range $elem := .Param "consul/servers"}}
 PEERS="${PEERS},{{ $elem.Address }}"
 {{ end -}}
+RETRY_JOIN=${PEERS:1}
+{{ end -}}
+
+cat << EOF > /etc/consul.env
+RETRY_JOIN=${RETRY_JOIN}
+EOF
 
 cat >/etc/systemd/system/consul.service <<EOF
 ### BEGIN INIT INFO
@@ -227,17 +242,18 @@ Requires=network-online.target
 After=network-online.target
 
 [Service]
+EnvironmentFile=/etc/consul.env
 User=consul
 Group=consul
 PIDFile=/var/run/consul/consul.pid
 PermissionsStartOnly=true
 ExecStartPre=-/bin/mkdir -p /var/run/consul
 ExecStartPre=/bin/chown -R consul:consul /var/run/consul
-ExecStart=/usr/local/bin/consul agent \
-    -retry-join=${PEERS:1}  \
-    -config-file=/etc/consul.d/consul.json \
+ExecStart=/usr/local/bin/consul agent \\
+    -retry-join=\${RETRY_JOIN}  \\
+    -config-file=/etc/consul.d/consul.json \\
     -pid-file=/var/run/consul/consul.pid
-ExecReload=/bin/kill -HUP $MAINPID
+ExecReload=/bin/kill -HUP \$MAINPID
 KillMode=process
 KillSignal=SIGTERM
 Restart=on-failure
@@ -247,18 +263,14 @@ RestartSec=42s
 WantedBy=multi-user.target
 EOF
 
-echo $PEERS > /tmp/debug.log
+echo $RETRY_JOIN > /tmp/debug.log
 
 systemctl daemon-reload
 systemctl enable consul
 systemctl start consul
 systemctl status consul
 
-echo "Consul started, lets go!"
-add_me_if_not_count "consul/servers-done" $CONSUL_SERVER_COUNT $CONSUL_IP
 
-echo "Waiting for ${CONSUL_SERVER_COUNT} servers to complete consul install"
-wait_for_count "consul/servers-done" $CONSUL_SERVER_COUNT
 
 rm -rf ${TMP_DIR}
 
