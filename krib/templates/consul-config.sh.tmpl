@@ -32,29 +32,15 @@ xiterr 1 "Missing consul/cluster-profile on the machine!"
 
 {{template "krib-lib.sh.tmpl" .}}
 
-build_cert() {
-  local profile=$1
-  local ca_name=$2
-  local ca_pw=$3
-  local myname=$4
-  local myip=$5
-
-  echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
-  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/consul/${profile}-ca.pem
-  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) server.dc1.consul {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
-  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/consul/$profile.pem
-  jq -r .Key tmp.csr > /etc/kubernetes/pki/consul/$profile-key.pem
-  rm tmp.csr
-}
-
 {{if .ParamExists "consul/servers" -}}
-# construct the list of consul peers in json format for /etc/consul.d/consul-server.json
-get_peers() {
-  PEERS=""
+# Ensure that the consul systemd service specifies all consul nodes using retry-join
+setup_retry_join() {
   {{- range $elem := .Param "consul/servers"}}
-  PEERS="${PEERS},{{ $elem.Address }}"
+  PEER={{ $elem.Address }}
+  if [[ ! `grep $PEER /etc/systemd/system/consul.service` ]]; then
+    sed -i "/ExecStart=/ a \    -retry-join=$PEER \\\\" /etc/systemd/system/consul.service
+  fi
   {{ end -}}
-  echo ${PEERS:1}
 }
 
 get_member_list() {
@@ -73,205 +59,10 @@ get_member_id() {
 
 echo "Configure the consul cluster"
 
-CONSUL_CLUSTER_NAME={{.Param "consul/cluster-profile"}}
-{{ if .ParamExists "consul/ip" -}}
-CONSUL_IP={{ .Param "consul/ip" }}
-{{ else -}}
-CONSUL_IP={{ .Machine.Address }}
-{{ end -}}
-
-{{if eq (.ParamExists "consul/servers") false -}}
-# add server management params if missing
-echo "Add initial variables to track members."
-drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/servers" to "[]" || true
-{{ end -}}
-
-{{if eq (.ParamExists "consul/servers-done") false -}}
-drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/servers-done" to "[]" || true
-{{ end -}}
-
-# Get the number of servers to create
-CONSUL_SERVER_COUNT={{.Param "consul/server-count"}}
-echo "Creating $CONSUL_SERVER_COUNT servers"
-
-echo "Electing consul members to cluster profile: $CLUSTER_PROFILE"
-CONSUL_INDEX=$(add_me_if_not_count "consul/servers" $CONSUL_SERVER_COUNT $CONSUL_IP)
-
-echo "Added myself to cluster profile, my index is ${CONSUL_INDEX}"
-
-if [[ $CONSUL_INDEX == notme ]] ; then
-  echo "I am not a CONSUL server.  Move on."
-  wait_for_count "consul/servers-done" $CONSUL_SERVER_COUNT
-  exit 0
-fi
-
-SERVER_CA=${CONSUL_CLUSTER_NAME}-server-ca
-
-EXISTING_INDEX=$(find_me "consul/servers-done" "Uuid" $RS_UUID)
-if [[ $EXISTING_INDEX == notme ]] ; then
-  {{if .ParamExists "certs/root" -}}
-
-  echo "Certs plugin detected....setting up CA"
-  # If we are INDEX=0, let's setup the root certs for building keys
-  if [[ $CONSUL_INDEX == "0" ]] ; then
-    echo "We are first machine in cluster, setting up the root certs..."
-    # Are certs built yet?
-    if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
-      SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
-      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/server-ca-name" to "$SERVER_CA" || true
-      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/server-ca-pw" to "$SERVER_CA_PW" || true
-    else
-      if [[ $(get_param "consul/server-ca-pw") == null ]] ; then
-        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
-      fi
-    fi
-  fi
-  {{else -}}
-  xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
-  {{end}}
-fi
-
-echo "Waiting for ${CONSUL_SERVER_COUNT} servers to start"
-wait_for_count "consul/servers" $CONSUL_SERVER_COUNT
-
-echo "${CONSUL_SERVER_COUNT} servers started!"
-
-SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
-
-# Add the consul user if it doesn't exist
-id -u consul &>/dev/null || ( echo "Creating consul user"; useradd consul -d /var/lib/consul )
-
-mkdir -p /etc/kubernetes/pki/consul/
-
-CONSUL_NAME="consul$CONSUL_INDEX"
-
-build_cert "server" $SERVER_CA $SERVER_CA_PW $CONSUL_NAME $CONSUL_IP
-
-# david - I'm not sure what this does...
-CONSUL_URLS=""
-INDEX=0
-OLD_IFS=$IFS
-IFS=" " ; while read ip ; do
-  if [[ $INDEX -gt 0 ]] ; then
-    CONSUL_URLS="${CONSUL_URLS},"
-  fi
-  CONSUL_URLS="${CONSUL_URLS}consul${INDEX}=https://${ip}:${CONSUL_PEER_PORT}"
-  INDEX=$(($INDEX+1))
-done <<< $(get_param "consul/servers" | jq -r '.[].Address')
-IFS=$OLD_IFS
-
-TMP_DIR=/tmp/consul-tmp
-INSTALL_DIR=/usr/local/bin
-if [[ $OS_FAMILY == coreos ]] ; then
-  INSTALL_DIR=/opt/bin
-fi
-
-mkdir -p ${TMP_DIR}
-
-echo "Download consul version: v${CONSUL_VERSION}"
-# Allow for a local repository for installation files
-{{if .ParamExists "krib/package-repository" -}}
-KRIB_REPO={{.Param "krib/package-repository"}}
-{{end -}}
-
-if [[ ! -z "$KRIB_REPO" ]] ; then
-  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
-else
-  download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
-fi
-
-echo "Install consul version: ${CONSUL_VERSION}"
-yum -y install unzip || echo "Unzip already installed"
-unzip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
-
-
-CLUSTER_STATE="new"
-if [[ $EXISTING_INDEX != notme ]] ; then
-  CLUSTER_STATE="existing"
-
-  if [[ "$(get_member_list)" == "" ]] ; then
-    xiterr 1 "consul/servers-done is not empty but no cluster members are up.  Did you forget to run krib-cluster-reset?"
-  fi
-
-  MEMBER_ID=$(get_member_id)
-
-  if [[ "${MEMBER_ID}" != "" ]] ; then
-    consul operator raft remove-peer ${MEMBER_ID}
-  fi
-
-  echo "Problem here - not sure what to do - I'm expected to remove/re-add this member?"
-fi
-
-# PEERS=$(get_peers)
-
-echo "Consul started, lets go!"
-add_me_if_not_count "consul/servers-done" $CONSUL_SERVER_COUNT $CONSUL_IP
-
-echo "Waiting for ${CONSUL_SERVER_COUNT} servers to complete consul install"
-wait_for_count "consul/servers-done" $CONSUL_SERVER_COUNT
-
-
-
-# Assemble list of peers
-{{if .ParamExists "consul/servers" -}}
-PEERS=""
-{{- range $elem := .Param "consul/servers"}}
-PEERS="${PEERS},{{ $elem.Address }}"
-{{ end -}}
-RETRY_JOIN=${PEERS:1}
-{{ end -}}
-
-cat << EOF > /etc/consul.env
-RETRY_JOIN=${RETRY_JOIN}
-EOF
-
-cat >/etc/systemd/system/consul.service <<EOF
-### BEGIN INIT INFO
-# Provides:          consul
-# Required-Start:    $local_fs $remote_fs
-# Required-Stop:     $local_fs $remote_fs
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Consul agent
-# Description:       Consul service discovery framework
-### END INIT INFO
-
-[Unit]
-Description=Consul server agent
-Requires=network-online.target
-After=network-online.target
-
-[Service]
-EnvironmentFile=/etc/consul.env
-User=consul
-Group=consul
-PIDFile=/var/run/consul/consul.pid
-PermissionsStartOnly=true
-ExecStartPre=-/bin/mkdir -p /var/run/consul
-ExecStartPre=/bin/chown -R consul:consul /var/run/consul
-ExecStart=/usr/local/bin/consul agent \\
-    -retry-join=\${RETRY_JOIN}  \\
-    -config-file=/etc/consul.d/consul.json \\
-    -pid-file=/var/run/consul/consul.pid
-ExecReload=/bin/kill -HUP \$MAINPID
-KillMode=process
-KillSignal=SIGTERM
-Restart=on-failure
-RestartSec=42s
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-echo $RETRY_JOIN > /tmp/debug.log
+setup_retry_join
 
 systemctl daemon-reload
-systemctl enable consul
 systemctl start consul
 systemctl status consul
-
-
-
-rm -rf ${TMP_DIR}
 
 exit 0

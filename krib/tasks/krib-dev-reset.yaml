@@ -111,7 +111,7 @@ Templates:
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
     rm -rf /var/lib/docker/*    
-    rm -rf /var/lib/consul/*    
+    rm -rf /var/lib/consul/data
 
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
     

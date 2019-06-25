@@ -1,8 +1,8 @@
 ---
-Description: "A task to configure etcd"
+Description: "A task to configure consul"
 Name: "consul-config"
 Documentation: |
-  Installs a consul cluster, to be used as an HA backend to Vault
+  Configures a consul cluster, to be used as an HA backend to Vault
 OptionalParams:
   - consul/server-count
   - consul/version
@@ -11,8 +11,8 @@ Templates:
     Name: "Consul configuration"
     Path: "/etc/consul.d/consul.json"
   - ID: "consul-config.sh.tmpl"
-    Name: "Config consul"
-    Path: ""
+    Name: "Configure consul"
+    Path: ""    
 Meta:
   icon: "book"
   color: "blue"

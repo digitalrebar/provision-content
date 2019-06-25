@@ -3,7 +3,8 @@ Name: "consul-config"
 Description: "Configure a consul cluster."
 RunnerWait: true
 Tasks:
-  - "consul-config"
+  - "consul-install"
+  - "consul-config"  
 Meta:
   icon: "ship"
   color: "yellow"
