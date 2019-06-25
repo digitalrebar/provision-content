@@ -1,0 +1,76 @@
+---
+Name: net/interface-topology
+Description: "Topology of the local interfaces as expressed in netplan format"
+Documentation: |
+  This parameter defines what the local network interface topology
+  on a machine should look like, as expressed in netplan format.
+  https://netplan.io/reference defines how this param must be formatted,
+  with a few key differences:
+
+  * It only supports systemd-networkd and old-style Redhat network
+    configurations as output formats.  Debian style is a planned on,
+    and NetworkManager style is a lower priority.
+
+  * No support for configuring wireless interfaces or tunnel devices.
+    Wireless support is omitted because this tool is mainly intended
+    for servers and other devices that do not have wireless
+    interfaces.  Tunnel devices are omitted primarily due to developer
+    bandwidth constraints.
+
+  * No support for NIC renaming or MAC address reassignment.  Support
+    may be added at a later date.
+
+  * Where ther netplan.io spec calls for glob expansion when matching
+    names or device drivers, we also allow full regular expressions,
+    as long as the match in question starts with ^.
+
+  * No support for per-interface backend renderers.  This just doesn't
+    seem like a good idea if you don't care about dynamic interface
+    reconfiguration.
+
+  * Support for a few interesting generic interface match names in the
+    netplan:
+
+    - *bootif* is the interface the system last booted from, as
+      recorded by the last-boot-macaddr Param.
+
+    - *onboard:1* ... *onboard:n* The first through nth onboard nics.
+      Whether a nic is onboard or not is determined by what udev
+      thinks.
+
+    - *pci:1* ... *pci:n* The first through nth nic in PCI expansion
+      slots.  These nics are always ordered by their PCI bus ordering,
+      which can vary on a system by system basis.
+
+    - *usb:1* ... *usb:n* The first through nth USB nics, also ordered
+      by bus order.  If you want to use one of these, make sure it
+      stays plugged in to the same USB port.
+
+  This param primarily concerns itself with topology, not address
+  management, which is handled by the net/interface-config param
+  instead.  As such, you should not include any addresses, routes, etc
+  in this param.  If you do, they will be overridden by matching
+  fields for the matching interface IDs in the net/interface-config
+  param.  In netplan terminollogy, this param should contain a match
+  stanza for each ID that requires it, along with any device-specific
+  properties required for virtual devices ( vlan ID, bridge
+  configuration settings, bond modes, etc)
+Schema:
+  type: object
+  parameters:
+    network:
+      type: object
+      parameters:
+        version:
+          type: number
+        ethernets:
+          type: object
+        bonds:
+          type: object
+        bridges:
+          type: object
+        vlans:
+          type: object
+  default:
+    network:
+      version: 2

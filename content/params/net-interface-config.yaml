@@ -1,0 +1,23 @@
+---
+Name: net/interface-config
+Description: "Address and advanced routing management for local interfaces"
+Documentation: |
+  This parameter defines how nics created by the
+  network/interface-topology param should have their addressing and
+  routing configured.  It consists of an object whose keys are netplan
+  IDs and whose values are objects containing values listed in
+  https://netplan.io/reference#common-properties-for-all-device-types.
+
+  Any netplan IDs listed here that are not present in
+  network/interface-topology will be treated like they refer to
+  ethernet devices with the same name as the netplan id.
+
+  The default value of this parameter specifies that the network
+  interface we last booted from via the network (as recorded in the
+  last-boot-macaddr param on the machine) should be configured via
+  DHCP v4.
+Schema:
+  type: object
+  default:
+    bootif:
+      dhcp4: true
