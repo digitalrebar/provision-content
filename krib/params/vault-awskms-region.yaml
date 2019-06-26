@@ -1,0 +1,13 @@
+---
+Name: "vault/awskms-region"
+Description: "AWS region for AWS KMS if used with Vault for automatic unsealing"
+Documentation: |
+  Allows operators to specify an AWS region to be used in the Vault "awskms" seal
+Schema:
+  type: "string"
+  default: "us-east-1"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  render: "semver"

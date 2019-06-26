@@ -27,14 +27,24 @@ xiterr 1 "Missing vault/cluster-profile on the machine!"
 
 {{if .ParamExists "vault/servers" -}}
 # Ensure that the vault systemd service specifies all vault nodes using retry-join
-setup_retry_join() {
-  echo "Setting up retry_join..."
-  {{- range $elem := .Param "vault/servers"}}
-  PEER={{ $elem.Address }}
-  if [[ ! `grep $PEER /etc/systemd/system/vault.service` ]]; then
-    sed -i "/ExecStart=/ a \    -retry-join=$PEER \\\\" /etc/systemd/system/vault.service
-  fi
+setup_seal() {
+  echo "Setting up seal..."
+
+  if [[ ! `grep awskms /etc/vault/vault.hcl` ]]; then
+  {{if and (.ParamExists "vault/awskms-region") (.ParamExists "vault/awskms-access-key") (.ParamExists "vault/awskms-secret-key") (.ParamExists "vault/awskms-kms-key-id") }}
+    cat << EOF >> /etc/vault/vault.hcl
+    seal "awskms" {
+    region     = "{{ .Param "vault/awskms-region" }}"
+    access_key = "{{ .Param "vault/awskms-access-key" }}"
+    secret_key = "{{ .Param "vault/awskms-secret-key" }}"
+    kms_key_id = "{{ .Param "vault/awskms-kms-key-id" }}"
+    }
+    EOF
+  {{ else -}}
+    echo "awskms" specified  as "vault/seal", but requisite parameters vault/awskms-region, vault/awskms-access-key, vault/awskms-secret-key, or vault/awskms-kms-key-id not set. Skipping seal.
   {{ end -}}
+  fi
+
 }
 
 setup_encryption() {
