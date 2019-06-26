@@ -1,0 +1,20 @@
+---
+Description: "A task to configure consul servers"
+Name: "consul-server-config"
+Documentation: |
+  Configures a consul server cluster, to be used as an HA backend to Vault
+OptionalParams:
+  - consul/server-count
+  - consul/version
+Templates:
+  - ID: "consul-server.json.tmpl"
+    Name: "Consul configuration"
+    Path: "/etc/consul.d/consul-server.json"
+  - ID: "consul-server-config.sh.tmpl"
+    Name: "Configure consul server"
+    Path: ""    
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

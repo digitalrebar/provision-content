@@ -1,0 +1,26 @@
+{
+  "server": false,
+  "node_name": "{{.Machine.ShortName}}-agent",
+  "datacenter": "dc1",
+  "data_dir": "/var/lib/consul/client",
+  "bind_addr": "0.0.0.0",
+  "client_addr": "127.0.0.1",
+  "advertise_addr": "{{.Machine.Address}}",  
+  "ui": false,
+  "log_level": "DEBUG",
+  "enable_syslog": true,
+  "acl_enforce_version_8": false,
+  "verify_incoming": false,
+  "verify_outgoing": false,
+  "verify_server_hostname": false,
+  "ca_file": "/etc/kubernetes/pki/consul/server-ca.pem",
+  "cert_file": "/etc/kubernetes/pki/consul/server.pem",
+  "key_file": "/etc/kubernetes/pki/consul/server-key.pem",
+  "ports": {
+    "http": 8500,
+    "https": -1,
+    "serf_wan": -1,
+    "serf_lan": 8311,
+    "dns": 8601
+  }  
+}
