@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# notes - David on 21 June 2019
-# 
 # This script installs consul, but doesn't configure it
 
 set -e
@@ -35,7 +33,7 @@ build_cert() {
 
   echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
   drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/consul/${profile}-ca.pem
-  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) server.dc1.consul {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) server.dc1.consul localhost {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
   drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/consul/$profile.pem
   jq -r .Key tmp.csr > /etc/kubernetes/pki/consul/$profile-key.pem
   rm tmp.csr
@@ -185,6 +183,17 @@ RestartSec=42s
 [Install]
 WantedBy=multi-user.target
 EOF
+
+cat >/etc/consul.d/env.sh <<EOF
+#!/bin/bash
+# Set defaults for Consul CLI.
+export CONSUL_HTTP_ADDR=https://localhost:8501
+export CONSUL_CACERT=/etc/kubernetes/pki/consul/server-ca.pem
+export CONSUL_CLIENT_CERT=/etc/kubernetes/pki/consul/server.pem
+export CONSUL_CLIENT_KEY=/etc/kubernetes/pki/consul/server-key.pem
+EOF
+
+echo "Source /etc/consul.d/env.sh in your .bash_profile to add the necessary environment variables to run consul CLI with TLS"
 
 systemctl daemon-reload
 systemctl enable consul

@@ -1,12 +1,5 @@
 #!/usr/bin/env bash
-# notes - David on 21 June 2019
-# 
-# This script is a copy of etcd-config.sh.tmpl
-# What's not working / considered yet:
-# [ ] We generate certificates but don't use them
-# [ ] We could potentially do all consul config in the systemd service, rather than a standalone config file?
-# [ ] I'm not sure what the workflow is re why we'd remove/add a member to an existing cluster. Looks dangerous
-# [ ] We should only complete this stage when the cluster has a leader
+
 
 # Build a consul cluster
 set -e
@@ -51,31 +44,15 @@ setup_encryption() {
     sed -i "/ExecStart=/ a \    -encrypt=$CONSUL_ENCRYPTION_KEY \\\\" /etc/systemd/system/consul.service
   fi
 }
-
-
-get_member_list() {
-  set +e
-  echo `consul operator raft list-peers 2>/dev/null`
-  set -e
-}
-
-get_member_id() {
-  set +e
-  MEMBER_ID=`consul operator raft list-peers | grep ${CONSUL_IP} | awk -F' '  '{print $3}' | awk -F':' '{print $1}'`
-  set -e
-  echo ${MEMBER_ID}
-}
 {{ end -}}
 
 echo "Configure the consul cluster"
-
-    
 
 setup_retry_join
 setup_encryption
 
 systemctl daemon-reload
-systemctl start consul
+systemctl restart consul
 systemctl status consul
 
 exit 0
