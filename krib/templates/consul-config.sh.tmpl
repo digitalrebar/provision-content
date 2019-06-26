@@ -35,6 +35,7 @@ xiterr 1 "Missing consul/cluster-profile on the machine!"
 {{if .ParamExists "consul/servers" -}}
 # Ensure that the consul systemd service specifies all consul nodes using retry-join
 setup_retry_join() {
+  echo "Setting up retry_join..."
   {{- range $elem := .Param "consul/servers"}}
   PEER={{ $elem.Address }}
   if [[ ! `grep $PEER /etc/systemd/system/consul.service` ]]; then
@@ -42,6 +43,15 @@ setup_retry_join() {
   fi
   {{ end -}}
 }
+
+setup_encryption() {
+  echo "Setting up encryption..."
+  CONSUL_ENCRYPTION_KEY={{ .Param "consul/encryption-key" }}
+  if [[ ! `grep encrypt /etc/systemd/system/consul.service` ]]; then
+    sed -i "/ExecStart=/ a \    -encrypt=$CONSUL_ENCRYPTION_KEY \\\\" /etc/systemd/system/consul.service
+  fi
+}
+
 
 get_member_list() {
   set +e
@@ -59,7 +69,10 @@ get_member_id() {
 
 echo "Configure the consul cluster"
 
+    
+
 setup_retry_join
+setup_encryption
 
 systemctl daemon-reload
 systemctl start consul

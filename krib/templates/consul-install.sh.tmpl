@@ -95,6 +95,13 @@ if [[ $EXISTING_INDEX == notme ]] ; then
         xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
       fi
     fi
+    echo "Setting up encryption key for gossip..."
+{{if eq (.ParamExists "consul/encryption-key") false -}}
+    CONSUL_ENCRYPTION_KEY=`consul keygen`
+    # add server management params if missing
+    echo "Add initial encryption key ..."
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/encryption-key" to "$CONSUL_ENCRYPTION_KEY" || true
+{{ end -}}    
   fi
   {{else -}}
   xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
