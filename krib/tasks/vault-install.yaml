@@ -7,9 +7,15 @@ OptionalParams:
   - vault/server-count
   - vault/version
 Templates:
+  - ID: "vault.service.tmpl"
+    Name: "Prepare systemd file for vault"
+    Path: "/etc/systemd/system/vault.service"
   - ID: "vault.hcl.tmpl"
     Name: "Vault configuration"
     Path: "/etc/vault/vault.hcl"
+  - ID: "vault-env.sh.tmpl"
+    Name: "Prepare env file for CLI vault usage"
+    Path: "/etc/vault/vault-env.sh"    
   - ID: "vault-install.sh.tmpl"
     Name: "Configure consul"
     Path: ""    

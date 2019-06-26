@@ -1,0 +1,12 @@
+---
+Name: "consul/name"
+Description: "Name of the consul cluster"
+Documentation: |
+  Allows operators to set a name for the consul cluster
+Schema:
+  type: "string"
+  default: "consul-cluster"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

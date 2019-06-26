@@ -24,10 +24,25 @@ xiterr 1 "Missing vault/cluster-profile on the machine!"
 
 {{template "krib-lib.sh.tmpl" .}}
 
+build_cert() {
+  local profile=$1
+  local ca_name=$2
+  local ca_pw=$3
+  local myname=$4
+  local myip=$5
+
+  echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
+  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/vault/${profile}-ca.pem
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) localhost 127.0.0.1 {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
+  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/vault/$profile.pem
+  jq -r .Key tmp.csr > /etc/kubernetes/pki/vault/$profile-key.pem
+  rm tmp.csr
+}
+
 
 echo "Prepare the vault cluster"
 
-VAULT_CLUSTER_NAME={{.Param "vault/cluster-profile"}}
+VAULT_CLUSTER_NAME={{.Param "vault/name"}}
 {{ if .ParamExists "vault/ip" -}}
 VAULT_IP={{ .Param "vault/ip" }}
 {{ else -}}
@@ -59,7 +74,32 @@ if [[ $VAULT_INDEX == notme ]] ; then
   exit 0
 fi
 
+SERVER_CA=${VAULT_CLUSTER_NAME}-vault-ca
+
 EXISTING_INDEX=$(find_me "vault/servers-done" "Uuid" $RS_UUID)
+if [[ $EXISTING_INDEX == notme ]] ; then
+  {{if .ParamExists "certs/root" -}}
+
+  echo "Certs plugin detected....setting up CA"
+  # If we are INDEX=0, let's setup the root certs for building keys
+  if [[ $VAULT_INDEX == "0" ]] ; then
+    echo "We are first machine in cluster, setting up the root certs..."
+    # Are certs built yet?
+    if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
+      SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-name" to "$SERVER_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-pw" to "$SERVER_CA_PW" || true
+    else
+      if [[ $(get_param "vault/server-ca-pw") == null ]] ; then
+        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+      fi
+    fi
+  fi
+  {{else -}}
+  xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
+  {{end}}
+fi
+
 
 
 echo "Waiting for ${VAULT_SERVER_COUNT} servers to be ready"
@@ -70,6 +110,15 @@ echo "${VAULT_SERVER_COUNT} servers ready!"
 
 # Add the vault user if it doesn't exist
 id -u vault &>/dev/null || ( echo "Creating vault user"; useradd vault -d /var/lib/vault )
+
+SERVER_CA_PW=$(wait_for_variable "vault/server-ca-pw")
+
+# Add the vault user if it doesn't exist
+id -u vault &>/dev/null || ( echo "Creating vault user"; useradd vault -d /var/lib/vault )
+
+mkdir -p /etc/kubernetes/pki/vault/
+
+build_cert "server" $SERVER_CA $SERVER_CA_PW {{.Machine.Name}} $VAULT_IP
 
 
 TMP_DIR=/tmp/vault-tmp
@@ -95,40 +144,6 @@ fi
 echo "Install vault version: ${VAULT_VERSION}"
 yum -y install unzip || echo "Unzip already installed"
 unzip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
-
-
-
-cat >/etc/systemd/system/vault.service <<EOF
-### BEGIN INIT INFO
-# Provides:          vault
-# Required-Start:    $local_fs $remote_fs
-# Required-Stop:     $local_fs $remote_fs
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Vault server
-# Description:       Vault secret management tool
-### END INIT INFO
-
-[Unit]
-Description=Vault secret management tool
-Requires=network-online.target
-After=network-online.target
-
-[Service]
-User=vault
-Group=vault
-PIDFile=/var/run/vault/vault.pid
-ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl -log-level=debug
-ExecReload=/bin/kill -HUP \$MAINPID
-KillMode=process
-KillSignal=SIGTERM
-Restart=on-failure
-RestartSec=42s
-LimitMEMLOCK=infinity
-
-[Install]
-WantedBy=multi-user.target
-EOF
 
 
 systemctl daemon-reload
