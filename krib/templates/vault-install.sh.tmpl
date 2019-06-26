@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# This script installs vault, but doesn't configure it
+
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+VAULT_VERSION="{{ .Param "vault/version" }}"
+
+# these need to be before krib-lib template
+{{if .ParamExists "vault/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing vault/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+
+echo "Prepare the vault cluster"
+
+VAULT_CLUSTER_NAME={{.Param "vault/cluster-profile"}}
+{{ if .ParamExists "vault/ip" -}}
+VAULT_IP={{ .Param "vault/ip" }}
+{{ else -}}
+VAULT_IP={{ .Machine.Address }}
+{{ end -}}
+
+{{if eq (.ParamExists "vault/servers") false -}}
+# add server management params if missing
+echo "Add initial variables to track members."
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/servers" to "[]" || true
+{{ end -}}
+
+{{if eq (.ParamExists "vault/servers-done") false -}}
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/servers-done" to "[]" || true
+{{ end -}}
+
+# Get the number of servers to create
+VAULT_SERVER_COUNT={{.Param "vault/server-count"}}
+echo "Creating $VAULT_SERVER_COUNT servers"
+
+echo "Electing vault members to cluster profile: $CLUSTER_PROFILE"
+VAULT_INDEX=$(add_me_if_not_count "vault/servers" $VAULT_SERVER_COUNT $VAULT_IP)
+
+echo "Added myself to cluster profile, my index is ${VAULT_INDEX}"
+
+if [[ $VAULT_INDEX == notme ]] ; then
+  echo "I am not a VAULT server.  Move on."
+  wait_for_count "vault/servers-done" $VAULT_SERVER_COUNT
+  exit 0
+fi
+
+EXISTING_INDEX=$(find_me "vault/servers-done" "Uuid" $RS_UUID)
+
+
+echo "Waiting for ${VAULT_SERVER_COUNT} servers to be ready"
+wait_for_count "vault/servers" $VAULT_SERVER_COUNT
+
+echo "${VAULT_SERVER_COUNT} servers ready!"
+
+
+# Add the vault user if it doesn't exist
+id -u vault &>/dev/null || ( echo "Creating vault user"; useradd vault -d /var/lib/vault )
+
+
+TMP_DIR=/tmp/vault-tmp
+INSTALL_DIR=/usr/local/bin
+if [[ $OS_FAMILY == coreos ]] ; then
+  INSTALL_DIR=/opt/bin
+fi
+
+mkdir -p ${TMP_DIR}
+
+echo "Download vault version: v${VAULT_VERSION}"
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/vault_${VAULT_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip
+else
+  download -L https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip
+fi
+
+echo "Install vault version: ${VAULT_VERSION}"
+yum -y install unzip || echo "Unzip already installed"
+unzip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
+
+
+
+cat >/etc/systemd/system/vault.service <<EOF
+### BEGIN INIT INFO
+# Provides:          vault
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Vault server
+# Description:       Vault secret management tool
+### END INIT INFO
+
+[Unit]
+Description=Vault secret management tool
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=vault
+Group=vault
+PIDFile=/var/run/vault/vault.pid
+ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.hcl -log-level=debug
+ExecReload=/bin/kill -HUP \$MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=42s
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+
+systemctl daemon-reload
+systemctl enable vault
+systemctl restart vault
+systemctl status vault
+
+
+echo "Vault installed, ready to start"
+add_me_if_not_count "vault/servers-done" $VAULT_SERVER_COUNT $VAULT_IP
+
+echo "Waiting for ${VAULT_SERVER_COUNT} servers to complete vault install"
+wait_for_count "vault/servers-done" $VAULT_SERVER_COUNT
+
+rm -rf ${TMP_DIR}
+
+exit 0

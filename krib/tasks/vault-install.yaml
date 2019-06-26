@@ -1,0 +1,20 @@
+---
+Description: "A task to install vault"
+Name: "vault-install"
+Documentation: |
+  Installs (but not configures) consul, to be used as an HA backend to Vault
+OptionalParams:
+  - vault/server-count
+  - vault/version
+Templates:
+  - ID: "vault.hcl.tmpl"
+    Name: "Vault configuration"
+    Path: "/etc/vault/vault.hcl"
+  - ID: "vault-install.sh.tmpl"
+    Name: "Configure consul"
+    Path: ""    
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

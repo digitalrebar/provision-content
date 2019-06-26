@@ -1,0 +1,20 @@
+---
+Description: "A task to configure vault"
+Name: "vault-config"
+Documentation: |
+  Configures a consul cluster, to be used as an HA backend to Vault
+OptionalParams:
+  - vault/server-count
+  - vault/version
+Templates:
+  - ID: "vault.hcl.tmpl"
+    Name: "Vault configuration"
+    Path: "/etc/vault/vault.hcl"
+  - ID: "vault-config.sh.tmpl"
+    Name: "Configure vault"
+    Path: ""    
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
