@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+# This script installs consul, but doesn't configure it
+
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+CONSUL_VERSION="{{ .Param "consul/version" }}"
+
+# these need to be before krib-lib template
+{{if .ParamExists "consul/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing consul/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+build_cert() {
+  local profile=$1
+  local ca_name=$2
+  local ca_pw=$3
+  local myname=$4
+  local myip=$5
+
+  echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
+  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/consul/${profile}-ca.pem
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) server.dc1.consul localhost {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
+  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/consul/$profile.pem
+  jq -r .Key tmp.csr > /etc/kubernetes/pki/consul/$profile-key.pem
+  rm tmp.csr
+}
+
+echo "Prepare the consul cluster"
+
+CONSUL_CLUSTER_NAME={{.Param "consul/cluster-profile"}}
+{{ if .ParamExists "consul/ip" -}}
+CONSUL_IP={{ .Param "consul/ip" }}
+{{ else -}}
+CONSUL_IP={{ .Machine.Address }}
+{{ end -}}
+
+{{if eq (.ParamExists "consul/servers") false -}}
+# add server management params if missing
+echo "Add initial variables to track members."
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/servers" to "[]" || true
+{{ end -}}
+
+{{if eq (.ParamExists "consul/servers-done") false -}}
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/servers-done" to "[]" || true
+{{ end -}}
+
+# Get the number of servers to create
+CONSUL_SERVER_COUNT={{.Param "consul/server-count"}}
+echo "Creating $CONSUL_SERVER_COUNT servers"
+
+echo "Electing consul members to cluster profile: $CLUSTER_PROFILE"
+CONSUL_INDEX=$(add_me_if_not_count "consul/servers" $CONSUL_SERVER_COUNT $CONSUL_IP)
+
+echo "Added myself to cluster profile, my index is ${CONSUL_INDEX}"
+
+if [[ $CONSUL_INDEX == notme ]] ; then
+  echo "I am not a CONSUL server.  Move on."
+  wait_for_count "consul/servers-done" $CONSUL_SERVER_COUNT
+  exit 0
+fi
+
+SERVER_CA=${CONSUL_CLUSTER_NAME}-server-ca
+
+EXISTING_INDEX=$(find_me "consul/servers-done" "Uuid" $RS_UUID)
+if [[ $EXISTING_INDEX == notme ]] ; then
+  {{if .ParamExists "certs/root" -}}
+
+  echo "Certs plugin detected....setting up CA"
+  # If we are INDEX=0, let's setup the root certs for building keys
+  if [[ $CONSUL_INDEX == "0" ]] ; then
+    echo "We are first machine in cluster, setting up the root certs..."
+    # Are certs built yet?
+    if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
+      SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/server-ca-name" to "$SERVER_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/server-ca-pw" to "$SERVER_CA_PW" || true
+    else
+      if [[ $(get_param "consul/server-ca-pw") == null ]] ; then
+        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+      fi
+    fi
+    echo "Setting up encryption key for gossip..."
+{{if eq (.ParamExists "consul/encryption-key") false -}}
+    CONSUL_ENCRYPTION_KEY=`consul keygen`
+    # add server management params if missing
+    echo "Add initial encryption key ..."
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/encryption-key" to "$CONSUL_ENCRYPTION_KEY" || true
+{{ end -}}    
+  fi
+  {{else -}}
+  xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
+  {{end}}
+fi
+
+echo "Waiting for ${CONSUL_SERVER_COUNT} servers to be ready"
+wait_for_count "consul/servers" $CONSUL_SERVER_COUNT
+
+echo "${CONSUL_SERVER_COUNT} servers ready!"
+
+SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
+
+# Add the consul user if it doesn't exist
+id -u consul &>/dev/null || ( echo "Creating consul user"; useradd consul -d /var/lib/consul )
+
+mkdir -p /etc/kubernetes/pki/consul/
+
+CONSUL_NAME="consul$CONSUL_INDEX"
+
+build_cert "server" $SERVER_CA $SERVER_CA_PW $CONSUL_NAME $CONSUL_IP
+
+TMP_DIR=/tmp/consul-tmp
+INSTALL_DIR=/usr/local/bin
+if [[ $OS_FAMILY == coreos ]] ; then
+  INSTALL_DIR=/opt/bin
+fi
+
+mkdir -p ${TMP_DIR}
+
+echo "Download consul version: v${CONSUL_VERSION}"
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+else
+  download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+fi
+
+echo "Install consul version: ${CONSUL_VERSION}"
+yum -y install unzip || echo "Unzip already installed"
+unzip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
+
+
+
+cat >/etc/systemd/system/consul.service <<EOF
+### BEGIN INIT INFO
+# Provides:          consul
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Consul agent
+# Description:       Consul service discovery framework
+### END INIT INFO
+
+[Unit]
+Description=Consul server agent
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=consul
+Group=consul
+PIDFile=/var/run/consul/consul.pid
+PermissionsStartOnly=true
+ExecStartPre=-/bin/mkdir -p /var/run/consul
+ExecStartPre=/bin/chown -R consul:consul /var/run/consul
+ExecStart=/usr/local/bin/consul agent \\
+    -config-file=/etc/consul.d/consul.json \\
+    -pid-file=/var/run/consul/consul.pid
+ExecReload=/bin/kill -HUP \$MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat >/etc/consul.d/env.sh <<EOF
+#!/bin/bash
+# Set defaults for Consul CLI.
+export CONSUL_HTTP_ADDR=https://localhost:8501
+export CONSUL_CACERT=/etc/kubernetes/pki/consul/server-ca.pem
+export CONSUL_CLIENT_CERT=/etc/kubernetes/pki/consul/server.pem
+export CONSUL_CLIENT_KEY=/etc/kubernetes/pki/consul/server-key.pem
+EOF
+
+echo "Source /etc/consul.d/env.sh in your .bash_profile to add the necessary environment variables to run consul CLI with TLS"
+
+systemctl daemon-reload
+systemctl enable consul
+
+echo "Consul installed, ready to start"
+add_me_if_not_count "consul/servers-done" $CONSUL_SERVER_COUNT $CONSUL_IP
+
+echo "Waiting for ${CONSUL_SERVER_COUNT} servers to complete consul install"
+wait_for_count "consul/servers-done" $CONSUL_SERVER_COUNT
+
+rm -rf ${TMP_DIR}
+
+exit 0

@@ -1,0 +1,13 @@
+---
+Name: "consul/server-ca-pw"
+Description: "Password to access the consul server CA"
+Documentation: |
+  Allows operators to set the CA password for the consul server certificate
+  Requires Cert Plugin
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

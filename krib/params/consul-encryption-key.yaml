@@ -1,0 +1,12 @@
+---
+Name: "consul/encryption-key"
+Description: "Encryption key used to secure Consul Gossip communications"
+Documentation: |
+  Enables gossip encryption between Consul nedes
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

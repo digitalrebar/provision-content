@@ -1,0 +1,13 @@
+---
+Name: "consul/version"
+Description: "Version of consul to use in cluster"
+Documentation: |
+  Allows operators to determine the version of consul to install
+Schema:
+  type: "string"
+  default: "1.5.1"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  render: "semver"

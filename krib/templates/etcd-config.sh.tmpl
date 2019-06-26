@@ -75,14 +75,6 @@ get_member_id() {
 }
 {{ end -}}
 
-## Additional param to explicitly indicate masters
-{{if eq (.ParamExists "krib/selective-mastership") true -}}
-{{if eq (.ParamExists "krib/i-am-master") false -}}
-echo "krib/selective-mastership is true but krib/i-am-master is false. I am denied mastership, so move on"
-exit 0
-{{ end -}}
-{{ end -}}
-
 echo "Configure the etcd cluster"
 
 ETCD_CLUSTER_NAME={{.Param "etcd/name"}}

@@ -76,6 +76,23 @@ Templates:
   Name: etcd-reset
 - Contents: |-
     #!/bin/bash
+    # Reset consul params
+    set -e
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/encryption-key')
+    declare CLUSTER_TYPE="consul"
+    {{template "setup.tmpl" .}}
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consulv/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing consul/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done consul params reset"
+  Name: consul-reset  
+- Contents: |-
+    #!/bin/bash
     # Reset KRIB params
     set -e
     declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
@@ -111,6 +128,7 @@ Templates:
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
     rm -rf /var/lib/docker/*    
+    rm -rf /var/lib/consul/data
 
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
     
