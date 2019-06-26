@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+
+# Build a consul cluster
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+CONSUL_VERSION="{{ .Param "consul/version" }}"
+
+# these need to be before krib-lib template
+{{if .ParamExists "consul/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing consul/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+{{if .ParamExists "consul/servers" -}}
+# Ensure that the consul systemd service specifies all consul nodes using retry-join
+setup_retry_join() {
+  echo "Setting up retry_join..."
+  {{- range $elem := .Param "consul/servers"}}
+  PEER={{ $elem.Address }}
+  if [[ ! `grep $PEER /etc/systemd/system/consul-agent.service` ]]; then
+    sed -i "/ExecStart=/ a \    -retry-join=$PEER:8301 \\\\" /etc/systemd/system/consul-agent.service
+  fi
+  {{ end -}}
+}
+
+setup_encryption() {
+  echo "Setting up encryption..."
+  CONSUL_ENCRYPTION_KEY={{ .Param "consul/encryption-key" }}
+  if [[ ! `grep encrypt /etc/systemd/system/consul-agent.service` ]]; then
+    sed -i "/ExecStart=/ a \    -encrypt=$CONSUL_ENCRYPTION_KEY \\\\" /etc/systemd/system/consul-agent.service
+  fi
+}
+{{ end -}}
+
+echo "Configure the consul cluster"
+
+setup_retry_join
+setup_encryption
+
+systemctl daemon-reload
+systemctl restart consul-agent
+systemctl status consul-agent
+
+exit 0

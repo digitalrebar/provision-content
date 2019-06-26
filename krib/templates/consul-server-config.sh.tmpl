@@ -31,8 +31,8 @@ setup_retry_join() {
   echo "Setting up retry_join..."
   {{- range $elem := .Param "consul/servers"}}
   PEER={{ $elem.Address }}
-  if [[ ! `grep $PEER /etc/systemd/system/consul.service` ]]; then
-    sed -i "/ExecStart=/ a \    -retry-join=$PEER \\\\" /etc/systemd/system/consul.service
+  if [[ ! `grep $PEER /etc/systemd/system/consul-server.service` ]]; then
+    sed -i "/ExecStart=/ a \    -retry-join=$PEER \\\\" /etc/systemd/system/consul-server.service
   fi
   {{ end -}}
 }
@@ -40,8 +40,8 @@ setup_retry_join() {
 setup_encryption() {
   echo "Setting up encryption..."
   CONSUL_ENCRYPTION_KEY={{ .Param "consul/encryption-key" }}
-  if [[ ! `grep encrypt /etc/systemd/system/consul.service` ]]; then
-    sed -i "/ExecStart=/ a \    -encrypt=$CONSUL_ENCRYPTION_KEY \\\\" /etc/systemd/system/consul.service
+  if [[ ! `grep encrypt /etc/systemd/system/consul-server.service` ]]; then
+    sed -i "/ExecStart=/ a \    -encrypt=$CONSUL_ENCRYPTION_KEY \\\\" /etc/systemd/system/consul-server.service
   fi
 }
 {{ end -}}
@@ -52,7 +52,7 @@ setup_retry_join
 setup_encryption
 
 systemctl daemon-reload
-systemctl restart consul
-systemctl status consul
+systemctl restart consul-server
+systemctl status consul-server
 
 exit 0

@@ -1,0 +1,23 @@
+---
+Description: "A task to install consul server"
+Name: "consul-server-install"
+Documentation: |
+  Installs (but not configures) consul in server mode, to be used as an HA backend to Vault
+OptionalParams:
+  - consul/server-count
+  - consul/version
+Templates:
+  - ID: "consul-server.service.tmpl"
+    Name: "Prepare systemd file for consul-server"
+    Path: "/etc/systemd/system/consul-server.service"
+  - ID: "consul-server-env.sh.tmpl"
+    Name: "Prepare env file for CLI consul usage"
+    Path: "/etc/consul/consul-server-env.sh"
+  - ID: "consul-server-install.sh.tmpl"
+    Name: "Configure consul"
+    Path: ""    
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

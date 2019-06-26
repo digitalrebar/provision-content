@@ -1,0 +1,20 @@
+---
+Description: "A task to configure consul servers"
+Name: "consul-agent-config"
+Documentation: |
+  Configures consul agents, to be used by Vault against a consul server cluster
+OptionalParams:
+  - consul/agent-count
+  - consul/version
+Templates:
+  - ID: "consul-agent.json.tmpl"
+    Name: "Consul agent configuration"
+    Path: "/etc/consul.d/consul-agent.json"
+  - ID: "consul-agent-config.sh.tmpl"
+    Name: "Configure consul agent"
+    Path: ""    
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

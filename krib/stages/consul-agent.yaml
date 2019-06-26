@@ -1,0 +1,11 @@
+---
+Name: "consul-agent"
+Description: "Configure consul agents."
+RunnerWait: true
+Tasks:
+  - "consul-agent-install"
+  - "consul-agent-config"  
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

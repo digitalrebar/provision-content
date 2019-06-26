@@ -1,0 +1,20 @@
+---
+Description: "A task to install consul agent"
+Name: "consul-agent-install"
+Documentation: |
+  Installs (but not configures) consul in agent mode, to be used as an HA backend to Vault
+OptionalParams:
+  - consul/agent-count
+  - consul/version
+Templates:
+  - ID: "consul-agent.service.tmpl"
+    Name: "Prepare systemd file for consul-agent"
+    Path: "/etc/systemd/system/consul-agent.service"
+  - ID: "consul-agent-install.sh.tmpl"
+    Name: "Configure consul agent"
+    Path: ""    
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
