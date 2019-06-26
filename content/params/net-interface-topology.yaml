@@ -54,7 +54,41 @@ Documentation: |
   param.  In netplan terminollogy, this param should contain a match
   stanza for each ID that requires it, along with any device-specific
   properties required for virtual devices ( vlan ID, bridge
-  configuration settings, bond modes, etc)
+  configuration settings, bond modes, etc).
+
+  The default for ths parameter is
+
+      network:
+        version: 2
+
+  which leaves the network topology on the machine alone.  A contrived
+  example which bonds the onboard interfaces, bridges that bond with
+  all the interfaces on expansion cards, and then creates a VLAN
+  interface on top of that is as follows:
+
+      network:
+        version: 2
+        ethernets:
+          onboards:
+            match:
+              name: '^onboard:.*'
+          others:
+            match:
+              name: pci:*
+        bonds:
+          bond0:
+            interfaces: [ onboards ]
+            parameters:
+              mode: '802.3ad'
+        bridges:
+          bridge0:
+            interfaces: [ others, bond0 ]
+        vlans:
+          vlan0:
+            id: 1000
+            link: bridge0
+
+  Many other topologies are possible.
 Schema:
   type: object
   parameters:
