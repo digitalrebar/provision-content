@@ -1,0 +1,11 @@
+kind: EncryptionConfig
+apiVersion: v1
+resources:
+ - resources:
+   - secrets
+   providers:
+   - kms:
+       name: vault
+       endpoint: unix:///var/lib/vault/vault-kms-plugin.sock
+       cachesize: 100
+   - identity: {}

@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# This script installs vault, but doesn't configure it
+
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+# these need to be before krib-lib template
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+{{template "krib-lib.sh.tmpl" .}}
+
+
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+TMP_DIR=/tmp/kms-plugin
+mkdir -p ${TMP_DIR}
+
+echo "Download oracle kubernetes-vault-kms-plugin master.."
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/kubernetes-vault-kms-plugin -o $TMP_DIR/kubernetes-vault-kms-plugin
+else
+  # Not implemented yet - there's no public compiled version of this binary
+  exit 1
+  # download -L https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip
+fi
+
+# Need our plugin to be executable
+mv ${TMP_DIR}/kubernetes-vault-kms-plugin /usr/local/bin/kubernetes-vault-kms-plugin
+chmod 755 /usr/local/bin/kubernetes-vault-kms-plugin
+
+# We should secure the encryption.yaml file for root-only read
+chmod 600 /etc/kubernetes/pki/encryption.yaml
+
+{{if .ParamExists "vault/kms-plugin-token" }}
+TOKEN={{ .Param "vault/kms-plugin-token" }}
+{{else -}}
+TOKEN=setmemanually
+{{end -}}
+
+# Create the plugin config (requires a param for token)
+cat <<EOF > /etc/vault/vault-kms-plugin.yaml
+keyNames:
+  - kube-secret-enc-key
+transitPath: /transit
+ca-cert: /etc/kubernetes/pki/vault/server-ca.pem
+addr: https://localhost:8200
+token: $TOKEN
+EOF
+
+setup_encryption() {
+  echo "Setting up encryption..."
+  # Add the encryption provider to kube api, and restart it
+  if [[ ! `grep encryption-provider-config /etc/kubernetes/manifests/kube-apiserver.yaml` ]]; then
+    sed -i "/- --advertise-address/ a \    - --encryption-provider-config=/etc/kubernetes/pki/encryption.yaml" /etc/kubernetes/manifests/kube-apiserver.yaml    
+  fi
+}
+
+setup_encryption
+
+
+systemctl daemon-reload
+systemctl enable vault-kms-plugin
+systemctl restart vault-kms-plugin
+systemctl status vault-kms-plugin
+
+exit 0

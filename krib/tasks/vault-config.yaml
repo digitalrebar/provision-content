@@ -2,7 +2,7 @@
 Description: "A task to configure vault"
 Name: "vault-config"
 Documentation: |
-  Configures a consul cluster, to be used as an HA backend to Vault
+  Configures a vault backend (using consul for storage) for secret encryption
 OptionalParams:
   - vault/server-count
   - vault/version
@@ -13,6 +13,15 @@ Templates:
   - ID: "vault-config.sh.tmpl"
     Name: "Configure vault"
     Path: ""    
+  - ID: "krib-encryption-config.yaml.tmpl"
+    Name: "Setup kube secret encryption"
+    Path: "/etc/kubernetes/pki/encryption.yaml"    
+  - ID: "vault-kms-plugin.service.tmpl"
+    Name: "Setup systemd service for kms plugin"
+    Path: "/etc/systemd/system/vault-kms-plugin.service"
+  - ID: "krib-vault-kms-plugin.sh.tmpl"
+    Name: "Configure vault kms plugin"
+    Path: ""        
 Meta:
   icon: "book"
   color: "blue"
