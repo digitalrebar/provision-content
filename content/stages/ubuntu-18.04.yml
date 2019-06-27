@@ -23,5 +23,6 @@ RequiredParams: []
 Tasks:
 - ubuntu-drp-only-repos
 - ssh-access
+- "configure-network"
 Templates: []
 
