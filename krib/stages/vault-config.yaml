@@ -1,0 +1,11 @@
+---
+Name: "vault-config"
+Description: "Configure a vault cluster."
+RunnerWait: true
+Tasks:
+  - "vault-install"
+  - "vault-config"  
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"

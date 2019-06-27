@@ -26,7 +26,7 @@ xiterr 1 "Missing consul/cluster-profile on the machine!"
 
 echo "Prepare the consul cluster"
 
-CONSUL_CLUSTER_NAME={{.Param "consul/cluster-profile"}}
+CONSUL_CLUSTER_NAME={{.Param "consul/name"}}
 {{ if .ParamExists "consul/ip" -}}
 CONSUL_IP={{ .Param "consul/ip" }}
 {{ else -}}

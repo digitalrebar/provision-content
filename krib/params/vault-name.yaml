@@ -1,0 +1,12 @@
+---
+Name: "vault/name"
+Description: "Name of the vault cluster"
+Documentation: |
+  Allows operators to set a name for the vault cluster
+Schema:
+  type: "string"
+  default: "vault-cluster"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

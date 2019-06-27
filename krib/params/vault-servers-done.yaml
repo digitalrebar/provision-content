@@ -1,0 +1,21 @@
+---
+Name: "vault/servers-done"
+Description: "List of the servers in the vault cluster that are complete"
+Documentation: |
+  Param is set (output) by the vault cluster building process
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    properties:
+      Address:
+        type: string
+      Name:
+        type: string
+      Uuid:
+        type: string
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  render: "machines-map"

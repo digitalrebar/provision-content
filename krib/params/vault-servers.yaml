@@ -1,0 +1,21 @@
+---
+Name: "vault/servers"
+Description: "List of the server UUIDs in the vault cluster"
+Documentation: |
+  Param is set (output) by the vault cluster building process
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    properties:
+      Address:
+        type: string
+      Name:
+        type: string
+      Uuid:
+        type: string
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  render: "machines-map"
