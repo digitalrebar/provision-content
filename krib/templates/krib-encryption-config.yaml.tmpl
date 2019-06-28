@@ -6,6 +6,6 @@ resources:
    providers:
    - kms:
        name: vault
-       endpoint: unix:///var/lib/vault/vault-kms-plugin.sock
+       endpoint: unix:///etc/kubernetes/pki/vault-kms-plugin/vault-kms-plugin.sock
        cachesize: 100
    - identity: {}

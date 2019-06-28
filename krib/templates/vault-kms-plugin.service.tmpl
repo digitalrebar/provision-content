@@ -17,7 +17,7 @@ After=network-online.target
 User=vault
 Group=vault
 PIDFile=/var/run/vault/kubernetes-vault-kms-plugin.pid
-ExecStart=/usr/local/bin/kubernetes-vault-kms-plugin -vaultConfig=/etc/vault/vault-kms-plugin.yaml -socketFile=/var/lib/vault/vault-kms-plugin.sock
+ExecStart=/usr/local/bin/kubernetes-vault-kms-plugin -vaultConfig=/etc/vault/vault-kms-plugin.yaml -socketFile=/etc/kubernetes/pki/vault-kms-plugin/vault-kms-plugin.sock
 ExecReload=/bin/kill -HUP \$MAINPID
 KillMode=process
 KillSignal=SIGTERM

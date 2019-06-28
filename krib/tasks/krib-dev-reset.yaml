@@ -83,7 +83,7 @@ Templates:
     {{template "setup.tmpl" .}}
     {{if .ParamExists "consul/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consulv/cluster-profile") 7200}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
     {{else -}}
     echo "Missing consul/cluster-profile on the machine!"
     exit 1
@@ -117,6 +117,10 @@ Templates:
  
     kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
+    systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
+    systemctl stop vault || echo "vault not running, no need to stop"
+    systemctl stop consul-server || echo "consul-server not running, no need to stop"
+    systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
 
     # Whether we're using containerd or dockerd, kill either
     pkill containerd || pkill dockerd
@@ -129,6 +133,7 @@ Templates:
     rm -rf /var/lib/containerd/*
     rm -rf /var/lib/docker/*    
     rm -rf /var/lib/consul/data
+    rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
 
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
     

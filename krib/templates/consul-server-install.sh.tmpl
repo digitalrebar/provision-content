@@ -73,6 +73,32 @@ if [[ $CONSUL_INDEX == notme ]] ; then
   exit 0
 fi
 
+TMP_DIR=/tmp/consul-tmp
+INSTALL_DIR=/usr/local/bin
+if [[ $OS_FAMILY == coreos ]] ; then
+  INSTALL_DIR=/opt/bin
+fi
+
+mkdir -p ${TMP_DIR}
+
+echo "Download consul version: v${CONSUL_VERSION}"
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+else
+  download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+fi
+
+echo "Install consul version: ${CONSUL_VERSION}"
+yum -y install unzip || echo "Unzip already installed"
+unzip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
+
+
+
 SERVER_CA=${CONSUL_CLUSTER_NAME}-server-ca
 
 EXISTING_INDEX=$(find_me "consul/servers-done" "Uuid" $RS_UUID)
@@ -122,29 +148,6 @@ CONSUL_NAME="consul$CONSUL_INDEX"
 
 build_cert "server" $SERVER_CA $SERVER_CA_PW $CONSUL_NAME $CONSUL_IP
 
-TMP_DIR=/tmp/consul-tmp
-INSTALL_DIR=/usr/local/bin
-if [[ $OS_FAMILY == coreos ]] ; then
-  INSTALL_DIR=/opt/bin
-fi
-
-mkdir -p ${TMP_DIR}
-
-echo "Download consul version: v${CONSUL_VERSION}"
-# Allow for a local repository for installation files
-{{if .ParamExists "krib/package-repository" -}}
-KRIB_REPO={{.Param "krib/package-repository"}}
-{{end -}}
-
-if [[ ! -z "$KRIB_REPO" ]] ; then
-  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
-else
-  download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
-fi
-
-echo "Install consul version: ${CONSUL_VERSION}"
-yum -y install unzip || echo "Unzip already installed"
-unzip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
 
 echo "Source /etc/consul.d/env.sh in your .bash_profile to add the necessary environment variables to run consul CLI with TLS"
 

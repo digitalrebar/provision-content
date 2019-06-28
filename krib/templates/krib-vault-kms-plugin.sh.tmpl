@@ -49,26 +49,30 @@ TOKEN={{ .Param "vault/kms-plugin-token" }}
 TOKEN=setmemanually
 {{end -}}
 
+# First md5sum the existing config, to work out whether we need to restart apiserver
+if [[ -f /etc/vault/vault-kms-plugin.yaml ]]; then
+  md5sum /etc/vault/vault-kms-plugin.yaml > /etc/vault/vault-kms-plugin.yaml.md5 
+  VAULT_KMS_YML_PREEXISTED=true
+fi
+
 # Create the plugin config (requires a param for token)
 cat <<EOF > /etc/vault/vault-kms-plugin.yaml
 keyNames:
   - kube-secret-enc-key
 transitPath: /transit
-ca-cert: /etc/kubernetes/pki/vault/server-ca.pem
+vaultCACert: /etc/kubernetes/pki/vault/server-ca.pem
 addr: https://localhost:8200
 token: $TOKEN
 EOF
 
-setup_encryption() {
-  echo "Setting up encryption..."
-  # Add the encryption provider to kube api, and restart it
-  if [[ ! `grep encryption-provider-config /etc/kubernetes/manifests/kube-apiserver.yaml` ]]; then
-    sed -i "/- --advertise-address/ a \    - --encryption-provider-config=/etc/kubernetes/pki/encryption.yaml" /etc/kubernetes/manifests/kube-apiserver.yaml    
-  fi
-}
+# Ensure that /etc/kubernetes/pki/vault-kms-plugin/ exists and is writeable by the vault user
+mkdir -p /etc/kubernetes/pki/vault-kms-plugin
+chown vault /etc/kubernetes/pki/vault-kms-plugin
 
-setup_encryption
-
+# Restart plugin/apiserver only if the file has changed (because the socket will need to be refreshed)
+if [[ "${VAULT_KMS_YML_PREEXISTED}" == "true" ]]; then
+  md5sum -c /etc/vault/vault-kms-plugin.yaml.md5 || ( systemctl restart vault-kms-plugin.service && sleep 2s && kill -HUP `pidof kube-apiserver` )
+fi
 
 systemctl daemon-reload
 systemctl enable vault-kms-plugin
