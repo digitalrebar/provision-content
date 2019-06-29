@@ -131,7 +131,7 @@ if [[ $EXISTING_INDEX == notme ]] ; then
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
     else
       if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-        xiterr 1 "Client CA Exists, but we did not set password.  Need to reset!!"
+        xiterr 1 "Client CA Exists ($CLIENT_CA), but we did not set password.  Need to reset!!"
       else
         echo "  Client CA $CLIENT_CA configured"
       fi

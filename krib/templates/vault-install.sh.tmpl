@@ -74,7 +74,7 @@ if [[ $VAULT_INDEX == notme ]] ; then
   exit 0
 fi
 
-SERVER_CA=${VAULT_CLUSTER_NAME}-vault-ca
+SERVER_CA=${VAULT_CLUSTER_NAME}-ca
 
 EXISTING_INDEX=$(find_me "vault/servers-done" "Uuid" $RS_UUID)
 if [[ $EXISTING_INDEX == notme ]] ; then

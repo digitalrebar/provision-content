@@ -41,7 +41,7 @@ build_cert() {
 
 echo "Prepare the consul cluster"
 
-CONSUL_CLUSTER_NAME={{.Param "consul/cluster-profile"}}
+CONSUL_CLUSTER_NAME={{.Param "consul/name"}}
 {{ if .ParamExists "consul/ip" -}}
 CONSUL_IP={{ .Param "consul/ip" }}
 {{ else -}}
@@ -99,7 +99,7 @@ unzip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
 
 
 
-SERVER_CA=${CONSUL_CLUSTER_NAME}-server-ca
+SERVER_CA=${CONSUL_CLUSTER_NAME}-ca
 
 EXISTING_INDEX=$(find_me "consul/servers-done" "Uuid" $RS_UUID)
 if [[ $EXISTING_INDEX == notme ]] ; then
@@ -116,7 +116,7 @@ if [[ $EXISTING_INDEX == notme ]] ; then
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/server-ca-pw" to "$SERVER_CA_PW" || true
     else
       if [[ $(get_param "consul/server-ca-pw") == null ]] ; then
-        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+        xiterr 1 "SERVER CA ($SERVER_CA) Exists, but we did not set password.  Need to reset data in certs-data profile!!"
       fi
     fi
     echo "Setting up encryption key for gossip..."
