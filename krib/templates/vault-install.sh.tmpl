@@ -32,10 +32,10 @@ build_cert() {
   local myip=$5
 
   echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
-  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/vault/${profile}-ca.pem
+  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/vault/pki/${profile}-ca.pem
   drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) localhost 127.0.0.1 {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
-  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/vault/$profile.pem
-  jq -r .Key tmp.csr > /etc/kubernetes/pki/vault/$profile-key.pem
+  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/vault/pki/$profile.pem
+  jq -r .Key tmp.csr > /etc/vault/pki/$profile-key.pem
   rm tmp.csr
 }
 
@@ -116,7 +116,7 @@ SERVER_CA_PW=$(wait_for_variable "vault/server-ca-pw")
 # Add the vault user if it doesn't exist
 id -u vault &>/dev/null || ( echo "Creating vault user"; useradd vault -d /var/lib/vault )
 
-mkdir -p /etc/kubernetes/pki/vault/
+mkdir -p /etc/vault/pki/
 
 build_cert "server" $SERVER_CA $SERVER_CA_PW {{.Machine.Name}} $VAULT_IP
 
@@ -150,13 +150,6 @@ systemctl daemon-reload
 systemctl enable vault
 systemctl restart vault
 systemctl status vault
-
-
-echo "Vault installed, ready to start"
-add_me_if_not_count "vault/servers-done" $VAULT_SERVER_COUNT $VAULT_IP
-
-echo "Waiting for ${VAULT_SERVER_COUNT} servers to complete vault install"
-wait_for_count "vault/servers-done" $VAULT_SERVER_COUNT
 
 rm -rf ${TMP_DIR}
 

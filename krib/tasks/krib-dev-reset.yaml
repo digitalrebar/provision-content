@@ -50,6 +50,8 @@ Templates:
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-vault-ca
+      
       export RS_TOKEN=$HOLD_TOKEN
     else
       echo "  No CA root detected - no reset required"
@@ -78,7 +80,7 @@ Templates:
     #!/bin/bash
     # Reset consul params
     set -e
-    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/encryption-key')
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consu/agent' 'consul/agents-done' 'consul/encryption-key' 'vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
     declare CLUSTER_TYPE="consul"
     {{template "setup.tmpl" .}}
     {{if .ParamExists "consul/cluster-profile" -}}
@@ -132,7 +134,8 @@ Templates:
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
     rm -rf /var/lib/docker/*    
-    rm -rf /var/lib/consul/data
+    rm -rf /var/lib/consul/client
+    rm -rf /var/lib/consul/server    
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
 
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X

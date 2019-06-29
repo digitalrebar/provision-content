@@ -37,19 +37,11 @@ setup_retry_join() {
   {{ end -}}
 }
 
-setup_encryption() {
-  echo "Setting up encryption..."
-  CONSUL_ENCRYPTION_KEY={{ .Param "consul/encryption-key" }}
-  if [[ ! `grep encrypt /etc/systemd/system/consul-server.service` ]]; then
-    sed -i "/ExecStart=/ a \    -encrypt=$CONSUL_ENCRYPTION_KEY \\\\" /etc/systemd/system/consul-server.service
-  fi
-}
 {{ end -}}
 
 echo "Configure the consul cluster"
 
 setup_retry_join
-setup_encryption
 
 systemctl daemon-reload
 systemctl restart consul-server

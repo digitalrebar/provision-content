@@ -47,13 +47,58 @@ EOF
 
 }
 
+
 echo "Configure the vault cluster"
 
 setup_seal
 
-
 systemctl daemon-reload
 systemctl restart vault
-systemctl status vault
+
+
+# Init the vault if it's not already initialized
+sleep 5s
+set +e
+VAULT_CACERT=/etc/vault/pki/server-ca.pem vault operator init -status > /dev/null
+if [[ $? -gt 0 ]]; then
+  set -x
+  set -e
+  export VAULT_CACERT=/etc/vault/pki/server-ca.pem 
+  vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
+
+  # Get our recovery key and token, then delete the local record
+  export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
+  export VAULT_TOKEN=`cat /tmp/vault.json | jq -r '[.root_token][0]'`
+
+  # Insert recovery key and token into params
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
+
+  # enable the transit secret backend
+  vault secrets enable transit
+
+  # create a policy for the transit backend
+  vault policy write transit-only /etc/vault/policy-transit-only.hcl
+
+  # Create a token for kubernetes
+  echo "Setting vault/kms-plugin-token"
+  vault token create -policy transit-only -format json > /tmp/token.json
+  VAULT_KMS_TOKEN=`cat /tmp/token.json | jq -r '[.auth.client_token][0]'`
+  
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/kms-plugin-token" to "$VAULT_KMS_TOKEN"
+
+  # Destroy the evidence
+  #rm /tmp/vault.json
+  #rm /tmp/token.json
+fi
+
+VAULT_SERVER_COUNT={{.Param "vault/server-count"}}
+
+echo "Vault installed and setup, let's go"
+add_me_if_not_count "vault/servers-done" $VAULT_SERVER_COUNT $VAULT_IP
+
+echo "Waiting for ${VAULT_SERVER_COUNT} servers to complete vault install"
+wait_for_count "vault/servers-done" $VAULT_SERVER_COUNT
+
 
 exit 0

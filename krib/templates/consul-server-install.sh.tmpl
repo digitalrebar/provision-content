@@ -32,10 +32,10 @@ build_cert() {
   local myip=$5
 
   echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
-  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/consul/${profile}-ca.pem
+  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/consul/pki/${profile}-ca.pem
   drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) server.dc1.consul localhost {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
-  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/consul/$profile.pem
-  jq -r .Key tmp.csr > /etc/kubernetes/pki/consul/$profile-key.pem
+  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/consul/pki/$profile.pem
+  jq -r .Key tmp.csr > /etc/consul/pki/$profile-key.pem
   rm tmp.csr
 }
 
@@ -142,7 +142,7 @@ SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
 # Add the consul user if it doesn't exist
 id -u consul &>/dev/null || ( echo "Creating consul user"; useradd consul -d /var/lib/consul )
 
-mkdir -p /etc/kubernetes/pki/consul/
+mkdir -p /etc/consul/pki
 
 CONSUL_NAME="consul$CONSUL_INDEX"
 
