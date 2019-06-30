@@ -49,6 +49,7 @@ get_endpoints() {
   echo ${ENDPOINTS}
 }
 
+
 get_member_list() {
   set +e
   ENDPOINTS=$1
@@ -84,6 +85,13 @@ ETCD_CLIENT_PORT={{.Param "etcd/client-port"}}
 ETCD_IP={{ .Param "etcd/ip" }}
 {{ else -}}
 ETCD_IP={{ .Machine.Address }}
+{{ end -}}
+
+# Either set controller IP to a param, or default to the DRP IP
+{{ if .ParamExists "etcd/controller-ip" -}}
+ETCD_CONTROLLER_IP={{ .Param "etcd/controller-ip" }}
+{{ else -}}
+ETCD_CONTROLLER_IP={{ .ProvisionerAddress }}
 {{ end -}}
 
 {{if eq (.ParamExists "etcd/servers") false -}}
@@ -156,6 +164,28 @@ if [[ $EXISTING_INDEX == notme ]] ; then
         xiterr 1 "PEER CA Exists, but we didn't set password.  Need to reset!!"
       fi
     fi
+    
+    # On the assumption that we'll want to backup the etcd cluster externally (from DRP host or a "controller")
+    # Generate a client cert for the controller
+    {{ if and (.ParamExists "etcd/controller-client-cert") (.ParamExists "etcd/controller-client-key") }}
+    echo "Generating controller client certificate with IP ${ETCD_CONTROLLER_IP}"
+    # First, get the CA cert into a param
+    drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA | jq -r . > tmp.ca
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
+
+    # Next, generate a client cert and key for the controller's IP
+    drpcli certs csr client $ETCD_CONTROLLER_IP > tmp.csr
+    drpcli machines runaction $RS_UUID signcert certs/root $CLIENT_CA certs/root-pw $CLIENT_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile client | jq -r . > controller.pem
+    jq -r .Key tmp.csr > controller.key
+
+    # Now put the etcd controller cert details _back_ into params, to be extracted on the controller
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/controller-client-cert" to "\"$(awk '{printf "%s\\n", $0}' controller.pem)\""
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/controller-client-key" to "\"$(awk '{printf "%s\\n", $0}' controller.key)\""
+
+    # Clean up
+    rm {tmp.ca,tmp.csr,controller.pem,controller.key}
+    {{ end -}}
+
   fi
   {{else -}}
   xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
