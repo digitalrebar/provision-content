@@ -1,0 +1,12 @@
+---
+Name: "etcd/server-ca-cert"
+Description: "The etcd server CA cert"
+Documentation: |
+  Stores etcd CA cert for use in non-DRP managed hosts (like a backup host)
+  Requires Cert Plugin
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
