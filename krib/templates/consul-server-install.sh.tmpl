@@ -48,6 +48,14 @@ CONSUL_IP={{ .Param "consul/ip" }}
 CONSUL_IP={{ .Machine.Address }}
 {{ end -}}
 
+# Either set controller IP to a param, or default to the DRP IP
+{{ if .ParamExists "consul/controller-ip" -}}
+CONSUL_CONTROLLER_IP={{ .Param "consul/controller-ip" }}
+{{ else -}}
+CONSUL_CONTROLLER_IP={{ .ProvisionerAddress }}
+{{ end -}}
+
+
 {{if eq (.ParamExists "consul/servers") false -}}
 # add server management params if missing
 echo "Add initial variables to track members."
@@ -126,6 +134,27 @@ if [[ $EXISTING_INDEX == notme ]] ; then
     echo "Add initial encryption key ..."
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/encryption-key" to "$CONSUL_ENCRYPTION_KEY" || true
 {{ end -}}    
+
+    # On the assumption that we'll want to backup the consul cluster externally (from DRP host or a "controller")
+    # Generate a client cert for the controller
+    echo "Generating controller client certificate with IP ${CONSUL_CONTROLLER_IP}"
+    # First, get the CA cert into a param
+    drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA | jq -r . > tmp.ca
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/server-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
+
+    SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
+    # Next, generate a client cert and key for the controller's IP
+    drpcli certs csr client $CONSUL_CONTROLLER_IP > tmp.csr
+    drpcli machines runaction $RS_UUID signcert certs/root $SERVER_CA certs/root-pw $SERVER_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile server | jq -r . > controller.pem
+    jq -r .Key tmp.csr > controller.key
+
+    # Now put the etcd controller cert details _back_ into params, to be extracted on the controller
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/controller-client-cert" to "\"$(awk '{printf "%s\\n", $0}' controller.pem)\""
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/controller-client-key" to "\"$(awk '{printf "%s\\n", $0}' controller.key)\""
+
+    # Clean up
+    rm {tmp.ca,tmp.csr,controller.pem,controller.key}
+
   fi
   {{else -}}
   xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
@@ -137,7 +166,7 @@ wait_for_count "consul/servers" $CONSUL_SERVER_COUNT
 
 echo "${CONSUL_SERVER_COUNT} servers ready!"
 
-SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
+
 
 # Add the consul user if it doesn't exist
 id -u consul &>/dev/null || ( echo "Creating consul user"; useradd consul -d /var/lib/consul )

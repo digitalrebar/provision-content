@@ -17,7 +17,7 @@ Templates:
     # we need a random backoff to avoid races.
     SLEEP=$[ ( $RANDOM % 25 ) ]
     sleep $SLEEP
-    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw')
+    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
     {{if .ParamExists "etcd/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
     PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
@@ -82,7 +82,7 @@ Templates:
     #!/bin/bash
     # Reset consul params
     set -e
-    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/server-ca-name' 'consul/server-ca-pw' 'consul/agents' 'consul/agents-done' 'consul/encryption-key' 'vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key' 'consul/agents' 'consul/agents-done' 'consul/encryption-key' 'vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
     declare CLUSTER_TYPE="consul"
     {{template "setup.tmpl" .}}
     {{if .ParamExists "krib/cluster-profile" -}}
