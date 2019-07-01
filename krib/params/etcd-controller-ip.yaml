@@ -1,0 +1,15 @@
+---
+Name: "etcd/controller-ip"
+Description: "An optional IP for a controller outside of KRIB used to interact with/backup etcd"
+Documentation: |
+  An optional IP outside the cluster designated for a "controller" (can be the DRP host)
+  Can be used in combination with etcd/controller-client-cert and etcd/controller/client-key
+  to remotely backup an etcd cluster
+
+  If unset, will default to the DRP ProvisionerAddress.
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
