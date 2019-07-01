@@ -1,8 +1,8 @@
 listener "tcp" {
   address          = "0.0.0.0:8200"
   cluster_address  = "{{.Machine.Address}}:8201"
-  tls_cert_file = "/etc/kubernetes/pki/vault/server.pem"
-  tls_key_file  = "/etc/kubernetes/pki/vault/server-key.pem"
+  tls_cert_file = "/etc/vault/pki/server.pem"
+  tls_key_file  = "/etc/vault/pki/server-key.pem"
 }
 
 storage "consul" {

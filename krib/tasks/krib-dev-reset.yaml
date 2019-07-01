@@ -36,6 +36,8 @@ Templates:
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"            
       echo "==========================================================================="
       echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
       
@@ -50,6 +52,8 @@ Templates:
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca            
       export RS_TOKEN=$HOLD_TOKEN
     else
       echo "  No CA root detected - no reset required"
@@ -78,14 +82,14 @@ Templates:
     #!/bin/bash
     # Reset consul params
     set -e
-    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/encryption-key')
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/server-ca-name' 'consul/server-ca-pw' 'consul/agents' 'consul/agents-done' 'consul/encryption-key' 'vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
     declare CLUSTER_TYPE="consul"
     {{template "setup.tmpl" .}}
-    {{if .ParamExists "consul/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consulv/cluster-profile") 7200}}
+    {{if .ParamExists "krib/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
     {{else -}}
-    echo "Missing consul/cluster-profile on the machine!"
+    echo "Missing krib/cluster-profile on the machine!"
     exit 1
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
@@ -117,6 +121,10 @@ Templates:
  
     kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
+    systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
+    systemctl stop vault || echo "vault not running, no need to stop"
+    systemctl stop consul-server || echo "consul-server not running, no need to stop"
+    systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
 
     # Whether we're using containerd or dockerd, kill either
     pkill containerd || pkill dockerd
@@ -128,7 +136,9 @@ Templates:
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
     rm -rf /var/lib/docker/*    
-    rm -rf /var/lib/consul/data
+    rm -rf /var/lib/consul/client
+    rm -rf /var/lib/consul/server    
+    rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
 
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
     

@@ -5,6 +5,7 @@ RunnerWait: true
 Tasks:
   - "vault-install"
   - "vault-config"  
+  - "vault-kms-plugin"    
 Meta:
   icon: "ship"
   color: "yellow"
