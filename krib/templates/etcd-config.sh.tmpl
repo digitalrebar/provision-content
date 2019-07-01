@@ -167,7 +167,6 @@ if [[ $EXISTING_INDEX == notme ]] ; then
     
     # On the assumption that we'll want to backup the etcd cluster externally (from DRP host or a "controller")
     # Generate a client cert for the controller
-    {{ if and (.ParamExists "etcd/controller-client-cert") (.ParamExists "etcd/controller-client-key") }}
     echo "Generating controller client certificate with IP ${ETCD_CONTROLLER_IP}"
     # First, get the CA cert into a param
     drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA | jq -r . > tmp.ca
@@ -184,7 +183,6 @@ if [[ $EXISTING_INDEX == notme ]] ; then
 
     # Clean up
     rm {tmp.ca,tmp.csr,controller.pem,controller.key}
-    {{ end -}}
 
   fi
   {{else -}}
