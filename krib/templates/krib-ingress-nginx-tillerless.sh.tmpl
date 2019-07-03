@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) nginx-ingress Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+  if ! which wget ; then
+    install wget
+  fi
+
+  wget -O /tmp/nginx-ingress-mandatory.yaml {{ .Param "krib/ingress-nginx-mandatory" }}
+  wget -O /tmp/nginx-ingress-service.yaml {{ .Param "krib/ingress-nginx-config" }}
+
+  if [[ -n $(kubectl get namespaces | grep -w ingress-nginx) ]] ; then
+    echo "Purging existing nginx-ingress install"
+    kubectl delete -f /tmp/nginx-ingress-mandatory.yaml
+  fi
+
+  # Create the default "internal" nginx
+  kubectl apply -f /tmp/nginx-ingress-mandatory.yaml
+  kubectl apply -f /tmp/nginx-ingress-service.yaml
+
+  {{ if eq (.Param "krib/ingress-external-enabled") true -}}
+  ##### Create create the "external" nginx (which is nginx in all but name)
+  cp /tmp/nginx-ingress-service.yaml /tmp/nginx-ingress-external-service.yaml
+  # Add annotations per https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
+  sed "/annotations-prefix=nginx.ingress/ a \            - --ingress-class=nginx-external \\" \
+    /tmp/nginx-ingress-mandatory.yaml > /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "/annotations-prefix=nginx.ingress/ a \            - --election-id=ingress-controller-leader-external \\" \
+    /tmp/nginx-ingress-external-mandatory.yaml
+    
+  sed -i "s/name: nginx-ingress-controller/name: external-nginx-ingress-controller/" /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "s/app.kubernetes.io\/name: ingress-nginx/app.kubernetes.io\/name: ingress-nginx-external/" /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "s/app.kubernetes.io\/part-of: ingress-nginx/app.kubernetes.io\/part-of: ingress-nginx-external/" /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "s/  name: ingress-nginx$/  name: ingress-nginx-external/" /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "s/  name: nginx-ingress$/  name: external-nginx-ingress/" /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "s/nginx-ingress-serviceaccount/external-nginx-ingress-serviceaccount/" /tmp/nginx-ingress-external-mandatory.yaml
+  sed -i "s/namespace: ingress-nginx$/namespace: ingress-nginx-external/" /tmp/nginx-ingress-external-mandatory.yaml
+
+  # Prepare the service
+  sed -i "s/app.kubernetes.io\/name: ingress-nginx/app.kubernetes.io\/name: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
+  sed -i "s/app.kubernetes.io\/part-of: ingress-nginx/app.kubernetes.io\/part-of: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
+  sed -i "s/  name: ingress-nginx$/  name: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
+  sed -i "s/namespace: ingress-nginx$/namespace: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
+
+
+  if [[ -n $(kubectl get namespaces | grep -w ingress-nginx-external) ]] ; then
+    echo "Purging existing nginx-ingress install"
+    kubectl delete -f /tmp/nginx-ingress-external-mandatory.yaml
+  fi
+
+  kubectl apply -f /tmp/nginx-ingress-external-mandatory.yaml
+  kubectl apply -f /tmp/nginx-ingress-external-service.yaml
+  {{ end }}
+
+  # now cert-manager
+{{if .ParamExists "certmanager/email"}}
+  echo "Start cert-manager install"
+  wget -O /tmp/certmanager-crds.yaml {{ .Param "certmanager/crds" }}
+
+  echo "Adding  cert-manager crds"
+  kubectl apply -f /tmp/certmanager-crds.yaml
+  kubectl create namespace cert-manager
+  kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
+
+# do some sedding to replace this
+#     helm install \
+#      --name cert-manager \
+#      --namespace cert-manager \
+#      --set webhook.enabled=false \
+#      --set ingressShim.defaultIssuerName="letsencrypt-prod" \
+#      --set ingressShim.defaultIssuerKind="ClusterIssuer" \
+# {{- if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
+#      --set ingressShim.defaultACMEChallengeType="dns01" \
+#      --set ingressShim.defaultACMEDNS01ChallengeProvider="{{.Param "certmanager/acme-challenge-dns01-provider"}}" \
+# {{- end}}
+#      stable/cert-manager
+
+{{if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
+  if [[ -n $(kubectl -n kube-system get secrets | grep -w certmanager-provider) ]] ; then
+    echo "Removing existing certmanager-provider Secret"
+    kubectl delete -f /tmp/certmanager-provider-secret.yaml
+  fi
+  echo "Creating certmanager-provider Secret"
+  kubectl apply -f /tmp/certmanager-provider-secret.yaml
+{{end}}
+
+  # Clean up
+  #rm -f /tmp/certmanager-provider-secret.yaml
+  #rm -f /tmp/certmanager-clusterissuer.yaml
+  #rm -f /tmp/certmanager-crds.yaml
+  #rm -f /tmp/k8s-db-ingress.yaml
+{{end}}
+else
+  echo "I was not the leader, skipping nginx ingress install"
+fi
+
+echo "Finished nginx ingress deployment successfully"
+
+echo "Finished successfully"
+exit 0

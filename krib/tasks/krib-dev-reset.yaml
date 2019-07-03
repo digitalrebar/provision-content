@@ -82,7 +82,7 @@ Templates:
     #!/bin/bash
     # Reset consul params
     set -e
-    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key' 'consul/agents' 'consul/agents-done' 'consul/encryption-key' 'vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
     declare CLUSTER_TYPE="consul"
     {{template "setup.tmpl" .}}
     {{if .ParamExists "krib/cluster-profile" -}}
@@ -95,6 +95,23 @@ Templates:
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done consul params reset"
   Name: consul-reset  
+- Contents: |-
+    #!/bin/bash
+    # Reset vault params
+    set -e
+    declare -a WIPE_PARAMS=('vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
+    declare CLUSTER_TYPE="vault"
+    {{template "setup.tmpl" .}}
+    {{if .ParamExists "krib/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing krib/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done vault params reset"
+  Name: vault-reset    
 - Contents: |-
     #!/bin/bash
     # Reset KRIB params
