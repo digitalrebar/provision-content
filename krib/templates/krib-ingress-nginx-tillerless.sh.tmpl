@@ -105,8 +105,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl apply -f /tmp/certmanager-clusterissuer.yaml
 
   # Clean up
-  #mkdir /tmp/cleanup
-  #mv /tmp/*.yaml /tmp/cleanup
+  mkdir /tmp/cleanup
+  mv /tmp/*.yaml /tmp/cleanup
   #rm -f /tmp/certmanager-provider-secret.yaml
   #rm -f /tmp/certmanager-clusterissuer.yaml
   #rm -f /tmp/certmanager-crds.yaml
