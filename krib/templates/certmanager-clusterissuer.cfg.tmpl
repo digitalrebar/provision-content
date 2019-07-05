@@ -18,9 +18,6 @@ spec:
 {{- if .ParamExists "certmanager/cloudflare-email"}}
             email: "{{.Param "certmanager/cloudflare-email"}}"
 {{- end}}
-{{- if .ParamExists "certmanager/route53-region"}}
-            region: "{{.Param "certmanager/route53-region"}}"
-{{- end}}
 {{- if .ParamExists "certmanager/fastdns-service-consumer-domain"}}
             serviceConsumerDomain: "{{.Param "certmanager/fastdns-service-consumer-domain"}}"
 {{- end}}
@@ -33,7 +30,16 @@ spec:
 {{- if .ParamExists "certmanager/rfc2136-tsig-alg"}}
             tsigAlgorithm: "{{.Param "certmanager/rfc2136-tsig-alg"}}"
 {{- end}}
-{{- if .ParamExists "certmanager/route53-access-key"}}
+{{- if .ParamExists "certmanager/route53-secret-access-key"}}
+{{- if .ParamExists "certmanager/route53-region"}}
+            region: "{{.Param "certmanager/route53-region"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/route53-access-key-id"}}
+            accessKeyID: {{.Param "certmanager/route53-access-key-id" }}
+{{- end}}
+{{- if .ParamExists "certmanager/route53-hosted-zone-id"}}
+            hostedZoneID: {{.Param "certmanager/route53-hosted-zone-id" }}
+{{- end}}
             secretAccessKeySecretRef:
               name: certmanager-provider
               namespace: kube-system
@@ -68,6 +74,27 @@ spec:
               name: certmanager-provider
               namespace: kube-system
               key: tsigKey
+{{- end}}
+    solvers:
+    - dns01:
+{{- if .ParamExists "certmanager/route53-secret-access-key"}}
+        route53:
+{{- if .ParamExists "certmanager/route53-region"}}
+          region: "{{.Param "certmanager/route53-region"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/route53-access-key-id"}}
+          accessKeyID: {{.Param "certmanager/route53-access-key-id" }}
+{{- end}}
+{{- if .ParamExists "certmanager/route53-hosted-zone-id"}}
+          hostedZoneID: {{.Param "certmanager/route53-hosted-zone-id" }}
+{{- end}}
+          secretAccessKeySecretRef:
+            name: certmanager-provider
+            namespace: kube-system
+            key: accessKey
+        selector:
+          matchLabels:
+            use-route53-solver: "true"            
 {{- end}}
 {{- else}}
     http01: {}
@@ -110,7 +137,16 @@ spec:
 {{- if .ParamExists "certmanager/rfc2136-tsig-alg"}}
             tsigAlgorithm: "{{.Param "certmanager/rfc2136-tsig-alg"}}"
 {{- end}}
-{{- if .ParamExists "certmanager/route53-access-key"}}
+{{- if .ParamExists "certmanager/route53-secret-access-key"}}
+{{- if .ParamExists "certmanager/route53-region"}}
+            region: "{{.Param "certmanager/route53-region"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/route53-access-key-id"}}
+            accessKeyID: {{.Param "certmanager/route53-access-key-id" }}
+{{- end}}
+{{- if .ParamExists "certmanager/route53-hosted-zone-id"}}
+            hostedZoneID: {{.Param "certmanager/route53-hosted-zone-id" }}
+{{- end}}
             secretAccessKeySecretRef:
               name: certmanager-provider
               namespace: kube-system
@@ -145,6 +181,27 @@ spec:
               name: certmanager-provider
               namespace: kube-system
               key: tsigKey
+{{- end}}
+    solvers:
+    - dns01:
+{{- if .ParamExists "certmanager/route53-secret-access-key"}}
+        route53:
+{{- if .ParamExists "certmanager/route53-region"}}
+          region: "{{.Param "certmanager/route53-region"}}"
+{{- end}}
+{{- if .ParamExists "certmanager/route53-access-key-id"}}
+          accessKeyID: {{.Param "certmanager/route53-access-key-id" }}
+{{- end}}
+{{- if .ParamExists "certmanager/route53-hosted-zone-id"}}
+          hostedZoneID: {{.Param "certmanager/route53-hosted-zone-id" }}
+{{- end}}
+          secretAccessKeySecretRef:
+            name: certmanager-provider
+            namespace: kube-system
+            key: accessKey
+        selector:
+          matchLabels:
+            use-route53-solver: "true"            
 {{- end}}
 {{- else}}
     http01: {}

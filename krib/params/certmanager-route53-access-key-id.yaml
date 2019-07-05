@@ -1,0 +1,13 @@
+---
+Name: "certmanager/route53-access-key-id"
+Description: "certmanager route53 access key id"
+Documentation: |
+  DNS01 Challenge Provider Configuration data
+  See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#amazon-route53
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

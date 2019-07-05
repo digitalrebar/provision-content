@@ -112,7 +112,7 @@ Templates:
       echo "  No CA root detected - no reset required"
     fi
     {{template "krib-dev-reset.sh.tmpl" .}}
-    echo "done CA params reset"
+    echo "done consul CA params reset"
   Name: consul CA clear
 - Contents: |-
     #!/bin/bash
@@ -121,11 +121,11 @@ Templates:
     declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
     declare CLUSTER_TYPE="consul"
     {{template "setup.tmpl" .}}
-    {{if .ParamExists "krib/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
     {{else -}}
-    echo "Missing krib/cluster-profile on the machine!"
+    echo "Missing consul/cluster-profile on the machine!"
     exit 1
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}

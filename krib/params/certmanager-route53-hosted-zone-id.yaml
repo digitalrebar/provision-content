@@ -1,6 +1,6 @@
 ---
-Name: "certmanager/route53-access-key"
-Description: "certmanager route53 access key"
+Name: "certmanager/route53-hosted-zone-id"
+Description: "certmanager route53 hosted zone id"
 Documentation: |
   DNS01 Challenge Provider Configuration data
   See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#amazon-route53
@@ -10,4 +10,3 @@ Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  password: "hideme"
