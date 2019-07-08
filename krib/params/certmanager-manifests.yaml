@@ -3,10 +3,10 @@ Name: "certmanager/manifests"
 Description: "Specifies the YAML config file to use for an entire deploy of certmanager via manifests (vs helm)"
 Documentation: |
   Set this string to an HTTP or HTTPS reference for a YAML configuration to
-  use for the cert-manager deployment
+  use for the cert-manager deployment (https://github.com/jetstack/cert-manager/releases/download/v0.8.1/cert-manager-no-webhook.yaml is the non-validating one)
 Schema:
   type: "string"
-  default: "https://github.com/jetstack/cert-manager/releases/download/v0.8.1/cert-manager-no-webhook.yaml"
+  default: "https://github.com/jetstack/cert-manager/releases/download/v0.8.1/cert-manager.yaml"
 Meta:
   color: "blue"
   icon: "book"
