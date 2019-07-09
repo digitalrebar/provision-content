@@ -119,6 +119,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
     # example of appending a featureGate to cluster after initial init
     #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
 
+{{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}
+    # We are using serverTLSBootstrap for kublets, so enable auto-approval of kubelet server CSRs
+    kubectl create -f /tmp/krib-kubelet-rubber-stamp.yaml
+    rm /tmp/krib-kubelet-rubber-stamp.yaml
+{{ end -}}{{ end -}}
+
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
