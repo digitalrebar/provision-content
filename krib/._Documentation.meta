@@ -77,11 +77,9 @@ CLI Install
 KRIB uses the Certs plugin to build TLS, you can install that from the RackN library
 
   ::
+    # install required content and create the certs plugin
+    drpcli plugin_providers upload certs from catalog:certs-tip
 
-    # download cert plugin provider (installs the plugin autmatically)
-    curl -o certs https://s3-us-west-2.amazonaws.com/rebar-catalog/certs/v2.4.0-0-02301d35f9f664d6c81d904c92a9c81d3fd41d2c/amd64/linux/certs
-    # install plugin provider
-    drpcli plugin_providers upload certs from certs
     # verify it worked - should return true
     drpcli plugins show certs | jq .Available
 
@@ -90,14 +88,7 @@ Using the Command Line (`drpcli`) utility configured to your endpoint, use this 
   ::
 
     # Get code
-    git clone https://github.com/digitalrebar/provision-content
-    cd krib
-
-    # KRIB content install
-    drpcli contents bundle krib.yaml
-    drpcli contents upload krib.yaml
-
-If KRIB is already installed, you should replace the upload with `drpcli contents update krib krib.yaml`
+    drpcli contents upload catalog:krib-tip
 
 UX Install
 ==========
@@ -126,11 +117,6 @@ The basic outline for configuring KRIB follows the below steps:
 
 There are many configuration options available, review the ``krib/*`` and ``etcd/*`` parameters to learn more.
 
-Configure with Terraform
-========================
-
-Please review the ``intergrations/krib`` for example Terraform plans.
-
 Configure with the CLI
 ======================
 
@@ -151,6 +137,8 @@ You must writeable create a *Profile* from YAML (or JSON if you prefer) with the
       color: "purple"
       icon: "ship"
       title: "My Installed Kubernetes Cluster"
+      render: "krib"
+      reset-keeps": "krib/cluster-profile,etcd/cluster-profile"
     ' > /tmp/krib-config.yaml
 
     drpcli profiles create - < /tmp/krib-config.yaml
