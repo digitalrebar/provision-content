@@ -88,7 +88,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
 
   # a fresh cluster struggles with races if this happens too fast.
-  sleep 2m
+  sleep 1m
   kubectl apply -f /tmp/certmanager-manifests.yaml
 
   # It seems to take about 2m until the pods are createde, and the webhook admission controller is ready for validating the CRDs which come next
