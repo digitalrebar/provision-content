@@ -12,7 +12,7 @@ OptionalParams:
 Templates:
 - Contents: |-
     #!/bin/bash
-    # Reset CA params
+    # Reset etcd CA params
     set -e
     # we need a random backoff to avoid races.
     SLEEP=$[ ( $RANDOM % 25 ) ]
@@ -35,9 +35,7 @@ Templates:
       echo "==========================================================================="
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"            
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"     
       echo "==========================================================================="
       echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
       
@@ -52,15 +50,13 @@ Templates:
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
-      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca
-      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca            
       export RS_TOKEN=$HOLD_TOKEN
     else
       echo "  No CA root detected - no reset required"
     fi
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
-  Name: CA clear
+  Name: etcd CA clear
 - Contents: |-
     #!/bin/bash
     # Reset etcd params
@@ -80,10 +76,107 @@ Templates:
   Name: etcd-reset
 - Contents: |-
     #!/bin/bash
+    # Reset consul CA params
+    set -e
+    declare -a WIPE_PARAMS=('consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key')
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing consul/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "setup.tmpl" .}}
+    echo "Checking CA"
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "consul/name"}}-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "consul/name"}}-ca) || true
+    if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
+      echo "CA contains $CA_TEST"
+      echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
+      echo "==========================================================================="
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"            
+      echo "==========================================================================="
+      echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
+      
+      sleep 1
+      {{if .ParamExists "unsafe/rs-password"}}
+        PASSWORD="{{.Param "unsafe/rs-password"}}"
+      {{else}}
+        PASSWORD="r0cketsk8ts"
+      {{end}}
+      HOLD_TOKEN=$RS_TOKEN
+      unset RS_TOKEN
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca            
+      export RS_TOKEN=$HOLD_TOKEN
+    else
+      echo "  No CA root detected - no reset required"
+    fi
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done consul CA params reset"
+  Name: consul CA clear
+- Contents: |-
+    #!/bin/bash
     # Reset consul params
     set -e
-    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key' 'consul/agents' 'consul/agents-done' 'consul/encryption-key' 'vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
     declare CLUSTER_TYPE="consul"
+    {{template "setup.tmpl" .}}
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing consul/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done consul params reset"
+  Name: consul-reset  
+- Contents: |-
+    #!/bin/bash
+    # Reset vault CA params
+    set -e
+    declare -a WIPE_PARAMS=('vault/server-ca-name' 'vault/server-ca-pw' 'vault/server-ca-cert')
+    {{if .ParamExists "vault/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{else -}}
+    echo "Missing vault/cluster-profile on the machine!"
+    exit 1
+    {{end -}}
+    {{template "setup.tmpl" .}}
+    echo "Checking CA"
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "vault/name"}}-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "vault/name"}}-ca) || true
+    if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
+      echo "CA contains $CA_TEST"
+      echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
+      echo "==========================================================================="
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"            
+      echo "==========================================================================="
+      echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
+      
+      sleep 1
+      {{if .ParamExists "unsafe/rs-password"}}
+        PASSWORD="{{.Param "unsafe/rs-password"}}"
+      {{else}}
+        PASSWORD="r0cketsk8ts"
+      {{end}}
+      HOLD_TOKEN=$RS_TOKEN
+      unset RS_TOKEN
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca            
+      export RS_TOKEN=$HOLD_TOKEN
+    else
+      echo "  No CA root detected - no reset required"
+    fi
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done CA params reset"
+  Name: vault CA clear
+- Contents: |-
+    #!/bin/bash
+    # Reset vault params
+    set -e
+    declare -a WIPE_PARAMS=('vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
+    declare CLUSTER_TYPE="vault"
     {{template "setup.tmpl" .}}
     {{if .ParamExists "krib/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
@@ -93,8 +186,8 @@ Templates:
     exit 1
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
-    echo "done consul params reset"
-  Name: consul-reset  
+    echo "done vault params reset"
+  Name: vault-reset    
 - Contents: |-
     #!/bin/bash
     # Reset KRIB params

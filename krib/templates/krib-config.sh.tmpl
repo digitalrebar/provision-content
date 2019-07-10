@@ -107,7 +107,13 @@ if [[ $MASTER_INDEX != notme ]] ; then
     kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
 
     echo "Building certificate file."
-    tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
+    tar -zcvf /tmp/cert.tgz \
+      /etc/kubernetes/pki/ca.crt \
+      /etc/kubernetes/pki/ca.key \
+      /etc/kubernetes/pki/sa.key \
+      /etc/kubernetes/pki/sa.pub \
+      /etc/kubernetes/pki/front-proxy-ca.*
+
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
     rm /tmp/cert.tgz /tmp/cert.b64
@@ -118,6 +124,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     # example of appending a featureGate to cluster after initial init
     #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
+
+{{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}
+    # We are using serverTLSBootstrap for kublets, so enable auto-approval of kubelet server CSRs
+    kubectl create -f /tmp/krib-kubelet-rubber-stamp.yaml
+    rm /tmp/krib-kubelet-rubber-stamp.yaml
+{{ end -}}{{ end -}}
 
     case $NET_TYPE in
       calico)

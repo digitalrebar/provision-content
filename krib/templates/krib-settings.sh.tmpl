@@ -24,6 +24,19 @@ MASTER_VIP={{.Param "krib/cluster-master-vip"}}
 if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
+  {{ if .ParamExists "krib/return-nxdomain-for" }}
+  # Let's fix the possibility of a broken coredns on alpine..
+  # This is a convoluted way to add a single domain to a rewrite
+  # plugin which will return NXDOMAIN for searches for the current searchdomain
+  kubectl get configmaps coredns -n kube-system -o yaml > /tmp/coredns.yaml
+  SEARCH_DOMAIN={{.Param "krib/return-nxdomain-for" }}
+  sed -i '/prometheus/ a \        rewrite name suffix banana cluster.local' /tmp/coredns.yaml
+  sed -i "s/banana/$SEARCH_DOMAIN/" /tmp/coredns.yaml
+  kubectl delete configmap coredns -n kube-system
+  kubectl create -f /tmp/coredns.yaml
+  kubectl scale --replicas=0 -n kube-system deployment/coredns
+  {{ end }}
+
   echo "Up the DNS replica count"
   kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/coredns
 
