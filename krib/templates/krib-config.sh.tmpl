@@ -107,7 +107,13 @@ if [[ $MASTER_INDEX != notme ]] ; then
     kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
 
     echo "Building certificate file."
-    tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
+    tar -zcvf /tmp/cert.tgz \
+      /etc/kubernetes/pki/ca.crt \
+      /etc/kubernetes/pki/ca.key \
+      /etc/kubernetes/pki/sa.key \
+      /etc/kubernetes/pki/sa.pub \
+      /etc/kubernetes/pki/front-proxy-ca.*
+
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
     rm /tmp/cert.tgz /tmp/cert.b64
