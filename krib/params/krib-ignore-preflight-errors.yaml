@@ -1,0 +1,18 @@
+---
+Name: "krib/ignore-preflight-errors"
+Description: "Options for kubeadm init --ignore-preflight-errors"
+Documentation: |
+  Helpful for debug and test clusters.  This flag allows operators to select none, all or some
+  preflight error checks to ignore during the kubeadm init.
+
+  Use "all" to ignore all errors
+  Use "none" to include all errors [default]
+
+  More Info, see https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/
+Schema:
+  type: "string"
+  default: "none"
+Meta:
+  color: "black"
+  icon: "bug"
+  title: "Community Content"

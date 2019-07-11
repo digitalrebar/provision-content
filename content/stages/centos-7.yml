@@ -6,6 +6,7 @@ Tasks:
   - "set-hostname"
   - "centos-drp-only-repos"
   - "ssh-access"
+  - "configure-network"
 Meta:
   icon: "download"
   color: "yellow"

@@ -1,0 +1,17 @@
+---
+Name: configure-network
+Description: "Configure the network during OS install"
+Documentation: |
+  Configures the network during OS install.
+  This uses the net/interface-topology and net/interface-config
+  params to write out the network configuration that should be used once
+  the system reboots after the install finishes
+Templates:
+  - Name: write-network-config
+    Contents: |
+      #!/usr/bin/env bash
+      if ! grep -q autogen < <(drpcli net); then
+          echo "drpcli net autogen is not a valid command"
+          exit 1
+      fi
+      drpcli net autogen {{.Machine.UUID}}
