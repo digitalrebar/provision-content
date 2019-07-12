@@ -58,8 +58,8 @@ systemctl restart vault
 
 # Init the vault if it's not already initialized
 # we need a sleep to allow vault to finish starting up, plus a random backoff to avoid races.
-sleep 15s
-SLEEP=$[ ( $RANDOM % 10 ) ]
+sleep 20s
+SLEEP=$[ ( $RANDOM % 20 ) ]
 set +e
 VAULT_CACERT=/etc/vault/pki/server-ca.pem vault operator init -status > /dev/null
 if [[ $? -gt 0 ]]; then

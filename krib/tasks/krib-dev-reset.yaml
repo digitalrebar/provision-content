@@ -228,7 +228,8 @@ Templates:
     rm -rf /etc/cni/
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
-    rm -rf /var/lib/docker/*    
+    rm -rf /var/lib/docker/*   
+    rm -rf /var/lib/rook/*    
     rm -rf /var/lib/consul/client
     rm -rf /var/lib/consul/server    
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"

@@ -1,0 +1,15 @@
+---
+Description: "A task to install and setup Rook Ceph"
+Name: "krib-rook-ceph"
+Templates:
+  - ID: "krib-rook-ceph.sh.tmpl"
+    Name: "Setup Rook Ceph"
+    Path: ""
+RequiredParams:
+  - krib/cluster-profile
+
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) nginx-ingress Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+  if ! which wget ; then
+    install wget
+  fi
+
+  download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/common.yaml \
+    -o /tmp/rook-common.yaml
+  download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/operator.yaml \
+    -o /tmp/rook-operator.yaml 
+  download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml \
+    -o /tmp/rook-cluster.yaml
+  download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml \
+    -o /tmp/rook-storageclass.yaml
+
+
+  # if [[ -n $(kubectl get namespaces | grep -w ingress-nginx) ]] ; then
+  #   echo "Purging existing nginx-ingress install"
+  #   kubectl delete -f /tmp/nginx-ingress-mandatory.yaml
+  # fi
+
+  # Create the default "internal" nginx
+  kubectl apply -f /tmp/rook-common.yaml
+  kubectl apply -f /tmp/rook-operator.yaml
+  
+  # Clean up
+  mkdir -p /tmp/cleanup
+  mv /tmp/*.yaml /tmp/cleanup
+
+else
+  echo "I was not the leader, skipping rook-ceph install"
+fi
+
+{{if .ParamExists "krib/selective-mastership" -}}
+SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+{{end -}}
+{{if .ParamExists "krib/i-am-master" -}}
+I_AM_MASTER={{.Param "krib/i-am-master" }}
+{{end -}}
+if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+  if [[ ! "$I_AM_MASTER" == true ]] ; then
+    # I'm a worker, so wipe /dev/sda in preparation for ceph
+    yum install -y gdisk
+    sgdisk --zap-all /dev/sda
+    exit 0
+  fi
+fi
+
+
+
+echo "Finished rook-ceph deployment successfully"
+
+echo "Finished successfully"
+exit 0
