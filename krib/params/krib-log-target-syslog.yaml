@@ -1,0 +1,13 @@
+---
+Name: "krib/log-target-syslog"
+Description: "The target for remote syslog logs if running the krib-logging stage"
+Documentation: |
+  An IP outside the cluster designated configured to receive remote syslog logs
+  on UDP 514
+  
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

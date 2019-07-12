@@ -92,7 +92,7 @@ data:
     [OUTPUT]
         Name          gelf
         Match         *
-        Host          {{ .Param "krib/controller-ip" }}
+        Host          {{ .Param "krib/log-target-gelf" }}
         Port          12201
         Mode          udp
         Gelf_Short_Message_Key log
