@@ -8,7 +8,7 @@ Documentation: |
   The install checks to see if tiller is running and may skip initialization.
 RequiredParams:
   - krib/cluster-profile
-  - krib/controller-ip  
+  - krib/log-target-gelf
 Templates:
   - ID: "logging-fluent-bit.yaml.tmpl"
     Name: "YAML manifents for fluent-bit"
