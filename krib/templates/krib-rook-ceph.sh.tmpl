@@ -58,8 +58,8 @@ I_AM_MASTER={{.Param "krib/i-am-master" }}
 if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
   if [[ ! "$I_AM_MASTER" == true ]] ; then
     # I'm a worker, so wipe /dev/sda in preparation for ceph
-    parted --script -a optimal /dev/sda mklabel gpt mkpart primary 0% 100%
-    parted --script -a optimal /dev/sda rm 1
+    yum install -y gdisk
+    sgdisk --zap-all /dev/sda
     exit 0
   fi
 fi
