@@ -30,6 +30,8 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     echo "Applying fluent-bit manifests"
     kubectl apply -f /tmp/logging-fluent-bit.yaml
+    mkdir -p /tmp/cleanup
+    mv /tmp/logging-fluent-bit.yaml /tmp/cleanup
 
   else
 
