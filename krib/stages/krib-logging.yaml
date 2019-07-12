@@ -1,0 +1,13 @@
+---
+Name: "krib-logging"
+Description: "KRIB install fluent-bit on the cluster for logging"
+Documentation: |
+  Installs and runs fluent-bit to aggregate container logs to a graylog server
+  via GELF UDP input
+RunnerWait: true
+Tasks:
+  - "krib-logging"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
