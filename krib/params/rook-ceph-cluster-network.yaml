@@ -1,6 +1,6 @@
 ---
-Name: "rook/ceph-cluster-range"
-Description: "IP range used for rook ceph when separating custer traffic from public traffic"
+Name: "rook/ceph-cluster-network"
+Description: "Network (in CIDR format) rook ceph will use when separating cluster traffic from public traffic"
 Documentation: |
   This should be set to match a physical network on rook nodes to be used exclusively
   for cluster traffic

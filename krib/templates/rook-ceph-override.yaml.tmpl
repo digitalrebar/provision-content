@@ -6,4 +6,7 @@ metadata:
 data:
   config: |
     [global]
-    cluster network = {{ .Param "krib/rook-ceph-cluster-range" }}
+    public network = {{ .Param "krib/rook-ceph-public-network" }}
+    cluster network = {{ .Param "krib/rook-ceph-cluster-network" }}
+    public addr = ""
+    cluster addr = ""    

@@ -233,7 +233,6 @@ Templates:
     rm -rf /var/lib/consul/client
     rm -rf /var/lib/consul/server    
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
-    dmsetup remove /dev/mapper/ceph* || echo "No device-mapper remnants of ceph"
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 
     {{if .ParamExists "krib/selective-mastership" -}}
@@ -247,7 +246,10 @@ Templates:
         # I'm a worker, so wipe /dev/sda in preparation for ceph
         yum install -y gdisk
         sgdisk --zap-all /dev/sda
-        exit 0
+
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+
       fi
     fi
 
