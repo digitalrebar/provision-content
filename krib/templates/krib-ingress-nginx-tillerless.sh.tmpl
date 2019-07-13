@@ -87,12 +87,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl create namespace cert-manager || echo "Failed to create namespace, it probably already exists. Proceeding..."
   kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true" || echo "Failed to disable validation on namespace, it's probably already done. Proceeding..."
 
-  # a fresh cluster struggles with races if this happens too fast, because containers are still downloading
-  sleep 2m
   kubectl apply -f /tmp/certmanager-manifests.yaml
 
-  # It seems to take about 2m until the pods are createde, and the webhook admission controller is ready for validating the CRDs which come next
-  sleep 2m
+  # TODO : It seems to take about 2-3m until the pods are created, and the webhook admission controller is ready for validating the CRDs which come next
+  sleep 3m
 {{if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
   if [[ -n $(kubectl -n kube-system get secrets | grep -w certmanager-provider) ]] ; then
     echo "Removing existing certmanager-provider Secret"

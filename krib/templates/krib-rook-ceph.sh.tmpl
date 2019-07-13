@@ -41,12 +41,23 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl apply -f /tmp/rook-common.yaml
   kubectl apply -f /tmp/rook-operator.yaml
   
-  ### Prepare the CephCluster manifest
-  # Enable host networking
-  sed -i 's/hostNetwork: false$/hostNetwork: true' /tmp/rook-cluster.yaml
-  sed -i 's/useAllDevices:$/useAllDevices: false' /tmp/rook-cluster.yaml
-  sed -i 's/deviceFilter:$/deviceFilter: sda' /tmp/rook-cluster.yaml
+  # Apply override to use the cluster range
+  kubectl apply -f /tmp/rook-ceph-override.yaml
 
+  # Create cluster
+  sed -i 's/hostNetwork: false$/hostNetwork: true/' /tmp/rook-cluster.yaml
+  sed -i 's/useAllDevices:$/useAllDevices: false/' /tmp/rook-cluster.yaml
+  sed -i 's/deviceFilter:$/deviceFilter: sda/' /tmp/rook-cluster.yaml
+  kubectl apply -f /tmp/rook-cluster.yaml
+
+  # Create the storageclass
+  kubectl apply -f /tmp/rook-storageclass.yaml
+
+  # Create the dashboard
+  kubectl apply -f /tmp/rook-ceph-dashboard-ingress.yaml
+
+  # Create the toolbox
+  kubectl apply -f /tmp/rook-ceph-toolbox.yaml
 
 
   # Clean up
