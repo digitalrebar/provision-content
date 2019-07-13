@@ -2,6 +2,9 @@
 Description: "A task to install and setup Rook Ceph"
 Name: "krib-rook-ceph"
 Templates:
+  - ID: "rook-ceph-override.yaml.tmpl"
+    Name: "Ceph override configmap"
+    Path: "/tmp/rook-ceph-override.yaml"
   - ID: "krib-rook-ceph.sh.tmpl"
     Name: "Setup Rook Ceph"
     Path: ""

@@ -41,27 +41,20 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl apply -f /tmp/rook-common.yaml
   kubectl apply -f /tmp/rook-operator.yaml
   
+  ### Prepare the CephCluster manifest
+  # Enable host networking
+  sed -i 's/hostNetwork: false$/hostNetwork: true' /tmp/rook-cluster.yaml
+  sed -i 's/useAllDevices:$/useAllDevices: false' /tmp/rook-cluster.yaml
+  sed -i 's/deviceFilter:$/deviceFilter: sda' /tmp/rook-cluster.yaml
+
+
+
   # Clean up
   mkdir -p /tmp/cleanup
   mv /tmp/*.yaml /tmp/cleanup
 
 else
   echo "I was not the leader, skipping rook-ceph install"
-fi
-
-{{if .ParamExists "krib/selective-mastership" -}}
-SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
-{{end -}}
-{{if .ParamExists "krib/i-am-master" -}}
-I_AM_MASTER={{.Param "krib/i-am-master" }}
-{{end -}}
-if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
-  if [[ ! "$I_AM_MASTER" == true ]] ; then
-    # I'm a worker, so wipe /dev/sda in preparation for ceph
-    yum install -y gdisk
-    sgdisk --zap-all /dev/sda
-    exit 0
-  fi
 fi
 
 
