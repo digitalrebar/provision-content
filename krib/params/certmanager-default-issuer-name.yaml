@@ -1,0 +1,11 @@
+---
+Name: "certmanager/default-issuer-name"
+Description: "certmanager default issuer name"
+Documentation: |
+  The default issuer to use when creating ingresses
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
