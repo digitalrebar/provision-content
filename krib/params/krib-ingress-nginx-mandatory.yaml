@@ -1,12 +1,13 @@
 ---
-Name: "krib/ingress-nginx-mandatory"
-Description: "Specifies the YAML config file url to use for nginx ingress install."
+Name: "krib/ingress-nginx-publish-ip"
+Description: "Optionally specifies a publish IP to the nginx external ingress"
 Documentation: |
-  Set this string to an HTTP or HTTPS reference for a YAML configuration to
-  use for nginx install.  
+  If running an nginx ingress behind a NATing firewall, it may be required to explicitly specify
+  the public IP assigned to ingresses, for example to make something like external-dns work
+  If this value is set, then either the nginx ingress, or (if enabled) the _external_ nginx ingress
+  will have the "--publish-status-address" argument set to this value.
 Schema:
   type: "string"
-  default: "https://github.com/kubernetes/ingress-nginx/raw/nginx-0.24.1/deploy/mandatory.yaml"
 Meta:
   color: "blue"
   icon: "ship"
