@@ -35,7 +35,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # If we're only doing one ingress, allow the possibilty to override the publish ip
   {{ if .ParamExists "krib/ingress-nginx-publish-ip" }}
   {{ if eq (.Param "krib/ingress-external-enabled") false -}}
-  sed -i "/--ingress-class=/ a \            - --publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }} \\" \
+  sed -i "s/publish-service=$(POD_NAMESPACE)/publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }}/" \
     /tmp/nginx-ingress-mandatory.yaml
   {{ end -}}
   {{ end -}}
@@ -56,12 +56,15 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     /tmp/nginx-ingress-mandatory.yaml > /tmp/nginx-ingress-external-mandatory.yaml
   sed -i "/annotations-prefix=nginx.ingress/ a \            - --election-id=ingress-controller-leader-external \\" \
     /tmp/nginx-ingress-external-mandatory.yaml
-  sed -i "/annotations-prefix=nginx.ingress/ a \            - --publish-service=ingress-nginx-external/ingress-nginx-external \\" \
-    /tmp/nginx-ingress-external-mandatory.yaml
 
-  # If we're doing an _additional_ external ingress, then allow the possibility of overriding the external ingress publish ip only
+
+  # If we're doing an _additional_ external ingress, then allow the possibility of overriding the external ingress publish ip using --publish-status-address
+  # This value is mutually exclusive from --publish-service
   {{- if .ParamExists "krib/ingress-nginx-publish-ip" }}
-  sed -i "/--ingress-class=/ a \            - --publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }} \\" \
+  sed -i "s/publish-service=$(POD_NAMESPACE)/publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }}/" \
+    /tmp/nginx-ingress-external-mandatory.yaml
+  {{ else }}
+    sed -i "/annotations-prefix=nginx.ingress/ a \            - --publish-service=ingress-nginx-external/ingress-nginx-external \\" \
     /tmp/nginx-ingress-external-mandatory.yaml
   {{ end -}}
 
