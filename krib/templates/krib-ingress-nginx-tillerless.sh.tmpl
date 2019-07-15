@@ -115,8 +115,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   # It can take some time before this succeeds, because it requires un-tainted workers available to 
   # run workloads, and the download of container images for certmanager's validating webhook
-  # For this reason, we use with_backoff
-  with_backoff kubectl apply -f /tmp/certmanager-clusterissuer.yaml
+  # For this reason, we use with_backoff, and we retry every minute for 10 min
+  ATTEMPTS=10 TIMEOUT=10 with_backoff kubectl apply -f /tmp/certmanager-clusterissuer.yaml
 
   # Clean up
   mkdir -p /tmp/cleanup
