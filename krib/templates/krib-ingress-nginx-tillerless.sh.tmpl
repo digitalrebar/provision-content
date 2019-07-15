@@ -60,7 +60,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     /tmp/nginx-ingress-external-mandatory.yaml
 
   # If we're doing an _additional_ external ingress, then allow the possibility of overriding the external ingress publish ip only
-  {{ if .ParamExists "krib/ingress-nginx-publish-ip" }}
+  {{- if .ParamExists "krib/ingress-nginx-publish-ip" }}
   sed -i "/--ingress-class=/ a \            - --publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }} \\" \
     /tmp/nginx-ingress-external-mandatory.yaml
   {{ end -}}
