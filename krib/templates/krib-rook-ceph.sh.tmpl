@@ -47,7 +47,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # Create cluster
   sed -i 's/hostNetwork: false$/hostNetwork: true/' /tmp/rook-cluster.yaml
   sed -i 's/useAllDevices:$/useAllDevices: false/' /tmp/rook-cluster.yaml
-  if {{ .ParamExists "rook/ceph-target-disk" }}
+  {{ if .ParamExists "rook/ceph-target-disk" }}
   sed -i 's/deviceFilter:$/deviceFilter: {{ .Param "rook/ceph-target-disk" }}/' /tmp/rook-cluster.yaml
   {{ end -}}
   kubectl apply -f /tmp/rook-cluster.yaml
