@@ -56,48 +56,40 @@ systemctl daemon-reload
 systemctl restart vault
 
 
-# Init the vault if it's not already initialized
-MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
-if [[ $MASTER_INDEX == 0 ]] ; then
-  # Before attempting to init vault, first make sure it's up and talking to consul. The "vault status" command should exit 0
-  with_backoff VAULT_CACERT=/etc/vault/pki/server-ca.pem vault status
+# Only initialize vault on the consul leader, to avoid races
 
-  set +e
-  # Check whether the vault is initialized. This seems unnecessary on a fresh install, but it may be that we are re-running this
-  # task for some reason (like a transitory failure) on an already-configured vault
-  VAULT_CACERT=/etc/vault/pki/server-ca.pem vault operator init -status > /dev/null
-  if [[ $? -gt 0 ]]; then
-    set -x
-    set -e
-    export VAULT_CACERT=/etc/vault/pki/server-ca.pem 
-    vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
+if [[ $(consul operator raft list-peers | grep `hostname -s` | grep -q leader) ]] ; then
+  # Before attempting to init vault, sleep 5s to give it time to wake up
+  sleep 5s
 
-    # Get our recovery key and token, then delete the local record
-    export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
-    export VAULT_TOKEN=`cat /tmp/vault.json | jq -r '[.root_token][0]'`
+  export VAULT_CACERT=/etc/vault/pki/server-ca.pem 
+  vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
-    # Insert recovery key and token into params
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
+  # Get our recovery key and token, then delete the local record
+  export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
+  export VAULT_TOKEN=`cat /tmp/vault.json | jq -r '[.root_token][0]'`
 
-    # enable the transit secret backend
-    vault secrets enable transit
+  # Insert recovery key and token into params
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
 
-    # create a policy for the transit backend
-    vault policy write transit-only /etc/vault/policy-transit-only.hcl
+  # enable the transit secret backend
+  vault secrets enable transit
 
-    # Create a token for kubernetes
-    echo "Setting vault/kms-plugin-token"
-    vault token create -policy transit-only -format json > /tmp/token.json
-    VAULT_KMS_TOKEN=`cat /tmp/token.json | jq -r '[.auth.client_token][0]'`
-    
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/kms-plugin-token" to "$VAULT_KMS_TOKEN"
+  # create a policy for the transit backend
+  vault policy write transit-only /etc/vault/policy-transit-only.hcl
 
-    # Destroy the evidence
-    mkdir -p /tmp/cleanup
-    mv /tmp/vault.json /tmp/cleanup
-    mv /tmp/token.json /tmp/cleanup
-  fi
+  # Create a token for kubernetes
+  echo "Setting vault/kms-plugin-token"
+  vault token create -policy transit-only -format json > /tmp/token.json
+  VAULT_KMS_TOKEN=`cat /tmp/token.json | jq -r '[.auth.client_token][0]'`
+  
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/kms-plugin-token" to "$VAULT_KMS_TOKEN"
+
+  # Destroy the evidence
+  mkdir -p /tmp/cleanup
+  mv /tmp/vault.json /tmp/cleanup
+  mv /tmp/token.json /tmp/cleanup
 fi
 
 VAULT_SERVER_COUNT={{.Param "vault/server-count"}}
