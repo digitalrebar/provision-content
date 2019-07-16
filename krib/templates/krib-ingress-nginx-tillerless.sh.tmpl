@@ -84,15 +84,15 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   wget -O /tmp/certmanager-manifests.yaml {{ .Param "certmanager/manifests" }}
 
   echo "Preparing namespace and disabling validation.."
-  kubectl create namespace cert-manager
-  kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true"
+  kubectl create namespace cert-manager || echo "Failed to create namespace, it probably already exists. Proceeding..."
+  kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true" || echo "Failed to disable validation on namespace, it's probably already done. Proceeding..."
 
   # a fresh cluster struggles with races if this happens too fast.
   sleep 1m
   kubectl apply -f /tmp/certmanager-manifests.yaml
 
   # It seems to take about 2m until the pods are createde, and the webhook admission controller is ready for validating the CRDs which come next
-  sleep 1m
+  sleep 2m
 {{if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
   if [[ -n $(kubectl -n kube-system get secrets | grep -w certmanager-provider) ]] ; then
     echo "Removing existing certmanager-provider Secret"

@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+echo "Configure fluent-bit logging the master (skip for minions)..."
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  if [[ $MASTER_INDEX == 0 ]] ; then
+
+    echo "I am the elected leader - install fluent-bit and helm init"
+
+    # needed to apply manifests
+    export KUBECONFIG="/etc/kubernetes/admin.conf"
+
+
+    echo "Applying fluent-bit manifests"
+    kubectl apply -f /tmp/logging-fluent-bit.yaml
+    mkdir -p /tmp/cleanup
+    mv /tmp/logging-fluent-bit.yaml /tmp/cleanup
+
+  else
+
+    echo "I was not the leader, skipping fluent-bit init"
+
+  fi
+
+else
+
+  echo "I am a worker - no fluent-bit actions"
+
+fi
+
+echo "Finished successfully"
+exit 0

@@ -1,0 +1,23 @@
+---
+Description: "A task to install logging"
+Name: "krib-logging"
+Documentation: |
+  Installs fluent-bit for aggregation of cluster logging to a graylog server
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set.
+
+  The install checks to see if tiller is running and may skip initialization.
+RequiredParams:
+  - krib/cluster-profile
+  - krib/log-target-gelf
+Templates:
+  - ID: "logging-fluent-bit.yaml.tmpl"
+    Name: "YAML manifents for fluent-bit"
+    Path: "/tmp/logging-fluent-bit.yaml"
+  - ID: "logging-fluent-bit.sh.tmpl"
+    Name: "Apply the YAML manifests"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
