@@ -108,6 +108,7 @@ data:
     address-pools:
     - name: default
       protocol: bgp
+      avoid-buggy-ips: true
       addresses:
       - {{$l3_ip_range}} 
 EOFCONFIG
