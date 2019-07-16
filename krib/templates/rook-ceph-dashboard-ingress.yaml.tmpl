@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rook-ceph-mgr-dashboard
+  namespace: rook-ceph
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      proxy_ssl_verify off;
+{{- if .ParamExists "certmanager/default-issuer-name" }}    
+    certmanager.k8s.io/cluster-issuer: "{{ .Param "certmanager/default-issuer-name" }}"
+{{ end -}}
+spec:
+  tls:
+   - hosts:
+     - ceph.{{ .Param "certmanager/dns-domain" }}
+     secretName: ceph.{{ .Param "certmanager/dns-domain" }}
+  rules:
+  - host: ceph.{{ .Param "certmanager/dns-domain" }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rook-ceph-mgr-dashboard
+          servicePort: https-dashboard

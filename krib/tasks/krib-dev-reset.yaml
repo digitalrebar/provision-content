@@ -228,14 +228,52 @@ Templates:
     rm -rf /etc/cni/
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
-    rm -rf /var/lib/docker/*    
+    rm -rf /var/lib/docker/*   
+    rm -rf /var/lib/rook/*    
     rm -rf /var/lib/consul/client
     rm -rf /var/lib/consul/server    
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
-
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
-    
+
+    {{ if .ParamExists "rook/ceph-target-disk"}}
+    {{if .ParamExists "krib/selective-mastership" -}}
+    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+    {{end -}}
+    {{if .ParamExists "krib/i-am-master" -}}
+    I_AM_MASTER={{.Param "krib/i-am-master" }}
+    {{end -}}
+    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+      if [[ ! "$I_AM_MASTER" == true ]] ; then
+        # I'm a worker, so wipe disk in preparation for next ceph installation
+        yum install -y gdisk
+        sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+      fi
+    fi
+    {{ end -}}
   Name: KRIB wipe machine for cluster reinstall  
+- Contents: |-
+    #!/bin/bash
+
+    {{ if .ParamExists "rook/ceph-target-disk"}}
+    {{if .ParamExists "krib/selective-mastership" -}}
+    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+    {{end -}}
+    {{if .ParamExists "krib/i-am-master" -}}
+    I_AM_MASTER={{.Param "krib/i-am-master" }}
+    {{end -}}
+    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+      if [[ ! "$I_AM_MASTER" == true ]] ; then
+        # I'm a worker, so wipe disk in preparation for next ceph installation
+        yum install -y gdisk
+        sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+      fi
+    fi
+    {{ end -}}
+  Name: KRIB wipe disks used for rook-ceph (if configured)  
 Meta:
   icon: "ship"
   color: "orange"

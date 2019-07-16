@@ -1,0 +1,23 @@
+---
+Description: "A task to install and setup Rook Ceph"
+Name: "krib-rook-ceph"
+Templates:
+  - ID: "rook-ceph-dashboard-ingress.yaml.tmpl"
+    Name: "Ceph dashboard ingress"
+    Path: "/tmp/rook-ceph-dashboard-ingress.yaml"    
+  - ID: "rook-ceph-override.yaml.tmpl"
+    Name: "Ceph override configmap"
+    Path: "/tmp/rook-ceph-override.yaml"
+  - ID: "rook-ceph-toolbox.yaml.tmpl"
+    Name: "Ceph toolbox deployment"
+    Path: "/tmp/rook-ceph-toolbox.yaml"    
+  - ID: "krib-rook-ceph.sh.tmpl"
+    Name: "Setup Rook Ceph"
+    Path: ""
+RequiredParams:
+  - krib/cluster-profile
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

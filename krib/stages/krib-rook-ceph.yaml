@@ -1,0 +1,12 @@
+---
+Name: "krib-rook-ceph"
+Description: "KRIB installs and configures Rook Ceph on the cluster"
+Documentation: |
+  Installs and runs Rook Ceph install
+RunnerWait: true
+Tasks:
+  - "krib-rook-ceph"
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
