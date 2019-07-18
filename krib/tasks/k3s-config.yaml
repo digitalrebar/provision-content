@@ -1,0 +1,20 @@
+---
+Description: "A task to configure k3s"
+Name: "k3s-config"
+Documentation: |
+  Sets Param: krib/cluster-join, krib/cluster-admin-conf
+  Configure K3s using built-in commands
+  This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set
+RequiredParams:
+  - krib/cluster-profile
+Templates:
+  - ID: "k3s-config.sh.tmpl"
+    Name: "Config K3s"
+    Path: ""
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  k3s: "true"
+  copyright: "RackN 2019"
