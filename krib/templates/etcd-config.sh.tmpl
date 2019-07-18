@@ -9,7 +9,7 @@ set -e
 {{template "krib-skip-if-not-master.tmpl" .}}
 
 # we need a random backoff to avoid races.
-SLEEP=$[ ( $RANDOM % 10 ) ]
+SLEEP=$[ ( $RANDOM % 20 ) ]
 
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"

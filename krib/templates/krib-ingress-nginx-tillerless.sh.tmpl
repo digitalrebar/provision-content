@@ -107,6 +107,29 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl create namespace cert-manager || echo "Failed to create namespace, it probably already exists. Proceeding..."
   kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true" || echo "Failed to disable validation on namespace, it's probably already done. Proceeding..."
 
+  ###### Perform optional substitution of the container image specified in the deployment YAML with
+  ###### an image from a local registry, for security
+  {{ if .ParamExists "krib/cert-manager-container-image-controller" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
+  sed -i 's|quay.io/jetstack/cert-manager-controller|{{ .Param "krib/cert-manager-container-image-controller" }}|' \
+    /tmp/certmanager-manifests.yaml
+  {{ end -}}
+
+  {{ if .ParamExists "krib/cert-manager-container-image-cainjector" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
+  sed -i 's|quay.io/jetstack/cert-manager-cainjector|{{ .Param "krib/cert-manager-container-image-cainjector" }}|' \
+    /tmp/certmanager-manifests.yaml
+  {{ end -}}
+
+  {{ if .ParamExists "krib/cert-manager-container-image-webhook" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
+  sed -i 's|quay.io/jetstack/cert-manager-webhook|{{ .Param "krib/cert-manager-container-image-webhook" }}|' \
+    /tmp/certmanager-manifests.yaml
+  {{ end -}}  
+  ######
+  ###### End optional substitution
+
+
   kubectl apply -f /tmp/certmanager-manifests.yaml
 
 {{if .ParamExists "certmanager/acme-challenge-dns01-provider"}}

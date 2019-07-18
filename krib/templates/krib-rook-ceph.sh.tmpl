@@ -31,13 +31,28 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml \
     -o /tmp/rook-storageclass.yaml
 
+  ##### Optionally replace containers in distributed YAML manifests with operator-specified
+  ##### containers from a private registry
+  #####
+  {{ if .ParamExists "krib/rook-ceph-container-image-daemon-base" }}
+  # Replace default container image with the one specified in "krib/metallb-container-image-daemon-base"
+  sed -i 's|ceph/daemon-base|{{ .Param "krib/rook-ceph-container-image-daemon-base" }}|' /tmp/rook-cluster.yaml
+  {{ end -}}
+  {{ if .ParamExists "krib/rook-ceph-container-image" }}
+  # Replace default container image with the one specified in "krib/metallb-container-image"
+  sed -i 's|image: rook/ceph|image: {{ .Param "krib/rook-ceph-container-image" }}|' /tmp/rook-operator.yaml
+  # Replace default container image with the one specified in "krib/metallb-container-image"
+  sed -i 's|image: rook/ceph|image: {{ .Param "krib/rook-ceph-container-image" }}|' /tmp/rook-ceph-toolbox.yaml
+  {{ end -}}
+  #####
+  ##### Finish optional replacement
 
   # if [[ -n $(kubectl get namespaces | grep -w ingress-nginx) ]] ; then
   #   echo "Purging existing nginx-ingress install"
   #   kubectl delete -f /tmp/nginx-ingress-mandatory.yaml
   # fi
 
-  # Create the default "internal" nginx
+  # Create the common elements
   kubectl apply -f /tmp/rook-common.yaml
   kubectl apply -f /tmp/rook-operator.yaml
   

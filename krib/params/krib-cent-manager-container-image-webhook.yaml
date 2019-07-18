@@ -1,0 +1,14 @@
+---
+Name: "krib/cert-manager-container-image-webhook"
+Description: "Custom container image to use for cert-manager webhook"
+Documentation: |
+  Allows operators to optionally override the container image used in the
+  cert-manager deployment. Possible use case would be pre-prepared images pushed to a 
+  local trusted registry
+  
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"
