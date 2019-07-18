@@ -1,0 +1,17 @@
+---
+Name: "k3s-config"
+Description: "KRIB configure a K3s cluster master and nodes"
+Documentation: |
+  Designed to substitute for Kubernetes with K3s
+  Installs k3s using the KRIB process and params
+  with the goal of being able to use the same downstream stages
+RunnerWait: true
+Tasks:
+  - "krib-get-masters"
+  - "k3s-config"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"
+  k3s: "true"
+  copyright: "RackN 2019"

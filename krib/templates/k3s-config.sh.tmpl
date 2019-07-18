@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# k3s part of Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+# Copyright RackN 2019
+set -e
+
+# Get access and who we are.
+{{ template "setup.tmpl" .}}
+
+{{ if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
+PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
+{{ else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{ end -}}
+
+{{ template "krib-lib.sh.tmpl" .}}
+
+echo "Download k3s (for now only use latest and AMD64 arch)"
+
+RELEASE=v0.6.1
+TMP_DIR=/tmp/k3s-tmp
+INSTALL_DIR=/usr/bin
+KRIB_REPO=https://github.com/rancher/k3s/releases/
+
+echo "Download k3s: ${RELEASE}"
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L --remote-name-all "${KRIB_REPO}/releases/download/${RELEASE}/k3s"
+else
+  echo "missing REPO AND RELEASE"
+  exit 1
+fi
+chmod +x k3s
+
+echo "Configure master or nodes..."
+
+{{ if .ParamExists "krib/ip" -}}
+KRIB_IP={{ .Param "krib/ip" }}
+{{ else -}}
+KRIB_IP={{ .Machine.Address }}
+{{ end -}}
+
+# we need a random backoff to avoid races.
+SLEEP=$[ ( $RANDOM % 25 ) ]
+sleep $SLEEP
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  echo "I am master - run k3s server"
+
+  sudo k3s server &
+  echo "verify install"
+  echo $(sudo k3s kubectl get node)
+
+  # collect the cluster bootstrap token, then store it on the Param
+  TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
+  drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_BOOTSTRAP_TOKEN to "$TOKEN"
+
+  # example of appending a featureGate to cluster after initial init
+  #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
+  echo "Recording cluster admin config ..."
+  drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to - < /etc/rancher/k3s/k3s.yaml
+
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"purple\", \"icon\": \"anchor\" }}" | jq .Meta
+
+else
+
+  echo "I am a node - run k3s agent"
+
+  TOKEN=$(wait_for_variable $PROFILE_TOKEN)
+
+  echo "Running: $TOKEN"
+  sudo k3s agent --server https://{{ .Param "krib/cluster-master-vip" -}}:6443 --token $TOKEN
+
+  # Set machine icon and color for KRIB cluster building
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\" }}" | jq .Meta
+
+fi
+
+echo "Finished successfully"
+exit 0
