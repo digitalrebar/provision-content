@@ -1,9 +1,9 @@
 ---
-Name: "metallb/container-image-speaker"
-Description: "Custom container image to use for MetalLB speaker"
+Name: "krib/externaldns-container-image"
+Description: "Custom container image to use for ExternalDNS"
 Documentation: |
   Allows operators to optionally override the container image used in the
-  MetalLB speaker daemonset. Possible use case would be pre-prepared images pushed to a 
+  ExteranlDNS deployment. Possible use case would be pre-prepared images pushed to a 
   local trusted registry
   
 Schema:

@@ -19,6 +19,11 @@ MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
+  {{ if .ParamExists "krib/externaldns-container-image" }}
+  # Replace default container image with the one specified in "externaldns/container-image" 
+  sed -i 's|registry.opensource.zalan.do/teapot/external-dns|{{ .Param "krib/externaldns-container-image" }}|' /tmp/krib-external-dns.yaml
+  {{ end -}}
+
   # Deploy
   kubectl apply -f /tmp/krib-external-dns.yaml
 

@@ -1,9 +1,9 @@
 ---
-Name: "metallb/container-image-controller"
-Description: "Custom container image to use for MetalLB controller"
+Name: "krib/kubelet-rubber-stamp-container-image"
+Description: "Custom container image to use for kublet rubber stamp"
 Documentation: |
   Allows operators to optionally override the container image used in the
-  MetalLB controller deployment. Possible use case would be pre-prepared images pushed to a 
+  kubelt rubber stamp deployment. Possible use case would be pre-prepared images pushed to a 
   local trusted registry
   
 Schema:

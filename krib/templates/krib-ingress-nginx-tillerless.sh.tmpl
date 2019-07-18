@@ -30,6 +30,11 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   #   kubectl delete -f /tmp/nginx-ingress-mandatory.yaml
   # fi
 
+  {{ if .ParamExists "krib/nginx-ingress-controller-container-image" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-controller-container-image"
+  sed -i 's|quay.io/kubernetes-ingress-controller/nginx-ingress-controller|{{ .Param "krib/nginx-ingress-controller-container-image" }}|' /tmp/nginx-ingress-mandatory.yaml
+  {{ end -}}
+
   # If we're only doing one ingress, allow the possibilty to override the publish ip
   {{ if .ParamExists "krib/ingress-nginx-publish-ip" }}
   {{ if eq (.Param "krib/ingress-external-enabled") false -}}

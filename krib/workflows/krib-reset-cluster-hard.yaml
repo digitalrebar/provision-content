@@ -1,0 +1,11 @@
+Description: "KRIB Developer HARD Reset Cluster Profile"
+Errors: []
+Meta:
+  color: "red"
+  icon: "ship"
+  title: "kubernetes reset cluster hard (flush out errors on a regular reset)"
+Name: "krib-reset-cluster-hard"
+ReadOnly: false
+Stages:
+  - "krib-dev-hard-reset"
+  - "krib-live-wait"

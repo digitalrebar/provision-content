@@ -1,0 +1,10 @@
+---
+Name: "krib-dev-hard-reset"
+Description: "DEV: Clear the Profile to Reset before test run, with no regard for races"
+RunnerWait: true
+Tasks:
+  - "krib-dev-hard-reset"
+Meta:
+  icon: "ship"
+  color: "red"
+  title: "Community Content"
