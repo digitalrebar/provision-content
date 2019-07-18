@@ -35,6 +35,16 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 {{$memory := .Param "metallb/limits-memory"}}  
   sed -i 's/memory: 100Mi/memory: {{$memory}}/' /tmp/metallb.yaml
 
+  {{ if .ParamExists "metallb/container-image-controller" }}
+  # Replace default container image with the one specified in "metallb/container-image"
+  sed -i 's|metallb/controller:master|{{ .Param "metallb/container-image-controller" }}|' /tmp/metallb.yaml
+  {{ end -}}
+
+  {{ if .ParamExists "metallb/container-image-speaker" }}
+  # Replace default container image with the one specified in "metallb/container-image"
+  sed -i 's|metallb/speaker:master|{{ .Param "metallb/container-image-speaker" }}|' /tmp/metallb.yaml
+  {{ end -}}
+
   if [[ -n $(kubectl get namespaces | grep -w metallb-system) ]] ; then
     echo "Purging existing metallb install"
     kubectl delete -f /tmp/metallb.yaml
