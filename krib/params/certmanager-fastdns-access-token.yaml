@@ -4,10 +4,10 @@ Description: "certmanager fastdns access token"
 Documentation: |
   DNS01 Challenge Provider Configuration data
   See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#akamai-fastdns
+Secure: true
 Schema:
   type: "string"
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  password: "hideme"

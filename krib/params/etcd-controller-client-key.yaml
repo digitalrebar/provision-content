@@ -8,8 +8,8 @@ Documentation: |
 
 Schema:
   type: "string"
+Secure: true
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  password: "hideme"

@@ -6,8 +6,8 @@ Documentation: |
   See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#rfc2136
 Schema:
   type: "string"
+Secure: true
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  password: "hideme"

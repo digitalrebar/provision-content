@@ -6,8 +6,8 @@ Documentation: |
   becomes unavailable. Store this somewhere secure, and delete from DRP, for confidence
 Schema:
   type: "string"
+Secure: true
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  password: "hideme" 
