@@ -1,0 +1,12 @@
+Description: "KRIB built K3s cluster"
+Errors: []
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "k3s cluster"
+  k3s: "true"
+  copyright: "RackN 2019"
+Name: "k3s-cluster"
+ReadOnly: false
+Stages:
+  - "krib-config"
