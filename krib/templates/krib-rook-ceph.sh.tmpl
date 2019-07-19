@@ -55,6 +55,9 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # Create the storageclass
   kubectl apply -f /tmp/rook-storageclass.yaml
 
+  # Make storageclass the default (could potentially override this in future with a param)
+  kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  
   # Create the dashboard
   kubectl apply -f /tmp/rook-ceph-dashboard-ingress.yaml
 
