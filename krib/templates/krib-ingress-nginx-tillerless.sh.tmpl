@@ -33,7 +33,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # If we're only doing one ingress, allow the possibilty to override the publish ip
   {{ if .ParamExists "krib/ingress-nginx-publish-ip" }}
   {{ if eq (.Param "krib/ingress-external-enabled") false -}}
-  sed -i "s/publish-service=$(POD_NAMESPACE)/publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }}/" \
+  sed -i "s/publish-service=.*/publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }}/" \
     /tmp/nginx-ingress-mandatory.yaml
   {{ end -}}
   {{ end -}}
