@@ -5,8 +5,8 @@ Documentation: |
   Authorizes the vault-kms-plugin to communicate with vault on behalf of Kubernetes API
 Schema:
   type: "string"
+Secure: true
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
-  password: "hideme" 
