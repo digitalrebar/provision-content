@@ -27,6 +27,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
     # needed to apply manifests
     export KUBECONFIG="/etc/kubernetes/admin.conf"
 
+    ##### Optionally replace containers in distributed YAML manifests with operator-specified
+    ##### containers from a private registry
+    {{ if .ParamExists "krib/fluent-bit-container-image" }}
+    # Replace default container image with the one specified in "krib/fluent-bit-container-image"
+    sed -i 's|fluent/fluent-bit|{{ .Param "krib/fluent-bit-container-image" }}|' /tmp/logging-fluent-bit.yaml
+    {{ end -}}
 
     echo "Applying fluent-bit manifests"
     kubectl apply -f /tmp/logging-fluent-bit.yaml

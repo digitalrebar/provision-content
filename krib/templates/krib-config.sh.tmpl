@@ -127,6 +127,12 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
 {{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}
     # We are using serverTLSBootstrap for kublets, so enable auto-approval of kubelet server CSRs
+
+  {{ if .ParamExists "krib/kubelet-rubber-stamp-container-image" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-controller-container-image"
+  sed -i 's|quay.io/kontena/kubelet-rubber-stamp-amd64|{{ .Param "krib/kubelet-rubber-stamp-container-image" }}|' /tmp/krib-kubelet-rubber-stamp.yaml
+  {{ end -}}
+
     kubectl create -f /tmp/krib-kubelet-rubber-stamp.yaml
     rm /tmp/krib-kubelet-rubber-stamp.yaml
 {{ end -}}{{ end -}}
