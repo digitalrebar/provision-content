@@ -6,6 +6,7 @@ Documentation: |
   See https://cert-manager.readthedocs.io/en/latest/reference/issuers/acme/dns01.html#amazon-route53
 Schema:
   type: "string"
+Secure: true
 Meta:
   color: "blue"
   icon: "book"
