@@ -6,6 +6,8 @@ Documentation: |
   Installs k3s using the KRIB process and params
   with the goal of being able to use the same downstream stages
 RunnerWait: true
+Params:
+  "krib/k3s": true
 Tasks:
   - "krib-get-masters"
   - "k3s-config"
