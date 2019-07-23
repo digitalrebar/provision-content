@@ -150,6 +150,27 @@ if [[ $MASTER_INDEX != notme ]] ; then
         # This can optionally be changed to a regex or even an explicit NIC name
         sed -i "/autodetect\"/a\            - name: IP_AUTODETECTION_METHOD\n              value: \"can-reach=1.1.1.1\"" /tmp/calico.yaml
         sed -i "s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" /tmp/calico.yaml
+
+        ##### Optionally replace default container images with ones from
+        ##### Our trusted registry
+        {{ if .ParamExists "krib/calico-container-image-cni" }}
+        # Replace default container image with the one specified in "krib/calico-container-image-cni"
+        sed -i 's|calico/cni|{{ .Param "krib/calico-container-image-cni" }}|' /tmp/calico.yaml
+        {{ end -}}
+        {{ if .ParamExists "krib/calico-container-image-kube-controllers" }}
+        # Replace default container image with the one specified in "krib/calico-container-image-kube-controllers"
+        sed -i 's|calico/kube-controllers|{{ .Param "krib/calico-container-image-kube-controllers" }}|' /tmp/calico.yaml
+        {{ end -}} 
+        {{ if .ParamExists "krib/calico-container-image-node" }}
+        # Replace default container image with the one specified in "krib/calico-container-image-node"
+        sed -i 's|calico/node|{{ .Param "krib/calico-container-image-node" }}|' /tmp/calico.yaml
+        {{ end -}}  
+        {{ if .ParamExists "krib/calico-container-image-pod2daemon-flexvol" }}
+        # Replace default container image with the one specified in "krib/calico-container-pod2daemon-flexvol"
+        sed -i 's|calico/pod2daemon-flexvol|{{ .Param "krib/calico-container-image-pod2daemon-flexvol" }}|' /tmp/calico.yaml
+        {{ end -}}         
+        ##### End optional image adjustments               
+
         kubectl apply -f /tmp/calico.yaml
         mkdir -p /tmp/cleanup
         mv /tmp/calico.yaml /tmp/cleanup/
