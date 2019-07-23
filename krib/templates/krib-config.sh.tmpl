@@ -163,11 +163,11 @@ if [[ $MASTER_INDEX != notme ]] ; then
         {{ end -}} 
         {{ if .ParamExists "krib/calico-container-image-node" }}
         # Replace default container image with the one specified in "krib/calico-container-image-node"
-        sed -i 's|calico/node/nginx-ingress-controller|{{ .Param "krib/calico-container-image-node" }}|' /tmp/calico.yaml
+        sed -i 's|calico/node|{{ .Param "krib/calico-container-image-node" }}|' /tmp/calico.yaml
         {{ end -}}  
         {{ if .ParamExists "krib/calico-container-image-pod2daemon-flexvol" }}
         # Replace default container image with the one specified in "krib/calico-container-pod2daemon-flexvol"
-        sed -i 's|calico/pod2daemon-flexvolr|{{ .Param "krib/calico-container-pod2daemon-flexvol" }}|' /tmp/calico.yaml
+        sed -i 's|calico/pod2daemon-flexvol|{{ .Param "krib/calico-container-image-pod2daemon-flexvol" }}|' /tmp/calico.yaml
         {{ end -}}         
         ##### End optional image adjustments               
 

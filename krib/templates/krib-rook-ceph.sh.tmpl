@@ -38,6 +38,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # Replace default container image with the one specified in "krib/metallb-container-image-daemon-base"
   sed -i 's|ceph/daemon-base|{{ .Param "krib/rook-ceph-container-image-daemon-base" }}|' /tmp/rook-cluster.yaml
   {{ end -}}
+    {{ if .ParamExists "krib/rook-ceph-container-image-ceph" }}
+  # Replace default container image with the one specified in "krib/metallb-container-image-ceph"
+  sed -i 's|ceph/ceph|{{ .Param "krib/rook-ceph-container-image-ceph" }}|' /tmp/rook-cluster.yaml
+  {{ end -}}
   {{ if .ParamExists "krib/rook-ceph-container-image" }}
   # Replace default container image with the one specified in "krib/metallb-container-image"
   sed -i 's|image: rook/ceph|image: {{ .Param "krib/rook-ceph-container-image" }}|' /tmp/rook-operator.yaml
