@@ -15,28 +15,24 @@ Templates:
     # Reset etcd CA params
     set -e
 
-    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
     export RS_IP="{{.Machine.Address}}"
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+
+    {{if .ParamExists "etcd/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
       echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
       exit 0
     fi
-
-    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
-    {{if .ParamExists "etcd/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
     {{else -}}
     echo "Missing etcd/cluster-profile on the machine! Nothing to clear!"
     exit 0
     {{end -}}
-    {{template "setup.tmpl" .}}
+
     echo "Checking CA"
     echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca"
     CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca) || true
@@ -65,6 +61,7 @@ Templates:
     else
       echo "  No CA root detected - no reset required"
     fi
+    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
   Name: etcd CA clear
@@ -73,29 +70,23 @@ Templates:
     # Reset etcd params
     set -e
 
-    # This only needs to happen on the cluster master, so skip for non master[0]s
+    declare CLUSTER_TYPE="etcd"
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
-    export RS_IP="{{.Machine.Address}}"
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{if .ParamExists "etcd/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
       echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
       exit 0
     fi
-
-    declare -a WIPE_PARAMS=('etcd/servers' 'etcd/servers-done')
-    declare CLUSTER_TYPE="etcd"
-    {{template "setup.tmpl" .}}
-    {{if .ParamExists "etcd/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
     {{else -}}
     echo "Missing etcd/cluster-profile on the machine! Nothing to clear!"
     exit 0
     {{end -}}
+    declare -a WIPE_PARAMS=('etcd/servers' 'etcd/servers-done')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done etcd params reset"
   Name: etcd-reset
@@ -104,28 +95,22 @@ Templates:
     # Reset consul CA params
     set -e
 
-    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
     export RS_IP="{{.Machine.Address}}"
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
       echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
       exit 0
     fi
-
-    declare -a WIPE_PARAMS=('consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key')
-    {{if .ParamExists "consul/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
     {{else -}}
     echo "Missing consul/cluster-profile on the machine! Nothing to clear."
     exit 0
     {{end -}}
-    {{template "setup.tmpl" .}}
     echo "Checking CA"
     echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "consul/name"}}-ca"
     CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "consul/name"}}-ca) || true
@@ -150,6 +135,7 @@ Templates:
     else
       echo "  No CA root detected - no reset required"
     fi
+    declare -a WIPE_PARAMS=('consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done consul CA params reset"
   Name: consul CA clear
@@ -158,29 +144,24 @@ Templates:
     # Reset consul params
     set -e
 
-    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
     export RS_IP="{{.Machine.Address}}"
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
       echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
       exit 0
     fi
-
-    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
     declare CLUSTER_TYPE="consul"
-    {{template "setup.tmpl" .}}
-    {{if .ParamExists "consul/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
     {{else -}}
     echo "Missing consul/cluster-profile on the machine! Nothing to clear!"
     exit 0
     {{end -}}
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done consul params reset"
   Name: consul-reset
@@ -189,12 +170,12 @@ Templates:
     # Reset vault CA params
     set -e
 
-    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
     export RS_IP="{{.Machine.Address}}"
+    {{if .ParamExists "vault/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
     PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
@@ -202,10 +183,6 @@ Templates:
       exit 0
     fi
 
-    declare -a WIPE_PARAMS=('vault/server-ca-name' 'vault/server-ca-pw' 'vault/server-ca-cert')
-    {{if .ParamExists "vault/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
     {{else -}}
     echo "Missing vault/cluster-profile on the machine! Nothing to clear!"
     exit 0
@@ -235,6 +212,7 @@ Templates:
     else
       echo "  No CA root detected - no reset required"
     fi
+    declare -a WIPE_PARAMS=('vault/server-ca-name' 'vault/server-ca-pw' 'vault/server-ca-cert')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
   Name: vault CA clear
@@ -245,10 +223,11 @@ Templates:
 
     # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
     export RS_IP="{{.Machine.Address}}"
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    declare CLUSTER_TYPE="vault"
+    {{if .ParamExists "krib/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
@@ -256,16 +235,11 @@ Templates:
       exit 0
     fi
 
-    declare -a WIPE_PARAMS=('vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
-    declare CLUSTER_TYPE="vault"
-    {{template "setup.tmpl" .}}
-    {{if .ParamExists "krib/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
     {{else -}}
     echo "Missing krib/cluster-profile on the machine! Nothing to clear!"
     exit 0
     {{end -}}
+    declare -a WIPE_PARAMS=('vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done vault params reset"
   Name: vault-reset
@@ -274,12 +248,12 @@ Templates:
     # Reset KRIB params
     set -e
 
-    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "setup.tmpl" .}}
-    export RS_UUID="{{.Machine.UUID}}"
     export RS_IP="{{.Machine.Address}}"
-    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{if .ParamExists "krib/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
     {{template "krib-lib.sh.tmpl" .}}
     MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
     if [[ ! $MASTER_INDEX == 0 ]] ; then
@@ -287,15 +261,11 @@ Templates:
       exit 0
     fi
 
-    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
-    {{template "setup.tmpl" .}}
-    {{if .ParamExists "krib/cluster-profile" -}}
-    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
-    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
     {{else -}}
     echo "Missing krib/cluster-profile on the machine! Nothing to clear!"
     exit 0
     {{end -}}
+    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
     {{template "krib-dev-reset.sh.tmpl" .}}
     drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"black\", \"icon\": \"server\"}}" | jq .Meta
     echo "done KRIB params reset"
