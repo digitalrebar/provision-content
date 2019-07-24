@@ -1,0 +1,12 @@
+---
+Name: "krib-external-dns"
+Description: "KRIB installs and configures ExternalDNS on the cluster"
+Documentation: |
+  Installs and runs ExternalDNS
+RunnerWait: true
+Tasks:
+  - "krib-external-dns"
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
