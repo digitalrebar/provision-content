@@ -15,6 +15,13 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 
 {{ template "krib-lib.sh.tmpl" .}}
 
+{{ if .Param "krib/k3s" }}
+echo "Starting krib/k3s enabled stage"
+{{ else }}
+echo "ERROR krib/k3s param must be true"
+exit 1
+{{ end }}
+
 echo "Download k3s (for now only use latest and AMD64 arch)"
 
 RELEASE=v0.6.1

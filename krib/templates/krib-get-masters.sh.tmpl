@@ -39,7 +39,17 @@ KRIB_IP={{ .Machine.Address }}
 KRIB_MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 echo "Creating $KRIB_MASTER_COUNT k8s masters"
 
-if [[ $MASTER_ON_ETCDS == true ]] ; then
+# Detect when using K3s
+{{ if .ParamExists "krib/k3s" }}
+echo "Starting krib/k3s enabled stage"
+K3S={{ .Param "krib/k3s" }}
+{{ else }}
+K3S=false
+{{ end }}
+
+if [[ $K3S ]] ; then
+  echo "K3s, skipping etcd config"
+elif [[ $MASTER_ON_ETCDS == true ]] ; then
   if (( $KRIB_MASTER_COUNT >= $ETCD_COUNT )) ; then
     # If we have the same or more masters than etcd, start with the etcd list.
     ETCD_MASTERS=$(get_param $ETCD_SERVERS_PARAM)

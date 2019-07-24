@@ -9,4 +9,5 @@ Meta:
 Name: "k3s-cluster"
 ReadOnly: false
 Stages:
-  - "krib-config"
+  - "k3s-config"
+  - "krib-live-wait"
