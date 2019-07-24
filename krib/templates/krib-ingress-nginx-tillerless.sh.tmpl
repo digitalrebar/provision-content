@@ -21,8 +21,6 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   if ! which wget ; then
     install wget
   fi
-  # Give cluster time to finish starting workers
-  sleep 2m
 
   wget -O /tmp/nginx-ingress-mandatory.yaml {{ .Param "krib/ingress-nginx-mandatory" }}
   wget -O /tmp/nginx-ingress-service.yaml {{ .Param "krib/ingress-nginx-config" }}
@@ -106,8 +104,6 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   kubectl apply -f /tmp/certmanager-manifests.yaml
 
-  # TODO : It seems to take about 2-3m until the pods are created, and the webhook admission controller is ready for validating the CRDs which come next
-  sleep 3m
 {{if .ParamExists "certmanager/acme-challenge-dns01-provider"}}
   if [[ -n $(kubectl -n kube-system get secrets | grep -w certmanager-provider) ]] ; then
     echo "Removing existing certmanager-provider Secret"
@@ -117,7 +113,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl apply -f /tmp/certmanager-provider-secret.yaml
 {{end}}
 
-  kubectl apply -f /tmp/certmanager-clusterissuer.yaml
+  # It can take some time before this succeeds, because it requires un-tainted workers available to 
+  # run workloads, and the download of container images for certmanager's validating webhook
+  # For this reason, we use with_backoff, and we retry every minute for 10 min
+  ATTEMPTS=10 TIMEOUT=10 with_backoff kubectl apply -f /tmp/certmanager-clusterissuer.yaml
 
   # Clean up
   mkdir -p /tmp/cleanup

@@ -55,16 +55,20 @@ setup_seal
 systemctl daemon-reload
 systemctl restart vault
 
+# Wait around until consul has elected a leader
+until consul operator raft list-peers | grep -q leader;
+do 
+  SLEEP=$[ ( $RANDOM % 5 ) ]; 
+done
 
-# Init the vault if it's not already initialized
-# we need a sleep to allow vault to finish starting up, plus a random backoff to avoid races.
-sleep 20s
-SLEEP=$[ ( $RANDOM % 20 ) ]
+# Only initialize vault on the consul leader, to avoid races
 set +e
-VAULT_CACERT=/etc/vault/pki/server-ca.pem vault operator init -status > /dev/null
-if [[ $? -gt 0 ]]; then
-  set -x
+$(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
+if [[ $? -eq 0 ]] ; then
   set -e
+  # Before attempting to init vault, sleep 5s to give it time to wake up
+  sleep 5s
+
   export VAULT_CACERT=/etc/vault/pki/server-ca.pem 
   vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
@@ -90,9 +94,12 @@ if [[ $? -gt 0 ]]; then
   drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/kms-plugin-token" to "$VAULT_KMS_TOKEN"
 
   # Destroy the evidence
-  #rm /tmp/vault.json
-  #rm /tmp/token.json
+  mkdir -p /tmp/cleanup
+  mv /tmp/vault.json /tmp/cleanup
+  mv /tmp/token.json /tmp/cleanup
 fi
+
+set -e
 
 VAULT_SERVER_COUNT={{.Param "vault/server-count"}}
 

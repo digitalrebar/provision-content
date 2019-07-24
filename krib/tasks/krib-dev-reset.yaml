@@ -14,9 +14,20 @@ Templates:
     #!/bin/bash
     # Reset etcd CA params
     set -e
-    # we need a random backoff to avoid races.
-    SLEEP=$[ ( $RANDOM % 25 ) ]
-    sleep $SLEEP
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
     {{if .ParamExists "etcd/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
@@ -61,6 +72,20 @@ Templates:
     #!/bin/bash
     # Reset etcd params
     set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('etcd/servers' 'etcd/servers-done')
     declare CLUSTER_TYPE="etcd"
     {{template "setup.tmpl" .}}
@@ -78,6 +103,20 @@ Templates:
     #!/bin/bash
     # Reset consul CA params
     set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key')
     {{if .ParamExists "consul/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
@@ -118,6 +157,20 @@ Templates:
     #!/bin/bash
     # Reset consul params
     set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
     declare CLUSTER_TYPE="consul"
     {{template "setup.tmpl" .}}
@@ -135,6 +188,20 @@ Templates:
     #!/bin/bash
     # Reset vault CA params
     set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('vault/server-ca-name' 'vault/server-ca-pw' 'vault/server-ca-cert')
     {{if .ParamExists "vault/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
@@ -175,6 +242,20 @@ Templates:
     #!/bin/bash
     # Reset vault params
     set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
     declare CLUSTER_TYPE="vault"
     {{template "setup.tmpl" .}}
@@ -192,6 +273,20 @@ Templates:
     #!/bin/bash
     # Reset KRIB params
     set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_UUID="{{.Machine.UUID}}"
+    export RS_IP="{{.Machine.Address}}"
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
     {{template "setup.tmpl" .}}
     {{if .ParamExists "krib/cluster-profile" -}}
