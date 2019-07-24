@@ -167,7 +167,7 @@ if [[ $EXISTING_INDEX == notme ]] ; then
         xiterr 1 "PEER CA Exists, but we didn't set password.  Need to reset!!"
       fi
     fi
-    
+
     # On the assumption that we'll want to backup the etcd cluster externally (from DRP host or a "controller")
     # Generate a client cert for the controller
     echo "Generating controller client certificate with IP ${ETCD_CONTROLLER_IP}"
