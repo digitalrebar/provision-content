@@ -36,7 +36,7 @@ apiServer:
     audit-log-path: /var/log/kubernetes/audit
     audit-log-maxage: "2"
     endpoint-reconciler-type: "lease"
-    {{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}    
+    {{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}
     kubelet-certificate-authority: "/etc/kubernetes/pki/ca.crt"
     {{ end -}}
     {{ end -}}
@@ -47,7 +47,12 @@ apiServer:
     {{ end }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
+{{ $ha := ne (int 1) (int (.Param "krib/cluster-master-count")) -}}
+{{ if $ha -}}
 controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}:{{ .Param "krib/cluster-api-vip-port" }}
+{{ else -}}
+controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}:{{ .Param "krib/cluster-api-port" }}
+{{ end -}}
 imageRepository: {{ .Param "krib/cluster-image-repository" }}
 etcd:
   external:
@@ -55,13 +60,13 @@ etcd:
     certFile: /etc/kubernetes/pki/etcd/client.pem
     keyFile: /etc/kubernetes/pki/etcd/client-key.pem
     endpoints:
-{{if and (.ParamExists "krib/cluster-master-vip") (.ParamExists "etcd/cluster-client-vip-port") }}
+{{if and $ha (.ParamExists "krib/cluster-master-vip") (.ParamExists "etcd/cluster-client-vip-port") }}
       - https://{{ .Param "krib/cluster-master-vip" }}:{{ .Param "etcd/cluster-client-vip-port" }}
 {{else}}
   {{ $port := .Param "etcd/client-port" -}}
   {{- range $elem := .Param "etcd/servers"}}
       - https://{{ $elem.Address }}:{{ $port }}
-  {{ end -}}    
+  {{ end -}}
 {{ end -}}
 useHyperKubeImage: true
 kubernetesVersion: {{ .Param "krib/cluster-kubernetes-version" }}
