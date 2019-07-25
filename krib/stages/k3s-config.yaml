@@ -9,6 +9,7 @@ RunnerWait: true
 Params:
   "krib/k3s": true
 Tasks:
+  - "containerd-install"
   - "krib-get-masters"
   - "k3s-config"
 Meta:

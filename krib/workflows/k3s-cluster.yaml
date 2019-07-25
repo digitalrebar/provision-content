@@ -8,6 +8,9 @@ Meta:
   copyright: "RackN 2019"
 Name: "k3s-cluster"
 ReadOnly: false
+Params:
+  krib/container-runtime: "containerd"
 Stages:
+  - "krib-runtime-install"
   - "k3s-config"
   - "krib-live-wait"
