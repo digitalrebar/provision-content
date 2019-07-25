@@ -47,7 +47,9 @@ K3S={{ .Param "krib/k3s" }}
 K3S=false
 {{ end }}
 
-if [[ $K3S ]] ; then
+if [[ $K3S == true ]] ; then
+  echo "K3s, add $KRIB_MASTERS_PARAM to $CLUSTER_PROFILE"
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$KRIB_MASTERS_PARAM" to "[]" || true
   echo "K3s, skipping etcd config"
 elif [[ $MASTER_ON_ETCDS == true ]] ; then
   if (( $KRIB_MASTER_COUNT >= $ETCD_COUNT )) ; then

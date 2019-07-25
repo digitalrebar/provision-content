@@ -6,6 +6,14 @@ set -e
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
+K3S={{ .Param "krib/k3s" }}
+if [[ $K3S == true ]] ; then
+  echo "Starting krib/k3s enabled stage"
+else
+  echo "ERROR krib/k3s param must be true"
+  exit 1
+fi
+
 {{ if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
 PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
@@ -15,28 +23,53 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 
 {{ template "krib-lib.sh.tmpl" .}}
 
-{{ if .Param "krib/k3s" }}
-echo "Starting krib/k3s enabled stage"
-{{ else }}
-echo "ERROR krib/k3s param must be true"
-exit 1
-{{ end }}
+echo "Install Containerd - MOVE THIS INTO ITS OWN STAGE"
+# Install containerd
+## Set up the repository
+### Install required packages
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+### Add docker repository
+yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+## Install containerd
+yum -y update && yum -y install containerd.io
+
+# Configure containerd
+mkdir -p /etc/containerd
+containerd config default > /etc/containerd/config.toml
+
+# Restart containerd
+systemctl restart containerd
 
 echo "Download k3s (for now only use latest and AMD64 arch)"
 
-RELEASE=v0.6.1
+KRIB_REPO=https://github.com/rancher/k3s/releases
+RELEASE=`curl -w "%{url_effective}" -I -L -s -S ${KRIB_REPO}/latest -o /dev/null | sed -e 's|.*/||'`
 TMP_DIR=/tmp/k3s-tmp
 INSTALL_DIR=/usr/bin
-KRIB_REPO=https://github.com/rancher/k3s/releases/
 
-echo "Download k3s: ${RELEASE}"
-if [[ ! -z "$KRIB_REPO" ]] ; then
-  download -L --remote-name-all "${KRIB_REPO}/releases/download/${RELEASE}/k3s"
+if [ ! -f k3s ] ; then
+  echo "Download k3s ${RELEASE} from ${KRIB_REPO}/download/${RELEASE}/k3s"
+  if [[ ! -z "$KRIB_REPO" ]] ; then
+    download -L --remote-name-all "${KRIB_REPO}/download/${RELEASE}/k3s" -o k3s
+  else
+    echo "missing REPO AND RELEASE"
+    exit 1
+  fi
+  if [ -f k3s ] ; then
+    chmod +x k3s
+  else
+    pwd
+    ls -la
+    echo "k3s not installed on system"
+    exit 1
+  fi
 else
-  echo "missing REPO AND RELEASE"
-  exit 1
+  echo "found k3s binary, moving on..."
 fi
-chmod +x k3s
 
 echo "Configure master or nodes..."
 
@@ -52,21 +85,27 @@ sleep $SLEEP
 
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
+./k3s -v
 
 if [[ $MASTER_INDEX != notme ]] ; then
 
   echo "I am master - run k3s server"
+  ./k3s server &
+  sleep 3
 
-  sudo k3s server &
   echo "verify install"
-  echo $(sudo k3s kubectl get node)
+  ./k3s kubectl get nodes
+  ls -la
 
-  # collect the cluster bootstrap token, then store it on the Param
-  TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
-  drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_BOOTSTRAP_TOKEN to "$TOKEN"
+  if [[ -f /var/lib/rancher/k3s/server/node-token ]] ; then
+    # collect the cluster bootstrap token, then store it on the Param
+    TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_BOOTSTRAP_TOKEN to "$TOKEN"
+  else
+    echo "halting, could not find /var/lib/rancher/k3s/server/node-token"
+    exit 1
+  fi
 
-  # example of appending a featureGate to cluster after initial init
-  #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
   echo "Recording cluster admin config ..."
   drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to - < /etc/rancher/k3s/k3s.yaml
 
@@ -79,7 +118,7 @@ else
   TOKEN=$(wait_for_variable $PROFILE_TOKEN)
 
   echo "Running: $TOKEN"
-  sudo k3s agent --server https://{{ .Param "krib/cluster-master-vip" -}}:6443 --token $TOKEN
+  ./k3s agent --server https://{{ .Param "krib/cluster-master-vip" -}}:6443 --token $TOKEN
 
   # Set machine icon and color for KRIB cluster building
   drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\" }}" | jq .Meta
