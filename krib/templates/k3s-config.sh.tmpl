@@ -23,27 +23,6 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 
 {{ template "krib-lib.sh.tmpl" .}}
 
-echo "Install Containerd - MOVE THIS INTO ITS OWN STAGE"
-# Install containerd
-## Set up the repository
-### Install required packages
-yum install -y yum-utils device-mapper-persistent-data lvm2
-
-### Add docker repository
-yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-
-## Install containerd
-yum -y update && yum -y install containerd.io
-
-# Configure containerd
-mkdir -p /etc/containerd
-containerd config default > /etc/containerd/config.toml
-
-# Restart containerd
-systemctl restart containerd
-
 echo "Download k3s (for now only use latest and AMD64 arch)"
 
 KRIB_REPO=https://github.com/rancher/k3s/releases
@@ -105,7 +84,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "halting, could not find /var/lib/rancher/k3s/server/node-token"
     exit 1
   fi
-
   echo "Recording cluster admin config ..."
   drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to - < /etc/rancher/k3s/k3s.yaml
 
