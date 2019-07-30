@@ -133,9 +133,11 @@ WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload && systemctl start k3s
-sleep 10
+sleep 15
 
 if [[ $MASTER_INDEX != notme ]] ; then
+  # need more delay for master
+  sleep 15
   echo "verify install"
   k3s kubectl get nodes
   echo "Recording cluster admin config ..."
