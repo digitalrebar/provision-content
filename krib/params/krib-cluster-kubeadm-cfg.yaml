@@ -6,7 +6,7 @@ Documentation: |
   KRIB config task will record the bootstrap configuration used
   by 'kubeadm init'.  This provides a reference going forward on
   the cluster configurations when it was created.
-Secure: true
+
 Meta:
   color: "blue"
   icon: "ship"

@@ -4,7 +4,7 @@ Description: "Define the cluster BootStrap Token value"
 Documentation: |
   Defines the bootstrap token to use.
   Default is 'fedcba.fedcba9876543210'.
-Secure: true
+
 Schema:
   type: "string"
   default: "fedcba.fedcba9876543210"
@@ -12,3 +12,4 @@ Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
+  password: "hideme"

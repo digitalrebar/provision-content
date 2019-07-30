@@ -5,8 +5,8 @@ Documentation: |
   Param is set (output) by the cluster building process
 Schema:
   type: "string"
-Secure: true
 Meta:
   color: "blue"
   icon: "ship"
   title: "Community Content"
+  password: "hideme"

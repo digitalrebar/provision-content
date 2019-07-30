@@ -5,8 +5,8 @@ Documentation: |
   Allows operators to specify an AWS region to be used in the Vault "awskms" seal
 Schema:
   type: "string"
-Secure: true
 Meta:
   color: "blue"
   icon: "book"
   title: "Community Content"
+  password: "hideme"

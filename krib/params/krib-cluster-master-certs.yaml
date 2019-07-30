@@ -5,8 +5,8 @@ Documentation: |
   Requires Cert Plugin
 Schema:
   type: "string"
-Secure: true
 Meta:
   color: "blue"
   icon: "ship"
   title: "Community Content"
+  password: "hideme"
