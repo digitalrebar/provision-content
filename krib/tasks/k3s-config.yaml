@@ -5,6 +5,10 @@ Documentation: |
   Sets Param: krib/cluster-join, krib/cluster-admin-conf
   Configure K3s using built-in commands
   This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set
+
+  Server is setup to also be an agent - all machines have workload
+
+  WARNING: Must NOT set etcd/cluster-profile when install k3s1
 RequiredParams:
   - krib/cluster-profile
 Templates:
