@@ -7,11 +7,6 @@ echo "starting containerd v{{.Param "containerd/version"}} install"
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
-# not sure why we need this here...but it needs to be protected
-{{ if .ParamExists "etcd/controller-ip" }}
-ETCD_CONTROLLER_IP={{.Param "etcd/controller-ip"}}
-{{ end }}
-
 {{if .ParamExists "kubectl/working-dir" -}}
 # Only do this if it exists.
 # if it isn't setup, don't use it.
