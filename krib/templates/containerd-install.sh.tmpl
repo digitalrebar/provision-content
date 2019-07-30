@@ -7,9 +7,8 @@ echo "starting containerd v{{.Param "containerd/version"}} install"
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
-{{ if .ParamExists "krib/k3s" }}
-echo "installing K3s - no etcd needed"
-{{ else }}
+# not sure why we need this here...but it needs to be protected
+{{ if .ParamExists "etcd/controller-ip" }}
 ETCD_CONTROLLER_IP={{.Param "etcd/controller-ip"}}
 {{ end }}
 

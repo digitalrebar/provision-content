@@ -7,7 +7,6 @@ Documentation: |
   with the goal of being able to use the same downstream stages
 RunnerWait: true
 Params:
-  "krib/k3s": true
   "krib/container-runtime": "containerd"
   "krib/repo": "https://github.com/rancher/k3s/releases"
 Tasks:

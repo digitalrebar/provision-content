@@ -39,13 +39,11 @@ KRIB_IP={{ .Machine.Address }}
 KRIB_MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 echo "Creating $KRIB_MASTER_COUNT k8s masters"
 
-# Detect when using K3s
-{{ if .ParamExists "krib/k3s" }}
-echo "Starting krib/k3s enabled stage"
-K3S={{ .Param "krib/k3s" }}
-{{ else }}
+{{ .ParamExists "etcd/cluster-name" }}
 K3S=false
-{{ end }}
+{{else}}
+K3S=true
+{{end}}
 
 if [[ $K3S == true ]] ; then
   echo "K3s, add $KRIB_MASTERS_PARAM to $CLUSTER_PROFILE"
