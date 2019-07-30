@@ -6,7 +6,7 @@ set -e
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
-{{ .ParamExists "etcd/cluster-name" }}
+{{ if .ParamExists "etcd/cluster-name" }}
 echo "k3s does not use etcd - delete the etcd/cluster-name param"
 exit 1
 {{ end }}

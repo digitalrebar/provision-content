@@ -39,7 +39,7 @@ KRIB_IP={{ .Machine.Address }}
 KRIB_MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 echo "Creating $KRIB_MASTER_COUNT k8s masters"
 
-{{ .ParamExists "etcd/cluster-name" }}
+{{ if .ParamExists "etcd/cluster-name" }}
 K3S=false
 {{else}}
 K3S=true
