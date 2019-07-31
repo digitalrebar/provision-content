@@ -6,10 +6,10 @@ set -e
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
-{{ if .ParamExists "etcd/cluster-name" }}
-echo "k3s does not use etcd - delete the etcd/cluster-name param"
-exit 1
-{{ end }}
+if [[ {{ .Param "krib/k3s" }} != true ]]; then
+  echo "krib/k3s must be true"
+  exit 1
+fi
 
 # Fix hostname lookup
 echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
