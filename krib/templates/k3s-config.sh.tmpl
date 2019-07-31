@@ -86,7 +86,7 @@ else
 
   wait_for_variable $KRIB_JOIN_PARAM
   # we need to get the decoded version
-  TOKEN=$(drpcli -T $PROFILE_TOKEN profiles get demo param $KRIB_JOIN_PARAM --decode)
+  TOKEN=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_JOIN_PARAM --decode)
 
   echo "Running Agent: join $TOKEN"
   EXECSTART="${K3SBIN} agent --token $TOKEN"
