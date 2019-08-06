@@ -41,6 +41,7 @@ echo "Skipping custom etc/containerd/config.toml: No containerd/config defined"
 
 # start containerd
 systemctl start containerd
+systemctl enable containerd
 
 echo "Containerd installed successfully"
 exit 0
