@@ -1,1 +1,1 @@
-sane-exit-codes, job-exit-states, fsm-runner, workflows, default-workflow, http-range-header, roles, tenants, sprig
+sane-exit-codes, job-exit-states, fsm-runner, workflows, default-workflow, http-range-header, roles, tenants, sprig, log-has-head-method

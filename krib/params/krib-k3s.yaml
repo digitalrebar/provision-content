@@ -1,0 +1,13 @@
+---
+Name: "krib/k3s"
+Description: "Use k3s for KRIB (instead of k8s)"
+Documentation: |
+  Informs tasks to use k3s instead of k8s
+  No need to include etcd stages when k3s is true
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "cube"
+  title: "Community Content"

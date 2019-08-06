@@ -187,6 +187,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     esac
 
   else
+    echo "waiting for $KRIB_MASTER_CERTS_PARAM"
     wait_for_variable $KRIB_MASTER_CERTS_PARAM
 
     cd /
@@ -275,6 +276,7 @@ do
 done
 
 # Wait for KRIB config to be updated from bootstrap node
+echo "waiting for $KRIB_ADMIN_CONF_PARAM"
 wait_for_variable $KRIB_ADMIN_CONF_PARAM > label.conf
 
 # Set labels for nodes / runs on all nodes
