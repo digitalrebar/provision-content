@@ -1,0 +1,14 @@
+---
+Name: "krib/fluent-bit-container-image"
+Description: "Custom container image to use for fluent-bit"
+Documentation: |
+  Allows operators to optionally override the container image used in the
+  fluent-bit / logging daemonset. Possible use case would be pre-prepared images pushed to a 
+  local trusted registry
+  
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "setting"
+  title: "Community Content"

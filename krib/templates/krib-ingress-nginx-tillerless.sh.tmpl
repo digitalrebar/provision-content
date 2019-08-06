@@ -30,10 +30,15 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   #   kubectl delete -f /tmp/nginx-ingress-mandatory.yaml
   # fi
 
+  {{ if .ParamExists "krib/nginx-ingress-controller-container-image" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-controller-container-image"
+  sed -i 's|quay.io/kubernetes-ingress-controller/nginx-ingress-controller|{{ .Param "krib/nginx-ingress-controller-container-image" }}|' /tmp/nginx-ingress-mandatory.yaml
+  {{ end -}}
+
   # If we're only doing one ingress, allow the possibilty to override the publish ip
   {{ if .ParamExists "krib/ingress-nginx-publish-ip" }}
   {{ if eq (.Param "krib/ingress-external-enabled") false -}}
-  sed -i "s/publish-service=$(POD_NAMESPACE)/publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }}/" \
+  sed -i "s/publish-service=.*/publish-status-address={{ .Param "krib/ingress-nginx-publish-ip" }}/" \
     /tmp/nginx-ingress-mandatory.yaml
   {{ end -}}
   {{ end -}}
@@ -101,6 +106,29 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   echo "Preparing namespace and disabling validation.."
   kubectl create namespace cert-manager || echo "Failed to create namespace, it probably already exists. Proceeding..."
   kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true" || echo "Failed to disable validation on namespace, it's probably already done. Proceeding..."
+
+  ###### Perform optional substitution of the container image specified in the deployment YAML with
+  ###### an image from a local registry, for security
+  {{ if .ParamExists "krib/cert-manager-container-image-controller" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
+  sed -i 's|quay.io/jetstack/cert-manager-controller|{{ .Param "krib/cert-manager-container-image-controller" }}|' \
+    /tmp/certmanager-manifests.yaml
+  {{ end -}}
+
+  {{ if .ParamExists "krib/cert-manager-container-image-cainjector" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
+  sed -i 's|quay.io/jetstack/cert-manager-cainjector|{{ .Param "krib/cert-manager-container-image-cainjector" }}|' \
+    /tmp/certmanager-manifests.yaml
+  {{ end -}}
+
+  {{ if .ParamExists "krib/cert-manager-container-image-webhook" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
+  sed -i 's|quay.io/jetstack/cert-manager-webhook|{{ .Param "krib/cert-manager-container-image-webhook" }}|' \
+    /tmp/certmanager-manifests.yaml
+  {{ end -}}  
+  ######
+  ###### End optional substitution
+
 
   kubectl apply -f /tmp/certmanager-manifests.yaml
 
