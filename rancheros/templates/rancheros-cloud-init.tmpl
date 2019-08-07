@@ -1,0 +1,52 @@
+#cloud-config
+hostname: {{.Machine.ShortName -}}
+{{if .ParamExists "access-keys" }}
+ssh_authorized_keys:
+{{- range $key := .Param "access-keys" }}
+  - {{$key -}}
+{{end}}
+{{end}}
+write_files:
+  - path: /etc/drpcli
+    permissions: "0600"
+    owner: root
+    content: |
+      export RS_ENDPOINT={{.ApiURL}}
+      export RS_TOKEN={{.GenerateInfiniteToken}}
+      export RS_UUID={{.Machine.UUID}}
+  - path: /etc/rc.local
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/bash -x
+
+      wget -O /usr/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
+      chmod +x /usr/bin/drpcli
+
+      . /etc/drpcli
+      /usr/bin/drpcli machines update "{{.Machine.UUID}}" '{ "Runnable": true, "CurrentTask": -1 }'
+      /usr/bin/drpcli machines processjobs "{{.Machine.UUID}}" &
+
+      exit 0
+rancher:
+{{if .ParamExists "rancheros/network-template" -}}
+{{$tmpl := (printf "%s" (.Param "rancheros/network-template")) -}}
+{{.CallTemplate $tmpl .}}
+{{else}}
+  network:
+    interfaces:
+      eth*:
+        dhcp: true
+{{end -}}
+{{if .ParamExists "rancheros/state-template" -}}
+{{$tmpl := (printf "%s" (.Param "rancheros/state-template")) -}}
+{{.CallTemplate $tmpl .}}
+{{else -}}
+{{if ne .Machine.BootEnv "rancheros-install"}}
+  state:
+    fstype: auto
+    dev: LABEL=RANCHER_STATE
+    autoformat:
+    - /dev/sda
+{{end}}
+{{end -}}
