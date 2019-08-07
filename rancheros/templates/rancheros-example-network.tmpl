@@ -1,0 +1,17 @@
+{{- if .ParamExists "nic-bond-macs" }}
+  # Indentation matters.
+  network:
+    interfaces:
+      bond0:
+        dhcp: true
+        bond_opts:
+          lacp_rate: 1
+          miimon: 100
+          mode: 802.3ad
+          xmit_hash_policy: layer2+3
+        mtu: 9000
+      {{range $mac := .Param "nic-bond-macs" -}}
+        "mac={{$mac -}}":
+          bond: bond0
+      {{end}}
+{{end}}
