@@ -1,0 +1,10 @@
+---
+Name: "burnin-disk-destructive"
+Description: "Whether to perfrom a destructive write test to disks"
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"

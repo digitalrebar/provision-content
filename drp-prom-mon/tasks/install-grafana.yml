@@ -1,0 +1,18 @@
+---
+Name: "install-grafana"
+Description: "A task to install Grafana."
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "install-grafana"
+
+Templates:
+  - Contents: ""
+    ID: "install-grafana.sh.tmpl"
+    Name: "Install Grafana"
+    Path: ""
+
+ReadOnly: true

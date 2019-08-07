@@ -2,35 +2,17 @@
 
 set -e
 
-. tools/version.sh
-version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH"
-
-DOIT=0
-if [[ $version =~ ^v || $version =~ ^tip ]] ; then
-    DOIT=1
-fi
-if [[ $version =~ travis ]] ; then
-    DOIT=0
-fi
-if [[ $DOIT == 0 ]] ;then
-    echo "Not a publishing branch."
-    exit 0
-fi
-
 [[ $GOPATH ]] || export GOPATH="$HOME/go"
 fgrep -q "$GOPATH/bin" <<< "$PATH" || export PATH="$PATH:$GOPATH/bin"
 
 go get -u github.com/stevenroose/remarshal
 
-. tools/version.sh
-version="$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH"
+version=$(tools/version.sh)
 
-TOKEN=R0cketSk8ts
 tools/pieces.sh | while read i ; do
-    echo "Publishing $i to cloud"
-    CONTENT=$i
-    remarshal -i $CONTENT.yaml -o $CONTENT.json -if yaml -of json
-    curl -f -X PUT -T $CONTENT.json https://qww9e4paf1.execute-api.us-west-2.amazonaws.com/main/support/content/$CONTENT?token=$TOKEN
-    echo
+    echo "Publishing $i to rebar-catalog"
+    remarshal -i $i.yaml -o $i.json -if yaml -of json
+    mkdir -p rebar-catalog/$i
+    cp $i.json rebar-catalog/$i/$version.json
 done
 

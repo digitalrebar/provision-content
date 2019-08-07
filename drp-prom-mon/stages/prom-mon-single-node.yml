@@ -1,0 +1,20 @@
+---
+Name: "prom-mon-single-node"
+Description: "Single node with DRP/Node Exporter/Prometheus/Grafana setup"
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "build-prom-mon-cluster"
+Reboot: false
+OptionalParams: []
+RequiredParams: ["drp-prom-mon/node-exporter"]
+Tasks:
+  - install-drp
+  - cfg-drp-cc
+  - cfg-drp-sledgehammer
+  - cfg-drp-centos7
+  - cfg-drp-ubuntu1604
+  - install-node-exporter
+  - install-prom-mon
+  - cfg-grafana
+Templates: []

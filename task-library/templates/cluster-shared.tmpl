@@ -1,0 +1,60 @@
+#!/usr/local/bin/env bash
+# Cluster Add-Step-Remove-Sync Common Code
+#
+###
+#  This is a BASH script snippet intended to be run inside other BASH templates.
+#  It assumed you are also running setup.tmpl
+#
+#
+#  To use this in other templates, simply specify:
+#
+#         \{\{template "cluster-shared.tmpl" .\}\}
+#
+#  without the backslashes.
+###
+
+{{if .ParamExists "cluster/profile" -}}
+CLUSTER_PROFILE={{.Param "cluster/profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "cluster/profile") 7200}}
+{{else -}}
+echo "=== Missing cluster/profile on the machine! ==="
+echo "Hint: cluster/profile param create on Machine or an attached Profile."
+exit 1
+{{end -}}
+
+# provide user with feedback if no profile
+if [[ -z $CLUSTER_PROFILE ]] ; then
+  echo "=== Undefined cluster/profile on the machine! ==="
+  echo "Hint: cluster/profile param must be defined on Machine or an attached Profile."
+  exit 1
+fi
+
+# add machines param if missing
+if [[ $(drpcli -T "$PROFILE_TOKEN" profiles get "$CLUSTER_PROFILE" param "cluster/machines") == null ]]; then
+  drpcli -r "" -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "cluster/machines" to "[]" || :
+  echo "Init: Added cluster/machines param to $CLUSTER_PROFILE"
+fi
+
+# cluster step definition (assumes 1 if not defined)
+CLUSTER_STEP={{.Param "cluster/step"}}
+echo "Init: Using cluster/step=$CLUSTER_STEP (set cluster/step to override)"
+
+# cluster leader count definition (assumes 1 if not defined)
+CLUSTER_LEADER_COUNT={{.Param "cluster/leader-count"}}
+echo "Init: Using cluster/leaders=$CLUSTER_LEADER_COUNT (set cluster/leader-count to override)"
+
+# add leaders param if missing
+CLUSTER_LEADERS=$(drpcli -T "$PROFILE_TOKEN" profiles get "$CLUSTER_PROFILE" param "cluster/leaders")
+if [[ $CLUSTER_LEADERS == null ]]; then
+  drpcli -r "" -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "cluster/leaders" to "[]" || :
+  echo "Init: Added cluster/leaders param to $CLUSTER_PROFILE"
+  CLUSTER_I_AM_LEADER=null
+else
+  CLUSTER_I_AM_LEADER=$(jq "index(\"${RS_UUID}\")" <<< "$CLUSTER_LEADERS")
+fi
+
+if [[ "$CLUSTER_I_AM_LEADER" != "null" ]] ; then
+  echo "Init: Machine ${RS_UUID} IS A LEADER (# $CLUSTER_I_AM_LEADER)"
+else
+  echo "Init: Machine ${RS_UUID} is NOT a leader"
+fi

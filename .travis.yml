@@ -22,28 +22,6 @@ after_script:
 notifications:
   slack:
     secure: SZbSknaaUrVGpmRxvBMQhWeG5TKNHhiTHZTb8ZT+00dQcMjfGfa0vFhXgWgKjm/Hwt6YMw/GbwPWCudhvRnwmnVKytrf55hsmlE+N/jdoyg3VNRW4r2PwbBRnqtc37JNC6BvgJpKNbqM4zBc5ze9AMZ31uPLuTAFaMZwcwnpwr2Qha6DoQDGrnzuxxOMsFz6wH7YvMa3hvSDFSC2Vbgu57a0KwaZsyCH5aS2G7n9p346fElSe9f1Zy8Q/xlkxl9Eu6ZhynwXjcWDsL4KOdXjrbGHYgQEJT3xgO985zsV4MisM4xBVe08MyrJQbJO1rkYXZkElyIHHHTySiw6v/JOInlAroD29tJo+RZZ8LL04KT2Lghq0Du9MELUo0q1a/mcKJ4KSG2YNbY98TyP2FIEdL9iGLM5WNhU59kY1T7VKv+b4Z/ngGZFr3C4d/RhGdV5Ys2rLAYTsT+za9/D4zzg09abSYmonWKyzyaWe4ifbcnN6Yx9F+UrGYLSEzHaGCRDggPDkxZodRRhAyfUu/BE9XxplmoWJH+1cFuIgg1YXj4vCQxnrUdwVfLClHv24aSdn4HZW4bx41aNf9FaEWLLJjmcRUP7uPQvexioiotlvrRZVkZKqjc/qj8Xdicx+qtgOIUU3e9p2xq4t4FXgrbJOB5e+Zbs8x2yjoIVS/RsLiU=
-deploy:
-  provider: releases
-  overwrite: true
-  api_key:
-    secure: fLwWEA4oJjfS7jjX9mnbnhTv7Dc7OfEjvbJslhJ8Kue71Oq8l4VzePJl1G6zhICNrcQjIWTSnBtQvAMvlby9ij/PY1d8U/8KvV/KHBE++iyyAXYPVBTiXs3QnrW/gQPKvcm3dnDgR25tl3Ygz/9mmGyUl2hv88bn70Ac8C/dqxiv7LuOCur4bgqBCAS0iOEt2LHkz2+1yFkKuDLHEIua1VEj37qGnKl3fPkWja/t1/O27trGInUnu2caESeQwkHV0+LgQ0rF9IIvV7ZEswdTrM6hQ6MyPePhhnOW0nDA1gejfoGVWhAiSJgHPIDku6CH70r5JRvckqB73l+/CfC4xcP3Bq95T2Ci2GeTE7/fEMq7APQasI/g9JB9QlZlpj+9P/yWaL1VpvF7If4eHm8hSqYZwqPcuFAou2vIFqZvL19KqUJWTQldr01caZmuuA+ZQTTzFHA+1/WRs5X3M6aDirO2ZYHB6Bg1VlQ5Y5wTeal75Lo5GL0BzhN3PAO979RbitDdOLWHx/PjBnbI2IxO1kTtu7evFDvHM+9+MWpUeJckRhnzG1kqodgqzlbFfacNWuQe2s32RIwzSstO7FtwbDCGPTzlGntJpC3HaYlVt1Q09rr/fILEHXywkn1FPDmSmJZvW+bLYEA8wxWX8Vo77lWFK3Qo9W0ma4HCqnFOmyc=
-  file:
-  - drp-community-content.rst
-  - drp-community-content.yaml
-  - drp-community-content.sha256
-  - drp-community-contrib.rst
-  - drp-community-contrib.yaml
-  - drp-community-contrib.sha256
-  - krib.rst
-  - krib.yaml
-  - krib.sha256
-  - sledgehammer-builder.rst
-  - sledgehammer-builder.yaml
-  - sledgehammer-builder.sha256
-  skip_cleanup: true
-  on:
-    repo: digitalrebar/provision-content
-    tags: true
 before_install:
 - openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv
   -in e-info.tgz.enc -out e-info.tgz -d
@@ -51,3 +29,28 @@ before_install:
 env:
   global:
     secure: VS1+ORCFRkEBlQbzKiwDXB2ToPm6/Qb1XrNoYKQpr7vq+LdctgPdbDXCqQD8xJ/OKUR8k2FMdslXQyGg7M00GSxEdg4XYpOFbSNYbPbTR3Q8MEJMTzpDuKlsnRhdjKIHzZhyK616Lxp7uQpuUXF2dzWJY44GQlTFX5S3aRdlE8Oil7VYn+6TW8v+GVLNjdp17Q+7lmegVIcZ8GGwIqS60eHs2YrBOm+u4dPAuoscJOvyfD9+bH7gaGxpjl3vSg2RIIZQrZfJQsZ9uD0TssGnKvQy5pN2w3+I1QLmCbAOe1GJozqy8Gc8XJpB4bKs7LwV6Jwl2YNgm06VSkf7Ljz7WB6Udg1mhqTXe1oHcUPKRLTkCXiqmdVcIOa0GVBLfvCElr5CthUwkxngPk3KxTNSgHFdH/lHUFDkmWCb57ehG7nUNuD1UN+enOMfFHwvh+q0bH3M0+5YYZt74NLZjoOubCLyVabCtXrCnaoHYRdfiwRjW4NjOraUaD83P24C6VljBMXW/XmRrPQsMl9GcdcXvfOroRhG2klA0ttwDJvqt9mXOxIPohpONZMSb0RHsHzt7buS/yfLzU4YCUC83S4DfAp0oYkuZZKCMcInrAn1OWT8HcSnAsjcDSkdTe//JDFO9uwBMA4mb4OYL1njmlUl9L+7KDlFMFgZykmp1V9e6Q8=
+deploy:
+- provider: s3
+  access_key_id: AKIAJY25W4N3CA7NRHJQ
+  secret_access_key:
+    secure: X8lPmUWg7zWFnWeP4NSwigWHRTY7uL6yq5VYfVwOG1F2RZ3YJN9hZd1aJRf6YY5Zlq6e4uePSyZGulKOw1mk04od9Cb7oAtuZJvCkMm3rcbey5e2Bdx7+l8t77kAN2zOBowHCl/2wGU4D27TYSlY9LJBcvwJxsYx09IDNrLWImSRQA+X4HfZ1pCj35OL3wf2AR4Tx0xJDYjMfY3MTJmjVpzcVlIbCwiDcPiSHqLtdX/BVALr8ZA/ns2ql5NOGuoEAvOh2jaEIs0T/gqOJEys7nz2caU+RgawwS1fxjH4xhpqYF8jN6w4hv07OXz6bAj9X+ZumllrkBJWb35LpE/zrHSPX+bgRJ8uL/8zLQupzN1bMkKWbPGA+REQffnjHXl0aNDHbYzAKxcrAbwKhWC93tdJml+phM15+K1+Z5MXCf+EbYzqmAlb77QovxALEmKHW2g93wT0/X54ukv6Yehq9IPJ+fvgf70rQKKxbPdnFu6iDN4m3/oDE0lQQYBwu8X1dV3+bTbsyFlL/uhbHbKvgfZF3NqVXJgPw5xzYEOtBANcFehf3zaAkg1Hmz5UQYIbZlqWaWMhvgIscPIbLzhERoxNlaBUbHN/tS7fgyWvhRM+aCHInYwoRfv920FMjoiYrwTMFWTo+Hf3D/vJZ9ax/2GGhDAueLfarYTtIrIGnzg=
+  bucket: rebar-catalog
+  region: us-west-2
+  local-dir: rebar-catalog
+  acl: public_read
+  skip_cleanup: true
+  on:
+    repo: digitalrebar/provision-content
+    branch: v4
+- provider: s3
+  access_key_id: AKIAJY25W4N3CA7NRHJQ
+  secret_access_key:
+    secure: X8lPmUWg7zWFnWeP4NSwigWHRTY7uL6yq5VYfVwOG1F2RZ3YJN9hZd1aJRf6YY5Zlq6e4uePSyZGulKOw1mk04od9Cb7oAtuZJvCkMm3rcbey5e2Bdx7+l8t77kAN2zOBowHCl/2wGU4D27TYSlY9LJBcvwJxsYx09IDNrLWImSRQA+X4HfZ1pCj35OL3wf2AR4Tx0xJDYjMfY3MTJmjVpzcVlIbCwiDcPiSHqLtdX/BVALr8ZA/ns2ql5NOGuoEAvOh2jaEIs0T/gqOJEys7nz2caU+RgawwS1fxjH4xhpqYF8jN6w4hv07OXz6bAj9X+ZumllrkBJWb35LpE/zrHSPX+bgRJ8uL/8zLQupzN1bMkKWbPGA+REQffnjHXl0aNDHbYzAKxcrAbwKhWC93tdJml+phM15+K1+Z5MXCf+EbYzqmAlb77QovxALEmKHW2g93wT0/X54ukv6Yehq9IPJ+fvgf70rQKKxbPdnFu6iDN4m3/oDE0lQQYBwu8X1dV3+bTbsyFlL/uhbHbKvgfZF3NqVXJgPw5xzYEOtBANcFehf3zaAkg1Hmz5UQYIbZlqWaWMhvgIscPIbLzhERoxNlaBUbHN/tS7fgyWvhRM+aCHInYwoRfv920FMjoiYrwTMFWTo+Hf3D/vJZ9ax/2GGhDAueLfarYTtIrIGnzg=
+  bucket: rebar-catalog
+  region: us-west-2
+  local-dir: rebar-catalog
+  acl: public_read
+  skip_cleanup: true
+  on:
+    repo: digitalrebar/provision-content
+    tags: true

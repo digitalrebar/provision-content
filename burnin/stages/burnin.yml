@@ -1,0 +1,12 @@
+---
+Name: "burnin"
+Description: "Perform CPU, Memory, and disk stress tests"
+BootEnv: "sledgehammer"
+Tasks:
+  - "cpumem_stress"
+  - "disk_stress"
+  - "burnin_complete"
+Meta:
+  color: "yellow"
+  icon: "fire"
+  title: "RackN Content"

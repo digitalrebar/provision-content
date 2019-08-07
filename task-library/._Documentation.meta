@@ -1,0 +1,23 @@
+
+.. _component_task_library:
+
+RackN Task Library
+~~~~~~~~~~~~~~~~~~
+
+This content package is used to collect useful stages and operations for Digital Rebar.
+
+.. _component_task_library_cluster:
+
+Cluster Stages
+--------------
+
+These stages implement the :ref:`rs_cluster_pattern`.
+
+Allows operators to orchestrate machines into sequential or parallel operation.
+
+.. _component_task_library_inventory:
+
+Inventory Stage
+---------------
+
+Convert gohai and other JSON data into a map that can be used for analysis, classification or filtering.

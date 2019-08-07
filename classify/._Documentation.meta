@@ -1,0 +1,21 @@
+Classifier System
+-----------------
+
+The Classifier System allows an operator flexibly define groups of
+"test/action" sequences to perform on a Machine.  These can be used
+to do any number of tasks.
+
+By default the classifier ships with a limited set of tests and actions
+that can be performed.  However, the operator can specify additional
+groups of test/actions pairs by use of the ``classify/custom-functions``
+Param.  See the Param documentation on how to use it.
+
+By default, the classifier is designed to exit on the first test match
+that succeeds with a "pass" status.  The operator can override this
+behavior by setting the optional ``continue`` value set to ``true``
+in the ``classify/classification-data`` structure.
+
+If you are extending the Classifier to add custom groups of test/actions
+sequences, please review the ``function ... {}`` BASH functions in the
+``classify.sh.tmpl`` template.
+

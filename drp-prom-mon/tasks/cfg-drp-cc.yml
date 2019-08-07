@@ -1,0 +1,18 @@
+---
+Name: "cfg-drp-cc"
+Description: "A task to install DRP community content"
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "cfg-drp-cc"
+
+Templates:
+  - Contents: ""
+    ID: "cfg-drp-cc.sh.tmpl"
+    Name: "Configure DRP Community Content"
+    Path: ""
+
+ReadOnly: true

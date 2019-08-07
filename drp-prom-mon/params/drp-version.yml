@@ -1,0 +1,23 @@
+---
+Name: "drp-prom-mon/drp-version"
+Description: "The version of DRP to be installed on Machine."
+Documentation: |
+  This param will set the version of Digital Rebar Provision
+  to install on the Machine.
+
+  Set this to any value supported by the DRP installer script.
+  Typically these values would be like the following
+
+    stable    = current production 'stable' release
+    tip       = current 'tip' release (usually tracks a few
+                commits behind 'master'
+    v3.7.3    = an explicit version to install - the leading
+                'v' is required in the version string
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "node-exporter"

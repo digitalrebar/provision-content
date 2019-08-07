@@ -1,0 +1,72 @@
+{
+  "ignition": {
+    "config": {},
+    "security": {
+      "tls": {}
+    },
+    "timeouts": {},
+    "version": "2.2.0"
+  },
+  "networkd": {},
+{{if .ParamExists "access-keys"}}
+{{$list := values (.Param "access-keys")}}
+{{if $list }}
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "sshAuthorizedKeys": [
+{{range $i, $key := $list }}
+        {{if $i}},{{end}}
+        "{{$key}}"
+{{end}}
+        ]
+      }
+    ]
+  },
+{{end}}
+{{end}}
+  "storage": {
+    "files": [
+      {
+        "filesystem": "root",
+        "path": "/etc/hostname",
+        "mode": 420,
+        "contents": { "source": "data:,{{.Machine.Name}}" }
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/bin/drpcli",
+        "contents": {
+          "source": "{{.ProvisionerURL}}/files/drpcli.amd64.linux",
+          "verification": {}
+        },
+        "mode": 493
+      },
+      {
+        "filesystem": "root",
+        "path": "/etc/drpcli",
+        "contents": {
+          "source": "data:,RS_ENDPOINT%3D{{.ApiURL}}%0ARS_TOKEN%3D{{.GenerateInfiniteToken}}%0ARS_UUID%3D{{.Machine.UUID}}%0A",
+          "verification": {}
+        },
+        "mode": 384
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "contents": "[Unit]\nDescription=DigitalRebar Provision Client Runner\nDocumentation=http://provision.readthedocs.io/en/latest/\nWants=network-online.target network.target\nAfter=drpcli-init.service network-online.target network.target\n\n[Service]\nEnvironmentFile=/etc/drpcli\nExecStart=/opt/bin/drpcli machines processjobs \"$RS_UUID\"\nRestart=always\nRestartSec=3\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "drpcli.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=DigitalRebar Provision Client Runner Initial Runnable\nDocumentation=http://provision.readthedocs.io/en/latest/\nWants=network-online.target network.target\nAfter=network-online.target network.target\n\n[Service]\nType=simple\nEnvironmentFile=/etc/drpcli\nExecStartPre=-/bin/curl -g -o /opt/bin/drpcli \"{{.ProvisionerURL}}/files/drpcli.amd64.linux\"\nExecStartPre=-/bin/chmod +x /opt/bin/drpcli\nExecStart=/opt/bin/drpcli machines update \"$RS_UUID\" '{ \"Runnable\": true }'\nExecStop=/opt/drpcli machines update \"$RS_UUID\" '{ \"CurrentTask\": -1, \"Runnable\": false }'\nRemainAfterExit=true\nRestart=on-failure\nRestartSec=5s\nStandardOutput=journal\n\n[Install]\nWantedBy=multi-user.target\n",
+        "enabled": true,
+        "name": "drpcli-init.service"
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,33 @@
+#!/bin/bash
+# Install Digital Rebar Provision on a Machine
+
+{{if .ParamExists "drp-prom-mon/skip-centos-7-install" -}}
+{{ if eq (.Param "drp-prom-mon/skip-centos-7-install") true -}}
+echo "skipping this task as Param set to skip"
+exit 0
+{{end -}}{{end -}}
+
+set -e
+
+{{template "setup.tmpl" .}}
+
+unset RS_TOKEN
+###
+#  This template installs Digital Rebar Provision on a given
+#  machine.  It requires a BootEnv be run prior to this stage,
+#  which installs either Centos 7 or Ubuntu 16.04.
+#
+#  By default we wll NOT configure with DRP Community Content.
+#  Install mode will be Production by default to get restart scripts.
+#  Further tasks should be used to customize the DRP endpoint.
+###
+#[[ `id -nu` != "0" ]] && xiterr "Must be root to install."
+
+_drpcli=`which drpcli`
+[[ ! -x "$_drpcli" ]] && xiterr 1 "'drpcli' binary not found or not executable"
+
+# need to force the DRP endpoint to be localhost - otherwise, we
+# perform the action on the Endpoint deploying us
+set -x
+$_drpcli -E https://127.0.0.1:8092 bootenvs uploadiso centos-7-install
+

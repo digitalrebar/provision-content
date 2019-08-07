@@ -1,0 +1,33 @@
+---
+Name: hpe-repo-urls
+Description: The base URLs for the that the HPE tooling
+Documentation: |
+  HPE systems require some base tooling to fully enable remote management
+  and low-level hardware management.  The repository that this URL points
+  at should provide the HP SUM tooling and the SSA tooling for managing RAID
+  controllers.  You can use the usual YUM variables here, along with
+  "$hpe_gen" for generation specific tooling.
+Schema:
+  type: array
+  items:
+    type: object
+    required:
+      - name
+      - url
+      - requireToken
+  default:
+    - name: mcp
+      url: 'https://downloads.linux.hpe.com/SDR/repo/mcp/centos/$releasever/$basearch/$mcp_ver/'
+      requireToken: false
+    - name: hpsum
+      url: 'https://downloads.linux.hpe.com/SDR/repo/hpsum/redhat/7/$basearch/$hpsum_ver/'
+      requireToken: false
+    - name: spp
+      url: 'https://downloads.linux.hpe.com/SDR/repo/spp-$hpe_gen/rhel/7/$basearch/$spp_ver/'
+      requireToken: false
+    - name: stk
+      url: 'https://downloads.linux.hpe.com/SDR/repo/stk/rhel/7/$basearch/$stk_ver/'
+      requireToken: false
+    - name: fwpp
+      url: 'https://downloads.linux.hpe.com/SDR/repo/fwpp-$hpe_gen/$fwpp_ver/'
+      requireToken: true

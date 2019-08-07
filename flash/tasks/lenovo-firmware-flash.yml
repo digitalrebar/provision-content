@@ -1,0 +1,66 @@
+---
+Name: lenovo-firmware-flash
+Description: Flash supported firmware on Lenovo systems
+RequiredParams:
+  - skip-flash
+Templates:
+  - Name: prep-usb-nic
+    Contents: |
+      #!/usr/bin/env bash
+      [[ {{.Param "skip-flash"}} = true ]] && exit 0
+      ocshow() {
+          local v
+          v=$(grep "$1" <(/opt/OneCli/OneCli config show "$1"))
+          printf '%s' "${v#${1}=}"
+      }
+      ocset() {
+          /opt/OneCli/OneCli config set "$1" "$2"
+      }
+      if [[ $(ocshow IMM.LanOverUsb) != Enabled ]]; then
+          ocset IMM.LanOverUsb Enabled
+      fi
+      raddr=$(ocshow IMM.LanOverUsbIMMIP)
+      laddr=$(ocshow IMM.LanOverUsbHostIP)
+      mask=$(ocshow IMM.LanOverUsbIMMNetmask)
+      for nic in /sys/class/net/*; do
+          driver=$(readlink -f "$nic/device/driver")
+          [[ ${driver##*/} = cdc_ether ]] || continue
+          nic=${nic##*/}
+          break
+      done
+      if [[ ! -d /sys/class/net/$nic ]]; then
+          echo "Unable to find USB network device"
+          exit 1
+      fi
+      ip link set "$nic" up
+      ip addr flush dev "$nic" scope global
+      ip addr add "$laddr/$mask" dev "$nic"
+      ping -q -c 1 "$raddr" && exit 0
+      echo "Unable to talk to IPMI controller at $raddr via $laddr"
+      exit 1
+  - Name: acquire-latest-updates
+    Contents: |
+      #!/usr/bin/env bash
+      [[ {{.Param "skip-flash"}} = true ]] && exit 0
+      mt="$(drpcli gohai |jq -r '.DMI.Chassis| .[0]| .SKUNumber')"
+      mt="${mt:0:4}"
+      /opt/OneCli/OneCli update acquire --ostype platform --scope latest --mt "$mt"
+  - Name: flash-latest-updates
+    Contents: |
+      #!/usr/bin/env bash
+      [[ {{.Param "skip-flash"}} = true ]] && exit 0
+      [[ -d /sys/module/sg ]] || modprobe sg
+      /opt/OneCli/OneCli update flash --noreboot
+      reboot=false
+      fail=false
+      while read line; do
+          case $line in
+             *STATUS*)
+                 [[ $line = *'Package installed successfully'* ]] || fail=true;;
+             *REBOOT*)
+                 [[ $fail = false && $line = *'Reboot Required to take effect'* ]] && reboot=true;;
+          esac
+          [[ $reboot = true || $fail = true ]] && break
+      done < <(awk '/<(REBOOT|STATUS)>/' logs/*/Onecli-update_flash_status.xml |tac)
+      [[ $reboot = true ]] && exit 192
+      [[ $fail = false ]]

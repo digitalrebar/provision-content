@@ -1,0 +1,6 @@
+---
+Name: "flash"
+Description: "Flash firmware on a target system"
+BootEnv: "sledgehammer"
+Tasks:
+  - "flash-discover"

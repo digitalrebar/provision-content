@@ -1,0 +1,22 @@
+---
+Name: dell-dsu-block-release
+Description: The block release to pull firmware and OMSA from.  Defaults to the latest block
+  release.
+Documentation: |
+  Dell releases updates to its firmware on a block schedule (usually
+  once a month) and the tooling assumes that all firmware in a block
+  should be installed together.  You can use this param to pin
+  firmware and tools at a specific release, or you can leave it
+  unspecified to allow tools and updates to be installed from the
+  latest block release.
+
+  Block releases are named according to the following format:
+
+    YY.MM.NN
+
+  YY is the last two digits of the year
+  MM is the month
+  NN is the nth release in a month, starting at 00
+Schema:
+  type: string
+  default: ''

@@ -1,0 +1,23 @@
+---
+Name: flash-discover
+Description: Detect which system firmware flash method to use.
+Prerequisites:
+  - hardware-tools-install
+Templates:
+  - Name: discover
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl"  .}}
+      mfgr="$(drpcli gohai |jq -r '.DMI | .System | .Manufacturer')"
+
+      {{ if .ParamExists "flash-list" }}
+      echo "Hardware system, $mfgr, updated by list. Assume list is self-contained."
+      drpcli machines tasks add {{.Machine.UUID}} at 0 flash-list
+      {{ else }}
+      case $mfgr in
+          "Dell Inc.") drpcli machines tasks add {{.Machine.UUID}} at 0 dell-firmware-flash;;
+          "HP"|"HPE") drpcli machines tasks add {{.Machine.UUID}} at 0 hpe-firmware-flash;;
+          Lenovo) drpcli machines tasks add {{.Machine.UUID}} at 0 lenovo-firmware-flash;;
+          *) echo "No idea how to flash for $mfgr";;
+      esac
+      {{ end }}

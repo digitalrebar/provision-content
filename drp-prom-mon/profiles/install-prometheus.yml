@@ -1,0 +1,28 @@
+---
+Name: "install-prometheus"
+Description: "Install Prometheus - you MUST clone and apply to Machines"
+Documentation: |
+  You MUST clone this profile, and apply the clone to the Machines
+  you are configuring for Node Exporter and Prometheus services.
+  In addition, you must set the name of your cloned Profile in the
+  'drp-prom-mon/cluster-name' Param.
+
+  The 'cfg-node-exporter.sh.tmpl' Template will collect the Machines
+  IP Address and add a the Param 'drp-prom-mon/node-exporter' to the
+  cloned profile.  DO NOT create the Param, otherwise, the template
+  will fail with an error.
+
+  The Prometheus configuration task will use the Param to write the
+  config appropriately for the service to scrape the Node Exporter.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-prometheus"
+
+Params:
+  drp-prom-mon/cluster-profile: "set-to-your-clone-cluster-profile-name"
+  change-stage/map:
+    install-prometheus: complete:Success
+
+ReadOnly: true

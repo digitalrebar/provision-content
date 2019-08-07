@@ -1,0 +1,18 @@
+---
+Name: "cfg-drp-sledgehammer"
+Description: "A task to configure DRP sledgehammer"
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "cfg-drp-sledgehammer"
+
+Templates:
+  - Contents: ""
+    ID: "cfg-drp-sledgehammer.sh.tmpl"
+    Name: "Configure DRP Sledgehammer"
+    Path: ""
+
+ReadOnly: true

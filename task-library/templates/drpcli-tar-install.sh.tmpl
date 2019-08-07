@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -e
+
+
+function install_tarball() {
+    mkdir -p fakeroot/usr/local/bin
+    mkdir -p fakeroot/etc
+
+    cp drpcli fakeroot/usr/local/bin/drpcli
+    chmod +x fakeroot/usr/local/bin/drpcli
+
+    echo "Placing init file in place"
+    cp "$etcfile" fakeroot/etc/drpcli
+    chmod 600 fakeroot/etc/drpcli
+
+    mkdir -p $(dirname $initdest)
+    cp "$initfile" "$initdest"
+    mkdir -p $(dirname $start_initdest)
+    cp "$start_initfile" "$start_initdest"
+    eval $chmod
+
+    cd fakeroot
+    tar -zcvf $1 *
+    cd -
+}
+
+
+# Install drpcli into the correct place
+echo "Installing DRPCLI in /usr/local/bin"
+if [[ ! -e fakeroot/usr/local/bin/drpcli ]] ; then
+    curl -g -s -f -L -o drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
+fi
+
+echo "Loading helper script"
+. ./helper
+
+echo "Using systemd service method"
+# SystemD
+etcfile="drpcli.etc"
+etcdest="fakeroot/etc/drpcli"
+initfile="drpcli.service"
+initdest="fakeroot/etc/systemd/system/drpcli.service"
+start_initfile="drpcli-init.service"
+start_initdest="fakeroot/etc/systemd/system/drpcli-init.service"
+
+rm -rf fakeroot
+mkdir -p fakeroot/etc/systemd/system/multi-user.target.wants
+cd fakeroot/etc/systemd/system/multi-user.target.wants
+ln -s ../drpcli-init.service drpcli-init.service
+ln -s ../drpcli.service drpcli.service
+cd -
+install_tarball /tmp/drpcli-service-systemd.tgz
+
+echo "Using upstart service method"
+# Upstart
+etcfile="drpcli.etc.export"
+initfile="drpcli.unit"
+initdest="fakeroot/etc/init/drpcli.conf"
+start_initfile="drpcli-init.unit"
+start_initdest="fakeroot/etc/init/drpcli-init.conf"
+rm -rf fakeroot
+install_tarball /tmp/drpcli-service-upstart.tgz
+
+echo "Using sysv service method"
+# SysV
+etcfile="drpcli.etc.export"
+initfile="drpcli.sysv"
+initdest="fakeroot/etc/init.d/drpcli"
+start_initfile="drpcli-init.sysv"
+start_initdest="fakeroot/etc/init.d/drpcli-init"
+chmod="chmod 700 $initdest $start_initdest"
+rm -rf fakeroot
+# sysv check chkconfig symlink need to be done.
+install_tarball /tmp/drpcli-service-sysv.tgz
+
+exit 0
+

@@ -1,0 +1,18 @@
+---
+Name: "install-prometheus"
+Description: "A task to Install Prometheus"
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "install-prometheus"
+
+Templates:
+  - Contents: ""
+    ID: "install-prometheus.sh.tmpl"
+    Name: "Install Prometheus"
+    Path: ""
+
+ReadOnly: true

@@ -1,0 +1,29 @@
+---
+Name: "install-prom-mon"
+Description: "Install prom-mon cluster - you MUST apply a clone to Machines"
+Documentation: |
+  Installs the Prometheus and Grafana tools, and configures a
+  Node Exporter for Prometheus.
+
+  You MUST clone this profile, and apply the clone to the Machines
+  you are configuring for Node Exporter and Prometheus services.
+  In addition, you must set the name of your cloned Profile in the
+  'drp-prom-mon/cluster-name' Param.
+
+  The 'cfg-node-exporter.sh.tmpl' Template will collect the Machines
+  IP Address and add a the Param 'drp-prom-mon/node-exporter' to the
+  cloned profile.  DO NOT create the Param, otherwise, the template
+  will fail with an error.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-prom-mon"
+
+Params:
+  drp-prom-mon/cluster-profile: "set-to-your-clone-cluster-profile-name"
+  change-stage/map:
+    install-prometheus: install-grafana:Success
+    install-grafana: complete:Success
+
+ReadOnly: true

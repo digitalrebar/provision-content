@@ -1,0 +1,19 @@
+---
+Name: "drp-prom-mon/cluster-profile"
+Description: "This profile holds the Params configs for this cluster."
+Documentation: |
+  This param will be set to the users cloned profile name
+  for the cluster.  It is used to identify the Profile to
+  write Param data to for subsequent use during install
+  and configuration stages.
+
+  This Params should be used in a cloned Profile which
+  contains the name of the Clone in this Param.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "cluster-profile"

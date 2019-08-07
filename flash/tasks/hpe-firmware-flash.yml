@@ -1,0 +1,54 @@
+---
+Name: hpe-firmware-flash
+Description: Dell firmware update utilizing the smartupdate process
+RequiredParams:
+  - skip-flash
+Templates:
+  - Name: hpe-flash-with-smartupdate
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      skip_flash="{{.Param "skip-flash"}}"
+      if [[ $skip_flash = true ]]; then
+          echo "Skipping all flash operations due to skip-flash being true"
+          exit 0
+      fi
+
+      if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          echo "System not in Sledgehammer, exiting"
+          exit 0
+      fi
+
+      # Sigh, smartupdate is not actually that smart about what to do with duplicates,
+      # especially since firmware updates can be provided by firmware- and hp-firmware-
+      # packages.  So, we install everything but the hard drive firmware updates
+      # that are needed on the system (because they are huge, and smartupdate requires
+      # is not intelligent to filter out the ones not relavent to the system),
+      # then manually throw out everything but the highest update for any
+      # given firmware.
+      #
+      # That I need to do this at all makes me appreciate the Dell DSU toolset more.
+      yum -y install $(smartupdate requires |fgrep 'firmware(')
+      ire='^i[-cfe][-rR][-dU][-1]$'
+      while read line; do
+          IFS=' |' read info name ver <<< "$line"
+          [[ $info =~ $ire ]] || continue
+          if [[ $info != *U1 ]]; then
+              # This is a downgrade or the same thing.  Get rid of all its versions.
+              yum -y erase $(rpm -q "firmware-$name" "hp-firmware-$name" |grep -v 'is not installed') || :
+              continue
+          fi
+          # Get rid of all older versions of the package
+          yum -y erase $(rpm -q "firmware-$name" "hp-firmware-$name" |grep -v 'is not installed'| tail -n +2) || :
+      done < <(smartupdate list 2>/dev/null)
+      # Now that all the unwanted update packages are gone, run smartupdate for reals
+      if ! smartupdate -y -v upgrade --cleanupall_onexit; then
+          case $? in
+              1) exit_reboot;;
+              3) exit 0;;
+              *) echo "smartupdate exited with return code $?"
+                 exit 1;;
+          esac
+      fi

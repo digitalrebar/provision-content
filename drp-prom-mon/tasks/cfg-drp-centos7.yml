@@ -1,0 +1,18 @@
+---
+Name: "cfg-drp-centos7"
+Description: "A task to configure DRP content bootenv Centos 7"
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "cfg-drp-centos7"
+
+Templates:
+  - Contents: ""
+    ID: "cfg-drp-centos7.sh.tmpl"
+    Name: "Configure DRP Content"
+    Path: ""
+
+ReadOnly: true

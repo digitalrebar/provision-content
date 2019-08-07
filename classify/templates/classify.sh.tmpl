@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+# Classify a machine and take actions based upon the classification.
+#
+# This will only really work in sledgehammer (it might work in other linux OSes)
+
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+[[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
+
+DISABLE_CLASSIFIER="{{.Param "classify/disable-classifier"}}"
+if [[ "$DISABLE_CLASSIFIER" == "true" ]]; then
+  echo "Classification system disabled ('classify/disable-classifier' set to 'true')."
+  exit 0
+fi
+
+# globals used below
+MY_MAC_ADDR=""
+
+###
+#   Sets a given parameter to a given value on a Machine object.
+###
+function set_parameter() {
+  local _parameter="$1"
+  local _value="$2"
+
+  drpcli machines set $RS_UUID param "$_parameter" to "$_value"
+}
+
+###
+#  Adds a given ARGv1 profile to the Machine object
+###
+function add_profile() {
+  local _profile="$1"
+
+  if drpcli profiles exists "$_profile"
+  then
+    if drpcli machines show $RS_UUID | jq -r '.Profiles' | grep -q "\"$_profile\""
+    then
+      echo "Profile ('$_profile') already exists on Machine - no action taken."
+    else
+      drpcli machines addprofile $RS_UUID "$_profile"
+    fi
+  else
+    echo "Requested profile ('$_profile') does not exist."
+    exit 1
+  fi
+}
+
+###
+#  Changes the Machine workflow to ARGv1 specified workflow
+###
+function change_workflow() {
+  local _wf="$1"
+
+  if drpcli workflows exists "$_wf"
+  then
+    drpcli machines update $RS_UUID "{ \"Workflow\": \"$_wf\" }"
+  else
+    echo "Requested workflow ('$_wf') does not exist."
+    exit 1
+  fi
+}
+
+###
+###  Test functions echo 0 for success and 1 for failure
+###
+
+###
+#  Generally a fallthrough function, that will always succeed if Requested###
+function always() {
+  echo "pass"
+}
+
+###
+#  Determine if the Machine is in a given in_subnet
+###
+function in_subnet() {
+  local _cidr="$1"
+  local _prefix=${_cidr#*/}
+  local _myaddr="{{.Machine.Address}}/$_prefix"
+
+  local _mynet=$(ipcalc -n $_myaddr)
+  local _thenet=$(ipcalc -n $_cidr)
+
+  if [[ "$_mynet" == "$_thenet" ]] ; then
+      echo "pass"
+  else
+      echo "fail"
+  fi
+}
+
+###
+#  Determine if the Machine has the given MAC address
+###
+function has_mac() {
+  # normalize the input MAC for comparison
+  local _mac_match=$(echo "$1" | tr -d " :-" | tr '[:upper:]' '[:lower:]')
+  get_my_mac    # sets global var MY_MAC_ADDR
+  # strip it down to 12 chars (tosses 01 type if exists)
+  _mac_match=${_mac_match:(-12)}
+
+  if [[ "$_mac_match" == "$MY_MAC_ADDR" ]]; then
+    echo "pass"
+  else
+    echo "fail"
+  fi
+}
+
+###
+#  get the Machines boot interface Mac Addr
+#  NOTE: we shouuld NOT echo anything out here
+###
+function get_my_mac() {
+  bootif_re='BOOTIF=([^ ]+)'
+  local _macaddr="UNKNOWN"
+  if [[ $(cat /proc/cmdline) =~ $bootif_re ]]; then
+    _macaddr="${BASH_REMATCH[1]//-/:}"
+    _macaddr=$(echo $_macaddr | tr -d " :-" | tr '[:upper:]' '[:lower:]')
+    _macaddr=${_macaddr:(-12)}
+  else
+    xiterr 1 "Unable to 'cat /proc/cmdline' and rematch successfully"
+  fi
+  MY_MAC_ADDR="$_macaddr"
+}
+
+# if any custom classify functions are specified, inject them here
+{{ template "classify-custom-functions.tmpl" .}}
+
+{{range $index, $group := .Param "classify/classification-data"}}
+
+[[ $RS_DEBUG_ENABLE ]] && echo ">>>   INDEX:  {{$index}}"
+[[ $RS_DEBUG_ENABLE ]] && echo ">>>   GROUP:  {{$group}}"
+
+RESULT=$({{$group.test}})
+[[ "$RESULT" == "0" ]] && RESULT="pass"
+[[ "$RESULT" == "1" ]] && RESULT="fail"
+if [[ $RESULT == "pass" ]] ; then
+  {{range $si, $action := $group.actions}}
+[[ $RS_DEBUG_ENABLE ]] && echo ">>>      SI:  {{$si}}"
+[[ $RS_DEBUG_ENABLE ]] && echo ">>>  ACTION:  {{$action}}"
+    {{$action}}
+  {{end}}
+
+# check if we should exit on first match, or continue on
+ {{ if $group.continue -}}
+   echo "Classified successfully ('{{$group.test}}') - moving to next test..."
+ {{ else -}}
+   echo "Classified successfully without continue set - classifier finishing..."
+   exit 0
+ {{ end -}}
+fi
+
+{{else}}
+echo "No data to classify.  Continuing without classification ..."
+exit 0
+{{end}}
+
+echo "Classification tests didn't match - no modifications made to Machine ..."
+exit 0

@@ -1,0 +1,10 @@
+---
+Name: "burnin-reboot-count"
+Description: "The number of times to reboot before continuing"
+Schema:
+  type: "number"
+  default: 3
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"

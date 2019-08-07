@@ -1,0 +1,32 @@
+---
+Name: "cpumem_stress"
+Description: "CPU/MEM Stress Test"
+RequiredParams:
+- "burnin-cpumem-duration"
+- "burnin-skip"
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "cpumem_stress.sh"
+  Contents: |
+    #!/bin/bash
+
+    {{ template "setup.tmpl" . }}
+
+    {{ if .Param "burnin-skip" }}
+    echo "Burnin has already run - skipping CPU/MEM Stress Test"
+    exit 0
+    {{ end }}
+
+    NUMPROCS="$(grep '^processor' /proc/cpuinfo |wc -l)"
+    DURATION="{{.Param "burnin-cpumem-duration"}}m"
+    echo 3 >/proc/sys/vm/drop_caches
+    MEM="$(free -m |awk '/Mem/ {print $7}')"
+    MEM=$(( (MEM / NUMPROCS) - 128 ))
+
+    stress-ng --cpu 0 --cpu-method=all \
+          --vm 0 --vm-method=all --vm-locked --vm-keep --vm-bytes="${MEM}m" \
+          --metrics-brief --perf --tz --ignite-cpu --verify -t "$DURATION"

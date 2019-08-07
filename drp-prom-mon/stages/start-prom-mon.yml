@@ -1,0 +1,17 @@
+Name: start-prom-mon
+Description: Start the prom-mon process on this Machine.
+
+BootEnv: ""
+OptionalParams: []
+RequiredParams: []
+Profiles: []
+Reboot: false
+Tasks: []
+Templates: []
+
+Meta:
+  color: "orange"
+  icon: "play"
+  title: "start-prom-mon"
+
+ReadOnly: true

@@ -1,0 +1,20 @@
+---
+Name: "burnin_reset"
+Description: "Burn-In Reset"
+RequiredParams:
+- "burnin-skip"
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "burnin-reset.sh"
+  Contents: |
+    #!/bin/bash
+
+    {{ template "setup.tmpl" . }}
+
+    echo "Burn-in reset.  Clearing the flag that keeps burnin from running."
+    drpcli machines remove $RS_UUID param burnin-skip || :
+    exit 0

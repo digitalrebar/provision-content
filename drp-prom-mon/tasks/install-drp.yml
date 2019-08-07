@@ -1,0 +1,18 @@
+---
+Name: "install-drp"
+Description: "A task to install Digital Rebar Provision on a Machine."
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "install-drp"
+
+Templates:
+  - Contents: ""
+    ID: "install-drp.sh.tmpl"
+    Name: "Install DRP"
+    Path: ""
+
+ReadOnly: true

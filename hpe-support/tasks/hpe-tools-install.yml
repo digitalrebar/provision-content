@@ -1,0 +1,57 @@
+---
+Name: hpe-tools-install
+Description: Install HPE tooling from appropriate yum repositories
+RequiredParams:
+  - hpe-repo-urls
+  - hpe-repo-versions
+  - hpe-firmware-token
+Templates:
+  - Name: detect-hpe-system-gen
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      gen="$(dmidecode |awk '/Product Name:/ { print tolower($NF); exit}')" || :
+      printf '%s\n' "$gen" > /etc/yum/vars/hpe_gen
+      set_param hpe-system-gen "$gen"
+  - Name: set-up-hpe-tools-repo
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      rm -f /etc/yum.repos.d/drp-hpe*.repo || :
+      repos="$(get_param hpe-repo-urls)"
+      versions="$(get_param hpe-repo-versions)"
+      token="$(get_param hpe-firmware-token)"
+      while read -r repo; do
+          name=$(jq -r '.name' <<<"$repo")
+          url=$(jq -r '.url' <<<"$repo")
+          url=$(echo "$url" | sed 's+{{"{{"}}.ProvisionerURL{{"}}"}}+{{.ProvisionerURL}}+g')
+          want_token=$(jq -r '.requireToken' <<<"$repo")
+          if [[ $want_token = true && ($token = unset || !$token) ]]; then
+              echo "Skipping repo for $name because it wants an auth token and none was provided"
+              continue
+          fi
+          version=$(jq -r ".$name" <<< "$versions")
+          [[ $version ]] || version=current
+          printf '%s\n' "$version" > "/etc/yum/vars/${name}_ver"
+          cat > /etc/yum.repos.d/drp-hpe-$name.repo <<EOI
+      [drp-hpe-$name]
+      name=drp-hpe-$name
+      baseurl=${url}
+      gpgcheck=0
+      enabled=1
+      EOI
+          if [[ $want_token = true ]]; then
+              cat >> /etc/yum.repos.d/drp-hpe-$name.repo <<EOI
+      username={{.Param "hpe-firmware-token"}}
+      password=null
+      EOI
+          fi
+      done < <(jq -rc '.[]' <<<"$repos")
+  - Name: install-hpe-mgmt-tools
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      {{ template "set-proxy-servers.sh.tmpl" .}}
+      yum -y makecache
+      yum -y install yum-plugin-ovl || :
+      yum -y install hponcfg hpsum ssacli sut hp-scripting-tools

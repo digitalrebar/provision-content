@@ -1,0 +1,45 @@
+#!/bin/bash
+# Install Node Exporter for Prometheus stats collection
+
+set -e
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit $XIT; }
+#[[ `id -nu` != "0" ]] && xiterr "Must be root to install."
+
+N=`mktemp -d /tmp/node_exp-dir.XXXXXXX`
+
+set -x
+
+cd $N
+# do NOT upgrade to 0.17.0 without careful consideration - it contains MAJOR
+# metric naming breaking functionality
+_pkg_url="https://github.com/prometheus/node_exporter/releases/download/v0.15.2/node_exporter-0.15.2.linux-amd64.tar.gz"
+_pkg=`basename ${_pkg_url}`
+curl -gL -o "$_pkg" "$_pkg_url"
+tar -xzvf "$_pkg"
+mv node_exporter-*/node_exporter /usr/local/bin/
+chmod 755 /usr/local/bin/node_exporter
+cd /tmp/
+rm -rf $N
+node_exporter --version
+
+cat << EOFNE > /etc/systemd/system/node_exporter.service
+[Unit]
+Description=Prometheus Node Exporter
+Documentation=https://prometheus.io/docs
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/node_exporter
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LimitCORE=infinity
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOFNE
+
+systemctl daemon-reload
+systemctl enable node_exporter.service
+systemctl start node_exporter.service

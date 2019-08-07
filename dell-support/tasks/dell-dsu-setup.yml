@@ -1,0 +1,51 @@
+---
+Name: dell-dsu-setup
+Description: Set up yum repositories required for Dell tooling.
+RequiredParams:
+  - dell-dsu-base-url
+  - dell-dsu-block-release
+Templates:
+  - Name: dell-dsu-repo-setup
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      baseurl="{{.ParamExpand "dell-dsu-base-url"}}"
+      release="{{.Param "dell-dsu-block-release"}}"
+
+      if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          echo "System not in Sledgehammer, exiting"
+          exit 0
+      fi
+
+      {{ template "set-proxy-servers.sh.tmpl" .}}
+
+      REPO_NAME=dell-system-update
+      url="$baseurl"
+      if [[ $release ]]; then
+          url="${url}/DSU_${release}"
+      fi
+      checksig=0
+
+      if curl -fgLO "${url}/public.key"; then
+          rpm --import public.key
+          checksig=1
+      fi
+      if curl -fgLO "${url}/public_gpg3.key"; then
+          rpm --import public_gpg3.key
+          checksig=1
+      fi
+
+      cat > /etc/yum.repos.d/${REPO_NAME}.repo <<EOF
+      [${REPO_NAME}_independent]
+      name=${REPO_NAME}_independent
+      baseurl=${url}/os_independent/
+      gpgcheck=${checksig}
+      enabled=1
+      exclude=dell-system-update*.$exclude_arch
+
+      [${REPO_NAME}_dependent]
+      name=${REPO_NAME}_dependent
+      baseurl=${url}/os_dependent/RHEL7_64/
+      gpgcheck=${checksig}
+      enabled=1
+      EOF

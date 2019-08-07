@@ -1,0 +1,22 @@
+---
+Name: "drp-prom-mon/node-exporter"
+Description: "The machine that the Node Exporter will run on."
+Documentation: |
+  This param will be set to the Machine IP address that
+  the Node Exporter will be running on.  Node Exporter will
+  feed metrics to the Prometheus/Grafana instance
+
+  Prometheus pulls stats, so no need to configure the Node
+  Exporter to know about it.  However, Prometheus DOES
+  need to be configured to know about Node Exporter to scrape
+  stats.
+
+  This Param is used in the Prometheus install task.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "node-exporter"

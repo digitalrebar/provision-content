@@ -1,0 +1,10 @@
+---
+Name: "burnin-reboot-skip"
+Description: "Should the Burnin Reboot Tasks be skipped"
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"

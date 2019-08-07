@@ -1,0 +1,10 @@
+---
+Name: "burnin-disk-test-ssd"
+Description: "Whether to perform write tests on SSDs"
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"

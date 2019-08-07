@@ -1,0 +1,9 @@
+---
+Name: hpe-ilo-unwedge-count
+Description: The number of times the system has needed to unwedge the ilo
+Documentation: |
+  This tracks the number of times the system has needed to unwedge the ilo
+  while configuring the machine.
+
+Schema:
+  type: integer

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Start the LLDP Daemon
+
+{{template "setup.tmpl" .}}
+
+echo ""
+echo "Network Status"
+ip link
+echo ""
+echo "Disabling Intel NIC LLDP Offload ..."
+for instance in /sys/kernel/debug/i40e/*/command
+do
+    echo "lldp stop" > $instance
+    echo "instance" `basename \`dirname $instance\``
+done
+
+{{if .Param "network/lldp-all-nics" }}
+echo ""
+echo "Setting all links up"
+ip -o link | awk -F: '{ print $2 }' | while read intf
+do
+    ip link set dev $intf up
+done
+{{end}}
+
+{{if .ParamExists "network/lldp-sleep" -}}
+SLEEP={{.Param "network/lldp-sleep"}}
+{{else -}}
+SLEEP="20"
+{{end -}}
+
+echo "Checking and starting LLDPD if necessary ... "
+
+do_sleep() { local _n=$SLEEP; while (( _n>=1 )); do printf "%s " "$_n"; sleep 1; (( _n-- )); done; echo "0"; }
+
+function set_family() {
+  FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+  echo "FAMILY set from os-release to:  '$FAMILY'"
+
+  case $FAMILY in
+    redhat|centos) _pkgmgr="yum"; yum -y install epel-release ;;
+    debian|ubuntu) _pkgmgr="apt" ;;
+    *) >&2 echo "Unsupported package manager family '$FAMILY'."
+       exit 1 ;;
+  esac
+}
+
+if which lldpd > /dev/null 2>&1
+then
+  if pgrep lldpd > /dev/null 2>&1
+  then
+{{if .Param "network/lldp-all-nics" }}
+    echo "LLDPD already running..."
+    printf "Sleeping for '$SLEEP' seconds to collect LLDPD data... "
+    do_sleep
+{{else}}
+    echo "LLDPD already running, no sleep required."
+{{end}}
+  else
+    echo "Not running. Starting ... "
+    systemctl enable lldpd
+    systemctl start lldpd
+    printf "Sleeping for '$SLEEP' seconds to collect LLDPD data... "
+    do_sleep
+    echo "Finished successfully"
+  fi
+else
+  # make a last ditch attempt at installing it if possible
+  echo "No LLDPD installed, trying to install and start ... "
+  set_family
+  $_pkgmgr -y install lldpd
+  systemctl enable lldpd
+  systemctl start lldpd.service
+
+  if pgrep lldpd > /dev/null 2>&1
+  then
+    printf "Installed and Sleeping for '$SLEEP' seconds to collect LLDPD data... "
+    do_sleep
+  else
+    echo "Failed installing and/or starting... giving up ... :( "
+  fi
+fi
+
+exit 0

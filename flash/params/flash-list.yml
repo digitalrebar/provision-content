@@ -1,0 +1,26 @@
+---
+Name: flash-list
+Description: List of flash images to apply.
+Documentation: |
+  This parameter contains a list of files to retrieve and run against the system.
+
+  The list contains objects that specify a type (RPM or BIN) and a URL or file to
+  retrieve the files directory.
+
+  If not specified, the system will attempt to update to the latest block release.
+  If the list is empty, nothing is updated.
+
+Schema:
+  type: array
+  items:
+    type: object
+    properties:
+      Type:
+        type: string
+        enum:
+          - "rpm"
+          - "bin"
+      File:
+        type: string
+      Force:
+        type: boolean

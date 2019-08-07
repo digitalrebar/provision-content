@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [[ -f /etc/os-release ]]; then
+  . /etc/os-release
+fi
+
+if ! which python 2>/dev/null >/dev/null ; then
+    if [[ -f /etc/redhat-release || -f /etc/centos-release ]]; then
+        yum -y makecache
+        yum install -y python
+    elif [[ -d /etc/apt ]]; then
+        apt-get -y update
+        apt-get -y install --force-yes python
+    else
+        echo "Staged on to unknown OS media!"
+        exit 4
+    fi
+else
+    echo "python already installed."
+fi
+
+exit 0
+

@@ -23,7 +23,7 @@ PATH=$PATH:$GOPATH/bin
 which drbundler || (curl -L -o $GOPATH/bin/drbundler https://github.com/digitalrebar/provision/releases/download/tip/drbundler && chmod +x $GOPATH/bin/drbundler)
 which drpcli || (curl -L -o $GOPATH/bin/drpcli https://github.com/digitalrebar/provision/releases/download/tip/drpcli && chmod +x $GOPATH/bin/drpcli)
 
-. tools/version.sh
+version=$(tools/version.sh)
 
 tools/pieces.sh | while read i ; do
     dir=$i
@@ -33,7 +33,7 @@ tools/pieces.sh | while read i ; do
     if [[ $i == "drp-community-contrib" ]] ; then
         dir="contrib"
     fi
-    echo -n "$Prepart$MajorV.$MinorV.$PatchV$Extra-$GITHASH" > $dir/._Version.meta
+    echo "$version" > $dir/._Version.meta
     drbundler $dir $i.yaml
     drpcli contents document $i.yaml > $i.rst
     $shasum $i.yaml > $i.sha256

@@ -1,0 +1,15 @@
+---
+Name: "install-prom-mon"
+Description: "Stage that installs Prometheus/Grafana monitoring"
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-prom-mon"
+Reboot: false
+RequiredParams: ["drp-prom-mon/node-exporter"]
+OptionalParams: []
+Tasks:
+  - install-prometheus
+  - install-grafana
+  - cfg-grafana
+Templates: []

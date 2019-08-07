@@ -1,0 +1,10 @@
+---
+Name: "burnin-reset"
+Description: "Reset the Burn-in flags so that it can be rerun"
+Tasks:
+  - "burnin_reset"
+  - "burnin_reboot_reset"
+Meta:
+  color: "yellow"
+  icon: "fire"
+  title: "RackN Content"

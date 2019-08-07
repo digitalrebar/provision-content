@@ -1,0 +1,10 @@
+---
+Name: "shred"
+Description: "Shred disks"
+BootEnv: "sledgehammer"
+Tasks:
+  - "shred"
+Meta:
+  color: "yellow"
+  icon: "fire"
+  title: "RackN Content"

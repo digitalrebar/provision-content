@@ -1,0 +1,17 @@
+---
+Name: hpe-repo-versions
+Description: The versions to use for HPE tool repos
+Documentation: |
+  Depending on your update and audit requirements, you may not want to track
+  the current release of the HPE tooling and firmware update bundles.
+  This param allows you to override the versions of the tooling you are
+  using on a repo by repo basis.
+  If an enrty is omitted, it will default to 'current'
+Schema:
+  type: object
+  default:
+    mcp: current
+    hpsum: current
+    spp: current
+    stk: current
+    fwpp: current

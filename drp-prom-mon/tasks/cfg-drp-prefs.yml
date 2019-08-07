@@ -1,0 +1,29 @@
+---
+Name: "cfg-drp-prefs"
+Description: "A task to configure Global Preferences"
+Documentation: |
+  Set the Global Preferences for a DRP instance.  If the associated
+  OptionalParams are set, then the default settings will be overridden
+  with the value specified.  The defaults for the BootEnv and Stages
+  will assume Discover/Sledgehamer/Discovery.
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "cfg-drp-prefs"
+
+OptionalParams:
+  - "drp-prom-mon/drp-prefs-unknownBootenv"
+  - "drp-prom-mon/drp-prefs-unknownStage"
+  - "drp-prom-mon/drp-prefs-defaultBootenv"
+  - "drp-prom-mon/drp-prefs-knownTokenTimeout"
+  - "drp-prom-mon/drp-prefs-unknownTokenTimeout"
+
+Templates:
+  - Contents: ""
+    ID: "cfg-drp-prefs.sh.tmpl"
+    Name: "Configure DRP Global Prefs"
+    Path: ""
+
+ReadOnly: true

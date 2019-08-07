@@ -1,0 +1,22 @@
+---
+Name: "add-node-exporter-param"
+Description: "A task to add node exporter Param to DRP endpoint"
+Documentation: |
+  The 'drp-prom-mon/node-exporter' Param defines the IP Address of the
+  Node Exporter that will be scraped by the Prometheus instance.
+  This value will subsequently be used by the Prometheus configuration
+  steps to add a scrape rule to config files for collecting metrics.
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "add-node-exporter-param"
+
+Templates:
+  - Contents: ""
+    ID: "add-node-exporter-param.sh.tmpl"
+    Name: "Configure Node Exporter Param"
+    Path: ""
+
+ReadOnly: true

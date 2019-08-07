@@ -1,0 +1,8 @@
+# extends Classifier to check if 'inventory-data' field matches value
+function has_param() {
+  local _value=$1
+  local _data=$(drpcli machines get $RS_UUID param "$_value")
+
+  [[ "$_data" == "true" ]] && echo "pass" || echo "fail"
+}
+

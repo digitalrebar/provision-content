@@ -1,0 +1,43 @@
+#!/bin/bash
+# Image build template to push our created tarball to a remote location
+# origin: rackn/image-builder
+
+########## NOT USED A.T.M. - image-capture encompases this (wrongly)
+
+{{ template "setup.tmpl" .}}
+
+echo ">>> In push step ... "
+set -x
+
+# push tarball to S3 ?  dr-provision ?
+
+MD5=$(md5sum ${RS_BUILDER_TARFILE} | awk ' { print $1 } ')
+
+if [[ -f $RS_BUILDER_TARFILE ]]
+then
+    _size=$(ls -lh $RS_BUILDER_TARFILE | awk ' { print $5 } ')
+    echo "Image Builder created image information: "
+    echo "--------------------------------------------------------------------------------"
+    echo "        filename:  $RS_BUILDER_TARFILE   "
+    echo "           ident:  $RS_IMAGE_IDENT       "
+    echo "            date:  $RS_BUILDER_DATE      "
+    echo "            size:  $_size                "
+    echo "          md5sum:  $MD5                  "
+    echo "  upload tarball:  $RS_UPLOAD_TARBALL    "
+    echo " upload manifest:  $RS_UPLOAD_MANIFEST   "
+fi
+
+# build_json_manifest !!
+# insert above info, plus files manifest, etc... should be JSON so it can be "consumed"
+
+set -x
+# why no worky w/ TOKEN ?
+#drpcli -T ${RS_TOKEN} files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
+#drpcli -T ${RS_TOKEN} files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
+
+# our Token scope does not allow file uploads
+#unset RS_TOKEN
+drpcli -T "" -U rocketskates -P r0cketsk8ts -E ${RS_ENDPOINT} files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
+drpcli -T "" -U rocketskates -P r0cketsk8ts -E ${RS_ENDPOINT} files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
+
+set +x

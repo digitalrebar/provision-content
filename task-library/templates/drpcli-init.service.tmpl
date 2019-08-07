@@ -1,0 +1,20 @@
+[Unit]
+Description=DigitalRebar Provision Client Runner Initial Runnable
+Documentation=http://provision.readthedocs.io/en/latest/
+Wants=network-online.target network.target
+After=network-online.target network.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/drpcli
+ExecStartPre=-/bin/curl -g -o /usr/local/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
+ExecStartPre=-/bin/chmod +x /usr/local/bin/drpcli
+ExecStart=/usr/local/bin/drpcli machines update "$RS_UUID" '{ "Runnable": true }'
+ExecStop=/usr/local/bin/drpcli machines update "$RS_UUID" '{ "Runnable": false }'
+RemainAfterExit=true
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

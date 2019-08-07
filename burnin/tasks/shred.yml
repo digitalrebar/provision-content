@@ -1,0 +1,72 @@
+---
+Name: "shred"
+Description: "Removes data from drives"
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "disk_shred.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2015
+
+    {{ template "setup.tmpl" . }}
+
+    function concurrent_shred()
+    {
+        JOBLIST=""
+        TASKLIST[0]=""
+        i=0
+
+        for DISK in "$@"
+        do
+            echo "Runnning: shred -n 1 -z $DISK 2>/dev/null >/dev/null"
+            shred -n 1 -z $DISK 2>/dev/null >/dev/null &
+            JOBSTRING=$(jobs %%)
+            LASTJOB=$(echo "$JOBSTRING" | sed 's/^[^0-9]*//' | sed 's/[^0-9].*$//')
+            JOBLIST="$JOBLIST $LASTJOB"
+            TASKLIST[$i]="$DISK"
+            i=$(($i+1))
+        done
+
+        i=0
+        FAIL=0
+        for JOB in $JOBLIST ; do
+            wait %$JOB
+            if [[ $? -ne 0 ]] ; then
+            echo "${TASKLIST[$i]} – shred failed with $?"
+            FAIL=1
+              fi
+            i=$(($i+1))
+        done
+
+        if [[ $FAIL -eq 1 ]] ; then
+            exit 1
+        fi
+    }
+
+    which lshw 2>&1 >/dev/null || yum install -y lshw
+    lshw -class disk 2>&1 > /tmp/disk.data
+
+    # Get disks
+    for i in $(ls -d /sys/block/*)
+    do
+      SIZE=$(cat $i/stat | awk '{ print $1 }')
+      if [ "$SIZE" != "0" ]
+      then
+        DEV=${i/\/sys\/block/\/dev}
+        cat /tmp/disk.data | grep -q $DEV || continue
+        DISK="$DISK $DEV"
+      fi
+    done
+
+    rm -f /tmp/disk.data
+
+    if [ "$DISK" != "" ] ; then
+      concurrent_shred $DISK
+    fi
+
+    exit 0
+

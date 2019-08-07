@@ -1,0 +1,99 @@
+#!/bin/bash
+# Install Prometheus
+
+set -e
+
+{{template "setup.tmpl" .}}
+
+#[[ $(id -nu) != "0" ]] && xiterr "Must be root to install."
+
+set -x
+
+P=$(mktemp -d /tmp/prom-dir.XXXXXXX)
+cd $P
+
+# in the future make this a Param
+FAMILY="{{.Env.OS.Family}}"
+echo "    FAMILY set by Template to:  '$FAMILY'"
+FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+echo "FAMILY set from os-release to:  '$FAMILY'"
+
+case $FAMILY in
+        redhat|centos) _pkgmgr="yum" ;;
+        debian|ubuntu) _pkgmgr="apt" ;;
+        *) xiterr 1 "Unsupported package manager '$FAMILY'." ;;
+esac
+
+grep "^prometheus:" /etc/passwd > /dev/null 2>&1 \
+  && echo "User 'prometheus' exists already, skipping user creation ... " \
+  || useradd -c "Prometheus Server" -d /srv/prometheus -s /bin/bash -m -k /etc/skel prometheus
+$_pkgmgr -y install curl
+echo 'prometheus:rocketskates' | chpasswd
+
+# make this a Param in the future
+PROM_VER="2.2.0"
+
+# maybe a Param here too
+_prom_dir="/srv/prometheus"
+mkdir -p ${_prom_dir}/server
+_pkg_url="https://github.com/prometheus/prometheus/releases/download/v${PROM_VER}/prometheus-${PROM_VER}.linux-amd64.tar.gz"
+_pkg=$(basename ${_pkg_url})
+curl -gL -o "$_pkg" "$_pkg_url"
+tar -xzf "$_pkg"
+
+if pgrep prometheus
+then
+    systemctl stop prometheus.service \
+      || xiterr 1 "unable to stop running prometheus instance"
+fi
+
+cp -r prometheus-${PROM_VER}*/* ${_prom_dir}/server/
+chmod 755 ${_prom_dir}/server/prometheus
+chown -R prometheus:prometheus ${_prom_dir}/server/
+${_prom_dir}/server/prometheus --version
+cd /tmp
+rm -rf $P
+
+
+# get the IP addr of our Node Exporter to add config snippet
+{{if .ParamExists "drp-prom-mon/node-exporter" -}}
+EXPORTER={{.Param "drp-prom-mon/node-exporter"}}
+{{else -}}
+xiterr 1 "Missing Param ('drp-prom-mon/node-exporter'), can't configure Prometheus to scrape Node Exporter"
+{{end -}}
+
+#############################
+#############################  MUST set the target IP addr
+#############################  to the DRP endpoint running
+#############################  the Node Exporter
+#############################
+
+cat << EOFSCRAPE >> /srv/prometheus/server/prometheus.yml
+
+  - job_name: "node-$EXPORTER"
+    scrape_interval: "1s"
+
+    static_configs:
+      - targets: ['${EXPORTER}:9100']
+EOFSCRAPE
+
+cat << EOFPROM > /etc/systemd/system/prometheus.service
+[Unit]
+Description=Prometheus Server
+Documentation=https://prometheus.io/docs
+After=network.target
+
+[Service]
+ExecStart=/srv/prometheus/server/prometheus --config.file=/srv/prometheus/server/prometheus.yml
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LimitCORE=infinity
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOFPROM
+
+systemctl daemon-reload
+systemctl enable prometheus.service
+systemctl start prometheus.service

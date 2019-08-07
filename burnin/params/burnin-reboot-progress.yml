@@ -1,0 +1,10 @@
+---
+Name: "burnin-reboot-progress"
+Description: "The number of times the system has reboot so far"
+Schema:
+  type: "number"
+  default: 0
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"

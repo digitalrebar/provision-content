@@ -1,0 +1,20 @@
+---
+Name: "burnin_complete"
+Description: "Burn-In completed successfully"
+RequiredParams:
+- "burnin-skip"
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "burnin_complete.sh"
+  Contents: |
+    #!/bin/bash
+
+    {{ template "setup.tmpl" . }}
+
+    echo "Burn-in completed.  Marking successful by setting burnin-skip"
+    set_param burnin-skip true
+    exit 0

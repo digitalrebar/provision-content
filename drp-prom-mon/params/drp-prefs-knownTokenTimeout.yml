@@ -1,0 +1,12 @@
+---
+Name: "drp-prom-mon/drp-prefs-knownTokenTimeout"
+Description: "Set the Global Preferences for known token timeout."
+Documentation: ""
+
+Schema:
+  type: "number"
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "set DRP prefs knownTokenTimeout"

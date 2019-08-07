@@ -1,0 +1,63 @@
+#!/bin/bash
+# Image builder template to reset the package repos to stock OS repos.
+# origin: rackn/image-builder
+
+######## this should only be run if requested, or if we have local-repos
+######## set to true - as the local repos will not contain packages we
+######## need for subsequent install tasks to succeed
+
+{{template "setup.tmpl" .}}
+
+case $OS_FAMILY in
+  rhel)
+    echo "Setting '$OS_TYPE' base repos back to default."
+    yum -y reinstall $OS_TYPE-release
+    rm -f /etc/yum.repos.d/00-rebar-base.repo
+    yum -y clean all
+    yum -y makecache
+    #### TODO:  in the future, we want to give control over the
+    ####        pkg installs to define local repos
+    # Install EPEL repo - but if this failes, we don't want to
+    # exit out, we'll try to manually get the EPEL rpm and install
+    # that as a last ditch resort
+    if ! yum -y install epel-release; then
+      if ! curl -fgL \
+          http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+          -o /tmp/epel.rpm; then
+       echo "Failed to get EPEL RPM"
+       exit 1
+     fi
+        rpm -ivh /tmp/epel.rpm && rm -f /tmp/epel.rpm
+    fi
+    ;;
+  debian|ubuntu)
+    echo "Setting '$OS_TYPE' '$OS_VER' base repos back to default."
+
+    if [[ "$OS_TYPE" == "ubuntu" ]]
+    then
+      case $OS_VER in
+        14.04) RELEASE="trusty" ;;
+        16.04) RELEASE="xenial" ;;
+        17.04) RELEASE="zesty"  ;;
+        17.10) RELEASE="artful" ;;
+        18.04) RELEASE="bionic" ;;
+        *) echo "Unable to reset repos for this version ... please fix me ... "
+          exit 1
+            ;;
+      esac
+
+      cat <<EOREPO > /etc/apt/sources.list
+deb http://archive.ubuntu.com/ubuntu ${RELEASE} main multiverse restricted universe
+deb http://archive.ubuntu.com/ubuntu ${RELEASE}-updates main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu ${RELEASE}-backports main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu ${RELEASE}-security main restricted universe multiverse
+EOREPO
+    fi
+      ;;
+  *)
+     echo "Sorry, no idea how to reset package repos for $OS_TYPE"
+     exit 1
+     ;;
+esac
+
+exit 0

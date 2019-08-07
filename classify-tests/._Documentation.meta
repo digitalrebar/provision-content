@@ -1,0 +1,9 @@
+Classify Tests Content
+----------------------
+
+The classify-tests content pack is intended to help with testing the "classify"
+content pack.  It contains params/profiles/templates, etc. for use while testing
+the functioning of the Classify framework.
+
+See the individual Params/Profiles/etc. for more details in their respective
+Description or Documentation fields.

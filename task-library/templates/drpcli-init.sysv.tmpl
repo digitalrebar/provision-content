@@ -1,0 +1,24 @@
+#!/bin/bash
+# chkconfig: 2345 89 11
+# description: DigitalRebar Provision Client Runner Initialize
+PATH="$PATH:/usr/local/bin"
+
+. /etc/drpcli
+
+touch /var/log/drpcli-init.log
+case $1 in
+    start)
+        /usr/local/bin/drpcli machines update "$RS_UUID" '{ "Runnable": true }' &>>/var/log/drpcl-init.log </dev/zero
+        ;;
+    stop)
+        /usr/local/bin/drpcli machines update "$RS_UUID" '{ "Runnable": false }' &>>/var/log/drpcl-init.log </dev/zero
+        ;;
+    status)
+        true;;
+    enable)
+        chkconfig --add drpcli-init;;
+    disable)
+        chkconfig --del drpcli-init;;
+esac
+
+

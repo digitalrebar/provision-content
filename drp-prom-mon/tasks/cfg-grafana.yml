@@ -1,0 +1,22 @@
+---
+Name: "cfg-grafana"
+Description: "A task to configure Grafana"
+Documentation: |
+  This task configures the drp-prom-mon Grafana component.
+  The Prometheus Datasource will be setup, the default
+  admin credentials will be changed, and the grafana
+  shared dashboard (ID 405) will be installed.
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "cfg-grafana"
+
+Templates:
+  - Contents: ""
+    ID: "cfg-grafana.sh.tmpl"
+    Name: "Configure Grafana"
+    Path: ""
+
+ReadOnly: true

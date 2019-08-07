@@ -1,0 +1,6 @@
+---
+Name: skip-flash
+Description: Skip trying to flash firmware
+Schema:
+  type: boolean
+  default: false

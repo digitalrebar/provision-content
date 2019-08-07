@@ -1,0 +1,12 @@
+description "DigitalRebar Provision Client Runner Initializer"
+author "support@rackn.com"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+script
+  . /etc/drpcli
+  sleep 30
+  /usr/local/bin/drpcli machines update "$RS_UUID" '{ "Runnable": true }' >> /var/log/drpcli-init.log 2>&1
+end script
+

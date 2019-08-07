@@ -1,0 +1,13 @@
+---
+Name: "install-prometheus"
+Description: "Stage that installs Prometheus monitoring"
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-prometheus"
+Reboot: false
+RequiredParams: ["drp-prom-mon/node-exporter"]
+OptionalParams: []
+Tasks:
+  - install-prometheus
+Templates: []

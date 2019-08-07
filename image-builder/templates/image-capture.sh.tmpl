@@ -1,0 +1,101 @@
+#!/bin/bash
+# Image builder setup tasks
+# origin: rackn/image-builder
+{{template "setup.tmpl" .}}
+
+# ensure we escape any wildcards so shell globbing doesn't cause
+# this to fail
+IMAGE=/RS_IMAGE
+[[ -d $IMAGE ]] && rm -rf "$IMAGE"
+mkdir -p "$IMAGE"
+
+# use Params on DRP instead of vars
+export RS_BUILDER_BASE="${IMAGE}/tarball"
+export RS_BUILDER_TARNAME="${RS_BUILDER_BASE}.tgz"
+export RS_BUILDER_MANIFEST="${RS_BUILDER_BASE}-MANIFEST.txt"
+export RS_BUILDER_TARFILE="${RS_BUILDER_TARNAME}"
+export RS_BUILDER_DATE="`date`"
+
+DSTAMP=`date +%Y%m%d-%H%M%S`
+export RS_IMAGE_IDENT=`uuidgen | md5sum | awk ' { print $1 } ' | cut -c 1-10`
+export RS_UPLOAD_TARBALL="images/$OS_TYPE-tarball-$DSTAMP-$RS_IMAGE_IDENT.tgz"
+export RS_UPLOAD_MANIFEST="images/$OS_TYPE-MANIFEST-$DSTAMP-$RS_IMAGE_IDENT.txt"
+
+# branding
+for F in issue issue.net
+do
+    # first pass, backup the issue files, if we re-run this prevents
+    # duplicate Rebar messages in the issue files
+    BKUP=/etc/$F.rebar.backup
+    [[ -r "$BKUP" ]] && cp $BKUP /etc/$F || cp /etc/$F $BKUP
+
+    cat <<- ISSUE >> /etc/$F
+
+          ######  ###  #####  ### #######   #    #
+          #     #  #  #        #     #    #   #  #
+          #     #  #  #  ####  #     #   #     # #
+          #     #  #  #     #  #     #   # ### # #
+          ######  ###  #####  ###    #   #     # #######
+
+             ######  ####### ######     #    ######
+             #     # #       #     #  #   #  #     #
+             ######  #####   ######  #     # ######
+             #   #   #       #     # # ### # #   #
+             #    #  ####### ######  #     # #    #
+
+          This image built with Digital Rebar Provision.
+                       (c) RackN, Inc.
+
+                IMAGE IDENTITY: ${RS_IMAGE_IDENT}
+                BUILD DATE: ${RS_BUILDER_DATE}
+
+ISSUE
+done
+
+printf "\n\nImage Identity: ${RS_IMAGE_IDENT}\n\n
+Image built with Digital Rebar Provision.  (c) RackN, Inc.\n\n" > /etc/motd
+# we expect we're operating in the chroot environment, so go to root
+# in the future, we will parameterize this if we're booting an already
+# built system and not chroot'd to the installed structure
+cd /
+
+# for short tests, use var/ directory
+#  -czvf ${RS_BUILDER_TARNAME} ./var/                  \
+
+export GZIP="-9"
+tar                                                        \
+    --exclude={.${IMAGE}\*,./proc/\*,./sys/\*,./tmp/\*,./dev/\*,./var/tmp/\*,./run/\*,./root/post-install.log} \
+    --numeric-owner                                          \
+    -czvf ${RS_BUILDER_TARNAME} .                            \
+    > ${RS_BUILDER_MANIFEST}                                 \
+    2> >(tee -a ${RS_BUILDER_BASE}-ERRORS.txt >&2)
+
+# both STDOUT and STDERR to screen and file
+#  > >(tee -a ${RS_BUILDER_MANIFEST})             \
+#  2> >(tee -a ${RS_BUILDER_BASE}-ERRORS.txt >&2)
+# end tar command
+
+MD5=`md5sum ${RS_BUILDER_TARFILE} | awk ' { print $1 } '`
+
+if [[ -f $RS_BUILDER_TARFILE ]]
+then
+    echo "Image Builder created image information: "
+    echo "--------------------------------------------------------------------------------"
+    echo "        filename:  $RS_BUILDER_TARFILE   "
+    echo "           ident:  $RS_IMAGE_IDENT       "
+    echo "            date:  $RS_BUILDER_DATE      "
+    echo "            size:  $(stat -c '%s' $RS_BUILDER_TARFILE)                "
+    echo "          md5sum:  $MD5                  "
+    echo "  upload tarball:  $RS_UPLOAD_TARBALL    "
+    echo " upload manifest:  $RS_UPLOAD_MANIFEST   "
+fi
+
+# build_json_manifest !!
+# insert above info, plus files manifest, etc... should be JSON so it can be "consumed"
+
+# our Token scope does not allow file uploads Make a param to pass in
+# a token that does instead of hardcoding a username and password
+# here.
+unset RS_TOKEN
+drpcli -U rocketskates -P r0cketsk8ts files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
+drpcli -U rocketskates -P r0cketsk8ts files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"

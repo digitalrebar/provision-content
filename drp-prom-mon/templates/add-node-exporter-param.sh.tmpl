@@ -1,0 +1,48 @@
+#!/bin/bash
+# Configure the drp-prom-mon/node-exporter Param in a Profile
+
+set -e
+
+{{template "setup.tmpl" .}}
+
+unset RS_TOKEN
+#[[ `id -nu` != "0" ]] && xiterr "Must be root to install."
+
+_drpcli=`which drpcli`
+[[ ! -x "$_drpcli" ]] && xiterr 1 "'drpcli' binary not found or not executable"
+
+set -x
+
+ipaddr={{.Machine.Address}}
+echo "Machine Address set to:  '$ipaddr'"
+
+{{if .ParamExists "drp-prom-mon/cluster-profile" -}}
+CLUSTER_NAME={{.Param "drp-prom-mon/cluster-profile"}}
+{{end -}}
+
+case $CLUSTER_NAME in
+  prom-mon-single-node)
+      echo "Single node cluster, not setting 'drp-prom-mon/node-exporter' ... "
+      exit 0
+    ;;
+  *)  PROFILE_TOKEN="{{.GenerateProfileToken (.Param "drp-prom-mon/node-exporter") 7200}}"
+    ;;
+esac
+
+{{if .ParamExists "drp-prom-mon/node-exporter" -}}
+echo "Param drp-prom-mon/node-exporter already exists on the Machine ('$RS_UUID') !!"
+exit 1
+{{else -}}
+NODE_EXPORTER="$ipaddr"
+{{end -}}
+
+echo "Writing drp-prom-mon/node-exporter details (IP Address)"
+
+IP=$(drpcli machines get $RS_UUID param "krib/cluster-master" --aggregate | jq -r .)
+while [[ $IP == null ]] ; do
+  # Add is normally atomic.
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "drp-prom-mon/node-exporter" to "$NODE_EXPORTER" || true
+  IP=$(drpcli machines get $RS_UUID param "drp-prom-mon/node-exporter" --aggregate | jq -r .)
+done
+
+

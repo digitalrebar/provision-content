@@ -1,0 +1,18 @@
+---
+Name: "cfg-drp-ubuntu1604"
+Description: "A task to configure DRP content bootenv Ubuntu 16.04"
+Documentation: ""
+
+Meta:
+  color: "orange"
+  feature-flags: "sane-exit-codes"
+  icon: "dashboard"
+  title: "cfg-drp-ubuntu1604"
+
+Templates:
+  - Contents: ""
+    ID: "cfg-drp-ubuntu1604.sh.tmpl"
+    Name: "Configure DRP bootenv Ubuntu 16.04"
+    Path: ""
+
+ReadOnly: true

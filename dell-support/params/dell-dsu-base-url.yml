@@ -1,0 +1,13 @@
+---
+Name: dell-dsu-base-url
+Description: The base URL that the Dell System Update yum repos live at.
+Documentation: |
+  The Dell System Update repositories contain BIOS and firmware
+  updates for all supported Dell servers (in the os_independent repo)
+  as well as OpenManage Server Administrator (in the os_dependent repo).
+
+  You can find more information on DSU and the update process we take advantage of
+  at https://linux.dell.com/repo/hardware/dsu/
+Schema:
+  type: string
+  default: http://linux.dell.com/repo/hardware/dsu

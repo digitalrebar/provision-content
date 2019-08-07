@@ -1,0 +1,35 @@
+---
+Name: "burnin_reboot"
+Description: "Reboot a number of times before continuing"
+RequiredParams:
+- "burnin-reboot-count"
+- "burnin-reboot-progress"
+- "burnin-reboot-skip"
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "burnin_reboot.sh"
+  Contents: |
+    #!/bin/bash
+
+    {{ template "setup.tmpl" . }}
+
+    {{ if .Param "burnin-reboot-skip" }}
+    echo "Burnin Reboot has already run - skipping Reboot Test"
+    exit 0
+    {{ end }}
+
+    NUMTIMES={{.Param "burnin-reboot-count"}}
+    CURRENTTIME={{.Param "burnin-reboot-progress"}}
+
+    if [[ $NUMTIMES == $CURRENTTIME ]] ; then
+        echo "Completed $NUMTIMES Reboots"
+        set_param burnin-reboot-skip true
+        exit 0
+    fi
+
+    set_param burnin-reboot-progress $(($CURRENTTIME+1))
+    exit_reboot

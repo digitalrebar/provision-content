@@ -1,0 +1,13 @@
+description "DigitalRebar Provision Client Runner"
+author "support@rackn.com"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+
+script
+  . /etc/drpcli
+  sleep 30
+  /usr/local/bin/drpcli machines processjobs "$RS_UUID" >> /var/log/drpcli.log 2>&1
+end script

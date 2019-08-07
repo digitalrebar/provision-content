@@ -1,0 +1,25 @@
+{{/*
+#
+# This template allows the operator to use the default Ignition
+# configuration file, or the operator may specify
+# an alternate ignition file to use for local customizations.
+#
+# To use, simply create a Param called "cores/ignition-template" with the value
+# set to the template you wish to use.
+#
+# The param ('cores/ignition-template') can be applied to a Machine, or to a Profile
+# which is subsequently applied to a machine.  Remember the 'global' profile
+# applies to all machines provisioned by Digital Rebar Provision.
+#
+# Required Paramters:  none
+# Optional Paramters:  coreos/ignition-template
+#
+# Defaults:
+#   coreos/ignition-template:  "basic-ign.tmpl"
+#
+# Example (applies globally to all Machines):
+#   drpcli profiles set global param coreos/ignition-template to "my-ignition.tmpl"
+#
+*/}}
+{{$selectKickSeed := (printf "%s" (.Param "coreos/ignition-template")) -}}
+{{.CallTemplate $selectKickSeed .}}

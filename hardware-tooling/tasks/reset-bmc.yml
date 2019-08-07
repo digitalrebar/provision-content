@@ -1,0 +1,26 @@
+---
+Name: reset-bmc
+Description: Reset the BMC through vendor specific tools
+Meta:
+  icon: "wrench"
+  color: "red"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+  - Name: reset-bmc
+    Contents: |
+      #!/usr/bin/env bash
+      set -x
+      . helper
+      __sane_exit
+      mfgr="$(drpcli gohai |jq -r '.DMI | .System | .Manufacturer')"
+      case $mfgr in
+          HPE|HP)
+              if drpcli machines show {{.Machine.UUID}} | jq .Tasks | grep -q hpe-ilo-reset ; then
+                echo "Already in list!"
+                exit 0
+              fi
+              tasks=hpe-ilo-reset;;
+          *) echo "No idea how to reset the BMC for mfgr $mfgr"; exit 0;;
+      esac
+      drpcli machines tasks add {{.Machine.UUID}} at 0 $tasks

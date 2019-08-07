@@ -1,0 +1,23 @@
+#!/bin/bash
+# chkconfig: 2345 90 10
+# description: DigitalRebar Provision Client Runner
+PATH="$PATH:/usr/local/bin"
+
+. /etc/drpcli
+
+touch /var/log/drpcli.log
+case $1 in
+    start)
+        /usr/local/bin/drpcli machines processjobs "$RS_UUID" &>>/var/log/drpcl.log </dev/zero &
+        disown;;
+    stop)
+        pkill drpcli;;
+    status)
+        pgrep drpcli;;
+    enable)
+        chkconfig --add drpcli;;
+    disable)
+        chkconfig --del drpcli;;
+esac
+
+

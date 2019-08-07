@@ -1,0 +1,15 @@
+---
+Name: "dell-install-omsa"
+Description: "Install the OMSA CLI and start required services"
+Templates:
+  - Name: "omsa-install"
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      {{ template "set-proxy-servers.sh.tmpl" .}}
+
+      yum install -y yum-plugin-ovl || :
+      [[ -x /opt/dell/srvadmin/bin/omexec ]] || \
+          yum -y install srvadmin-omacore srvadmin-idrac srvadmin-storage-cli
+      pgrep dsm_sa_datamgrd || \
+          /opt/dell/srvadmin/sbin/srvadmin-services.sh start

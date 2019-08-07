@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# This template marks a machine as terraform ready
+#
+# Required Parameters:
+# Optional Parameters:
+#
+# Parameter YAML format:
+#
+
+# This will contain a token appropriate for the path being
+# used below.  Either a create or update/show token
+export RS_UUID="{{.Machine.UUID}}"
+
+{{ template "setup.tmpl" . }}
+
+echo "Marking node for ready for terraform"
+
+if ! drpcli machines set $RS_UUID param terraform/allocated to false ; then
+    echo "Failed to mark node as not allocated"
+    exit 1
+fi
+
+if ! drpcli machines set $RS_UUID param terraform/managed to true ; then
+    echo "Failed to mark node as not allocated"
+    exit 1
+fi
+
+# set icon on first run (if machine not managed)
+{{if .ParamExists "terraform/managed"}}
+{{else}}
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"blue\", \"icon\": \"map outline\"}}" | jq .Meta
+{{end}}
+
+{{if .ParamExists "terraform/poweroff"}}
+poweroff={{.Param "terraform/poweroff"}}
+if [[ $poweroff == "true" ]] ; then
+    # Turn runnable off to indicate that we are sleepy.
+    drpcli machines update $RS_UUID '{ "Runnable": false }'
+
+    echo "Successfully letting the runner shutdown the system"
+    exit_shutdown
+fi
+{{end}}
+
+echo "Succesfully marked machine for terraform"
+exit 0
+

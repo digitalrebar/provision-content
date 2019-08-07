@@ -1,0 +1,81 @@
+---
+Name: dell-firmware-flash
+Description: Dell firmware update utilizing the DSU process
+RequiredParams:
+  - skip-flash
+  - dell-dsu-block-release
+  - dell-dsu-base-url
+Templates:
+  - Name: flash-configure-repos
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      skip_flash="{{.Param "skip-flash"}}"
+      if [[ $skip_flash = true ]]; then
+          echo "Skipping all flash operations due to skip-flash being true"
+          exit 0
+      fi
+
+      if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          echo "System not in Sledgehammer, exiting"
+          exit 0
+      fi
+
+      yum -y install dell-system-update
+      dsuargs="--non-interactive --log-level=1"
+      if grep -q import-public-key < <(dsu --help); then
+          baseurl="{{.ParamExpand "dell-dsu-base-url"}}"
+          # We also need all the pubkeys listed at the upstream.
+          mkdir -p /usr/libexec/dell_dup
+          (
+              cd /usr/libexec/dell_dup
+              [[ -f fingerprints.txt ]] || \
+              wget -rc -nd --no-parent "${baseurl%/hardware/*}/pgp_pubkeys/"
+              rm -f index* robots.txt || :
+          )
+          dsuargs+=" --import-public-key"
+      fi
+
+      want_reboot=no
+      failed=no
+
+      set -o pipefail
+
+      dsu $dsuargs |& tee /root/dsu.log || case $? in
+          1)
+              # If the system is up to date, this is the return code and
+              # the log will have the message "No Applicable Updates Available"
+              fgrep -q "No Applicable Updates Available" /root/dsu.log && exit 0
+            failed=yes;;
+          8)
+              echo "Reboot required to finish updates"
+              want_reboot=yes;;
+          25)
+              echo "Partial ugrade failure"
+              failed=yes;;
+          26)
+              echo "Partial upgrade failure, but system reboot required"
+              want_reboot=yes
+              failed=yes;;
+          34)
+              echo "Nothing to do";;
+          *)
+              echo "Unhandleable exit code $?"
+              failed=yes
+              echo "Please refer to the DSU manual at http://www.dell.com/support/manuals/uk/en/ukdhs1/system-update-v1.4.0/DSU_UG_1.4/Updating-the-system-using-DSU";;
+      esac
+      if [[ $want_reboot = yes ]]; then
+          exit_incomplete_reboot
+      fi
+
+      if [[ -d /etc/yum.repos.d.bak ]]; then
+          mv /etc/yum.repos.d /etc/yum.repos.d.dsu
+          mv /etc/yum.repos.d.bak /etc/yum.repos.d
+      fi
+
+      if [[ $failed = yes ]]; then
+          exit 1
+      fi
+      exit 0

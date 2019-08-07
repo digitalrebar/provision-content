@@ -1,0 +1,10 @@
+---
+Name: "burnin-cpumem-duration"
+Description: "Time to run the CPU/Memory stress test in minutes"
+Schema:
+  type: "number"
+  default: 30
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"

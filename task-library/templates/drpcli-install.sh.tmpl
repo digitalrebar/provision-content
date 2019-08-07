@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Install drpcli into the correct place
+echo "Installing DRPCLI in /usr/local/bin"
+if [[ ! -e /usr/local/bin/drpcli ]] ; then
+    mkdir -p /usr/local/bin
+    curl -g -s -f -L -o /usr/local/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
+    chmod +x /usr/local/bin/drpcli
+fi
+
+echo "Loading helper script"
+. ./helper
+
+case $(uname -s) in
+    Linux)
+        if [[ $INITSTYLE == "systemd" ]]; then
+            echo "Using systemd service method"
+            # SystemD
+            etcfile="drpcli.etc"
+            initfile="drpcli.service"
+            initdest="/etc/systemd/system/drpcli.service"
+            enabler="systemctl daemon-reload && systemctl enable drpcli"
+            start_initfile="drpcli-init.service"
+            start_initdest="/etc/systemd/system/drpcli-init.service"
+            start_enabler="systemctl daemon-reload && systemctl enable drpcli-init"
+            chmod=""
+        elif [[ $INITSTYLE == "upstart" ]]; then
+            echo "Using upstart service method"
+            # Upstart
+            etcfile="drpcli.etc.export"
+            initfile="drpcli.unit"
+            initdest="/etc/init/drpcli.conf"
+            enabler=""
+            start_initfile="drpcli-init.unit"
+            start_initdest="/etc/init/drpcli-init.conf"
+            start_enabler=""
+            chmod=""
+        elif [[ $INITSTYLE == "sysv" ]]; then
+            echo "Using sysv service method"
+            # SysV
+            etcfile="drpcli.etc.export"
+            initfile="drpcli.sysv"
+            initdest="/etc/init.d/drpcli"
+            enabler="/etc/init.d/drpcli enable"
+            start_initfile="drpcli-init.sysv"
+            start_initdest="/etc/init.d/drpcli-init"
+            start_enabler="/etc/init.d/drpcli-init enable"
+            chmod="chmod 700 $initdest $start_initdest"
+        else
+            echo "No idea how to install startup stuff -- not using systemd, upstart, or sysv init"
+            exit 1
+        fi;;
+    *)
+        echo "Someday, support installing on Windows/Darwin.  Service creation could be tricky."
+        exit 1;;
+esac
+
+echo "Placing init file in place"
+cp "$etcfile" /etc/drpcli
+chmod 600 /etc/drpcli
+cp "$initfile" "$initdest"
+cp "$start_initfile" "$start_initdest"
+eval $chmod
+
+echo "Enabled sevice"
+eval $enabler
+echo "Enabled init sevice"
+eval $start_enabler
+
+echo "Service installed successfully"
+exit 0
+

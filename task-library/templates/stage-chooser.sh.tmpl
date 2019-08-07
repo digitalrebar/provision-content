@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -e
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_TOKEN="{{.GenerateToken}}"
+
+# Install drpcli into the correct place
+if [[ ! -e /usr/local/bin/drpcli ]] ; then
+    echo "Installing DRPCLI in /usr/local/bin"
+    mkdir -p /usr/local/bin
+    curl -g -s -f -L -o /usr/local/bin/drpcli "{{.ProvisionerURL}}/files/drpcli.amd64.linux"
+    chmod +x /usr/local/bin/drpcli
+fi
+
+. ./helper
+
+{{if .ParamExists "stage-chooser/next-stage" -}}
+NEXT_STAGE={{.Param "stage-chooser/next-stage"}}
+{{else -}}
+NEXT_STAGE=""
+{{end -}}
+
+{{if .ParamExists "stage-chooser/reboot" -}}
+REBOOT={{.Param "stage-chooser/reboot"}}
+{{else -}}
+REBOOT=false
+{{end -}}
+
+echo "Stage Chooser - next stage: $NEXT_STAGE"
+echo "Stage Chooser - reboot: $REBOOT"
+
+if [[ NEXT_STAGE != "" ]] ; then
+    # Update stage to indicate that we are done.
+    if ! drpcli machines stage "${RS_UUID}" "$NEXT_STAGE" --force ; then
+        echo "\nFailed to change stage"
+        exit 1
+    fi
+fi
+
+if [[ $REBOOT == true ]] ; then
+    echo "Rebooting machine upon success"
+    exit_reboot
+fi
+
+echo "Finished successfully"
+exit 0
+

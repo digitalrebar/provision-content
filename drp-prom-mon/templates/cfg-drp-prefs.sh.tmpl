@@ -1,0 +1,70 @@
+#!/bin/bash
+# Install Digital Rebar Provision on a Machine
+
+{{if .ParamExists "drp-prom-mon/drp-skip-prefs" -}}
+{{ if eq (.Param "drp-prom-mon/drp-skip-prefs") true -}}
+echo "skipping this task as Param set to skip"
+exit 0
+{{end -}}{{end -}}
+
+set -e
+
+{{template "setup.tmpl" .}}
+
+###
+#  Set DRP Configuration global preferences
+###
+#[[ $(id -nu) != "0" ]] && xiterr "Must be root to install."
+
+_drpcli=$(which drpcli)
+[[ ! -x "$_drpcli" ]] && xiterr 1 "'drpcli' binary not found or not executable"
+
+# need to force the DRP endpoint to be localhost - otherwise, we
+# perform the action on the Endpoint deploying us
+set -x
+_drpcli="$_drpcli -E https://127.0.0.1:8092"
+
+# set knownTokenTimeout
+{{if .ParamExists "drp-prom-mon/drp-prefs-knownTokenTimeout" -}}
+pref='{{ .Param "drp-prom-mon/drp-prefs-knownTokenTimeout" }}'
+$_drpcli prefs set knownTokenTimeout "$pref"
+{{end -}}
+
+# set unknownTokenTimeout
+{{if .ParamExists "drp-prom-mon/drp-prefs-unknownTokenTimeout" -}}
+pref='{{ .Param "drp-prom-mon/drp-prefs-unknownTokenTimeout" }}'
+$_drpcli prefs set unknownTokenTimeout "$pref"
+{{end -}}
+
+# verify Sledgehammer BootEnv has been installed, otherwise we'll
+# get errors on setting these valuse
+if $_drpcli bootenvs exists sledgehammer
+then
+    # set unknownBootEnv
+    {{if .ParamExists "drp-prom-mon/drp-prefs-unknownBootEnv" -}}
+    pref='{{ .Param "drp-prom-mon/drp-prefs-unknownBootEnv" }}'
+    $_drpcli prefs set unknownBootEnv "$pref"
+    {{else -}}
+    $_drpcli prefs set unknownBootEnv discovery
+    {{end -}}
+
+    # set defaultStage
+    {{if .ParamExists "drp-prom-mon/drp-prefs-defaultStage" -}}
+    pref='{{ .Param "drp-prom-mon/drp-prefs-defaultStage" }}'
+    $_drpcli prefs set defaultStage "$pref"
+    {{else -}}
+    $_drpcli prefs set defaultBootEnv discover
+    {{end -}}
+
+    # set defaultBootEnv
+    {{if .ParamExists "drp-prom-mon/drp-prefs-defaultBootEnv" -}}
+    pref='{{ .Param "drp-prom-mon/drp-prefs-defaultBootEnv" }}'
+    $_drpcli prefs set defaultBootEnv "$pref"
+    {{else -}}
+    $_drpcli prefs set defaultBootEnv sledgehammer
+    {{end -}}
+
+else
+    echo "unknownBootEnv, defaultBootEnv, and defaultStage NOT SET"
+    echo "'sledgehammer' BootEnv is not installed"
+fi

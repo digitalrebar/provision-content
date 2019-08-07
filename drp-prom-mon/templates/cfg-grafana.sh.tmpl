@@ -1,0 +1,83 @@
+#!/bin/bash
+# Configure Grafana
+
+set -e
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit $XIT; }
+
+set -x
+
+# in future these should be Params to set
+# we assume we're install/config from the grafana server itself
+GRAF_SERVER="127.0.0.1"
+NEW_USER="admin"
+NEW_PASS="rocketskates"
+# Param for this? subsequent run of the installer will
+# fail if grafana is installed already - param would let
+# us fix this
+DEFAULT_PASS="admin"
+
+# reset the admin password
+curl -g -X PUT -H "Content-Type: application/json" -d "{
+  \"oldPassword\": \"${DEFAULT_PASS}\",
+  \"newPassword\": \"${NEW_PASS}\",
+  \"confirmNew\": \"${NEW_PASS}\"
+}" "http://admin:${DEFAULT_PASS}@${GRAF_SERVER}:3000/api/user/password"
+
+# create the Prometheus datasource
+curl -g -X POST -H "Content-Type: application/json" -H "Accept: application/json" -d '
+  {
+    "name": "prometheus",
+    "type": "prometheus",
+    "typeLogoUrl": "public/app/plugins/datasource/prometheus/img/prometheus_logo.svg",
+    "access": "proxy",
+    "url": "http://localhost:9090",
+    "database": "",
+    "basicAuth": false,
+    "isDefault": true,
+    "jsonData": {
+      "timeInterval": "5s"
+    },
+    "readOnly": false
+  }
+' "http://admin:${NEW_PASS}@localhost:3000/api/datasources"
+
+systemctl stop grafana-server.service
+
+mkdir -p /etc/grafana/provisioning/dashboards
+chmod 775 /etc/grafana/provisioning/dashboards
+cat >/etc/grafana/provisioning/dashboards/node-exporter.yaml << 'EOPROV'
+apiVersion: 1
+
+providers:
+- name: 'default'
+  org_id: 1
+  folder: ''
+  type: 'file'
+  options:
+    path: '/var/lib/grafana/dashboards'
+EOPROV
+
+chown 664 /etc/grafana/provisioning/dashboards/node-exporter.yaml
+chown grafana:grafana /etc/grafana/provisioning/dashboards/node-exporter.yaml
+
+mkdir -p /var/lib/grafana/dashboards
+chmod 775 /var/lib/grafana/dashboards
+
+# very very bad hack - but how you get a dashboard from grafana via
+# api, cli, or other mechanism is beyond my grasp at the moment...
+# http://get.rebar.digital/files/contents/grafana-dashboard-405.json
+
+# new way to do this (not via hack above) - two different versions of the
+# node exporter dashboards
+curl -o /var/lib/grafana/dashboards/node-exporter-405.json https://grafana.com/api/dashboards/405
+curl -o /var/lib/grafana/dashboards/node-exporter-1860.json https://grafana.com/api/dashboards/1860
+chown grafana:grafana /var/lib/grafana/dashboards/node-exporter-405.json
+chown grafana:grafana /var/lib/grafana/dashboards/node-exporter-1860.json
+
+if pgrep grafana-server
+then
+    systemctl restart grafana-server.service
+else
+    systemctl start grafana-server.service
+fi

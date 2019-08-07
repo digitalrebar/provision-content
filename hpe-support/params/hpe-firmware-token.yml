@@ -1,0 +1,12 @@
+---
+Name: hpe-firmware-token
+Description: The access token needed to download system firmware from HPE
+Documentation: |
+  HPE requires that you have a valid support contract to download firmware updates
+  for their ProLiant servers.  This token, which can be generated at
+  https://support.hpe.com/hpsc/swd/entitlement-token-service/generate
+  is required to be able to download updates from the firmware update repositories
+Secure: true
+Schema:
+  type: string
+  default: unset

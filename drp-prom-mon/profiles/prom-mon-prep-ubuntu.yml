@@ -1,0 +1,25 @@
+---
+Name: "prom-mon-prep-ubuntu"
+Description: "Install Ubuntu and Runner Service for drp-prom-mon use."
+Documentation: |
+  This stage installs ubuntu on a machine and the runner
+  service.  It leaves runner-service running for the
+  following drp-prom-mon install steps.
+
+  The associated profile ('prom-mon-single-node') sets the
+  needed param 'drp-prom-mon/node-exporter' value to the
+  machines loopback address (127.0.0.1).
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "prom-mon-prep-ubuntu"
+
+Params:
+  change-stage/map:
+    ubuntu-16.04-install: ssh-access:Success
+    ssh-access: runner-service:Success
+    runner-service: finish-install:Reboot
+    finish-install: complete:Success
+
+ReadOnly: true

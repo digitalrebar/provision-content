@@ -1,0 +1,33 @@
+---
+Name: "prom-mon-single-node"
+Description: "drp-prom-mon single-node (drp, node-exporter, prometheus, grafana)"
+Documentation: |
+  This profile defins the install of a drp-prom-mon cluster in one step.
+  DRP, Node Exporter, Prometheus, and Grafana components will be
+  installed.  All pieces are installed on a single Machine.
+
+  You do NOT need to clone this profile as it doesn't require write
+  access to the Params for a Single Node install.
+
+  The 'drp-prom-mon/node-exporter' is set to loopback address because
+  we are only running on a single machine instance.
+
+  The Machines must have a supported OS installed, and the 'drpcli'
+  runner Agent must be running.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "prom-mon-single-node"
+
+Params:
+  drp-prom-mon/cluster-profile: "prom-mon-single-node"
+  drp-prom-mon/node-exporter: "127.0.0.1"
+  change-stage/map:
+    start-prom-mon: install-drp:Success
+    install-drp: install-node-exporter:Success
+    install-node-exporter: install-prom-mon:Success
+    install-prom-mon: finish-install:Success
+    finish-install: complete:Success
+
+ReadOnly: true

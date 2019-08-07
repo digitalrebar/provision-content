@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Start the LLDP Client and Collect Data
+set -e
+
+export RS_UUID="{{.Machine.UUID}}"
+
+{{template "setup.tmpl" .}}
+
+echo "Collecting Neighbors information from LLDPctl"
+
+# do work!
+drpcli machines remove {{.Machine.UUID}} param "network/lldp" || :
+if which lldpcli >/dev/null 2>/dev/null ; then
+    COUNT=0
+    while (($COUNT < 9)) ; do
+        DATA=$(lldpctl -f json | jq .lldp)
+        if [[ "$DATA" != "{}" ]] ; then
+            lldpctl -f json | jq .lldp | drpcli machines set {{.Machine.UUID}} param "network/lldp" to -
+            echo "Finished successfully"
+            exit 0
+        fi
+        COUNT=$(($COUNT+1))
+        sleep 5
+    done
+    drpcli machines set {{.Machine.UUID}} param "network/lldp" to '{}'
+    echo "No Data found"
+else
+    drpcli machines set {{.Machine.UUID}} param "network/lldp" to '{"lldpctl":false}'
+    echo "No LLDPctl found, cannot collect data"
+fi
+
+exit 0

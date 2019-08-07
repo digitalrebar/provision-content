@@ -1,0 +1,94 @@
+#!/bin/bash
+# Install Digital Rebar Provision on a Machine
+
+set -e
+
+{{template "setup.tmpl" .}}
+
+unset RS_TOKEN
+###
+#  This template installs Digital Rebar Provision on a given
+#  machine.  It requires a BootEnv be run prior to this stage,
+#  which installs either Centos 7 or Ubuntu 16.04.
+#
+#  By default we wll NOT configure with DRP Community Content.
+#  Install mode will be Production by default to get restart scripts.
+#  Further tasks should be used to customize the DRP endpoint.
+###
+set -x
+#[[ `id -nu` != "0" ]] && xiterr "Must be root to install."
+
+
+##########
+##########  TODO
+##########  Change user/pass credentials, etc.
+##########  Set startup options for DRP in initfile
+##########
+
+set -x
+
+INSTALLER="stable"       # install.sh script version to get
+DRP_VER="stable"         # DRP version to install
+
+# NOT supported yet, as in isolated mode we don't get start up
+# scripts, and have to handle injecting the scripts to work
+# with the arbitrary install location
+BASE="drp"               # Isolated mode, BASE directory to deploy to
+MODE=""                  # Production mode by default
+
+[[ -f "/usr/local/bin/drpcli" ]] && mv /usr/local/bin/drpcli /usr/local/bin/drpcli.runner
+T=`mktemp -d /tmp/drp.XXXXXXX`
+cd $T
+
+# if running, kill and assume we're updating or testing
+pgrep dr-provision > /dev/null 2>&1 && pkill dr-provision
+
+{{if .ParamExists "drp-prom-mon/drp-base" -}}
+BASE={{.Param "drp-prom-mon/drp-base"}}
+{{end -}}
+
+{{if .ParamExists "drp-prom-mon/drp-mode" -}}
+case {{.Param "drp-prom-mon/drp-mode"}} in
+  # "production" or "system" install
+  prod*|sys*) MODE="" ;;
+  # "isolated" install
+  iso*) MODE="--isolated" ;;
+  *) xiterr 1 "unsupported MODE type $*";;
+esac
+{{end -}}
+
+{{if .ParamExists "drp-prom-mon/installer-version" -}}
+INSTALLER={{.Param "drp-prom-mon/installer-version"}}
+{{end -}}
+
+{{if .ParamExists "drp-prom-mon/drp-version" -}}
+DRP_VER={{.Param "drp-prom-mon/drp-version"}}
+{{end -}}
+
+{{if .ParamExists "drp-prom-mon/drp-extra-args" -}}
+EXTRA_ARGS={{.Param "drp-prom-mon/drp-extra-args"}}
+{{end -}}
+
+{{if .ParamExists "drp-prom-mon/drp-community-content" -}}
+{{ if (.Param "drp-prom-mon/drp-community-content") true }}
+CONTENT=""
+{{else -}}
+CONTENT="--nocontent"
+{{end -}}
+{{end -}}
+
+# install DRP
+curl -s get.rebar.digital/$INSTALLER | bash -s -- install --version="$DRP_VER" --force $CONTENT $EXTRA_ARGS
+
+# set to start; and start DRP
+systemctl daemon-reload
+systemctl enable dr-provision
+systemctl start dr-provision
+
+# execute any post install actions
+{{if .ParamExists "drp-prom-mon/drp-post-install" -}}
+{{.Param "drp-prom-mon/drp-post-install"}}
+{{end -}}
+
+cd /
+rm -rf $T

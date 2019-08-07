@@ -1,0 +1,10 @@
+---
+Name: "burnin-reboot"
+Description: "Perform a number of reboots before continuing"
+BootEnv: "sledgehammer"
+Tasks:
+  - "burnin_reboot"
+Meta:
+  color: "yellow"
+  icon: "fire"
+  title: "RackN Content"

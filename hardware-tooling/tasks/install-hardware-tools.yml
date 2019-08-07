@@ -1,0 +1,23 @@
+---
+Name: hardware-tools-install
+Description: Install hardware mamagement tooling for this system
+Meta:
+  icon: "wrench"
+  color: "yellow"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+  - Name: tools-install
+    Contents: |
+      #!/usr/bin/env bash
+      set -x
+      . helper
+      __sane_exit
+      mfgr="$(drpcli gohai |jq -r '.DMI | .System | .Manufacturer')"
+      case $mfgr in
+          HPE|HP) tasks=hpe-tools-install;;
+          "Dell Inc.") tasks="dell-dsu-setup dell-install-omsa";;
+          Lenovo) tasks=lenovo-install-onecli;;
+          *) echo "No idea how to install tooling for mfgr $mfgr"; exit 0;;
+      esac
+      drpcli machines tasks add {{.Machine.UUID}} at 0 $tasks

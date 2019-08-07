@@ -1,0 +1,21 @@
+# Adds additional Classify templates for extending classifier matching
+#############################################################################
+# Uses the "classify/custom-functions" Param to specify various additional
+# custom templates to include in to the Classifier.  See Param documentation
+# for data structure and usage.
+#
+# This is intended to inject BASH "function NAME { ... }" stanzas in to the
+# classifer to provide custom function blocks to extend the tests you can
+# apply to the classifier
+
+{{ $dot := . -}}
+{{range $index, $template := .Param "classify/custom-functions" -}}
+
+#############################################################################
+# injecting custom template: {{ squote $template }}
+{{ $dot.CallTemplate $template $dot }}
+# end injection of template: {{ squote $template }}
+
+{{ end -}}
+### end custom template injection
+#############################################################################

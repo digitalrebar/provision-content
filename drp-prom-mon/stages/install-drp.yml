@@ -1,0 +1,15 @@
+---
+Name: "install-drp"
+Description: "Stage that install DRP endpoint."
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-drp"
+Reboot: false
+Tasks:
+  - install-drp
+  - cfg-drp-cc
+  - cfg-drp-sledgehammer
+  - cfg-drp-centos7
+  - cfg-drp-ubuntu1604
+Templates: []

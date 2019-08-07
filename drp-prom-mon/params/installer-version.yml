@@ -1,0 +1,19 @@
+---
+Name: "drp-prom-mon/installer-version"
+Description: "The version of 'install.sh' to use to install DRP."
+Documentation: |
+  This param will set the version of the 'install.sh' script
+  to install this DRP instance with.
+
+  The only options supported are
+
+      stable
+      tip
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "node-exporter"

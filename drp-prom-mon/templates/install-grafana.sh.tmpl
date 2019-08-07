@@ -1,0 +1,61 @@
+#!/bin/bash
+# Install Grafana
+
+set -e
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*"; exit $XIT; }
+
+set -x
+G_TMP=$(mktemp -d /tmp/grafana.XXXXXXX)
+cd $G_TMP
+chmod 777 $G_TMP
+
+# in the future make this a Param
+FAMILY="{{.Env.OS.Family}}"
+[[ -z "$FAMILY" ]] && FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+echo "FAMILY set from os-release to:  '$FAMILY'"
+
+case $FAMILY in
+        redhat|centos)
+                GRAF_VER="5.0.3-1"
+                _pkgmgr="yum -y localinstall"
+                _pkg_name="grafana-5.0.3-1.x86_64.rpm"
+        ;;
+        debian|ubuntu)
+        GRAF_VER="5.0.3"
+                _pkgmgr="apt -y install"
+                _pkg_name="grafana_5.0.3_amd64.deb"
+        ;;
+        *) xiterr 1 "Unsupported package manager '$FAMILY'." ;;
+esac
+
+_pkg_url="https://s3-us-west-2.amazonaws.com/grafana-releases/release/${_pkg_name}"
+_pkg="./$(basename $_pkg_url)"
+
+curl -gL -o "$_pkg" "$_pkg_url"
+chmod 644 "$_pkg"
+
+if pgrep grafana-server
+then
+    which systemctl > /dev/null 2>&1 \
+      && systemctl stop grafana-server.service
+    [[ -x /etc/init.d/grafana-server ]] \
+      && /etc/init.d/grafana-server stop
+
+    if pgrep grafana-server
+        xiterr 1 "Unable to kill running 'grafana-server' instance..."
+    fi
+fi
+
+$_pkgmgr $_pkg
+#chkconfig --add grafana-server
+#chkconfig --list grafana-server
+#chkconfig --level 234 grafana-server on
+#/etc/init.d/grafana-server start
+
+systemctl daemon-reload
+systemctl enable grafana-server.service
+systemctl start grafana-server.service
+
+cd /tmp/
+rm -rf $G_TMP
