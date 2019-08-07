@@ -20,6 +20,7 @@ case $(uname -s) in
 esac
 
 PATH=$PATH:$GOPATH/bin
+export GO111MODULE=on
 which drbundler || (go build github.com/digitalrebar/provision/v4/cmds/drbundler -o $GOPATH/bin/drbundler)
 which drpcli || (go build github.com/digitalrebar/provision/v4/cmds/drpcli -o $GOPATH/bin/drpcli)
 
