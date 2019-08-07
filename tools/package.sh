@@ -19,9 +19,11 @@ case $(uname -s) in
         exit 1;;
 esac
 
-PATH=$PATH:$GOPATH/bin
-which drbundler || (go build github.com/digitalrebar/provision/v4/cmds/drbundler -o $GOPATH/bin/drbundler)
-which drpcli || (go build github.com/digitalrebar/provision/v4/cmds/drpcli -o $GOPATH/bin/drpcli)
+P=`pwd`
+PATH=$PATH:$P/bin
+export GO111MODULE=on
+which drbundler || (go build -o $P/bin/drbundler github.com/digitalrebar/provision/v4/cmds/drbundler)
+which drpcli || (go build -o $P/bin/drpcli github.com/digitalrebar/provision/v4/cmds/drpcli)
 
 version=$(tools/version.sh)
 

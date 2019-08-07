@@ -5,6 +5,7 @@ set -e
 [[ $GOPATH ]] || export GOPATH="$HOME/go"
 fgrep -q "$GOPATH/bin" <<< "$PATH" || export PATH="$PATH:$GOPATH/bin"
 
+unset GO111MODULE
 go get -u github.com/stevenroose/remarshal
 
 version=$(tools/version.sh)
