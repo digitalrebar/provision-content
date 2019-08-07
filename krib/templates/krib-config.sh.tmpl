@@ -62,6 +62,10 @@ KRIB_IP={{ .Param "krib/ip" }}
 KRIB_IP={{ .Machine.Address }}
 {{ end -}}
 
+# we need a random backoff to avoid races.
+SLEEP=$[ ( $RANDOM % 25 ) ]
+sleep $SLEEP
+
 # Making sure I use the right cluster InternalIP
 echo "KUBELET_EXTRA_ARGS=--node-ip=${KRIB_IP}" > /etc/default/kubelet
 
@@ -100,10 +104,16 @@ if [[ $MASTER_INDEX != notme ]] ; then
     cat $T >> /tmp/kubeadm.cfg && rm -f $T
     {{ end -}}
 
-    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 | tee -a /tmp/kubeadm.init.log
+    kubeadm init --config=/tmp/kubeadm.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 | tee -a /tmp/kubeadm.init.log
 
     echo "Building certificate file."
-    tar -zcvf /tmp/cert.tgz /etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.key /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
+    tar -zcvf /tmp/cert.tgz \
+      /etc/kubernetes/pki/ca.crt \
+      /etc/kubernetes/pki/ca.key \
+      /etc/kubernetes/pki/sa.key \
+      /etc/kubernetes/pki/sa.pub \
+      /etc/kubernetes/pki/front-proxy-ca.*
+
     base64 -w 0 /tmp/cert.tgz > /tmp/cert.b64
     drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_MASTER_CERTS_PARAM to /tmp/cert.b64
     rm /tmp/cert.tgz /tmp/cert.b64
@@ -115,10 +125,56 @@ if [[ $MASTER_INDEX != notme ]] ; then
     # example of appending a featureGate to cluster after initial init
     #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
 
+{{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}
+    # We are using serverTLSBootstrap for kublets, so enable auto-approval of kubelet server CSRs
+
+  {{ if .ParamExists "krib/kubelet-rubber-stamp-container-image" }}
+  # Replace default container image with the one specified in "krib/nginx-ingress-controller-container-image"
+  sed -i 's|quay.io/kontena/kubelet-rubber-stamp-amd64|{{ .Param "krib/kubelet-rubber-stamp-container-image" }}|' /tmp/krib-kubelet-rubber-stamp.yaml
+  {{ end -}}
+
+    kubectl create -f /tmp/krib-kubelet-rubber-stamp.yaml
+    rm /tmp/krib-kubelet-rubber-stamp.yaml
+{{ end -}}{{ end -}}
+
     case $NET_TYPE in
       calico)
         echo "Starting calico networking..."
-        curl -gfsSL {{ .Param "provider/calico-config" }} | sed "s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" | kubectl apply -f -
+        # Disable NetworkManager interference per https://docs.projectcalico.org/v3.8/maintenance/troubleshooting#configure-networkmanager
+        if [ -d "/etc/NetworkManager/conf.d" ]; then
+          echo -e "[keyfile]\nunmanaged-devices=interface-name:cali*;interface-name:tunl*" > /etc/NetworkManager/conf.d/calico.conf
+        fi
+
+        curl -gfsSL {{ .Param "provider/calico-config" }} > /tmp/calico.yaml
+        # This next line assures that in the event of multiple NICs in the node, the NIC able to reach 1.1.1.1 will be chosen
+        # This can optionally be changed to a regex or even an explicit NIC name
+        sed -i "/autodetect\"/a\            - name: IP_AUTODETECTION_METHOD\n              value: \"can-reach=1.1.1.1\"" /tmp/calico.yaml
+        sed -i "s#value: \"192.168.0.0/16\"#value: \"{{ .Param "krib/cluster-pod-subnet" }}\"#g" /tmp/calico.yaml
+
+        ##### Optionally replace default container images with ones from
+        ##### Our trusted registry
+        {{ if .ParamExists "krib/calico-container-image-cni" }}
+        # Replace default container image with the one specified in "krib/calico-container-image-cni"
+        sed -i 's|calico/cni|{{ .Param "krib/calico-container-image-cni" }}|' /tmp/calico.yaml
+        {{ end -}}
+        {{ if .ParamExists "krib/calico-container-image-kube-controllers" }}
+        # Replace default container image with the one specified in "krib/calico-container-image-kube-controllers"
+        sed -i 's|calico/kube-controllers|{{ .Param "krib/calico-container-image-kube-controllers" }}|' /tmp/calico.yaml
+        {{ end -}} 
+        {{ if .ParamExists "krib/calico-container-image-node" }}
+        # Replace default container image with the one specified in "krib/calico-container-image-node"
+        sed -i 's|calico/node|{{ .Param "krib/calico-container-image-node" }}|' /tmp/calico.yaml
+        {{ end -}}  
+        {{ if .ParamExists "krib/calico-container-image-pod2daemon-flexvol" }}
+        # Replace default container image with the one specified in "krib/calico-container-pod2daemon-flexvol"
+        sed -i 's|calico/pod2daemon-flexvol|{{ .Param "krib/calico-container-image-pod2daemon-flexvol" }}|' /tmp/calico.yaml
+        {{ end -}}         
+        ##### End optional image adjustments               
+
+        kubectl apply -f /tmp/calico.yaml
+        mkdir -p /tmp/cleanup
+        mv /tmp/calico.yaml /tmp/cleanup/
+
         ;;
       flannel)
         echo "Starting flannel networking..."
@@ -131,13 +187,14 @@ if [[ $MASTER_INDEX != notme ]] ; then
     esac
 
   else
+    echo "waiting for $KRIB_MASTER_CERTS_PARAM"
     wait_for_variable $KRIB_MASTER_CERTS_PARAM
 
     cd /
     get_param $KRIB_MASTER_CERTS_PARAM | jq -r . | base64 -d - | tar -zxvf -
     cd -
 
-    kubeadm init --config=/tmp/kubeadm.cfg 2>&1 > /tmp/kubeadm.init.log
+    kubeadm init --config=/tmp/kubeadm.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 > /tmp/kubeadm.init.log
 
   fi
 
@@ -219,6 +276,7 @@ do
 done
 
 # Wait for KRIB config to be updated from bootstrap node
+echo "waiting for $KRIB_ADMIN_CONF_PARAM"
 wait_for_variable $KRIB_ADMIN_CONF_PARAM > label.conf
 
 # Set labels for nodes / runs on all nodes

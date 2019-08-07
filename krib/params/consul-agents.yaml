@@ -1,0 +1,21 @@
+---
+Name: "consul/agents"
+Description: "List of the agent UUIDs in the consul cluster"
+Documentation: |
+  Param is set (output) by the consul cluster building process
+Schema:
+  type: "array"
+  items:
+    type: "object"
+    properties:
+      Address:
+        type: string
+      Name:
+        type: string
+      Uuid:
+        type: string
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  render: "machines-map"

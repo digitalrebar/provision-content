@@ -1,0 +1,13 @@
+---
+Name: "krib/log-target-gelf"
+Description: "The target for GELF (Graylog) logs if running the krib-logging stage"
+Documentation: |
+  An IP outside the cluster designated configured to receive GELF (GrayLog) "The target for GELF (Graylog) "The target for GELF (Graylog) logs
+  on UDP 2201
+  
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

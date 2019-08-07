@@ -1,0 +1,19 @@
+---
+Name: "krib/i-am-master"
+Description: "Cause member nodes to assume a GKC master role"
+Documentation: |
+  When this param is set to true AND the krib/selective-mastership param is set to true,
+  then this node will participate in mastership election. On the other hard, if this param
+  is set to false (the default), but krib/selective-mastership param is set to true, then
+  this node will never become a master. This option is useful to prevent dedicated workers from
+  assuming mastership.
+
+  Defaults to 'false'.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

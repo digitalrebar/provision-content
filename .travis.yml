@@ -4,7 +4,7 @@ branches:
   - gh-pages
 sudo: false
 go:
-- "1.10"
+- '1.10'
 git:
   depth: 500
 addons:
@@ -15,9 +15,10 @@ script:
 - mkdir -p ~/.ssh
 - cp tools/ssh-config ~/.ssh/config
 - chmod 600 ~/.ssh/config
-- ./tools/package.sh
-#- ./tools/test.sh
-- ./tools/publish.sh
+- "./tools/package.sh"
+- "./tools/publish.sh"
+after_script:
+- tools/notify.sh digitalrebar/provision-content
 notifications:
   slack:
     secure: SZbSknaaUrVGpmRxvBMQhWeG5TKNHhiTHZTb8ZT+00dQcMjfGfa0vFhXgWgKjm/Hwt6YMw/GbwPWCudhvRnwmnVKytrf55hsmlE+N/jdoyg3VNRW4r2PwbBRnqtc37JNC6BvgJpKNbqM4zBc5ze9AMZ31uPLuTAFaMZwcwnpwr2Qha6DoQDGrnzuxxOMsFz6wH7YvMa3hvSDFSC2Vbgu57a0KwaZsyCH5aS2G7n9p346fElSe9f1Zy8Q/xlkxl9Eu6ZhynwXjcWDsL4KOdXjrbGHYgQEJT3xgO985zsV4MisM4xBVe08MyrJQbJO1rkYXZkElyIHHHTySiw6v/JOInlAroD29tJo+RZZ8LL04KT2Lghq0Du9MELUo0q1a/mcKJ4KSG2YNbY98TyP2FIEdL9iGLM5WNhU59kY1T7VKv+b4Z/ngGZFr3C4d/RhGdV5Ys2rLAYTsT+za9/D4zzg09abSYmonWKyzyaWe4ifbcnN6Yx9F+UrGYLSEzHaGCRDggPDkxZodRRhAyfUu/BE9XxplmoWJH+1cFuIgg1YXj4vCQxnrUdwVfLClHv24aSdn4HZW4bx41aNf9FaEWLLJjmcRUP7uPQvexioiotlvrRZVkZKqjc/qj8Xdicx+qtgOIUU3e9p2xq4t4FXgrbJOB5e+Zbs8x2yjoIVS/RsLiU=
@@ -44,5 +45,9 @@ deploy:
     repo: digitalrebar/provision-content
     tags: true
 before_install:
-- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv -in e-info.tgz.enc -out e-info.tgz -d
+- openssl aes-256-cbc -K $encrypted_223424b83f8c_key -iv $encrypted_223424b83f8c_iv
+  -in e-info.tgz.enc -out e-info.tgz -d
 - tar -zxvf e-info.tgz
+env:
+  global:
+    secure: VS1+ORCFRkEBlQbzKiwDXB2ToPm6/Qb1XrNoYKQpr7vq+LdctgPdbDXCqQD8xJ/OKUR8k2FMdslXQyGg7M00GSxEdg4XYpOFbSNYbPbTR3Q8MEJMTzpDuKlsnRhdjKIHzZhyK616Lxp7uQpuUXF2dzWJY44GQlTFX5S3aRdlE8Oil7VYn+6TW8v+GVLNjdp17Q+7lmegVIcZ8GGwIqS60eHs2YrBOm+u4dPAuoscJOvyfD9+bH7gaGxpjl3vSg2RIIZQrZfJQsZ9uD0TssGnKvQy5pN2w3+I1QLmCbAOe1GJozqy8Gc8XJpB4bKs7LwV6Jwl2YNgm06VSkf7Ljz7WB6Udg1mhqTXe1oHcUPKRLTkCXiqmdVcIOa0GVBLfvCElr5CthUwkxngPk3KxTNSgHFdH/lHUFDkmWCb57ehG7nUNuD1UN+enOMfFHwvh+q0bH3M0+5YYZt74NLZjoOubCLyVabCtXrCnaoHYRdfiwRjW4NjOraUaD83P24C6VljBMXW/XmRrPQsMl9GcdcXvfOroRhG2klA0ttwDJvqt9mXOxIPohpONZMSb0RHsHzt7buS/yfLzU4YCUC83S4DfAp0oYkuZZKCMcInrAn1OWT8HcSnAsjcDSkdTe//JDFO9uwBMA4mb4OYL1njmlUl9L+7KDlFMFgZykmp1V9e6Q8=

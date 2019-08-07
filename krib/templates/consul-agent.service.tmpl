@@ -1,0 +1,33 @@
+### BEGIN INIT INFO
+# Provides:          consul
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Consul agent
+# Description:       Consul service discovery framework (agent)
+### END INIT INFO
+
+[Unit]
+Description=Consul agent
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=consul
+Group=consul
+PIDFile=/var/run/consul/consul-agent.pid
+PermissionsStartOnly=true
+ExecStartPre=-/bin/mkdir -p /var/run/consul
+ExecStartPre=/bin/chown -R consul:consul /var/run/consul
+ExecStart=/usr/local/bin/consul agent \
+    -config-file=/etc/consul.d/consul-agent.json \
+    -pid-file=/var/run/consul/consul-agent.pid
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target

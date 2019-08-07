@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) nginx-ingress Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+  {{ if .ParamExists "krib/externaldns-container-image" }}
+  # Replace default container image with the one specified in "externaldns/container-image" 
+  sed -i 's|registry.opensource.zalan.do/teapot/external-dns|{{ .Param "krib/externaldns-container-image" }}|' /tmp/krib-external-dns.yaml
+  {{ end -}}
+
+  # Deploy
+  kubectl apply -f /tmp/krib-external-dns.yaml
+
+  # Clean up
+  mkdir -p /tmp/cleanup
+  mv /tmp/*.yaml /tmp/cleanup
+
+else
+  echo "I was not the leader, skipping external-dns install"
+fi
+
+
+
+echo "Finished external-dns deployment successfully"
+
+echo "Finished successfully"
+exit 0

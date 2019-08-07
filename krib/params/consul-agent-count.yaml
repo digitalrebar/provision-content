@@ -1,0 +1,15 @@
+---
+Name: "consul/agent-count"
+Description: "Number of consul agents to expect"
+Documentation: |
+  Allows operators to set the number of machines required for the
+  consul agents cluster.
+  Machines will be automatically added until the number is met.
+  NOTE: These machines will also be the vault members
+Schema:
+  type: "integer"
+  default: 1
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

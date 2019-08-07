@@ -1,0 +1,14 @@
+---
+Name: "etcd/controller-client-cert"
+Description: "Generated SSL cert for use by a controller, external to the KRIB cluster"
+Documentation: |
+  For configurations where the etcd cluster should communicate
+  over a network other than the one that the machine was booted
+  from. Will be generated for the value in etcd/controller-ip.
+
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

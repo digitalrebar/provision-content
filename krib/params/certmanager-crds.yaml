@@ -6,7 +6,7 @@ Documentation: |
   use for the cert-manager CRDs.
 Schema:
   type: "string"
-  default: "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.6/deploy/manifests/00-crds.yaml"
+  default: "https://raw.githubusercontent.com/jetstack/cert-manager/release-0.8.1/deploy/manifests/00-crds.yaml"
 Meta:
   color: "blue"
   icon: "book"

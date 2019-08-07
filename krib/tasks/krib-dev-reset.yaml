@@ -12,20 +12,27 @@ OptionalParams:
 Templates:
 - Contents: |-
     #!/bin/bash
-    # Reset CA params
+    # Reset etcd CA params
     set -e
-    # we need a random backoff for races
-    SLEEP=$[ ( $RANDOM % 5 ) ]
-    sleep $SLEEP
-    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw')
+
+    {{template "setup.tmpl" .}}
+    export RS_IP="{{.Machine.Address}}"
+
     {{if .ParamExists "etcd/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
     PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
     {{else -}}
-    echo "Missing etcd/cluster-profile on the machine!"
-    exit 1
+    echo "Missing etcd/cluster-profile on the machine! Nothing to clear!"
+    exit 0
     {{end -}}
-    {{template "setup.tmpl" .}}
+
     echo "Checking CA"
     echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca"
     CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca) || true
@@ -38,7 +45,7 @@ Templates:
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
       echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
-      
+
       sleep 1
       {{if .ParamExists "unsafe/rs-password"}}
         PASSWORD="{{.Param "unsafe/rs-password"}}"
@@ -54,43 +61,284 @@ Templates:
     else
       echo "  No CA root detected - no reset required"
     fi
+    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
-  Name: CA clear
+  Name: etcd CA clear
 - Contents: |-
     #!/bin/bash
     # Reset etcd params
     set -e
-    declare -a WIPE_PARAMS=('etcd/servers' 'etcd/servers-done')
+
     declare CLUSTER_TYPE="etcd"
     {{template "setup.tmpl" .}}
     {{if .ParamExists "etcd/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
     PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
     {{else -}}
-    echo "Missing etcd/cluster-profile on the machine!"
-    exit 1
+    echo "Missing etcd/cluster-profile on the machine! Nothing to clear!"
+    exit 0
     {{end -}}
+    declare -a WIPE_PARAMS=('etcd/servers' 'etcd/servers-done')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done etcd params reset"
   Name: etcd-reset
 - Contents: |-
     #!/bin/bash
-    # Reset KRIB params
+    # Reset consul CA params
     set -e
-    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
+
     {{template "setup.tmpl" .}}
+    export RS_IP="{{.Machine.Address}}"
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+    {{else -}}
+    echo "Missing consul/cluster-profile on the machine! Nothing to clear."
+    exit 0
+    {{end -}}
+    echo "Checking CA"
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "consul/name"}}-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "consul/name"}}-ca) || true
+    if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
+      echo "CA contains $CA_TEST"
+      echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
+      echo "==========================================================================="
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"
+      echo "==========================================================================="
+      echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
+
+      sleep 1
+      {{if .ParamExists "unsafe/rs-password"}}
+        PASSWORD="{{.Param "unsafe/rs-password"}}"
+      {{else}}
+        PASSWORD="r0cketsk8ts"
+      {{end}}
+      HOLD_TOKEN=$RS_TOKEN
+      unset RS_TOKEN
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca
+      export RS_TOKEN=$HOLD_TOKEN
+    else
+      echo "  No CA root detected - no reset required"
+    fi
+    declare -a WIPE_PARAMS=('consul/server-ca-name' 'consul/server-ca-pw' 'consul/server-ca-cert' 'consul/controller-client-cert' 'consul/controller-client-key')
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done consul CA params reset"
+  Name: consul CA clear
+- Contents: |-
+    #!/bin/bash
+    # Reset consul params
+    set -e
+
+    {{template "setup.tmpl" .}}
+    export RS_IP="{{.Machine.Address}}"
+    {{if .ParamExists "consul/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+    declare CLUSTER_TYPE="consul"
+    {{else -}}
+    echo "Missing consul/cluster-profile on the machine! Nothing to clear!"
+    exit 0
+    {{end -}}
+    declare -a WIPE_PARAMS=('consul/servers' 'consul/servers-done' 'consul/agents' 'consul/agents-done' 'consul/encryption-key')
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done consul params reset"
+  Name: consul-reset
+- Contents: |-
+    #!/bin/bash
+    # Reset vault CA params
+    set -e
+
+    {{template "setup.tmpl" .}}
+    export RS_IP="{{.Machine.Address}}"
+    {{if .ParamExists "vault/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
+    {{else -}}
+    echo "Missing vault/cluster-profile on the machine! Nothing to clear!"
+    exit 0
+    {{end -}}
+    {{template "setup.tmpl" .}}
+    echo "Checking CA"
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "vault/name"}}-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "vault/name"}}-ca) || true
+    if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
+      echo "CA contains $CA_TEST"
+      echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
+      echo "==========================================================================="
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"
+      echo "==========================================================================="
+      echo "Try to add unsafe/rs-password with value: your-non-default-password, on your profile and re-run the krib-reset-cluster workflow"
+
+      sleep 1
+      {{if .ParamExists "unsafe/rs-password"}}
+        PASSWORD="{{.Param "unsafe/rs-password"}}"
+      {{else}}
+        PASSWORD="r0cketsk8ts"
+      {{end}}
+      HOLD_TOKEN=$RS_TOKEN
+      unset RS_TOKEN
+      drpcli -U "rocketskates" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca
+      export RS_TOKEN=$HOLD_TOKEN
+    else
+      echo "  No CA root detected - no reset required"
+    fi
+    declare -a WIPE_PARAMS=('vault/server-ca-name' 'vault/server-ca-pw' 'vault/server-ca-cert')
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done CA params reset"
+  Name: vault CA clear
+- Contents: |-
+    #!/bin/bash
+    # Reset vault params
+    set -e
+
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "setup.tmpl" .}}
+    export RS_IP="{{.Machine.Address}}"
+    declare CLUSTER_TYPE="vault"
     {{if .ParamExists "krib/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
     PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
     {{else -}}
-    echo "Missing krib/cluster-profile on the machine!"
-    exit 1
+    echo "Missing krib/cluster-profile on the machine! Nothing to clear!"
+    exit 0
     {{end -}}
+    declare -a WIPE_PARAMS=('vault/unseal-key' 'vault/root-token' 'vault/kms-plugin-token' 'vault/servers' 'vault/servers-done' 'vault/server-ca-pw' 'vault/server-ca-name')
+    {{template "krib-dev-reset.sh.tmpl" .}}
+    echo "done vault params reset"
+  Name: vault-reset
+- Contents: |-
+    #!/bin/bash
+    # Reset KRIB params
+    set -e
+
+    {{template "setup.tmpl" .}}
+    export RS_IP="{{.Machine.Address}}"
+    {{if .ParamExists "krib/cluster-profile" -}}
+    CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+    PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+    # This only needs to happen on the cluster master, so skip for non master[0]s
+    {{template "krib-lib.sh.tmpl" .}}
+    MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+    if [[ ! $MASTER_INDEX == 0 ]] ; then
+      echo "I am not master[0], so skipping DRP interaction (to avoid unnecessary races)"
+      exit 0
+    fi
+
+    {{else -}}
+    echo "Missing krib/cluster-profile on the machine! Nothing to clear!"
+    exit 0
+    {{end -}}
+    declare -a WIPE_PARAMS=('krib/cluster-masters' 'krib/cluster-join-command' 'krib/cluster-admin-conf' 'krib/cluster-master-certs' 'krib/cluster-bootstrap-token' 'krib/cluster-kubeadm-cfg')
     {{template "krib-dev-reset.sh.tmpl" .}}
     drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"black\", \"icon\": \"server\"}}" | jq .Meta
     echo "done KRIB params reset"
   Name: KRIB clear
+- Contents: |-
+    #!/bin/bash
+
+    # We might want to re-initialize a cluster using this machine, but without any
+    # remanants of the old cluster. This script brutally removes any cluster-specific content,
+    # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
+
+    kubeadm reset -f
+    systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
+    systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
+    systemctl stop vault || echo "vault not running, no need to stop"
+    systemctl stop consul-server || echo "consul-server not running, no need to stop"
+    systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
+
+    # Whether we're using containerd or dockerd, kill either
+    pkill containerd || pkill dockerd
+
+    # Wipe out any persistent content
+    rm -rf /var/lib/cni/
+    rm -rf /var/lib/kubelet/*
+    rm -rf /etc/cni/
+    rm -rf /docker/etcd/*
+    rm -rf /var/lib/containerd/*
+    rm -rf /var/lib/docker/*
+    rm -rf /var/lib/rook/*
+    rm -rf /var/lib/consul/client
+    rm -rf /var/lib/consul/server
+    rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
+    iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+    {{ if .ParamExists "rook/ceph-target-disk"}}
+    {{if .ParamExists "krib/selective-mastership" -}}
+    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+    {{end -}}
+    {{if .ParamExists "krib/i-am-master" -}}
+    I_AM_MASTER={{.Param "krib/i-am-master" }}
+    {{end -}}
+    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+      if [[ ! "$I_AM_MASTER" == true ]] ; then
+        # I'm a worker, so wipe disk in preparation for next ceph installation
+        yum install -y gdisk
+        sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+      fi
+    fi
+    {{ end -}}
+  Name: KRIB wipe machine for cluster reinstall
+- Contents: |-
+    #!/bin/bash
+
+    {{ if .ParamExists "rook/ceph-target-disk"}}
+    {{if .ParamExists "krib/selective-mastership" -}}
+    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+    {{end -}}
+    {{if .ParamExists "krib/i-am-master" -}}
+    I_AM_MASTER={{.Param "krib/i-am-master" }}
+    {{end -}}
+    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+      if [[ ! "$I_AM_MASTER" == true ]] ; then
+        # I'm a worker, so wipe disk in preparation for next ceph installation
+        yum install -y gdisk
+        sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+      fi
+    fi
+    {{ end -}}
+  Name: KRIB wipe disks used for rook-ceph (if configured)
 Meta:
   icon: "ship"
   color: "orange"

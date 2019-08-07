@@ -1,0 +1,23 @@
+---
+Description: "A task to configure vault kms plugin"
+Name: "vault-kms-plugin"
+Documentation: |
+  Configures a vault plugin for secret encryption
+OptionalParams:
+  - vault/server-count
+  - vault/version
+Templates:
+  - ID: "krib-encryption-config.yaml.tmpl"
+    Name: "Setup kube secret encryption"
+    Path: "/etc/kubernetes/pki/encryption.yaml"    
+  - ID: "vault-kms-plugin.service.tmpl"
+    Name: "Setup systemd service for kms plugin"
+    Path: "/etc/systemd/system/vault-kms-plugin.service"
+  - ID: "krib-vault-kms-plugin.sh.tmpl"
+    Name: "Configure vault kms plugin"
+    Path: ""        
+Meta:
+  icon: "book"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

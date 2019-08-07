@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# k3s part of Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+# Copyright RackN 2019
+set -e
+
+# Get access and who we are.
+{{ template "setup.tmpl" .}}
+
+if [[ {{ .Param "krib/k3s" }} != true ]]; then
+  echo "krib/k3s must be true"
+  exit 1
+fi
+
+# Fix hostname lookup
+echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
+
+echo "Starting krib/k3s enabled stage"
+drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"black\", \"icon\": \"cube\" }}" | jq .Meta
+
+{{ if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
+PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
+{{ else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{ end -}}
+
+{{ template "krib-lib.sh.tmpl" .}}
+
+echo "Download k3s (for now only use latest and AMD64 arch)"
+
+KRIB_REPO={{ .Param "krib/repo" }}
+RELEASE=`curl -w "%{url_effective}" -I -L -s -S ${KRIB_REPO}/latest -o /dev/null | sed -e 's|.*/||'`
+TMP_DIR=/tmp/k3s-tmp
+INSTALL_DIR=/usr/bin
+SYSTEMD_DIR="/etc/systemd/system"
+K3SBIN="$INSTALL_DIR/k3s"
+
+if ! which k3s ; then
+  echo "Download k3s ${RELEASE} from ${KRIB_REPO}/download/${RELEASE}/k3s to $K3SBIN"
+  if [[ ! -z "$KRIB_REPO" ]] ; then
+    download -L --remote-name-all "${KRIB_REPO}/download/${RELEASE}/k3s" -o $K3SBIN
+  else
+    echo "missing REPO AND RELEASE"
+    exit 1
+  fi
+  if [ -f $K3SBIN ] ; then
+    chmod +x $K3SBIN
+  else
+    echo "$K3SBIN not installed on system"
+    exit 1
+  fi
+else
+  echo "found $K3SBIN binary, moving on..."
+fi
+
+echo "Configure master or nodes..."
+
+{{ if .ParamExists "krib/ip" -}}
+KRIB_IP={{ .Param "krib/ip" }}
+{{ else -}}
+KRIB_IP={{ .Machine.Address }}
+{{ end -}}
+
+# we need a random backoff to avoid races.
+SLEEP=$[ ( $RANDOM % 25 ) ]
+sleep $SLEEP
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+echo "My Master index is $MASTER_INDEX"
+echo "k3s version: $(k3s -v)"
+
+CLUSTERNAME={{ .Param "krib/cluster-name" }}
+
+if [[ $MASTER_INDEX != notme ]] ; then
+
+  echo "I am master - run k3s server"
+
+  EXECSTART="${K3SBIN} server --bind-address={{ .Param "krib/cluster-master-vip" }} --https-listen-port={{ .Param "krib/cluster-api-port" }}"
+  SYSTEMD_TYPE="notify"
+
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"anchor\" }}" | jq .Meta
+
+else
+
+  echo "I am a node - run k3s agent"
+
+  wait_for_variable $KRIB_JOIN_PARAM
+  # we need to get the decoded version
+  TOKEN=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param $KRIB_JOIN_PARAM --decode)
+
+  echo "Running Agent: join $TOKEN"
+  EXECSTART="${K3SBIN} agent --token $TOKEN"
+  SYSTEMD_TYPE="exec"
+
+  # Set machine icon and color for KRIB cluster building
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"yellow\", \"icon\": \"ship\" }}" | jq .Meta
+
+fi
+
+MODEPROBE=$(which modprobe)
+
+## Build Systemd environment vars
+tee /etc/systemd/system/k3s.service.env >/dev/null << EOF
+K3S_URL=https://{{ .Param "krib/cluster-master-vip" }}:{{ .Param "krib/cluster-api-port" }}
+EOF
+
+## Build Systemd service
+tee /etc/systemd/system/k3s.service >/dev/null << EOF
+[Unit]
+Description=Lightweight Kubernetes
+Documentation=https://k3s.io
+After=network-online.target
+
+[Service]
+Type=${SYSTEMD_TYPE}
+EnvironmentFile=/etc/systemd/system/k3s.service.env
+ExecStartPre=${MODEPROBE} br_netfilter
+ExecStartPre=${MODEPROBE} overlay
+ExecStart=${EXECSTART}
+KillMode=process
+Delegate=yes
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload && systemctl start k3s
+sleep 15
+
+if [[ $MASTER_INDEX != notme ]] ; then
+  # need more delay for master
+  sleep 15
+  echo "verify install"
+  k3s kubectl get nodes
+  echo "Recording cluster admin config ..."
+  drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_ADMIN_CONF_PARAM to - < /etc/rancher/k3s/k3s.yaml
+  if [[ -f /var/lib/rancher/k3s/server/node-token ]] ; then
+    # collect the cluster bootstrap token, then store it on the Param
+    TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param $KRIB_JOIN_PARAM to "$TOKEN"
+  else
+    echo "halting, could not find /var/lib/rancher/k3s/server/node-token"
+    exit 1
+  fi
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"anchor\" }}" | jq .Meta
+else
+  # Set machine icon and color for KRIB cluster building
+  drpcli machines update $RS_UUID "{\"Meta\":{\"color\":\"green\", \"icon\": \"ship\" }}" | jq .Meta
+fi
+
+echo "Finished successfully"
+exit 0

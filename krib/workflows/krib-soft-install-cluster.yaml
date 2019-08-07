@@ -1,0 +1,17 @@
+# Workflow
+---
+Name: "krib-soft-install-cluster"
+Description: "Install KRIB cluster on existing machine OS (post-reset)"
+Errors: []
+Meta:
+  color: "yellow"
+  icon: "ship"
+  title: "kubernetes install on existing machine OS"
+ReadOnly: false
+Stages:
+  - "krib-runtime-install"
+  - "kubernetes-install"
+  - "etcd-config"
+  - "krib-config"
+  - "krib-helm"
+  - "krib-install-complete"

@@ -12,7 +12,7 @@ Stages:
   - "centos-7-install"
   - "runner-service"
   - "finish-install"
-  - "docker-install"
+  - "krib-runtime-install"
   - "kubernetes-install"
   - "etcd-config"
   - "krib-config"

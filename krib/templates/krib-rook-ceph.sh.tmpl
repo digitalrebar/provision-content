@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) nginx-ingress Installer
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+{{if .ParamExists "krib/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing krib/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+
+if [[ $MASTER_INDEX == 0 ]] ; then
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+  if ! which wget ; then
+    install wget
+  fi
+
+  download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/common.yaml \
+    -o /tmp/rook-common.yaml
+  download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/operator.yaml \
+    -o /tmp/rook-operator.yaml 
+  download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml \
+    -o /tmp/rook-cluster.yaml
+  download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml \
+    -o /tmp/rook-storageclass.yaml
+
+  ##### Optionally replace containers in distributed YAML manifests with operator-specified
+  ##### containers from a private registry
+  #####
+  {{ if .ParamExists "krib/rook-ceph-container-image-daemon-base" }}
+  # Replace default container image with the one specified in "krib/metallb-container-image-daemon-base"
+  sed -i 's|ceph/daemon-base|{{ .Param "krib/rook-ceph-container-image-daemon-base" }}|' /tmp/rook-cluster.yaml
+  {{ end -}}
+    {{ if .ParamExists "krib/rook-ceph-container-image-ceph" }}
+  # Replace default container image with the one specified in "krib/metallb-container-image-ceph"
+  sed -i 's|ceph/ceph|{{ .Param "krib/rook-ceph-container-image-ceph" }}|' /tmp/rook-cluster.yaml
+  {{ end -}}
+  {{ if .ParamExists "krib/rook-ceph-container-image" }}
+  # Replace default container image with the one specified in "krib/metallb-container-image"
+  sed -i 's|image: rook/ceph|image: {{ .Param "krib/rook-ceph-container-image" }}|' /tmp/rook-operator.yaml
+  # Replace default container image with the one specified in "krib/metallb-container-image"
+  sed -i 's|image: rook/ceph|image: {{ .Param "krib/rook-ceph-container-image" }}|' /tmp/rook-ceph-toolbox.yaml
+  {{ end -}}
+  #####
+  ##### Finish optional replacement
+
+  # if [[ -n $(kubectl get namespaces | grep -w ingress-nginx) ]] ; then
+  #   echo "Purging existing nginx-ingress install"
+  #   kubectl delete -f /tmp/nginx-ingress-mandatory.yaml
+  # fi
+
+  # Create the common elements
+  kubectl apply -f /tmp/rook-common.yaml
+  kubectl apply -f /tmp/rook-operator.yaml
+  
+  # Apply override to use the cluster range
+  kubectl apply -f /tmp/rook-ceph-override.yaml
+
+  # Create cluster
+  sed -i 's/hostNetwork: false$/hostNetwork: true/' /tmp/rook-cluster.yaml
+  sed -i 's/useAllDevices:$/useAllDevices: false/' /tmp/rook-cluster.yaml
+  {{ if .ParamExists "rook/ceph-target-disk" }}
+  sed -i 's/deviceFilter:$/deviceFilter: {{ .Param "rook/ceph-target-disk" }}/' /tmp/rook-cluster.yaml
+  {{ end -}}
+  kubectl apply -f /tmp/rook-cluster.yaml
+
+  # Create the storageclass
+  kubectl apply -f /tmp/rook-storageclass.yaml
+
+  # Make storageclass the default (could potentially override this in future with a param)
+  kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  
+  # Create the dashboard
+  kubectl apply -f /tmp/rook-ceph-dashboard-ingress.yaml
+
+  # Create the toolbox
+  kubectl apply -f /tmp/rook-ceph-toolbox.yaml
+
+
+  # Clean up
+  mkdir -p /tmp/cleanup
+  mv /tmp/*.yaml /tmp/cleanup
+
+else
+  echo "I was not the leader, skipping rook-ceph install"
+fi
+
+
+
+echo "Finished rook-ceph deployment successfully"
+
+echo "Finished successfully"
+exit 0

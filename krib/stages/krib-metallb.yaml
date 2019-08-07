@@ -4,7 +4,7 @@ Description: "KRIB installs and configures MetalLB on the cluster"
 Documentation: |
   Installs and runs MetalLB kubectl install
 
-  see: https://metallb.netlify.com/tutorial/layer2/
+  see: https://metallb.netlify.com/tutorial/
 RunnerWait: true
 Tasks:
   - "krib-metallb"

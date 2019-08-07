@@ -4,7 +4,9 @@ Description: "Specify the CRI Socket for Kubernetes."
 Documentation: |
   This Param defines which Socket to use for the Container Runtime
   Interface.  By default KRIB content uses Docker as the CRI, however
-  our goal is to support multiple container CRI formats. 
+  our goal is to support multiple container CRI formats. A viable 
+  alternative is /run/containerd/containerd.sock, assuming krib/container-runtime 
+  is set to "containerd"
 Schema:
   type: "string"
   default: "/var/run/dockershim.sock"

@@ -1,0 +1,22 @@
+---
+Description: "A task to install and setup ExternalDNS"
+Name: "krib-external-dns"
+Templates:
+  - ID: "krib-external-dns.yaml.tmpl"
+    Name: "ExternalDNS manifests"
+    Path: "/tmp/krib-external-dns.yaml"    
+  - ID: "krib-external-dns.sh.tmpl"
+    Name: "ExternalDNS script execution"
+    Path: ""
+RequiredParams:
+  - krib/cluster-profile
+  - krib/external-dns-provider
+OptionalParams:
+  - certmanager/dns-domain
+  - certmanager/route53-access-key-id
+  - certmanager/route53-secret-access-key
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

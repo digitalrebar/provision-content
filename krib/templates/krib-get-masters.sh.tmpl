@@ -5,8 +5,14 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
 
 echo "Elect and wait for the masters"
 
@@ -33,7 +39,11 @@ KRIB_IP={{ .Machine.Address }}
 KRIB_MASTER_COUNT={{.Param "krib/cluster-master-count"}}
 echo "Creating $KRIB_MASTER_COUNT k8s masters"
 
-if [[ $MASTER_ON_ETCDS == true ]] ; then
+if [[ {{ .Param "krib/k3s" }} == true ]] ; then
+  echo "K3s, add $KRIB_MASTERS_PARAM to $CLUSTER_PROFILE"
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "$KRIB_MASTERS_PARAM" to "[]" || true
+  echo "K3s, skipping etcd config"
+elif [[ $MASTER_ON_ETCDS == true ]] ; then
   if (( $KRIB_MASTER_COUNT >= $ETCD_COUNT )) ; then
     # If we have the same or more masters than etcd, start with the etcd list.
     ETCD_MASTERS=$(get_param $ETCD_SERVERS_PARAM)

@@ -9,7 +9,7 @@ ReadOnly: false
 Stages:
   - "ssh-access"
   - "mount-local-disks"
-  - "docker-install"
+  - "krib-runtime-install"
   - "kubernetes-install"
   - "etcd-config"
   - "krib-config"

@@ -1,0 +1,12 @@
+---
+Name: "certmanager/dns-domain"
+Description: "certmanager dns domain"
+Documentation: |
+  cert-manager DNS domain - the suffix appended to hostnames on certificates
+  signed with cert-manager. Used to auto-generate the ingress for rook ceph, for example
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"

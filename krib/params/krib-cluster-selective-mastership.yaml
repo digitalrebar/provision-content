@@ -1,0 +1,17 @@
+---
+Name: "krib/selective-mastership"
+Description: "Require an additional param (krib/i-am-master) to permit a machine to self-elect to master"
+Documentation: |
+  When this param is set to true, then in order for a machine to self-elect to a mastetr,
+  the, krib/i-am-master param must be set for that machine. This option is useful to prevent 
+  dedicated workers from assuming mastership.
+
+  Defaults to 'false'.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

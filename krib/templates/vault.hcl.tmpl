@@ -1,0 +1,14 @@
+listener "tcp" {
+  address          = "0.0.0.0:8200"
+  cluster_address  = "{{.Machine.Address}}:8201"
+  tls_cert_file = "/etc/vault/pki/server.pem"
+  tls_key_file  = "/etc/vault/pki/server-key.pem"
+}
+
+storage "consul" {
+  address = "127.0.0.1:8500"
+  path    = "vault/"
+}
+
+api_addr = "http://{{.Machine.Address}}:8200"
+cluster_addr = "https://{{.Machine.Address}}:8201"

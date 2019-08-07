@@ -1,0 +1,20 @@
+---
+Name: "vault/seal"
+Description: "The KMS (if any) to use with Vault auto-unseal"
+Documentation: |
+  Vault can optionally be configured to automatically unseal, using a cloud-based KMS. Currently
+  the only configured option is "awskms", which necessitates you setting the following additional parameters
+  - vault/awskms-region
+  - vault/awskms-access-key
+  - vault/awskms-secret-key
+  - vault/awskms-kms-key-id
+Schema:
+  type: string
+  enum:
+    - undefined
+    - awskms
+  default: undefined
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

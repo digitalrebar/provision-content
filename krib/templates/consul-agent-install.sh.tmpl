@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# This script installs consul, but doesn't configure it
+
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+CONSUL_VERSION="{{ .Param "consul/version" }}"
+
+# these need to be before krib-lib template
+{{if .ParamExists "consul/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "consul/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "consul/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing consul/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+echo "Prepare the consul cluster"
+
+CONSUL_CLUSTER_NAME={{.Param "consul/name"}}
+{{ if .ParamExists "consul/ip" -}}
+CONSUL_IP={{ .Param "consul/ip" }}
+{{ else -}}
+CONSUL_IP={{ .Machine.Address }}
+{{ end -}}
+
+{{if eq (.ParamExists "consul/agents") false -}}
+# add server management params if missing
+echo "Add initial variables to track members."
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/agents" to "[]" || true
+{{ end -}}
+
+{{if eq (.ParamExists "consul/agents-done") false -}}
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "consul/agents-done" to "[]" || true
+{{ end -}}
+
+# Get the number of servers to create
+CONSUL_SERVER_COUNT={{.Param "consul/server-count"}}
+echo "Creating $CONSUL_SERVER_COUNT servers"
+
+echo "Electing consul members to cluster profile: $CLUSTER_PROFILE"
+CONSUL_INDEX=$(add_me_if_not_count "consul/agents" $CONSUL_SERVER_COUNT $CONSUL_IP)
+
+echo "Added myself to cluster profile, my index is ${CONSUL_INDEX}"
+
+if [[ $CONSUL_INDEX == notme ]] ; then
+  echo "I am not a CONSUL server.  Move on."
+  wait_for_count "consul/agents-done" $CONSUL_SERVER_COUNT
+  exit 0
+fi
+
+SERVER_CA=${CONSUL_CLUSTER_NAME}-server-ca
+
+EXISTING_INDEX=$(find_me "consul/agents-done" "Uuid" $RS_UUID)
+
+
+echo "Waiting for ${CONSUL_SERVER_COUNT} servers to be ready"
+wait_for_count "consul/agents" $CONSUL_SERVER_COUNT
+
+echo "${CONSUL_SERVER_COUNT} servers ready!"
+
+SERVER_CA_PW=$(wait_for_variable "consul/server-ca-pw")
+
+# Add the consul user if it doesn't exist
+id -u consul &>/dev/null || ( echo "Creating consul user"; useradd consul -d /var/lib/consul )
+
+TMP_DIR=/tmp/consul-tmp
+INSTALL_DIR=/usr/local/bin
+if [[ $OS_FAMILY == coreos ]] ; then
+  INSTALL_DIR=/opt/bin
+fi
+
+mkdir -p ${TMP_DIR}
+
+echo "Download consul version: v${CONSUL_VERSION}"
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/consul_${CONSUL_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+else
+  download -L https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip
+fi
+
+echo "Install consul version: ${CONSUL_VERSION}"
+yum -y install unzip || echo "Unzip already installed"
+unzip -o ${TMP_DIR}/consul_${CONSUL_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
+
+systemctl daemon-reload
+systemctl enable consul-agent
+
+echo "Consul installed, ready to start"
+add_me_if_not_count "consul/agents-done" $CONSUL_SERVER_COUNT $CONSUL_IP
+
+echo "Waiting for ${CONSUL_SERVER_COUNT} servers to complete consul install"
+wait_for_count "consul/agents-done" $CONSUL_SERVER_COUNT
+
+rm -rf ${TMP_DIR}
+
+exit 0

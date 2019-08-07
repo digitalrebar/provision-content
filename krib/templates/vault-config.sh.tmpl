@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+
+# Build a vault cluster
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+VAULT_VERSION="{{ .Param "vault/version" }}"
+
+# these need to be before krib-lib template
+{{if .ParamExists "vault/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing vault/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+# Ensure that the vault systemd service specifies all vault nodes using retry-join
+setup_seal() {
+  echo "Setting up seal..."
+
+  if [[ ! `grep awskms /etc/vault/vault.hcl` ]]; then
+  {{ if and (.ParamExists "vault/awskms-region") (.ParamExists "vault/awskms-access-key") (.ParamExists "vault/awskms-secret-key") (.ParamExists "vault/awskms-kms-key-id") }}
+    cat <<EOF >> /etc/vault/vault.hcl
+    
+seal "awskms" {
+    region     = "{{ .Param "vault/awskms-region" }}"
+    access_key = "{{ .Param "vault/awskms-access-key" }}"
+    secret_key = "{{ .Param "vault/awskms-secret-key" }}"
+    kms_key_id = "{{ .Param "vault/awskms-kms-key-id" }}"
+}
+EOF
+  {{ else -}}
+    echo "awskms" specified  as "vault/seal", but requisite parameters vault/awskms-region, vault/awskms-access-key, vault/awskms-secret-key, or vault/awskms-kms-key-id not set. Skipping seal.
+  {{ end -}}
+  fi
+
+}
+
+
+echo "Configure the vault cluster"
+
+setup_seal
+
+systemctl daemon-reload
+systemctl restart vault
+
+# Wait around until consul has elected a leader
+until consul operator raft list-peers | grep -q leader;
+do 
+  SLEEP=$[ ( $RANDOM % 5 ) ]; 
+done
+
+# Only initialize vault on the consul leader, to avoid races
+set +e
+$(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
+if [[ $? -eq 0 ]] ; then
+  set -e
+  # Before attempting to init vault, sleep 5s to give it time to wake up
+  sleep 5s
+
+  export VAULT_CACERT=/etc/vault/pki/server-ca.pem 
+  vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
+
+  # Get our recovery key and token, then delete the local record
+  export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
+  export VAULT_TOKEN=`cat /tmp/vault.json | jq -r '[.root_token][0]'`
+
+  # Insert recovery key and token into params
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
+
+  # enable the transit secret backend
+  vault secrets enable transit
+
+  # create a policy for the transit backend
+  vault policy write transit-only /etc/vault/policy-transit-only.hcl
+
+  # Create a token for kubernetes
+  echo "Setting vault/kms-plugin-token"
+  vault token create -policy transit-only -format json > /tmp/token.json
+  VAULT_KMS_TOKEN=`cat /tmp/token.json | jq -r '[.auth.client_token][0]'`
+  
+  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/kms-plugin-token" to "$VAULT_KMS_TOKEN"
+
+  # Destroy the evidence
+  mkdir -p /tmp/cleanup
+  mv /tmp/vault.json /tmp/cleanup
+  mv /tmp/token.json /tmp/cleanup
+fi
+
+set -e
+
+VAULT_SERVER_COUNT={{.Param "vault/server-count"}}
+
+echo "Vault installed and setup, let's go"
+add_me_if_not_count "vault/servers-done" $VAULT_SERVER_COUNT $VAULT_IP
+
+echo "Waiting for ${VAULT_SERVER_COUNT} servers to complete vault install"
+wait_for_count "vault/servers-done" $VAULT_SERVER_COUNT
+
+
+exit 0

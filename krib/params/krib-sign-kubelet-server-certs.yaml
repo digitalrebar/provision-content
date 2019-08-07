@@ -1,0 +1,16 @@
+---
+Name: "krib/sign-kubelet-server-certs"
+Description: "Whether to sign the kubelet server certs using the CA, or leave them as self-signed (default)"
+Documentation: |
+  When this param is set to true, then the kubelets will be configured to request their certs from
+  the cluster CA, using CSRs. The CSR approver won't natively sign server certs, so a custom operator,
+  "https://github.com/kontena/kubelet-rubber-stamp", will be deployed to sign these.
+
+  Defaults to 'false'.
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

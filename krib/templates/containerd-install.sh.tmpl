@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Kubernetes Rebar Integrated Boot (KRIB) Docker Install
+set -e
+
+echo "starting containerd v{{.Param "containerd/version"}} install"
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+[[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
+
+{{if .ParamExists "kubectl/working-dir" -}}
+# Only do this if it exists.
+# if it isn't setup, don't use it.
+if [[ -e {{.Param "kubectl/working-dir"}} ]] ; then
+  echo "Linking the kubectl working directory into place."
+  ln -s {{.Param "kubectl/working-dir"}} /var/lib/kubectl
+fi
+{{end -}}
+
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+  echo "local repo download containerd v{{.Param "containerd/version"}} binaries in {{.Param "krib/package-repository"}}"
+  curl -L {{.Param "krib/package-repository"}}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
+{{else}}
+  BINARIES="cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz"
+  if [[ ! -f $BINARIES ]] ; then
+	  echo "download containerd v{{.Param "containerd/version"}} to $BINARIES"
+	  curl -L https://storage.googleapis.com/cri-containerd-release/$BINARIES -o $BINARIES
+  else
+    echo "$BINARIES already downloaded"
+  fi
+  CHECK=$(sha256sum $BINARIES)
+  SHA256=$(curl -L https://storage.googleapis.com/cri-containerd-release/$BINARIES.sha256)
+  if [[ "$CHECK" == "$SHA256  $BINARIES" ]] ; then
+  	echo "verified checksum for $BINARIES!"
+    tar --no-overwrite-dir -C / -xzf $BINARIES
+  else
+  	echo "checksum does not match! computed $CHECK vs download $SHA256"
+  	exit 1
+  fi
+{{end -}}
+# Configure containerd
+
+{{if .ParamExists "containerd/config" -}}
+echo "Creating /etc/containerd/config.toml file from Param containerd/config"
+cat <<EOF >/etc/containerd/config.toml
+{{.Param "containerd/config"}}
+EOF
+cat /etc/containerd/config.toml
+{{else -}}
+echo "Skipping custom etc/containerd/config.toml: No containerd/config defined"
+{{end -}}
+
+# start containerd
+systemctl start containerd
+systemctl enable containerd
+
+ctr --version
+echo "Containerd v{{.Param "containerd/version"}} installed successfully"
+exit 0

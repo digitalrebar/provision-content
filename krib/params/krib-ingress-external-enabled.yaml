@@ -1,0 +1,15 @@
+---
+Name: "krib/ingress-external-enabled"
+Description: "Enables install of a second nginx controller intended for external access"
+Documentation: |
+  When enabled, deploys a second ingress controller (the first is default)
+  Services are exposed to the second ingress using the class "nginx-external" instead of the
+  "ingress" class. This can be helpful in environments where it may be helpful to expose
+  some services only to the cluster, as an ingress, as opposed to the world.
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  icon: "dashboard"
+  color: "blue"
+  title: "Digital Rebar Community Content"

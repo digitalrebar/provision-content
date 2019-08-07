@@ -1,0 +1,14 @@
+---
+Name: "consul/controller-client-key"
+Description: "Generated SSL key for use by a controller, external to the KRIB cluster"
+Documentation: |
+  For use in configurations where the consul cluster is backed up from a machine
+  external to the KRIB cluster. Will be generated for the value in etcd/controller-client-cert.
+
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
+  password: "hideme"

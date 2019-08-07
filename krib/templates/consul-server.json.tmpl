@@ -1,0 +1,25 @@
+{
+  "server": true,
+  "node_name": "{{.Machine.ShortName}}-server",
+  "datacenter": "dc1",
+  "data_dir": "/var/lib/consul/server",
+  "bind_addr": "{{.Machine.Address}}",
+  "client_addr": "0.0.0.0",
+  "advertise_addr": "{{.Machine.Address}}",
+  "bootstrap_expect": 3,
+  "ui": false,
+  "log_level": "DEBUG",
+  "enable_syslog": true,
+  "encrypt": "{{ .Param "consul/encryption-key" }}",  
+  "acl_enforce_version_8": false,
+  "verify_incoming": true,
+  "verify_outgoing": true,
+  "verify_server_hostname": true,
+  "ca_file": "/etc/consul/pki/server-ca.pem",
+  "cert_file": "/etc/consul/pki/server.pem",
+  "key_file": "/etc/consul/pki/server-key.pem",
+  "ports": {
+    "http": -1,
+    "https": 8501
+  }  
+}

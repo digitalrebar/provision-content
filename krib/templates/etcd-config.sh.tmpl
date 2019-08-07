@@ -4,6 +4,13 @@ set -e
 
 # Get access and who we are.
 {{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+# we need a random backoff to avoid races.
+SLEEP=$[ ( $RANDOM % 20 ) ]
+
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
@@ -28,7 +35,7 @@ build_cert() {
 
   echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
   drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/kubernetes/pki/etcd/${profile}-ca.pem
-  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) > tmp.csr
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
   drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/kubernetes/pki/etcd/$profile.pem
   jq -r .Key tmp.csr > /etc/kubernetes/pki/etcd/$profile-key.pem
   rm tmp.csr
@@ -44,6 +51,7 @@ get_endpoints() {
   ENDPOINTS="--endpoints=${ENDPOINTS:1}"
   echo ${ENDPOINTS}
 }
+
 
 get_member_list() {
   set +e
@@ -80,6 +88,13 @@ ETCD_CLIENT_PORT={{.Param "etcd/client-port"}}
 ETCD_IP={{ .Param "etcd/ip" }}
 {{ else -}}
 ETCD_IP={{ .Machine.Address }}
+{{ end -}}
+
+# Either set controller IP to a param, or default to the DRP IP
+{{ if .ParamExists "etcd/controller-ip" -}}
+ETCD_CONTROLLER_IP={{ .Param "etcd/controller-ip" }}
+{{ else -}}
+ETCD_CONTROLLER_IP={{ .ProvisionerAddress }}
 {{ end -}}
 
 {{if eq (.ParamExists "etcd/servers") false -}}
@@ -127,7 +142,7 @@ if [[ $EXISTING_INDEX == notme ]] ; then
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
     else
       if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-        xiterr 1 "Client CA Exists, but we did not set password.  Need to reset!!"
+        xiterr 1 "Client CA Exists ($CLIENT_CA), but we did not set password.  Need to reset!!"
       else
         echo "  Client CA $CLIENT_CA configured"
       fi
@@ -152,6 +167,26 @@ if [[ $EXISTING_INDEX == notme ]] ; then
         xiterr 1 "PEER CA Exists, but we didn't set password.  Need to reset!!"
       fi
     fi
+
+    # On the assumption that we'll want to backup the etcd cluster externally (from DRP host or a "controller")
+    # Generate a client cert for the controller
+    echo "Generating controller client certificate with IP ${ETCD_CONTROLLER_IP}"
+    # First, get the CA cert into a param
+    drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA | jq -r . > tmp.ca
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
+
+    # Next, generate a client cert and key for the controller's IP
+    drpcli certs csr client $ETCD_CONTROLLER_IP > tmp.csr
+    drpcli machines runaction $RS_UUID signcert certs/root $CLIENT_CA certs/root-pw $CLIENT_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile client | jq -r . > controller.pem
+    jq -r .Key tmp.csr > controller.key
+
+    # Now put the etcd controller cert details _back_ into params, to be extracted on the controller
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/controller-client-cert" to "\"$(awk '{printf "%s\\n", $0}' controller.pem)\""
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/controller-client-key" to "\"$(awk '{printf "%s\\n", $0}' controller.key)\""
+
+    # Clean up
+    rm {tmp.ca,tmp.csr,controller.pem,controller.key}
+
   fi
   {{else -}}
   xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
@@ -197,7 +232,17 @@ fi
 mkdir -p ${TMP_DIR}
 
 echo "Download etcd version: v${ETCD_VERSION}"
-download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+else
+  download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+fi
+
 echo "Install etcd version: ${ETCD_VERSION}"
 tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
 

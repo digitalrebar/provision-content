@@ -63,19 +63,36 @@ mkdir -p ${TMP_DIR}
 mkdir -p ${INSTALL_DIR}
 mkdir -p /opt/cni/bin
 
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
 echo "Download cni plugin version: ${CNI_VERSION}"
-download -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L "${KRIB_REPO}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
+else
+  download -L "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz" -o ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
+fi
 echo "Install cni plugin version: ${CNI_VERSION}"
 tar -C /opt/cni/bin -xzf ${TMP_DIR}/cni-plugins-amd64-${CNI_VERSION}.tgz
 
 echo "Download crictl version: ${CRICTL_VERSION}"
-download -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" -o ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L "${KRIB_REPO}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" -o ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
+else
+  download -L "https://github.com/kubernetes-incubator/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz" -o ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
+fi
 echo "Install crictl version: ${CRICTL_VERSION}"
 tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
 
 cd ${INSTALL_DIR}
 echo "Download kubelet, kubeadm, and kubectl version: ${RELEASE}"
-download -L --remote-name-all https://storage.googleapis.com/kubernetes-release/release/${RELEASE}/bin/linux/amd64/{kubeadm,kubelet,kubectl}
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L --remote-name-all "${KRIB_REPO}/{kubeadm,kubelet,kubectl}"
+else
+  download -L --remote-name-all https://storage.googleapis.com/kubernetes-release/release/${RELEASE}/bin/linux/amd64/{kubeadm,kubelet,kubectl}
+fi
 chmod +x {kubeadm,kubelet,kubectl}
 
 echo "Download kubelet systemd service unit file for version: ${RELEASE}"

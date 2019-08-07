@@ -1,0 +1,13 @@
+---
+Name: "krib-ingress-nginx-tillerless"
+Description: "KRIB install/config ingress-nginx and optional cert-manager WITHOUT helm or tiller"
+Documentation: |
+  Install/config ingress-nginx and optional cert-manager
+  Requires a cloud LoadBalancer or MetalLB to provide Service ingress.ip
+RunnerWait: true
+Tasks:
+  - "krib-ingress-nginx-tillerless"
+Meta:
+  icon: "sitemap"
+  color: "blue"
+  title: "Community Content"

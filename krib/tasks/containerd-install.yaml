@@ -1,0 +1,18 @@
+
+---
+Description: "A task to install containerd"
+Name: "containerd-install"
+Documentation: |
+  Installs containerd using O/S packages
+OptionalParams:
+  - docker/working-dir
+  - kubectl/working-dir
+Templates:
+  - ID: "containerd-install.sh.tmpl"
+    Name: "Install containerd from internet repo"
+    Path: ""
+Meta:
+  icon: "docker"
+  color: "blue"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"

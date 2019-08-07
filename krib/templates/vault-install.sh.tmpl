@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+# This script installs vault, but doesn't configure it
+
+set -e
+
+# Get access and who we are.
+{{template "setup.tmpl" .}}
+
+# Skip the remainder of this template if this host is not a master in a selective-master deployment
+{{template "krib-skip-if-not-master.tmpl" .}}
+
+export RS_UUID="{{.Machine.UUID}}"
+export RS_IP="{{.Machine.Address}}"
+
+VAULT_VERSION="{{ .Param "vault/version" }}"
+
+# these need to be before krib-lib template
+{{if .ParamExists "vault/cluster-profile" -}}
+CLUSTER_PROFILE={{.Param "vault/cluster-profile"}}
+PROFILE_TOKEN={{.GenerateProfileToken (.Param "vault/cluster-profile") 7200}}
+{{else -}}
+xiterr 1 "Missing vault/cluster-profile on the machine!"
+{{end -}}
+
+{{template "krib-lib.sh.tmpl" .}}
+
+build_cert() {
+  local profile=$1
+  local ca_name=$2
+  local ca_pw=$3
+  local myname=$4
+  local myip=$5
+
+  echo "Generating certificate for ${profile} with my name ${myname} and my IP ${myip}"
+  drpcli machines runaction $RS_UUID getca certs/root $ca_name | jq -r . > /etc/vault/pki/${profile}-ca.pem
+  drpcli certs csr $ca_name $myname $RS_IP $myip $(hostname) localhost 127.0.0.1 {{if .ParamExists "krib/cluster-master-vip" }}{{ .Param "krib/cluster-master-vip" }}{{end}} > tmp.csr
+  drpcli machines runaction $RS_UUID signcert certs/root $ca_name certs/root-pw $ca_pw certs/csr "$(jq .CSR tmp.csr)" certs/profile $profile | jq -r . > /etc/vault/pki/$profile.pem
+  jq -r .Key tmp.csr > /etc/vault/pki/$profile-key.pem
+  rm tmp.csr
+}
+
+
+echo "Prepare the vault cluster"
+
+VAULT_CLUSTER_NAME={{.Param "vault/name"}}
+{{ if .ParamExists "vault/ip" -}}
+VAULT_IP={{ .Param "vault/ip" }}
+{{ else -}}
+VAULT_IP={{ .Machine.Address }}
+{{ end -}}
+
+{{if eq (.ParamExists "vault/servers") false -}}
+# add server management params if missing
+echo "Add initial variables to track members."
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/servers" to "[]" || true
+{{ end -}}
+
+{{if eq (.ParamExists "vault/servers-done") false -}}
+drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/servers-done" to "[]" || true
+{{ end -}}
+
+# Get the number of servers to create
+VAULT_SERVER_COUNT={{.Param "vault/server-count"}}
+echo "Creating $VAULT_SERVER_COUNT servers"
+
+echo "Electing vault members to cluster profile: $CLUSTER_PROFILE"
+VAULT_INDEX=$(add_me_if_not_count "vault/servers" $VAULT_SERVER_COUNT $VAULT_IP)
+
+echo "Added myself to cluster profile, my index is ${VAULT_INDEX}"
+
+if [[ $VAULT_INDEX == notme ]] ; then
+  echo "I am not a VAULT server.  Move on."
+  wait_for_count "vault/servers-done" $VAULT_SERVER_COUNT
+  exit 0
+fi
+
+SERVER_CA=${VAULT_CLUSTER_NAME}-ca
+
+EXISTING_INDEX=$(find_me "vault/servers-done" "Uuid" $RS_UUID)
+if [[ $EXISTING_INDEX == notme ]] ; then
+  {{if .ParamExists "certs/root" -}}
+
+  echo "Certs plugin detected....setting up CA"
+  # If we are INDEX=0, let's setup the root certs for building keys
+  if [[ $VAULT_INDEX == "0" ]] ; then
+    echo "We are first machine in cluster, setting up the root certs..."
+    # Are certs built yet?
+    if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
+      SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-name" to "$SERVER_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-pw" to "$SERVER_CA_PW" || true
+    else
+      if [[ $(get_param "vault/server-ca-pw") == null ]] ; then
+        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+      fi
+    fi
+  fi
+  {{else -}}
+  xiterr 1 "STAGE REQUIRES CERT PLUGIN!!  It is freely available, download from RackN SaaS."
+  {{end}}
+fi
+
+
+
+echo "Waiting for ${VAULT_SERVER_COUNT} servers to be ready"
+wait_for_count "vault/servers" $VAULT_SERVER_COUNT
+
+echo "${VAULT_SERVER_COUNT} servers ready!"
+
+
+# Add the vault user if it doesn't exist
+id -u vault &>/dev/null || ( echo "Creating vault user"; useradd vault -d /var/lib/vault )
+
+SERVER_CA_PW=$(wait_for_variable "vault/server-ca-pw")
+
+# Add the vault user if it doesn't exist
+id -u vault &>/dev/null || ( echo "Creating vault user"; useradd vault -d /var/lib/vault )
+
+mkdir -p /etc/vault/pki/
+
+build_cert "server" $SERVER_CA $SERVER_CA_PW {{.Machine.Name}} $VAULT_IP
+
+
+TMP_DIR=/tmp/vault-tmp
+INSTALL_DIR=/usr/local/bin
+if [[ $OS_FAMILY == coreos ]] ; then
+  INSTALL_DIR=/opt/bin
+fi
+
+mkdir -p ${TMP_DIR}
+
+echo "Download vault version: v${VAULT_VERSION}"
+# Allow for a local repository for installation files
+{{if .ParamExists "krib/package-repository" -}}
+KRIB_REPO={{.Param "krib/package-repository"}}
+{{end -}}
+
+if [[ ! -z "$KRIB_REPO" ]] ; then
+  download -L ${KRIB_REPO}/vault_${VAULT_VERSION}_linux_amd64.zip  -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip
+else
+  download -L https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip
+fi
+
+echo "Install vault version: ${VAULT_VERSION}"
+yum -y install unzip || echo "Unzip already installed"
+unzip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
+
+
+systemctl daemon-reload
+systemctl enable vault
+systemctl restart vault
+systemctl status vault
+
+rm -rf ${TMP_DIR}
+
+exit 0
