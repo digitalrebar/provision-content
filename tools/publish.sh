@@ -15,5 +15,6 @@ tools/pieces.sh | while read i ; do
     remarshal -i $i.yaml -o $i.json -if yaml -of json
     mkdir -p rebar-catalog/$i
     cp $i.json rebar-catalog/$i/$version.json
+    cp $i.rst rebar-catalog/docs/$i.rst
 done
 
