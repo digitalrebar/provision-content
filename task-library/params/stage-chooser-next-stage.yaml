@@ -1,0 +1,9 @@
+---
+Name: "stage-chooser/next-stage"
+Description: "The stage to set in the stage-chooser task."
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "question circle outline"
+  title: "RackN Content"

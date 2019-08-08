@@ -1,0 +1,9 @@
+---
+Name: reset-bmc
+Description: "A stage to reset and recover the BMC using vendor specific tools"
+Tasks:
+  - reset-bmc
+Meta:
+  icon: "wrench"
+  color: "red"
+  title: "RackN Content"

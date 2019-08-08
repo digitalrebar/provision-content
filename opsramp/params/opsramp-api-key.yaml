@@ -1,0 +1,13 @@
+---
+Name: "opsramp/api-key"
+Description: "The OAUTH API Key for authentication"
+Documentation: |
+  This string defines OAUTH API Key for the OpsRamp client.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "privacy"
+  color: "blue"
+  title: "RackN Content"

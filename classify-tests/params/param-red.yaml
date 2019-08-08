@@ -1,0 +1,6 @@
+---
+Name: "param-red"
+Description: "Test parameter for classifier"
+Schema:
+  type: boolean
+  default: false

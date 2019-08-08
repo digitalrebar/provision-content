@@ -1,0 +1,13 @@
+Description: "Start a Live Rancher Server on RancherOS"
+Errors: []
+Meta:
+  color: "red"
+  icon: "ship"
+  title: "Live Rancher Server On RancherOS"
+Name: "rancher-server-live"
+ReadOnly: false
+Stages:
+  - "rancheros-wipe-disks"
+  - "rancheros-live"
+  - "rancher-install"
+  - "rancheros-live-wait"

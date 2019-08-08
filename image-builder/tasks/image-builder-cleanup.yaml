@@ -1,0 +1,15 @@
+Name: image-builder-cleanup
+Description: Post provisioning cleanup tasks for image-builder
+Documentation: ""
+ReadOnly: true
+Meta:
+  color: purple
+  feature-flags: sane-exit-codes
+  icon: pin
+  title: Image Builder suite
+  origin: rackn/image-builder
+Templates:
+  - Contents:
+    Name: image-builder-cleanup
+    ID: image-builder-cleanup.sh.tmpl
+    Path: ""

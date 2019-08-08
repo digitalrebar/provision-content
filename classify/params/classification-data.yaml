@@ -1,0 +1,70 @@
+---
+Name: "classify/classification-data"
+Description: "Data for classifying machines into new workflows."
+Meta:
+  color: "blue"
+  icon: "search"
+  title: "RackN"
+Documentation: |
+  This object defines a series of tests to determine the classification
+  of a Machine followed by a list of actions to apply to that Machine
+  if the test is successful.
+
+  The order of precedence is important!  A Machine will be evaluated in
+  the order you specify in the tests below.  Generally speaking, you
+  should order the MOST SPECIFIC tests first, followed by general tests
+  next.  The very last test in the example below would be a default
+  in the event no previous tests matched.
+
+  Setting "continue: true" in this Param data structure will allow the
+  classifier to continue classifying after the first match.  This
+  effectively allows the operations to continue multiple tests/actions
+  sequences, instead of exiting on first match.
+
+  If none of the tests match, then the Machine will not be modified.
+
+  The object should look like this.
+
+  - test: "has_mac 00:11:22:33:44:55"
+    continue: true
+    actions:
+    - "add_profile profile_name_1"
+    - "change_workflow workflow_name_1"
+  - test: "in_subnet 192.168.0.0/24"
+    actions:
+    - "set_parameter param_name value"
+    - "add_profile profile_name_2"
+    - "change_workflow workflow_name_2"
+  - test: "always"
+    actions:
+    - "change_workflow wait-for-input"
+
+  In the above example, the "has_mac" test will be applied, if the test
+  passes, it would normally exit the Classifier.  However, the "continue"
+  operator has been set to "true", so the tests will continue to the next
+  ("in_subnet"), and subsequently if passing that test, will apply the
+  actions specified.
+
+  EXTENDING CLASSIFIER tests AND actions
+
+  The classifier can be extended to add custom "test" and "actions" groups.
+  See the "classify/custom-functions" Param for details.
+
+Schema:
+  default: []
+  type: "array"
+  items:
+    type: "object"
+    required:
+      - "test"
+      - "actions"
+    properties:
+      test:
+        type: "string"
+      continue:
+        type: boolean
+      actions:
+        type: "array"
+        items:
+          type: "string"
+Secure: false

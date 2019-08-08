@@ -1,0 +1,22 @@
+Available: true
+BootEnv: ubuntu-14.04-install
+Description: Ubuntu 14.04 install stage for Image Builder
+Errors: []
+Meta:
+  color: yellow
+  icon: download
+  title: Digital Rebar Community Content
+  origin: rackn/image-builder
+Name: ubuntu-14.04-install-builder
+OptionalParams: []
+Profiles: []
+ReadOnly: true
+Reboot: false
+RequiredParams: []
+Tasks:
+  - set-hostname
+  - ubuntu-drp-only-repos
+  - ssh-access
+Templates: []
+Validated: true
+

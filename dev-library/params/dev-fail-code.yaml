@@ -1,0 +1,10 @@
+---
+Name: "dev/fail-code"
+Description: "Always Fail Exit Code"
+Schema:
+  type: "integer"
+  minimum: 0
+Meta:
+  color: "red"
+  icon: "warning sign"
+  title: "RackN Content"

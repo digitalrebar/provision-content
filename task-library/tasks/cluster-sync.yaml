@@ -1,0 +1,56 @@
+---
+Name: "cluster-sync"
+Description: "Waits till all machines complete (use after cluster-remove)"
+Documentation: |
+  Waits until no machines remain.  Use with cluster-remove
+  Typical cluster workflow is add->step->remove->sync
+  Where step or sync are optional.
+  See cluster-add task for more details
+Meta:
+  icon: "object group"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - cluster/machines
+  - cluster/profile
+OptionalParams:
+  - cluster/leaders
+  - cluster/escape
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # cluster workflow - holds machine until all reach this stage
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+    {{template "cluster-shared.tmpl" .}}
+
+    echo "Waiting until cluster is empty..."
+
+    # wait until the cluster length is zero
+    while true; do
+      # optional escape / rescue code
+      CLUSTER_ESCAPE=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/escape)
+      if [[ "$CLUSTER_ESCAPE" != null ]] ; then
+        echo "RESCUE: cluster/escape set to $CLUSTER_ESCAPE - breaking from loop"
+        exit $CLUSTER_ESCAPE
+      fi
+      # get the current cluster machines
+      CLUSTER_MACHINES=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/machines)
+      CLUSTER_SIZE=$(jq length <<< "$CLUSTER_MACHINES")
+      echo "$CLUSTER_SIZE Machines in Cluster: $CLUSTER_MACHINES"
+      if [[ $CLUSTER_SIZE == 0 ]] ; then
+        echo "cluster empty! release hold"
+        exit 0
+      else
+        echo "still have $CLUSTER_SIZE machines..."
+      fi
+      # sleep is a hack but it allows for backoffs
+      sleep 1
+    done
+
+    # should not get here!
+    exit 0
+  Name: cluster-remove

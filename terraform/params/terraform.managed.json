@@ -1,0 +1,12 @@
+{
+  "Name": "terraform/managed",
+  "Description": "Indicates if this machine can be managed by terraform",
+  "Schema": {
+    "type": "boolean"
+  },
+  "Meta": {
+    "icon": "hand paper",
+    "color": "green",
+    "title": "RackN Content"
+  }
+}

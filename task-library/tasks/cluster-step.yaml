@@ -1,0 +1,58 @@
+---
+Name: "cluster-step"
+Description: "Waits for machine to be top of queue (use before cluster-remove!)"
+Documentation: |
+  Waits until machine is in Nth (or earlier) position
+  Replies on cluster-remove to advance queue
+  Typical cluster workflow is add->step->remove->sync
+  Where step or sync are optional.
+  See cluster-add task for more details
+Meta:
+  icon: "object group"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - cluster/machines
+  - cluster/profile
+OptionalParams:
+  - cluster/step
+  - cluster/leaders
+  - cluster/escape
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # cluster workflow - releases machine for work
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+    {{template "cluster-shared.tmpl" .}}
+
+    echo "Waiting until cluster is empty..."
+
+    # wait until machine is $CLUSTER_STEP or earlier position (1 = first)
+    while true; do
+      # optional escape / rescue code
+      CLUSTER_ESCAPE=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/escape)
+      if [[ "$CLUSTER_ESCAPE" != null ]] ; then
+        echo "RESCUE: cluster/escape set to $CLUSTER_ESCAPE - breaking from loop"
+        exit $CLUSTER_ESCAPE
+      fi
+      # we need time to let the cluster catch up
+      sleep 1
+      # get the current cluster machines
+      CLUSTER_MACHINES=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/machines)
+      CLUSTER_INDEX=$(jq "index(\"${RS_UUID}\")" <<< "$CLUSTER_MACHINES")
+      echo "We are Machine $CLUSTER_INDEX in Cluster: $CLUSTER_MACHINES"
+      # we're good!
+      if [[ $CLUSTER_INDEX -lt $CLUSTER_STEP ]] ; then
+        echo "Machine $CLUSTER_INDEX <= $CLUSTER_STEP, releasing!"
+        exit 0
+      fi
+      echo "Machine $CLUSTER_INDEX > $CLUSTER_STEP, waiting..."
+    done
+
+    # should not get here!
+    exit 0
+  Name: cluster-step

@@ -1,0 +1,65 @@
+---
+Name: grub-shell
+Description: "Boot a system into a GRUB shell"
+OS:
+  Name: grub
+  SupportedArchitectures:
+    amd64:
+      Kernel: ../grub.pxe
+    arm64:
+      Kernel: ../../grubarm64.efi
+Templates:
+  - Name: pxelinux
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+    Contents: |
+      DEFAULT local
+      PROMPT 0
+      TIMEOUT 10
+      COM32 chain.c32
+      APPEND grub.pxe
+  - Name: pxelinux-mac
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+    Contents: |
+      DEFAULT local
+      PROMPT 0
+      TIMEOUT 10
+      COM32 chain.c32
+      APPEND grub.pxe
+  - Name: ipxe
+    Path: '{{.Machine.Address}}.ipxe'
+    Contents: |
+      #!ipxe
+      iseq ${platform} efi && goto efi || goto pc
+      :pc
+      chain grub.pxe || goto end
+      :efi
+      iseq ${builtin/buildarch} x86_64 && goto x86 || goto arm64
+      :x86
+      chain grubamd64.efi || goto end
+      :arm64
+      chain grubarm64.efi || goto end
+      :end
+      shell
+  - Name: ipxe-mac
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+    Contents: |
+      #!ipxe
+      iseq ${platform} efi && goto efi || goto pc
+      :pc
+      chain grub.pxe || goto end
+      :efi
+      iseq ${builtin/buildarch} x86_64 && goto x86 || goto arm64
+      :x86
+      chain grubamd64.efi || goto end
+      :arm64
+      chain grubarm64.efi || goto end
+      :end
+      shell
+  - Name: grub
+    Path: 'grub/{{.Machine.Address}}.cfg'
+    Contents: |
+      echo Dropping to a GRUB shell
+  - Name: grub-mac
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+    Contents: |
+      echo Dropping to a GRUB shell

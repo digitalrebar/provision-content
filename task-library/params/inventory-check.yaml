@@ -1,0 +1,23 @@
+---
+Name: "inventory/check"
+Description: "Fields to check from Gohai via JQ"
+Documentation: |
+  Using BASH REGEX, define a list of inventory data
+  fields to test using Regular Expressions.
+  Fields are tested in sequence, the first to fail
+  will halt the script
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+  default:
+    RAM: "[0-9]"
+    NICs: "[0-9]"
+    CPUs: "[0-9]"
+    Manufacturer: ".*"
+    Family: ".*"
+    NewTest: ".*"
+Meta:
+  color: "blue"
+  icon: "balance scale"
+  title: "RackN Content"

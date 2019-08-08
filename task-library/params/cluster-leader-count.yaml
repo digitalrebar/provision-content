@@ -1,0 +1,11 @@
+---
+Name: "cluster/leader-count"
+Description: "Number of leaders to elect while building cluster"
+Schema:
+  type: integer
+  default: 1
+  minimum: 0
+Meta:
+  color: "blue"
+  icon: "address card"
+  title: "RackN Content"

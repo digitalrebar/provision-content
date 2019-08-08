@@ -1,0 +1,10 @@
+---
+Name: "network/lldp-sleep"
+Description: "LLDP Sleep Seconds After Start"
+Schema:
+  type: "integer"
+  minimum: 0
+Meta:
+  color: "blue"
+  icon: "hourglass start"
+  title: "RackN Content"

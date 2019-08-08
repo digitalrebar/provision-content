@@ -1,0 +1,11 @@
+Description: The Cluster Name for Rancher
+Documentation: |
+  The Cluster Name for Rancher
+Errors: []
+Meta:
+  color: blue
+  icon: user circle
+  title: RackN Content
+Name: rancher/cluster-name
+Schema:
+  type: string

@@ -1,0 +1,10 @@
+---
+Name: "classify"
+Description: "Run the sample Classification Workflow"
+Meta:
+  color: "green"
+  icon: "balance scale"
+  title: "Run Classification"
+ReadOnly: true
+Stages:
+  - "classify"

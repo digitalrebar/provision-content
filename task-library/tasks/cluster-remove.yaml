@@ -1,0 +1,58 @@
+---
+Name: "cluster-remove"
+Description: "A task that removes nodes from cluster profile"
+Documentation: |
+  Removes the Machine Uuid into the cluster profile
+  Typical cluster workflow is add->step->remove->sync
+  Where step or sync are optional.
+  See cluster-add task for more details
+Meta:
+  icon: "object ungroup"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - cluster/machines
+  - cluster/profile
+OptionalParams:
+  - cluster/leaders
+  - cluster/escape
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # cluster workflow - removes machine from cluster
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+    {{template "cluster-shared.tmpl" .}}
+
+    echo "Removing Machine $RS_UUID from $CLUSTER_PROFILE"
+
+    # remove the machine from the cluster
+    while true; do
+      # optional escape / rescue code
+      CLUSTER_ESCAPE=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/escape)
+      if [[ "$CLUSTER_ESCAPE" != null ]] ; then
+        echo "RESCUE: cluster/escape set to $CLUSTER_ESCAPE - breaking from loop"
+        exit $CLUSTER_ESCAPE
+      fi
+      # get the current cluster machines
+      CLUSTER_MACHINES=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/machines)
+      echo "Machines in Cluster: $CLUSTER_MACHINES"
+      # we're good!
+      if [[ $(jq "index(\"${RS_UUID}\")" <<< "$CLUSTER_MACHINES") == null ]] ; then
+        echo "not in cluster, continue"
+        break
+      fi
+      echo "Attempting to remove Machine ${RS_UUID} from cluster $CLUSTER_PROFILE"
+      NEW_CLUSTER=$(jq ". -= [\"${RS_UUID}\"]" <<< "$CLUSTER_MACHINES")
+      drpcli -r "$CLUSTER_MACHINES" -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param cluster/machines to "$NEW_CLUSTER" && break
+      # sleep is is a hack but it allows for backoffs
+      sleep 1
+    done
+
+    echo "Machine $RS_UUID removed from Cluster $CLUSTER_PROFILE"
+
+    exit 0
+  Name: cluster-remove

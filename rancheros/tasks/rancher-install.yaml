@@ -1,0 +1,23 @@
+Description: Install / Start Rancher DEV Server
+Documentation: |
+  Install / Start Rancher DEV Server
+Errors: []
+Meta:
+  color: black
+  feature-flags: sane-exit-codes
+  icon: unlinkify
+  title: RackN Content
+Name: rancher-install
+Templates:
+- Name: rancher-install
+  Contents: |-
+    #!/bin/bash
+    # Install / start rancher server
+
+    set -e
+
+    echo "Start Rancher Server"
+    mkdir -p /host/rancher
+    docker run -d --restart=unless-stopped -p 80:80 -p 443:443 -v /host/rancher:/var/lib/rancher rancher/rancher:latest
+    echo "Finished successfully"
+    exit 0

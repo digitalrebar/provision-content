@@ -1,0 +1,20 @@
+BootEnv: centos-7-install
+Description: CentOS 7 install stage for Image Builder
+Errors: []
+Meta:
+  color: yellow
+  icon: download
+  title: Digital Rebar Community Content
+  origin: rackn/image-builder
+Name: centos-7-install-builder
+OptionalParams: []
+Profiles: []
+ReadOnly: true
+Reboot: false
+RequiredParams: []
+Tasks:
+  - set-hostname
+  - centos-drp-only-repos
+  - ssh-access
+Templates: []
+

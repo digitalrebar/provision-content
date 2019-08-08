@@ -1,0 +1,15 @@
+Name: image-capture
+Description: A task to run the Image Builder suite.
+Documentation: ""
+ReadOnly: true
+Meta:
+  color: purple
+  feature-flags: sane-exit-codes
+  icon: pin
+  title: Image Builder suite
+  origin: rackn/image-builder
+Templates:
+  - Contents: ''
+    ID: "image-capture.sh.tmpl"
+    Name: image-capture
+    Path: ""

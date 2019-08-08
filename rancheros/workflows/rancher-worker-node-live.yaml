@@ -1,0 +1,11 @@
+Description: "Build and Join a Live RancherOS node to a Rancher Cluster"
+Meta:
+  color: "red"
+  icon: "ship"
+  title: "Build and Join a Live RancherOS node to a Rancher Cluster"
+Name: "rancher-worker-node-live"
+Stages:
+  - "rancheros-wipe-disks"
+  - "rancheros-live"
+  - "rancher-join-cluster"
+  - "rancheros-live-wait"

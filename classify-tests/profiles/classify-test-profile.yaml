@@ -1,0 +1,24 @@
+---
+Name: "classify-test-profile"
+Description: Tests the RED / BLUE classification
+Documentation: |
+  This test switches a machines workflow based on the Params
+  for the VirtualBox "pixie" environment (Shane's Dev).
+Meta:
+  color: "purple"
+  icon: "balance scale"
+  title: "RackN"
+Documentation: |
+  MAC - 08:00:27:cd:7e:db - 192.168.8.100 - pxe-client-1
+  MAC - 08:00:27:80:08:be - 192.168.8.101 - pxe-client-2
+Secure: false
+
+Params:
+  classify/classification-data:
+    - test: "has_mac 08:00:27:80:08:be"
+      actions:
+      - "add_profile classify-test-profile-RED"
+      - "change_workflow classify-test-workflow-RED"
+    - test: "always"
+      actions:
+      - "change_workflow classify-test-sledgehammer-wait"

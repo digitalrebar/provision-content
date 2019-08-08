@@ -1,0 +1,49 @@
+---
+Name: "inventory/collect"
+Description: "Extra Params as Inventory Source (optional)"
+Documentation: |
+  Map of commands to run to collect Inventory Input
+  Each group includes the fields with jq maps to store
+  For example: adding "drpcli gohai" will use gohai JSON as input
+  Then jq will be run with provided values to collect inventory
+  into a inventory/data as a simple map.
+
+  To work correctly, Commands should emit JSON
+
+  Special Options:
+    * Change the command to parse JSON from other sources
+    * Add JQargs to give hints into jq arguments before the parse string
+
+  Gohai example:
+    ::
+      {
+        gohai: {
+          Command: "drpcli gohai",
+          JQargs: ""
+          Fields: {
+            RAM: ".System.Memory.Total / 1048576 | floor",
+            NICs: ".Networking.Interfaces | length"
+          }
+        }
+      }
+Schema:
+  type: "object"
+  default:
+    gohai:
+      Command: "drpcli gohai"
+      JQargs: ""
+      Fields:
+        RAM: ".System.Memory.Total / 1048576 | floor"
+        NICs: ".Networking.Interfaces | length"
+        CPUs: ".System.ProcessorCount"
+        CPUType: ".System.Processors[0].Model"
+        CPUSpeed: ".System.Processors[0].Speed"
+        CPUCores: ".System.Processors[0].Cores"
+        Manufacturer: ".DMI.System.Manufacturer"
+        SerialNumber: ".DMI.System.SerialNumber"
+        ProductName: ".DMI.System.ProductName"
+        Family: ".DMI.System.Family"
+Meta:
+  color: "green"
+  icon: "handshake outline"
+  title: "RackN Content"

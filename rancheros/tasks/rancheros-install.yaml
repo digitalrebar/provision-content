@@ -1,0 +1,23 @@
+Description: Install RancherOS to the disk
+Documentation: |
+  Install RancherOS to the disk
+Errors: []
+Meta:
+  color: black
+  feature-flags: sane-exit-codes
+  icon: unlinkify
+  title: RackN Content
+Name: rancheros-install
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # Install rancheros to the disk
+
+    set -e
+
+    echo "Install RancherOS to disk"
+    ros install --debug -c "{{.ProvisionerURL}}/machines/{{.Machine.Uuid}}/rancheros-cloud-init" -d /dev/sda -t gptsyslinux --no-reboot
+
+    echo "Finished successfully"
+    exit 0
+  Name: rancheros-install

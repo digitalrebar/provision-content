@@ -1,0 +1,12 @@
+---
+Name: "classify-test-profile-BLUE"
+Description: "Test Profile BLUE"
+Errors: []
+Meta:
+  color: "blue"
+  icon: "balance scale"
+  title: "Test Profile BLUE"
+Params:
+  classify-test-profile/blue: true
+ReadOnly: true
+

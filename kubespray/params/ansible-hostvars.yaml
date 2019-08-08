@@ -1,0 +1,11 @@
+Name: "ansible/hostvars"
+Description: "Ansible Host Variables"
+Documentation: |
+  Sets additional variables in the Ansible dynamic inventory
+  generator for Ansible.
+Schema:
+  type: "object"
+Meta:
+  icon: "phone square"
+  color: "blue"
+  title: "Ansible Integration"

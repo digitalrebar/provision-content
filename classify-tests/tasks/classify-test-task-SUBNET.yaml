@@ -1,0 +1,19 @@
+---
+Description: Test Task SUBNET
+Documentation: ""
+Meta:
+  color: "green"
+  feature-flags: "sane-exit-codes"
+  icon: "magnet"
+  title: "Test Task SUBNET"
+Name: "classify-test-task-SUBNET"
+ReadOnly: true
+Templates:
+- Contents: |-
+    #!/bin/bash
+    printf "\n--------\n$(date)\nClassify test task SUBNET\n-------\n" > /dev/tty1
+    exit 0
+  ID: ""
+  Name: classify-test-task-SUBNET
+  Path: ""
+

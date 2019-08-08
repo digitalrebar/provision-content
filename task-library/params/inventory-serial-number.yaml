@@ -1,0 +1,11 @@
+---
+Name: "inventory/SerialNumber"
+Description: "Flat Inventory for SerialNumber"
+Documentation: |
+  From inventory/data, used for indexable data
+Schema:
+  type: "string"
+Meta:
+  color: "black"
+  icon: "expand"
+  title: "RackN Content"

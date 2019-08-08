@@ -1,0 +1,10 @@
+Name: "kube_version"
+Description: "Sets the Kube Version"
+Documentation: |
+  Overrides default for admin user
+Schema:
+  type: "string"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Kubernetes Enablement"

@@ -1,0 +1,11 @@
+BootEnv: coreos-1911.3.0-disk
+Description: Install coreos 1911.3.0 to disk
+Documentation: ""
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: coreos-install
+Tasks:
+- coreos-install
+

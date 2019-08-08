@@ -1,0 +1,39 @@
+Name: "k8s-deploy"
+Description: "Example ansible deployment profile - clone to use"
+Params:
+  ansible/hostvars:
+    ansible_user: "root"
+
+  ansible/groups:
+  - "etcd"
+  - "kube-master"
+  - "kube-node"
+
+  ansible/parent-groups:
+    "k8s-cluster":
+    - "kube-master"
+    - "kube-node"
+
+  ansible/groupvars:
+    "etcd": "kube-etcd"
+    "kube-master": "kube-master"
+    "kube-node": "kube-node"
+
+  #REFERENCE ONLY - created by UX
+  #ansible/groups-members:
+  #  "etcd":
+  #  - "uuid1"
+  #  - "uuid2"
+  #  "kube-master":
+  #  - "uuid1"
+  #  - "uuid2"
+  #  "kube-node":
+  #  - "uuid3"
+  #  - "uuid4"
+  #  - "uuid5"
+
+Meta:
+  icon: "ship"
+  color: "blue"
+  render: "ansible"
+  title: "Kubernetes Enablement"

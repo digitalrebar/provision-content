@@ -1,0 +1,10 @@
+---
+Name: "unsafe/rs-username"
+Description: "Make RS username available for dev systems"
+Schema:
+  type: "string"
+  default: "rocketskates"
+Meta:
+  color: "red"
+  icon: "user"
+  title: "RackN Content"

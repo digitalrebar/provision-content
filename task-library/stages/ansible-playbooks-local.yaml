@@ -1,0 +1,18 @@
+Description: Invoke ansible playbooks from git
+Documentation: |
+  Local Git-Based Ansible Playbooks
+  ---------------------------------
+  Invoke ansible playbooks from git
+
+  Required Param: `ansible/playbooks` - List of playbook git repos to run on the local machin
+Meta:
+  color: yellow
+  icon: play
+  title: RackN Content
+Name: ansible-playbooks-local
+Reboot: false
+RequiredParams:
+  - ansible/playbooks
+RunnerWait: true
+Tasks:
+  - ansible-playbooks-local

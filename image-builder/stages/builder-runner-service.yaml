@@ -1,0 +1,18 @@
+BootEnv: ""
+Description: Stage to install the drpcli job processor as a service
+Errors: []
+Meta:
+  color: yellow
+  icon: motorcycle
+  title: RackN Content
+  origin: rackn/image-builder
+Name: builder-runner-service
+OptionalParams: []
+Profiles: []
+ReadOnly: true
+Reboot: false
+RequiredParams: []
+Tasks:
+  - builder-drpcli-install
+Templates: []
+

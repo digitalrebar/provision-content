@@ -1,0 +1,16 @@
+---
+Name: "classify"
+Description: "A task to classify machines into new workflows"
+Documentation: |
+  This will change the machines workflow and add profiles.
+
+Meta:
+  color: "blue"
+  feature-flags: "sane-exit-codes"
+  icon: "search"
+  title: "RackN"
+Templates:
+- Contents: ""
+  ID: "classify.sh.tmpl"
+  Name: "Classify Machine"
+  Path: ""

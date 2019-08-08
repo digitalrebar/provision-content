@@ -1,0 +1,48 @@
+---
+Name: "coreos-1911.3.0-disk"
+Description: "CoreOS 1911.3.0 Install"
+OS:
+  Name: "coreos-1911.3.0"
+  Family: "coreos"
+  IsoFile: "coreos-1911.3.0.iso"
+  IsoSha256: "1ecba13ce8078fb7cf5c62058773a6b11a61721c2647e2430ccf54fc62afd4f8"
+  IsoUrl: "http://stable.release.core-os.net/amd64-usr/1911.3.0/coreos_production_iso_image.iso"
+  Version: "1911.3.0"
+Initrds:
+  - "coreos/cpio.gz"
+Kernel: "coreos/vmlinuz"
+BootParams: >-
+  coreos.first_boot=1
+  coreos.config.url={{.Machine.Url}}/ign.json
+  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+RequiredParams:
+OptionalParams:
+  - "kernel-console"
+  - "coreos/ignition-template"
+Templates:
+  - Name: "kexec"
+    ID: "kexec.tmpl"
+    Path: "{{.Machine.Path}}/kexec"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: "basic-ign.tmpl"
+    Name: "ign.json"
+    Path: "{{.Machine.Path}}/ign.json"
+  - ID: "select-ign.tmpl"
+    Name: "select.json"
+    Path: "{{.Machine.Path}}/select-ign.json"
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "black"
+  title: "Digital Rebar Community Content"

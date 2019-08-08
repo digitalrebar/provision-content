@@ -1,0 +1,47 @@
+---
+Name: "drive-signature-verify"
+Description: "Verify drive signatures"
+Documentation: |
+  Using the signatures on the machine, validate each drive's
+  signature matches.
+Meta:
+  icon: "signup"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+OptionalParams:
+  - drive-signatures
+Templates:
+- Name: drive-signature-verify
+  Contents: |-
+    #!/bin/bash
+    # Verify signature for each drive.
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    {{range $drive, $sig := .Param "drive-signatures"}}
+    (
+      SIG=$(dd if={{$drive}} bs=1M | sha1sum | awk '{ print $1 }')
+      if [[ "$SIG" != "{{$sig}}" ]] ; then
+        echo "Signature {{$drive}} doesn't match current signature"
+        touch {{$drive}}.failed
+      fi
+    ) &
+    {{end}}
+    wait
+
+    ERROR=0
+    {{range $drive, $sig := .Param "drive-signatures"}}
+        if [[ -e {{$drive}}.failed ]] ; then
+            ERROR=1
+        fi
+    {{end}}
+    if [[ $ERROR != 0 ]] ; then
+        echo "Signatures failed."
+        exit 1
+    fi
+
+    echo "Signatures matched... Success"
+    exit 0

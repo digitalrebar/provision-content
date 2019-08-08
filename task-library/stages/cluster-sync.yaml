@@ -1,0 +1,9 @@
+---
+Name: "cluster-sync"
+Description: "Wait for Queue Empty"
+Tasks:
+  - "cluster-sync"
+Meta:
+  icon: "object group"
+  color: "blue"
+  title: "RackN Content"

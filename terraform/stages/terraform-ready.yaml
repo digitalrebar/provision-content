@@ -1,0 +1,10 @@
+---
+Name: "terraform-ready"
+BootEnv: "sledgehammer"
+Description: "marks a machine as managed by terraform and ready for allocation"
+Tasks:
+  - "terraform-enable"
+Meta:
+  icon: "map outline"
+  color: "green"
+  title: "RackN Content"

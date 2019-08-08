@@ -1,0 +1,12 @@
+{
+  "Name": "terraform/allocated",
+  "Description": "Indicates if this machine has been allocated by terraform",
+  "Schema": {
+    "type": "boolean"
+  },
+  "Meta": {
+    "icon": "hand rock",
+    "color": "yellow",
+    "title": "RackN Content"
+  }
+}

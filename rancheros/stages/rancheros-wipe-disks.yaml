@@ -1,0 +1,10 @@
+Description: Wipe Disks for RancherOS
+Documentation: ""
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: rancheros-wipe-disks
+Tasks:
+- rancheros-wipe-disks
+

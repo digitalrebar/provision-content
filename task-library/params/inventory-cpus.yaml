@@ -1,0 +1,11 @@
+---
+Name: "inventory/CPUs"
+Description: "Flat Inventory for CPUs"
+Documentation: |
+  From inventory/data, used for indexable data
+Schema:
+  type: "integer"
+Meta:
+  color: "black"
+  icon: "expand"
+  title: "RackN Content"

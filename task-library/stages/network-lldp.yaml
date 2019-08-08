@@ -1,0 +1,9 @@
+---
+Name: "network-lldp"
+Description: "Run LLDP network discovery"
+Tasks:
+  - "network-lldp"
+Meta:
+  icon: "exchange"
+  color: "yellow"
+  title: "RackN Content"

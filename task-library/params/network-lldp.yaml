@@ -1,0 +1,8 @@
+---
+Name: "network/lldp"
+Description: "LLDP information"
+Meta:
+  color: "blue"
+  icon: "exchange"
+  title: "RackN Content"
+  readonly: "yes"

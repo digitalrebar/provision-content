@@ -1,0 +1,10 @@
+Description: Install Rancher Server (assumes docker)
+Documentation: Install Rancher Server (assumes docker)
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: rancher-install
+Tasks:
+- rancher-install
+

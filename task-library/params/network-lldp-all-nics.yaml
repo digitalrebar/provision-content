@@ -1,0 +1,10 @@
+---
+Name: "network/lldp-all-nics"
+Description: "LLDP activate all nics for processing"
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "hourglass start"
+  title: "RackN Content"

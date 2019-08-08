@@ -1,0 +1,8 @@
+BootEnv: rancheros-latest
+Description: A live RAM boot latest version of RancherOS
+Documentation: ""
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: rancheros-live

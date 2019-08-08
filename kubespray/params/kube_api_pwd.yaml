@@ -1,0 +1,11 @@
+Name: "kube_api_version"
+Description: "Sets the Kube API Password"
+Documentation: |
+  Overrides default password for user kube
+Schema:
+  type: "string"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Kubernetes Enablement"
+  password: "hideme"

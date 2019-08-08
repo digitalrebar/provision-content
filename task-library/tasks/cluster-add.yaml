@@ -1,0 +1,110 @@
+---
+Name: "cluster-add"
+Description: "A task that adds nodes to a cluster profile"
+Documentation: |
+  Injects the Machine Uuid into the cluster/machines param.
+  This is the first step in a the cluster workflow
+  Typical cluster workflow is add->step->remove->sync
+  Where step or sync are optional.
+
+  The cluster-* stages provide basic queue management for machines
+  with a shared profile.  That profile must have a cluster/profile
+  field that names the profile.  Once the queue is running, machines
+  are tracked in the cluster/machines parameter.
+
+  cluster-add enqueues the machine
+  cluster-step services the queue (takes the next cluster/step in line)
+  cluster-remove dequeues the machine (should be done AFTER servicing)
+  cluster-sync forces all machines to wait until the queue is empty
+
+  If you are doing a rolling upgrade, use the following sequence:
+  cluster-add -> cluster-step -> [do work] -> cluster-remove
+
+  If you are coalescing work over multiple machines, use the following sequence:
+  cluster-add -> [do work] -> cluster-remove -> cluster-sync
+
+  The cluster-add process will automatically elect cluster/leader-count leaders
+  during the enqueue step.  These cluster/leaders will be be maintained
+  after the run is over and require manual editing to remove.  It is possible
+  to pre-create the leasder list.
+
+  It is possible to do multiple add/remove steps in a single workflow
+
+  If your cluster is NOT behaving, you can rescue or escape from the cluster stages
+  by setting cluster/escape on the profile.  This will interrupt a cluster in process.
+  Using escape=0 will allow the cluster stages to exit normally and noop while
+  using escape=1 will exit with an error and the stages will stop progressing.
+  Escape=1 is safter since downstream actions are blocked.
+Meta:
+  icon: "object group"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - cluster/profile
+OptionalParams:
+  - cluster/machines
+  - cluster/leaders
+  - cluster/leader-count
+  - cluster/escape
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # cluster workflow - adds machine to cluster
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+    {{template "cluster-shared.tmpl" .}}
+
+    echo "Adding Machine $RS_UUID to $CLUSTER_PROFILE"
+
+    while true; do
+      # optional escape / rescue code
+      CLUSTER_ESCAPE=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/escape)
+      if [[ "$CLUSTER_ESCAPE" != null ]] ; then
+        echo "RESCUE: cluster/escape set to $CLUSTER_ESCAPE - breaking from loop"
+        exit $CLUSTER_ESCAPE
+      fi
+      # get the current cluster machines
+      CLUSTER_MACHINES=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/machines)
+      echo "Machines in Cluster: $CLUSTER_MACHINES"
+      # we're good!
+      if [[ $(jq "index(\"${RS_UUID}\")" <<< "$CLUSTER_MACHINES") != null ]] ; then
+        echo "Already in cluster, no action required"
+        break
+      fi
+      echo "Attempting to add Machine ${RS_UUID} to cluster $CLUSTER_PROFILE"
+      NEW_CLUSTER=$(jq ". += [\"${RS_UUID}\"]" <<< "$CLUSTER_MACHINES")
+      drpcli -r "$CLUSTER_MACHINES" -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param cluster/machines to "$NEW_CLUSTER" || :
+      # sleep is is a hack but it allows for backoffs
+      sleep 1
+    done
+
+    echo "Electing Leaders to $CLUSTER_PROFILE"
+
+    while [[ $(jq length <<< "$CLUSTER_LEADERS") -lt $CLUSTER_LEADER_COUNT ]]; do
+      # optional escape / rescue code
+      CLUSTER_ESCAPE=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/escape)
+      if [[ "$CLUSTER_ESCAPE" != null ]] ; then
+        echo "RESCUE: cluster/escape set to $CLUSTER_ESCAPE - breaking from loop"
+        exit $CLUSTER_ESCAPE
+      fi
+      # we're good!
+      if [[ $(jq "index(\"${RS_UUID}\")" <<< "$CLUSTER_LEADERS") != null ]] ; then
+        echo "Already a Leader, no action required"
+        break
+      fi
+      echo "Adding Machine $RS_UUID to Leaders in Cluster: $CLUSTER_LEADERS"
+      NEW_LEADERS=$(jq ". += [\"${RS_UUID}\"]" <<< "$CLUSTER_LEADERS")
+      drpcli -r "$CLUSTER_LEADERS" -T "$PROFILE_TOKEN" profiles set "$CLUSTER_PROFILE" param cluster/leaders to "$NEW_LEADERS" || :
+      # sleep is is a hack but it allows for backoffs
+      sleep 1
+      # get the current cluster leaders
+      CLUSTER_LEADERS=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param cluster/leaders)
+    done
+
+    echo "Done: Machine $RS_UUID in Cluster $CLUSTER_PROFILE"
+
+    exit 0
+  Name: cluster-add

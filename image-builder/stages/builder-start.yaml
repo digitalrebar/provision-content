@@ -1,0 +1,15 @@
+BootEnv: ""
+Description: Start the Image Builder process.
+Meta:
+  color: purple
+  icon: play
+  title: builder-start
+Name: builder-start
+OptionalParams: []
+Profiles: []
+ReadOnly: false
+Reboot: false
+RequiredParams: []
+Tasks: []
+Templates: []
+

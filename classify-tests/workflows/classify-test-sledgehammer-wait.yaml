@@ -1,0 +1,12 @@
+---
+Name: "classify-test-sledgehammer-wait"
+Description: "Test Workflow sledgehammer-wait"
+Errors: []
+Meta:
+  color: "green"
+  icon: "check"
+  title: "Test Workflow sledgehammer-wait"
+ReadOnly: true
+Stages:
+  - "sledgehammer-wait"
+

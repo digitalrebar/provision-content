@@ -1,0 +1,19 @@
+Name: image-update-packages
+Description: Run 'yum -y update' on Ubuntu
+Documentation: |
+  Should be run after fixing repo packages, but
+  before installing cloud-init.
+ReadOnly: true
+Meta:
+  color: purple
+  feature-flags: sane-exit-codes
+  icon: pin
+  title: Image Builder suite
+  origin: rackn/image-builder
+Templates:
+  - Contents: |
+      #!/bin/bash
+      {{ template "setup.tmpl" .}}
+      #[[ "$OS_TYPE" == "ubuntu" && "$OS_VER" == "16.04" ]] && { apt-get -y update; apt-get -y dist-upgrade; }
+    Name: image-update-packages
+    Path: ""

@@ -1,0 +1,11 @@
+---
+Name: lenovo-onecli-url
+Description: The URL to the version of OneCLI that you want to install.
+Documentation: |
+  Lenovo systems are configured in-band via a the OneCli command.
+  This parameter is a URL that points directly at the version
+  of the command you want to install in the Sledgehammer environment
+  for in-band BIOS configuration management and firmware updates.
+Schema:
+  type: string
+  default: https://download.lenovo.com/servers/mig/2019/04/10/19873/lnvgy_utl_lxce_onecli01v-2.5.0_rhel_x86-64.tgz

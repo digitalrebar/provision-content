@@ -1,0 +1,13 @@
+{
+  "Name": "terraform-managed",
+  "Description": "Example base state for machines wanting to be managed by terraform",
+  "Params": {
+    "terraform/managed": true,
+    "terraform/allocated": false
+  },
+  "Meta": {
+    "icon": "map outline",
+    "color": "blue",
+    "title": "RackN Content"
+  }
+}

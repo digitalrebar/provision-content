@@ -1,0 +1,9 @@
+---
+Name: "cluster-step"
+Description: "Select Next N In Queue"
+Tasks:
+  - "cluster-step"
+Meta:
+  icon: "object group"
+  color: "blue"
+  title: "RackN Content"

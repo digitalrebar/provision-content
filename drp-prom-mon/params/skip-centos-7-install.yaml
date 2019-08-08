@@ -1,0 +1,13 @@
+---
+Name: "drp-prom-mon/skip-centos-7-install"
+Description: "Set to 'true' to skip installing CentOS 7 Install ISO"
+Documentation: ""
+
+Schema:
+  type: "boolean"
+  default: false
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "skip centos-7-install"

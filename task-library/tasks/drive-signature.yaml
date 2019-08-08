@@ -1,0 +1,44 @@
+---
+Name: "drive-signature"
+Description: "Generate a signature for each drive and record on machine"
+Documentation: |
+  Generate a signature for each drive and record them on them machine.
+Meta:
+  icon: "signup"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: drive-signature
+  Contents: |-
+    #!/bin/bash
+    # Generate a signature for each drive.
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    DATA="{"
+    COMMA=""
+    while read disk ; do
+      (
+        SIG=$(dd if=/dev/$disk bs=1M | sha1sum | awk '{ print $1 }')
+        DISK=$(ls -l /dev/disk/by-path/* | grep ${disk}$ | awk '{ print $9 }')
+        echo "\"$DISK\": \"$SIG\"" > $disk.sig
+      ) &
+    done < <(lsblk | grep disk | awk '{ print $1 }')
+    wait
+
+    DATA="{"
+    COMMA=""
+    while read disk ; do
+        DATA="$DATA$COMMA$(cat $disk.sig)"
+        COMMA=","
+    done < <(lsblk | grep disk | awk '{ print $1 }')
+    DATA="${DATA}}"
+
+    echo "Recording signatures:"
+    echo $DATA | jq .
+    drpcli machines set {{.Machine.UUID}} param drive-signatures to "$DATA"
+
+    exit 0

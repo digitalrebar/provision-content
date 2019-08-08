@@ -1,0 +1,9 @@
+---
+Name: "runner-service"
+Description: "Stage to install the drpcli job processor as a service"
+Tasks:
+  - "drpcli-install"
+Meta:
+  icon: "motorcycle"
+  color: "yellow"
+  title: "RackN Content"

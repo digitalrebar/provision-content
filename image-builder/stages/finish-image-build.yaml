@@ -1,0 +1,11 @@
+BootEnv: local
+Description: Used with the STOP runner action to leave Image Build host in wait state
+Meta:
+  color: green
+  icon: checkmark
+  title: Digital Rebar Community Content
+  origin: rackn/image-builder
+Name: finish-image-build
+OptionalParams: []
+Profiles: []
+Reboot: false

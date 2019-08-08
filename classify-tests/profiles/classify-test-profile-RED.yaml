@@ -1,0 +1,12 @@
+---
+Name: "classify-test-profile-RED"
+Description: "Test Profile RED"
+Errors: []
+Meta:
+  color: "red"
+  icon: "balance scale"
+  title: "Test Profile RED"
+Params:
+  classify-test-profile/red: true
+ReadOnly: true
+

@@ -1,0 +1,20 @@
+---
+Name: "ansible/children"
+Description: "Add Group Children to Ansible Inventory"
+Documentation: |
+  Used by `drpmachines.py` integration to add children to an Ansible group.
+
+  The `drpmachines.py` integration automatically maps Profiles directly to Ansible groups;
+  however, DRP Profiles do not have any nesting concept.  Using this Param on a Profile
+  tells the integration to build a children section in the group from the list of names.
+
+  No reference checking is provided.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  icon: "shopping cart"
+  color: "blue"
+  title: "Task Library"

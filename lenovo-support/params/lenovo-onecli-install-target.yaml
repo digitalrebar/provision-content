@@ -1,0 +1,11 @@
+---
+Name: lenovo-onecli-install-target
+Description: The target directory to install OneCli
+Documentation: |
+  OneCli is packaged as tarball that contains all the executables and support
+  libraries in a big flat directory.  As such, it cannot be installed in
+  using the usual package installation methods.  The directory indicated by this
+  parameter is where we will install it instead.
+Schema:
+  type: string
+  default: /opt/OneCli

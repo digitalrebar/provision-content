@@ -1,0 +1,7 @@
+Description: Indicate that coreos is up and running in live mode
+Documentation: Indicate that coreos is up and running in live mode
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: coreos-live-wait

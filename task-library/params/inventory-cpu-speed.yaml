@@ -1,0 +1,11 @@
+---
+Name: "inventory/CPUSpeed"
+Description: "Flat Inventory for CPUSpeed"
+Documentation: |
+  From inventory/data, used for indexable data
+Schema:
+  type: "string"
+Meta:
+  color: "black"
+  icon: "expand"
+  title: "RackN Content"

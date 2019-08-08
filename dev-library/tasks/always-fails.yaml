@@ -1,0 +1,34 @@
+---
+Name: always-fails
+Description: "DEV USE forces job to fail for testing"
+Documentation: |
+  Handy for debugging, this task will always fail to
+  allow for testing of fault conditions
+Meta:
+  title: "RackN Content"
+  color: black
+  feature-flags: sane-exit-codes
+  icon: "warning sign"
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # fail with exit dev/fail-code (default 1)
+
+    set -e
+
+    export RS_UUID="{{.Machine.UUID}}"
+
+    {{template "setup.tmpl" .}}
+
+    {{if .ParamExists "dev/fail-code" -}}
+    FAILCODE={{.Param "dev/fail-code"}}
+    {{else -}}
+    FAILCODE="1"
+    {{end -}}
+
+    echo "I'm failing now..."
+
+    exit $FAILCODE
+
+    echo "I've failen and can't get back up."
+  Name: always-fails

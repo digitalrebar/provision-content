@@ -1,0 +1,13 @@
+---
+Name: "drp-prom-mon/skip-ubuntu-1604-install"
+Description: "Set to 'true' to skip installing Ubuntu 16 Install ISO"
+Documentation: ""
+
+Schema:
+  type: "boolean"
+  default: false
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "skip ubuntu-16.04-install"
