@@ -1,0 +1,14 @@
+---
+Name: "terraform-enable"
+Description: "A task to enable terraform for the machine."
+OptionalParameters:
+  - "terraform/poweroff"
+Templates:
+  - ID: "terraform-enable.sh.tmpl"
+    Name: "The terraform enable script"
+    Path: ""
+Meta:
+  icon: "map outline"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

@@ -1,0 +1,13 @@
+---
+Name: wait-time
+Description: "DEV USE creates a # seconds delay in workflow"
+Documentation: |
+  Uses the dev/wait-time param to determine delay (default=5).
+  This can be very helpful to troubleshoot timing issues
+  in provisioning.  It should NOT be used in production!
+Meta:
+  title: "RackN Content"
+  color: yellow
+  icon: "hourglass half"
+Tasks:
+- wait-time

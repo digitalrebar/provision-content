@@ -1,0 +1,16 @@
+Name: image-builder-linux
+Description: Create an image ready to be managed by cloud-init
+Meta:
+  color: purple
+  icon: pin
+  title: Digital Rebar Image Builder
+  origin: rackn/image-builder
+Reboot: false
+Tasks:
+  - image-reset-package-repos
+  - image-update-packages
+  - image-install-cloud-init
+  - image-builder-cleanup
+  - image-capture
+Templates: []
+

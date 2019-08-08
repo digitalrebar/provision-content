@@ -1,0 +1,12 @@
+{
+  "Name": "terraform/owner",
+  "Description": "Helper parameter that indicates who allocated this machine",
+  "Schema": {
+    "type": "string"
+  },
+  "Meta": {
+    "icon": "user circle outline",
+    "color": "blue",
+    "title": "RackN Content"
+  }
+}

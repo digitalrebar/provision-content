@@ -1,0 +1,17 @@
+---
+Name: "ansible-inventory"
+Description: "Ansible inventory as reported by ansible"
+Documentation: |
+  Ansible inventory facts as gathered by ansible.
+
+  This provides an untyped dictionary of values from Ansible.
+
+  NOTE: This is raw data.  Other parameters can be distilled from this.
+Schema:
+  type: "object"
+  default: {}
+Meta:
+  icon: "shopping cart"
+  color: "blue"
+  title: "Task Library"
+  readonly: "yes"

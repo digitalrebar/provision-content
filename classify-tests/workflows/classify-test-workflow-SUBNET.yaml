@@ -1,0 +1,11 @@
+---
+Name: "classify-test-workflow-SUBNET"
+Description: "Test Workflow SUBNET"
+Errors: []
+Meta:
+  color: "green"
+  icon: "magnet"
+  title: "Test Workflow SUBNET"
+ReadOnly: true
+Stages:
+  - "classify-test-stage-SUBNET"

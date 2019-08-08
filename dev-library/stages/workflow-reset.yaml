@@ -1,0 +1,9 @@
+---
+Name: workflow-reset
+Description: "Clear Workflow Field"
+Meta:
+  title: "RackN Content"
+  color: red
+  icon: unlinkify
+Tasks:
+- workflow-reset

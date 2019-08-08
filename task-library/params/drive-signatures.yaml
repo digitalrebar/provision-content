@@ -1,0 +1,14 @@
+---
+Name: "drive-signatures"
+Description: "SHA1 Signatures for each drive"
+Documentation: |
+  A map of drive to SHA1 signatures.
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+  default: {}
+Meta:
+  color: "blue"
+  icon: "signup"
+  title: "RackN Content"

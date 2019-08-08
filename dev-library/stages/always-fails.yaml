@@ -1,0 +1,9 @@
+---
+Name: always-fails
+Description: "DEV USE forces jobs to failed state"
+Meta:
+  title: "RackN Content"
+  color: red
+  icon: "warning sign"
+Tasks:
+- always-fails

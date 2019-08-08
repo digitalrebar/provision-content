@@ -1,0 +1,11 @@
+BootEnv: rancheros-disk
+Description: Install latest RancherOS to disk
+Documentation: ""
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: rancheros-install
+Tasks:
+- rancheros-install
+

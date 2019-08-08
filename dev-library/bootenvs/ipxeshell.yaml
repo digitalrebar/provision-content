@@ -1,0 +1,57 @@
+---
+Name: ipxe-shell
+Description: "Boot a system into a GRUB shell"
+OS:
+  Name: ipxe
+  SupportedArchitectures:
+    amd64:
+      Kernel: ../ipxe.efi
+    arm64:
+      Kernel: ../../ipxe-arm64.efi
+Templates:
+  - Name: pxelinux
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+    Contents: |
+      DEFAULT local
+      PROMPT 0
+      TIMEOUT 10
+      COM32 chain.c32
+      APPEND grub/grub.pxe
+  - Name: pxelinux-mac
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+    Contents: |
+      DEFAULT local
+      PROMPT 0
+      TIMEOUT 10
+      COM32 chain.c32
+      APPEND grub/grub.pxe
+  - Name: ipxe
+    Path: '{{.Machine.Address}}.ipxe'
+    Contents: |
+      #!ipxe
+      shell
+  - Name: ipxe-mac
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+    Contents: |
+      #!ipxe
+      shell
+  - Name: grub
+    Path: 'grub/{{.Machine.Address}}.cfg'
+    Contents: |
+      if test $grub_platform == pc; then
+          chain (tftp)/ipxe.pxe
+      elif $grub_cpu == x86_64; then
+          chain (tftp)/ipxe.efi
+      elif $grub_cpu == arm64; then
+          chain (tftp)/ipxe-arm64.efi
+      fi
+  - Name: grub-mac
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+    Contents: |
+      if test $grub_platform == pc; then
+          chain (tftp)/ipxe.pxe
+      elif $grub_cpu == x86_64; then
+          chain (tftp)/ipxe.efi
+      elif $grub_cpu == arm64; then
+          chain (tftp)/ipxe-arm64.efi
+      fi

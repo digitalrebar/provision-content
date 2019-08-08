@@ -1,0 +1,15 @@
+---
+Name: "dev/wait-time"
+Description: "Creates # Seconds of Delay in Workflow"
+Documentation: |
+  Used by the wait-time stage for development use.
+  This can be very helpful to troubleshoot timing issues
+  in provisioning.  It should NOT be used in production!
+Schema:
+  type: "integer"
+  minimum: 1
+  default: 5
+Meta:
+  color: "yellow"
+  icon: "hourglass half"
+  title: "RackN Content"

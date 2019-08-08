@@ -1,0 +1,9 @@
+---
+Description: "Install and Activate the OpsRamp Client"
+Name: "opsramp-install"
+Tasks:
+  - "opsramp-join"
+Meta:
+  icon: "announcement"
+  color: "yellow"
+  title: "RackN Content"

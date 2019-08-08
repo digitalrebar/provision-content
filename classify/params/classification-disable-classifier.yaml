@@ -1,0 +1,25 @@
+Description: "Enable or Disable the Classify system."
+Documentation: |
+  In some use cases, you may need to disable the classifier system
+  from running when machines are being provisioned.  This parameter
+  enables a fast disable, without having to remove the classifier
+  itself.
+
+  Apply this Param with the value "true" to disable the classifier,
+  on any machines or profiles applied to machines, to effect disabling.
+
+  For example, you could apply this Param to "global" profile to disable
+  it globally. NOTE that normal precedence with Paramaters applies, so
+  if a Machine has the Param applied also, the Machines Param value
+  overrides the global value.
+Meta:
+  color: "blue"
+  icon: "key"
+  title: "RackN"
+Name: "classify/disable-classifier"
+ReadOnly: true
+Schema:
+  type: "boolean"
+  default: false
+Secure: false
+

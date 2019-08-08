@@ -1,0 +1,9 @@
+---
+Name: "workflow-pause"
+Description: "Pause a workflow by making the machine unrunnable."
+Tasks:
+  - "workflow-pause"
+Meta:
+  icon: "pause"
+  color: "yellow"
+  title: "RackN Content"

@@ -1,0 +1,12 @@
+Description: The Name or IP address of the Rancher Server
+Documentation: |
+  The Name or IP address of the Rancher Server
+Errors: []
+Meta:
+  color: blue
+  icon: user circle
+  title: RackN Content
+  render: link
+Name: rancher/server-ip
+Schema:
+  type: string

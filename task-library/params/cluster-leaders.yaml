@@ -1,0 +1,13 @@
+---
+Name: "cluster/leaders"
+Description: "Machines that have been elected leader"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "address card outline"
+  title: "RackN Content"
+  render: "machines-array"

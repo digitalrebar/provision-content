@@ -1,0 +1,31 @@
+---
+Name: workflow-reset
+Description: "Clear Workflow Field"
+Documentation: |
+  Handy for debugging, this task will clear the current
+  Workflow value form a machine.  This allows machines to
+  reset their workflow so THE SAME workflow can be reapplied.
+  Typically, this is a Workflow builder use case only.
+Meta:
+  title: "RackN Content"
+  color: black
+  feature-flags: sane-exit-codes
+  icon: unlinkify
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # clear the workflow for a machine (makes it easy to rerun workflow)
+
+    set -e
+
+    export RS_UUID="{{.Machine.UUID}}"
+
+    {{template "setup.tmpl" .}}
+
+    echo "Workflow Clear"
+
+    drpcli machines update "${RS_UUID}" '{"Workflow":""}'
+
+    echo "Finished successfully"
+    exit 0
+  Name: workflow-clear

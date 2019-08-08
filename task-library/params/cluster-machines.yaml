@@ -1,0 +1,13 @@
+---
+Name: "cluster/machines"
+Description: "Machines in this cluster"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "object ungroup"
+  title: "RackN Content"
+  render: "machines-array"

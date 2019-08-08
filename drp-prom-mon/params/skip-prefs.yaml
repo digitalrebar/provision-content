@@ -1,0 +1,13 @@
+---
+Name: "drp-prom-mon/drp-skip-prefs"
+Description: "Set to 'true' to skip setting Global Preferences"
+Documentation: ""
+
+Schema:
+  type: "boolean"
+  default: false
+
+Meta:
+  icon: "dashboard"
+  color: "orange"
+  title: "drp skip prefs"

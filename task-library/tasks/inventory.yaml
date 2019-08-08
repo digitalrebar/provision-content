@@ -1,0 +1,131 @@
+---
+Name: "inventory-check"
+Description: "A task JQs gohai data into a short list"
+Documentation: |
+  Using the inventory/collect parameter, filters the JSON command output
+  into inventory/data hashmap for rendering and validation.
+  Will apply inventory/check for field valation
+Meta:
+  icon: "shopping cart"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+OptionalParams:
+  - inventory/collect
+  - inventory/check
+  - inventory/data
+  - inventory/integrity
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # JQ parse gohai data into simpler inventory/data map
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    INVENTORY="{}"
+
+    echo "=== BACKWARD COMPATABILTY CHECK ===="
+    {{if .ParamExists "inventory/fields" -}}
+      {{if .Param "inventory/fields" -}}
+        echo "ERROR inventory/fields deprecated!"
+        echo "You must replace it with Param inventory/collect using the following JSON:"
+        echo "  { gohai: { Command: \"drpcli gohai\", Fields: {"
+        {{range $key, $jqindex := .Param "inventory/fields" -}}
+          echo "    \"{{$key}}\": \"${{$jqindex}}\","
+        {{end }}
+        echo "  } } }"
+        exit 1
+      {{else -}}
+        echo "passed - no use of inventory/fields"
+      {{end -}}
+    {{else -}}
+      echo "passed - no use of inventory/fields"
+    {{end -}}
+
+    FLATTEN="{{.Param "inventory/flatten"}}"
+
+    echo "=== COLLECTING INVENTORY ===="
+    {{range $index, $group := .Param "inventory/collect"}}
+      echo "Parsing Inventory Group {{$index}} for Machine $RS_UUID"
+      echo "  Collecting Data with cmd: {{$group.Command}}"
+      if {{$group.Command}} 2>/dev/null >/dev/null ; then
+        GOHAI="$({{$group.Command}})"
+        JQARGS="{{$group.JQargs}}"
+        echo "  Starting Collection Loop"
+        {{range $key, $jqindex := $group.Fields}}
+          # evaluate and store inventory value
+          VALUE="$(jq ${JQARGS} "{{$jqindex}}" <<< "${GOHAI}")"
+          echo "  ... {{$key}} = $VALUE (from jq ${JQARGS} {{$jqindex}})"
+          INVENTORY="$(jq ". += {\"{{$key}}\": ${VALUE}}" <<< "$INVENTORY")"
+          if [ "$FLATTEN" = "true" ]; then
+            drpcli machines set $RS_UUID param "inventory/{{$key -}}" to "${VALUE}" > /dev/null 2>&1
+          fi
+        {{else -}}
+          echo "  No .Fields defined in Inventory Group $index"
+        {{end -}}
+      else
+        echo "Command: {{$group.Command}} failed or is missing - ignore"
+      fi
+    {{else}}
+      echo "Cannot collect inventory: inventory/collect was not defined"
+      exit 1
+    {{end}}
+
+    echo "=== INVENTORY INTEGRITY CHECK ===="
+    {{if .Param "inventory/integrity"}}
+      echo "Starting Integrity Check against previous inventory/data"
+      {{range $key, $value := .Param "inventory/data" }}
+        IS="$(jq -r ".{{$key}}" <<< "$INVENTORY")"
+        if [[ $IS == "{{$value}}" ]] ; then
+          echo "... {{$key}} values matched"
+        else
+          ERROR="integrity"
+          echo "!!! previous {{$key}} did not match new value! $IS vs {{$value}}"
+        fi
+      {{else}}
+        echo "skipping check... first run, no previous inventory/data to compare"
+      {{end}}
+    {{else}}
+      echo "skipping check... inventory/integrity is false"
+    {{end}}
+
+    # present all errors and stop
+    if [ -z $ERROR ] ; then
+      echo "Integrity Check PASSED.  OK to save/update inventory"
+      # save result (replaces previous each time)
+      drpcli machines set $RS_UUID param inventory/data to "$INVENTORY"
+      echo "Inventory saved"
+    else
+      echo "INTEGRITY CHECK FAILED.  See items above and halting"
+      exit 1
+    fi
+
+    echo "=== INVENTORY COMPLIANCE CHECK ===="
+    echo "Starting validation check items from inventory/check"
+    {{range $key, $regex := .Param "inventory/check" }}
+      VALUE="$(jq -r ".{{$key}}" <<< "$INVENTORY")"
+      if [[ $VALUE == null ]] ; then
+        echo "--- {{$key}} has no value, skipping.  (regex was {{$regex}})"
+      else
+        if [[ $VALUE =~ {{$regex}} ]] ; then
+          echo "+++ {{$key}}: $VALUE matches {{$regex}}"
+        else
+          echo "XXX {{$key}}: $VALUE does not match {{$regex}}"
+          ERROR="validation"
+        fi
+      fi
+    {{else}}
+      echo "No validation checks defined in inventory/check"
+    {{end}}
+
+    # present all errors and stop
+    if [ -z $ERROR ] ; then
+      echo "Validation Check PASSED. Done"
+      exit 0
+    else
+      echo "VALIDATION CHECK FAILED.  See items above and halting"
+      exit 1
+    fi
+  Name: inventory-check

@@ -1,0 +1,11 @@
+---
+Name: "classify-test-workflow-RED"
+Description: "Test Workflow RED"
+Errors: []
+Meta:
+  color: "red"
+  icon: "balance scale"
+  title: "Test Workflow RED"
+ReadOnly: true
+Stages:
+  - "classify-test-stage-RED"

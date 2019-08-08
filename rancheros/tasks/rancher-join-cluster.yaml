@@ -1,0 +1,117 @@
+Description: Join a node to a Rancher cluster
+Documentation: |
+  Join a node to a Rancher Cluster
+Errors: []
+Meta:
+  color: black
+  feature-flags: sane-exit-codes
+  icon: unlinkify
+  title: RackN Content
+Name: rancher-join-cluster
+Templates:
+- Name: rancher-join-cluster
+  Contents: |-
+    #!/bin/bash
+    # Join node to Rancher Cluster
+
+    set -e
+    set -x
+
+    function sudo {
+            $@
+    }
+
+    export curlimage=appropriate/curl
+    export jqimage=stedolan/jq
+    export rancher_server_ip='{{ .Param "rancher/server-ip" }}'
+    export docker_version_agent='17.03.2'
+
+    for image in $curlimage $jqimage; do
+      until docker inspect $image > /dev/null 2>&1; do
+      docker pull $image
+          sleep 2
+      done
+      done
+
+    while true; do
+      docker run --rm $curlimage -sLk "https://$rancher_server_ip/ping" && break
+      sleep 5
+    done
+
+    # Login
+    while true; do
+
+      LOGINRESPONSE=$(docker run \
+        --rm \
+        $curlimage \
+        -s "https://$rancher_server_ip/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary '{"username":"admin","password":"{{ .Param "rancher/admin-password" }}"}' --insecure)
+      LOGINTOKEN=$(echo $LOGINRESPONSE | docker run --rm -i $jqimage -r .token)
+
+      if [ "$LOGINTOKEN" != "null" ]; then
+        break
+      else
+        sleep 5
+      fi
+    done
+
+    # Get the Agent Image from the rancher server
+    while true; do
+      AGENTIMAGE=$(docker run \
+        --rm \
+        $curlimage \
+        -sLk \
+        -H "Authorization: Bearer $LOGINTOKEN" \
+        "https://$rancher_server_ip/v3/settings/agent-image" | docker run --rm -i $jqimage -r '.value')
+
+      if [ -n "$AGENTIMAGE" ]; then
+        break
+      else
+        sleep 5
+      fi
+    done
+
+    until docker inspect $AGENTIMAGE > /dev/null 2>&1; do
+      docker pull $AGENTIMAGE
+      sleep 2
+    done
+
+    # Test if cluster is created
+    while true; do
+      CLUSTERID=$(docker run \
+        --rm \
+        $curlimage \
+        -sLk \
+        -H "Authorization: Bearer $LOGINTOKEN" \
+        "https://$rancher_server_ip/v3/clusters?name={{ .Param "rancher/cluster-name" }}" | docker run --rm -i $jqimage -r '.data[].id')
+
+      if [ -n "$CLUSTERID" ]; then
+        break
+      else
+        sleep 5
+      fi
+    done
+
+    # Get token
+    # Test if cluster is created
+    while true; do
+      AGENTCMD=$(docker run \
+        --rm \
+        $curlimage \
+        -sLk \
+        -H "Authorization: Bearer $LOGINTOKEN" \
+        "https://$rancher_server_ip/v3/clusterregistrationtoken?clusterId=$CLUSTERID" | docker run --rm -i $jqimage -r '.data[].nodeCommand' | head -1)
+
+      if [ -n "$AGENTCMD" ]; then
+        break
+      else
+        sleep 5
+      fi
+    done
+
+    # Combine command and flags
+    COMPLETECMD="$AGENTCMD {{ .Param "rancher/role-flags" }} --address {{.Machine.Address}}"
+
+    # Run command
+    $COMPLETECMD
+
+    exit 0

@@ -1,0 +1,21 @@
+---
+Name: "workflow-pause"
+Description: "A task that sets the machine to not runnable"
+Documentation: |
+  This task will set the machine to NOT runnable, but leave the runner
+  running.  This will act as a pause in the workflow for other
+  system to restart.
+Meta:
+  icon: "pause"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: workflow-pause.sh
+  Contents: |-
+    #!/bin/bash
+    set -e
+    {{template "setup.tmpl" .}}
+    echo "Setting Machine to Not Runnable"
+    drpcli machines update $RS_UUID '{ "Runnable": false }' >/dev/null
+    exit 0

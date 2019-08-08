@@ -1,0 +1,41 @@
+---
+Description: "A task to open ports in Firewalld"
+Documentation: |
+  Requires that firewall-cmd enabled system
+  Will reset the firewall at the end of the task
+Name: "network-firewalld"
+RequiredParams:
+  - network/firewalld-ports
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # update firewall rules
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    if which firewall-cmd >/dev/null 2>/dev/null ; then
+
+      {{range $index, $port := .Param "network/firewalld-ports" }}
+        echo "Rule {{$index}}: add-port {{$port}}"
+        firewall-cmd --permanent --add-port={{$port}}
+      {{else}}
+        echo "No network/firewalld-ports defined"
+      {{end}}
+
+      echo "restart firewall"
+      firewall-cmd --reload
+
+      echo "done"
+
+    else
+        echo "firewall not installed on system"
+        exit 1
+    fi
+  Name: firewalld-ports
+Meta:
+  icon: "fire"
+  color: "blue"
+  title: "RackN Content Copyright 2019"
+  feature-flags: "sane-exit-codes"

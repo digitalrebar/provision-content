@@ -1,0 +1,20 @@
+---
+Name: "inventory/flatten"
+Description: "Flatten inventory/data into inventory/PARAM"
+Documentation: |
+  Creates each inventory value as a top level Params
+  This is needed if you want to filter machines in the API
+  by inventory data.  For example, using Terraform filters.
+  
+  This behavior is very helpful for downstream users of the inventory
+  params because it allows them to be individually retried and searched.
+  
+  NOTE: This will create LOTS of Params on machines.  We recommend
+  that you define Params to match fields instead of relying on adhoc Params.
+Schema:
+  type: boolean
+  default: true
+Meta:
+  color: "green"
+  icon: "hand paper"
+  title: "RackN Content"

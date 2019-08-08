@@ -1,0 +1,31 @@
+---
+Description: "A task to add the OpsRamp client to the system and point it to the cloud."
+Name: "opsramp-join"
+RequiredParams:
+  - "opsramp/api-key"
+  - "opsramp/api-secret"
+  - "opsramp/client-id"
+Templates:
+  - ID: "deployAgent.py.tmpl"
+    Name: "Add the join script to the system"
+    Path: "/tmp/deployAgent.py"
+  - ID: "ensure-python.sh.tmpl"
+    Name: "Ensure python is installed"
+  - Name: "Run deploy agent."
+    Contents: |
+      #!/usr/bin/env bash
+      
+      python /tmp/deployAgent.py -i silent -K {{.Param "opsramp/api-key"}} -S {{.Param "opsramp/api-secret"}} -c {{.Param "opsramp/client-id"}}
+      if [[ $? -ne 0 ]] ; then
+          echo "Failed to install and configure OpsRamp agent"
+          exit 1
+      fi
+
+      echo "Successfully installed OpsRamp agent"
+      rm -f /tmp/deployAgent.py
+      exit 0
+Meta:
+  icon: "announcement"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

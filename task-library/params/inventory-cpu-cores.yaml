@@ -1,0 +1,11 @@
+---
+Name: "inventory/CPUCores"
+Description: "Flat Inventory for CPUCores"
+Documentation: |
+  From inventory/data, used for indexable data
+Schema:
+  type: "integer"
+Meta:
+  color: "black"
+  icon: "expand"
+  title: "RackN Content"

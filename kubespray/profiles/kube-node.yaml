@@ -1,0 +1,6 @@
+Name: "kube-node"
+Description: "Worker nodes in the Kubernetes Cluster"
+Meta:
+  icon: "truck"
+  color: "blue"
+  title: "Kubernetes Enablement"

@@ -1,0 +1,14 @@
+---
+Name: "ansible"
+Description: "Filter for Ansible Inventory"
+Documentation: |
+  Used by `drpmachines.py` integration to limit the hosts included in the dynamic
+  inventory.
+
+  Setting this value requires also setting the `RS_ANSIBLE` for the `drpmachine.py`.
+Schema:
+  type: "string"
+Meta:
+  icon: "shopping cart"
+  color: "blue"
+  title: "Task Library"

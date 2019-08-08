@@ -1,0 +1,9 @@
+---
+Name: "cluster-add"
+Description: "Enqueue for Operation"
+Tasks:
+  - "cluster-add"
+Meta:
+  icon: "object group"
+  color: "yellow"
+  title: "RackN Content"

@@ -1,0 +1,14 @@
+---
+Name: "classify"
+Description: "Classify machines based upon data"
+Documentation: |
+  Moves machines into new workflows based upon classification.
+Meta:
+  color: "yellow"
+  icon: "search"
+  title: "RackN"
+Reboot: false
+RequiredParams:
+  - "classify/classification-data"
+Tasks:
+  - "classify"

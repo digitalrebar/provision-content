@@ -1,0 +1,19 @@
+Description: Roles this node should have in the Cluster managed by Rancher.
+Documentation: |
+  Roles this node should have in the Cluster managed by Rancher.
+
+  This is a space separated string that can contain.
+
+  * --etcd
+  * --controlplane
+  * --worker
+
+  e.g. --etcd --controlplane --worker
+Errors: []
+Meta:
+  color: blue
+  icon: user circle
+  title: RackN Content
+Name: rancher/role-flags
+Schema:
+  type: string

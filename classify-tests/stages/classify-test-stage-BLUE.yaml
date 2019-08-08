@@ -1,0 +1,11 @@
+---
+Name: "classify-test-stage-BLUE"
+Description: "Test Stage BLUE"
+Documentation: ""
+Meta:
+  color: "blue"
+  icon: "balance scale"
+  title: "RackN"
+Reboot: false
+Tasks:
+  - "classify-test-task-BLUE"

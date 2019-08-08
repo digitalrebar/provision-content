@@ -1,0 +1,11 @@
+---
+Name: "classify-test-stage-RED"
+Description: "Test Stage RED"
+Documentation: ""
+Meta:
+  color: "blue"
+  icon: "balance scale"
+  title: "RackN"
+Reboot: false
+Tasks:
+  - "classify-test-task-RED"

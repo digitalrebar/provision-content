@@ -1,0 +1,13 @@
+---
+Name: "opsramp/client-id"
+Description: "Id of client to use for this device"
+Documentation: |
+  This string defines the id of the client to use in OpsRamp.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "RackN Content"

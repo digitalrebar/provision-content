@@ -1,0 +1,9 @@
+---
+Name: "runner-tarball"
+Description: "Stage to build drpcli service tarballs"
+Tasks:
+  - "drpcli-tarball"
+Meta:
+  icon: "motorcycle"
+  color: "yellow"
+  title: "RackN Content"

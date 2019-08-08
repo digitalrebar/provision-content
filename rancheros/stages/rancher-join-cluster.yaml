@@ -1,0 +1,10 @@
+Description: Join a RancherOS node to a Rancher Cluster.
+Documentation: ""
+Meta:
+  color: purple
+  icon: spinner
+  title: RackN
+Name: rancher-join-cluster
+Tasks:
+- rancher-join-cluster
+

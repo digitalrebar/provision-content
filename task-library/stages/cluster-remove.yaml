@@ -1,0 +1,9 @@
+---
+Name: "cluster-remove"
+Description: "Dequeue After Servicing"
+Tasks:
+  - "cluster-remove"
+Meta:
+  icon: "object ungroup"
+  color: "yellow"
+  title: "RackN Content"

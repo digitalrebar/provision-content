@@ -1,0 +1,11 @@
+---
+Name: "cluster/step"
+Description: "Number of machines to use per step in this cluster"
+Schema:
+  type: integer
+  default: 1
+  minimum: 1
+Meta:
+  color: "blue"
+  icon: "clone"
+  title: "RackN Content"

@@ -1,0 +1,12 @@
+Description: The template to use for the ignition file.
+Documentation: |
+  The template to use for the ignition file.
+Errors: []
+Meta:
+  color: blue
+  icon: user circle
+  title: RackN Content
+Name: coreos/ignition-template
+Schema:
+  type: string
+  default: "basic-ign.tmpl"

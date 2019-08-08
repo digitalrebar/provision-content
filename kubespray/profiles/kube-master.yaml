@@ -1,0 +1,6 @@
+Name: "kube-master"
+Description: "Nodes in the Kubernetes Control Plane"
+Meta:
+  icon: "ship"
+  color: "blue"
+  title: "Kubernetes Enablement"

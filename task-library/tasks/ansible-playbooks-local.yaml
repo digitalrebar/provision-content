@@ -1,0 +1,67 @@
+Description: A task to invoke a specific set of ansible playbooks pulled from git
+Documentation: |
+  Local Git-Based Ansible Playbooks
+  ---------------------------------
+  A task to invoke a specific set of ansible playbooks pulled from git.
+
+  Required Param: `ansible/playbooks` - List of playbook git repos to run on the local machine
+Meta:
+  color: black
+  feature-flags: sane-exit-codes
+  icon: play
+  title: RackN Content
+Name: ansible-playbooks-local
+RequiredParams:
+  - ansible/playbooks
+Templates:
+- Name: git-ansible-playbook
+  Contents: |
+    #!/usr/bin/env bash
+    # Invoke a set of ansible playbooks pulled from git
+    #
+
+    set -e
+
+    # Get access and who we are.
+    {{template "setup.tmpl" .}}
+    [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
+
+    echo "Running Git-based ansible playbooks"
+    {{range $index, $playbook := .Param "ansible/playbooks"}}
+        NAME={{$playbook.name}}
+        REPO={{$playbook.repo}}
+        DIR={{$playbook.path}}
+        PB={{$playbook.playbook}}
+        L=$(mktemp "./$F.$$.XXXXXXXX.log")
+
+        {{if not $playbook.data }}
+            ARGS=""
+        {{else}}
+            ARGS="{{$playbook.args}}"
+        {{end}}
+
+        echo "Getting the git repo: $REPO"
+        git clone "$REPO" "$NAME"
+
+        {{if not $playbook.commit }}
+        echo "No commit"
+        {{else}}
+        git checkout {{$playbook.commit}}
+        {{end}}
+
+        echo "Running the playbook, $PB, from $DIR"
+        echo "Setting log file to:  '$L'"
+        cd "$NAME/$DIR"
+        {{if not $playbook.verbosity }}
+        echo "ansible-playbook $ARGS \"$PB\" | tee -a \"$L\""
+        ansible-playbook $ARGS "$PB" 2>&1 | tee -a "$L"
+        {{else}}
+        echo "ansible-playbook $ARGS {{$playbook.verbosity}} \"$PB\" | tee -a \"$L\""
+        ansible-playbook $ARGS {{$playbook.verbosity}} "$PB" 2>&1 | tee -a "$L"
+        {{end}}
+        cd -
+
+        rm -rf $NAME $L
+    {{end}}
+
+    exit 0

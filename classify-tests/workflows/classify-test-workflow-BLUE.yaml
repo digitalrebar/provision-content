@@ -1,0 +1,12 @@
+---
+Name: "classify-test-workflow-BLUE"
+Description: "Test Workflow BLUE"
+Errors: []
+Meta:
+  color: "blue"
+  icon: "balance scale"
+  title: "Test Workflow BLUE"
+ReadOnly: true
+Stages:
+  - "classify-test-stage-BLUE"
+

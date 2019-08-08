@@ -1,0 +1,6 @@
+---
+Name: hardware-tools-install
+Description: "Install hardware-specific management tooling on a target system"
+BootEnv: "sledgehammer"
+Tasks:
+  - hardware-tools-install

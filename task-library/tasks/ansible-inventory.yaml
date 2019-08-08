@@ -1,0 +1,32 @@
+---
+Name: "ansible-inventory"
+Description: "Add ansible setup module data as a value on the machine"
+Documentation: |
+  Install ansible, if needed, and record the setup module ansible variables
+  onto the machine as parameter, ansible-inventory.
+Meta:
+  icon: "shopping cart"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: ansible-inventory
+  Contents: |-
+    #!/usr/bin/env bash
+    # Gather ansible setup module data
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    if ! which ansible 2>/dev/null >/dev/null ; then
+        install ansible
+    fi
+
+    ansible -m setup -o 127.0.0.1 2>/dev/null | sed "s/127.0.0.1 | SUCCESS => //g" > ansible.json
+
+    # save result (replaces previous each time)
+    drpcli machines remove $RS_UUID param ansible-inventory || :
+    drpcli machines set $RS_UUID param ansible-inventory to - < ansible.json
+    echo "Ansible inventory saved"
+    exit 0

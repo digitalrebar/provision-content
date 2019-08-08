@@ -1,0 +1,11 @@
+Name: "ansible/groupvars"
+Description: "Ansible Group to Rebar Profile Map"
+Documentation: |
+  Maps Rebar Profiles to Ansible Host Groups when using the dynamic inventory
+  generator for Ansible.
+Schema:
+  type: "object"
+Meta:
+  icon: "phone square"
+  color: "blue"
+  title: "Ansible Integration"

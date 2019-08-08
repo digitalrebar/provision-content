@@ -1,0 +1,12 @@
+---
+Name: "classify-test-profile-SUBNET"
+Description: "Test Profile SUBNET"
+Errors: []
+Meta:
+  color: "green"
+  icon: "magnet"
+  title: "Test Profile SUBNET"
+Params:
+  classify-test-profile/green: true
+ReadOnly: true
+

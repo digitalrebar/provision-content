@@ -1,0 +1,20 @@
+Name: image-install-cloud-init
+Description: Install cloud-init service on system to be imaged.
+Documentation: ""
+ReadOnly: true
+Meta:
+  color: purple
+  feature-flags: sane-exit-codes
+  icon: pin
+  title: Image Builder suite
+  origin: rackn/image-builder
+Templates:
+  - Contents: |
+      #!/bin/bash
+      # Image builder setup tasks
+      # origin: rackn/image-builder
+      {{template "setup.tmpl" .}}
+
+      install cloud-init
+    Name: image-install-cloud-init
+    Path: ""

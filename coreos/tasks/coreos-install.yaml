@@ -1,0 +1,28 @@
+Description: Install CoreOS to the disk
+Documentation: |
+  Install CoreOS to the disk
+Errors: []
+Meta:
+  color: black
+  feature-flags: sane-exit-codes
+  icon: unlinkify
+  title: RackN Content
+Name: coreos-install
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # Install coreos to the disk
+
+    set -e
+
+    echo "Get ign.json file for post install"
+    /usr/bin/curl "{{.ProvisionerURL}}/machines/{{.Machine.Uuid}}/select-ign.json" -o /tmp/ign.json
+
+    echo "Install coreos to disk"
+    /usr/bin/coreos-install \
+      -d /dev/{{if .ParamExists "operating-system-disk"}}{{.Param "operating-system-disk"}}{{else}}sda{{end}} \
+      -i /tmp/ign.json
+
+    echo "Finished successfully"
+    exit 0
+  Name: coreos-install

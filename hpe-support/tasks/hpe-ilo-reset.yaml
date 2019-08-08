@@ -1,0 +1,247 @@
+---
+Name: "hpe-ilo-reset"
+Description: "A task to reset and recovery an non-responsive HPE iLO"
+Documentation: |
+  HPE iLOs have a tendancy to get stuck, and not function correctly
+  in many situations.  If you are having issues configuring the HPE
+  iLO, you may need to run this recovery task to ensure you reset
+  the iLO back to a known good working state.
+
+  .. note:: This workflow RESETS the HPE iLO to the Param specified
+            username and password pair in the "ipmi/username" and
+            "ipmi/password" Params.  If no values are specified, the
+            iLO will not add a new user to the iLO.
+
+RequiredParams:
+OptionalParams:
+- "impi/username"
+- "impi/password"
+Prerequisites:
+  - hpe-tools-install
+Meta:
+  icon: "wrench"
+  color: "red"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "Reset HPE iLO"
+  Path: ""
+  Contents: |
+    #!/bin/bash
+    # Reset an HPE iLO when it gets wedged up.
+
+    ###
+    #  WARNING: "hponcfg" must be installed on the machine (see hp-support content
+    #            to install it)
+    #
+    #  HPE iLOs often get wedged up and need to be reset to continue working
+    #  correctly.  HPE will identify this as a "failed motherboard", and request
+    #  a motherboard replacement.  However, the following code usually clears the
+    #  iLO and resets it back to a working state.
+    #
+    #  The symptoms in RackN/Digital Rebar Provision workflow usually manifests
+    #  with an error as follows in the Job Log for the BIOS configuration:
+    #
+    #      Starting command ./bios-current-config-current-config
+    #
+    #      ERROR Unable to find any OpenIPMI devices
+    #      Conrep return code: 0
+    #      <date_string> Error getting config: exit status 255
+    #      null
+    #      Command exited with status 1
+    #      Task bios-current-config failed
+    #      Marked machine <machine_name> to failed
+    #      Update job for <stage>:bios-configure:bios-current-config to failed
+    #      Task signalled that it failed
+    ###
+
+    # make sure our path is right for hponcfg and drpcli
+    export PATH="$PATH:/usr/bin:/bin:/sbin:/usr/sbin:/usr/sbin/hponcfg:/usr/local/bin"
+
+    # number of times this Machine has executed an unwedge task/template
+    UNWEDGE_PARAM="hpe-ilo-unwedge-count"
+
+    {{ template "setup.tmpl" . }}
+    function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+    set -e
+
+    load_ipmi() {
+      echo "Loading IPMI modules"
+      [[ -d /sys/module/ipmi_devintf ]] || modprobe ipmi_devintf &>/dev/null || :
+      [[ -d /sys/module/ipmi_si ]] || modprobe ipmi_si &>/dev/null || :
+      [[ -d /sys/module/ipmi_ssif ]] || modprobe ipmi_ssif &>/dev/null || :
+      if ! [[ -d /sys/module/ipmi_si ||
+              -d /sys/module/ipmi_devintf ||
+              -d /sys/module/ipmi_ssif ]]; then
+        echo "Failed to load ipmi kernel modules"
+        exit 1
+      fi
+      [[ -e /dev/ipmi0 || -e /dev/ipmi/0 || -e /dev/ipmidev/0 ]] && return || :
+      echo "No IPMI devices present"
+      exit 1
+    }
+
+    tool() {
+      if ! [[  "$@" =~ password ]] ; then
+        echo "ipmitool $@"
+      else
+        echo "ipmitool password setting command"
+      fi >&2
+      ipmitool "$@"
+    }
+
+    echo "$(date) :: Attempting to reset the HPE iLO ..."
+    ( which hponcfg > /dev/null 2>&1 ) || xiterr 1 "Unable to locate 'hponcfg' tool in path ('$PATH'), perhaps you need to install it."
+    ( which drpcli > /dev/null 2>&1 ) || xiterr 1 "Unable to locate 'drpcli' tool in path ('$PATH')."
+
+    CUR_USER="{{ if .ParamExists "ipmi/username" }}{{ .Param "ipmi/username" }}{{ end }}"
+    CUR_PASS="{{ if .ParamExists "ipmi/password" }}{{ .Param "ipmi/password" }}{{ end }}"
+    [[ -n "$CUR_USER" && -n "$CUR_PASS" ]] && ADD_USER="true"
+
+    TDIR=$(mktemp -d /tmp/ilo-reset-XXXX)
+    cd $TDIR
+
+    if tool chassis status 2>/dev/null >/dev/null ; then
+      echo "IPMI access is fine..."
+      exit 0
+    fi
+
+    # hardcoded user/pass ok - it just allows the process from local machine to
+    # continue, credentials are ignored, but required
+    cat > get_ilo_info.xml << EOF_GET
+    <RIBCL VERSION="2.0">
+      <LOGIN USER_LOGIN="Administrator" PASSWORD="password">
+        <RIB_INFO MODE="read">
+        <GET_NETWORK_SETTINGS/>
+        </RIB_INFO>
+      </LOGIN>
+    </RIBCL>
+    EOF_GET
+    hponcfg -f get_ilo_info.xml -l dhcp_ilo_info.xml
+
+
+    IP_ADDRESS=`grep -w IP_ADDRESS dhcp_ilo_info.xml | awk -F '"' '{print $2}'`
+    SUBNET_MASK=`grep -w SUBNET_MASK dhcp_ilo_info.xml | awk -F '"' '{print $2}'`
+    GATEWAY_IP_ADDRESS=`grep -w GATEWAY_IP_ADDRESS dhcp_ilo_info.xml | awk -F '"' '{print $2}'`
+    PRIM_DNS_SERVER=`grep -w PRIM_DNS_SERVER dhcp_ilo_info.xml | awk -F '"' '{print $2}'`
+    DOMAIN_NAME=`grep -w DOMAIN_NAME dhcp_ilo_info.xml | awk -F '"' '{print $2}'`
+    PRIM_WINS_SERVER=`grep -w PRIM_WINS_SERVER dhcp_ilo_info.xml | awk -F '"' '{print $2}'`
+
+    #TODO - test DNS/DOMAIN/WINS values and set to sane if not used
+    #TODO - determine if we're supposed to be DHCP and use that instead
+
+    echo "$(date) :: Collected HPE iLO details:"
+    FMT="%-15s %-15s %-15s %-15s %-25s %-25s\n"
+    printf "$FMT" "IP_ADDRESS" "SUBNET_MASK" "GATEWAY_IP_ADDR" "PRIM_DNS_SERVER" "DOMAIN_NAME" "PRIM_WINS_SERVER"
+    printf "$FMT" "$IP_ADDRESS" "$SUBNET_MASK" "$GATEWAY_IP_ADDRESS" "$PRIM_DNS_SERVER" "$DOMAIN_NAME" "$PRIM_WINS_SERVER"
+
+    # hardcoded user/pass ok - it just allows the process from local machine to
+    # continue, credentials are ignored, but required
+    cat > ilo_static.xml << EOF_STATIC
+    <RIBCL VERSION="2.1">
+     <LOGIN USER_LOGIN="Administrator" PASSWORD="password">
+      <RIB_INFO MODE="write">
+      <MOD_NETWORK_SETTINGS>
+        <ENABLE_NIC VALUE="Y"/>
+        <SHARED_NETWORK_PORT VALUE="N"/>
+        <DHCP_ENABLE VALUE="N"/>
+        <SPEED_AUTOSELECT VALUE = "Y"/>
+        <NIC_SPEED VALUE = "Automatic"/>
+        <FULL_DUPLEX VALUE = "Y"/>
+        <IP_ADDRESS VALUE = "$IP_ADDRESS"/>
+        <SUBNET_MASK VALUE = "$SUBNET_MASK"/>
+        <GATEWAY_IP_ADDRESS VALUE = "$GATEWAY_IP_ADDRESS"/>
+        <DNS_NAME VALUE = "ILOUSE6368ENP"/>
+        <PRIM_DNS_SERVER value = "$PRIM_DNS_SERVER"/>
+        <DOMAIN_NAME VALUE = "$DOMAIN_NAME"/>
+        <DHCP_GATEWAY VALUE = "N"/>
+        <DHCP_DNS_SERVER VALUE = "N"/>
+        <DHCP_STATIC_ROUTE VALUE = "N"/>
+        <DHCP_WINS_SERVER VALUE = "N"/>
+        <REG_WINS_SERVER VALUE = "N"/>
+        <PRIM_WINS_SERVER value = "$PRIM_WINS_SERVER"/>
+        <SEC_WINS_SERVER value = "0.0.0.0"/>
+        <STATIC_ROUTE_1 DEST = "0.0.0.0" GATEWAY = "0.0.0.0"/>
+        <STATIC_ROUTE_2 DEST = "0.0.0.0" GATEWAY = "0.0.0.0"/>
+        <STATIC_ROUTE_3 DEST = "0.0.0.0" GATEWAY = "0.0.0.0"/>
+      </MOD_NETWORK_SETTINGS>
+      </RIB_INFO>
+      <USER_INFO MODE="write">
+      </USER_INFO>
+     </LOGIN>
+    </RIBCL>
+    EOF_STATIC
+
+    echo "$(date) :: ATTEMPTING TO RESET HPE ILO..."
+
+    hponcfg -r
+
+    echo "$(date) :: Configuring the ilo..."
+
+    hponcfg -f ilo_static.xml -l ilo_static_out
+    if [[ -s ./ilo_static_out ]]
+    then
+      echo "$(date) :: Output from configuration run..."
+      cat ilo_static_out
+    fi
+
+    if [[ -n "$ADD_USER" ]]
+    then
+      echo "$(date) :: Attempting to add requested new user ... "
+
+      cat > ilo_user.xml << EOF_USER
+    <RIBCL VERSION="2.1">
+    <LOGIN USER_LOGIN="$CUR_USER" PASSWORD="$CUR_PASS">
+      <USER_INFO MODE="write">
+      <ADD_USER
+        USER_NAME = "$CUR_USER"
+        USER_LOGIN = "$CUR_USER"
+        PASSWORD = "$CUR_PASS">
+        <ADMIN_PRIV value = "Y"/>
+        <REMOTE_CONS_PRIV value = "Y"/>
+        <RESET_SERVER_PRIV value = "Y"/>
+        <VIRTUAL_MEDIA_PRIV value = "Y"/>
+        <CONFIG_ILO_PRIV value = "Y"/>
+      </ADD_USER>
+      </USER_INFO>
+     </LOGIN>
+    </RIBCL>
+    EOF_USER
+
+      hponcfg -f ilo_user.xml
+    else
+      echo "NOTICE: No 'ipmi/username' and 'ipmi/password' set on Machine - no ADD_USER operation occured."
+    fi
+
+    rmmod ipmi_watchdog || :
+    rmmod ipmi_si || :
+    rmmod ipmi_ssif || :
+    rmmod ipmi_devintf || :
+    rmmod ipmi_msghandler || :
+    load_ipmi
+    if ! tool chassis status 2>/dev/null >/dev/null ; then
+      echo "IPMI access is still not available!"
+      exit 1
+    fi
+
+    ID={{.Machine.UUID}}
+    COUNT=$(drpcli machines get $ID param $UNWEDGE_PARAM | jq -r .)
+
+    if [[ "$COUNT" == "null" ]]
+    then
+      drpcli machines add $ID param $UNWEDGE_PARAM to 1
+    else
+      if [[ -n "$COUNT" && "$COUNT" =~ ^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])$ ]]
+      then
+        (( COUNT++ ))
+        drpcli machines remove $ID param $UNWEDGE_PARAM
+        drpcli machines add $ID param $UNWEDGE_PARAM to $COUNT
+      else
+        echo "WARNING:  Unsupported value ('$COUNT') set in '$UNWEDGE_PARAM' for tracking number of counts"
+        echo "          RESETTING count values back to '1'"
+        drpcli machines remove $ID param $UNWEDGE_PARAM || :
+        drpcli machines add $ID param $UNWEDGE_PARAM to 1
+      fi
+    fi
+
+    echo "$(date) :: CROSS YOUR FINGERS and login to the ilo ... "

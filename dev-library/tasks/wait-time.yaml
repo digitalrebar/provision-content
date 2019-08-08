@@ -1,0 +1,37 @@
+---
+Name: wait-time
+Description: "Wait in Workflow"
+Documentation: |
+  Handy for dev/test, this task will sleep for
+  a programmable amount of time
+Meta:
+  title: "RackN Content"
+  color: black
+  feature-flags: sane-exit-codes
+  icon: hourglass half
+Templates:
+- Contents: |-
+    #!/usr/bin/env bash
+    # clear the workflow for a machine (makes it easy to rerun workflow)
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    do_sleep() { local _n=$SLEEP; while (( _n>=1 )); do printf "%s " "$_n"; sleep 1; (( _n-- )); done; echo "0"; }
+
+    export RS_UUID="{{.Machine.UUID}}"
+
+    {{if .ParamExists "dev/wait-time" -}}
+    SLEEP={{.Param "dev/wait-time"}}
+    {{else -}}
+    SLEEP="5"
+    {{end -}}
+
+    echo "Wait Start - $SLEEP seconds"
+
+    do_sleep
+
+    echo "Wait Finished"
+    exit 0
+  Name: wait-time

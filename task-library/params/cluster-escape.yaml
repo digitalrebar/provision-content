@@ -1,0 +1,12 @@
+---
+Name: "cluster/escape"
+Description: "Exit code out of cluster stages (rescue!)"
+Schema:
+  type: integer
+  default: 1
+  minimum: 0
+  maximum: 4
+Meta:
+  color: "red"
+  icon: "sign out alternate"
+  title: "RackN Content"

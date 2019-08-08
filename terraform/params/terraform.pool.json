@@ -1,0 +1,13 @@
+{
+  "Name": "terraform/pool",
+  "Description": "Indicates the machine pool to be used",
+  "Schema": {
+    "type": "string",
+    "default": "default"
+  },
+  "Meta": {
+    "icon": "hand scissors",
+    "color": "black",
+    "title": "RackN Content"
+  }
+}

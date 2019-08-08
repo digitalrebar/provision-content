@@ -1,0 +1,60 @@
+---
+Name: "classify-classification-param-test"
+Description: "Test Profile that defines Param classify/classification-data structure"
+Documentation: |
+  This is a test Profile.  Apply it to a machine you wish to test the
+  Classfier "Param" tests on.
+
+  The test flow for this is:
+
+    add this Profile to your Machine under test
+    execute the "Classify" Workflow on the Machine with the
+    following test Param conditions:
+
+    add Param to machine -    param-red: true
+    expect Param "found-param-red: true" added to machine
+    delete found-param-red from machine
+
+    add Param to machine -    param-green: true
+    expect Param "found-param-green: true" added to machine
+    (no "found-param-green" or "found-param-red")
+    delete found-param-green from machine
+
+    add Param to machine -    param-blue: true
+    add Param to machine -    param-green: true
+    (no "found-param-red")
+    expect Param "found-param-blue: true" added to machine
+    expect Param "found-param-green: true" added to machine
+
+    clean up
+    --------
+    delete param-blue from machine
+    delete param-green from machine
+    delete param-red from machine
+    delete found-param-blue from machine
+    delete found-param-green from machine
+
+ReadOnly: true
+Meta:
+  color: "blue"
+  icon: "balance scale"
+  title: "RackN"
+ReadOnly: true
+Params:
+  classify/custom-functions:
+    - "has_param.sh.tmpl"
+  classify/classification-data:
+    - test: "has_param param-blue"
+      continue: true
+      actions:
+        - "set_parameter found-param-blue true"
+    - test: "has_param param-green"
+      continue: false
+      actions:
+        - "set_parameter found-param-green true"
+    - test: "has_param param-red"
+      actions:
+        - "set_parameter found-param-red true"
+    - test: "always"
+      actions:
+        - "set_parameter found-default-to-always true"

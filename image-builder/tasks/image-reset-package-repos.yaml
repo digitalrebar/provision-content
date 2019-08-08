@@ -1,0 +1,15 @@
+Name: image-reset-package-repos
+Description: Reset image repositories to desired defaults
+Documentation: ""
+ReadOnly: true
+Meta:
+  color: purple
+  feature-flags: sane-exit-codes
+  icon: pin
+  title: Image Builder suite
+  origin: rackn/image-builder
+Templates:
+  - Contents:
+    Name: image-reset-package-repos
+    ID: image-reset-package-repos.sh.tmpl
+    Path: ""

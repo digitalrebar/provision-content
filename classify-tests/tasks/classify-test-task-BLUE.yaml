@@ -1,0 +1,19 @@
+---
+Description: "Test Task BLUE"
+Documentation: ""
+Meta:
+  color: "blue"
+  feature-flags: "sane-exit-codes"
+  icon: "balance scale"
+  title: "Test Task BLUE"
+Name: "classify-test-task-BLUE"
+ReadOnly: true
+Templates:
+- Contents: |-
+    #!/bin/bash
+    printf "\n--------\n$(date)\nClassify test task BLUE\n-------\n" > /dev/tty1
+    exit 0
+  ID: ""
+  Name: "classify-test-task-BLUE"
+  Path: ""
+

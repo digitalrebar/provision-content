@@ -1,0 +1,15 @@
+Name: image-builder-stage
+Description: A task to stage the Image Builder image to DRP.
+Documentation: ""
+ReadOnly: true
+Meta:
+  color: purple
+  feature-flags: sane-exit-codes
+  icon: pin
+  title: Image Builder suite
+  origin: rackn/image-builder
+Templates:
+  - Contents: ''
+    ID: "image-builder-stage.sh.tmpl"
+    Name: image-builder-stage
+    Path: ""

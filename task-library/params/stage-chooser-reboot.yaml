@@ -1,0 +1,9 @@
+---
+Name: "stage-chooser/reboot"
+Description: "Should the machine reboot after changing the stage."
+Schema:
+  type: "boolean"
+Meta:
+  color: "blue"
+  icon: "power"
+  title: "RackN Content"

@@ -1,0 +1,11 @@
+---
+Name: "classify-test-stage-SUBNET"
+Description: "Test Stage SUBNET"
+Documentation: ""
+Meta:
+  color: "green"
+  icon: "magnet"
+  title: "RackN"
+Reboot: false
+Tasks:
+  - "classify-test-task-SUBNET"

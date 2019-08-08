@@ -1,0 +1,6 @@
+Name: "etcd"
+Description: "etcd nodes supporting the Kubernetes Cluster"
+Meta:
+  icon: "database"
+  color: "blue"
+  title: "Kubernetes Enablement"
