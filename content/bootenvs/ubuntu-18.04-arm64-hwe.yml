@@ -20,9 +20,9 @@ OS:
   Version: "18.04"
   SupportedArchitectures:
     arm64:
-      IsoFile: "ubuntu-18.04.2-server-arm64.iso"
-      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.2-server-arm64.iso"
-      IsoSha256: "22ffc947df8c699920582c6d446b4e32e8471c1684bdeab7c91e36c1ebb7f2ba"
+      IsoFile: "ubuntu-18.04.3-server-arm64.iso"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.3-server-arm64.iso"
+      IsoSha256: "59f141b7c3816dc4ef5ff5322b9225faa2c59d02225528f0f21d367628bde9b1"
       Kernel: "install/hwe-netboot/ubuntu-installer/arm64/linux"
       Loader: "grubarm64.efi"
       Initrds:
