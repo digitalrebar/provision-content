@@ -22,7 +22,6 @@ esac
 P=`pwd`
 PATH=$PATH:$P/bin
 export GO111MODULE=on
-which drbundler || (go build -o $P/bin/drbundler github.com/digitalrebar/provision/v4/cmds/drbundler)
 which drpcli || (go build -o $P/bin/drpcli github.com/digitalrebar/provision/v4/cmds/drpcli)
 
 version=$(tools/version.sh)
@@ -36,7 +35,10 @@ tools/pieces.sh | while read i ; do
         dir="contrib"
     fi
     echo "$version" > $dir/._Version.meta
-    drbundler $dir $i.yaml
+    ldir=$(pwd)
+    cd $dir
+    drpcli contents bundle $ldir/$i.yaml
+    cd -
     drpcli contents document $i.yaml > $i.rst
     $shasum $i.yaml > $i.sha256
 done
