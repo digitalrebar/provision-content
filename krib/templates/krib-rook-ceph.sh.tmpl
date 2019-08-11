@@ -26,9 +26,9 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     -o /tmp/rook-common.yaml
   download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/operator.yaml \
     -o /tmp/rook-operator.yaml 
-  download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml \
+  download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/cluster.yaml \
     -o /tmp/rook-cluster.yaml
-  download -L https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml \
+  download -L https://raw.githubusercontent.com/rook/rook/release-1.0/cluster/examples/kubernetes/ceph/storageclass.yaml \
     -o /tmp/rook-storageclass.yaml
 
   ##### Optionally replace containers in distributed YAML manifests with operator-specified
