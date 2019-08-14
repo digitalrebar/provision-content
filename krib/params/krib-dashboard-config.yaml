@@ -6,7 +6,7 @@ Documentation: |
   use for the Kubernetes Dashboard.
 Schema:
   type: "string"
-  default: "https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml"
+  default: "https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended.yaml"
 Meta:
   color: "blue"
   icon: "ship"

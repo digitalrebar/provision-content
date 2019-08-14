@@ -16,16 +16,6 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 export RS_UUID="{{.Machine.UUID}}"
 
 {{ if eq (.Param "krib/dashboard-enabled") true -}}
-cloneHeapster() {
-  if [ -d heapster ]; then
-    cd heapster || return 1
-    git reset --hard HEAD || return 1
-    git pull || return 1
-  else
-    git clone --depth 1 https://github.com/kubernetes/heapster.git || return 1
-  fi
-}
-
 echo "Start Dashboard"
 
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
@@ -48,14 +38,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   OPWD=$(pwd)
   cd /tmp
-  if ! cloneHeapster; then
-    rm -rf heapster
-    cloneHeapster
-  fi
   cd $OPWD
-
-  sed -i 's/name: system:heapster/name: cluster-admin/' /tmp/heapster/deploy/kube-config/rbac/heapster-rbac.yaml
-  sed -i 's#source=kubernetes:https://kubernetes.default$#source=kubernetes:https://kubernetes.default?useServiceAccount=true\&kubeletHttps=true\&kubeletPort=10250\&insecure=true#' /tmp/heapster/deploy/kube-config/influxdb/heapster.yaml
 
   mkdir -p /root/setup/dashboard
   cp /tmp/kubernetes-dashboard.yaml /root/setup/dashboard/kubernetes-dashboard.yaml
@@ -64,37 +47,36 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: admin-user
-  namespace: kube-system
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
 EOFSA
 
   cat >/root/setup/dashboard/dashboard-admin.yaml <<EOFDA
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: admin-user
+  name: kubernetes-dashboard
+  labels:
+    k8s-app: kubernetes-dashboard
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: admin-user
-  namespace: kube-system
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
 EOFDA
 
-  cp -r /tmp/heapster /root/setup/dashboard
-
   kubectl apply -f /root/setup/dashboard/kubernetes-dashboard.yaml
+  kubectl delete -f /root/setup/dashboard/dashboard-serviceaccount.yaml
+  kubectl delete -f /root/setup/dashboard/dashboard-admin.yaml
   kubectl apply -f /root/setup/dashboard/dashboard-serviceaccount.yaml
   kubectl apply -f /root/setup/dashboard/dashboard-admin.yaml
-  kubectl apply -f /root/setup/dashboard/heapster/deploy/kube-config/influxdb/
-  kubectl apply -f /root/setup/dashboard/heapster/deploy/kube-config/rbac/heapster-rbac.yaml
-  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/kubernetes-dashboard
-  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/heapster
-  kubectl scale --replicas=$MASTER_COUNT -n kube-system deployment/monitoring-influxdb
+  kubectl scale --replicas=$MASTER_COUNT -n kubernetes-dashboard deployment/kubernetes-dashboard
 
-  rm -rf /root/setup /tmp/heapster
 fi
 echo "Finished successfully"
 {{end -}}
