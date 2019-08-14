@@ -1,3 +1,4 @@
+BootEnv: sledgehammer
 Description: Wipe Disks for RancherOS
 Documentation: |
   Wipe Disks for RancherOS
