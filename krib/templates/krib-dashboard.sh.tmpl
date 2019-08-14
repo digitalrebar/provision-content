@@ -77,6 +77,7 @@ EOFDA
   kubectl apply -f /root/setup/dashboard/dashboard-admin.yaml
   kubectl scale --replicas=$MASTER_COUNT -n kubernetes-dashboard deployment/kubernetes-dashboard
 
+  rm -rf /root/setup
 fi
 echo "Finished successfully"
 {{end -}}
