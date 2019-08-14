@@ -16,6 +16,14 @@ Templates:
 
     set -e
 
+    echo "Wait for docker daemon to start"
+    for ((i=0; i<120; i++)); do
+        if docker ps >/dev/null; then
+            break
+        fi
+        sleep 1
+    done
+
     echo "Start Rancher Server"
     mkdir -p /host/rancher
     docker run -d --restart=unless-stopped -p 80:80 -p 443:443 -v /host/rancher:/var/lib/rancher rancher/rancher:latest
