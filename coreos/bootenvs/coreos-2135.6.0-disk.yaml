@@ -1,13 +1,13 @@
 ---
-Name: "coreos-1911.3.0-live"
-Description: "CoreOS 1911.3.0 Live"
+Name: "coreos-2135.6.0-disk"
+Description: "CoreOS 2135.6.0 Install"
 OS:
-  Name: "coreos-1911.3.0"
+  Name: "coreos-2135.6.0"
   Family: "coreos"
-  IsoFile: "coreos-1911.3.0.iso"
-  IsoSha256: "1ecba13ce8078fb7cf5c62058773a6b11a61721c2647e2430ccf54fc62afd4f8"
-  IsoUrl: "http://stable.release.core-os.net/amd64-usr/1911.3.0/coreos_production_iso_image.iso"
-  Version: "1911.3.0"
+  IsoFile: "coreos-2135.6.0.iso"
+  IsoSha256: "9a1a84345a74559457e11d6fc83216af6b3e35d179df54228fec76a8a8692103"
+  IsoUrl: "http://stable.release.core-os.net/amd64-usr/2135.6.0/coreos_production_iso_image.iso"
+  Version: "2135.6.0"
 Initrds:
   - "coreos/cpio.gz"
 Kernel: "coreos/vmlinuz"
@@ -35,9 +35,12 @@ Templates:
   - ID: "default-ipxe.tmpl"
     Name: "ipxe-mac"
     Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
-  - ID: "select-ign.tmpl"
+  - ID: "basic-ign.tmpl"
     Name: "ign.json"
     Path: "{{.Machine.Path}}/ign.json"
+  - ID: "select-ign.tmpl"
+    Name: "select.json"
+    Path: "{{.Machine.Path}}/select-ign.json"
 Meta:
   feature-flags: "change-stage-v2"
   icon: "linux"

@@ -1,4 +1,4 @@
-BootEnv: coreos-1911.3.0-live
+BootEnv: coreos-2135.6.0-live
 Description: A live RAM boot version of CoreOS
 Documentation: ""
 Meta:
