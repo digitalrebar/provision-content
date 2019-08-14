@@ -1,3 +1,4 @@
+BootEnv: sledgehammer
 Description: Wipe Disks for RancherOS
 Documentation: |
   Wipe Disks for RancherOS
@@ -8,6 +9,8 @@ Meta:
   icon: unlinkify
   title: RackN Content
 Name: rancheros-wipe-disks
+OptionalParams:
+  - "operating-system-disk"
 Templates:
 - Contents: |-
     #!/bin/bash
@@ -15,8 +18,8 @@ Templates:
 
     set -e
 
-    echo "Force wipe and format /dev/sda"
-    mkfs.ext4 -F -L RANCHER_STATE /dev/sda
+    echo "Force wipe and format disk"
+    mkfs.ext4 -F -L RANCHER_STATE /dev/{{if .ParamExists "operating-system-disk"}}{{.Param "operating-system-disk"}}{{else}}sda{{end}}
     echo "Finished successfully"
     exit 0
   Name: rancheros-wipe-disks
