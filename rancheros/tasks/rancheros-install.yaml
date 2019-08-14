@@ -8,6 +8,8 @@ Meta:
   icon: unlinkify
   title: RackN Content
 Name: rancheros-install
+OptionalParams:
+  - "operating-system-disk"
 Templates:
 - Contents: |-
     #!/bin/bash
@@ -16,7 +18,9 @@ Templates:
     set -e
 
     echo "Install RancherOS to disk"
-    ros install --debug -c "{{.ProvisionerURL}}/machines/{{.Machine.Uuid}}/rancheros-cloud-init" -d /dev/sda -t gptsyslinux --no-reboot
+    ros install --debug -c "{{.ProvisionerURL}}/machines/{{.Machine.Uuid}}/rancheros-cloud-init" \
+                        -d /dev/{{if .ParamExists "operating-system-disk"}}{{.Param "operating-system-disk"}}{{else}}sda{{end}} \
+                        -t gptsyslinux --no-reboot
 
     echo "Finished successfully"
     exit 0
