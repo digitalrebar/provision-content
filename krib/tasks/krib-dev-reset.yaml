@@ -351,8 +351,8 @@ Templates:
         yum install -y gdisk
         for disk in `ls /dev/ | grep {{ .Param "rook/ceph-target-disk" }}`
         do
-          # Don't wipe mounted filesystems
-          mount | grep $disk
+          # Don't wipe OS filesystems
+          echo {{ .Param "operating-system-disk" }} | grep $disk
           if [[ $? -ne 0 ]]; then
             sgdisk --zap-all /dev/$disk
           fi
