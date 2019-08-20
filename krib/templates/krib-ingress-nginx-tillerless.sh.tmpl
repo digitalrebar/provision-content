@@ -47,6 +47,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl apply -f /tmp/nginx-ingress-mandatory.yaml
   kubectl apply -f /tmp/nginx-ingress-service.yaml
 
+  # Create exposed TCP/UDP services
+  kubectl apply -f /tmp/krib-nginx-tcp-services.yaml
+  kubectl apply -f /tmp/krib-nginx-udp-services.yaml
+
   {{ if eq (.Param "krib/ingress-external-enabled") true -}}
   ##### Create create the "external" nginx (which is nginx in all but name)
   # Rather than try to entangle the two controllers, just wholesale search/replace with sed
@@ -95,6 +99,11 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   kubectl apply -f /tmp/nginx-ingress-external-mandatory.yaml
   kubectl apply -f /tmp/nginx-ingress-external-service.yaml
+
+  # Create exposed TCP/UDP services
+  kubectl apply -f /tmp/krib-nginx-external-tcp-services.yaml
+  kubectl apply -f /tmp/krib-nginx-external-udp-services.yaml
+
   ############ End external ingress
   {{ end }}
 

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+    {{ if .ParamExists "krib/nginx-tcp-services" -}}
+    {{ range $key, $value  := .Param "krib/nginx-tcp-services" -}}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+    {{ end }}
