@@ -351,11 +351,15 @@ Templates:
         yum install -y gdisk
         for disk in `ls /dev/ | grep {{ .Param "rook/ceph-target-disk" }}`
         do
-          # Don't wipe mounted filesystems
-          mount | grep $disk
+          # Don't wipe OS filesystems
+          echo {{ .Param "operating-system-disk" }} | grep $disk
           if [[ $? -ne 0 ]]; then
+            echo "DESTRUCTIVELY zapping /dev/$disk"
             sgdisk --zap-all /dev/$disk
+          else
+            echo "/dev/$disk matches {{ .Param "operating-system-disk" }}, so NOT zapping"
           fi
+
         done
         # Now remove devicemapper details
         for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done

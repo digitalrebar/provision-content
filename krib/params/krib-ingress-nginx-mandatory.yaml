@@ -6,7 +6,7 @@ Documentation: |
   use for nginx install.  
 Schema:
   type: "string"
-  default: "https://github.com/kubernetes/ingress-nginx/raw/nginx-0.24.1/deploy/mandatory.yaml"
+  default: "https://github.com/kubernetes/ingress-nginx/raw/nginx-0.25.1/deploy/static/mandatory.yaml"
 Meta:
   color: "blue"
   icon: "ship"

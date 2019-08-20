@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: udp-services
+  namespace: ingress-nginx-external
+data:
+    {{ if .ParamExists "krib/nginx-external-tcp-services" -}}
+    {{ range $key, $value  := .Param "krib/nginx-external-udp-services" -}}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+    {{ end }}
