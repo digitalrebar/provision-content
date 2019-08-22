@@ -1,0 +1,16 @@
+
+#
+# Library to help manage common validation routines
+#
+
+add_validation_error() {
+  local err="$1"
+  local taskname="{{slice .Machine.Tasks .Machine.CurrentTask | first}}"
+
+  local list=$(get_param validation/errors)
+
+  list="$(jq ". += [\"${taskname}: ${err}\"]" <<< "$list")"
+
+  set_param validation/errors "$list"
+}
+
