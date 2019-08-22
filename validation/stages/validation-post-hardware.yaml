@@ -1,0 +1,12 @@
+---
+Name: "validation-post-hardware"
+Description: "Perform validation tasks post-hardware configuration"
+Params:
+  "validation/list-parameter": "validation/post-hardware"
+Tasks:
+  - "validation-start"
+  - "validation-stop"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"
