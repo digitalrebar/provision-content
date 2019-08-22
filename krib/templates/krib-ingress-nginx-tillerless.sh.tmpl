@@ -22,8 +22,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     install wget
   fi
 
+  # Get manifests, and duplicate service manifest for optional additional external ingress
   wget -O /tmp/nginx-ingress-mandatory.yaml {{ .Param "krib/ingress-nginx-mandatory" }}
   wget -O /tmp/nginx-ingress-service.yaml {{ .Param "krib/ingress-nginx-config" }}
+  cp /tmp/nginx-ingress-service.yaml /tmp/nginx-ingress-external-service.yaml
 
   # if [[ -n $(kubectl get namespaces | grep -w ingress-nginx) ]] ; then
   #   echo "Purging existing nginx-ingress install"
@@ -33,6 +35,11 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   {{ if .ParamExists "krib/nginx-ingress-controller-container-image" }}
   # Replace default container image with the one specified in "krib/nginx-ingress-controller-container-image"
   sed -i 's|quay.io/kubernetes-ingress-controller/nginx-ingress-controller|{{ .Param "krib/nginx-ingress-controller-container-image" }}|' /tmp/nginx-ingress-mandatory.yaml
+  {{ end -}}
+
+  {{ if .ParamExists "krib/ingress-nginx-loadbalancer-ip" }}
+  # Add explicit loadbalancer IP to service
+  sed -i "/type: LoadBalancer/ a \  loadBalancerIP: {{ .Param "krib/ingress-nginx-loadbalancer-ip" }} \\" /tmp/nginx-ingress-service.yaml
   {{ end -}}
 
   # If we're only doing one ingress, allow the possibilty to override the publish ip
@@ -57,7 +64,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # and end up with each controller in its own namespace, with its own clusterrolebindings, etc.
   # This makes it easier to restrict access later, or to remove and redeploy one ingress independently
   # of the other
-  cp /tmp/nginx-ingress-service.yaml /tmp/nginx-ingress-external-service.yaml
+
   # Add annotations per https://kubernetes.github.io/ingress-nginx/user-guide/multiple-ingress/
   sed "/annotations-prefix=nginx.ingress/ a \            - --ingress-class=nginx-external \\" \
     /tmp/nginx-ingress-mandatory.yaml > /tmp/nginx-ingress-external-mandatory.yaml
@@ -91,6 +98,11 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   sed -i "s/app.kubernetes.io\/part-of: ingress-nginx/app.kubernetes.io\/part-of: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
   sed -i "s/  name: ingress-nginx$/  name: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
   sed -i "s/namespace: ingress-nginx$/namespace: ingress-nginx-external/" /tmp/nginx-ingress-external-service.yaml
+
+  {{ if .ParamExists "krib/ingress-nginx-external-loadbalancer-ip" }}
+  # Add explicit loadbalancer IP to service
+  sed -i "/type: LoadBalancer/ a \  loadBalancerIP: {{ .Param "krib/ingress-nginx-external-loadbalancer-ip" }} \\" /tmp/nginx-ingress-external-service.yaml
+  {{ end -}}
 
   # if [[ -n $(kubectl get namespaces | grep -w ingress-nginx-external) ]] ; then
   #   echo "Purging existing nginx-ingress install"
