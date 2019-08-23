@@ -1,4 +1,4 @@
-*.yaml
+krib.yaml
 *.sha256
 *.rst
 *.json

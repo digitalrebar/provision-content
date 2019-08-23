@@ -1,0 +1,12 @@
+---
+Name: "rook/ceph-version"
+Description: "The version of rook-ceph to deploy"
+Documentation: |
+  The version of rook-ceph to deploy
+Schema:
+  type: "string"
+  default: "1.0.4"
+Meta:
+  color: "blue"
+  icon: "chess rock"
+  title: "Community Content"

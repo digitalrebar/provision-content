@@ -1,0 +1,13 @@
+---
+Name: "krib/ingress-nginx-loadbalancer-ip"
+Description: "Optionally specifies a loadbalancer IP for the nginx ingress"
+Documentation: |
+  If set, this param will set the LoadBalancer IP for the nginx ingress service. Used
+  in situations where you want to specifically choose the IP assigned to the ingress,
+  rather than having it be applied by the cloud provider (or metallb, in the bare-metal case)
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
