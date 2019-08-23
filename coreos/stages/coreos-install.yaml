@@ -1,5 +1,5 @@
-BootEnv: coreos-1911.3.0-disk
-Description: Install coreos 1911.3.0 to disk
+BootEnv: coreos-2135.6.0-disk
+Description: Install coreos 2135.6.0 to disk
 Documentation: ""
 Meta:
   color: purple

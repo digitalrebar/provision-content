@@ -1,0 +1,34 @@
+---
+Name: "validation-stop"
+Description: "Stop a validation run and report the results"
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "validation_stop.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    # Print Errors
+    {{ range $index, $error := .Param "validation/errors" }}
+    cat <<EOF{{$index}}
+    {{$error}}
+    EOF{{$index}}
+    {{ end }}
+
+    {{ if eq (len (.Param "validation/errors")) 0 }}
+    RC=0
+    echo "No errors found"
+    {{ else }}
+    RC=1
+    echo
+    echo "{{len (.Param "validation/errors")}} errors found"
+    {{ end }}
+
+    exit $RC

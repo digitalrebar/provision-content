@@ -3,4 +3,4 @@
     fstype: auto
     dev: LABEL=RANCHER_STATE
     autoformat:
-    - /dev/sda
+    - /dev/{{if .ParamExists "operating-system-disk"}}{{.Param "operating-system-disk"}}{{else}}sda{{end}}

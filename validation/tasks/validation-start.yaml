@@ -1,0 +1,52 @@
+---
+Name: "validation-start"
+Description: "Start a validation run"
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "validation_start.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    {{ if eq (.ParamExists "validation/list-parameter") false }}
+    echo "validation/list-parameter is not specified"
+    exit 1
+    {{ end }}
+
+    {{ $lp := .Param "validation/list-parameter" }}
+    {{ if eq (.ParamExists $lp) false }}
+    echo "validation/list-parameter is {{$lp}} and it does not exist."
+    exit 1
+    {{ end }}
+
+    # XXX: This should done as a single update call.
+
+    # Clear tasks
+    {{ $seestop := false -}}
+    {{ range $index, $taskname := (slice .Machine.Tasks (add .Machine.CurrentTask 1)) -}}
+       {{ if and (not (eq $taskname "validation-stop")) (not $seestop) -}}
+    echo "Remove {{$taskname}} from task"
+    drpcli machines removetask $RS_UUID "{{$taskname}}" >/dev/null
+       {{ end -}}
+       {{ if eq $taskname "validation-stop" -}}
+         {{ $seestop = true -}}
+       {{ end -}}
+    {{ end -}}
+
+    # Reset the task list
+    {{ range $index, $taskname := .ComposeParam $lp -}}
+    drpcli machines inserttask $RS_UUID "{{$taskname}}" {{$index}} >/dev/null
+    {{ end -}}
+
+    drpcli machines remove $RS_UUID param "validation/errors" >/dev/null || :
+    drpcli machines add $RS_UUID param "validation/errors" to "[]" >/dev/null
+

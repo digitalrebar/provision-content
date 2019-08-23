@@ -1,0 +1,12 @@
+---
+Name: "validation/post-install"
+Description: "Tests to run during the post-install validation stage"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

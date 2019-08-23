@@ -1,0 +1,25 @@
+---
+Name: "validation-test-success"
+Description: "Example validation success task"
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "validation_succes.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    # Just exit 0
+    echo "This is a successful validation task."
+    echo "Just exit 0."
+
+    exit 0
+

@@ -1,0 +1,12 @@
+---
+Name: "validation-post-install"
+Description: "Perform validation tasks post-install"
+Params:
+  "validation/list-parameter": "validation/post-install"
+Tasks:
+  - "validation-start"
+  - "validation-stop"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

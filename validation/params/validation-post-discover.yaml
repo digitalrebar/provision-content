@@ -1,0 +1,12 @@
+---
+Name: "validation/post-discover"
+Description: "Tests to run during the post-discover validation stage"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
