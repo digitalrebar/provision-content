@@ -7,6 +7,7 @@ Meta:
 Name: "rancher-server-live"
 ReadOnly: false
 Stages:
+  - "erase-hard-disk-set"
   - "rancheros-wipe-disks"
   - "rancheros-live"
   - "rancher-install"

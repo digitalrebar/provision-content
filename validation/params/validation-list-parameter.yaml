@@ -1,0 +1,9 @@
+---
+Name: "validation/list-parameter"
+Description: "The name of the parameter that contains the list of test to run"
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

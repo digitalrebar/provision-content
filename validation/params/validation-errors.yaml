@@ -1,0 +1,12 @@
+---
+Name: "validation/errors"
+Description: "A list of errors that valided in validation."
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

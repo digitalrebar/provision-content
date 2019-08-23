@@ -28,10 +28,10 @@ Templates:
 
     for image in $curlimage $jqimage; do
       until docker inspect $image > /dev/null 2>&1; do
-      docker pull $image
-          sleep 2
+        docker pull $image
+        sleep 2
       done
-      done
+    done
 
     while true; do
       docker run --rm $curlimage -sLk "https://$rancher_server_ip/ping" && break

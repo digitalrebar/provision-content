@@ -4,13 +4,13 @@ Description: "Run RancherOS latest disk"
 OS:
   Name: "rancheros-latest"
   Family: "rancheros"
-  IsoFile: "rancheros-latest.iso"
-  IsoSha256: "4ebb4d7ae2732482dade8131b1b6425ff1bc4a9122a318d97cdc831bd64b400c"
-  IsoUrl: "https://releases.rancher.com/os/v1.5.0/rancheros.iso"
-  Version: "v1.5.0"
+  IsoFile: "rancheros-v1.5.3.iso"
+  IsoSha256: "ea14623a2dc36cdec944d10f10c453f70e16b294713a1fe8f96449d61c70c02a"
+  IsoUrl: "https://releases.rancher.com/os/v1.5.3/rancheros.iso"
+  Version: "v1.5.3"
 Initrds:
-  - "boot/initrd-v1.5.0"
-Kernel: "boot/vmlinuz-4.14.85-rancher"
+  - "boot/initrd-v1.5.3"
+Kernel: "boot/vmlinuz-4.14.128-rancher"
 BootParams: >-
   rancher.password=rancher
   rancher.cloud_init.datasources=[url:{{.Machine.Url}}/rancheros-cloud-init]
@@ -19,6 +19,7 @@ BootParams: >-
 RequiredParams:
 OptionalParams:
   - "kernel-console"
+  - "operating-system-disk"
 Templates:
   - Name: "kexec"
     ID: "kexec.tmpl"

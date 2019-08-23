@@ -1,7 +1,7 @@
-krib.yaml
-*.sha256
-*.rst
-*.json
+/*.yaml
+/*.sha256
+/*.rst
+/*.json
 */._Version.meta
 key1*
 key2*
