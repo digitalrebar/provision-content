@@ -79,7 +79,7 @@ Templates:
         {{ if eq $elem.Type "rpm" }}
         rpm -ivh $FILENAME
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
-        SETUP=$(rpm -ql $RPMNAME | grep '/setup')
+        SETUP=$(rpm -ql $RPMNAME | grep '/setup$')
         # One day make this an argument
         TPMARG=""
         if [[ "$RPMNAME" =~ ^firmware-system ]] ; then
