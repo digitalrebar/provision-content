@@ -1,0 +1,81 @@
+Overview
+--------
+
+The image builder content pack allows an operator to create a workflow
+to build a **gold master** systemi and to capture a filesystem tarball image
+of that system as a single artifact image.  The image is suitable for
+deployment to new systems via the ``image-deploy`` plugin.
+
+In addition, the tools used in this content pack to capture an image of a
+workflow built image should also be sufficient to capture so called *brown
+field* images.  This would allow an operator to essentially "cut-n-paste"
+copies of existing servers in their operational environment.
+
+Currently, the Image Builder content only supports Linux type systems.  If you
+wish to build Microsoft Windows images, please consider using a different tool
+like Hashicorp's Packer.
+
+The Process
+===========
+
+The basic process that this content pack employs is as follows:
+
+  * create a workflow to build a new machine "gold image" from scratch
+  * use stages to customize the contents/configuration of your image
+  * capture the image as a filesystem tarball, and compress it
+  * stage the image to the DRP Endpoint in the ``files`` space for deployment
+
+The process is relatively opinionated in some aspects (repo management, installation
+of ``cloud-init`` for image deployment customizations, etc.).  It is entirely
+likely that you may need to customize either the Stages or specific tasks attached
+to the Stages to meet your use case requirements.
+
+Tutorial Videos
+===============
+
+The following tutorial videos have been made that outline and show the use of this
+content pack in conjunction with the ``image-deploy`` plugin.
+
+  * `Red Hat Enterprise Linux 7.7 <https://youtu.be/KN0oF_9DIAM>`_ (RHEL 7.7)
+  * `Digital Rebar: Immutable Image Deployment Demo <https://youtu.be/K3P9rFyZSNs>`_ (CentOS)
+
+Uploading Images
+================
+
+At the conclusion of the ``image-capture`` task (in the ``image-builder-linux`` stage),
+the image will be uploaded to the HTTP fileserver space on the DRP Endpoint.  To successfully
+upload the image, an account with administrative access to the DRP Endpoint must be used
+to authenticate to DRP.
+
+It is not possible to use the Token system to render a token in the template for authorization.
+The Token system and rendering is limited by design to only allow a Machine to make changes
+related to that given Machine's object, and not administrative access to the DRP Endpoint.
+
+Please set the ``unsafe/rs-username`` and ``unsafe/rs-password`` Params to the username and
+password with RBAC permissions to upload files to the DRP Endpoint.  In future iterations of
+this tool, the Encrypted Params system will be used.
+
+Using the Image
+===============
+
+Once the image build process has been completed, you will need to locate the HTTP file server
+URL location for use in the image deploy ``image-deploy/image-url`` Param.  To find the uploaded
+URL, review the output of the ``image-capture`` Job Log.  You should find a output similar to:
+
+  ::
+
+    | Image Builder created image information:
+    | --------------------------------------------------------------------------------
+    |         filename:  /RS_IMAGE/tarball.tgz
+    |            ident:  cf99cd80eb
+    |             date:  Tue Aug 27 18:44:35 UTC 2019
+    |             size:  517036600
+    |           md5sum:  1f40ac1bac2eb3ea99cebc38b807c15f
+    |   upload tarball:  images/rhel-tarball-20190827-184435-cf99cd80eb.tgz
+    |  upload manifest:  images/rhel-MANIFEST-20190827-184435-cf99cd80eb.txt
+
+The relevant piece is the ``images/rhel-tarball-20190827-184435-cf99cd80eb.tgz``.  You can set
+the ``image-deploy/image-url`` to:
+
+  * {{ .ProvisionerURL }}/files/images/rhel-tarball-20190827-184435-cf99cd80eb.tgz
+

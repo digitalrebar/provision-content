@@ -1,5 +1,5 @@
 Name: image-update-packages
-Description: Run 'yum -y update' on Ubuntu
+Description: On Ubuntu 16.04, run apt-get 'update' and 'dist-upgrade'.
 Documentation: |
   Should be run after fixing repo packages, but
   before installing cloud-init.
