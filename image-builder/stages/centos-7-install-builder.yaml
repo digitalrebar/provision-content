@@ -1,17 +1,21 @@
+---
+Name: centos-7-install-builder
 BootEnv: centos-7-install
 Description: CentOS 7 install stage for Image Builder
-Errors: []
+Documentation: |
+  This stage starts a CentOS 7 install for the Image Builder content.
+  It also will set the Repos based on the Install Repos specified for
+  CentOS 7 in the ``package-repositories`` param.
+
 Meta:
-  color: yellow
+  color: purple
   icon: download
   title: Digital Rebar Community Content
   origin: rackn/image-builder
-Name: centos-7-install-builder
-OptionalParams: []
 Profiles: []
-ReadOnly: true
 Reboot: false
 RequiredParams: []
+OptionalParams: []
 Tasks:
   - set-hostname
   - centos-drp-only-repos

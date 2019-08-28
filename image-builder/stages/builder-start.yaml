@@ -1,13 +1,17 @@
+---
+Name: image-builder-start
 BootEnv: ""
 Description: Start the Image Builder process.
+Documentation: |
+  This is a "decorator" stage that marks the beginning of the
+  image builder process.
+
 Meta:
   color: purple
   icon: play
   title: builder-start
-Name: builder-start
 OptionalParams: []
 Profiles: []
-ReadOnly: false
 Reboot: false
 RequiredParams: []
 Tasks: []

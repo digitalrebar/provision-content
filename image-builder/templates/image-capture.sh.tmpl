@@ -93,9 +93,9 @@ fi
 # build_json_manifest !!
 # insert above info, plus files manifest, etc... should be JSON so it can be "consumed"
 
-# our Token scope does not allow file uploads Make a param to pass in
-# a token that does instead of hardcoding a username and password
-# here.
-unset RS_TOKEN
-drpcli -U rocketskates -P r0cketsk8ts files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
-drpcli -U rocketskates -P r0cketsk8ts files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
+# our Token scope does not allow file uploads
+# TODO: use secure params for password
+UN='{{ Param "unsafe/rs-username" }}'
+PW='{{ Param "unsafe/rs-password" }}'
+drpcli -T "" -U "$UN" -P "$PW" files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
+drpcli -T "" -U "$UN" -P "$PW" files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"

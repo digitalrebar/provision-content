@@ -10,25 +10,36 @@
 
 case $OS_FAMILY in
   rhel)
-    echo "Setting '$OS_TYPE' base repos back to default."
-    yum -y reinstall $OS_TYPE-release
+    source /etc/os-release
+    echo "Identified RHEL variant as '$NAME'"
     rm -f /etc/yum.repos.d/00-rebar-base.repo
     yum -y clean all
     yum -y makecache
-    #### TODO:  in the future, we want to give control over the
-    ####        pkg installs to define local repos
-    # Install EPEL repo - but if this failes, we don't want to
-    # exit out, we'll try to manually get the EPEL rpm and install
-    # that as a last ditch resort
-    if ! yum -y install epel-release; then
-      if ! curl -fgL \
-          http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-          -o /tmp/epel.rpm; then
-       echo "Failed to get EPEL RPM"
-       exit 1
-     fi
-        rpm -ivh /tmp/epel.rpm && rm -f /tmp/epel.rpm
-    fi
+
+    case $NAME in
+      "Red Hat Enterprise Linux Server")
+        echo "Activate Redhat Subscription Manager repositories"
+        {{ template "redhat-subscription-register.sh.tmpl" .}}
+      ;;
+      *)
+        echo "Setting '$OS_TYPE' base repos back to default."
+        yum -y reinstall $OS_TYPE-release
+        #### TODO:  in the future, we want to give control over the
+        ####        pkg installs to define local repos
+        # Install EPEL repo - but if this failes, we don't want to
+        # exit out, we'll try to manually get the EPEL rpm and install
+        # that as a last ditch resort
+        if ! yum -y install epel-release; then
+          if ! curl -fgL \
+              http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+              -o /tmp/epel.rpm; then
+          echo "Failed to get EPEL RPM"
+          exit 1
+        fi
+            rpm -ivh /tmp/epel.rpm && rm -f /tmp/epel.rpm
+        fi
+      ;;
+    esac
     ;;
   debian|ubuntu)
     echo "Setting '$OS_TYPE' '$OS_VER' base repos back to default."
