@@ -1,0 +1,25 @@
+---
+Name: rhel-server-7-reset
+Description: Basic RHEL Install Workflow, Register, and Runner
+Documentation: |
+  This workflow includes the DRP Runner in RHEL provisioning process for DRP.
+  It also will register the system with Redhat Subscription Manager.  Requires
+  the ``redhat/subscription-username`` and ``redhat/subscription-password`
+  Params are specified with values that have entitlement for Redhat Server
+  subscritpion.
+
+  After the install completes, the workflow installs the runner
+  in a waiting state so that DRP will automatically detect and start a
+  new workflow if the Machine.Workflow is updated.
+
+  NOTE: To enable, upload the RHEL ISO as per the rhel-7-install BootEnv
+
+Meta:
+  color: red
+  icon: hat
+  title: RackN Content
+ReadOnly: true
+Stages:
+  - redhat-subscription-unregister
+  - rhel-to-sledgehammer
+

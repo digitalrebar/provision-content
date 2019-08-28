@@ -1,0 +1,30 @@
+---
+Name: redhat-subscription-unregister
+Description: RHEL Server Subscription Manager Unregister
+Documentation: |
+  Unregister the system from the Red Hat Subscription management service.
+
+  Used for decommission workflow to cleanly release an activated subscription
+  for reuse elsewhere.  If you do not run this process, then you must release
+  the subscription from the Redhat portal at:
+
+    https://access.redhat.com/management/systems
+
+  If the ``redhat/subscription-skip-activation`` Param is set to ``true``, then
+  unregister process will also skip.
+
+Meta:
+  color: blue
+  icon: download
+  title: Digital Rebar Community Content
+Params: {}
+Partial: false
+Profiles: []
+Reboot: false
+RequiredParams: []
+OptionalParams:
+  - redhat/subscription-skip-activation
+RunnerWait: true
+Tasks:
+  - redhat-subscription-unregister
+Templates: []

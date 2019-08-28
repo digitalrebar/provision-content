@@ -1,0 +1,17 @@
+---
+Name: "redhat/subscription-skip-activation"
+Description: "Bypasses the Redhat Subscription Manager activation if set to true"
+Documentation: |
+  Boolean value that tells the redhat subscription mananger stage to skip
+  setting up and activating.  Mainly used in debugging workflows.
+
+  Additionally, if this is set to ``true``, the *unregister* process will
+  skip as well.
+Meta:
+  icon: "database"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+
+Schema:
+  type: "boolean"
+  default: false

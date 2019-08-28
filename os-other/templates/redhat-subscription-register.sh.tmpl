@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Sets up RedHat Subscription Manager and activates repos
+
+{{ template "setup.tmpl" .}}
+{{ if eq (.Param "redhat/subscription-skip-activation") true }}echo "Skipping RHSM setup."; exit 0{{ end -}}
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+
+(which subscription-manager > /dev/null 2>&1 ) || xiterr "Unable to locate 'subscription-manager' tool in PATH ($PATH)."
+
+{{ if .Param "redhat/subscription-username" }}UN={{ .Param "redhat/subscription-username" }}{{ else }}ERR=1{{ end }}
+{{ if .Param "redhat/subscription-password" }}PW={{ .Param "redhat/subscription-password" }}{{ else }}ERR=1{{ end }}
+(( $ERR )) && xiterr "Missing RHSM username or password info ('redhat/subscription-username' and 'redhat/subscription-password')"
+
+{{ range $key, $repos := .Param "redhat/subscription-repos" -}}
+echo "Adding '{{ $repos }}' to the activated subscription manager repositories."
+REPOS="$REPOS --enable={{ $repos }}"
+{{ end -}}
+[[ -n "$REPOS" ]] && DO_REPOS="subscription-manager repos $REPOS" || DO_REPOS=""
+
+subscription-manager register --force --username="$UN" --password="$PW"
+subscription-manager attach --auto
+eval $DO_REPOS
+yum -y makecache
+{{ range $key, $gpgkey := .Param "redhat/subscription-gpg-keys" -}}
+rpm --import {{ $gpgkey }}
+{{ else -}}
+echo "No GPG keys for import found. (Param: 'redhat/subscription-gpg-keys')."
+{{ end -}}
+
+exit 0

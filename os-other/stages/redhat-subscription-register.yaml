@@ -1,0 +1,34 @@
+---
+Name: redhat-subscription-register
+Description: RHEL Server Subscription Manager Register and Repo Activation
+Documentation: |
+  Register the machine to Redhat Subscription Manager, and activate the repos
+  specified in ``redhat/subscription-repos`` Param.
+
+  If the ``redhat/subscription-skip-activation`` is ``false`` (the default
+  value), then you **MUST** set the ``redhat/subscription-username`` and
+  ``redhat/subscription-password`` Params.  Your subscription entitlement
+  must have an active subscription right for Red Hat Enterprise Linux.
+
+  If no valid entitlement is found, the register process will fail and the
+  workflow will stop.
+
+Meta:
+  color: blue
+  icon: download
+  title: Digital Rebar Community Content
+Params: {}
+Partial: false
+Profiles: []
+Reboot: false
+RequiredParams: []
+OptionalParams:
+  - redhat/subscription-username
+  - redhat/subscription-password
+  - redhat/subscription-gpg-keys
+  - redhat/subscription-repos
+  - redhat/subscription-skip-activation
+RunnerWait: true
+Tasks:
+  - redhat-subscription-register
+Templates: []
