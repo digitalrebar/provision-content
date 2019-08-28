@@ -1,0 +1,32 @@
+---
+Name: "redhat/subscription-repos"
+Description: "Defines YUM repos to activate for RHEL servers"
+Documentation: |
+  This is an array of strings where each string a repo name to apply to the
+  ``subscription-manager repos ... `` command.
+
+  If not specified the following repos will be enabled automatically:
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-optional-rpms
+    - rhel-7-server-ansible-2.8-rpms
+    - rhel-7-server-rhn-tools-rpms
+    - rhel-7-server-rh-common-rpms
+    - rhel-7-server-supplementary-rpms
+
+Meta:
+  icon: "time"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default:
+    - rhel-7-server-rpms
+    - rhel-7-server-extras-rpms
+    - rhel-7-server-optional-rpms
+    - rhel-7-server-ansible-2.8-rpms
+    - rhel-7-server-rhn-tools-rpms
+    - rhel-7-server-rh-common-rpms
+    - rhel-7-server-supplementary-rpms

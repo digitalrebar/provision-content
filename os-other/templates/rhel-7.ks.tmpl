@@ -1,0 +1,59 @@
+# DigitalRebar Provision RHEL-7 (and related distros) kickstart
+
+{{range .InstallRepos}}
+{{ .Install }}
+{{end}}
+# key --skip
+# Disable geolocation for language and timezone
+# Currently broken by https://bugzilla.redhat.com/show_bug.cgi?id=1111717
+# geoloc 0
+timezone --utc UTC
+lang en_US.UTF-8
+keyboard us
+# rebar
+rootpw --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1{{end}}
+firewall --disabled
+authconfig --enableshadow --enablemd5
+selinux --disabled
+
+bootloader --location=mbr {{if .ParamExists "operating-system-disk"}}--driveorder={{.Param "operating-system-disk"}}{{end}} --append="rhgb quiet"
+zerombr
+{{if .ParamExists "operating-system-disk"}}ignoredisk --only-use={{.Param "operating-system-disk"}}{{end}}
+clearpart --all {{if .ParamExists "operating-system-disk"}}--drives={{.Param "operating-system-disk"}}{{end}}
+part /boot --fstype ext4 --size=512 {{if .ParamExists "operating-system-disk"}}--ondisk={{.Param "operating-system-disk"}}{{end}}
+part /boot/efi --fstype vfat --size=512 {{if .ParamExists "operating-system-disk"}}--ondisk={{.Param "operating-system-disk"}}{{end}}
+part swap --recommended
+part pv.6 --size=1 --grow {{if .ParamExists "operating-system-disk"}}--ondisk={{.Param "operating-system-disk"}}{{end}}
+volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
+logvol / --fstype ext4 --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
+text
+reboot {{if .Param "kexec-ok" }}--kexec{{end}}
+
+%packages
+@core
+trousers
+fipscheck
+device-mapper-multipath
+openssh
+curl
+efibootmgr
+tar
+{{if .ParamExists "extra-packages" -}}
+{{ range $index, $element := (.Param "extra-packages") -}}
+{{$element}}
+{{end -}}
+{{end -}}
+%end
+
+%post
+
+exec > /root/post-install.log 2>&1
+set -x
+export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+
+{{template "reset-workflow.tmpl" .}}
+{{template "runner.tmpl" .}}
+
+sync
+%end
+
