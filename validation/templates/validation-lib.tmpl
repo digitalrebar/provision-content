@@ -14,3 +14,11 @@ add_validation_error() {
   set_param validation/errors "$list"
 }
 
+validate_machine_name_dns_by_ip() {
+    local my_ip=$(getent hosts {{.Machine.Name}}|awk '{print $1}')
+
+    if [[ ${my_ip} != $1 ]]; then
+        return 1
+    fi
+    return 0
+}
