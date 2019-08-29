@@ -1,0 +1,26 @@
+---
+Name: rhel-server-7-install
+BootEnv: rhel-server-7-install
+Description: RHEL Server 7 install stages.  Using full DVD ISO.
+Documentation: |
+  Uses the RHEL 7 server DVD ISO to install.  Enables installation from local
+  ISO as the repo source.
+
+  Note that ``centos-drp-only-repos`` is valid with Redhat systems.
+Meta:
+  color: blue
+  icon: download
+  title: Digital Rebar Community Content
+OptionalParams: []
+Params: {}
+Partial: false
+Profiles: []
+Reboot: false
+RequiredParams: []
+RunnerWait: true
+Tasks:
+  - set-hostname
+  - centos-drp-only-repos
+  - ssh-access
+  - configure-network
+Templates: []

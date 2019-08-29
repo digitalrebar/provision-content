@@ -1,0 +1,16 @@
+---
+Name: "redhat/subscription-username"
+Description: "Sets the Redhat Subscription Network username for activation"
+Documentation: |
+  Specifies the Redhat Subscription Manager username for activating this
+  redhat server with.
+
+  The username must have entitlement rights to actiave a subscription for
+  Redhat Server Enterprise Linux.
+
+Meta:
+  icon: "time"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "string"

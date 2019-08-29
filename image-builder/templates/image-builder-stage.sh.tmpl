@@ -9,8 +9,6 @@
 echo ">>> In push step ... "
 set -x
 
-# push tarball to S3 ?  dr-provision ?
-
 MD5=$(md5sum ${RS_BUILDER_TARFILE} | awk ' { print $1 } ')
 
 if [[ -f $RS_BUILDER_TARFILE ]]
@@ -27,17 +25,15 @@ then
     echo " upload manifest:  $RS_UPLOAD_MANIFEST   "
 fi
 
-# build_json_manifest !!
+# TODO: build_json_manifest !!
 # insert above info, plus files manifest, etc... should be JSON so it can be "consumed"
 
 set -x
-# why no worky w/ TOKEN ?
-#drpcli -T ${RS_TOKEN} files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
-#drpcli -T ${RS_TOKEN} files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
-
-# our Token scope does not allow file uploads
-#unset RS_TOKEN
-drpcli -T "" -U rocketskates -P r0cketsk8ts -E ${RS_ENDPOINT} files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
-drpcli -T "" -U rocketskates -P r0cketsk8ts -E ${RS_ENDPOINT} files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
+# our Token scope does not allow file uploads - have to use Username/Password
+# TODO: future iterations of this should be better with use of Encrypted Params
+UN='{{ Param "unsafe/rs-username" }}'
+PW='{{ Param "unsafe/rs-password" }}'
+drpcli -T "" -U $UN -P $PW -E ${RS_ENDPOINT} files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
+drpcli -T "" -U $UN -P $PW -E ${RS_ENDPOINT} files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
 
 set +x

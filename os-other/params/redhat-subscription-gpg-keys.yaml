@@ -1,0 +1,23 @@
+---
+Name: "redhat/subscription-gpg-keys"
+Description: "An array of Yum GPG Repo Keys to import"
+Documentation: |
+  This is an array of strings where each string is a Yum Repo GPG key
+  to import.  Specify either rendered keys (file path) on the system, or
+  a URL reference to the key.
+
+  If not specified, the primary Redhat keys will be added, as referenced
+  at https://access.redhat.com/security/team/key
+
+Meta:
+  icon: "lock"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default:
+    - https://www.redhat.com/security/data/fd431d51.txt
+    - https://www.redhat.com/security/d4082792.txt
+    - https://www.redhat.com/security/37017186.txt

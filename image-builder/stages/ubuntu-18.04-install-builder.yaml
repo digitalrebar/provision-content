@@ -1,13 +1,12 @@
-Available: true
+---
+Name: ubuntu-18.04-install-builder
 BootEnv: ubuntu-18.04-beta-install
-Description: (BETA) Ubuntu 18.04 install stage for Image Builder
-Errors: []
+Description: Ubuntu 18.04 install stage for Image Builder
 Meta:
-  color: yellow
+  color: purple
   icon: download
   title: Digital Rebar Community Content
   origin: rackn/image-builder
-Name: ubuntu-18.04-install-builder
 OptionalParams: []
 Profiles: []
 ReadOnly: true
@@ -18,5 +17,4 @@ Tasks:
   - ubuntu-drp-only-repos
   - ssh-access
 Templates: []
-Validated: true
 

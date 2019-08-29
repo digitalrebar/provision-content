@@ -1,5 +1,25 @@
+---
 Name: image-builder-linux
 Description: Create an image ready to be managed by cloud-init
+Documentation: |
+  An example stage that configures a CentOS 7 host to be ready for Image
+  Builder to capture a root filesystem tarball image of the installed system.
+
+  Note that package repository handling may need to be changed for your
+  environment, in which case you will want to construct a custom Stage
+  that modifies repos correctly for your use.
+
+  In addition this Stage will update all packages to the "latest" in the package
+  repositories.  This may not be the correct behavior for your use case.
+
+  This stage performs the following functions:
+
+    1. Reset package repositories - reset package repos to system "stock"
+    2. Update all packages to the latest versions in the package repositories
+    3. Install ``cloud-init`` for image bootstrap configuration
+    4. Clean up the image by stripping out useless kernels, package meta files, etc.
+    5. Perform the root filesystem tarball capture and stage it to the DRP Endpoint for use
+
 Meta:
   color: purple
   icon: pin

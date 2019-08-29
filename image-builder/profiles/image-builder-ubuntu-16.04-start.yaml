@@ -1,6 +1,9 @@
 Name: builder-ubuntu-16.04-start
 Description: Profile for image builder change-stage/map which uses 'builder-start' Stage.
 Documentation: |
+  NOTE:  This needs to be converted to Workflows - do not use
+  the change-stage/map process.
+
   This change-stage/map will enable use of the Image Builder.
   Starting from a 'sledgehammer-wait' stage, place the machine
   in the 'builder-start' Stage.  The Machine will reboot and

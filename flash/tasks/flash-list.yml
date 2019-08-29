@@ -79,19 +79,56 @@ Templates:
         {{ if eq $elem.Type "rpm" }}
         rpm -ivh $FILENAME
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
-        SETUP=$(rpm -ql $RPMNAME | grep '/setup')
+        SETUP=$(rpm -ql $RPMNAME | grep '/setup$')
+        # One day make this an argument
+        TPMARG=""
+        if [[ "$RPMNAME" =~ ^firmware-system ]] ; then
+          TPMARG="--tpmbypass"
+        fi
+        if [[ "$RPMNAME" =~ ^firmware-ilo ]] ; then
+          TPMARG="--tpmbypass"
+        fi
         cd $(dirname $SETUP)
-        $SETUP -s -g ${FORCE} |& tee $FILENAME.log || case $? in
+        if [[ "$RPMNAME" =~ ^firmware-nic-mellanox ]] ; then
+          $SETUP -s ${FORCE} |& tee $FILENAME.log || case $? in
+            0)
+              echo "Installed successfully - no reboot required";;
+            1)
+              echo "Nothing to do";;
             *)
-            echo "$SETUP returned $?"
-            ;;
-        esac
+              echo "$SETUP returned $?"
+              failed=yes;;
+          esac
+        else
+          $SETUP -s -g ${TPMARG} ${FORCE} |& tee $FILENAME.log || case $? in
+            0)
+              echo "Installed successfully - no reboot required";;
+            1)
+              echo "Installed successfully - reboot required"
+              want_reboot=yes;;
+            2)
+              echo "Nothing to do - at current level";;
+            3)
+              echo "Nothing to do - current level or no matching hardware";;
+            4)
+              echo "Nothing to do - matching hardware doesn't have firmware";;
+            5)
+              echo "Nothing to do - user interrupted the install";;
+            6)
+              echo "Nothing to do - hardware disabled";;
+            7)
+              echo "A failure has occurred."
+              failed=yes;;
+            *)
+              echo "$SETUP returned $?"
+              failed=yes;;
+          esac
+        fi
         cd -
-        want_reboot=yes
-        hpe=yes
         {{ end }}
       {{ end }}
 
+      # Leave this for now as a potential out in the future.  Going to try trusting the HPE return codes.
       if [[ $hpe = yes ]]; then
           echo "HPE system - return codes are useless - never come back"
           drpcli machines set "$RS_UUID" param skip-flash to true
