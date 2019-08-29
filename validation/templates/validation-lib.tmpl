@@ -37,3 +37,20 @@ validate_ipv4_ip_syntax() {
   fi
   return $stat
 }
+
+check_same_subnet() {
+    local ip=$1
+    local gw=$2
+    local nm=$3
+    eval $(ipcalc -n $ip $nm)
+    NET_IP=$NETWORK
+    [[ -z "$NET_IP" ]] && NET_IP="fail_ip"
+    unset NETWORK
+    eval $(ipcalc -n $gw $nm)
+    NET_GW=$NETWORK
+    [[ -z "$NET_GW" ]] && NET_GW="fail_gw"
+    if [[ $NET_IP == $NET_GW ]]; then
+      return 0
+    fi
+    return 1
+}
