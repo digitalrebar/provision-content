@@ -1,0 +1,12 @@
+---
+Name: "redhat-subscription-register"
+Description: "A task to register this Machine for Redhat Subscription Network and repos"
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+  - ID: "redhat-subscription-register.sh.tmpl"
+    Name: "Redhat Subscription Network Register"
+    Path: ""

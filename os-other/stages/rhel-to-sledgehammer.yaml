@@ -1,0 +1,7 @@
+---
+Name: rhel-to-sledgehammer
+Meta:
+  color: yellow
+  icon: sync
+Description: RHEL Make Sure To Go To Sledgehammer
+BootEnv: sledgehammer

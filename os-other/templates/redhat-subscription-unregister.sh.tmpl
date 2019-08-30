@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Unregisteres system from RedHat Subscription Manager
+
+{{ template "setup.tmpl" .}}
+{{ if eq (.Param "redhat/subscription-skip-activation") true }}echo "Skipping RHSM setup."; exit 0{{ end -}}
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+
+(which subscription-manager > /dev/null 2>&1 ) || xiterr "Unable to locate 'subscription-manager' tool in PATH ($PATH)."
+
+STAT=$(subscription-manager status | grep "^Overall Status:" | awk ' { print $NF } ')
+if [[ $STAT == "Unknown" ]]
+then
+  echo "System does not appear to be registered ... skipping deregistration process"
+else
+  subscription-manager remove --all
+  subscription-manager unregister
+  subscription-manager clean
+fi
+
+exit 0
