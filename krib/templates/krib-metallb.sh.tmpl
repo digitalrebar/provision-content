@@ -86,6 +86,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   
   wget -O /tmp/metallb.yaml https://github.com/danderson/metallb/raw/{{ .Param "krib/metallb-version" }}/manifests/metallb.yaml
 
+  # Replace references to "master" with the user-specified tag (if user has left the default at "master" this will have no effect)
+  sed -i 's/speaker:master/speaker:{{ .Param "krib/metallb-version" }}/' /tmp/metallb.yaml
+  sed -i 's/controller:master/controller:{{ .Param "krib/metallb-version" }}/' /tmp/metallb.yaml
+
 {{$port := .Param "metallb/monitoring-port"}}
   sed -i 's/prometheus.io\/port: "7472"/prometheus.io\/port: "{{$port}}"/' /tmp/metallb.yaml
   sed -i 's/- --port=7472/- --port={{$port}}/' /tmp/metallb.yaml
