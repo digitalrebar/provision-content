@@ -84,7 +84,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     install wget
   fi
   
-  wget -O /tmp/metallb.yaml {{ .Param "krib/metallb-config" }}
+  wget -O /tmp/metallb.yaml https://github.com/danderson/metallb/raw/{{ .Param "krib/metallb-version" }}/manifests/metallb.yaml
+
 {{$port := .Param "metallb/monitoring-port"}}
   sed -i 's/prometheus.io\/port: "7472"/prometheus.io\/port: "{{$port}}"/' /tmp/metallb.yaml
   sed -i 's/- --port=7472/- --port={{$port}}/' /tmp/metallb.yaml

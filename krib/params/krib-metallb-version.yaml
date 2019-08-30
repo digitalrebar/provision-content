@@ -1,0 +1,13 @@
+---
+Name: "krib/metallb-version"
+Description: "Specifies the version of MetalLB to install."
+Documentation: |
+  Set this string to the version of MetalLB to install. Defaults to "master", but cautious users may want to set
+  this to an established MetalLB release version
+Schema:
+  type: "string"
+  default: "master"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
