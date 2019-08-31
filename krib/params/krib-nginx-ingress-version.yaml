@@ -1,0 +1,14 @@
+---
+Name: "krib/nginx-ingress-version"
+Description: "Specifies the version of nginx ingress controller to install."
+Documentation: |
+  Set this string to the version of MetalLB to install. Defaults to "0.25.1". This should align with the param
+  krib/ingress-nginx-mandatory, and is used to ensure that the container images used for the nginx deployment
+  match the desired version.
+Schema:
+  type: "string"
+  default: "master"
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"
