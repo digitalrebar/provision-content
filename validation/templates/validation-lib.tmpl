@@ -15,7 +15,13 @@ add_validation_error() {
 }
 
 validate_machine_name_dns_by_ip() {
-    local my_ip=$(getent hosts {{.Machine.Name}}|awk '{print $1}')
+    local host=""
+    if [[ $# < 1 ]]; then
+        host={{.Machine.Name}}
+    else
+        host=$1
+    fi
+    local my_ip=$(getent hosts ${host}|awk '{print $1}')
 
     if [[ ${my_ip} != $1 ]]; then
         return 1
