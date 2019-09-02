@@ -25,6 +25,11 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # Get manifests, and duplicate service manifest for optional additional external ingress
   wget -O /tmp/nginx-ingress-mandatory.yaml {{ .Param "krib/ingress-nginx-mandatory" }}
   wget -O /tmp/nginx-ingress-service.yaml {{ .Param "krib/ingress-nginx-config" }}
+
+  # Replace references to "master" with the user-specified tag (if user has left the default at "master" this will have no effect)
+  sed -i 's/nginx-ingress-controller:.*/nginx-ingress-controller:{{ .Param "krib/nginx-ingress-version" }}/' /tmp/nginx-ingress-mandatory.yaml
+
+  # Prepare for possibility of a second, external ingress
   cp /tmp/nginx-ingress-service.yaml /tmp/nginx-ingress-external-service.yaml
 
   # if [[ -n $(kubectl get namespaces | grep -w ingress-nginx) ]] ; then
