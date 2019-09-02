@@ -14,3 +14,49 @@ add_validation_error() {
   set_param validation/errors "$list"
 }
 
+validate_machine_name_dns_by_ip() {
+    local host=""
+    if [[ $# -le 1 ]]; then
+        host={{.Machine.Name}}
+    else
+        host=$2
+    fi
+    local my_ip=$(getent hosts ${host}|awk '{print $1}')
+
+    if [[ ${my_ip} != $1 ]]; then
+        return 1
+    fi
+    return 0
+}
+
+validate_ipv4_ip_syntax() {
+  local ip=$1
+  local stat=1
+  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    OIFS=$IFS
+    IFS='.'
+    ip=($ip)
+    IFS=$OIFS
+    [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+    && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+    stat=$?
+  fi
+  return $stat
+}
+
+check_same_subnet() {
+    local ip=$1
+    local gw=$2
+    local nm=$3
+    eval $(ipcalc -n $ip $nm)
+    NET_IP=$NETWORK
+    [[ -z "$NET_IP" ]] && NET_IP="fail_ip"
+    unset NETWORK
+    eval $(ipcalc -n $gw $nm)
+    NET_GW=$NETWORK
+    [[ -z "$NET_GW" ]] && NET_GW="fail_gw"
+    if [[ $NET_IP == $NET_GW ]]; then
+      return 0
+    fi
+    return 1
+}
