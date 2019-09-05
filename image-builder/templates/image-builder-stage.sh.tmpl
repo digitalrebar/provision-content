@@ -31,8 +31,8 @@ fi
 set -x
 # our Token scope does not allow file uploads - have to use Username/Password
 # TODO: future iterations of this should be better with use of Encrypted Params
-UN='{{ Param "unsafe/rs-username" }}'
-PW='{{ Param "unsafe/rs-password" }}'
+UN='{{ .Param "unsafe/rs-username" }}'
+PW='{{ .Param "unsafe/rs-password" }}'
 drpcli -T "" -U $UN -P $PW -E ${RS_ENDPOINT} files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
 drpcli -T "" -U $UN -P $PW -E ${RS_ENDPOINT} files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
 
