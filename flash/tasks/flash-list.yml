@@ -80,6 +80,9 @@ Templates:
         rpm -ivh $FILENAME
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
         SETUP=$(rpm -ql $RPMNAME | grep '/setup$')
+        if [[ "$SETUP" = "" ]] ; then
+          SETUP=$(rpm -ql $RPMNAME | grep '/hpsetup$')
+        fi
         # One day make this an argument
         TPMARG=""
         if [[ "$RPMNAME" =~ ^firmware-system ]] ; then
