@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+[[ {{.Param "skip-flash"}} = true ]] && exit 0
+ocshow() {
+  local v
+  v=$(grep "$1" <(/opt/OneCli/OneCli config show "$1"))
+  printf '%s' "${v#${1}=}"
+}
+ocset() {
+  /opt/OneCli/OneCli config set "$1" "$2"
+}
+if [[ $(ocshow IMM.LanOverUsb) != Enabled ]]; then
+  ocset IMM.LanOverUsb Enabled
+fi
+raddr=$(ocshow IMM.LanOverUsbIMMIP)
+laddr=$(ocshow IMM.LanOverUsbHostIP)
+mask=$(ocshow IMM.LanOverUsbIMMNetmask)
+for nic in /sys/class/net/*; do
+  driver=$(readlink -f "$nic/device/driver")
+  [[ ${driver##*/} = cdc_ether ]] || continue
+  nic=${nic##*/}
+  break
+done
+if [[ ! -d /sys/class/net/$nic ]]; then
+  echo "Unable to find USB network device"
+  exit 1
+fi
+ip link set "$nic" up
+ip addr flush dev "$nic" scope global
+ip addr add "$laddr/$mask" dev "$nic"
+ping -q -c 1 "$raddr" && exit 0
+echo "Unable to talk to IPMI controller at $raddr via $laddr"
+exit 1

@@ -20,6 +20,7 @@ Schema:
         enum:
           - "rpm"
           - "bin"
+          - "onecli"
       File:
         type: string
       Force:
