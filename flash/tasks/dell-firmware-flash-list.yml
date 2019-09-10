@@ -1,0 +1,90 @@
+---
+Name: dell-firmware-flash-list
+Description: Dell Firmware Flash From List
+RequiredParams:
+  - skip-flash
+  - flash-list
+Templates:
+  - Name: dell-firmware-flash-list
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      skip_flash="{{.Param "skip-flash"}}"
+      if [[ $skip_flash = true ]]; then
+          echo "Skipping all flash operations due to skip-flash being true"
+          exit 0
+      fi
+
+      if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          echo "System not in Sledgehammer, exiting"
+          exit 0
+      fi
+
+      want_reboot=no
+      failed=no
+      hpe=no
+      {{ range $index, $elem := .Param "flash-list" }}
+        FILENAME="file.{{$index}}"
+        {{ if $elem.Force }}
+        FORCE="-f"
+        {{ else }}
+        FORCE=
+        {{ end }}
+
+        {{ if hasPrefix "http:" $elem.File }}
+        curl -o $FILENAME {{$elem.File}}
+        {{ else if hasPrefix "https:" $elem.File }}
+        curl -k -o $FILENAME {{$elem.File}}
+        {{ else }}
+        curl -o $FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
+        {{ end }}
+
+        chmod +x $FILENAME
+        ./$FILENAME -q ${FORCE} |& tee $FILENAME.log || case $? in
+          1)
+             # If the system is up to date, this is the return code and
+             # the log will have the message "No Applicable Updates Available"
+             failed=yes
+             fgrep -q "No Applicable Updates Available" $FILENAME.log && failed=no
+             ;;
+          2)
+             echo "$FILENAME wants a reboot"
+             want_reboot=yes;;
+          3)
+             echo "Soft error for $FILENAME"
+             echo "Likely at the exact level already.";;
+          4)
+             echo "Hard error for $FILENAME"
+             failed=yes;;
+          5)
+             echo "Unquailifed update for $FILENAME"
+             failed=yes;;
+          6)
+             echo "Reboot started!! for $FILENAME"
+             want_reboot=yes;;
+          9)
+             echo "RPM verify failed for $FILENAME"
+             failed=yes;;
+          13)
+             echo "Dependency failure, but success!";;
+          14)
+             echo "Dependency failure, but reboot wanted"
+             want_reboot=yes;;
+        esac
+      {{ end }}
+
+      if [[ $want_reboot = yes ]]; then
+          echo "Need reboot - start rebooting"
+          exit_incomplete_reboot
+      fi
+
+      if [[ $failed = yes ]]; then
+          echo "Something failed - error"
+          exit 1
+      fi
+
+      echo "Nothing else to do and complete"
+      drpcli machines set "$RS_UUID" param skip-flash to true
+      exit 0

@@ -1,11 +1,11 @@
 ---
-Name: flash-list
-Description: General Flash From List handles HPE RPMs and Dell BINs
+Name: hpe-firmware-flash-list
+Description: HPE Firmware Flash From List
 RequiredParams:
   - skip-flash
   - flash-list
 Templates:
-  - Name: flash-list
+  - Name: hpe-firmware-flash-list
     Contents: |
       #!/usr/bin/env bash
 
@@ -24,7 +24,6 @@ Templates:
 
       want_reboot=no
       failed=no
-      hpe=no
       {{ range $index, $elem := .Param "flash-list" }}
         FILENAME="file.{{$index}}"
         {{ if $elem.Force }}
@@ -41,42 +40,8 @@ Templates:
         curl -o $FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
         {{ end }}
 
-        {{ if eq $elem.Type "bin" }}
-        chmod +x $FILENAME
-        ./$FILENAME -q ${FORCE} |& tee $FILENAME.log || case $? in
-          1)
-             # If the system is up to date, this is the return code and
-             # the log will have the message "No Applicable Updates Available"
-             failed=yes
-             fgrep -q "No Applicable Updates Available" $FILENAME.log && failed=no
-             ;;
-          2)
-             echo "$FILENAME wants a reboot"
-             want_reboot=yes;;
-          3)
-             echo "Soft error for $FILENAME"
-             echo "Likely at the exact level already.";;
-          4)
-             echo "Hard error for $FILENAME"
-             failed=yes;;
-          5)
-             echo "Unquailifed update for $FILENAME"
-             failed=yes;;
-          6)
-             echo "Reboot started!! for $FILENAME"
-             want_reboot=yes;;
-          9)
-             echo "RPM verify failed for $FILENAME"
-             failed=yes;;
-          13)
-             echo "Dependency failure, but success!";;
-          14)
-             echo "Dependency failure, but reboot wanted"
-             want_reboot=yes;;
-        esac
-        {{ end }}
-
-        {{ if eq $elem.Type "rpm" }}
+        # Erroring commands are to be expected.
+        set +e
         rpm -ivh $FILENAME
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
         SETUP=$(rpm -ql $RPMNAME | grep '/setup$')
@@ -128,14 +93,7 @@ Templates:
           esac
         fi
         cd -
-        {{ end }}
       {{ end }}
-
-      # Leave this for now as a potential out in the future.  Going to try trusting the HPE return codes.
-      if [[ $hpe = yes ]]; then
-          echo "HPE system - return codes are useless - never come back"
-          drpcli machines set "$RS_UUID" param skip-flash to true
-      fi
 
       if [[ $want_reboot = yes ]]; then
           echo "Need reboot - start rebooting"
