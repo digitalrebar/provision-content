@@ -60,3 +60,25 @@ check_same_subnet() {
     fi
     return 1
 }
+
+ping_dest_from_src() {
+    local src=$1
+    local dest=$2
+    local count=${3:-4}
+    local timeout=${4:-1}
+    set +e
+    loss=$(ping -c ${count} -W ${timeout} -I ${src} ${dest})
+    local xit=$?
+    if [[ ${xit} -eq 0 ]]; then
+        loss=$(echo "${loss}"|awk '/loss/ {print substr($6, 1, length($6)-1)}')
+        if [[ ${loss} -gt 0 ]]; then
+            return 1
+        fi
+        return 0
+    elif [[ ${xit} -eq 1 ]]; then
+        return 1
+    elif [[ ${xit} -eq 2 ]]; then
+        return 2
+    fi
+    return ${xit}
+}
