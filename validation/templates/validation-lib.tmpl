@@ -21,7 +21,7 @@ validate_machine_name_dns_by_ip() {
     else
         host=$2
     fi
-    local my_ip=$(getent ahostsv4 ${host}|awk '{print $1}')
+    local my_ip=$(getent ahostsv4 ${host}|awk '{print $1}'|head -1)
 
     if [[ ${my_ip} != $1 ]]; then
         return 1
