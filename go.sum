@@ -15,6 +15,8 @@ github.com/digitalrebar/logger v0.3.0 h1:7/XP3BQiWfl1Lqmm7tvkvdwjPilDUUPC/iWbeWO
 github.com/digitalrebar/logger v0.3.0/go.mod h1:zH2t4FBhzVxZJTg+eaPzNCRL50nlcRLxWurfTsl5jWE=
 github.com/digitalrebar/provision/v4 v4.0.0 h1:JhYMI7uUdhgv0Ccg7p4lTmm/wCtmttykkMuKAvPnrWE=
 github.com/digitalrebar/provision/v4 v4.0.0/go.mod h1:AWhC3b3eBPL2c9hC8FnHwfL7X2EiEascOYvwHW3tkIs=
+github.com/digitalrebar/provision/v4 v4.0.20 h1:Ev4VLsCIv3HL8bwBcltIXp7YodiSUO+8bG887Bmv02o=
+github.com/digitalrebar/provision/v4 v4.0.20/go.mod h1:LjRvoXvY3uYzoLsQgBdV2BKo0YJIYOqL75WuCoP7rWQ=
 github.com/digitalrebar/tftp v2.1.0+incompatible h1:CzBcnsUaMtdLSOf3dSycinnfpajAAro7l8oo/ILyzOI=
 github.com/digitalrebar/tftp v2.1.0+incompatible/go.mod h1:k1tcsyQwHE72oTU5sfXPJdOCHFiZUt3M2BdYdHsfw6c=
 github.com/digitalrebar/tftp/v3 v3.0.0 h1:Ft2i3s2gCZ795rISs9vlcy3YSqfd6mtodxGoUcPSrhs=
@@ -27,6 +29,7 @@ github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeME
 github.com/go-ole/go-ole v1.2.4/go.mod h1:XCwSNxSkXRo4vlyPy93sltvi/qJq0jqQhjqQNIwKuxM=
 github.com/gofunky/semver v3.5.2+incompatible h1:bLtS5NNx0gLpaUJHGRtePWV6vs5Q2cNhatKFqKny5J8=
 github.com/gofunky/semver v3.5.2+incompatible/go.mod h1:7MXgDdC47tqmTJhxqX5CCuJaIx+c5igi9n0xPbKjG0U=
+github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/uuid v1.0.0 h1:b4Gk+7WdP/d3HZH8EJsZpvV7EtDOgaZLtnaNGIu1adA=
 github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH/Q=
@@ -38,6 +41,7 @@ github.com/huandu/xstrings v1.2.0/go.mod h1:DvyZB1rfVYsBIigL8HwpZgxHwXozlTgGqn63
 github.com/imdario/mergo v0.3.7 h1:Y+UAYTZ7gDEuOfhxKWy+dvb5dRQ6rJjFSdX2HZY1/gI=
 github.com/imdario/mergo v0.3.7/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+github.com/json-iterator/go v1.1.7/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
 github.com/klauspost/compress v1.7.4 h1:4UqAIzZ1Ns2epCTyJ1d2xMWvxtX+FNSCYWeOFogK9nc=
 github.com/klauspost/compress v1.7.4/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/cpuid v1.2.1 h1:vJi+O/nMdFt0vqm8NZBI6wzALWdA2X+egi0ogNyrC/w=
@@ -46,6 +50,8 @@ github.com/klauspost/pgzip v1.2.1 h1:oIPZROsWuPHpOdMVWLuJZXwgjhrW8r1yEX8UqMyeNHM
 github.com/klauspost/pgzip v1.2.1/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQKQE9RUs=
 github.com/krolaw/dhcp4 v0.0.0-20190531080455-7b64900047ae h1:eJIlhimWuFB4RmBV8UWt2CJhEPGunO0obfXHzzUxrOU=
 github.com/krolaw/dhcp4 v0.0.0-20190531080455-7b64900047ae/go.mod h1:0AqAH3ZogsCrvrtUpvc6EtVKbc3w6xwZhkvGLuqyi3o=
+github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
+github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/pborman/uuid v1.2.0 h1:J7Q5mO4ysT1dv8hyrUGHb9+ooztCXu1D8MY8DZYsu3g=
 github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtPdI/k=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
@@ -78,6 +84,7 @@ golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e h1:D5TXcfTk7xF7hvieo4QErS3qqCB4teTffacDWr7CI+0=
 golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
