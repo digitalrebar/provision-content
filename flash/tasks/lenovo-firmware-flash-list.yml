@@ -1,0 +1,108 @@
+---
+Name: lenovo-firmware-flash-list
+Description: Lenovo Flash From List
+RequiredParams:
+  - skip-flash
+  - flash-list
+Templates:
+  - Name: prep-usb-nic
+    ID: prep-usb-nic.sh.tmpl
+  - Name: lenovo-firmware-flash-list
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      skip_flash="{{.Param "skip-flash"}}"
+      if [[ $skip_flash = true ]]; then
+          echo "Skipping all flash operations due to skip-flash being true"
+          exit 0
+      fi
+
+      if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          echo "System not in Sledgehammer, exiting"
+          exit 0
+      fi
+
+      [[ -d /sys/module/sg ]] || modprobe sg
+
+      want_reboot=no
+      failed=no
+      {{ range $index, $elem := .Param "flash-list" }}
+        FILENAME=$(basename "{{$elem.File}}")
+        ID=$(basename $FILENAME .uxz)
+        ID=$(basename $ID .bin)
+        ID=$(basename $ID .tgz)
+        DNAME=$(dirname "{{$elem.File}}")
+
+        TMPDIR=$(mktemp -d "/tmp/flash-list-XXXXXXXX")
+
+        {{ if $elem.Force }}
+        FORCE="--forceid $ID"
+        {{ else }}
+        FORCE=
+        {{ end }}
+
+        {{ if hasPrefix "http:" $elem.File }}
+        curl -o $TMPDIR/$FILENAME {{$elem.File}}
+        curl -o $TMPDIR/$ID.xml "$DNAME/$ID.xml"
+        {{ else if hasPrefix "https:" $elem.File }}
+        curl -k -o $TMPDIR/$FILENAME {{$elem.File}}
+        curl -k -o $TMPDIR/$ID.xml "$DNAME/$ID.xml"
+        {{ else }}
+        curl -o $TMPDIR/$FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
+        curl -o $TMPDIR/$ID.xml "{{$.ProvisionerURL}}/$DNAME/$ID.xml"
+        {{ end }}
+
+        set +e
+        /opt/OneCli/OneCli update flash --noreboot --scope individual --dir $TMPDIR --includeid ${ID} ${FORCE} --output flash.{{$index}}
+        set -e
+
+        # Check for the presence of flash.{{$index}}/Onecli-update_flash_status.xml
+        if [[ -e flash.{{$index}}/Onecli-update_flash_status.xml ]] ; then
+          while read line; do
+            case $line in
+              *STATUS*)
+                [[ $line = *'Package installed successfully'* ]] || failed=true;;
+              *REBOOT*)
+                [[ $failed = false && $line = *'Reboot Required to take effect'* ]] && want_reboot=true;;
+            esac
+          done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
+        else
+          retco=0
+          regex="<RETURNCODE>(.*)</RETURNCODE>"
+          while read line; do
+            case $line in
+              *RETURNCODE*)
+                if [[ "$line" =~ $regex ]] ; then
+                  retco=${BASH_REMATCH[1]}
+                fi;;
+            esac
+          done < <(awk '/<(RETURNCODE)>/' flash.{{$index}}/common_result.xml)
+
+          case $retco in
+            110)
+              echo "Nothing to do - current level or no matching hardware";;
+            *)
+              echo "OneCli returned $retco"
+              cat flash.{{$index}}/common_result.xml
+              failed=yes;;
+          esac
+
+        fi
+        rm -rf $TMPDIR
+      {{ end }}
+
+      if [[ $want_reboot = yes ]]; then
+          echo "Need reboot - start rebooting"
+          exit_incomplete_reboot
+      fi
+
+      if [[ $failed = yes ]]; then
+          echo "Something failed - error"
+          exit 1
+      fi
+
+      echo "Nothing else to do and complete"
+      drpcli machines set "$RS_UUID" param skip-flash to true
+      exit 0
