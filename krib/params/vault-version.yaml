@@ -2,10 +2,10 @@
 Name: "vault/version"
 Description: "Version of vault to use in cluster"
 Documentation: |
-  Allows operators to determine the version of consul to install
+  Allows operators to determine the version of vault to install
 Schema:
   type: "string"
-  default: "1.1.3"
+  default: "1.2.2"
 Meta:
   color: "blue"
   icon: "book"
