@@ -6,12 +6,16 @@ RequiredParams:
   - flash-list
 Templates:
   - Name: prep-usb-nic
+    Path: attach-usb-lan.sh
     ID: prep-usb-nic.sh.tmpl
   - Name: lenovo-firmware-flash-list
     Contents: |
       #!/usr/bin/env bash
 
       {{ template "setup.tmpl" . }}
+
+      chmod +x attach-usb-lan.sh
+      ./attach-usb-lan.sh
 
       skip_flash="{{.Param "skip-flash"}}"
       if [[ $skip_flash = true ]]; then
@@ -58,14 +62,15 @@ Templates:
         /opt/OneCli/OneCli update flash --noreboot --scope individual --dir $TMPDIR --includeid ${ID} ${FORCE} --output flash.{{$index}}
         set -e
 
+        this_one_reboot=false
         # Check for the presence of flash.{{$index}}/Onecli-update_flash_status.xml
         if [[ -e flash.{{$index}}/Onecli-update_flash_status.xml ]] ; then
           while read line; do
             case $line in
               *STATUS*)
-                [[ $line = *'Package installed successfully'* ]] || failed=true;;
+                [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
-                [[ $failed = false && $line = *'Reboot Required to take effect'* ]] && want_reboot=true;;
+                [[ $failed = no && $line = *'Reboot Required to take effect'* ]] && this_one_reboot=true;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
@@ -89,6 +94,21 @@ Templates:
               failed=yes;;
           esac
 
+          if [[ $this_one_reboot = yes ]] ; then
+              if [[ "{{$elem.File}}" =~ xcc ]] ; then
+                  echo "Rebooting xcc"
+                  ipmitool mc reset cold
+                  while true ; do
+                      ./attach-usb-lan.sh
+                      /opt/OneCli/OneCli inventory getdevices && break
+                      echo "Not up yet"
+                      sleep 5
+                  done
+                  echo "BMC is back up"
+              else
+                  want_reboot=yes
+              fi
+          fi
         fi
         rm -rf $TMPDIR
       {{ end }}
