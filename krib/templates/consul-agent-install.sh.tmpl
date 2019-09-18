@@ -12,6 +12,9 @@ set -e
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
+# we need a random backoff to avoid races
+SLEEP=$[ ( $RANDOM % 30 ) ]
+
 CONSUL_VERSION="{{ .Param "consul/version" }}"
 
 # these need to be before krib-lib template
