@@ -56,7 +56,7 @@ echo "Creating /etc/systemd/system/containerd.service.d/override.con file from P
 mkdir /etc/systemd/system/containerd.service.d
 cat << EOF > /etc/systemd/system/containerd.service.d/override.conf
 [Service]
-ExecStart=/usr/local/bin/containerd -l {{.Param "containerd/config"}}
+ExecStart=/usr/local/bin/containerd -l {{.Param "containerd/loglevel"}}
 EOF
 systemctl daemon-reload
 {{end -}}
