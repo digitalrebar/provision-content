@@ -63,7 +63,7 @@ systemctl daemon-reload
 {{end -}}
 
 # start containerd
-systemctl start containerd
+systemctl restart containerd
 systemctl enable containerd
 
 ctr --version
