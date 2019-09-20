@@ -1,6 +1,6 @@
 ---
-Name: "centos-7.6.1908-install"
-Description: "CentOS-7.6.1908 install bootenv"
+Name: "centos-7.7.1908-install"
+Description: "CentOS-7.7.1908 install bootenv"
 Documentation: |
   This BootEnv installs the CentOS 7 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
@@ -11,7 +11,7 @@ Meta:
   title: "Digital Rebar Community Content"
 OS:
   Family: "redhat"
-  Name: "centos-7.6.1908"
+  Name: "centos-7.7.1908"
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-7-x86_64-Minimal-1908.iso"
