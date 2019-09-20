@@ -1,6 +1,6 @@
 ---
-Name: "centos-7-install"
-Description: "CentOS-7 installer that points to the latest CentOS 7 release."
+Name: "centos-7.6.1908-install"
+Description: "CentOS-7.6.1908 install bootenv"
 Documentation: |
   This BootEnv installs the CentOS 7 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
@@ -11,11 +11,11 @@ Meta:
   title: "Digital Rebar Community Content"
 OS:
   Family: "redhat"
-  Name: "centos-7"
+  Name: "centos-7.6.1908"
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-7-x86_64-Minimal-1908.iso"
-      IsoUrl: "http://mirror.rackspace.com/CentOS/7/isos/x86_64/CentOS-7-x86_64-Minimal-1908.iso"
+      IsoUrl: "http://mirror.rackspace.com/CentOS/7.7.1908/isos/x86_64/CentOS-7-x86_64-Minimal-1908.iso"
       Sha256: "9a2c47d97b9975452f7d582264e9fc16d108ed8252ac6816239a3b58cef5c53d"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
@@ -32,7 +32,7 @@ OS:
       Loader: "grubarm64.efi"
       IsoFile: "CentOS-7-aarch64-Minimal-1908.iso"
       Sha256: "079123767bf3f59f1cf4daf5f9c030c5f251267d6ea5abd49d63a44997d7db19"
-      IsoUrl: "http://ftp.osuosl.org/pub/centos-altarch/7/isos/aarch64/CentOS-7-aarch64-Minimal-1908.iso"
+      IsoUrl: "http://ftp.osuosl.org/pub/centos-altarch/7.7.1908/isos/aarch64/CentOS-7-aarch64-Minimal-1908.iso"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
