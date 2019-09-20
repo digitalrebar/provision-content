@@ -1,0 +1,18 @@
+---
+Name: "validate-nic-counts"
+Description: "Validate the NIC Counts and NIC UP checks"
+Meta:
+  icon: "plug"
+  color: "blue"
+  title: "RackN Content"
+Templates:
+  - Name: "validate-nic-counts.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      {{ template "validation-lib.tmpl" . }}
+
+      NICS={{ .Param "validate/nic-counts" }}
+      UPS={{ .Param "validate/nic-required-up" }}
+
+      validate_nic_counts $NICS $UPS

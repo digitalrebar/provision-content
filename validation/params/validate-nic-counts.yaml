@@ -1,0 +1,12 @@
+---
+Name: "validate/nic-counts"
+Description: "Validate the minimum number of NICs that a system must have."
+Documentation: |
+  Defines the minimum number of NICs that the Validation system should
+  check for.
+Schema:
+  type: number
+  minimum: 1
+  maximum: 99
+  default: 2
+Secure: false
