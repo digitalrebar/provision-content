@@ -50,3 +50,16 @@ name is *add_validation_error* call with a single string parameter.  This can be
 called multiple times.  A validation task should include both the *setup.tmpl*
 and the *validation-lib.tmpl*.
 
+Namespace Definitions
+=====================
+
+Validation system stages, control params, and other content parts will utilize the
+name space of ``validation>``.  Individual Tasks, Params, etc. that
+implement functional use of the Validation system components will utilize the
+common name space of ``validate`.
+
+For example, the Start Stage for the Validation system is ``validation-start``, while
+the NIC Count and UP link state checking uses a task namespaced as ``validate-nic-counts`.
+
+Standard Stage/Task and Param semantics still apply (eg ``validate/nic-required-up`` is the
+Param namespace name).

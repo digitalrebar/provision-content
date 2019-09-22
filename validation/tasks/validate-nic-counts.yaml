@@ -1,0 +1,27 @@
+---
+Name: "validate-nic-counts"
+Description: "Validate the NIC Counts and NIC UP checks"
+Documentation: |
+  This task implements the Validation library function to verify that
+  a given system has a minimum number of NICs in the system, and that
+  a minimum number of those NICs can be brought to a "link UP" state.
+
+  The link up state refers only to the systems ability to brint the link
+  UP, but does not attempt to configure any IP or network stack details
+  on the link.  This verifies cable connectivity and remote switch end
+  is able to establish "UP" state.
+Meta:
+  icon: "plug"
+  color: "blue"
+  title: "RackN Content"
+Templates:
+  - Name: "validate-nic-counts.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      {{ template "validation-lib.tmpl" . }}
+
+      NICS={{ .Param "validate/nic-counts" }}
+      UPS={{ .Param "validate/nic-required-up" }}
+
+      validate_nic_counts $NICS $UPS
