@@ -50,7 +50,7 @@ data:
    aws-secret-access-key: "{{.Param "certmanager/route53-secret-access-key"}}"
 {{- end}}
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: external-dns
@@ -58,6 +58,9 @@ metadata:
 spec:
   strategy:
     type: Recreate
+  selector:
+    matchLabels:
+      app: external-dns
   template:
     metadata:
       labels:

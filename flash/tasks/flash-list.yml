@@ -1,0 +1,149 @@
+---
+Name: flash-list
+Description: General Flash From List handles HPE RPMs and Dell BINs
+RequiredParams:
+  - skip-flash
+  - flash-list
+Templates:
+  - Name: flash-list
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      skip_flash="{{.Param "skip-flash"}}"
+      if [[ $skip_flash = true ]]; then
+          echo "Skipping all flash operations due to skip-flash being true"
+          exit 0
+      fi
+
+      if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+          echo "System not in Sledgehammer, exiting"
+          exit 0
+      fi
+
+      want_reboot=no
+      failed=no
+      hpe=no
+      {{ range $index, $elem := .Param "flash-list" }}
+        FILENAME="file.{{$index}}"
+        {{ if $elem.Force }}
+        FORCE="-f"
+        {{ else }}
+        FORCE=
+        {{ end }}
+
+        {{ if hasPrefix "http:" $elem.File }}
+        curl -o $FILENAME {{$elem.File}}
+        {{ else if hasPrefix "https:" $elem.File }}
+        curl -k -o $FILENAME {{$elem.File}}
+        {{ else }}
+        curl -o $FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
+        {{ end }}
+
+        {{ if eq $elem.Type "bin" }}
+        chmod +x $FILENAME
+        ./$FILENAME -q ${FORCE} |& tee $FILENAME.log || case $? in
+          1)
+             # If the system is up to date, this is the return code and
+             # the log will have the message "No Applicable Updates Available"
+             failed=yes
+             fgrep -q "No Applicable Updates Available" $FILENAME.log && failed=no
+             ;;
+          2)
+             echo "$FILENAME wants a reboot"
+             want_reboot=yes;;
+          3)
+             echo "Soft error for $FILENAME"
+             echo "Likely at the exact level already.";;
+          4)
+             echo "Hard error for $FILENAME"
+             failed=yes;;
+          5)
+             echo "Unquailifed update for $FILENAME"
+             failed=yes;;
+          6)
+             echo "Reboot started!! for $FILENAME"
+             want_reboot=yes;;
+          9)
+             echo "RPM verify failed for $FILENAME"
+             failed=yes;;
+          13)
+             echo "Dependency failure, but success!";;
+          14)
+             echo "Dependency failure, but reboot wanted"
+             want_reboot=yes;;
+        esac
+        {{ end }}
+
+        {{ if eq $elem.Type "rpm" }}
+        rpm -ivh $FILENAME
+        RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
+        SETUP=$(rpm -ql $RPMNAME | grep '/setup$')
+        # One day make this an argument
+        TPMARG=""
+        if [[ "$RPMNAME" =~ ^firmware-system ]] ; then
+          TPMARG="--tpmbypass"
+        fi
+        if [[ "$RPMNAME" =~ ^firmware-ilo ]] ; then
+          TPMARG="--tpmbypass"
+        fi
+        cd $(dirname $SETUP)
+        if [[ "$RPMNAME" =~ ^firmware-nic-mellanox ]] ; then
+          $SETUP -s ${FORCE} |& tee $FILENAME.log || case $? in
+            0)
+              echo "Installed successfully - no reboot required";;
+            1)
+              echo "Nothing to do";;
+            *)
+              echo "$SETUP returned $?"
+              failed=yes;;
+          esac
+        else
+          $SETUP -s -g ${TPMARG} ${FORCE} |& tee $FILENAME.log || case $? in
+            0)
+              echo "Installed successfully - no reboot required";;
+            1)
+              echo "Installed successfully - reboot required"
+              want_reboot=yes;;
+            2)
+              echo "Nothing to do - at current level";;
+            3)
+              echo "Nothing to do - current level or no matching hardware";;
+            4)
+              echo "Nothing to do - matching hardware doesn't have firmware";;
+            5)
+              echo "Nothing to do - user interrupted the install";;
+            6)
+              echo "Nothing to do - hardware disabled";;
+            7)
+              echo "A failure has occurred."
+              failed=yes;;
+            *)
+              echo "$SETUP returned $?"
+              failed=yes;;
+          esac
+        fi
+        cd -
+        {{ end }}
+      {{ end }}
+
+      # Leave this for now as a potential out in the future.  Going to try trusting the HPE return codes.
+      if [[ $hpe = yes ]]; then
+          echo "HPE system - return codes are useless - never come back"
+          drpcli machines set "$RS_UUID" param skip-flash to true
+      fi
+
+      if [[ $want_reboot = yes ]]; then
+          echo "Need reboot - start rebooting"
+          exit_incomplete_reboot
+      fi
+
+      if [[ $failed = yes ]]; then
+          echo "Something failed - error"
+          exit 1
+      fi
+
+      echo "Nothing else to do and complete"
+      drpcli machines set "$RS_UUID" param skip-flash to true
+      exit 0
