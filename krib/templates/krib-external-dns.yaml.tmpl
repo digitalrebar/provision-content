@@ -73,7 +73,7 @@ spec:
         args:
         - --source=service
         - --source=ingress
-        - --policy=upsert-only # would prevent ExternalDNS from deleting any records, omit to enable full synchronization
+        - --policy=sync # it's safe to use sync because we're also using registry=txt below, so we'll only delete record we created
         - --registry=txt
         - --txt-owner-id={{ .Param "krib/cluster-profile" }}
         - --domain-filter={{ .Param "certmanager/dns-domain" }}
