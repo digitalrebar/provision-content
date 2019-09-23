@@ -21,8 +21,8 @@ Meta:
 Params:
   local-repo: true
   change-stage/map:
-    builder-start: ubuntu-18.04-beta-install:Reboot
-    ubuntu-18.04-beta-install: ssh-access:Success
+    builder-start: ubuntu-18.04-install:Reboot
+    ubuntu-18.04-install: ssh-access:Success
     ssh-access: runner-service:Success
     runner-service: image-builder-linux:Success
     image-builder-linux: finish-install:Success
