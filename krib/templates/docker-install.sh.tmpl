@@ -3,16 +3,10 @@
 set -e
 
 # Get access and who we are.
-{{template "setup.tmpl" .}}
+{{ template "setup.tmpl" .}}
 
-{{ if .ParamExists "krib/cluster-profile" -}}
-CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
-PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
-{{ else -}}
-xiterr 1 "Missing krib/cluster-profile on the machine!"
-{{ end -}}
+{{ template "download-tools.tmpl" .}}
 
-{{ template "krib-lib.sh.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
 {{if .ParamExists "docker/working-dir" -}}
