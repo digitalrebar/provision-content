@@ -53,6 +53,7 @@ echo "Skipping custom etc/containerd/config.toml: No containerd/config defined"
 {{if .ParamExists "containerd/loglevel" -}}
 ## Override the default (noisy) "info" log level
 echo "Creating /etc/systemd/system/containerd.service.d/override.conf file from Param containerd/loglevel"
+
 mkdir -p /etc/systemd/system/containerd.service.d
 cat << EOF > /etc/systemd/system/containerd.service.d/override.conf
 [Service]
