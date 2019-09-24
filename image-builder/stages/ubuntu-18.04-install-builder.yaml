@@ -1,6 +1,6 @@
 ---
 Name: ubuntu-18.04-install-builder
-BootEnv: ubuntu-18.04-beta-install
+BootEnv: ubuntu-18.04-install
 Description: Ubuntu 18.04 install stage for Image Builder
 Meta:
   color: purple

@@ -82,3 +82,52 @@ ping_dest_from_src() {
     fi
     return ${xit}
 }
+
+check_up() { $(ip -o link show $1 | grep -q " UP ") && return 0 || return 1; }
+bring_up() { ip link set $1 up; return $?; }
+
+validate_nic_counts() {
+    # nic_min_count is the minimum number of NICs that should be found
+    # nic_req_up is minimum num of NICs that can be brought to "UP" state
+    # valid values for both counts are 1 to 99
+    local nic_min_count=$1
+    local nic_req_up=$2
+    local count=1
+    local check
+    local nic
+
+    [[ $nic_min_count =~ ^[0-9]{,2}$ && $nic_min_count -ne 0 ]] || xiterr "invalid value specified for 'nic_min_count' (arg 1)"
+    [[ $nic_req_up =~ ^[0-9]{,2}$ && $nic_req_up -ne 0 ]] || xiterr "invalid value specified for 'nic_req_up' (arg 2)"
+    [[ $nic_req_up -gt $nic_min_count ]] && xiterr "NIC required UP can't be greater NIC minimum count"
+
+    local addrs=$(drpcli machines get {{.Machine.UUID}} param gohai-inventory \
+      | jq -r '.Networking.HardwareAddrs'                                     \
+      | egrep -v "[\{\}]"                                                     \
+      | sed -e 's/[",]//g' -e 's/: / /' -e 's/^  //g'                         \
+      )
+
+    echo "Validating for MAC Addresses and NIC interfaces:"
+    echo "$addrs"
+
+    local found_count=$(echo "$addrs" | wc -l)
+
+    [[ $found_count -ge $nic_min_count ]] || xiterr "failed minimum NIC count ('$nic_min_count') validation"
+
+    local OIFS=${IFS}
+    IFS=$'\n'
+    for check in $addrs
+    do
+        mac=$(echo $check | cut -d " " -f 1)
+        nic=$(echo $check | cut -d " " -f 2)
+        $(check_up $nic || bring_up $nic) || xiterr "failed to 'UP' required NIC count"
+
+        if [[ $count -eq $nic_req_up ]]
+        then
+            echo "Successfully validated NIC Count ('$nic_min_count') and Minimum UP count ($nic_req_up)"
+            break
+        else
+            (( count++ ))
+        fi
+    done
+    IFS=${OIFS}
+}
