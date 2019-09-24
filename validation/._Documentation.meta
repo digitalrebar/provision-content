@@ -2,64 +2,399 @@ Validation System
 -----------------
 
 The Validation System allows an operator to flexibly define a set of
-tasks to do validation operations.  These can be fatal and stop
-execution, fail and be tallied at the end, or succeed.
+tasks to do validation operations.  Validation allows an operator to
+define tests to execute to verify that certain conditions have been
+met either in the environment or as completed tasks by other workflow
+steps.  This allows for a composable set of validation rules to be run
+to either verify the system has been provisioned successfully or an
+error may have occured that needs addresses.
 
-The Validation System provides three base sets of validation
-stages, *validation-post-discover*, *validation-post-hardware*,
-and *validation-post-install*.  The intent is to have a set of
-tasks that validate post discovery, post hardware configuration,
-and post install.  These are for general use, but additional
-validation sets can be added.
 
-The architecture of the system is a stage that does validation.
-The stage has the *validation-start* and *validation-stop* tasks.
-These should be the only tasks in the stage.  The stage should have
-a parameter, *validation/list-parameter*.  This parameter defines
-the actual parameter name that the *validation-start* task
-uses to update the task list with a list of tasks.  The parameter
-specified by the *validation/list-parameter* will be Composed
-and added to the task list between the immediate *validation-start*
-and *validation-stop* tasks.  *Composed* means the value of that
+Prebuilt Stages
+~~~~~~~~~~~~~~~
+
+The validation system provides three base sets of validation
+stages to run the validation engine in:
+
+  1. ``validation-post-discover``
+  2. ``validation-post-hardware``
+  3. ``validation-post-install``
+
+The intent is to have a set of tasks that validate after the initial
+discover (gohai-inventory, inventory, or other "discover" related tasks),
+post hardware configuration (typically after BIOS settings, Firmware Flash,
+and RAID volume creation), and in the and post install operating system.
+In addition to these defined stages, additional validation sets can be added.
+
+
+Using the Stages
+~~~~~~~~~~~~~~~~
+
+The validation system is run in Workflow as a standard *Stage* allowing the
+operator to place the stage anywhere in the Workflow that makes sense.  The
+above three pre-built stages define RackN defined useful points during the
+provisioning lifecycle of a _Machine_.
+
+The ``validation-start`` and ``validation-stop`` tasks are the only tasks
+that should be listed in the Stage, do not add Tasks to the Stage.  Tasks
+will dynamically be added based on the control Paramters.
+
+
+Defining Validation Tasks
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Control over which specific validation tasks are executed at any given
+validation stage is defined by the Param ``validation/list-parameter``.
+This parameter is a reference to the Param name that the ``validation-start``
+task uses to dynamically update the task list with a list of validation tasks.
+
+The parameter specified by the ``validation/list-parameter`` will be composed
+and added to the task list between the immediate ``validation-start``
+and ``validation-stop`` tasks.  *Composed* means the value of that
 parameter is the aggregation of all values of that parameters at all
 levels of the system, (e.g. From the parameters on the machine, then
 profiles on machines, then parameters on the stage, ...).  This allows
-multiple resources to provide the validation tests.
+multiple resources to provide the validation tests that will eventually
+be run on the system.
+
+The Param that is referenced by ``validation/list-parameter`` should be a
+simple array type Param.  It lists each *Task* that should be executed in
+the listed sequence by the validation process at that *Stage* in the
+*Workflow*.
+
+
+Task Exit Conditions
+~~~~~~~~~~~~~~~~~~~~
+
+Validation actions can exit one of three ways:
+
+  1. fatal: immediately stops execution
+  2. fail: continue remaining validations, failures tallied at the end
+  3. succeed: mark validation successful and continue
 
 Each validation task should do one of the following:
 
-* success - Return 0.
-* failure - Update the *validation/errors* parameters and exit 0.
-* fatal - Return 1.
+  * *success* - Return 0
+  * *failure* - Return 0, and Update the ``validation/errors`` Param
+  * *fatal* - Return 1
 
-The concept is that success returns zero and processing continue.  Failure marks
-the failure in the *validation/errors* parameter on the machine, but still
-returns 0 to allow the continuation of testing until the *validation-stop* task.
-Fatal does NOT update the *validation/errors* parameter, but does return 1.
+The concept is that *Success* returns zero and processing continue as normal.
 
-The idea is that if a failure that is one external to machine and can be remediated
-and success could ensue, the test should be fatal.  This allows the failure
-to be remediate and the can be continued without failing validation.  But if the
-failure is not able to be remediated, a failure should be added to the
-*validation/errors* and success returned so that additional issues can be found
-and aggregated.
+*Failure* logs the failure in the ``validation/errors`` logging parameter
+on the machine, but still returns 0 to allow continuation of testing any
+remaining validation tasks on the task list.
 
-The Validation System provides a library template, *validation-lib.tmpl*, that
-contains a helper routine to add errors to the *validation/errors*.  The function
-name is *add_validation_error* call with a single string parameter.  This can be
-called multiple times.  A validation task should include both the *setup.tmpl*
-and the *validation-lib.tmpl*.
+*Fatal* does NOT update the ``validation/errors`` parameter, but does return 1,
+which immediately halts the Workflow system.
+
+
+Remediating and Continuing Failed Tasks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The two failure exit conditions allow the developer of the validation task
+to determine if the failure is a "soft" failure which can be remediated, and
+then the Workflow can be resumed, or if the failure implies a "hard" fail
+that can not be corrected during workflow operation.
+
+If a failure that is external to machine and can be remediated (for example a
+DNS record has the wrong information, and DNS can be updated quickly)
+the test should be fatal.  This allows the failure to be remediate and Workflow
+can be continued without failing validation.
+
+If the failure is not able to be remediated, a failure should be added to the
+``validation/errors`` logging Param, and success returned so that additional
+issues can be found and aggregated.
+
+
+
+
+Example Usage
+~~~~~~~~~~~~~
+
+Here is a brief outline of example usage of the validation system utilizing
+the RackN defined stages.  In this example, we will define tasks to run in
+the ``validation-post-discovery`` and ``validation-post-hardware`` stages.
+
+Workflow
+========
+
+In this example we'll create a "my-complete-discovery" workflow that utilizes several
+components of the Digital Rebar content and plugins capabity.
+
+.. note::  Note the addition of the 'validation-post-discovery' and 'validation-post-hardware' Stages.
+
+	::
+
+		Meta:
+  		color: grey
+  		icon: money
+		Name: my-complete-discovery
+		Description: My complete discovery workflow
+		Stages:
+			- discover
+			- setup-repos
+			- ipmi-inventory
+			- raid-inventory
+			- network-lldp
+			- inventory
+			- rack-discover
+			- classify
+			- validation-post-discover
+			- ipmi-configure
+			- flash
+			- raid-enable-encryption
+			- raid-configure
+			- bios-configure
+			- ilo-config
+			- burnin
+			- burnin-reboot
+			- validation-post-hardware
+			- notify-hardware-complete
+			- sledgehammer-wait
+
+
+Stages
+======
+
+In this example, we are not creating any new stages, simply using the RackN
+defined stages in the above workflow example.  Please review the "*Adding
+New Stages*" section in the below "*Developing New Validation Capabilities*"
+section if you'd like to create custom stages.
+
+
+Tasks
+=====
+
+There are several tasks that are defeind to be used by the Validation system
+in this example.  You can find them in the following profile section.  Note
+that several of these tasks do exist in various content and plugins.  Each of
+these tasks would need to exist and perform the required functions.
+
+
+Define the Tasks for Validation
+===============================
+
+In this example, we will utilize a profile which contains the defined Params
+for the ``validation-post-discover`` and ``validation-post-hardware`` stages.
+The operator can apply the Profile to the appropriate machines, you could
+potentially use the ``classify`` stage to execute a classification task to
+determine whether or not to programmatically apply the Profile to the given
+machine as it executes the ``classify`` stage.
+
+The profile defines the tasks to run.  The profile YAML configuration would
+look like the following:
+
+	::
+
+		---
+		Meta:
+  		color: grey
+  		icon: money
+		Name: validations
+		Params:
+  		validation/post-discover:
+    		- "validation-machine-name-dns-to-ip"
+    		- "in-subnet-check-render"
+    		- "in-subnet-check-validate"
+    		- "ipmi-network-validation"
+    		- "validate-nic-counts"
+    		- "validate-jumbo-frames"
+  		validation/post-hardware:
+    		- "validate-ipmi-hostname-ip"
+
+Operating The Validation
+========================
+
+Once you have completed the above tasks, you can choose to make the
+``my-complete-discovery`` Workflow your default preference setting for all
+new machines, or manually choose to place machines in to the Workflow.
+
+To make this the default workflow, change your preferences (from **Info &
+Preferencess** in the Portal), or the following CLI command:
+
+  * ``drpcli prefs set defaultWorkflow my-complete-discovery``
+
+
+Reviewing Any Failures
+======================
+
+As with all jobs executed in Workflows, there will be a job log available to
+review the status output of any tasks that have run.  If you receive a
+Validation failure, refer to the appropriate job log.
+
+If the failure includes the use of the ``add_validation_error`` function, you
+can review the Param value that was added to the Machine, with the name
+``validation/errors``.  The Param will be added to the machine that has
+failed the validation process.
+
+The next run of any validation stage will empty the contents of this Param,
+prior to starting executing the tasks.  Please insure that you review the
+Para error values after a failure, but before you re-run any more validation
+stages.
+
+
+Skipping Validation Without Changing Your Workflow
+==================================================
+
+The validation system was designed to allow you to add it to the Workflow, and
+if no validation tasks are defined (by use of the reference
+``validation/list-parameter`` Param), then the system will skip any validation
+attempts for the given stage.
+
+This allows you to either leave the Stages defined control parameter blank, and
+not require changing the Workflow.  This effectively becomes a "noop" of the
+validation system.
+
+
+Developing New Validation Capabilities
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This section provides information on how to build custom validation capabilities
+utilizing the existing Validation system.
+
 
 Namespace Definitions
 =====================
 
-Validation system stages, control params, and other content parts will utilize the
-name space of ``validation>``.  Individual Tasks, Params, etc. that
+Validation system stages, control params, and other content parts will utilize
+the prefix name space of ``validation/``.  Individual Tasks, Params, etc. that
 implement functional use of the Validation system components will utilize the
-common name space of ``validate`.
+prefix name space of ``validate/`.
 
-For example, the Start Stage for the Validation system is ``validation-start``, while
-the NIC Count and UP link state checking uses a task namespaced as ``validate-nic-counts`.
+For example, the Start Stage for the Validation system is ``validation-start``,
+while the NIC Count and UP link state checking uses a Task namespaced as
+  ``validate-nic-counts`.
 
-Standard Stage/Task and Param semantics still apply (eg ``validate/nic-required-up`` is the
-Param namespace name).
+Standard Stage/Task and Param semantics still apply (eg ``validate/nic-required-up``
+is the Param namespace name).
+
+Note that traditionally, RackN uses the "slash" naming standard for Params,
+while Stages, Taks, and Templates generally utilize a "dash" to separate the
+parent namespace.  Don't ask us why.
+
+
+Library of Functions
+====================
+
+The Validation System provides a template which contains a library of currated
+tools for the system; the template is called *validation-lib.tmpl*.  Only Bash
+functions which implement broadly useful capabilities are placed in this
+template, which is managed by RackN.
+
+If your validation tools require a common library, they can be built as a
+standard template, and included in any appropriate custom tasks.
+
+
+Adding New Stages
+=================
+
+Stages define the primary grouping of Tasks that an operator runs at a given
+point in the Workflow sequence.  These stages can be placed anywhere that
+makes operational sense to a given Workflow.
+
+The Stage should **only** contain the ``validation-start`` and ``validation-stop``
+tasks, no other tasks should be added to your stage, as the ``validation-start``
+stage will dynamically inject the desired stages in to the Workflow for the
+operator.
+
+Example Stage in YAML:
+
+  ::
+
+    ---
+		Name: "my-validation"
+		Description: "Perform tasks defined by the 'my-validation' Param."
+		Documentation: |
+			The Param 'my-validatin' is an array that will contain
+			the list of validation tasks to run.
+		Params:
+  		"validation/list-parameter": "my-validation"
+		Tasks:
+  		- "validation-start"
+  		- "validation-stop"
+		Meta:
+  		color: "orange"
+  		icon: "search"
+  		title: "RackN Content"
+
+Note that as the ``Documentation`` field says; the ``validation/list-parameter``
+for this Stage is defined as ``my-validation``.  This Parameter must be defined
+as an array; which is a list of the Tasks to execute during this Stage.  The
+Param can be defined on the Machine in all of the normal ways (directly as a
+Param, as part of a Profile, or as a Param in the Global Profile.
+
+
+Adding New Tasks
+================
+
+Tasks are the heart of the validation system, and perform the actual validation
+implementation for the system to execute.  Validation tasks are standard RackN
+Workflow Tasks, and can carry embedded templates, or refer to external templates
+to perform the actual Task(s) defined.
+
+A validation task should include both the ``setup.tmpl`` template and the
+``validation-lib.tmpl`` template.  Both templates are required for a successful
+validation task.
+
+Validation tasks are only limited by the requirements (and perhaps creativity) of
+the author.  They should be individual and discreet items that the system should
+check for and return results on.  Please review the "*Task Exit Conditions*" above
+to insure you handle exit codes correctly for the system.
+
+Here is an example Task that implements a hypothetical validation function.
+
+	::
+
+		---
+		Name: "validation-test-fail"
+		Description: "Example failing validation task"
+		Meta:
+  		color: "blue"
+  		icon: "bug"
+  		title: "RackN Content"
+  		feature-flags: "sane-exit-codes"
+		Templates:
+		- Name: "validation_fail.sh"
+  		Contents: |
+    		#!/usr/bin/env bash
+    		{{ template "setup.tmpl" . }}
+    		{{ template "validation-lib.tmpl" . }}
+
+				{{ if eq (.Param "margarita-time" ) true }}
+    			echo "This is a failure.  Calling add_validation_error"
+    			add_validation_error "Margarita time! We'll finish provisioning later."
+    			exit 0
+				{{ else -}}
+					echo "Sadly, it's not margarita time.  Provision on!"
+					exit 0
+				{{ end -}}
+
+In this example, some other component or process would be responsible for
+setting the check Param ``margarita-time`` to either ``true`` or ``false``.
+
+
+Utilizing the Error Logging Param
+=================================
+
+The library also contains a helper routine to add errors to the
+ ``validation/errors`` logging Param.  The Bash function name is
+ ``add_validation_error`` which should be called with a single string which
+ contains the text of the error message.  This function can safely called
+ multiple times, and each subsequent error message will be appended to the
+ ``validatin/errors` array.
+
+
+Separating Validate Tasks from the Validation System
+====================================================
+
+Validation tasks or extensions can be built and used and added to other Content Packs
+or Plugins.  The validation system itself is a framework for executing and providing
+the method to run and manage the validation process.
+
+Examples of validation in use can be found throughout some of the other RackN
+managed content and plugin systems.  For example, review the VMware Plugin content:
+
+  https://github.com/digitalrebar/provision-plugins/blob/v4/cmds/vmware/content/tasks/validation-machine-name-dns-to-ip.yaml
+
+For a validation task that is defined and used outside of the Validation content pack.
+
