@@ -3,17 +3,26 @@ Validation System
 
 The Validation System allows an operator to flexibly define a set of
 tasks to do validation operations.  Validation allows an operator to
-define tests to execute to verify that certain conditions have been
-met either in the environment or as completed tasks by other workflow
-steps.  This allows for a composable set of validation rules to be run
-to either verify the system has been provisioned successfully or an
-error may have occured that needs addresses.
+execute tests to verify that certain conditions have been met either
+in the environment or as completed tasks by other workflow steps.
+This allows for a composable set of rules to be run to either verify
+the system has been provisioned successfully or an error may have
+occured that needs addressed.
+
+The validation system is designed to be flexibly extended in the field.  The
+current set of Staes, Library functions, and Tasks are curated capabilities
+by RackN. Custom Stages and Tasks can be flexibly added to allow for
+unique use cases.
+
+If you have developed a set of Tasks and Library functions that may be
+useful to other operators, please consider contributing back to the content
+pack to enhance it for other users.
 
 
 Prebuilt Stages
 ~~~~~~~~~~~~~~~
 
-The validation system provides three base sets of validation
+The validation system provides three prebuilt base sets of validation
 stages to run the validation engine in:
 
   1. ``validation-post-discover``
@@ -21,14 +30,9 @@ stages to run the validation engine in:
   3. ``validation-post-install``
 
 The intent is to have a set of tasks that validate after the initial
-discover (gohai-inventory, inventory, or other "discover" related tasks),
+discover (*gohai-inventory*, *inventory*, or other "discover" related tasks),
 post hardware configuration (typically after BIOS settings, Firmware Flash,
-and RAID volume creation), and in the and post install operating system.
-In addition to these defined stages, additional validation sets can be added.
-
-
-Using the Stages
-~~~~~~~~~~~~~~~~
+and RAID volume creation), and in the final installed operating system.
 
 The validation system is run in Workflow as a standard *Stage* allowing the
 operator to place the stage anywhere in the Workflow that makes sense.  The
@@ -48,14 +52,18 @@ validation stage is defined by the Param ``validation/list-parameter``.
 This parameter is a reference to the Param name that the ``validation-start``
 task uses to dynamically update the task list with a list of validation tasks.
 
-The parameter specified by the ``validation/list-parameter`` will be composed
-and added to the task list between the immediate ``validation-start``
-and ``validation-stop`` tasks.  *Composed* means the value of that
-parameter is the aggregation of all values of that parameters at all
-levels of the system, (e.g. From the parameters on the machine, then
-profiles on machines, then parameters on the stage, ...).  This allows
-multiple resources to provide the validation tests that will eventually
-be run on the system.
+The Tasks that are defined in the parameter (specified by the
+``validation/list-parameter``) will be composed and added to the task list.
+These will be dynamically inserted between the ``validation-start`` and
+``validation-stop`` tasks.
+
+*Composed* means the value of that parameter is the aggregation of all
+occurances of that parameter at all levels of the system, (e.g. From
+the parameters on the machine, then profiles on machines, then parameters
+on the stage, ...).  This allows multiple resources to provide the validation
+tests that will eventually be run on the system.  Typically, Parameter orders
+of precedence would override earlier occurances of the Paramter values.
+Validation does not follow that standard path.
 
 The Param that is referenced by ``validation/list-parameter`` should be a
 simple array type Param.  It lists each *Task* that should be executed in
@@ -78,14 +86,18 @@ Each validation task should do one of the following:
   * *failure* - Return 0, and Update the ``validation/errors`` Param
   * *fatal* - Return 1
 
-The concept is that *Success* returns zero and processing continue as normal.
+The concept is that *Success* returns zero and processing continues as normal.
 
 *Failure* logs the failure in the ``validation/errors`` logging parameter
 on the machine, but still returns 0 to allow continuation of testing any
-remaining validation tasks on the task list.
+remaining validation tasks on the task list.  If any single failure occurs,
+then when the ``validation-stop`` stage is reached, the Workflow will be
+stopped.
 
 *Fatal* does NOT update the ``validation/errors`` parameter, but does return 1,
-which immediately halts the Workflow system.
+which immediately halts the Workflow system.  An operator may potentially be
+able to remediate the issue, and then restart the *Runner* to continue the
+Workflow processing.
 
 
 Remediating and Continuing Failed Tasks
@@ -98,14 +110,12 @@ that can not be corrected during workflow operation.
 
 If a failure that is external to machine and can be remediated (for example a
 DNS record has the wrong information, and DNS can be updated quickly)
-the test should be fatal.  This allows the failure to be remediate and Workflow
+the test should be *fatal*.  This allows the failure to be remediate and Workflow
 can be continued without failing validation.
 
-If the failure is not able to be remediated, a failure should be added to the
-``validation/errors`` logging Param, and success returned so that additional
-issues can be found and aggregated.
-
-
+If the failure is not able to be remediated immediately, a log message should be
+added to the ``validation/errors`` logging Param, and success returned so
+that additional issues can be found and aggregated.
 
 
 Example Usage
@@ -114,14 +124,18 @@ Example Usage
 Here is a brief outline of example usage of the validation system utilizing
 the RackN defined stages.  In this example, we will define tasks to run in
 the ``validation-post-discovery`` and ``validation-post-hardware`` stages.
+Most of the Tasks referenced are valid tasks that exist across several
+content and plugin components.
 
 Workflow
 ========
 
-In this example we'll create a "my-complete-discovery" workflow that utilizes several
+In this example we will create a "my-complete-discovery" workflow that utilizes several
 components of the Digital Rebar content and plugins capabity.
 
-.. note::  Note the addition of the 'validation-post-discovery' and 'validation-post-hardware' Stages.
+.. note::  Note the addition of the 'validation-post-discovery' and
+  'validation-post-hardware' Stages, these define the point in the workflow
+   where the validation process will run.
 
 	::
 
@@ -202,6 +216,25 @@ look like the following:
   		validation/post-hardware:
     		- "validate-ipmi-hostname-ip"
 
+The type definition for the Params ``validation/post-discover`` are defined
+in the Validation content pack, and the appropriate stage contains the
+control mapping for each.
+
+For the ``validation-post-discover`` Stage, the stage carries the mapping
+within the stage, as follows:
+
+  ::
+
+    Params:
+      "validation/list-parameter": "validation/post-discover"
+
+Similarly, the ``validation-post-hardware`` stage defines the mapping to
+point to the Param ``validation/post-discover``.
+
+These are the values we use in our profile above to add the list of Tasks
+to execute at the appropriate Stage run.
+
+
 Operating The Validation
 ========================
 
@@ -232,6 +265,13 @@ prior to starting executing the tasks.  Please insure that you review the
 Para error values after a failure, but before you re-run any more validation
 stages.
 
+It is required to include the ``{{ template "setup.tmpl" .}}`` in each of the
+validation tasks.  With the inclusion of this template, you can set the
+``rs-debug-param`` on a Machine, and the validation tasks will contain a lot
+more debug output in the job log.  If you need to verify/debug the actions in
+the validation task, this is a good way to review more detailed output logging
+information.
+
 
 Skipping Validation Without Changing Your Workflow
 ==================================================
@@ -241,7 +281,7 @@ if no validation tasks are defined (by use of the reference
 ``validation/list-parameter`` Param), then the system will skip any validation
 attempts for the given stage.
 
-This allows you to either leave the Stages defined control parameter blank, and
+This allows you to leave the Stage defined control parameter blank and
 not require changing the Workflow.  This effectively becomes a "noop" of the
 validation system.
 
@@ -257,9 +297,9 @@ Namespace Definitions
 =====================
 
 Validation system stages, control params, and other content parts will utilize
-the prefix name space of ``validation/``.  Individual Tasks, Params, etc. that
+the prefix namespace of ``validation/``.  Individual Tasks, Params, etc. that
 implement functional use of the Validation system components will utilize the
-prefix name space of ``validate/`.
+prefix namespace of ``validate/`.
 
 For example, the Start Stage for the Validation system is ``validation-start``,
 while the NIC Count and UP link state checking uses a Task namespaced as
