@@ -16,7 +16,7 @@ BootParams: >-
   method={{.Env.InstallUrl}}
   inst.geoloc=0
   --
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
 OptionalParams:
   - "operating-system-disk"
   - "provisioner-default-password-hash"
