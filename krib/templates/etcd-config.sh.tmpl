@@ -297,6 +297,7 @@ LimitNOFILE=40000
 TimeoutStartSec=0
 
 ExecStart=${INSTALL_DIR}/etcd \
+ --enable-v2=true \
  --name \${PEER_NAME} \
  --data-dir /docker/etcd \
  --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT},http://127.0.0.1:\${CLIENT_PORT} \
