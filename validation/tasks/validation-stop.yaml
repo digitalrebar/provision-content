@@ -1,6 +1,14 @@
 ---
 Name: "validation-stop"
 Description: "Stop a validation run and report the results"
+Documentation: |
+  This task ends a given Validtion stage.  No other tasks should follow it on
+  the stage, and the only other task that should preceed is the ``validation-start``
+  task.
+
+  Tasks will be dynamically injected in to the workflow if they have been specified
+  by the appropriate control Params prior to this task.
+
 Meta:
   color: "blue"
   icon: "bug"

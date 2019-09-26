@@ -1,6 +1,9 @@
 ---
 Name: "validation-test-fail"
 Description: "Example failing validation task"
+Documentation: |
+  Example validation task that performs the "fail" error.
+
 Meta:
   color: "blue"
   icon: "bug"

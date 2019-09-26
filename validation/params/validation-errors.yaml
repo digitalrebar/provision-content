@@ -1,6 +1,13 @@
 ---
 Name: "validation/errors"
 Description: "A list of errors that valided in validation."
+Documentation: |
+  This param will be dynamically added to the Machine object if the
+  Validation system encounters any errors that are recorded with the
+  use of the helper function named ``add_validation_error``.
+
+  It will be wiped clean prior to any ``validation-start`` task being
+  executed.
 Schema:
   type: "array"
   items:

@@ -1,6 +1,11 @@
 ---
 Name: "validation/post-install"
 Description: "Tests to run during the post-install validation stage"
+Documentation: |
+  This param defines the list of Tasks to execute for validation
+  during the ``validation-post-install`` stage.  If left empty, all
+  validation for the stage will be skipped.
+
 Schema:
   type: "array"
   items:

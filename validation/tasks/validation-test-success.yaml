@@ -1,6 +1,9 @@
 ---
 Name: "validation-test-success"
 Description: "Example validation success task"
+Documentation: |
+  Example validation task that performs a "Success" validation.
+
 Meta:
   color: "blue"
   icon: "bug"

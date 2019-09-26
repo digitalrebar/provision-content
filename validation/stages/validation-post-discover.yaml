@@ -1,6 +1,13 @@
 ---
 Name: "validation-post-discover"
 Description: "Perform validation tasks post-discover"
+Documentation: |
+  This is a RackN defined validation Stage designed to run relatively soon
+  after the Discover process has started.  Typically this should run after
+  the ``gohai-inventory``, ``inventory``, ``raid-inventory``, ``network-lldp``,
+  or other similar "inventory" like stages, but prior to any hardware
+  configuration or changes (BIOS, Flash, etc.).
+
 Params:
   "validation/list-parameter": "validation/post-discover"
 Tasks:
