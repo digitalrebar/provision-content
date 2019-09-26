@@ -1,12 +1,6 @@
-{{if .ParamExists "operating-system-disk" -}}
 d-i partman-auto/disk string /dev/{{.Param "operating-system-disk"}}
 d-i grub-installer/choose_bootdev select /dev/{{.Param "operating-system-disk"}}
 d-i grub-installer/bootdev string /dev/{{.Param "operating-system-disk"}}
-{{else -}}
-d-i partman-auto/disk string /dev/sda
-d-i grub-installer/choose_bootdev select /dev/sda
-d-i grub-installer/bootdev string /dev/sda
-{{end -}}
 d-i partman-auto/method string lvm
 d-i partman-auto-lvm/guided_size string max
 d-i partman-auto-lvm/new_vg_name string {{.Machine.ShortName}}

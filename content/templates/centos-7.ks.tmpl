@@ -16,14 +16,14 @@ firewall --disabled
 authconfig --enableshadow --enablemd5
 selinux --disabled
 
-bootloader --location=mbr {{if .ParamExists "operating-system-disk"}}--driveorder={{.Param "operating-system-disk"}}{{end}} --append="rhgb quiet"
+bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
 zerombr
-{{if .ParamExists "operating-system-disk"}}ignoredisk --only-use={{.Param "operating-system-disk"}}{{end}}
-clearpart --all {{if .ParamExists "operating-system-disk"}}--drives={{.Param "operating-system-disk"}}{{end}}
-part /boot --fstype ext4 --size=512 {{if .ParamExists "operating-system-disk"}}--ondisk={{.Param "operating-system-disk"}}{{end}}
-part /boot/efi --fstype vfat --size=512 {{if .ParamExists "operating-system-disk"}}--ondisk={{.Param "operating-system-disk"}}{{end}}
+ignoredisk --only-use={{.Param "operating-system-disk"}}
+clearpart --all --drives={{.Param "operating-system-disk"}}
+part /boot --fstype ext4 --size=512 --ondisk={{.Param "operating-system-disk"}}
+part /boot/efi --fstype vfat --size=512 --ondisk={{.Param "operating-system-disk"}}
 part swap --recommended
-part pv.6 --size=1 --grow {{if .ParamExists "operating-system-disk"}}--ondisk={{.Param "operating-system-disk"}}{{end}}
+part pv.6 --size=1 --grow --ondisk={{.Param "operating-system-disk"}}
 volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
 logvol / --fstype ext4 --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
 text
