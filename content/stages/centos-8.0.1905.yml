@@ -1,0 +1,13 @@
+---
+Name: "centos-8.0.1905-install"
+Description: "CentOS 8.0.1905 install stage."
+BootEnv: "centos-8.0.1905-install"
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+  - "configure-network"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

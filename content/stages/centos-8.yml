@@ -1,0 +1,13 @@
+---
+Name: "centos-8-install"
+Description: "CentOS 8 install stages.  References the latest CentOS 8 release"
+BootEnv: "centos-8-install"
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+  - "configure-network"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
