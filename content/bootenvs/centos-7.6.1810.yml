@@ -25,9 +25,9 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
       IsoFile: "CentOS-7-aarch64-Minimal-1810.iso"
@@ -41,9 +41,9 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"

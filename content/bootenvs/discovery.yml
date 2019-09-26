@@ -36,9 +36,9 @@ OS:
         rd_NO_MD
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
     arm64:
       Loader: "grubarm64.efi"
       IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
@@ -56,9 +56,9 @@ OS:
         rd_NO_MD
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 OptionalParams:
   - "kernel-console"
   - "kernel-options"
@@ -307,6 +307,7 @@ Templates:
     Contents: |
       #!/bin/bash
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+      set +x
 
       get_macs() {
           local maclist=""
