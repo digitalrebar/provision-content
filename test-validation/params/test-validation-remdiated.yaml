@@ -1,0 +1,10 @@
+---
+Name: "test-validation/remdiated"
+Description: "Sets the task remediated flag value for testing."
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

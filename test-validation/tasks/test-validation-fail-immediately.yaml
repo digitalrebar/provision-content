@@ -1,0 +1,47 @@
+---
+Name: "test-validation-fail-immediately"
+Description: "Example fatal validation task that fails immediately."
+Documentation: |
+  This is a test example to raise an immediate failure by a task in the
+  Validation system.  Processing will stop immediately, and the Operator
+  should review the Job Log for the output details of the failure.
+
+  If the Param value ``test-validation/remdiated`` is ``false``, the
+  workflow will fail as intended.  If the param is set to ``true``,
+  then this test will not trigger a fail immediately condition.
+
+  This is intended to simulate a failure in the field that stops the
+  workflow immediately, the issue is "remediated", and then the runner on
+  the machine is started again, and the workflow should continue through
+  to successful conclusion.
+
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "test_validation_fail_immediately.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    # Call test_validation_fail_immediately() at end of this task.
+    # A fatal task needs immediate attention with possible remediation.
+    # Bad network or something like that could be fatal that would
+    # succeed without changes to the machine.
+
+    {{ if eq ( .Param "test-validation/remediated" ) true -}}
+    echo "($$): This is test-validation-fail-immediately, but remediation has been marked true."
+    validation_success
+    {{ else -}}
+    echo "($$): This is a fatal failure.  This will immediately stop the system."
+    echo "($$): Please remediate the failure, and restart the workflow."
+    validation_fail_immediately
+    {{ end -}}
+

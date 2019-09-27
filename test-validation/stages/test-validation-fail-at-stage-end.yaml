@@ -1,0 +1,31 @@
+---
+Name: "test-validation-fail-at-stage-end"
+Description: "Perform validation test fail at stage end."
+Documentation: |
+  This test should complete the following tasks:
+
+    * success
+    * fail - log a failre to ``validation/errors``, but continue
+    * success
+    * fail - log a failre to ``validation/errors``, but continue
+
+  The workflow should FAIL at the end of the Stage, completing all
+  tasks before being marked failed.
+
+  Evaluate the ``validation/errors`` Param, which should
+  contain two log entries for failure.
+
+Params:
+  "validation/list-parameter": "test-validation/fail-at-stage-end"
+  "test-validation/fail-at-stage-end":
+    - test-validation-success
+    - test-validation-fail-at-stage-end
+    - test-validation-success
+    - test-validation-fail-at-stage-end
+Tasks:
+  - "validation-start"
+  - "validation-stop"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

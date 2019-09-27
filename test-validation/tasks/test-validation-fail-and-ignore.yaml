@@ -1,0 +1,35 @@
+---
+Name: "test-validation-and-ignore"
+Description: "Example validation task that fails, ignoring the failure after logging a message."
+Documentation: |
+  This is an example validation task that exercises the "test and ignore"
+  feature.  This task will raise the ``validation_fail_and_ignore`` error
+  and write a message to the ``validation/errors-ignore`` Param, but will
+  not stop any processing of the workflow.
+
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "test_validation_fail_and_ignore.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    # A failure that we will log a message, and ultimately ignore, not
+    # stopping any processing of the workflow
+    # Bad network or something like that could be fatal that would
+    # succeed without changes to the machine.
+    #
+    # In this case, do NOT call add_validation_error, just exit 1.
+    MSG="($$): Received a failure that we are going to ignore and continue."
+
+    validation_fail_and_ignore "$MSG"
+
