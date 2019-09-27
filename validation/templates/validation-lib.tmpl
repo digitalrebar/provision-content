@@ -33,14 +33,8 @@ validation_clear_errors_ignore() {
 }
 
 validation_msg_prefix() {
-  {{ $stage := ".Machine.Stage" -}}
-  {{ $task := ".Machine.Task" -}}
-  {{ $cj := ".Machine.CurrentJob" -}}
-  {{ $sep := "::" -}}
-  {{ $prefix := (printf "%s %s %s %s %s %s" $stage $sep $task $sep $cj $sep) -}}
-  # builds:  'stage :: task :: current_job :: '
-
-  echo "{{ $prefix }}"
+  prefix="{{.Machine.Stage}} :: {{slice .Machine.Tasks .Machine.CurrentTask | first }} :: {{.Machine.CurrentJob}} "
+  echo "$prefix"
 }
 
 validation_success() {
