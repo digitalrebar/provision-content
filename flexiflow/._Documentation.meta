@@ -3,9 +3,12 @@ FlexiFlow
 
 The FlexiFlow system allows an operator to dynamically inject new tasks
 in to an existing workflow based on a Parameter.  This allows for other
-content to build up Tasks to add in to the workflow flexibly.  Some
+content to build up Tasks to add an existing workflow flexibly.  Some
 examples may include adding specific tasks based on classification results
-fromt the Classify system, or other paths.
+from the Classify system, or other paths.
+
+
+**Stage Based Manipulation:**
 
 The Tasks that are defined in the parameter (specified by the
 ``flexiflow/list-parameter``) will be composed and added to the task list.
@@ -25,16 +28,23 @@ simple array type Param.  It lists each *Task* that should be executed in
 the listed sequence by the FlexiFlow process at that *Stage* in the
 *Workflow*.
 
+**Workflow Based Manipulation**
 
-Operating FlexiFlow
-~~~~~~~~~~~~~~~~~~~
+The Workflow that is defined in the Param named ``flexiflow-workflow`` will
+be run when the stage of the same name is run.  This allows the operator
+to jump in to another Workflow in an existing workflow.
+
+
+Operating FlexiFlow Stage Based Manipulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here is a brief outline of example usage of the FlexiFlow system utilizing
 the RackN defined stage.  In this example, we will define tasks to run in
 the ``flexiflow-stage``.
 
-Workflow
-========
+
+Using the Stage and Task Injection
+==================================
 
 In this example we will create a "my-flexiflow-discovery" workflow.
 
@@ -191,3 +201,17 @@ Here is a list of some of the possible errors you may encounter.
 In this case, the ``superflex`` list parameter must be defined in advance of using it,
 the operator has attempted to use the Parameter as an adhoc param.  Create a Param
 type definition as specified in the *Create Parameter Definition* section above.
+
+
+Operating FlexiFlow Workflow Based Manipulation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The FlexiFlow content also allows you to add a Stage to a given workflow.  At that Stage,
+the system will reference the Param named ``flexiflow/workflow``.  The value of the
+param should be the name of an existing Workflow.  That workflow will then be executed
+on the system.
+
+Please review the ``test-flexiflow-workflow-main`` Workflow which will dynamically add the
+test workflow named ``test-flexiflow-workflow-include``.  This provides a working example
+of using the incldue workflow capability.
+

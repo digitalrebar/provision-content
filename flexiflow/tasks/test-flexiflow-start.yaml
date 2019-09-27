@@ -1,0 +1,19 @@
+---
+Name: "test-flexiflow-start"
+Description: "Decorator to mark start of Test flexiflow workflow."
+Documentation: |
+  Just markes the beginning of the test flexiflow workflow.
+
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "test_flexiflow_start.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    echo ">>> Beginning TEST stage for FlexiFlow workflow."
+    exit 0

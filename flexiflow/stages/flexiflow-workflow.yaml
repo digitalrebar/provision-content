@@ -1,0 +1,13 @@
+---
+Name: flexiflow-workflow
+Description: Dynamically inject a full new Workflow at this stage.
+Documentation: |
+  Allows the operator to set the ``flexiflow/workflow`` Parameter to the
+  name of an existing workflow.  This will then be added dynamically to
+  the system to be executed immediately at this position in the original
+  workflow.
+Meta:
+  color: purple
+  icon: magic
+Tasks:
+  - flexiflow-workflow

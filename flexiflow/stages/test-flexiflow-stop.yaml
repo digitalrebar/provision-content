@@ -1,0 +1,13 @@
+---
+Name: "test-flexiflow-stop"
+Description: "Decorator stage for testing flexiflow workflow stop."
+Documentation: |
+  Just provides a marker (decorator) that the flexiflow main stage
+  has stopped.
+
+Tasks:
+  - "test-flexiflow-stop"
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"

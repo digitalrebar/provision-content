@@ -1,0 +1,31 @@
+---
+Name: "flexiflow-workflow"
+Description: "Choose next workflow steps in the current workflow context."
+Meta:
+  icon: "purple"
+  color: "magic"
+  title: "RackN Content"
+Templates:
+  - Name: "flexiflow-workflow.sh"
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{if .Param "flexiflow/maintenance-mode" }}
+      echo ">>> Complete maintenance mode and return to local disk boot."
+      drpcli machines remove {{.Machine.UUID}} param "flexiflow/maintenance-mode" || :
+      drpcli machines workflow {{.Machine.UUID}} local > /dev/null
+      exit 0
+      {{end}}
+
+      {{ if .ParamExists "flexiflow/workflow" -}}
+      WF={{ .Param "flexiflow/workflow" }}
+      echo ">>> FLexiFlow is setting workflow to:  $WF"
+      drpcli machines workflow {{.Machine.UUID}} "$WF" > /dev/null
+      {{ else -}}
+      echo ">>> Wait for workflow assignment."
+      {{ end -}}
+
+      exit 0
+
