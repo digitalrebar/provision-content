@@ -1,0 +1,28 @@
+---
+Name: "validation/errors-ignore"
+Description: "A list of errors that were ignored in the validationion."
+Documentation: |
+  If validation occured, and an error is going to be ignored, this Param
+  captures that information for further review.
+
+  This Param will not be automatically cleaned up on ``validation-start`` task
+  run the way that ``validation/errors`` is.  Instead, the logged ``<message>``
+  will be prepended automatically with:
+
+    ::
+
+      Stage Name :: Task Name :: Job UUID :: <message>
+
+  If the operator wishes to wipe this value, add the ``validation-clear-errors-ignore``
+  task to the list of tasks to run, and the Param will be reset to an empty value at
+  that point in the Workflow/Stage/Task.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

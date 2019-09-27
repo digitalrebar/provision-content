@@ -1,0 +1,38 @@
+---
+Name: "test-validation-fail-at-stage-end"
+Description: "Example failing validation tasks at Stage end."
+Documentation: |
+  This is a test task that will raise the validation system failure
+  to fail at the end of the Stage run.  This allows multiple tasks
+  to run through to completion before stoppping the Validation system.
+
+  An error message will be written to the ``validation/errors`` Param.
+
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "validation_fail_at_stage_end.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    # Just define our error MSG and pass it to test_validation_fail_at_stage_end()
+    # This is a soft error that allows the accumulation of errors.
+    # Like hardware missing (where the is not direct remediation
+    # and other things could be added to the list of failures).
+    # Processing will stop at the end of the Stage after all task have run.
+
+    MSG="($$): Validation test failed, and workflow will be halted at Stage end."
+    echo "This is a failure.  Calling validation_fail_at_stage_end() to log the error."
+    echo "But still exit 0 to gather other failures as well."
+
+    validation_fail_at_stage_end "$MSG"
+

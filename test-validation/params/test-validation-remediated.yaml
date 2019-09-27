@@ -1,0 +1,16 @@
+---
+Name: "test-validation/remediated"
+Description: "Sets the task remediated flag value for testing."
+Documentation: |
+  Sets the remediation control flag for the fail immediately test.
+  By default, fail immediately will fail.  If this flag gets set
+  to ``true``, then the fail immediately task will exit with success,
+  which simulates the "task failure condition was remediate" concept.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

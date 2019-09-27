@@ -74,44 +74,32 @@ the listed sequence by the validation process at that *Stage* in the
 Task Exit Conditions
 ~~~~~~~~~~~~~~~~~~~~
 
-Validation actions can exit one of three ways:
+Validation actions can exit one of several ways:
 
-  1. fatal: immediately stops execution
-  2. fail: continue remaining validations, failures tallied at the end
-  3. succeed: mark validation successful and continue
 
-Each validation task should do one of the following:
+  1. ``validation-success`` = validation succeeded, exit 0
+  2. ``validation-fail-immediately`` = fail and exit 1, stopping workflow immediately at task
+  3. ``validation-fail-at-stage-end`` = exit 0, collect logs in validation/errors param, stop at end of Stage
+  4. ``validation-fail-and-ignore`` = log validation error to validation/errors-ignored, but exit 0 - no workflow stop will occur at all
 
-  * *success* - Return 0
-  * *failure* - Return 0, and Update the ``validation/errors`` Param
-  * *fatal* - Return 1
-
-The concept is that *Success* returns zero and processing continues as normal.
-
-*Failure* logs the failure in the ``validation/errors`` logging parameter
-on the machine, but still returns 0 to allow continuation of testing any
-remaining validation tasks on the task list.  If any single failure occurs,
-then when the ``validation-stop`` stage is reached, the Workflow will be
-stopped.
-
-*Fatal* does NOT update the ``validation/errors`` parameter, but does return 1,
-which immediately halts the Workflow system.  An operator may potentially be
-able to remediate the issue, and then restart the *Runner* to continue the
-Workflow processing.
+futures return conditions (not yet implemented):
+``validation-fail-and-remediate`` = exit 1, and if the task specifies an additional remediation task, run this new task, plus ourself again - hoping the remediation task solved the issue - may need number tracking and break the cycle after N failures
 
 
 Remediating and Continuing Failed Tasks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The two failure exit conditions allow the developer of the validation task
+The failure exit conditions allow the developer of the validation task
 to determine if the failure is a "soft" failure which can be remediated, and
 then the Workflow can be resumed, or if the failure implies a "hard" fail
-that can not be corrected during workflow operation.
+that can not be corrected during workflow operation.  Additionally, some
+failures may not impact final workflow completion, but the operator would
+like to have them recorded for future review or remediation.
 
 If a failure that is external to machine and can be remediated (for example a
 DNS record has the wrong information, and DNS can be updated quickly)
-the test should be *fatal*.  This allows the failure to be remediate and Workflow
-can be continued without failing validation.
+the test should be *validation-fail-immediately*.  This allows the failure to
+be remediate and Workflow can be continued without failing validation.
 
 If the failure is not able to be remediated immediately, a log message should be
 added to the ``validation/errors`` logging Param, and success returned so
@@ -324,6 +312,24 @@ template, which is managed by RackN.
 If your validation tools require a common library, they can be built as a
 standard template, and included in any appropriate custom tasks.
 
+Current functions that can be incorporated in to your Validation custom tasks
+are as follows:
+
+	* ``validation_add_error()`` = Adds a validation error to the ``validation/errors` Param
+	* ``validation_add_error_ignore()`` = Adds a validation error to the ``validation/errors-ignore`` Param
+	* ``validation_clear_errors_ignore()`` = Removes the ``validation/errors-ignore`` Param from the Machine
+	* ``validation_msg_prefix()`` = builds a prefix of Stage/Task/CurrentJob for output messages
+	* ``validation_success()`` = marks a validation task successful and exits 0
+	* ``validation_fail_at_stage_end()``= marks a validation task failed, but exits 0, and ultimately exits the Stage with exit code 1
+	* ``validation_fail_immediately()``= marks validation task failed and exits 1 immediately
+	* ``validation_fail_and_ignore()`` = marks validation as failed, but ignores the failure without exiting the workflow
+	* ``#validation_fail_and_remediate()`` = Not implemented yet
+	* ``validate_machine_name_dns_by_ip()`` = verifies the machine has a DNS record based on the Machines IP address
+	* ``validate_ipv4_ip_syntax()`` = simple helper to verify string is in IPv4 dotted quad notation
+	* ``validate_check_same_subnet()`` = verifies that given 2 ip address and a subnet mask, both addresses are in the same subnet network
+	* ``validate_ping_dest_from_src()`` = verifies that Machine can ping an IP address given a source interface to use
+	* ``validate_nic_counts()`` = verifies the number of NICs and number of NICs that can be brought to an "UP" state
+
 
 Adding New Stages
 =================
@@ -345,7 +351,7 @@ Example Stage in YAML:
 		Name: "my-validation"
 		Description: "Perform tasks defined by the 'my-validation' Param."
 		Documentation: |
-			The Param 'my-validatin' is an array that will contain
+			The Param 'my-validation' is an array that will contain
 			the list of validation tasks to run.
 		Params:
   		"validation/list-parameter": "my-validation"
@@ -421,7 +427,7 @@ The library also contains a helper routine to add errors to the
  ``add_validation_error`` which should be called with a single string which
  contains the text of the error message.  This function can safely called
  multiple times, and each subsequent error message will be appended to the
- ``validatin/errors` array.
+ ``validation/errors` array.
 
 
 Separating Validate Tasks from the Validation System

@@ -1,0 +1,16 @@
+---
+Name: "test-validation/success"
+Description: "Param for testing validation 'success'."
+Documentation: |
+  Param for testing validation system success return.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+
