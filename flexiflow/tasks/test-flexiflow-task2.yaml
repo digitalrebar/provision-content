@@ -1,0 +1,19 @@
+---
+Name: "test-flexiflow-task2"
+Description: "Example test task2 for FlexiFlow testing."
+Documentation: |
+  This is an example test task that just prints a message and exits successfully.
+
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "test_flexiflow_task2.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    echo ">>> Running FlexiFlow Test Task 2 at $(date)"
+    exit 0
