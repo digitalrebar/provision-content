@@ -1,0 +1,19 @@
+---
+Name: "flexiflow/list-parameter"
+Description: "The name of the parameter that contains the Param name with has the list of tasks to run."
+Documentation: |
+  This defines the parameter that the ``flexiflow-stage`` stage
+  will use to reference the list of Tasks to dynamically execute. It
+  essentially operates as a "control pointer" to the real list, allowing
+  for flexible usage of a single defined Param to point to a variable list
+  of tasks.
+
+  The Param that it points to **must be** type defined in the system, and
+  it must be an Array of Strings.
+
+Schema:
+  type: "string"
+Meta:
+  color: "purple"
+  icon: "magic"
+  title: "RackN Content"
