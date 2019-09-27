@@ -14,8 +14,8 @@ Documentation: |
   the Job Log for the failure message.
 
 Params:
-  "validation/list-parameter": "test-validation/fail-immediately"
-  "test-validation/fail-immediately":
+  validation/list-parameter: test-validation/fail-immediately
+  test-validation/fail-immediately:
     - test-validation-success
     - test-validation-fail-immediately
     - test-validation-success

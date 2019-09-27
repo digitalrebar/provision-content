@@ -16,8 +16,8 @@ Documentation: |
   contain two log entries for failure.
 
 Params:
-  "validation/list-parameter": "test-validation/fail-at-stage-end"
-  "test-validation/fail-at-stage-end":
+  validation/list-parameter: test-validation/fail-at-stage-end
+  test-validation/fail-at-stage-end:
     - test-validation-success
     - test-validation-fail-at-stage-end
     - test-validation-success

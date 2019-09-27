@@ -14,8 +14,8 @@ Documentation: |
   contain a single log entry.
 
 Params:
-  "validation/list-parameter": "test-validation/fail-and-ignore"
-  "test-validation/fail-and-ignore":
+  validation/list-parameter: test-validation/fail-and-ignore
+  test-validation/fail-and-ignore:
     - validation-clear-errors-ignore
     - test-validation-success
     - test-validation-fail-and-ignore

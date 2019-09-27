@@ -39,9 +39,17 @@ Templates:
     {{ if eq ( .Param "test-validation/remediated" ) true -}}
     echo "($$): This is test-validation-fail-immediately, but remediation has been marked true."
     validation_success
+
     {{ else -}}
+
     echo "($$): This is a fatal failure.  This will immediately stop the system."
     echo "($$): Please remediate the failure, and restart the workflow."
+
+    {{ if eq ( .Param "test-validation/remediated" ) false }}
+    echo "The remdiated param is false - toggling it to true."
+    set_param "test-validation/remediated" true
+    {{ end -}}
+
     validation_fail_immediately
     {{ end -}}
 

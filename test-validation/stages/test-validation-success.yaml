@@ -10,8 +10,8 @@ Documentation: |
   The workflow should complete successfully with no errors.
 
 Params:
-  "validation/list-parameter": "test-validation/success"
-  "test-validation/success":
+  validation/list-parameter: test-validation/success
+  test-validation/success:
     - test-validation-success
     - test-validation-success
 Tasks:

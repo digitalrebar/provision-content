@@ -1,0 +1,16 @@
+---
+Name: "test-validation/fail-and-ignore"
+Description: "Param for testing validation 'fail and ignore'."
+Documentation: |
+  Param for testing validation system fail and ignore return.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+

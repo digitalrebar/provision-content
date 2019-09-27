@@ -21,10 +21,9 @@ Documentation: |
   also succeed.
 
 Params:
-  "validation/list-parameter": "test-validation/remediated-fail-immediately"
-  "test-validation/remediated-fail-immediately":
+  validation/list-parameter: test-validation/remediated-fail-immediately
+  test-validation/remediated-fail-immediately:
     - test-validation-success
-    - test-validation-set-remediated
     - test-validation-fail-immediately
     - test-validation-success
     - test-validation-clear-remediated

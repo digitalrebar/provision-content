@@ -1,5 +1,5 @@
 ---
-Name: "test-validation-and-ignore"
+Name: "test-validation-fail-and-ignore"
 Description: "Example validation task that fails, ignoring the failure after logging a message."
 Documentation: |
   This is an example validation task that exercises the "test and ignore"
