@@ -78,12 +78,12 @@ Validation actions can exit one of several ways:
 
 
   1. ``validation-success`` = validation succeeded, exit 0
-  2. ``validatin-fail-immediately`` = fail and exit 1, stopping workflow immediately at task
-  3. ``validatin-fail-at-stage-end`` = exit 0, collect logs in validation/errors param, stop at end of Stage
-  4. ``validatin-fail-and-ignore`` = log validation error to validation/errors-ignored, but exit 0 - no workflow stop will occur at all
+  2. ``validation-fail-immediately`` = fail and exit 1, stopping workflow immediately at task
+  3. ``validation-fail-at-stage-end`` = exit 0, collect logs in validation/errors param, stop at end of Stage
+  4. ``validation-fail-and-ignore`` = log validation error to validation/errors-ignored, but exit 0 - no workflow stop will occur at all
 
 futures return conditions (not yet implemented):
-``validatin-fail-and-remediate`` = exit 1, and if the task specifies an additional remediation task, run this new task, plus ourself again - hoping the remediation task solved the issue - may need number tracking and break the cycle after N failures
+``validation-fail-and-remediate`` = exit 1, and if the task specifies an additional remediation task, run this new task, plus ourself again - hoping the remediation task solved the issue - may need number tracking and break the cycle after N failures
 
 
 Remediating and Continuing Failed Tasks
@@ -351,7 +351,7 @@ Example Stage in YAML:
 		Name: "my-validation"
 		Description: "Perform tasks defined by the 'my-validation' Param."
 		Documentation: |
-			The Param 'my-validatin' is an array that will contain
+			The Param 'my-validation' is an array that will contain
 			the list of validation tasks to run.
 		Params:
   		"validation/list-parameter": "my-validation"
@@ -427,7 +427,7 @@ The library also contains a helper routine to add errors to the
  ``add_validation_error`` which should be called with a single string which
  contains the text of the error message.  This function can safely called
  multiple times, and each subsequent error message will be appended to the
- ``validatin/errors` array.
+ ``validation/errors` array.
 
 
 Separating Validate Tasks from the Validation System
