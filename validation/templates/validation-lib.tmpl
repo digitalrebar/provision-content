@@ -3,16 +3,73 @@
 # Library to help manage common validation routines
 #
 
+taskname="{{slice .Machine.Tasks .Machine.CurrentTask | first}}"
+
 add_validation_error() {
   local err="$1"
-  local taskname="{{slice .Machine.Tasks .Machine.CurrentTask | first}}"
-
   local list=$(get_param validation/errors)
 
   list="$(jq ". += [\"${taskname}: ${err}\"]" <<< "$list")"
 
   set_param validation/errors "$list"
 }
+
+validation_add_error() {
+  add_validation_error "$*"
+}
+
+validation_add_error_ignore() {
+  local err="$1"
+  local list=$(get_param validation/errors-ignore)
+
+  list="$(jq ". += [\"${taskname}: ${err}\"]" <<< "$list")"
+
+  set_param validation/errors-ignore "$list"
+}
+
+validation_clear_errors_ignore() {
+  drpcli machines remove $RS_UUID param "validation/errors-ignore" >/dev/null || :
+  drpcli machines add $RS_UUID param "validation/errors-ignore" to "[]" >/dev/null
+}
+
+validation_msg_prefix() {
+  {{ $stage := ".Machine.Stage" -}}
+  {{ $task := ".Machine.Task" -}}
+  {{ $cj := ".Machine.CurrentJob" -}}
+  {{ $sep := "::" -}}
+  {{ $prefix := (printf "%s %s %s %s %s %s" $stage $sep $task $sep $cj $sep) -}}
+  # builds:  'stage :: task :: current_job :: '
+
+  echo "{{ $prefix }}"
+}
+
+validation_success() {
+    echo "Validation succeeded for task:  $taskname"
+    exit 0
+}
+
+validation_fail_at_stage_end() {
+  echo "Validation task ('$taskname') failed - will stop workflow at Staage end"
+  validation_add_error "$*"
+  exit 0
+}
+
+validation_fail_immediately() {
+  echo "Validation received a Fatal failure for task:  $taskname"
+  exit 1
+}
+
+validation_fail_and_ignore() {
+  echo "Validation error occured, but ignoring for task:  $taskname"
+  validation_add_error_ignore "$(validation_msg_prefix) $*"
+  exit 0
+}
+
+### TODO:  Define a task to run if fail occurs, to potentially remediate issue.
+###        Add remediate task, and original task again to verify it succeeded.
+###        May need count handling to stop after N remediation attempts.
+#validation_fail_and_remediate() {
+#}
 
 validate_machine_name_dns_by_ip() {
     local host=""
@@ -60,6 +117,7 @@ check_same_subnet() {
     fi
     return 1
 }
+validate_check_same_subnet() { check_same_subnet $*; }
 
 ping_dest_from_src() {
     local src=$1
@@ -82,6 +140,7 @@ ping_dest_from_src() {
     fi
     return ${xit}
 }
+validate_ping_dest_from_src() { ping_dest_from_src $*; }
 
 check_up() { $(ip -o link show $1 | grep -q " UP ") && return 0 || return 1; }
 bring_up() { ip link set $1 up; return $?; }
