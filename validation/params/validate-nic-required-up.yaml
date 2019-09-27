@@ -5,7 +5,7 @@ Documentation: |
   Validates the number of NICs that can support an ``UP`` link state.  This
   process does not try to configure any network stack on the interface, just
   verifies that the port link state can be brought ``UP`` successfully (eg
-  there is cable and connection to upstream switch device).
+  there is cable and link connection to upstream switch device).
 Schema:
   type: number
   minimum: 1

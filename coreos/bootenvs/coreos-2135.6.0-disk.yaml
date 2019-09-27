@@ -14,7 +14,7 @@ Kernel: "coreos/vmlinuz"
 BootParams: >-
   coreos.first_boot=1
   coreos.config.url={{.Machine.Url}}/ign.json
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "kernel-console"

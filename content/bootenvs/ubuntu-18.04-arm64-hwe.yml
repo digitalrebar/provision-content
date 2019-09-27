@@ -37,9 +37,9 @@ OS:
         url={{.Machine.Url}}/seed
         netcfg/get_hostname={{.Machine.Name}}
         rw quiet
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 OnlyUnknown: false
 OptionalParams:
   - part-scheme
