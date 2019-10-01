@@ -1,0 +1,11 @@
+---
+Name: test-flexiflow-workflow-main
+Meta:
+  color: orange
+  icon: magic
+Description: Main workflow to test FlexiFlow workflow inclusion.
+Stages:
+  - test-flexiflow-start
+  - test-flexiflow-workflow
+  - test-flexiflow-stop
+

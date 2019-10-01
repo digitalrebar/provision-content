@@ -1,0 +1,9 @@
+---
+Name: test-flexiflow-workflow-include
+Meta:
+  color: orange
+  icon: magic
+Description: Test to include this workflow in main workflow.
+Stages:
+  - test-flexiflow-stage
+

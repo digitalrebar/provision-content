@@ -1,0 +1,19 @@
+---
+Name: "test-flexiflow-stop"
+Description: "Decorator to mark stop of Test flexiflow workflow."
+Documentation: |
+  Just markes the ending of the test flexiflow workflow.
+
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "test_flexiflow_stop.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    echo ">>> Ending TEST stage for FlexiFlow workflow."
+    exit 0
