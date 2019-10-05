@@ -85,7 +85,7 @@ spec:
     {{ range $key, $value  := .Param "krib/external-dns-extra-args" -}}
     {{ $key }}: {{ $value }}
     {{ end }}
-    {{ end }}        
+    {{ end }}     
         env:
 {{if eq (.Param "krib/external-dns-provider") "aws" }}        
           - name: EXTERNAL_DNS_PROVIDER
