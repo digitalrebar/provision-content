@@ -40,10 +40,12 @@ Templates:
         curl -o $FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
         {{ end }}
 
-        # Erroring commands are to be expected.
-        set +e
-        rpm -ivh $FILENAME
+        # Check to see if RPM is already installed.
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
+        if ! rpm -q ${RPMNAME} 2>/dev/null >/dev/null ; then
+          rpm -ivh $FILENAME
+        fi
+        # Find SETUP command
         SETUP=$(rpm -ql $RPMNAME | grep '/setup$')
         if [[ "$SETUP" = "" ]] ; then
           SETUP=$(rpm -ql $RPMNAME | grep '/hpsetup$')
