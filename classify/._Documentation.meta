@@ -1,7 +1,7 @@
 Classifier System
 -----------------
 
-The Classifier System allows an operator flexibly define groups of
+The Classifier System allows an operator to flexibly define groups of
 "test/action" sequences to perform on a Machine.  These can be used
 to do any number of tasks.
 
