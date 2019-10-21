@@ -1,0 +1,24 @@
+---
+Name: "flexiflow-stage"
+Description: "Provides flexibly injected list of tasks to run during this stage."
+Documentation: |
+  This Stage implements the FlexiFlow capability.  When the task ``flexiflow-start``
+  is run, it will reference the paramtger defined in the ``flexiflow/list-parameter``
+  Param.  The Param that is referenced must be defined as an Array of Strings. Each
+  array element must be an existing Task on the system.  The list of tasks will
+  be dynamically injected in to this stage and run.
+
+  **Do not** insert any tasks between the start and stop tasks.
+
+  This task **requires** that the Param ``flexiflow/list-parameter`` exists on the
+  machine to run successfully.
+
+RequiredParams:
+  - "flexiflow/list-parameter"
+Tasks:
+  - "flexiflow-start"
+  - "flexiflow-stop"
+Meta:
+  color: "purple"
+  icon: "magic"
+  title: "RackN Content"

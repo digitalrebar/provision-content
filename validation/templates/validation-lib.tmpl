@@ -3,16 +3,67 @@
 # Library to help manage common validation routines
 #
 
+taskname="{{slice .Machine.Tasks .Machine.CurrentTask | first}}"
+
 add_validation_error() {
   local err="$1"
-  local taskname="{{slice .Machine.Tasks .Machine.CurrentTask | first}}"
-
   local list=$(get_param validation/errors)
 
   list="$(jq ". += [\"${taskname}: ${err}\"]" <<< "$list")"
 
   set_param validation/errors "$list"
 }
+
+validation_add_error() {
+  add_validation_error "$*"
+}
+
+validation_add_error_ignore() {
+  local err="$1"
+  local list=$(get_param validation/errors-ignore)
+
+  list="$(jq ". += [\"${taskname}: ${err}\"]" <<< "$list")"
+
+  set_param validation/errors-ignore "$list"
+}
+
+validation_clear_errors_ignore() {
+  drpcli machines remove $RS_UUID param "validation/errors-ignore" >/dev/null || :
+  drpcli machines add $RS_UUID param "validation/errors-ignore" to "[]" >/dev/null
+}
+
+validation_msg_prefix() {
+  prefix="{{.Machine.Stage}} :: {{slice .Machine.Tasks .Machine.CurrentTask | first }} :: {{.Machine.CurrentJob}} "
+  echo "$prefix"
+}
+
+validation_success() {
+    echo "Validation succeeded for task:  $taskname"
+    exit 0
+}
+
+validation_fail_at_stage_end() {
+  echo "Validation task ('$taskname') failed - will stop workflow at Staage end"
+  validation_add_error "$*"
+  exit 0
+}
+
+validation_fail_immediately() {
+  echo "Validation received a Fatal failure for task:  $taskname"
+  exit 1
+}
+
+validation_fail_and_ignore() {
+  echo "Validation error occured, but ignoring for task:  $taskname"
+  validation_add_error_ignore "$(validation_msg_prefix) $*"
+  exit 0
+}
+
+### TODO:  Define a task to run if fail occurs, to potentially remediate issue.
+###        Add remediate task, and original task again to verify it succeeded.
+###        May need count handling to stop after N remediation attempts.
+#validation_fail_and_remediate() {
+#}
 
 validate_machine_name_dns_by_ip() {
     local host=""
@@ -60,6 +111,7 @@ check_same_subnet() {
     fi
     return 1
 }
+validate_check_same_subnet() { check_same_subnet $*; }
 
 ping_dest_from_src() {
     local src=$1
@@ -81,4 +133,54 @@ ping_dest_from_src() {
         return 2
     fi
     return ${xit}
+}
+validate_ping_dest_from_src() { ping_dest_from_src $*; }
+
+check_up() { $(ip -o link show $1 | grep -q " UP ") && return 0 || return 1; }
+bring_up() { ip link set $1 up; return $?; }
+
+validate_nic_counts() {
+    # nic_min_count is the minimum number of NICs that should be found
+    # nic_req_up is minimum num of NICs that can be brought to "UP" state
+    # valid values for both counts are 1 to 99
+    local nic_min_count=$1
+    local nic_req_up=$2
+    local count=1
+    local check
+    local nic
+
+    [[ $nic_min_count =~ ^[0-9]{,2}$ && $nic_min_count -ne 0 ]] || xiterr "invalid value specified for 'nic_min_count' (arg 1)"
+    [[ $nic_req_up =~ ^[0-9]{,2}$ && $nic_req_up -ne 0 ]] || xiterr "invalid value specified for 'nic_req_up' (arg 2)"
+    [[ $nic_req_up -gt $nic_min_count ]] && xiterr "NIC required UP can't be greater NIC minimum count"
+
+    local addrs=$(drpcli machines get {{.Machine.UUID}} param gohai-inventory \
+      | jq -r '.Networking.HardwareAddrs'                                     \
+      | egrep -v "[\{\}]"                                                     \
+      | sed -e 's/[",]//g' -e 's/: / /' -e 's/^  //g'                         \
+      )
+
+    echo "Validating for MAC Addresses and NIC interfaces:"
+    echo "$addrs"
+
+    local found_count=$(echo "$addrs" | wc -l)
+
+    [[ $found_count -ge $nic_min_count ]] || xiterr "failed minimum NIC count ('$nic_min_count') validation"
+
+    local OIFS=${IFS}
+    IFS=$'\n'
+    for check in $addrs
+    do
+        mac=$(echo $check | cut -d " " -f 1)
+        nic=$(echo $check | cut -d " " -f 2)
+        $(check_up $nic || bring_up $nic) || xiterr "failed to 'UP' required NIC count"
+
+        if [[ $count -eq $nic_req_up ]]
+        then
+            echo "Successfully validated NIC Count ('$nic_min_count') and Minimum UP count ($nic_req_up)"
+            break
+        else
+            (( count++ ))
+        fi
+    done
+    IFS=${OIFS}
 }

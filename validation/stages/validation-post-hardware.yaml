@@ -1,6 +1,11 @@
 ---
 Name: "validation-post-hardware"
 Description: "Perform validation tasks post-hardware configuration"
+Documentation: |
+  This stage is a RackN predefined stage designed to run immediately
+  after the Machine hardware has been configured (typically things like
+  BIOS configuration, Flash Firmware updates, RAID configuration, etc).
+
 Params:
   "validation/list-parameter": "validation/post-hardware"
 Tasks:

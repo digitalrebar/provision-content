@@ -14,9 +14,9 @@ OS:
   Name: "centos-7"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-7-x86_64-Minimal-1810.iso"
-      IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1810.iso"
-      Sha256: "38d5d51d9d100fd73df031ffd6bd8b1297ce24660dc8c13a3b8b4534a4bd291c"
+      IsoFile: "CentOS-7-x86_64-Minimal-1908.iso"
+      IsoUrl: "http://mirror.rackspace.com/CentOS/7/isos/x86_64/CentOS-7-x86_64-Minimal-1908.iso"
+      Sha256: "9a2c47d97b9975452f7d582264e9fc16d108ed8252ac6816239a3b58cef5c53d"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -25,14 +25,14 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: "CentOS-7-aarch64-Minimal-1810.iso"
-      Sha256: "864596b2fb971c8d8c0f3618981cca4725f6c2347f6eb2f130e0aefa3413c0ef"
-      IsoUrl: "http://dallas.tx.mirror.xygenhosting.com/centos-altarch/7.6.1810/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso"
+      IsoFile: "CentOS-7-aarch64-Minimal-1908.iso"
+      Sha256: "079123767bf3f59f1cf4daf5f9c030c5f251267d6ea5abd49d63a44997d7db19"
+      IsoUrl: "http://ftp.osuosl.org/pub/centos-altarch/7/isos/aarch64/CentOS-7-aarch64-Minimal-1908.iso"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -41,9 +41,9 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"

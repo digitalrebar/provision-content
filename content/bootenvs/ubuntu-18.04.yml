@@ -40,9 +40,9 @@ OS:
         url={{.Machine.Url}}/seed
         netcfg/get_hostname={{.Machine.Name}}
         rw quiet
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
     arm64:
       IsoFile: "ubuntu-18.04.3-server-arm64.iso"
       IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.3-server-arm64.iso"
@@ -61,9 +61,9 @@ OS:
         url={{.Machine.Url}}/seed
         netcfg/get_hostname={{.Machine.Name}}
         rw quiet
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 OnlyUnknown: false
 OptionalParams:
   - part-scheme

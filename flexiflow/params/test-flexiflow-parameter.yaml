@@ -1,0 +1,18 @@
+---
+Name: "test-flexiflow/parameter"
+Description: "Param for testing flexiflow"
+Documentation: |
+  Param for testing flexiflow system.  This Param contains an Array of
+  Strings that will define which tasks to dynamically add to the
+  ``flexiflow-stage``.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"
+

@@ -1,0 +1,59 @@
+---
+Name: "flexiflow-start"
+Description: "Start a flexiflow run"
+Documentation: |
+  This task begins the FlexiFlow stage.  No other tasks should preceed it on
+  the stage, and the only other task that should follow is the ``flexiflow-stop``
+  task.
+
+  Tasks will be dynamically injected in to the task list after this task, if they
+  have been specified by the appropriate control Params.
+
+Meta:
+  color: "purple"
+  icon: "magic"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "flexiflow_start.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+
+    {{ if eq (.ParamExists "flexiflow/list-parameter") false -}}
+    echo "flexiflow/list-parameter is not specified"
+    exit 1
+    {{ end -}}
+
+    {{ $lp := .Param "flexiflow/list-parameter" -}}
+    echo '>>> FlexiFlow list  parameter set  to:  {{$lp}}'
+
+    {{ if eq (.ParamExists $lp) false }}
+    echo "!!! flexiflow/list-parameter is '{{$lp}}' and it does not exist."
+    exit 1
+    {{ end }}
+
+    # TODO: This should done as a single update call.
+
+    # Clear tasks
+    {{ $seestop := false -}}
+    {{ range $index, $taskname := (slice .Machine.Tasks (add .Machine.CurrentTask 1)) -}}
+       {{ if and (not (eq $taskname "flexiflow-stop")) (not $seestop) -}}
+    echo ">>> Removing FlexiFlow task from list:  {{$taskname}}"
+    drpcli machines removetask $RS_UUID "{{$taskname}}" >/dev/null
+       {{ end -}}
+       {{ if eq $taskname "flexiflow-stop" -}}
+         {{ $seestop = true -}}
+       {{ end -}}
+    {{ end -}}
+
+    # Reset the task list
+    {{ range $index, $taskname := .ComposeParam $lp -}}
+    echo '>>> Flexiflow dynamically adding task:  {{$taskname}}'
+    drpcli machines inserttask $RS_UUID "{{$taskname}}" {{$index}} >/dev/null
+    {{ end -}}
+

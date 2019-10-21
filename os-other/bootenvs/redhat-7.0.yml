@@ -12,7 +12,7 @@ BootParams: >-
   ks={{.Machine.Url}}/compute.ks
   method={{.Env.InstallUrl}}
   inst.geoloc=0
-  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+  {{.Param "kernel-options"}}
   --
   {{ if .ParamExists "kernel_console"}}{{.Param "kernel_console" }}{{ end }}
 OptionalParams:

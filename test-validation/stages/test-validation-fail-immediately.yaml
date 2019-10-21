@@ -1,0 +1,28 @@
+---
+Name: "test-validation-fail-immediately"
+Description: "Perform validation test fail immediately."
+Documentation: |
+  This test should complete the following tasks:
+
+    * success
+    * fail - immediately stop the system
+    * success will be ignored and never run
+
+  The workflow should FAIL immediately at the fail task.
+
+  No error will be written  to ``validation/errors`` Param, review
+  the Job Log for the failure message.
+
+Params:
+  validation/list-parameter: test-validation/fail-immediately
+  test-validation/fail-immediately:
+    - test-validation-success
+    - test-validation-fail-immediately
+    - test-validation-success
+Tasks:
+  - "validation-start"
+  - "validation-stop"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

@@ -1,0 +1,14 @@
+---
+Name: "validate/nic-required-up"
+Description: "Validate the required number of NICs that must support an 'UP' link state."
+Documentation: |
+  Validates the number of NICs that can support an ``UP`` link state.  This
+  process does not try to configure any network stack on the interface, just
+  verifies that the port link state can be brought ``UP`` successfully (eg
+  there is cable and link connection to upstream switch device).
+Schema:
+  type: number
+  minimum: 1
+  maximum: 99
+  default: 2
+Secure: false

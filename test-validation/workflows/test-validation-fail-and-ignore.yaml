@@ -1,0 +1,21 @@
+---
+Name: "test-validation-fail-and-ignore"
+Description: "Workflow that performs validation test fail and ignore."
+Documentation: |
+  This test should complete the following tasks successfully:
+
+    * clear the ``validation/errors-ignore`` Parm
+    * success
+    * fail - but then ignore the failure
+    * success
+
+  The workflow should succeed without stopping or marking failed.
+  Evaluate the ``validation/errors-ignore`` Param, which should
+  contain a single log entry.
+
+Stages:
+  - "test-validation-fail-and-ignore"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

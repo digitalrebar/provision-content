@@ -13,7 +13,7 @@ BootParams: >-
   ksdevice=bootif
   ks={{.Machine.Url}}/compute.ks
   method={{.Env.InstallUrl}}
-  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+  {{.Param "kernel-options"}}
   --
   {{ if .ParamExists "kernel_console"}}{{.Param "kernel_console" }}{{ end }}
 OptionalParams:

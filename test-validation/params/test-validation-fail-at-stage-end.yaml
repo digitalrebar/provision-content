@@ -1,0 +1,16 @@
+---
+Name: "test-validation/fail-at-stage-end"
+Description: "Param for testing validation 'fail at stage end'."
+Documentation: |
+  Param for testing validation system fail at stage end.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+

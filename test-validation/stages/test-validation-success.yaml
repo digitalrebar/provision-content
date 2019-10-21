@@ -1,0 +1,23 @@
+---
+Name: "test-validation-success"
+Description: "Perform validation success test"
+Documentation: |
+  This test should complete the following tasks:
+
+    * success
+    * success
+
+  The workflow should complete successfully with no errors.
+
+Params:
+  validation/list-parameter: test-validation/success
+  test-validation/success:
+    - test-validation-success
+    - test-validation-success
+Tasks:
+  - "validation-start"
+  - "validation-stop"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

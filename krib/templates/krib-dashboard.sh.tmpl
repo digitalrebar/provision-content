@@ -43,17 +43,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   mkdir -p /root/setup/dashboard
   cp /tmp/kubernetes-dashboard.yaml /root/setup/dashboard/kubernetes-dashboard.yaml
 
-  cat > /root/setup/dashboard/dashboard-serviceaccount.yaml << EOFSA
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    k8s-app: kubernetes-dashboard
-  name: kubernetes-dashboard
-  namespace: kubernetes-dashboard
-EOFSA
-
-  cat >/root/setup/dashboard/dashboard-admin.yaml <<EOFDA
+  cat > /root/setup/dashboard/dashboard-admin.yaml << EOFDA
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
@@ -71,9 +61,7 @@ subjects:
 EOFDA
 
   kubectl apply -f /root/setup/dashboard/kubernetes-dashboard.yaml
-  kubectl delete -f /root/setup/dashboard/dashboard-serviceaccount.yaml
   kubectl delete -f /root/setup/dashboard/dashboard-admin.yaml
-  kubectl apply -f /root/setup/dashboard/dashboard-serviceaccount.yaml
   kubectl apply -f /root/setup/dashboard/dashboard-admin.yaml
   kubectl scale --replicas=$MASTER_COUNT -n kubernetes-dashboard deployment/kubernetes-dashboard
 

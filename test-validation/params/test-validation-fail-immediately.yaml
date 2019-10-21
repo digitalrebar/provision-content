@@ -1,0 +1,16 @@
+---
+Name: "test-validation/fail-immediately"
+Description: "Param for testing validation 'fail immediately'."
+Documentation: |
+  Param for testing validation system fail immediately.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+
