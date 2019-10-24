@@ -18,7 +18,7 @@ OS:
         method={{.Env.InstallUrl}}
         inst.geoloc=0
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
       IsoFile: CentOS-7-aarch64-Minimal-1810.iso
@@ -33,7 +33,7 @@ OS:
         method={{.Env.InstallUrl}}
         inst.geoloc=0
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"

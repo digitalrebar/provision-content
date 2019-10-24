@@ -1,0 +1,11 @@
+---
+Name: "flexiflow/maintenance-mode"
+Description: "Indicate that we should go back to local disk"
+Documentation: |
+  Indicate that we should go back to local disk.
+Meta:
+  color: purple
+  icon: maagic
+Schema:
+  type: boolean
+  default: false

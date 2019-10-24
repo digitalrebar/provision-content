@@ -1,0 +1,21 @@
+---
+Name: "test-flexiflow-stage"
+Description: "Test stage for the FlexiFlow system"
+Documentation: |
+  This Stage tests the FlexiFlow capability.  It defines that the
+  ``flexiflow/list-parameter`` is set to ``test-flexiflow/parameter``, and
+  subsequently sets that Paramter to use the test tasks named ``test-flexiflow/task1``
+  and ``test-flexiflow/task2``.
+
+Params:
+  "flexiflow/list-parameter": "test-flexiflow/parameter"
+  "test-flexiflow/parameter":
+    - "test-flexiflow-task1"
+    - "test-flexiflow-task2"
+Tasks:
+  - "flexiflow-start"
+  - "flexiflow-stop"
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"

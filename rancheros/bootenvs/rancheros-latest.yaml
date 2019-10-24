@@ -17,7 +17,7 @@ BootParams: >-
   rancher.state.autoformat=[/dev/{{if .ParamExists "operating-system-disk"}}{{.Param "operating-system-disk"}}{{else}}sda{{end}}]
   rancher.cloud_init.datasources=[url:{{.Machine.Url}}/rancheros-cloud-init]
   loglevel=8
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "kernel-console"

@@ -1,0 +1,25 @@
+---
+Name: "test-validation-clear-remediated"
+Description: "Clears the remdiation states back to defaults."
+Documentation: |
+  This task clears the validation fail immediately remediation control flags
+  on a machine back to defaults.
+
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "test_validation_clear_remediated.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    drpcli machines remove "$RS_UUID" param "test-validation/remediated"
+

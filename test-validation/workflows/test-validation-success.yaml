@@ -1,0 +1,17 @@
+---
+Name: "test-validation-success"
+Description: "Workflows that performs validation success test"
+Documentation: |
+  This test should complete the following tasks:
+
+    * success
+    * success
+
+  The workflow should complete successfully with no errors.
+
+Stages:
+  - "test-validation-success"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

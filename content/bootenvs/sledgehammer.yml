@@ -37,9 +37,9 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
     arm64:
       Loader: "grubarm64.efi"
       IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
@@ -58,9 +58,9 @@ OS:
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
-        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        {{.Param "kernel-options"}}
         --
-        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+        {{.Param "kernel-console"}}
 OptionalParams:
   - "kernel-console"
   - "kernel-options"
@@ -107,8 +107,6 @@ Templates:
 
       # We get the following variables from start-up.sh
       # MAC BOOTDEV ADMIN_IP DOMAIN HOSTNAME HOSTNAME_MAC
-
-      set -x
       shopt -s extglob
       export PS4="${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): "
       cp /usr/share/zoneinfo/GMT /etc/localtime
@@ -129,22 +127,22 @@ Templates:
       }
       mac_re='BOOTIF=([^ ]+)'
       if [[ $(cat /proc/cmdline) =~ $mac_re ]]; then
-          drpcli machines set "$RS_UUID" param last-boot-macaddr to "\"${BASH_REMATCH[1]}\""
+          drpcli machines set "$RS_UUID" param last-boot-macaddr to "\"${BASH_REMATCH[1]}\"" &>/dev/null
       fi
       json="$(drpcli machines show "$RS_UUID")"
       # The machine does not have hardware addresses set, so set them
       if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
-          drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}"
+          drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}" &>/dev/null
       fi
       if [[ $IP && "$(jq -r '.Address' <<< "$json")" != $IP ]]; then
-          drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}"
+          drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
       fi
       unset get_macs json
 
       if [[ -d /sys/firmware/efi ]]; then
-          drpcli machines set "$RS_UUID" param detected-bios-mode to '"uefi"'
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"uefi"' &>/dev/null
       else
-          drpcli machines set "$RS_UUID" param detected-bios-mode to '"legacy-bios"'
+          drpcli machines set "$RS_UUID" param detected-bios-mode to '"legacy-bios"' &>/dev/null
       fi
 
       {{template "reset-workflow.tmpl" .}}

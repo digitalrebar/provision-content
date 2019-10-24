@@ -1,0 +1,36 @@
+---
+Name: "validation-clear-errors-ignore"
+Description: "Resets the 'validation/errors-ignore' log Param to an empty value."
+Documentation: |
+  This task resets the ``validation/errors-ignore`` contents to an empty value.
+
+  The ``validation/errors-ignore`` Param is not reset at the beginning of each
+  Stage run with the ``validation-start`` task.  It is assumed that the operator
+  would like to harvest the validation failure log messages, but not have them
+  as regularly reset.
+
+  The ignored error messages will be prefixed with the Stage, Task, and Current
+  Job UUID so they may be correctly correlated at a later time.
+
+  To use this Task, simply add it to the control Param task list whereever the
+  operator would like the Machines Param cleared.  It might make sense to add it
+  as the very first Task in the first Validation Stage in a given Workflow.
+
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
+Templates:
+- Name: "validation_clear_errors_ignore.sh"
+  Contents: |
+    #!/bin/bash
+    # Copyright RackN, 2019
+
+    set -e
+
+    {{ template "setup.tmpl" . }}
+    {{ template "validation-lib.tmpl" . }}
+
+    validation_clear_errors_ignore
+

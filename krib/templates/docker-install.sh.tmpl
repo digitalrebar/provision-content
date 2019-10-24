@@ -3,7 +3,10 @@
 set -e
 
 # Get access and who we are.
-{{template "setup.tmpl" .}}
+{{ template "setup.tmpl" .}}
+
+{{ template "download-tools.tmpl" .}}
+
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
 {{if .ParamExists "docker/working-dir" -}}
@@ -25,8 +28,9 @@ fi
 {{end -}}
 
 if ! which docker ; then
-  # Get latest docker...
-  curl -fsSL https://get.docker.com/ | VERSION={{.Param "docker/version"}} sh
+  echo "Install docker version: {{.Param "docker/version"}}"
+  download https://get.docker.com/ -o get-docker.sh
+  VERSION={{.Param "docker/version"}} with_backoff bash get-docker.sh
 fi
 
 {{if .ParamExists "docker/daemon"}}
@@ -46,4 +50,3 @@ service docker start
 
 echo "Docker installed successfully"
 exit 0
-

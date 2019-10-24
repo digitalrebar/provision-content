@@ -17,6 +17,8 @@ github.com/digitalrebar/provision/v4 v4.0.0 h1:JhYMI7uUdhgv0Ccg7p4lTmm/wCtmttykk
 github.com/digitalrebar/provision/v4 v4.0.0/go.mod h1:AWhC3b3eBPL2c9hC8FnHwfL7X2EiEascOYvwHW3tkIs=
 github.com/digitalrebar/provision/v4 v4.0.20 h1:Ev4VLsCIv3HL8bwBcltIXp7YodiSUO+8bG887Bmv02o=
 github.com/digitalrebar/provision/v4 v4.0.20/go.mod h1:LjRvoXvY3uYzoLsQgBdV2BKo0YJIYOqL75WuCoP7rWQ=
+github.com/digitalrebar/provision/v4 v4.1.0 h1:mwJ+FoPJAT0MdJEVdIFqKYGXgBRDmpZ6SyJO+tPVxj0=
+github.com/digitalrebar/provision/v4 v4.1.0/go.mod h1:LjRvoXvY3uYzoLsQgBdV2BKo0YJIYOqL75WuCoP7rWQ=
 github.com/digitalrebar/tftp v2.1.0+incompatible h1:CzBcnsUaMtdLSOf3dSycinnfpajAAro7l8oo/ILyzOI=
 github.com/digitalrebar/tftp v2.1.0+incompatible/go.mod h1:k1tcsyQwHE72oTU5sfXPJdOCHFiZUt3M2BdYdHsfw6c=
 github.com/digitalrebar/tftp/v3 v3.0.0 h1:Ft2i3s2gCZ795rISs9vlcy3YSqfd6mtodxGoUcPSrhs=

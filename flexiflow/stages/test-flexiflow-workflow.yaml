@@ -1,0 +1,14 @@
+---
+Name: test-flexiflow-workflow
+Description: Tests dynamically injecting a full new Workflow at this stage.
+Documentation: |
+  Sets the ``flexiflow/workflow`` Parameter to ``test-flexiflow-workflow-include``
+  which should then be dynamically included in the ``test-flexiflow-workflow-main``.
+
+Meta:
+  color: orange
+  icon: magic
+Params:
+  flexiflow/workflow: "test-flexiflow-workflow-include"
+Tasks:
+  - flexiflow-workflow

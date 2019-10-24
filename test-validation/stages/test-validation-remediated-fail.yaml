@@ -1,0 +1,36 @@
+---
+Name: "test-validation-remediated-fail"
+Description: "Perform validation test fail immediately that is marked success on second attempt."
+Documentation: |
+  This test should complete the following tasks:
+
+    * success
+    * fail - immediately the system will stop
+    * TEST OPERATOR: restart the runner on the Machine
+    * remediateion control flags will mark task remediated
+    * workflow resumes - failed task should succeeed
+    * success
+    * remediation control flags will be removed
+
+  The workflow should stop immediately at the fail task.  The operator sets the
+  override Param (``test-validation/remdiated`` to ``true``).  Once the Workflow
+  is restarted, the ``test-validation-fail-immediately`` Task will succeed after
+  evaluating the remediated Param.
+
+  The second workflow run should succeed and the final success test task should
+  also succeed.
+
+Params:
+  validation/list-parameter: test-validation/remediated-fail-immediately
+  test-validation/remediated-fail-immediately:
+    - test-validation-success
+    - test-validation-fail-immediately
+    - test-validation-success
+    - test-validation-clear-remediated
+Tasks:
+  - "validation-start"
+  - "validation-stop"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

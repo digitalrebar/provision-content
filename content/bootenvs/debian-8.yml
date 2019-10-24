@@ -39,8 +39,8 @@ BootParams: >-
   numa=off
   rw
   quiet
-  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
-  {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+  {{.Param "kernel-options"}}
+  {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "part-scheme"

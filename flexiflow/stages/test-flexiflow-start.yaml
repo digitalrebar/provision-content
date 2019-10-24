@@ -1,0 +1,13 @@
+---
+Name: "test-flexiflow-start"
+Description: "Decorator stage for testing flexiflow workflow start."
+Documentation: |
+  Just provides a marker (decorator) that the flexiflow main stage
+  has started.
+
+Tasks:
+  - "test-flexiflow-start"
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"

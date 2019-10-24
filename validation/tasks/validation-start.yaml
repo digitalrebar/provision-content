@@ -1,6 +1,14 @@
 ---
 Name: "validation-start"
 Description: "Start a validation run"
+Documentation: |
+  This task begins a given Validtion stage.  No other tasks should preceed it on
+  the stage, and the only other task that should follow is the ``validation-stop``
+  task.
+
+  Tasks will be dynamically injected in to the workflow after this task, if they
+  have been specified by the appropriate control Params.
+
 Meta:
   color: "blue"
   icon: "bug"
