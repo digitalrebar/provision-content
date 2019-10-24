@@ -1,0 +1,14 @@
+---
+Name: "krib/cluster-external-dns-version"
+Description: "Define what version of external-dns containers to install."
+Documentation: |
+  Allows operators to specify the version of Kubernetes containers to
+  pull from the 'krib/cluster-image-repository'.
+
+Schema:
+  type: "string"
+  default: "latest"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
