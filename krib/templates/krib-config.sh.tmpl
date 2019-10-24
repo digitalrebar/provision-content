@@ -125,6 +125,10 @@ if [[ $MASTER_INDEX != notme ]] ; then
     # example of appending a featureGate to cluster after initial init
     #kubeadm init --feature-gates=CoreDNS=true | tee -a ~/kubeadm_init.log
 
+# Apply PSPs (if the user hasn't enabled the PSP admission controller, these will have no effect,
+# but if he/she _has_, then the PSPs are required in order to proceed with CNI)
+kubectl create -f /tmp/krib-default-psps.yaml
+
 {{ if .ParamExists "krib/sign-kubelet-server-certs" -}}{{ if eq (.Param "krib/sign-kubelet-server-certs") true -}}
     # We are using serverTLSBootstrap for kublets, so enable auto-approval of kubelet server CSRs
 
