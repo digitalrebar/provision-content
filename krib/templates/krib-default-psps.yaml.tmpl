@@ -80,7 +80,7 @@ subjects:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: default
+  name: z-default
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
  #   apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
@@ -132,12 +132,12 @@ spec:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: default-psp
+  name: psp-default
 rules:
 - apiGroups:
   - policy
   resourceNames:
-  - default
+  - z-default
   resources:
   - podsecuritypolicies
   verbs:
@@ -149,11 +149,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: default-psp
+  name: psp-z-default
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: default-psp
+  name: psp-z-default
 subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: Group

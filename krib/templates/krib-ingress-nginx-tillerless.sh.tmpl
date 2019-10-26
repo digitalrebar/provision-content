@@ -129,7 +129,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   echo "Start cert-manager install"
   wget -O /tmp/certmanager-manifests.yaml {{ .Param "certmanager/manifests" }}
 
-  echo "Preparing namespace and disabling validation.."
+  echo "Preparing namespace and disabling validation.." 
   kubectl create namespace cert-manager || echo "Failed to create namespace, it probably already exists. Proceeding..."
   kubectl label namespace cert-manager certmanager.k8s.io/disable-validation="true" || echo "Failed to disable validation on namespace, it's probably already done. Proceeding..."
 
