@@ -294,7 +294,7 @@ Templates:
     # remanants of the old cluster. This script brutally removes any cluster-specific content,
     # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
 
-    kubeadm reset -f
+    timeout 10 kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
     systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
     systemctl stop vault || echo "vault not running, no need to stop"
