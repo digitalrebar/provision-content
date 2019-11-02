@@ -13,7 +13,7 @@ export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"
 
 # we need a random backoff to avoid races
-SLEEP=$[ ( $RANDOM % 30 ) ]
+SLEEP=$[ ( $RANDOM % 10 ) ]
 sleep $SLEEP
 
 CONSUL_VERSION="{{ .Param "consul/version" }}"

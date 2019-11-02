@@ -62,7 +62,7 @@ KRIB_IP={{ .Machine.Address }}
 {{ end -}}
 
 # we need a random backoff to avoid races.
-SLEEP=$[ ( $RANDOM % 25 ) ]
+SLEEP=$[ ( $RANDOM % 10 ) ]
 sleep $SLEEP
 
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
