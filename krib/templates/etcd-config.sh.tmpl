@@ -10,6 +10,7 @@ set -e
 
 # we need a random backoff to avoid races.
 SLEEP=$[ ( $RANDOM % 30 ) ]
+sleep $SLEEP
 
 export RS_UUID="{{.Machine.UUID}}"
 export RS_IP="{{.Machine.Address}}"

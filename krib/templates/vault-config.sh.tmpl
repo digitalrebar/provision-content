@@ -59,6 +59,7 @@ systemctl restart vault
 until consul operator raft list-peers | grep -q leader;
 do 
   SLEEP=$[ ( $RANDOM % 5 ) ]; 
+  sleep $SLEEP
 done
 
 # Only initialize vault on the consul leader, to avoid races
