@@ -6,7 +6,7 @@ Documentation: |
   Note: Changes should be coordinate with KRIB Kubernetes version
 Schema:
   type: "string"
-  default: "3.4.1"
+  default: "v3.4.1"
 Meta:
   color: "blue"
   icon: "book"

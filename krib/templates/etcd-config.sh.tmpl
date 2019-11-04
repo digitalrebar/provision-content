@@ -239,13 +239,13 @@ KRIB_REPO={{.Param "krib/package-repository"}}
 {{end -}}
 
 if [[ ! -z "$KRIB_REPO" ]] ; then
-  download -L ${KRIB_REPO}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+  download -L ${KRIB_REPO}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz
 else
-  download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+  download -L https://github.com/coreos/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz
 fi
 
 echo "Install etcd version: ${ETCD_VERSION}"
-tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
+tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
 
 CLUSTER_STATE="new"
 if [[ $EXISTING_INDEX != notme ]] ; then
