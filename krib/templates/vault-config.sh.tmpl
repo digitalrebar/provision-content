@@ -58,7 +58,7 @@ systemctl restart vault
 # Wait around until consul has elected a leader
 until consul operator raft list-peers | grep -q leader;
 do 
-  SLEEP=$[ ( $RANDOM % 5 ) ]; 
+  SLEEP=$[ ( $RANDOM % 20 ) ]; 
   sleep $SLEEP
 done
 

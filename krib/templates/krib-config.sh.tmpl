@@ -63,7 +63,7 @@ KRIB_IP={{ .Machine.Address }}
 {{ end -}}
 
 # we need a random backoff to avoid races.
-SLEEP=$[ ( $RANDOM % 10 ) ]
+SLEEP=$[ ( $RANDOM % 20 ) ]
 sleep $SLEEP
 
 # Making sure I use the right cluster InternalIP
