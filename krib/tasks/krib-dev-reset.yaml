@@ -301,9 +301,6 @@ Templates:
     systemctl stop consul-server || echo "consul-server not running, no need to stop"
     systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
 
-    # Whether we're using containerd or dockerd, kill either
-    pkill containerd || pkill dockerd
-
     # Wipe out any persistent content
     rm -rf /var/lib/cni/
     rm -rf /var/lib/kubelet/*
@@ -316,6 +313,11 @@ Templates:
     rm -rf /var/lib/consul/server
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+    # Whether we're using containerd or dockerd, kill either
+    pkill containerd || pkill dockerd
+    for i in `pidof /usr/local/bin/containerd-shim-runc-v1`; do kill -9 $i; done
+    
 
     {{ if .ParamExists "rook/ceph-target-disk"}}
     {{if .ParamExists "krib/selective-mastership" -}}
