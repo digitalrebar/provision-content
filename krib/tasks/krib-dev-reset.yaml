@@ -317,6 +317,8 @@ Templates:
     # Whether we're using containerd or dockerd, kill either
     pkill containerd || pkill dockerd
     for i in `pidof /usr/local/bin/containerd-shim-runc-v1`; do kill -9 $i; done
+    sleep 10s
+    for i in `pidof /usr/local/bin/containerd-shim-runc-v1`; do kill -9 $i; done
     
 
     {{ if .ParamExists "rook/ceph-target-disk"}}
