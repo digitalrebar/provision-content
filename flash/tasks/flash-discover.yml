@@ -10,11 +10,28 @@ Templates:
       {{ template "setup.tmpl"  .}}
       mfgr="$(drpcli gohai |jq -r '.DMI | .System | .Manufacturer')"
 
+      {{if eq (.Param "flash-method") "list" }}
+      {{ if .ParamExists "flash-list" }}
+      echo "Hardware system, $mfgr, updated by list. Assume list is self-contained."
+      APPEND="-list"
+      {{ else }}
+      echo "List install requested, but list not specified!"
+      exit 1
+      {{ end }}
+      {{end}}
+
+      {{if eq (.Param "flash-method") "block" }}
+      APPEND=""
+      {{end}}
+
+      {{if eq (.Param "flash-method") "list-then-block" }}
       APPEND=""
       {{ if .ParamExists "flash-list" }}
       echo "Hardware system, $mfgr, updated by list. Assume list is self-contained."
       APPEND="-list"
       {{ end }}
+      {{end}}
+
       case $mfgr in
           "Dell Inc.") drpcli machines tasks add {{.Machine.UUID}} at 0 dell-firmware-flash${APPEND};;
           "HP"|"HPE") drpcli machines tasks add {{.Machine.UUID}} at 0 hpe-firmware-flash${APPEND};;

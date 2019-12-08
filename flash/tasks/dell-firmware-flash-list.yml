@@ -32,6 +32,9 @@ Templates:
         {{ else }}
         FORCE=
         {{ end }}
+        {{ if $.Param "flash-list-force" }}
+        FORCE="-f"
+        {{ end }}
 
         {{ if hasPrefix "http:" $elem.File }}
         curl -o $FILENAME {{$elem.File}}

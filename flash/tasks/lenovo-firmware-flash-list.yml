@@ -46,6 +46,9 @@ Templates:
         {{ else }}
         FORCE=
         {{ end }}
+        {{ if $.Param "flash-list-force" }}
+        FORCE="--forceid $ID"
+        {{ end }}
 
         {{ if hasPrefix "http:" $elem.File }}
         curl -o $TMPDIR/$FILENAME {{$elem.File}}
