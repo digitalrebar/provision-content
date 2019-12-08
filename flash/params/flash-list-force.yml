@@ -1,0 +1,12 @@
+---
+Name: flash-list-force
+Description: Force to a specific firmware level (downward if needed)
+Documentation: |
+  This boolean flag allows the user to override the force flash list system to force
+  the flash packages to the specified level.  Normally, the system will not move backwards.
+
+  This will force the system backwards.
+
+Schema:
+  type: boolean
+  default: false
