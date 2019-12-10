@@ -1,0 +1,13 @@
+---
+Name: flash-allow-downgrades
+Description: Allow the flash system to downgrade components
+Documentation: |
+  This parameter allows the system to downgrade components if the
+  vendor allows it.
+
+  This applies to DELL flash updates.
+
+  This does NOT apply to the list flash method.
+Schema:
+  type: boolean
+  default: false
