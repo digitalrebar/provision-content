@@ -37,6 +37,12 @@ Templates:
           )
           dsuargs+=" --import-public-key"
       fi
+      {{ if .Param "flash-allow-downgrades" }}
+      dsuargs+=" --apply-downgrades"
+      {{ end }}
+      {{ if .Param "flash-ignore-signatures" }}
+      dsuargs+=" --ignore-signatures"
+      {{ end }}
 
       want_reboot=no
       failed=no
