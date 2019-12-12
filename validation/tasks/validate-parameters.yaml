@@ -1,0 +1,64 @@
+---
+Name: "validate-parameters"
+Description: "Validate the parameters on machine"
+Documentation: |
+  This task implements the Validation library function to verify that
+  the parameters specified in *validate/parameters* match their schema
+  and value.
+
+  This assumes that all the parameters have already been set.
+
+Meta:
+  icon: "plug"
+  color: "blue"
+  title: "RackN Content"
+Templates:
+  - Name: "validate-parameters.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      {{ template "validation-lib.tmpl" . }}
+
+      # validate/parameters
+      {{ range $param, $elem := .Param "validate/parameters" }}
+        {{ $v := $.Param $param }}
+        V="{{$param}}"
+
+        {{ if eq $elem.Op "equal" }}
+          {{ range $index, $t := $elem.Values }}
+            {{ if deepEqual $v $t }}
+      echo "Parameter $V equaled {{$t}}"
+            {{ else }}
+      validation_add_error "Parameter $V failed to match: expected: {{$t}} actual: {{$v}}"
+            {{ end }}
+          {{ end }}
+        {{ end }}
+
+        {{ if eq $elem.Op "between" }}
+           {{ if lt (len $elem.Values) 2 }}
+      validation_add_error "Parameter $V failed: Not enough arguments in test"
+           {{ else }}
+             {{ $t1 := index $elem.Values 0 }}
+             {{ $t2 := index $elem.Values 1 }}
+             {{ if and (le $t1 $v) (le $v $t2) }}
+      echo "Parameter $V ({{$v}} is between {{$t1}} and {{$t2}}"
+             {{ else }}
+      validation_add_error "Parameter $V failed: {{$v}} is not between {{$t1}} and {{$t2}}"
+             {{ end }}
+           {{ end }}
+        {{ end }}
+
+        {{ if eq $elem.Op "match" }}
+          {{ range $index, $t := $elem.Values }}
+            {{ if regexMatch $t $v }}
+      echo "Parameter $V matched {{$v}} {{$t}}"
+            {{ else }}
+      validation_add_error "Parameter $V failed to match: expected: {{$t}} actual: {{$v}}"
+            {{ end }}
+          {{ end }}
+        {{ end }}
+
+      {{ end }}
+
+      echo "Parameters validated completed."
+      exit 0

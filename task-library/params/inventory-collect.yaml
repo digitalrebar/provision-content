@@ -35,7 +35,7 @@ Schema:
       Fields:
         RAM: ".System.Memory.Total / 1048576 | floor"
         DIMMs: ".DMI.Memory.PopulatedSlots"
-        DIMMSizes: ".DMI.Memory.Devices | map(select(.Size != 0)) | map(.Size / 1048576 | floor)"
+        DIMMSizes: "[.DMI.Memory.Devices|.?|map(select(.Size != 0)) | map(.Size / 1048576 | floor) | .[]]"
         NICs: ".Networking.Interfaces | map(select(.Sys.BusAddress != \\\"virtual\\\"))|length"
         NICInfo: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.Vendor+\\\" \\\"+.Model+\\\" \\\"+.Sys.BusAddress)"
         CPUs: ".System.ProcessorCount"
@@ -46,6 +46,13 @@ Schema:
         SerialNumber: ".DMI.System.SerialNumber"
         ProductName: ".DMI.System.ProductName"
         Family: ".DMI.System.Family"
+    raid:
+      Command: "drp-raid"
+      JQargs: ""
+      Fields:
+        RaidControllers: "length"
+        RaidTotalDisks: "[0]+ map(.Disks|length)|add"
+        RaidDisks: "map(.Disks | length)"
 Meta:
   color: "green"
   icon: "handshake outline"
