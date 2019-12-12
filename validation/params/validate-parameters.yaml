@@ -1,0 +1,31 @@
+---
+Name: "validate/parameters"
+Description: "Tests to apply to parameters."
+Documentation: |
+  This param defines the map of parameters to tests to run against them.
+
+  The elements of the map convert a parameter to a test.
+
+  The test structure is an operation and a list of values.
+
+  Example:
+
+  inventory/CPUs:
+    Op: equal
+    Values: [ 1 ]
+
+  If inventory/CPUs exists and equals the value 1, this is successful.  Otherwise it is a failure.
+
+  Operations:
+  * equal - if any one value equals, then it returns true.
+  * between - if the value is between the two values.  Values is a list of two values.
+  * match - if the value matches the regex value.
+
+
+Schema:
+  type: "object"
+  default: {}
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"
