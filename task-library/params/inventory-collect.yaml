@@ -53,6 +53,7 @@ Schema:
         RaidControllers: "length"
         RaidTotalDisks: "[0]+ map(.Disks|length)|add"
         RaidDisks: "map(.Disks | length)"
+        RaidDiskSizes: "map(.Disks | map(.Size))"
 Meta:
   color: "green"
   icon: "handshake outline"
