@@ -4,7 +4,14 @@ Description: "Machines in this cluster"
 Schema:
   type: "array"
   items:
-    type: "string"
+    type: "object"
+    properties:
+      Address:
+        type: string
+      Name:
+        type: string
+      Uuid:
+        type: string
   default: []
 Meta:
   color: "blue"

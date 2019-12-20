@@ -3,7 +3,7 @@ Name: "cluster/profile"
 Description: "Name of the profile for this cluster"
 Schema:
   type: "string"
-  default: ""
+  default: "cluster01"
 Meta:
   color: "blue"
   icon: "object group"
