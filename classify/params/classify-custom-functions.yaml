@@ -9,15 +9,20 @@ Documentation: |
   classifer to provide custom function blocks to extend the tests and/or
   actions you can apply to the classifier.
 
-    # YAML example
-    - "my-classify-function-1.tmpl"
-    - "my-classify-function-2.tmpl"
+  .. highlight:: yaml
+  ::
+      # YAML example
+      - "my-classify-function-1.tmpl"
+      - "my-classify-function-2.tmpl"
 
+  .. highlight:: json
+  ::
     # JSON example
     [
       "my-classify-function-1.tmpl",
       "my-classify-function-2.tmpl"
     ]
+  ..
 
   WARNING - The executing environment is Sledgehammer with BASH scripts. You
             must insure that the Function you inject operates correctly in

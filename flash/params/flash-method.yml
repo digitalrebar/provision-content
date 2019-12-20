@@ -1,0 +1,19 @@
+---
+Name: flash-method
+Description: The method to flash the hardware - list or block release
+Documentation: |
+  This parameter defines the method to flash the system.  The options are:
+
+    * list - use the flash-list variable to define a list of items to flash.
+    * block - Use the vendor appropriate block release automatic update tools.
+    * list-then-block - Use list unless no list is specified then use block.
+
+  The default is *list-then-block*.
+
+Schema:
+  type: string
+  default: list-then-block
+  enum:
+    - "list"
+    - "block"
+    - "list-then-block"

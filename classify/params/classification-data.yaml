@@ -25,19 +25,23 @@ Documentation: |
 
   The object should look like this.
 
-  - test: "has_mac 00:11:22:33:44:55"
-    continue: true
-    actions:
-    - "add_profile profile_name_1"
-    - "change_workflow workflow_name_1"
-  - test: "in_subnet 192.168.0.0/24"
-    actions:
-    - "set_parameter param_name value"
-    - "add_profile profile_name_2"
-    - "change_workflow workflow_name_2"
-  - test: "always"
-    actions:
-    - "change_workflow wait-for-input"
+  .. highlight:: yaml
+
+  ::
+    - test: "has_mac 00:11:22:33:44:55"
+      continue: true
+      actions:
+        - "add_profile profile_name_1"
+        - "change_workflow workflow_name_1"
+    - test: "in_subnet 192.168.0.0/24"
+      actions:
+        - "set_parameter param_name value"
+        - "add_profile profile_name_2"
+        - "change_workflow workflow_name_2"
+    - test: "always"
+      actions:
+        - "change_workflow wait-for-input"
+  ..
 
   In the above example, the "has_mac" test will be applied, if the test
   passes, it would normally exit the Classifier.  However, the "continue"
