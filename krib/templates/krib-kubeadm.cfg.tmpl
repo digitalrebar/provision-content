@@ -74,6 +74,14 @@ networking:
   dnsDomain: "{{ .Param "krib/cluster-service-dns-domain" }}"
   podSubnet: "{{ .Param "krib/cluster-pod-subnet" }}"
   serviceSubnet: "{{ .Param "krib/cluster-service-subnet" }}"
+scheduler:
+  extraVolumes:
+    - name: "config"
+      hostPath: /etc/kubernetes/scheduler-config     # absolute path to ./scheduler-config directory
+      mountPath: /var/lib/scheduler
+      readOnly: true
+  extraArgs:
+    config: /var/lib/scheduler/scheduler-config.yaml  
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
