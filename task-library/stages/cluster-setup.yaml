@@ -1,0 +1,17 @@
+---
+Name: "cluster-setup"
+Description: "Setup cluster leader and members"
+Documentation: |
+  Initialize Cluster using Digital Rebar Patterns
+  1. will verify machine is in a shared profile
+  2. will create shared profile if missing
+  3. will add profile to machine if missing
+  4. will make machine leader if no leader is present
+RunnerWait: true
+Tasks:
+  - "cluster-setup"
+Meta:
+  icon: "object group outline"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2019"

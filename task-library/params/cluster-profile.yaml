@@ -6,5 +6,6 @@ Schema:
   default: "cluster01"
 Meta:
   color: "blue"
-  icon: "object group"
+  icon: "object group outline"
   title: "RackN Content"
+  copyright: "RackN 2019"
