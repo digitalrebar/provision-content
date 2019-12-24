@@ -15,6 +15,40 @@
 
 CLUSTER_PROFILE={{.Param "cluster/profile"}}
 
+cluster_wait_for_variable() {
+  local varname=$1
+  local var=$(get_param "$varname" | jq -r .)
+  local sleep_time=1
+  local timer_count=0
+  local timer_expire=600
+
+  while [[ $var == null ]] ; do
+    sleep $sleep_time
+    var=$(get_param "$varname" | jq -r .)
+    (( timer_count = timer_count + sleep_time ))
+    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
+  done
+  echo $var
+}
+
+cluster_wait_for_count() {
+  local varname=$1
+  local count=$2
+  local sleep_time=1
+  local timer_count=0
+  local timer_expire=600
+
+  local cl=$(get_param "$varname")
+  while [[ $(jq length <<< "$cl") -lt $count ]]; do
+    # we're good!
+    sleep $sleep_time
+    cl=$(get_param "$varname")
+    (( timer_count = timer_count + sleep_time ))
+    [[ $timer_count -ge $timer_expire ]] && xiterr 1 "timer expired ($timer_expire seconds) in loop ('${FUNCNAME[0]}')"
+  done
+  echo "Done"
+}
+
 echo "=== CLUSTER SHARED CODE START ==="
 
 echo "Assign $CLUSTER_PROFILE Profile to Machine if missing"
@@ -28,12 +62,18 @@ echo "Assign $CLUSTER_PROFILE Profile to Machine if missing"
     echo "No Action: Profile $CLUSTER_PROFILE exists"
   else
     echo "Creating $CLUSTER_PROFILE (requires Task to have ExtraClaims for Profiles)"
-    drpcli profiles create '{
+    if drpcli profiles create '{
       "Name":"{{.Param "cluster/profile"}}",
       "Description": "Cluster Tracking (added automatically)",
       "Params":{"cluster/profile":"{{.Param "cluster/profile"}}"},
       "Meta":{"icon":"object group outline", "color": "green"},
-    }'
+    }'; then
+      echo "Created $CLUSTER_PROFILE"
+    else
+      echo "Lost Race - another workflow created $CLUSTER_PROFILE"
+    fi
+    echo "Confirming Create Succeeded"
+    drpcli profiles show $CLUSTER_PROFILE | jq .Name
   fi
   echo "Verifying Cluster Profile has Param cluster/profile = $CLUSTER_PROFILE (add if missing)"
   if [[ "$(drpcli profiles get $CLUSTER_PROFILE param cluster/profile)" == "{{.Param "cluster/profile"}}" ]]; then
@@ -50,10 +90,12 @@ PROFILE_TOKEN={{.GenerateProfileToken (.Param "cluster/profile") 7200}}
 
 CLUSTER_LEADERS="{{ .ParamAsJSON "cluster/leaders" }}"
 CLUSTER_I_AM_LEADER=false
+CLUSTER_LEADER_INDEX=-1
 {{range $index, $leader := .Param "cluster/leaders"}}
   if [[ "$RS_UUID" == "{{$leader.Uuid}}" ]]; then
     echo "I am leader {{$index}}!"
     CLUSTER_I_AM_LEADER=true
+    CLUSTER_LEADER_INDEX={{$index}}
   fi
 {{else}}
   echo "No Leaders Assigned - make sure cluster-setup is run if needed"

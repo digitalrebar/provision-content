@@ -47,6 +47,7 @@ Templates:
       if drpcli profiles add $CLUSTER_PROFILE param cluster/leaders to "[${LEADER_NEW}]"; then
         echo "Won Race - I am now the leader"
         CLUSTER_I_AM_LEADER=true
+        CLUSTER_LEADER_INDEX=0
         drpcli machines meta set $RS_UUID key icon to anchor
       else
         echo "No Action: Lost Race - another machine became the leader"
