@@ -1,0 +1,52 @@
+---
+Name: "context-set"
+Description: "Set or Clear BaseContext on Machine"
+Documentation: |
+  This task allows stages to change the BaseContext for a machine as part
+  of a larger workflow.
+
+  This is especially helpful creating a new machine using an endpoint context,
+  such as Terraform to create a machine, and then allowing the machine to
+  transition to a runner when it starts.
+
+  To code is written to allow both clearing BaseContext (set to "") or setting
+  to a known value.  If setting to a value, code ensures that the Context exits
+RunnerWait: true
+RequiredParams:
+  - context/name
+Templates:
+  - Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2019
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      # if we're setting to value, make sure there is such a context!
+      {{ $context := .Param "context/name" }} {{ if eq "" $context}}
+
+      # prepare machine to change context
+      echo "Clearing $RS_UUID Meta.BaseContext"
+      drpcli machines meta set $RS_UUID key BaseContext to ""
+
+      {{ else }}
+
+      if drpcli contexts show "{{ $context }}" ; then
+        echo "Setting $RS_UUID Meta.BaseContext to {{ $context }}"
+        drpcli machines meta set $RS_UUID key BaseContext to "{{ $context }}"
+      else
+        echo "Cannot set BaseConext, no {{ $context }} is defined"
+        exit 1
+      fi
+
+      {{ end }}
+
+      echo "BaseContext change complete"
+      exit 0
+
+    Name: "context-set"
+Meta:
+  icon: "eraser"
+  color: "black"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"
