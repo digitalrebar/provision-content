@@ -24,8 +24,13 @@ Templates:
     fi
 
     {{range $index, $port := .Param "network/firewalld-ports" }}
-      echo "Rule {{$index}}: add-port {{$port}}"
-      firewall-cmd --permanent --add-port={{$port}}
+      {{ if contains "/" $port }}
+      PORT={{$port}}
+      {{ else }}
+      PORT={{$port}}/tcp
+      {{ end }}
+      echo "Rule {{$index}}: add-port $PORT"
+      firewall-cmd --permanent --add-port=$PORT
     {{else}}
       echo "No network/firewalld-ports defined"
     {{end}}
