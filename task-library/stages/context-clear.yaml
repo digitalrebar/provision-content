@@ -2,7 +2,7 @@
 Name: "context-clear"
 Description: "Prepare for (re)Discover - clear BaseContext"
 Params:
-  context/name: ""
+  "context/name": ""
 Tasks:
   - "context-set"
   - "context:"

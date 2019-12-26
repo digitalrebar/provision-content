@@ -13,7 +13,7 @@ Documentation: |
   to a known value.  If setting to a value, code ensures that the Context exits
 RunnerWait: true
 RequiredParams:
-  - context/name
+  - "context/name"
 Templates:
   - Contents: |-
       #!/bin/bash
