@@ -61,6 +61,8 @@ esac
 INSTALL_DIR=/usr/local/bin
 if grep -q coreos /etc/os-release ; then
   INSTALL_DIR=/opt/bin
+elif grep -q alpine /etc/os-release ; then
+  INSTALL_DIR=/usr/bin
 fi
 mkdir -p $INSTALL_DIR
 
