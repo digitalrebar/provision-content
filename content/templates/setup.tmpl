@@ -61,26 +61,25 @@ esac
 INSTALL_DIR=/usr/local/bin
 if grep -q coreos /etc/os-release ; then
   INSTALL_DIR=/opt/bin
+elif grep -q alpine /etc/os-release ; then
+  INSTALL_DIR=/usr/bin
 fi
 mkdir -p $INSTALL_DIR
 
-# TODO: we need to make drpcli/jq grab smarter to be a little
-#       more tolerant of OS arch/type - and grab the right one
-for tool in drpcli; do
-    which "$tool" &>/dev/null && continue
-    echo "Installing $tool in $INSTALL_DIR"
-    case $tool in
-        drpcli) curl -gsfLo "$INSTALL_DIR/$tool" "{{.ProvisionerURL}}/files/drpcli.$arch.linux";;
-    esac
-    chmod 755 "$INSTALL_DIR/$tool"
-done
+if ! which drpcli ; then
+    echo "Installing drpcli in $INSTALL_DIR"
+    curl -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
+    chmod 755 "$INSTALL_DIR/drcli"
+else
+    INSTALL_DIR="$(dirname $(which drpcli))"
+fi
+
 if [[ ! -e $INSTALL_DIR/drpjq ]] ; then
     ln -s $INSTALL_DIR/drpcli $INSTALL_DIR/drpjq
 fi
 if [[ ! -e $INSTALL_DIR/jq ]] ; then
     ln -s $INSTALL_DIR/drpcli $INSTALL_DIR/jq
 fi
-unset tool
 unset INSTALL_DIR
 
 if [[ -r ./helper ]]; then
