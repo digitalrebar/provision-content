@@ -44,6 +44,27 @@ OS:
       Loader: "grubarm64.efi"
       IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
       IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.arm64.tar"
+      Kernel: "9b5276ac5826520829aa73c149fe672fe2363656/vmlinuz0"
+      Initrds:
+        - "9b5276ac5826520829aa73c149fe672fe2363656/stage1.img"
+      BootParams: >-
+        rootflags=loop
+        root=live:/sledgehammer.iso
+        rootfstype=auto
+        ro
+        liveimg
+        rd_NO_LUKS
+        rd_NO_MD
+        rd_NO_DM
+        provisioner.web={{.ProvisionerURL}}
+        rs.uuid={{.Machine.UUID}}
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
+    rpi4:
+      Loader: "grubarm64.efi"
+      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
+      IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
       Kernel: "rpi/kernel8.img"
       Initrds:
         - "rpi/stage1.img"
@@ -129,8 +150,8 @@ Templates:
 
       [all]
       #dtoverlay=vc4-fkms-v3d
-      kernel {{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}}
-      initramfs {{.Env.JoinInitrdsFor "tftp" "arm64"}} followkernel
+      kernel {{.Env.PathForArch "tftp" (.Env.KernelFor "rpi4") "rpi4"}}
+      initramfs {{.Env.JoinInitrdsFor "tftp" "rpi4"}} followkernel
   - Name: "kexec"
     ID: "kexec.tmpl"
     Path: "{{.Machine.Path}}/kexec"
