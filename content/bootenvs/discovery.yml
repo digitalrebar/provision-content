@@ -62,7 +62,7 @@ OS:
     rpi4:
       Loader: "grubarm64.efi"
       IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      IsoUrl: "https://s3.us-east-2.amazonaws.com/vl-hammer/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9b5276ac5826520829aa73c149fe672fe2363656/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
       Kernel: "rpi/kernel8.img"
       Initrds:
         - "rpi/stage1.img"
