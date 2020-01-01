@@ -264,6 +264,9 @@ Templates:
       if [ $ARCH == amd64 ]; then
           squashfs="$nextone/sledgehammer/$SIGNATURE/root.squashfs"
       fi
+      if [ $ARCH == rpi4 ]; then
+          squashfs="$nextone/sledgehammer/rpi4/rpi/root.squashfs"
+      fi
       # Loop because it can take some time to come up.
       count=0
       while [[ $count != $wgetretrycount ]]; do

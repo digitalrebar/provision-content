@@ -86,6 +86,15 @@ OptionalParams:
   - "kernel-console"
   - "kernel-options"
 Templates:
+  - Name: start4.elf
+    Link: '{{.Env.PathForArch "tftp" "rpi/start4.elf" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi"}}/start4.elf'
+  - Name: fixup4.dat
+    Link: '{{.Env.PathForArch "tftp" "rpi/fixup4.dat" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi"}}/fixup4.dat'
+  - Name: bcm2711-rpi-4-b.dtb
+    Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi"}}/bcm2711-rpi-4-b.dtb'
   - Name: "rpi-cmdline.txt"
     Path: '{{.Machine.MacAddr "rpi"}}/cmdline.txt'
     Contents: |
