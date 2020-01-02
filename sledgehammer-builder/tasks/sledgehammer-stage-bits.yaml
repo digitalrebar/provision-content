@@ -33,8 +33,12 @@ Templates:
           exit 1
       fi
       if [[ $(cat /proc/cmdline) =~ $bootif_re ]]; then
-          MAC="${BASH_REMATCH[1]//-/:}"
-          MAC="${MAC#*:}"
+          if [[ "${BASH_REMATCH[1]}" == "discovery" ]] ; then
+              MAC=$(cat /sys/class/net/eth0/address)
+          else
+              MAC="${BASH_REMATCH[1]//-/:}"
+              MAC="${MAC#*:}"
+          fi
       elif [[ -d /sys/firmware/efi ]]; then
           declare -A boot_entries
           bootent_re='^Boot([0-9]{4})'
@@ -215,6 +219,11 @@ Templates:
       postportdelay=$(grep -o 'provisioner.postportdelay=[^ ]*' /proc/cmdline)
       routedelay=$(grep -o 'provisioner.routedelay=[^ ]*' /proc/cmdline)
       wgetretrycount=$(grep -o 'provisioner.wgetretrycount=[^ ]*' /proc/cmdline)
+      if [[ "$bootif" == "BOOTIF=discovery" ]] ; then
+        bootif=$(cat /sys/class/net/eth0/address)
+        bootif=${bootif//:/-}
+        bootif="BOOTIF=01-$bootif"
+      fi
       test -z "$bootif" && fail "Missing required parameter BOOTIF"
       test -z "$nextone" && fail "Missing required parameter provisioner.web"
       ip6=$(echo $nextone | grep -o '\[[0-9a-fA-F:]*\]')
@@ -254,6 +263,9 @@ Templates:
       squashfs="$nextone/sledgehammer/$ARCH/$SIGNATURE/root.squashfs"
       if [ $ARCH == amd64 ]; then
           squashfs="$nextone/sledgehammer/$SIGNATURE/root.squashfs"
+      fi
+      if [ $ARCH == rpi4 ]; then
+          squashfs="$nextone/sledgehammer/rpi4/rpi/root.squashfs"
       fi
       # Loop because it can take some time to come up.
       count=0
