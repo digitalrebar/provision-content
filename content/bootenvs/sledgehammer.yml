@@ -95,12 +95,18 @@ Templates:
   - Name: bcm2711-rpi-4-b.dtb
     Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/bcm2711-rpi-4-b.dtb'
+  - Name: kernel8.img
+    Link: '{{.Env.PathForArch "tftp" "rpi/kernel8.img" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/kernel8.img'
+  - Name: stage1.img
+    Link: '{{.Env.PathForArch "tftp" "rpi/stage1.img" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/stage1.img'
   - Name: "rpi-cmdline.txt"
     Path: '{{.Machine.MacAddr "rpi4"}}/cmdline.txt'
     Contents: |
-      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF={{.Machine.MacAddr "pxelinux"}} provisioner.web={{.ProvisionerURL}}
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF=discovery provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}}
   - Name: rpi4b-config.txt
-    Path: '{{.Machine.MacAddr "rpi"}}/config.txt'
+    Path: '{{.Machine.MacAddr "rpi4"}}/config.txt'
     Contents: |
       # uncomment if you get no picture on HDMI for a default "safe" mode
       #hdmi_safe=1
@@ -159,8 +165,8 @@ Templates:
 
       [all]
       #dtoverlay=vc4-fkms-v3d
-      kernel {{.Env.PathForArch "tftp" (.Env.KernelFor "rpi4") "rpi4"}}
-      initramfs {{.Env.JoinInitrdsFor "tftp" "rpi4"}} followkernel
+      kernel kernel8.img
+      initramfs stage1.img
   - Name: "kexec"
     ID: "kexec.tmpl"
     Path: "{{.Machine.Path}}/kexec"
