@@ -1,0 +1,16 @@
+---
+Name: "context/name"
+Description: "Target for Context-Set Task"
+Documentation: |
+  Used by `context-set` as the target for the Param.BaseContext
+  value.
+
+  Defaults to "" (Machine context)
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  icon: "shuffle"
+  color: "black"
+  title: "Task Library"
+  copyright: "RackN 2020"
