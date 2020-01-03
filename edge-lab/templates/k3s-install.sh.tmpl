@@ -7,6 +7,11 @@ echo "starting k3s install"
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
+if k3s kubectl get nodes ; then
+  echo "k3s kubectl works... no (re)install needed"
+  exit 0
+fi
+
 drpcli machines meta set $RS_UUID key color to yellow
 drpcli machines meta set $RS_UUID key icon to ship
 
@@ -76,7 +81,6 @@ else
   echo "found $BINARIES binary, moving on..."
 fi
 
-
 echo "Installing k3s version: $(k3s -v)"
 
 if $CLUSTER_I_AM_LEADER ; then
@@ -110,15 +114,21 @@ fi
 
 MODPROBE=$(which modprobe)
 
-## Build Systemd environment vars
-echo "Attaching to K3s at $K3S_URL"
-tee /etc/systemd/system/k3s.service.env >/dev/null << EOF
+if [[ ! -f /etc/systemd/system/k3s.service.env ]]; then
+  ## Build Systemd environment vars
+  echo "Attaching to K3s at $K3S_URL"
+  tee /etc/systemd/system/k3s.service.env >/dev/null << EOF
 K3S_URL=${K3S_URL}
 K3S_TOKEN=${K3S_TOKEN}
 EOF
+else
+  echo "No action: k3s.service.env file exists"
+fi
 
-## Build Systemd service
-tee /etc/systemd/system/k3s.service >/dev/null << EOF
+if [[ ! -f /etc/systemd/system/k3s.service ]]; then
+  ## Build Systemd service
+  echo "Buiilding k3s.service file"
+  tee /etc/systemd/system/k3s.service >/dev/null << EOF
 [Unit]
 Description=K3s - Lightweight Kubernetes
 Documentation=https://k3s.io
@@ -143,6 +153,9 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 EOF
+else
+  echo "No action: k3s.service file exists"
+fi
 
 systemctl daemon-reload && systemctl start k3s
 
