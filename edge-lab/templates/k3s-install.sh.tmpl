@@ -13,30 +13,45 @@ drpcli machines meta set $RS_UUID key icon to ship
 {{ template "cluster-shared.tmpl" .}}
 {{ template "download-tools.tmpl" .}}
 
+ARCH="$(uname -m)"
+case $ARCH in
+    amd64|x86_64) SHA256SUM="sha256sum-amd64.txt";;
+    arm64|aarch64) SHA256SUM="sha256sum-arm64.txt";;
+esac
+case $ARCH in
+    amd64|x86_64) ARCH="k3s";;
+    arm64|aarch64) ARCH="k3s-arm64";;
+    *)
+        echo "Unknown arch $ARCH"
+        exit 1;;
+esac
+
 # Fix hostname lookup
 echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
-
-echo "Download k3s"
 
 TMP_DIR=/tmp/k3s-tmp
 INSTALL_DIR=/usr/bin
 SYSTEMD_DIR="/etc/systemd/system"
 BINARIES="$INSTALL_DIR/k3s"
 
+echo "Checking for $ARCH"
 if ! which k3s ; then
   if $CLUSTER_I_AM_LEADER; then
     if drpcli files exists "k3s/k3s"; then
       echo "Found in DRP files/k3s - downloading from there"
-      drpcli files download "k3s/k3s" > $BINARIES
+      drpcli files download "k3s/k3s" to $BINARIES
     else
-      K3S_URL="https://github.com/rancher/k3s/releases"
-      # TODO - figure out arch
-      ARCH=""
-      K3S_VERSION=`curl -w "%{url_effective}" -I -L -s -S ${K3S_URL}/latest -o /dev/null | sed -e 's|.*/||'`
-      echo "Download k3s ${K3S_VERSION} from ${K3S_URL}/download/${K3S_VERSION}/k3s${ARCH} to $BINARIES"
-      download -L --remote-name-all "${K3S_URL}/download/${K3S_VERSION}/k3s" -o $BINARIES
-      # TODO - checksum check
+      K3S_URL="{{ .Param "k3s/download-url" }}/download/{{ .Param "k3s/version" }}"
+      echo "Download k3s from $K3S_URL/${ARCH}"
+      download -L --remote-name-all "$K3S_URL/${ARCH}" -o $ARCH
+      download -L --remote-name-all "$K3S_URL/${SHA256SUM}" -o checksum.txt
+
+      echo "Checksum Test"
+      sha256sum $ARCH -c checksum.txt --strict
+
+      mv $ARCH to $BINARIES
       drpcli files upload "$BINARIES" as "k3s/k3s"
+      drpcli files upload checksum.txt as "k3s/checksum.txt"
     fi
   else
     echo "Not the leader - waiting for k3s/node-token to be defined"
@@ -44,7 +59,7 @@ if ! which k3s ; then
     cluster_wait_for_variable "k3s/node-token"
     drpcli machines meta set $RS_UUID key color to yellow
     echo "download binaries from DRP k3s/k3s"
-    drpcli files download "k3s/k3s" > $BINARIES
+    drpcli files download "k3s/k3s" to $BINARIES
   fi
   if [ -f $BINARIES ] ; then
     chmod +x $BINARIES
@@ -55,6 +70,7 @@ if ! which k3s ; then
 else
   echo "found $BINARIES binary, moving on..."
 fi
+
 
 echo "Installing k3s version: $(k3s -v)"
 

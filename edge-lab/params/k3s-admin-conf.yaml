@@ -13,5 +13,5 @@ Schema:
   type: object
 Meta:
   color: "blue"
-  icon: "ship"
+  icon: "file code"
   title: "Community Content Copyright RackN 2019"

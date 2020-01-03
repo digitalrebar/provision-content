@@ -8,8 +8,8 @@ Assumptions:
 
 Edge Lab requires Digital Rebar Platform tip (post v4.2) due to RPi install requirements.
 
-Building an Edge Lab
---------------------
+Building & Installing DRP on Edge Lab
+-------------------------------------
 
 Please see the documentation in https://github.com/digitalrebar/edgelab for building the physical environment.
 
@@ -33,7 +33,17 @@ If you make changes, you can repeat steps 3 and 4 to upload the latest content.
 Setup K3s Cluster
 -----------------
 
-* `kubectl` has been installed on client system
-* select the nodes for installation and apply the `k3s-install` workflow
-* wait for workflow to complete on leader
-* use `drpcli profiles get cluster01 param  k3s/admin-conf --decode > admin.conf`
+Before starting, install `kubectl` has been installed on client system
+
+To build your cluster:
+1. select the nodes for installation and apply the `k3s-cluster` workflow
+1. wait for workflow to complete on leader
+1. use `drpcli profiles get cluster01 param  k3s/admin-conf --decode > admin.conf`
+
+To access on the DRP server or cluster:
+1. test with `kubectl --kubeconfig=admin.conf get nodes`
+
+To access from another system, use an SSH tunnel:
+1. setup an ssh tunnel: `ssh root@[host wifi ip] -L 6443:[leader node ip]:6443`
+1. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
+1. test with `kubectl --kubeconfig=admin.conf get nodes`
