@@ -44,12 +44,18 @@ if ! which k3s ; then
       K3S_URL="{{ .Param "k3s/download-url" }}/download/{{ .Param "k3s/version" }}"
       echo "Download k3s from $K3S_URL/${ARCH}"
       download -L --remote-name-all "$K3S_URL/${ARCH}" -o $ARCH
-      download -L --remote-name-all "$K3S_URL/${SHA256SUM}" -o checksum.txt
+      echo "Download k3s checksum from $K3S_URL/${SHA256SUM}"
+      download -L --remote-name-all "$K3S_URL/${SHA256SUM}" -o ${SHA256SUM}
 
-      echo "Checksum Test"
-      sha256sum $ARCH -c checksum.txt --strict
+      if grep -Fxq "$(sha256sum $ARCH)" $SHA256SUM ; then
+        echo "Checksum Test Pass"
+      else
+        echo "Checksum Does not match"
+        sha256sum $ARCH -c ${SHA256SUM}
+        exit 1
+      fi
 
-      mv $ARCH to $BINARIES
+      mv $ARCH $BINARIES
       drpcli files upload "$BINARIES" as "k3s/k3s"
     fi
   else
