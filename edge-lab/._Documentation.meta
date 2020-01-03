@@ -36,9 +36,9 @@ Setup K3s Cluster
 Before starting, install `kubectl` has been installed on client system
 
 To build your cluster:
-1. select the nodes for installation and apply the `k3s-cluster` workflow
+1. select the nodes for installation and apply the `k3s-install` workflow
 1. wait for workflow to complete on leader
-1. use `drpcli profiles get cluster01 param  k3s/admin-conf --decode > admin.conf`
+1. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > admin.conf`
 
 To access on the DRP server or cluster:
 1. test with `kubectl --kubeconfig=admin.conf get nodes`

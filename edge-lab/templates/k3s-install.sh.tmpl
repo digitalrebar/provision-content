@@ -51,7 +51,6 @@ if ! which k3s ; then
 
       mv $ARCH to $BINARIES
       drpcli files upload "$BINARIES" as "k3s/k3s"
-      drpcli files upload checksum.txt as "k3s/checksum.txt"
     fi
   else
     echo "Not the leader - waiting for k3s/node-token to be defined"

@@ -1,13 +1,16 @@
-Name: "k3s-cluster"
-Description: "Build K3s cluster"
+Name: "k3s-install"
+Description: "Install K3s cluster"
 Documentation: |
   Builds a k3s cluster
   Uses the task-library cluster building components
+
+  Downloads from the Rancher Github (`k3s/download-url`)
+  unless binary is already present as `/files/k3s/k3s`
 Stages:
   - "cluster-setup"
   - "k3s-install"
 Meta:
-  color: "yellow"
+  color: "green"
   icon: "ship"
   title: "k3s cluster"
   k3s: "true"

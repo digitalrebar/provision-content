@@ -21,7 +21,7 @@ Templates:
     Path: ""
 Meta:
   icon: "ship"
-  color: "blue"
+  color: "yellow"
   title: "Community Content"
   feature-flags: "sane-exit-codes"
   copyright: "RackN 2019"
