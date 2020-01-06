@@ -1,0 +1,22 @@
+---
+Description: "A task to download and install sledgehammer isos."
+Name: "edge-lab-bootstrap-isos"
+Documentation: |
+  This tasks downloads and uploads to DRP the sledgehammer isos.
+ExtraClaims:
+  - scope: "*"
+    action: "*"
+    specific: "*"
+Templates:
+  - Name: "iso_get.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      drpcli bootenvs uploadiso discovery
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2019"

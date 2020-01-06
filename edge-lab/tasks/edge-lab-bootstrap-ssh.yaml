@@ -1,0 +1,40 @@
+---
+Description: "A task to generate a local ssh key and add to access-keys"
+Name: "edge-lab-bootstrap-ssh"
+Documentation: |
+  This creates an ssh key pair if one doesn't exist.  It then adds the public
+  key to the access-keyss parameters.  if the access-keys parameter already exists,
+  the task does nothing.
+ExtraClaims:
+  - scope: "*"
+    action: "*"
+    specific: "*"
+Templates:
+  - Name: "build_key_add_it"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      if [[ ! -e ~/.ssh/id_rsa ]] ; then
+        echo "Create key pair for SSH"
+        ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa 2>/dev/null <<< y >/dev/null
+      else
+        echo "SSH key pair already exists"
+      fi
+
+      if [[ "$(drpcli profiles get global param access-keys)" == "null" ]] ; then
+        PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
+        drpcli profiles set global param access-keys to "{ \"edge-lab\": \"$PUB_KEY\" }"
+      else
+        echo "SSH access-keys already exists.  Not updating it...."
+      fi
+
+      exit 0
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2019"

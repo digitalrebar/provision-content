@@ -1,0 +1,17 @@
+Name: "edge-lab-bootstrap"
+Description: "Bootstrap and Edge Lab server"
+Documentation: |
+  Bootstrap and Edge Lab server.
+
+  * Make sure all the bootenvs are loaded for operation.
+  * Set the edge lab default preferences.
+  * Setup an ssh key pair and install it to the global profile.
+
+Stages:
+  - "edge-lab-bootstrap"
+Meta:
+  color: "green"
+  icon: "ship"
+  title: "k3s cluster"
+  k3s: "true"
+  copyright: "RackN 2019"
