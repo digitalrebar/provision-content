@@ -42,6 +42,7 @@ BINARIES="$INSTALL_DIR/k3s"
 echo "Checking for $ARCH"
 if ! which k3s ; then
   if $CLUSTER_I_AM_LEADER; then
+    drpcli machines meta set $RS_UUID key icon to download
     if drpcli files exists "k3s/k3s"; then
       echo "Found in DRP files/k3s - downloading from there"
       drpcli files download "k3s/k3s" to $BINARIES
@@ -63,6 +64,7 @@ if ! which k3s ; then
       mv $ARCH $BINARIES
       drpcli files upload "$BINARIES" as "k3s/k3s"
     fi
+    drpcli machines meta set $RS_UUID key icon to cog
   else
     echo "Not the leader - waiting for k3s/node-token to be defined"
     drpcli machines meta set $RS_UUID key color to grey
