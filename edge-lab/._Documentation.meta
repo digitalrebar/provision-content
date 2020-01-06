@@ -18,8 +18,9 @@ Setup Edge Lab Content
 
 Note: make sure that you `export RS_ENDPOINT` to your endpoint!
 
-Edge Lab (edge-lab) is available in the RackN Catalog, you 
+Edge Lab (edge-lab) is available in the RackN Catalog, you
 can install it using `drpcli catalog item install edge-lab`
+This was done for you as part of the bootstrapping process.
 
 To manually create and upload:
 
@@ -47,3 +48,18 @@ To access from another system, use an SSH tunnel:
 1. setup an ssh tunnel: `ssh root@[host wifi ip] -L 6443:[leader node ip]:6443`
 1. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
 1. test with `kubectl --kubeconfig=admin.conf get nodes`
+
+
+Edge Lab Bootstrap
+------------------
+
+This content pack includes the steps needed to bootstrap the Edge Lab server.  This includes
+a workflow, stage, and tasks to:
+1. Download the required isos (sledgehammer rpi, but others as well).
+1. Set the default preferences to make Edge Lab work.
+1. Set up an ssh key pair if one does not exist and update the global profile with it.
+   This can be used to access the clients from the server.
+1. Create the default subnet for the Edge Lab.
+
+The start_me.sh script will install the edge-lab content pack and set the DRP server's workflow to the bootstrap
+workflow.  The status of bootstrapping can be tracked in the jobs for the DRP server.
