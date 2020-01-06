@@ -1,0 +1,16 @@
+---
+Name: "edge-lab-reboot-to-discover"
+Description: "Reboot a node back into discover-base"
+Documentation: |
+  Reboot a node back into discover-base
+RunnerWait: true
+Params:
+  edge-lab/reboot-workflow: discover-base
+Tasks:
+  - "edge-lab-reboot-workflow"
+Meta:
+  icon: "ship"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2019"
+  
