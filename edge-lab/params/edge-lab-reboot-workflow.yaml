@@ -7,5 +7,5 @@ Schema:
   type: "string"
 Meta:
   color: "blue"
-  icon: "download"
+  icon: "recycle"
   title: "Community Content Copyright RackN 2019"

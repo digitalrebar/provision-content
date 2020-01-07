@@ -17,6 +17,7 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      drpcli machines meta set $RS_UUID key icon to "key"
       if [[ ! -e ~/.ssh/id_rsa ]] ; then
         echo "Create key pair for SSH"
         ssh-keygen -q -t rsa -N '' -f ~/.ssh/id_rsa 2>/dev/null <<< y >/dev/null
@@ -33,7 +34,7 @@ Templates:
 
       exit 0
 Meta:
-  icon: "ship"
+  icon: "key"
   color: "yellow"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

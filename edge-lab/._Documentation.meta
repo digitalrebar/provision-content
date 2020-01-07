@@ -50,6 +50,16 @@ To access from another system, use an SSH tunnel:
 1. test with `kubectl --kubeconfig=admin.conf get nodes`
 
 
+Machine Reset
+-------------
+
+Setting a machine's workflow to `edge-lab-reboot-to-discover` will force the machine through a soft reboot process and back to discovery.
+
+To indicate that the machine has been rebooted, the icon is set to the red recycling image.  The icon will remain until it get's reset.
+
+The machine is avilable once it is marked Runnable again.
+
+
 Edge Lab Bootstrap
 ------------------
 
@@ -60,6 +70,7 @@ a workflow, stage, and tasks to:
 1. Set up an ssh key pair if one does not exist and update the global profile with it.
    This can be used to access the clients from the server.
 1. Create the default subnet for the Edge Lab.
+1. Lock the Machine to prevent unintented actions
 
 The start_me.sh script will install the edge-lab content pack and set the DRP server's workflow to the bootstrap
 workflow.  The status of bootstrapping can be tracked in the jobs for the DRP server.

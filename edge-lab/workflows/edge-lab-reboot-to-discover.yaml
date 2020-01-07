@@ -5,6 +5,6 @@ Documentation: |
 Stages:
   - "edge-lab-reboot-to-discover"
 Meta:
-  color: "green"
-  icon: "ship"
+  color: "red"
+  icon: "recycle"
   copyright: "RackN 2019"
