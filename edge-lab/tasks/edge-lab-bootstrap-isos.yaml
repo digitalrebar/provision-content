@@ -13,9 +13,10 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       {{ template "setup.tmpl" . }}
+      drpcli machines meta set $RS_UUID key icon to "dot circle outline"
       drpcli bootenvs uploadiso discovery
 Meta:
-  icon: "ship"
+  icon: "dot circle outline"
   color: "yellow"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

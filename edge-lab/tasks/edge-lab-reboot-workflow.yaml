@@ -14,6 +14,8 @@ Templates:
       {{ template "setup.tmpl" . }}
 
       {{ if .ParamExists "edge-lab/reboot-workflow" }}
+      drpcli machines meta set $RS_UUID key icon to "recycle"
+      drpcli machines meta set $RS_UUID key color to "red"
       drpcli machines workflow $RS_UUID "" >/dev/null
       drpcli machines workflow $RS_UUID {{ .Param "edge-lab/reboot-workflow" }} >/dev/null
       {{ else }}
@@ -23,8 +25,8 @@ Templates:
 
       exit 192
 Meta:
-  icon: "ship"
-  color: "yellow"
+  icon: "recycle"
+  color: "red"
   title: "Community Content"
   feature-flags: "sane-exit-codes"
   copyright: "RackN 2019"

@@ -16,7 +16,12 @@ Templates:
       {{ template "setup.tmpl" . }}
 
       echo "Creating subnet"
-      drpcli subnets create - >/dev/null <<EOF
+      drpcli machines meta set $RS_UUID key icon to "cloud"
+      if drpcli subnets exists edge-lab > /dev/null; then
+        echo "no action: edge-lab subnet already exists"
+      else
+        echo "create edge-lab subnet"
+        drpcli subnets create - >/dev/null <<EOF
       {
         "Meta": {
           "color": "green",
@@ -63,8 +68,9 @@ Templates:
         ]
       }
       EOF
+      fi
 Meta:
-  icon: "ship"
+  icon: "cloud"
   color: "yellow"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

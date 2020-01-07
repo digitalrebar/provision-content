@@ -14,9 +14,10 @@ Templates:
       #!/usr/bin/env bash
 
       {{ template "setup.tmpl" . }}
+      drpcli machines meta set $RS_UUID key icon to "wrench"
       drpcli prefs set defaultWorkflow discover-base defaultStage discover defaultBootEnv sledgehammer unknownBootEnv discovery
 Meta:
-  icon: "ship"
+  icon: "wrench"
   color: "yellow"
   title: "Community Content"
   feature-flags: "sane-exit-codes"

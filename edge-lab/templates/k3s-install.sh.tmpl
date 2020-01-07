@@ -42,6 +42,7 @@ BINARIES="$INSTALL_DIR/k3s"
 echo "Checking for $ARCH"
 if ! which k3s ; then
   if $CLUSTER_I_AM_LEADER; then
+    drpcli machines meta set $RS_UUID key icon to download
     if drpcli files exists "k3s/k3s"; then
       echo "Found in DRP files/k3s - downloading from there"
       drpcli files download "k3s/k3s" to $BINARIES
@@ -63,6 +64,7 @@ if ! which k3s ; then
       mv $ARCH $BINARIES
       drpcli files upload "$BINARIES" as "k3s/k3s"
     fi
+    drpcli machines meta set $RS_UUID key icon to cog
   else
     echo "Not the leader - waiting for k3s/node-token to be defined"
     drpcli machines meta set $RS_UUID key color to grey
@@ -161,10 +163,11 @@ systemctl daemon-reload && systemctl start k3s
 
 if $CLUSTER_I_AM_LEADER; then
   # need more delay for leader
+  echo "waiting 10 seconds"
   sleep 10
   while [[ "$(k3s kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
     sleep 1
-    echo "waiting for cluster to start"
+    echo "waiting for cluster to start (1 second)"
   done
   echo "Verify install: k3s kubectl MUST succeed"
   k3s kubectl get nodes

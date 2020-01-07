@@ -9,8 +9,8 @@ Params:
 Tasks:
   - "edge-lab-reboot-workflow"
 Meta:
-  icon: "ship"
-  color: "yellow"
+  icon: "recycle"
+  color: "red"
   title: "Community Content"
   copyright: "RackN 2019"
   

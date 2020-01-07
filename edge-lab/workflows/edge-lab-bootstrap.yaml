@@ -11,5 +11,5 @@ Stages:
   - "edge-lab-bootstrap"
 Meta:
   color: "green"
-  icon: "ship"
+  icon: "sort amount up"
   copyright: "RackN 2019"
