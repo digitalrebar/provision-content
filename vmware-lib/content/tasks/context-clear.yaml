@@ -1,0 +1,27 @@
+---
+Description: "Clear Context from Machine"
+Name: "context-clear"
+Documentation: |
+  Clears the Context on the Machine.  Needed to return to the main
+  Workflow when we jump Contexts.
+
+Templates:
+  - Contents: |-
+      #!/bin/bash
+      # Clears the Context on the Machine by setting BaseContext to ""
+      # RackN Copyright 2019
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      # prepare machine for agent to take over
+      drpcli machines meta set $RS_UUID key BaseContext to ""
+
+      exit 0
+
+    Name: "context-clear"
+Meta:
+  icon: "eraser"
+  color: "black"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"

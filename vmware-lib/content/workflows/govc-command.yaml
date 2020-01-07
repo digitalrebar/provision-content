@@ -1,0 +1,18 @@
+---
+Name: "govc-command"
+Description: "Run VMware govc command Context workflow"
+Documentation: |
+  Requires that operator has created a Contexts for ``runner`` and ``govc``
+  that can run DRP Angent and govc.  The ``runner`` context is used for
+  starting the workflow on a fake machine, and the ``govc`` context is
+  responsible for executing the ``govc`` command and tooling.
+
+  Leaves the machines in a Runner Context not on the machine
+
+Stages:
+  - "govc-command"
+  - "complete-nobootenv"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

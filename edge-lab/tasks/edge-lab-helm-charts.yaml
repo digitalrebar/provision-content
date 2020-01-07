@@ -7,6 +7,7 @@ Documentation: |
 RequiredParams:
   - cluster/profile
   - cluster/leaders
+  - k3s/admin-conf
   - edge-lab/helm-charts
 Templates:
   - Name: "helm-charts.sh"
@@ -47,7 +48,9 @@ Templates:
 
       # helm requires the admin config
       export KUBECONFIG="./admin.conf"
-      drpcli machines get $RS_UUID param k3s/admin-conf --decode > $KUBECONFIG
+      tee $KUBECONFIG >/dev/null << EOF
+      {{ .ParamAsJSON "k3s/admin-conf" }}
+      EOF
       echo "testing cluster access"
       k3s kubectl --kubeconfig=$KUBECONFIG get nodes
 
@@ -55,31 +58,37 @@ Templates:
 
       echo "{{$index}}==== Installing {{$chart.name}} (from {{$chart.chart}}) ===="
 
-      {{ if $chart.targz }}
-      echo "retrieving chart from {{$chart.targz}}"
-      download -L --remote-name-all "{{$chart.targz}}" -o chart.targz
-      tar -xz chart.targz 
-      {{ else -}}
-      echo "no extra targz"
-      {{ end -}}
+      if [[ "$(helm list -o json --filter '{{$chart.name}}' | jq length)" == "0" ]] ; then
 
-      {{ if $chart.repos }}
-      {{ range $name, $url := $chart.repos -}}
-      echo "adding chart repo {{$name}}"
-      helm repo add {{$name}} {{$url}}
-      {{ end -}}
-      {{ else -}}
-      echo "no charts provided, using official Helm stable"
-      helm repo add stable https://kubernetes-charts.storage.googleapis.com/
-      {{ end -}}
-      helm repo update
+        {{ if $chart.targz }}
+        echo "retrieving chart from {{$chart.targz}}"
+        download -L --remote-name-all "{{$chart.targz}}" -o chart.targz
+        tar -xz chart.targz
+        {{ else -}}
+        echo "no extra targz"
+        {{ end -}}
 
-      echo "installing helm chart {{$chart.name}}"
-      helm install {{$chart.name}} {{$chart.chart}} \
-        --kubeconfig=$KUBECONFIG \
-        {{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
-        {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
+        {{ if $chart.repos }}
+        {{ range $name, $url := $chart.repos -}}
+        echo "adding chart repo {{$name}}"
+        helm repo add {{$name}} {{$url}}
+        {{ end -}}
+        {{ else -}}
+        echo "no charts provided, using official Helm stable"
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+        {{ end -}}
+        helm repo update
 
+        echo "installing helm chart {{$chart.name}}"
+        helm install {{$chart.name}} {{$chart.chart}} \
+          --kubeconfig=$KUBECONFIG \
+          {{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
+          {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
+
+      else
+        echo "Skipping Install: Found chart using helm list --filter={{$chart.name}}"
+        helm list
+      fi
       echo "{{$index}}==== Done {{$chart.name}} ===="
       {{ else -}}
       echo "No charts included in helm/charts to install"

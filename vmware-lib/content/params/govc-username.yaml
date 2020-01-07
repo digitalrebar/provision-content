@@ -1,0 +1,16 @@
+---
+Name: "govc/username"
+Description: "VMware ESXi or vCenter username used to authenticate for govc/command"
+Documentation: |
+  Username of the VMware ESXi or vCenter account to authenticate for the 
+  ``govc/command``.
+
+  Defaults to RackN default ESXi username of ``root``.
+
+Schema:
+  type: "string"
+  default: "root"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

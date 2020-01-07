@@ -1,0 +1,17 @@
+---
+Name: "govc/datastore"
+Description: "Set the datastore for subsequent govc commands."
+Documentation: |
+  Datastore that subsequent ``govc`` commands will use, if required.
+
+  For example set this to something like ``datastore1``.
+
+  Defaults to an empty (unused) value.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

@@ -14,6 +14,9 @@ Templates:
       #!/usr/bin/env bash
       {{ template "setup.tmpl" . }}
 
+      {{ if .ParamExists "cloud/provider" }}
+        echo "Running in Cloud, skip ISOs"
+      {{ else }}
       if [[ "$(drpcli isos list | jq length)" == "0" ]]; then
         echo "No ISOS, upload discovery image(s)"
         drpcli bootenvs uploadiso discovery
@@ -21,6 +24,7 @@ Templates:
         echo "ISOs already uploaded:"
         drpcli isos list
       fi
+      {{ end }}
 Meta:
   icon: "dot circle outline"
   color: "yellow"

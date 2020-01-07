@@ -1,0 +1,132 @@
+{
+  "Name": "vc01",
+  "Annotation": "RackN Deployed VMware vCenter Server Appliance (VCSA)",
+  "Deployment": "small",
+  "DiskProvisioning": "thin",
+  "IPAllocationPolicy": "dhcpPolicy",
+  "IPProtocol": "IPv4",
+  "MarkAsTemplate": false,
+  "PowerOn": true,
+  "InjectOvfEnv": true,
+  "WaitForIP": false,
+  "NetworkMapping": [
+    {
+      "Name": "Guest Network",
+      "Network": "VM Network"
+    }
+  ],
+  "PropertyMapping": [
+    {
+      "Key": "guestinfo.cis.deployment.autoconfig",
+      "Value": "True"
+    },
+    {
+       "Key": "guestinfo.cis.deployment.node.type",
+       "Value": "embedded"
+    },
+    {
+       "Key": "guestinfo.cis.db.type",
+       "Value": "embedded"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.addr.family",
+      "Value": "ipv4"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.mode",
+      "Value": "static"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.addr",
+      "Value": "10.10.10.83"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.prefix",
+      "Value": "24"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.gateway",
+      "Value": "10.10.10.1"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.dns.servers",
+      "Value": "1.1.1.1,1.0.0.1"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.ntp.servers",
+      "Value": "time-a.nist.gov,time-b.nist.gov,time-c.nist.gov"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.net.pnid",
+      "Value": "10.10.10.83"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.root.passwd",
+      "Value": "VMware1!"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.ssh.enabled",
+      "Value": "True"
+    },
+    {
+      "Key": "guestinfo.cis.appliance.root.shell",
+      "Value": "/bin/bash"
+    },
+    {
+      "Key": "guestinfo.cis.vmdir.site-name",
+      "Value": "vc01"
+    },
+    {
+      "Key": "guestinfo.cis.vmdir.domain-name",
+      "Value": "vsphere.local"
+    },
+    {
+      "Key": "guestinfo.cis.vmdir.username",
+      "Value": "root@vspere.local"
+    },
+    {
+      "Key": "guestinfo.cis.vmdir.password",
+      "Value": "VMware1!"
+    },
+    {
+      "Key": "guestinfo.cis.vmdir.first-instance",
+      "Value": "True"
+    },
+    {
+      "Key": "guestinfo.cis.vpxd.ha.management.addr",
+      "Value": ""
+    },
+    {
+      "Key": "guestinfo.cis.vpxd.ha.management.port",
+      "Value": "443"
+    },
+    {
+      "Key": "guestinfo.cis.vpxd.ha.management.user",
+      "Value": ""
+    },
+    {
+      "Key": "guestinfo.cis.vpxd.ha.management.password",
+      "Value": ""
+    },
+    {
+      "Key": "guestinfo.cis.vpxd.ha.management.thumbprint",
+      "Value": ""
+    },
+    {
+      "Key": "guestinfo.cis.vpxd.ha.placement",
+      "Value": ""
+    },
+    {
+      "Key": "guestinfo.cis.ceip_enabled",
+      "Value": "False"
+    },
+    {
+      "Key": "vami.domain.VMware-vCenter-Server-Appliance",
+      "Value": "vsphere.local"
+    },
+    {
+      "Key": "vami.searchpath.VMware-vCenter-Server-Appliance",
+      "Value": ""
+    }
+  ]
+}

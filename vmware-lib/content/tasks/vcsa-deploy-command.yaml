@@ -1,0 +1,57 @@
+---
+Description: "A task run to run vcsa-deploy context actions."
+Name: "vcsa-deploy-command"
+RequiredParams:
+  - "vcsa-deploy/command"
+  - "vcsa-deploy/template-json"
+OptionalParams: []
+Templates:
+  - Name: "vcsa-deploy-command.sh"
+    Contents: |
+      #!/bin/bash
+      # RackN Copyright 2020
+      # Run vcsa-deploy command
+
+      set -e
+
+      {{ template "setup.tmpl" .}}
+
+      {{ if .ParamExists "vcsa-deploy/template-json" }}
+      {{ $dot := . -}}
+      {{ $template := .Param "vcsa-deploy/template-json" -}}
+      cat <<EOTMPL > /tmp/template.json
+      {{ $dot.CallTemplate $template $dot }}
+      EOTMPL
+
+      echo "===== BEGIN TEMPLATE DEBUG ===="
+      echo ""
+      echo "Using JSON Template for OVA: {{ $template }}"
+      echo ""
+      cat /tmp/template.json
+      echo ""
+      echo "===== END TEMPLATE DEBUG ===="
+      {{ end -}}
+
+      echo ""
+      echo "==== SETUP vcsa-deploy Command ===="
+      echo ""
+
+      CMD="{{ .ParamExpand "vcsa-deploy/command" }}"
+      export PATH=/root/deploy:$PATH
+
+      echo ""
+      echo "==== RUN 'vcsa-deploy $CMD' ===="
+      echo ""
+
+      vcsa-deploy $CMD
+
+      echo ""
+      echo "==== DONE ===="
+      echo ""
+
+      exit 0
+Meta:
+  icon: "terminal"
+  color: "orange"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

@@ -5,13 +5,6 @@ Schema:
   type: "array"
   items:
     type: "object"
-    properties:
-      Address:
-        type: string
-      Name:
-        type: string
-      Uuid:
-        type: string
   default: []
 Meta:
   color: "blue"

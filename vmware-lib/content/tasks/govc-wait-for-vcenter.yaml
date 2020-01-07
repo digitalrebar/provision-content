@@ -1,0 +1,125 @@
+---
+Name: "govc-wait-for-vcenter"
+Description: "A task wait for vCenter API availability"
+Documentation: |
+  Simple task to wait until the remote vSphere deployed resource responds correctly
+  to a ``govc about`` request call.
+
+RequiredParams:
+  - "govc/template-json"
+OptionalParams:
+Templates:
+  - Name: "govc-wait-for-vcenter.sh"
+    Contents: |
+      #!/bin/bash
+      # Wait for vCenter API to become available.
+      # RackN Copyright 2020
+
+      {{ template "setup.tmpl" .}}
+
+      # disable shell history expansion as many vmware passwords have exclamation point in them
+      set +H
+      set -e
+      set -o noglob
+
+      # we render to this filepath location inside the container for use by govc
+      TMPL=/tmp/template.json
+      JQ=$(which jq)
+      [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
+      [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
+      [[ -z "$JQ" ]] && JQ=$(which gojq)     || true
+      if [[ -z "$JQ" ]]; then
+        D="$(which drpcli)"
+        if [[ -n "$D" ]]; then
+          ln -s $D /usr/local/bin/drpjq
+          JQ="/usr/local/bin/drpjq"
+        else
+          xiterr 1 "Unable to find 'jq' or alternative to use."
+        fi
+      fi
+
+      {{ if .ParamExists "govc/template-json" -}}
+      echo "Attempting to write '$TMPL' file from 'govc/template-json' defined template."
+      {{ $dot := . -}}
+      {{ $template := .Param "govc/template-json" -}}
+      cat <<EOTMPL > $TMPL
+      {{ $dot.CallTemplate $template $dot }}
+      EOTMPL
+      {{ else -}}
+      echo "Failed to render template from 'govc/template-json'"
+      exit 1
+      {{ end -}}
+
+      U="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.username") | .Value')"
+      P="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.password") | .Value')"
+      A="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.appliance.net.addr") | .Value')"
+      VCENTER_URL="https://${U}:${P}@${A}/sdk"
+
+      # set up timer/loops in seconds - yes it can take a REALLY long time for VCSA to
+      # fully come up on the network - benchmarked 45 minutes in some cases
+      COUNTER=0
+      TIMER=30
+      LOOPS=120
+      (( WAIT = LOOPS * TIMER ))
+
+      echo ""
+      echo "===== BEGIN wait loop for API service to become available ===="
+      echo ""
+      echo ">>> NOTICE:  This can take up to 60 minutes in some extreme cases. <<< "
+      echo ""
+
+      run_govc() {
+        local _cmd="govc about -persist-session=false -k=true -u=$VCENTER_URL > /tmp/about.txt 2>&1"
+        if eval $_cmd
+        then
+          return 0
+        else
+          echo ""
+          echo "!!! failed command:  '$_cmd'"
+          echo ""
+          return 1
+        fi
+      }
+
+      while (( COUNTER <= WAIT ))
+      do
+        if run_govc
+        then
+          echo "'govc about' returned results, API appears to be up, with returned info of:"
+          echo ""
+          cat /tmp/about.txt
+          COMPLETE="true"
+          break
+        else
+          echo "Waiting for API to become available ... '$LOOPS' Loops left at '$TIMER' seconds per loop."
+          sleep $TIMER
+          (( COUNTER += TIMER ))
+          (( LOOPS-- ))
+        fi
+      done
+
+      if [[ "$COMPLETE" == "true" ]]
+      then
+        echo ""
+        echo "===== COMPLETED wait loop for API service to become available ===="
+        echo ""
+        exit 0
+      else
+        echo ""
+        echo ">>> FATAL:  It appears the timer expired before the resource instance became available."
+        echo ">>>         Either the process took too long, or it failed to deploy correctly.  Setting"
+        echo ">>>         'rs-debug-enable=true' on the Machine and re-running may show useful debug info."
+        echo ">>>         Wait timer was set for a total of '$WAIT' seconds."
+        echo ""
+        echo ">>>         The last output from govc command was:"
+        echo ""
+        cat /tmp/about.txt
+        echo ""
+        exit 1
+      fi
+
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
