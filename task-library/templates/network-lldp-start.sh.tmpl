@@ -17,7 +17,7 @@ done
 {{if .Param "network/lldp-all-nics" }}
 echo ""
 echo "Setting all links up"
-ip -o link | awk -F: '{ print $2 }' | while read intf
+ip -o link | awk -F: '{ print $2 }' | awk -F@ '{ print $1 }' | while read intf
 do
     ip link set dev $intf up
 done
