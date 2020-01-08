@@ -24,10 +24,10 @@ This was done for you as part of the bootstrapping process.
 
 To manually create and upload:
 
-1. clone edge-lab with DRP content: `git clone https://github.com/digitalrebar/provision-content`
-1. got to the edge-lab content: `cd provision-content\edge-lab`
-1. build the content pack: `drpcli contents bundle edge-lab.yaml`
-1. install the `edge-lab` content pack: `drpcli contents upload edge-lab.yaml`
+#. clone edge-lab with DRP content: `git clone https://github.com/digitalrebar/provision-content`
+#. got to the edge-lab content: `cd provision-content\edge-lab`
+#. build the content pack: `drpcli contents bundle edge-lab.yaml`
+#. install the `edge-lab` content pack: `drpcli contents upload edge-lab.yaml`
 
 If you make changes, you can repeat steps 3 and 4 to upload the latest content.
 
@@ -37,17 +37,20 @@ Setup K3s Cluster
 Before starting, install `kubectl` has been installed on client system
 
 To build your cluster:
-1. select the nodes for installation and apply the `k3s-install` workflow
-1. wait for workflow to complete on leader
-1. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > admin.conf`
+
+#. select the nodes for installation and apply the `k3s-install` workflow
+#. wait for workflow to complete on leader
+#. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > admin.conf`
 
 To access on the DRP server or cluster:
-1. test with `kubectl --kubeconfig=admin.conf get nodes`
+
+#. test with `kubectl --kubeconfig=admin.conf get nodes`
 
 To access from another system, use an SSH tunnel:
-1. setup an ssh tunnel: `ssh root@[host wifi ip] -L 6443:[leader node ip]:6443`
-1. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
-1. test with `kubectl --kubeconfig=admin.conf get nodes`
+
+#. setup an ssh tunnel: `ssh root@[host wifi ip] -L 6443:[leader node ip]:6443`
+#. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
+#. test with `kubectl --kubeconfig=admin.conf get nodes`
 
 
 Machine Reset
@@ -65,12 +68,13 @@ Edge Lab Bootstrap
 
 This content pack includes the steps needed to bootstrap the Edge Lab server.  This includes
 a workflow, stage, and tasks to:
-1. Download the required isos (sledgehammer rpi, but others as well).
-1. Set the default preferences to make Edge Lab work.
-1. Set up an ssh key pair if one does not exist and update the global profile with it.
+
+#. Download the required isos (sledgehammer rpi, but others as well).
+#. Set the default preferences to make Edge Lab work.
+#. Set up an ssh key pair if one does not exist and update the global profile with it.
    This can be used to access the clients from the server.
-1. Create the default subnet for the Edge Lab.
-1. Lock the Machine to prevent unintented actions
+#. Create the default subnet for the Edge Lab.
+#. Lock the Machine to prevent unintented actions
 
 The start_me.sh script will install the edge-lab content pack and set the DRP server's workflow to the bootstrap
 workflow.  The status of bootstrapping can be tracked in the jobs for the DRP server.
