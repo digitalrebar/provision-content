@@ -1,0 +1,85 @@
+---
+Name: "ansible-join-up"
+Description: "Join DRP via Ansible"
+Documentation: |
+  Runs an embedded Ansible Playbook to run the DRP join-up process.
+
+  Requires an `ansible` context.
+
+  Expects to be in a Workflow that allows the joined machine to continue 
+  Discovery and configuration steps as needed.
+
+  Expects to have `rsa-key-create` run before stage is called and
+  the public key MUST be on the target machine.
+RequiredParams:
+  - rsa/key-private
+  - rsa/key-user
+Templates:
+  - Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+
+      {{template "setup.tmpl" .}}
+
+      # we need a keypair for Ansible
+      echo "Retrieving SSH key from Machine Params rsa/key-*"
+      tee rsa-{{.Machine.Name}} >/dev/null << EOF
+      {{.Param "rsa/key-private" | replace "|" "\n" }}
+      EOF
+      chmod 600 rsa-{{.Machine.Name}}
+
+      export ANSIBLE_HOST_KEY_CHECKING=False
+
+      ## Build Playbook
+      echo "Building from Join-Up Playbook"
+      tee join-up.yaml >/dev/null << EOF
+      ---
+      ### Run Join-Up via Ansible
+      - hosts: all
+        remote_user: "{{ .Param "rsa/key-user" }}"
+        connection: "ssh"
+        gather_facts: false
+        become: true
+
+        tasks:
+
+          - name: create uuid file
+            become: true
+            copy:
+              content: "{{.Machine.Uuid}}"
+              dest: /etc/rs-uuid
+
+          - name: download join-up script
+            become: true
+            get_url:
+              url: "{{.ProvisionerURL}}/machines/join-up.sh"
+              dest: "./join-up.sh"
+              mode: 0755
+
+          - name: run join-up script
+            become: true
+            shell: "nohup ./join-up.sh >/dev/null 2>&1 &"
+      EOF
+
+      drpcli machines meta set $RS_UUID key icon to "level up alternate"
+      drpcli machines meta set $RS_UUID key color to "yellow"
+      drpcli machines set $RS_UUID param start-over to false
+
+      echo "Run Join-Up Playbook using $(ansible-playbook --version)"
+      ansible-playbook \
+        -i {{ .Machine.Address }}, \
+        --private-key=rsa-{{ .Machine.Name }} \
+        join-up.yaml
+
+      drpcli machines meta set $RS_UUID key color to "green"
+      
+      echo "Done"
+    Name: "Run Playbooks"
+Meta:
+  icon: "cog"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"
