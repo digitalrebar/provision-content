@@ -1,0 +1,14 @@
+---
+Name: "rsa/key-public"
+Description: "Public RSA Key for SSH"
+Documentation: |
+  Public SSH Key
+
+  No default is set.
+Schema:
+  type: "string"
+Meta:
+  color: "black"
+  icon: "key"
+  title: "Digital Rebar Community Connect"
+  copyright: "RackN 2020"

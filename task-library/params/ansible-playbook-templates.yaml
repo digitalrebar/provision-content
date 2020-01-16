@@ -1,0 +1,21 @@
+---
+Name: "ansible/playbook-templates"
+Description: "Defines a list of playbook templates to run in Ansible Apply task"
+Documentation: |
+  This is an array of strings where each string is a template that renders
+  an Ansible Playbook.  They are run in sequence to allow building inventory
+  dynamically during a run.
+
+  Output from a playbook can be passed to the next one in the list by setting
+  the `ansible/output` value.  This value gets passed as a variable into the
+  next playbook as part of the params on the machine object json.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+
+Meta:
+  icon: "cog"
+  color: "blue"
+  title: "Digital Rebar Community Connect"
+  copyright: "RackN 2020"

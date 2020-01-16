@@ -1,0 +1,59 @@
+---
+Name: "rsa-key-create"
+Description: "Create RSA Key Pair"
+Documentation: |
+  Uses ssh-keygen to create an RSA public/private key pair.
+
+  Stores keys in `rsa/key-public` and `rsa/key-private` on
+  the machine.
+
+  The public key (which contains newlines) is stored in format
+  where newlines are converted to |.
+
+  Noop if the `rsa/key-private` exists
+OptionalParams:
+  - rsa/key-private
+Templates:
+  - Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+
+      {{template "setup.tmpl" .}}
+
+      # we need a keypair for Ansible
+      {{ if .ParamExists "rsa/key-private" }}
+      echo "Key Defined - Do Nothing"
+      {{ else }}
+      if [[ ! -e rsa-{{.Machine.Name}} ]]; then
+
+        if ! which ssh-keygen ; then
+            echo "ERROR: requires ssh-keygen"
+            exit 1
+        else
+          echo "Generating single use keypair for initialization"
+          ssh-keygen -t rsa -q -N "" -f "rsa-{{.Machine.Name}}"
+          cat rsa-{{.Machine.Name}} | tr "\n" "|" > rsa-{{.Machine.Name}}.safe
+        fi
+
+      else
+
+        echo "Using existing key: rsa-{{.Machine.Name}}.pub"
+
+      fi
+
+      echo "Saving key to Machine $RS_UUID"
+      drpcli machines set $RS_UUID param "rsa/key-private" to - < rsa-{{.Machine.Name}}.safe
+      drpcli machines set $RS_UUID param "rsa/key-public" to - < rsa-{{.Machine.Name}}.pub
+      {{ end }}
+
+      echo "Done"
+
+    Name: "RSA Generate"
+Meta:
+  icon: "key"
+  color: "black"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"
