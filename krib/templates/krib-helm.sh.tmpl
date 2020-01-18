@@ -31,9 +31,19 @@ export KUBECONFIG=$CFG
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 
-{{$render := .}}
+{{$render := . -}}
+{{ if .ParamExists "helm/charts" -}}
+  {{ $helmcharts := .Param "helm/charts" -}}
+{{ else -}}
+  {{ if .ParamExists "krib/helm-charts" -}}
+  {{ $helmcharts := .Param "krib/helm-charts" -}}
+  {{ end -}}
+  {{ if .ParamExists "edge-lab/helm-charts" -}}
+  {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
+  {{ end -}}
+{{ end -}}
 
-{{- range $index, $chart := .Param "helm/charts" -}}
+{{- range $index, $chart := $helmcharts -}}
 
 # check if it's installed without using helm
 INSTALLED=false

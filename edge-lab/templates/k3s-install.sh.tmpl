@@ -18,16 +18,16 @@ drpcli machines meta set $RS_UUID key icon to ship
 {{ template "cluster-shared.tmpl" .}}
 {{ template "download-tools.tmpl" .}}
 
-ARCH="$(uname -m)"
-case $ARCH in
+echo "setting up paths for arch $arch"
+case $arch in
     amd64|x86_64) SHA256SUM="sha256sum-amd64.txt";;
     arm64|aarch64) SHA256SUM="sha256sum-arm64.txt";;
 esac
-case $ARCH in
+case $arch in
     amd64|x86_64) ARCH="k3s";;
     arm64|aarch64) ARCH="k3s-arm64";;
     *)
-        echo "Unknown arch $ARCH"
+        echo "Unknown arch $arch"
         exit 1;;
 esac
 
