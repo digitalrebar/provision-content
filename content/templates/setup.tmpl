@@ -82,6 +82,8 @@ if [[ ! -e $INSTALL_DIR/jq ]] ; then
 fi
 unset INSTALL_DIR
 
+# Helper is rendered by the agent, and includes additional helpful functions; for
+# source, see repo https://github.com/digitalrebar/provision and file agent/cmdHelper.go
 if [[ -r ./helper ]]; then
     . ./helper
     __sane_exit
