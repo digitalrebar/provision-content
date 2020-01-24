@@ -1,5 +1,5 @@
 ---
-Description: "Run Helm Charts"
+Description: "Install Helm"
 Name: "edge-lab-helm-install"
 Documentation: |
   Installs Helm on the leader.
@@ -39,6 +39,7 @@ Templates:
       xiterr 1 "Missing cluster/profile on the machine!"
       {{end -}}
 
+      {{ $helmversion := "latest" -}}
       {{ if .ParamExists "helm/version" -}}
         {{ $helmversion := .Param "helm/version" -}}
       {{ else -}}
@@ -73,22 +74,29 @@ Templates:
           echo "Download helm checksum from $HELM_DOWNLOAD.sha256"
           download -L --remote-name-all "$HELM_DOWNLOAD.sha256" -o helm.tar.gz.sha256
 
-          if grep -Fxq "$(sha256sum helm.tar.gz)" helm.tar.gz.sha256 ; then
-            echo "Checksum Test Pass"
+          if [[ "$(sha256sum helm.tar.gz)" == "$(cat helm.tar.gz.sha256)  helm.tar.gz" ]]; then
+            echo "Checksum Test Pass: $(cat helm.tar.gz.sha256)"
           else
-            echo "Checksum Does not match"
-            sha256sum helm.tar.gz -c ${helm.tar.gz.sha256}
+            echo "Checksum Does not match: $(cat helm.tar.gz.sha256)"
+            sha256sum helm.tar.gz
             exit 1
           fi
           tar -zxvf helm.tar.gz
-          mv linux-$ARCH $BINARIES
-          echo "save downloaded files to helm/helm for next pass"
-          drpcli files upload "$BINARIES" as "helm/helm"
+          if [[ -e linux-$arch/helm ]] ; then
+            echo "save downloaded files to helm/helm for next pass"
+            drpcli files upload linux-$arch/helm as helm/helm
+            echo "moving from linux-$arch/helm to $BINARIES"
+            mv linux-$arch/helm $BINARIES
+          else
+            echo "ERROR: did not create linux-$arch/helm!"
+            exit 1
+          fi
         fi
         chmod +x $BINARIES
         echo "helm downloaded to $BINARIES"
       fi
 
+      echo "Running helm version $(helm version)"
       drpcli machines meta set $RS_UUID key color to green
       echo "Done"
       exit 0

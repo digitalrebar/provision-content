@@ -13,8 +13,14 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       {{ template "setup.tmpl" . }}
-      drpcli machines meta set $RS_UUID key icon to "dot circle outline"
-      drpcli bootenvs uploadiso discovery
+
+      if [[ "$(drpcli isos list | jq length)" == "0" ]]; then
+        echo "No ISOS, upload discovery image(s)"
+        drpcli bootenvs uploadiso discovery
+      else
+        echo "ISOs already uploaded:"
+        drpcli isos list
+      fi
 Meta:
   icon: "dot circle outline"
   color: "yellow"

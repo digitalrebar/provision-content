@@ -32,6 +32,7 @@ MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 
 {{$render := . -}}
+{{ $helmcharts := .Param "krib/helm-charts" -}}
 {{ if .ParamExists "helm/charts" -}}
   {{ $helmcharts := .Param "helm/charts" -}}
 {{ else -}}

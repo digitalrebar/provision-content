@@ -1,6 +1,6 @@
 ---
 Description: "Run Helm Charts"
-Name: "edge-lab-helm-install"
+Name: "edge-lab-helm-charts"
 Documentation: |
   Installs Helm on the leader.
   This uses the Digital Rebar Cluster pattern so cluster/profile and cluster/leader must be set.
@@ -33,6 +33,7 @@ Templates:
       xiterr 1 "Missing cluster/profile on the machine!"
       {{end -}}
 
+      {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
       {{ if .ParamExists "helm/charts" -}}
         {{ $helmcharts := .Param "helm/charts" -}}
       {{ else -}}

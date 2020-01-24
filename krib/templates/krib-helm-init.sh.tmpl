@@ -16,6 +16,7 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 
 {{template "krib-lib.sh.tmpl" .}}
 
+{{ $helmversion := "latest" -}}
 {{ if .ParamExists "helm/version" -}}
   {{ $helmversion := .Param "helm/version" -}}
 {{ else -}}
