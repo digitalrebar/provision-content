@@ -48,6 +48,8 @@ Templates:
       # helm requires the admin config
       export KUBECONFIG="./admin.conf"
       drpcli machines get $RS_UUID param k3s/admin-conf --decode > $KUBECONFIG
+      echo "testing cluster access"
+      k3s kubectl --kubeconfig=$KUBECONFIG get nodes
 
       {{ range $index, $chart := $helmcharts -}}
 
