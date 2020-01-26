@@ -26,13 +26,6 @@ Templates:
       echo "Run helm on the leader (skip for workers)..."
       drpcli machines meta set $RS_UUID key color to yellow
 
-      {{ if .ParamExists "cluster/profile" -}}
-      CLUSTER_PROFILE={{.Param "cluster/profile"}}
-      PROFILE_TOKEN={{.GenerateProfileToken (.Param "cluster/profile") 7200}}
-      {{else -}}
-      xiterr 1 "Missing cluster/profile on the machine!"
-      {{end -}}
-
       {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
       {{ if .ParamExists "helm/charts" -}}
         {{ $helmcharts := .Param "helm/charts" -}}
@@ -53,10 +46,10 @@ Templates:
       fi
 
       # helm requires the admin config
-      export KUBECONFIG="/etc/kubernetes/admin.conf"
-      drpcli profiles get $CLUSTER_PROFILE param k3s/admin-conf --decode > $KUBECONFIG
+      export KUBECONFIG="./admin.conf"
+      drpcli machines get $RS_UUID param k3s/admin-conf --decode > $KUBECONFIG
 
-      {{- range $index, $chart := $helmcharts -}}
+      {{ range $index, $chart := $helmcharts -}}
 
       echo "{{$index}}==== Installing {{$chart.name}} (from {{$chart.chart}}) ===="
 
@@ -74,12 +67,15 @@ Templates:
       helm repo add {{$name}} {{$url}}
       {{ end -}}
       {{ else -}}
-      echo "no extra repos"
+      echo "no charts provided, using official Helm stable"
+      helm repo add stable https://kubernetes-charts.storage.googleapis.com/
       {{ end -}}
       helm repo update
 
       echo "installing helm chart {{$chart.name}}"
-      helm install {{$chart.chart}} --name {{$chart.name}}{{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
+      helm install {{$chart.name}} {{$chart.chart}} \
+        --kubeconfig=$KUBECONFIG \
+        {{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
         {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
 
       echo "{{$index}}==== Done {{$chart.name}} ===="
