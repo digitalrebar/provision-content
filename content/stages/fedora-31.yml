@@ -1,0 +1,13 @@
+---
+Name: "fedora-31-install"
+Description: "Fedora 31 Install Stage"
+BootEnv: "fedora-31-install"
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+  - "configure-network"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
