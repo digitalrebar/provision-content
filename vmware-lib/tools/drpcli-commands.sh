@@ -2,7 +2,7 @@
 
 # commands to run after building container tar files
 
-contexts="runner-context:latest vcsa-deploy-context:latest govc-context:latest"
+contexts="vcsa-deploy-context:latest govc-context:latest"
 
 # run as:  CONTEXT=1 ./drpcli-commands.sh
 # if you want to run the context upload to DRP - if they are not already in
