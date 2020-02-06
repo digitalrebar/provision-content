@@ -14,6 +14,16 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      function clean_curl() {
+          local _src=$1
+          local _dest=$2
+
+          curl -k -o $_dest $_src
+          if [[ $? != 0 ]] ; then
+              xiterr 1 "Failed to download $_dest from $_src"
+          fi
+      }
+
       chmod +x attach-usb-lan.sh
       ./attach-usb-lan.sh
 
@@ -50,15 +60,12 @@ Templates:
         FORCE="--forceid $ID"
         {{ end }}
 
-        {{ if hasPrefix "http:" $elem.File }}
-        curl -o $TMPDIR/$FILENAME {{$elem.File}}
-        curl -o $TMPDIR/$ID.xml "$DNAME/$ID.xml"
-        {{ else if hasPrefix "https:" $elem.File }}
-        curl -k -o $TMPDIR/$FILENAME {{$elem.File}}
-        curl -k -o $TMPDIR/$ID.xml "$DNAME/$ID.xml"
+        {{ if hasPrefix "http" $elem.File }}
+        clean_curl "{{$elem.File}}" "$TMPDIR/$FILENAME"
+        clean_curl "$DNAME/$ID.xml" "$TMPDIR/$ID.xml"
         {{ else }}
-        curl -o $TMPDIR/$FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
-        curl -o $TMPDIR/$ID.xml "{{$.ProvisionerURL}}/$DNAME/$ID.xml"
+        clean_curl "{{$.ProvisionerURL}}/{{$elem.File}}" "$TMPDIR/$FILENAME"
+        clean_curl "{{$.ProvisionerURL}}/$DNAME/$ID.xml" "$TMPDIR/$ID.xml"
         {{ end }}
 
         set +e
