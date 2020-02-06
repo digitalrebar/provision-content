@@ -1,0 +1,5 @@
+dockerfile-govc.tar
+dockerfile-runner.tar
+dockerfile-vcsa-deploy.tar
+dockerfile-*.tar
+vmware-lib.yaml

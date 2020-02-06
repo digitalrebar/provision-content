@@ -1,0 +1,17 @@
+---
+Name: "govc/resource-pool"
+Description: "Resource Pool to use for the govc deployed OVA"
+Documentation: |
+  Resource Pool to use for the govc deployed OVA.
+
+  For example, set to something like ``*/Resources``.
+
+  Defaults to empty (unused) value.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

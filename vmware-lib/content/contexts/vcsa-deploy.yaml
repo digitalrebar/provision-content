@@ -1,0 +1,14 @@
+---
+Name: "vcsa-deploy"
+Description: "vcsa-deploy context using image digitalrebar-vcsa-deploy"
+Documentation: |
+  Context that executes the command specified in ``vcsa-deploy/command`` Param,
+  in container context ``digitalrebar-vcsa-deploy``.
+
+Engine: "docker-context"
+Image: "digitalrebar-vcsa-deploy"
+Meta:
+  color: orange
+  icon: terminal
+  title: RackN Content
+

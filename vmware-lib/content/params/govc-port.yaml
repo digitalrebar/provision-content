@@ -1,0 +1,14 @@
+---
+Name: "govc/port"
+Description: "Set the Port number of the VMware ESXi or vCenter resource"
+Documentation: |
+  Sets the Port number of the VMware ESXi or vCenter resource, if it has
+  been relocated from the default (443).
+
+Schema:
+  type: "integer"
+  default: 0
+Meta:
+  color: "blue"
+  icon: "terminal"
+  title: "RackN Content"

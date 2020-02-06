@@ -1,0 +1,89 @@
+VMware Library
+==============
+
+The Vmware Library provides additional content that enables capabilities for
+interacting with VMware ESXi, vSphere, and VCF (VMware Cloud Foundation)
+environments.
+
+GoVC General Information
+------------------------
+
+GoVC is a Golang binary that implements the VMOMI library of capabilities.  The
+primary benefit is it's a single statically compiled binary (stand alone) that has
+no external dependencies.  It implements API interaction with vSphere and services
+(eg ESXi and vCenter).
+
+The GoVC binary (``govc``) is compiled from the GoVMOMI project, which can be
+found at:
+
+  * https://github.com/vmware/govmomi
+
+The GoVC tool is capable of an extremely broad and complete set of control plane
+interactions with vSphere (ESXi and vCenter) services.  Please review the
+``examples`` directory in the above referenced Repo for more details.
+
+GoVC Context
+~~~~~~~~~~~~
+
+The GoVC context implements a RackN Context Container with the Agent (runner, drpcli
+binary) inside of it.  By use of setting Param values, ``govc`` commands can be
+executed against vSphere resources.
+
+GoVC and VCSA Deployment
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+VCSA (vCenter Server Appliance) can be deployed via the GoVC tool.  The operator must
+perform the following preparotry tasks to enable the Context environment to operate
+the ``govc`` binary in the RackN Context Container.
+
+  #. Install the "Docker (OCI) Execution Context" (docker-context) plugin via the Catalog
+    #. can run ``drpcli catalog item install docker-context`` from the command line
+  #. Create the docker container for the Runner and GoVC tools
+    #. See the ``tools/build-docker.sh`` script to build the containers
+  #. Upload the containers and enable them in drpcli
+    #. See the ``tools/drpcli-commands.sh`` script to do this
+  #. Create the Runner fake machines to start Workflow from
+    #. See the ``tools/drpcli-create-machines.sh`` script to do this
+  #. The VCSA OVA must be staged on an HTTP server for the tooling to download
+    #. Obtain the VMware provide VCSA ISO image and extract the OVA from the ISO
+      #. example download location: https://my.vmware.com/web/vmware/details?productId=742&rPId=39682&downloadGroup=VC67U3B
+    #. can be extracted with ``bsdtar`` like: ``bsdtar -xvf VMware-VCSA-all-6.7.0-15132721.iso vcsa/*.ova``
+    #. upload with drpcli like: ``export N=$(ls -1 vcsa/*.ova); drpcli files upload $N as images/$N``
+    #. reference this location on the DRP endpoint as: ``{{.ProvisionerURL}}/files/images/vcsa/{...name...}``
+  #. Prepare the Template JSON file that GoVC will use to deploy the OVA (see below)
+  #. Set the Param values on your Runner fake machine (either directly. or as a Profile)
+  #. Run the Workflow ``govc-vcenter-create``
+
+Scripts referenced in this document should be available from:
+
+  * https://github.com/digitalrebar/provision-content/tree/v4/vmware-lib
+
+Prepare the VCSA JSON Deployment Template
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Param ``govc/template-json`` defines the name of a Template that you must provide with
+the configuration details for the deployed VCSA instance.  This template can be a standard
+Digital Rebar template, provided via another Content Pack, or you can upload a one-off template
+for the job.  See the ``templates/govc-*EXAMPLE*.json`` examples in the ``vmware-lib`` content
+pack for an example template.
+
+Once you have prepared the Template JSON file and uploaded it, you must set the Param
+to point to it.  This param will be set on the fake Runner Machine that the Workflow is
+run on.
+
+In addition to the Template JSON Param, you must provie a vSphere resource (eg ESXi) node
+to execute the deployment to.  Set these Params as defined in the below section.
+
+Define the Deployment Target
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You must define the vSphere deployment target (eg ESXi node) to deploy the VCSA OVA to.
+This is done by specifying the URL directly as a single Param, or the individual Param
+values for the Username, Password, Node, and optionally Port.  See the Param documentation
+for these values.
+
+These values can all be combined in to a single Profile along with the Template JSON
+Param defined above for easier add/remove on the Machine object.
+
+
+

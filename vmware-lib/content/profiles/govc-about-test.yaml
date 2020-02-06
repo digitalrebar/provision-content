@@ -1,0 +1,15 @@
+---
+Name: "govc-about-test"
+Description: "govc command test profile"
+Documentation: |
+  Runs the simple ``govc about`` command on a test ESXi instance.
+
+Meta:
+  color: "grey"
+  icon: "terminal"
+  title: "GOVC Test Profile"
+Params:
+  govc/command: "about"
+  govc/url: "root:RocketSkates@192.168.124.4"
+  govc/insecure: true
+Profiles: []

@@ -1,0 +1,10 @@
+---
+Name: "govc-wait-for-vcenter"
+Description: "Use 'govc about' to check for API access to vCenter"
+Tasks:
+  - "context:govc"
+  - "govc-wait-for-vcenter"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

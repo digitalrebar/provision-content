@@ -1,0 +1,36 @@
+---
+Name: "govc/url"
+Description: "Full ESXi or vCenter URL resource to connect to."
+Documentation: |
+  The full VMware ESXi or vCenter URL resource to connect to, to execute a
+  ``govc/command`` against.
+
+  Example:  ``root:RocketSkates@192.168.1.10``
+
+  You must include the ``user:pass`` credentials if you sue this format.
+
+  There are two paths to configure the Resource URL, either this
+  Param, or leave this Param empty, and specify all three required Param
+  values, and the one optional:
+
+  All three required if ``govc/url`` is not used:
+  ::
+
+    govc/username:  user
+    govc/password:  s3cr3t
+    govc/node: 192.168.1.10
+
+  Optional (defaults to '443'):
+  ::
+
+    govc/port: 1443
+
+  By default this Param has an empty value.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"
