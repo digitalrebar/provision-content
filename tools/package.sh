@@ -34,11 +34,20 @@ tools/pieces.sh | while read i ; do
     if [[ $i == "drp-community-contrib" ]] ; then
         dir="contrib"
     fi
-    echo "$version" > $dir/._Version.meta
+
     ldir=$(pwd)
-    cd $dir
-    drpcli contents bundle $ldir/$i.yaml
-    cd -
+    if [ -d $dir/content ] ; then
+        echo "$version" > $dir/content/._Version.meta
+        cd $dir/content
+        drpcli contents bundle $ldir/$i.yaml
+        cd -
+    else
+        echo "$version" > $dir/._Version.meta
+        cd $dir
+        drpcli contents bundle $ldir/$i.yaml
+        cd -
+    fi
+
     drpcli contents document $i.yaml > $i.rst
     $shasum $i.yaml > $i.sha256
 done
