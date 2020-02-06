@@ -30,14 +30,16 @@ text
 reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 
 %packages
-@core
-trousers
-fipscheck
-device-mapper-multipath
-openssh
-curl
-efibootmgr
-tar
+{{ $packages := index (.Param "kickstart-base-packages") .Env.OS.Name -}}
+{{ if not $packages -}}
+{{ $packages = index (.Param "kickstart-base-packages") .Env.OS.Family -}}
+{{ end -}}
+{{ if not $packages -}}
+{{ $packages = index (.Param "kickstart-base-packages") "unknown" -}}
+{{ end -}}
+{{ range $index, $element := $packages -}}
+{{$element}}
+{{ end -}}
 {{if .ParamExists "extra-packages" -}}
 {{ range $index, $element := (.Param "extra-packages") -}}
 {{$element}}
