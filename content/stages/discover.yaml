@@ -1,6 +1,14 @@
 ---
 Name: "discover"
 Description: "Discovery stage used to inventory and baseline new machines"
+Documentation: |
+  Default machine discovery process used for bare metal.
+
+  This stage is the typical first entry point for all machines using
+  standard Digital Rebar discovery processes.
+
+  This stage expects and enforces `sledgehammer` as the BootEnv.  If the
+  machine is not using sledgehammer then use `discover-nobootenv`.
 BootEnv: "sledgehammer"
 Tasks:
   - "enforce-sledgehammer"
@@ -10,3 +18,5 @@ Meta:
   icon: "spinner"
   color: "purple"
   title: "Digital Rebar Community Content"
+  license: "APLv2"
+  copyright: "RackN 2018"

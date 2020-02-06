@@ -1,0 +1,19 @@
+---
+Name: "discover-nobootenv"
+Description: "Discovery stage used to inventory and baseline joined machines"
+Documentation: |
+  Specialized version of Discovery to be used with machines that use the join-up.sh process.
+
+  This stage is the typical first entry point for cloud and externally created machines
+  outside of the normal Digital Rebar discovery process.
+
+  If you are using `sledgehammer` then use the regular `discover` Stage.
+Tasks:
+  - "gohai"
+  - "ssh-access"
+Meta:
+  icon: "spinner"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  license: "APLv2"
+  copyright: "RackN 2020"
