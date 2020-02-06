@@ -1,0 +1,10 @@
+---
+Name: "vcsa-deploy-command"
+Description: "Run vcsa-deploy command in govomi context container"
+Tasks:
+  - "context:vcsa-deploy"
+  - "vcsa-deploy-command"
+Meta:
+  icon: "terminal"
+  color: "orange"
+  title: "RackN Content"

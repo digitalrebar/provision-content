@@ -1,0 +1,24 @@
+FROM alpine:latest
+#RUN apk update
+#RUN apk upgrade
+#RUN apk add bash
+
+MAINTAINER "The RackN Team <support@rackn.com>"
+
+ENV GOVC_VER="v0.21.0"
+ENV GOVC_SHA="8ac96aeeef4f43f38baed6089f5f2159b0e7802e"
+ENV DRPCLI_VER="v4.2.0-beta9.2%2Bg0399c2aa752b79696319b3c07d39fc163157236c"
+
+RUN apk add --no-cache bash
+
+ADD https://github.com/vmware/govmomi/releases/download/${GOVC_VER}/govc_linux_amd64.gz ./
+RUN gunzip govc_linux_amd64.gz
+RUN mv govc_linux_amd64 /usr/bin/govc
+RUN chmod 755 /usr/bin/govc
+RUN rm -f govc_linux_amd64.gz
+
+ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/arm64/linux/drpcli /usr/bin/
+#COPY drpcli /usr/bin/drpcli
+RUN chmod 755 /usr/bin/drpcli
+RUN ln -s /usr/bin/drpcli /usr/bin/jq
+ENTRYPOINT /usr/bin/drpcli machines processjobs

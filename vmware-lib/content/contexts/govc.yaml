@@ -1,0 +1,14 @@
+---
+Name: "govc"
+Description: "govc context using container image digitalrebar-govc"
+Documentation: |
+  Executes the command referenced in the ``govc/command`` Param, in the
+  container context ``digitalrebar-govc``.
+
+Engine: "docker-context"
+Image: "digitalrebar-govc"
+Meta:
+  color: blue
+  icon: terminal
+  title: RackN Content
+

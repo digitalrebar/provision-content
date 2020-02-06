@@ -1,0 +1,10 @@
+---
+Name: "govc-command"
+Description: "Run govc command in govomi context container"
+Tasks:
+  - "context:govc"
+  - "govc-command"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

@@ -1,0 +1,16 @@
+---
+Name: "govc/insecure"
+Description: "Allow accepting self signed certificates on VMware ESXi URL"
+Documentation: |
+  If set to ``true``, then accept self signed certificates of the
+  VMware ESXi or vCenter resource.
+
+  By default this value is set to ``true``.
+
+Schema:
+  type: "boolean"
+  default: true
+Meta:
+  color: "yellow"
+  icon: "terminal"
+  title: "RackN Content"

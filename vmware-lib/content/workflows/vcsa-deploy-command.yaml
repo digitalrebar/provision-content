@@ -1,0 +1,16 @@
+---
+Name: "vcsa-deploy-command"
+Description: "Run VMware vcsa-deploy command Context workflow"
+Documentation: |
+  Requires that operator has created a Contexts for "runner" and "vcsa-deploy"
+  that can run DRP Angent and vcsa-deploy.
+
+  Leaves the machines in a Runner Context not on the machine
+
+Stages:
+  - "vcsa-deploy-command"
+  - "complete-nobootenv"
+Meta:
+  color: "orange"
+  icon: "terminal"
+  title: "RackN Content"
