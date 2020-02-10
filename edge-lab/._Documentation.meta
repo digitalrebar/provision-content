@@ -1,6 +1,8 @@
 Edge Lab Reference Environment
 ==============================
 
+**Please see http://edgelab.digital for complete the reference architecture and additional documentation.**
+
 Assumptions:
 
 * the leader node have internet access for downloading `containerd` and `k3s` binaries

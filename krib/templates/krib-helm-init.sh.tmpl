@@ -16,6 +16,18 @@ xiterr 1 "Missing krib/cluster-profile on the machine!"
 
 {{template "krib-lib.sh.tmpl" .}}
 
+{{ $helmversion := "latest" -}}
+{{ if .ParamExists "helm/version" -}}
+  {{ $helmversion := .Param "helm/version" -}}
+{{ else -}}
+  {{ if .ParamExists "krib/helm-version" -}}
+  {{ $helmversion := .Param "krib/helm-version" -}}
+  {{ end -}}
+  {{ if .ParamExists "edge-lab/helm-version" -}}
+  {{ $helmversion := .Param "edge-lab/helm-version" -}}
+  {{ end -}}
+{{ end -}}
+
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 echo "My Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX != notme ]] ; then
@@ -34,19 +46,19 @@ if [[ $MASTER_INDEX != notme ]] ; then
 
     if [[ ! -f "${INSTALL_DIR}/helm" ]]; then
       # todo: provide more options for installing helm
-      {{ if eq (.Param "helm/version") "latest" -}}
+      {{ if eq $helmversion "latest" -}}
       # curl has exit code 23... meh
       set +e
       HELM_VERSION=$(curl -skX GET "https://api.github.com/repos/helm/helm/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]')
       set -e
       {{ else -}}
-      HELM_VERSION={{.Param "helm/version"}}
+      HELM_VERSION={{$helmversion}}
       {{ end -}}
       curl https://raw.githubusercontent.com/helm/helm/master/scripts/get > get_helm.sh
       chmod 700 get_helm.sh
 
       HELM_INSTALL_DIR=$INSTALL_DIR ./get_helm.sh -v ${HELM_VERSION}
-      echo "When helm fail to get the latest version, please add param "helm/version" and re-run again"
+      echo "When helm fail to get the latest version, please add param "krib/helm-version" and re-run again"
       echo "You can find the version release or tag on: https://github.com/helm/helm/releases/"
       
     fi

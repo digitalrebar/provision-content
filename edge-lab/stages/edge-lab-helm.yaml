@@ -1,0 +1,18 @@
+---
+Name: "edge-lab-helm"
+Description: "Edge Lab install helm and run charts"
+Documentation: |
+  Installs and runs Helm Charts after a cluster has been constructed.
+  This stage is idempotent and can be run multiple times.
+  This allows operators to create workflows with multiple instances of this stage.
+  The charts to run are determined by the edge-lab/helm-charts parameter.
+
+  Unless helm is uploaded to file helm/helm, this stage requires internet access.
+RunnerWait: true
+Tasks:
+  - "edge-lab-helm-install"
+  - "edge-lab-helm-charts"
+Meta:
+  icon: "map outline"
+  color: "blue"
+  title: "Community Content"

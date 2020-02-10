@@ -1,0 +1,106 @@
+---
+Description: "Run Helm Charts"
+Name: "edge-lab-helm-charts"
+Documentation: |
+  Installs Helm on the leader.
+  This uses the Digital Rebar Cluster pattern so cluster/profile and cluster/leader must be set.
+RequiredParams:
+  - cluster/profile
+  - cluster/leaders
+  - k3s/admin-conf
+  - edge-lab/helm-charts
+Templates:
+  - Name: "helm-charts.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{ template "cluster-shared.tmpl" .}}
+
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
+        exit 0
+      fi
+
+      echo "Run helm on the leader (skip for workers)..."
+      drpcli machines meta set $RS_UUID key color to yellow
+
+      {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
+      {{ if .ParamExists "helm/charts" -}}
+        {{ $helmcharts := .Param "helm/charts" -}}
+      {{ else -}}
+        {{ if .ParamExists "krib/helm-charts" -}}
+        {{ $helmcharts := .Param "krib/helm-charts" -}}
+        {{ end -}}
+        {{ if .ParamExists "edge-lab/helm-charts" -}}
+        {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
+        {{ end -}}
+      {{ end -}}
+
+      if which helm ; then
+        echo "found $(which helm) binary version $(helm version)"
+      else
+        echo "helm not installed"
+        exit 1
+      fi
+
+      # helm requires the admin config
+      export KUBECONFIG="./admin.conf"
+      tee $KUBECONFIG >/dev/null << EOF
+      {{ .ParamAsJSON "k3s/admin-conf" }}
+      EOF
+      echo "testing cluster access"
+      k3s kubectl --kubeconfig=$KUBECONFIG get nodes
+
+      {{ range $index, $chart := $helmcharts -}}
+
+      echo "{{$index}}==== Installing {{$chart.name}} (from {{$chart.chart}}) ===="
+
+      if [[ "$(helm list -o json --filter '{{$chart.name}}' | jq length)" == "0" ]] ; then
+
+        {{ if $chart.targz }}
+        echo "retrieving chart from {{$chart.targz}}"
+        download -L --remote-name-all "{{$chart.targz}}" -o chart.targz
+        tar -xz chart.targz
+        {{ else -}}
+        echo "no extra targz"
+        {{ end -}}
+
+        {{ if $chart.repos }}
+        {{ range $name, $url := $chart.repos -}}
+        echo "adding chart repo {{$name}}"
+        helm repo add {{$name}} {{$url}}
+        {{ end -}}
+        {{ else -}}
+        echo "no charts provided, using official Helm stable"
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+        {{ end -}}
+        helm repo update
+
+        echo "installing helm chart {{$chart.name}}"
+        helm install {{$chart.name}} {{$chart.chart}} \
+          --kubeconfig=$KUBECONFIG \
+          {{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
+          {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
+
+      else
+        echo "Skipping Install: Found chart using helm list --filter={{$chart.name}}"
+        helm list
+      fi
+      echo "{{$index}}==== Done {{$chart.name}} ===="
+      {{ else -}}
+      echo "No charts included in helm/charts to install"
+      {{ end -}}
+
+      drpcli machines meta set $RS_UUID key color to green
+      echo "Done"
+      exit 0
+
+Meta:
+  icon: "map outline"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"
