@@ -1,0 +1,50 @@
+---
+Name: kickstart-base-packages
+Description: A map containing the distro, and the list of base packages to be installed
+Documentation: |
+  This provides a list of packages to be installed during a CentOS, RHEL, Fedora, and compatible package based kickstar install.
+  Here is an example of how to override the default packages used for CentOS
+
+    ::
+
+      {"centos": ["@core", "openssh"]}
+
+
+Schema:
+  type: object
+  default:
+    unknown:
+      - "@core"
+      - trousers
+      - fipscheck
+      - device-mapper-multipath
+      - openssh
+      - curl
+      - efibootmgr
+      - tar
+    redhat:
+      - "@core"
+      - trousers
+      - fipscheck
+      - device-mapper-multipath
+      - openssh
+      - curl
+      - efibootmgr
+      - tar
+    centos:
+      - "@core"
+      - trousers
+      - fipscheck
+      - device-mapper-multipath
+      - openssh
+      - curl
+      - efibootmgr
+      - tar
+    fedora:
+      - "@core"
+      - fipscheck
+      - device-mapper-multipath
+      - openssh
+      - curl
+      - efibootmgr
+      - tar

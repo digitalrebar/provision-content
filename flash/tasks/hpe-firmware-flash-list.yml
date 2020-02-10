@@ -11,6 +11,16 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      function clean_curl() {
+          local _src=$1
+          local _dest=$2
+
+          curl -k -o $_dest $_src
+          if [[ $? != 0 ]] ; then
+              xiterr 1 "Failed to download $_dest from $_src"
+          fi
+      }
+
       skip_flash="{{.Param "skip-flash"}}"
       if [[ $skip_flash = true ]]; then
           echo "Skipping all flash operations due to skip-flash being true"
@@ -35,12 +45,10 @@ Templates:
         FORCE="-f"
         {{ end }}
 
-        {{ if hasPrefix "http:" $elem.File }}
-        curl -o $FILENAME {{$elem.File}}
-        {{ else if hasPrefix "https:" $elem.File }}
-        curl -k -o $FILENAME {{$elem.File}}
+        {{ if hasPrefix "http" $elem.File }}
+        clean_curl "{{$elem.File}}" "$FILENAME"
         {{ else }}
-        curl -o $FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
+        clean_curl "{{$.ProvisionerURL}}/{{$elem.File}}" "$FILENAME"
         {{ end }}
 
         # Check to see if RPM is already installed.
