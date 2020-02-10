@@ -1,6 +1,13 @@
 ---
 Name: sledgehammer-stage-bits
 Description: Stage Sledgehammer pieces needed for initial discovery and bootstrapping.
+ExtraClaims:
+  - scope: "contents"
+    action: "get"
+    specific: "*"
+  - scope: "isos"
+    action: "*"
+    specific: "*"
 Templates:
   - Name: sledgehammer-start-up.sh
     Path: /sbin/sledgehammer-start-up.sh
@@ -654,7 +661,7 @@ Templates:
       cd initrd
       sed -i -e "s/::SIGNATURE::/$signature/" init
       sed -i -e "s/::BUILD_DATE::/$(date)/" init
-      sed -i -e "s/::SBV::/$(RS_TOKEN= drpcli -U rocketskates -P r0cketsk8ts contents show sledgehammer-builder | jq .meta.Version -r)/" init
+      sed -i -e "s/::SBV::/$(RS_TOKEN= drpcli contents show sledgehammer-builder | jq .meta.Version -r)/" init
       find |sort |cpio -o -R 0:0 --format=newc |gzip -9 >../stage1.img
       cd ..
       # Tar it all up
@@ -667,5 +674,5 @@ Templates:
       # Push back to dr-provision
       unset RS_TOKEN
       echo "Uploading Sledgehammer to dr-provision"
-      drpcli -U rocketskates -P r0cketsk8ts isos upload $tarname as $tarname
+      drpcli isos upload $tarname as $tarname
       echo "$tarname uploaded to isos"
