@@ -1,0 +1,29 @@
+---
+Name: openfaas-base
+Description: Base Open FaaS Helm Profile
+Documentation: |
+  Apply this profile to machines in a k3s cluster in which
+  you want to install Open FaaS.
+
+  This does NOT work with other helm charts because it defines the
+  entire helm/charts param.  Clone and extend to combine with other
+  helm charts.
+Params:
+  edge-lab/helm-charts:
+    - chart: openfaas/openfaas
+      name: openfaas
+      namespace: openfaas
+      repos:
+        openfaas: "https://openfaas.github.io/faas-netes/"
+      prekubectl:
+        - "apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml"
+      postkubectl:
+        "openfaas/password": "-n openfaas get secret basic-auth -o jsonpath=\"{.data.basic-auth-password}\" | base64 --decode"
+      set:
+        - "functionNamespace=openfaas-fn",
+        - "generateBasicAuth=true"
+      sleep: 10
+Meta:
+  color: blue
+  icon: grid layout
+  title: Community Content

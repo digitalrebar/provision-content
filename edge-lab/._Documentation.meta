@@ -55,6 +55,23 @@ To access from another system, use an SSH tunnel:
 #. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
 #. test with `kubectl --kubeconfig=admin.conf get nodes`
 
+Install OpenFaaS via Helm
+-------------------------
+
+The k3s install above will automatically include Helm v3 and run
+charts defined in the `edge-lab/helm-charts` param array.
+
+OpenFaaS is provided as an example in the `openfaas-base` profile.
+To include OpenFaaS in the k3s install, simply assign the
+`openfaas-base` profile on cluster leader (you can assign it to all
+cluster machines and it will be ignore on the non-leaders).
+
+Since the helm stages are idempotent, either include the profile
+before running the `k3s-install` workflow or re-run the workflow.
+
+The OpenFaaS helm chart install will write its password to the
+cluster profile using `openfaas/password`.
+
 
 Machine Reset
 -------------

@@ -43,10 +43,10 @@ Documentation: |
         }, {
           "chart": "openfaas/openfaas",
           "name": "openfaas",
+          "namespace": "openfaas",
           "repos": {
             "openfaas":"https://openfaas.github.io/faas-netes/"
             },
-          "namespace": "openfaas",
           "prekubectl": [
             "apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml"
           ],
