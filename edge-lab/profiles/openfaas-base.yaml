@@ -20,7 +20,7 @@ Params:
       postkubectl:
         "openfaas/password": "-n openfaas get secret basic-auth -o jsonpath=\"{.data.basic-auth-password}\" | base64 --decode"
       set:
-        - "functionNamespace=openfaas-fn",
+        - "functionNamespace=openfaas-fn"
         - "generateBasicAuth=true"
       sleep: 10
 Meta:
