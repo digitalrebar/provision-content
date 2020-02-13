@@ -79,11 +79,33 @@ Templates:
         {{ end -}}
         helm repo update
 
+        {{ range $index, $before := $chart.prekubectl -}}
+        echo "running kubectl {{$before}}"
+        k3s kubectl --kubeconfig=$KUBECONFIG {{$before}}
+        {{ else }}
+        echo "No kubectl before steps"
+        {{ end }}
+
         echo "installing helm chart {{$chart.name}}"
-        helm install {{$chart.name}} {{$chart.chart}} \
+        helm upgrade {{$chart.name}} \
+          --install "{{$chart.chart}}" \
           --kubeconfig=$KUBECONFIG \
           {{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
+          {{ range $index, $value := $chart.set }} --set {{$value}}{{ end }} \
           {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
+
+        {{ if $chart.sleep }}
+        echo "sleep {{$chart.sleep}}"
+        sleep {{$chart.sleep}}
+        {{ end -}}
+
+        {{ range $key, $after := $chart.postkubectl -}}
+        echo "running kubectl {{$after}} (save to {{$key}})"
+        OUTPUT=$(k3s kubectl --kubeconfig=$KUBECONFIG {{$after}})
+        drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        {{ else }}
+        echo "No kubectl after steps"
+        {{ end }}
 
       else
         echo "Skipping Install: Found chart using helm list --filter={{$chart.name}}"

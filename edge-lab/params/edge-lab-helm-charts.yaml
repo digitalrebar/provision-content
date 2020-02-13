@@ -19,14 +19,15 @@ Documentation: |
   * chart: reference of the chart (required) - may rely on repo, path or other helm install [chart] standard
   * namespace: kubernetes namespace to use for chart (defaults to none)
   * params: map of parameters to include in the helm install (optional).  Keys and values are converted to --[key] [value] in the install instruction.
+  * set: array of values to set in the helm install (optional).  values are converted to --set [value] in the install instruction.
   * targz (optional) provides a location for a tar.gz file containing charts to install. Path is relative.
   * repos (optional) adds the requested repos to helm using `helm repo add` before installing helm.  syntax is `[repo name]: [repo path]`.
+  * sleep (optional): time in seconds to wait after install (defaults to none)
+  * postkubectl (optional) map of kubectl [request] commands to run after the helm install - stored using the map key
+  * prekubectl (optional) array of kubectl [request] commands to run before the helm install
 
   NOT YET PORTED FROM KRIB
-  * sleep: time to wait after install (defaults to 10)
   * wait: wait for name (and namespace if provided) to be running before next action
-  * prekubectl (optional) array of kubectl [request] commands to run before the helm install
-  * postkubectl (optional) array of kubectl [request] commands to run after the helm install
   * templates (optional) map of DRP templates keyed to the desired names (must be uploaded!) to render before doing other work.
   * templatesbefore (optional) expands the provided template files inline before the helm install happens.
   * templatesafter (optional) expands the provided template files inline after the helm install happens
@@ -40,41 +41,24 @@ Documentation: |
           "chart": "stable/mysql",
           "name": "mysql"
         }, {
-          "chart": "istio-1.0.1/install/kubernetes/helm/istio",
-          "name": "istio",
-          "targz": "https://github.com/istio/istio/releases/download/1.0.1/istio-1.0.1-linux.tar.gz",
-          "namespace": "istio-system",
-          "params": {
-            "set": "sidecarInjectorWebhook.enabled=true"
-          },
-          "sleep": 10,
-          "wait": true,
-          "kubectlbefore": ["get nodes"],
-          "kubectlafter": ["get nodes"]
-        }, {
-          "chart": "rook-stable/rook-ceph",
-          "kubectlafter": [
-            "apply -f cluster.yaml"
-          ],
-          "name": "rook-ceph",
-          "namespace": "rook-ceph-system",
+          "chart": "openfaas/openfaas",
+          "name": "openfaas",
+          "namespace": "openfaas",
           "repos": {
-            "rook-stable": "https://charts.rook.io/stable"
+            "openfaas":"https://openfaas.github.io/faas-netes/"
+            },
+          "prekubectl": [
+            "apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml"
+          ],
+          "postkubectl": {
+            "openfaas/password": "-n openfaas get secret basic-auth -o jsonpath=\"{.data.basic-auth-password}\" | base64 --decode"
           },
-          "templatesafter": [{
-            "name": "helm-rook.after.sh.tmpl"
-            "nodes": "leader",
-          }],
-          "templatesbefore": [{
-            "name": "helm-rook.before.sh.tmpl",
-            "nodes": "all",
-            "runIfInstalled": true
-          }],
-          "templates": {
-            "cluster": "helm-rook.cfg.tmpl"
-          },
-          "wait": true
-       }
+          "set": [
+            "functionNamespace=openfaas-fn",
+            "generateBasicAuth=true"
+          ],
+          "sleep": 10
+        }
       ]
 
 Schema:
