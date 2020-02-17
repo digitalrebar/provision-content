@@ -39,15 +39,18 @@ Templates:
       xiterr 1 "Missing cluster/profile on the machine!"
       {{end -}}
 
-      {{ $helmversion := "latest" -}}
+      HELM_VERSION="latest"
       {{ if .ParamExists "helm/version" -}}
-        {{ $helmversion := .Param "helm/version" -}}
+        echo "using general helm version from helm/version"
+        HELM_VERSION="{{ .Param "helm/version"}}"
       {{ else -}}
         {{ if .ParamExists "krib/helm-version" -}}
-        {{ $helmversion := .Param "krib/helm-version" -}}
+        HELM_VERSION="{{ .Param "krib/helm-version" }}"
+        echo "using krib helm version from krib/helm-version"
         {{ end -}}
         {{ if .ParamExists "edge-lab/helm-version" -}}
-        {{ $helmversion := .Param "edge-lab/helm-version" -}}
+        HELM_VERSION="{{ .Param "edge-lab/helm-version"}}"
+        echo "using edge-lab helm version from edge-lab/helm-version"
         {{ end -}}
       {{ end -}}
 
@@ -59,13 +62,11 @@ Templates:
           echo "Found in DRP helm/helm - downloading from there"
           drpcli files download "helm/helm" to $BINARIES
         else
-          {{ if eq $helmversion "latest" -}}
-            echo "Looking up latest helm version"
+          if [[ "$HELM_VERSION" == "latest" ]]; then
+            echo "Looking up latest version, requested $HELM_VERSION"
             download -L --remote-name-all "https://api.github.com/repos/helm/helm/releases/latest" -o helm_latest.json
-            HELM_VERSION=$(jq -r .tag_name <<< cat helm_latest.json)
-          {{ else }}
-            HELM_VERSION={{ $helmversion }}
-          {{ end }}
+            HELM_VERSION="$(jq -r .tag_name <<< cat helm_latest.json)"
+          fi
           echo "Using Helm Version $HELM_VERSION"
           echo "Installing Helm for arch $arch from {{ .Param "edge-lab/helm-download-url" }}"
           HELM_DOWNLOAD="{{ .Param "edge-lab/helm-download-url" -}}/helm-$HELM_VERSION-linux-$arch.tar.gz"

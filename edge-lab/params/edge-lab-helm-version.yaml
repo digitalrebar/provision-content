@@ -6,7 +6,7 @@ Documentation: |
   Note: Changes should be coordinate with KRIB Kubernetes version
 Schema:
   type: "string"
-  default: "latest"
+  default: "v3.1.0"
 Meta:
   color: "blue"
   icon: "hashtag"
