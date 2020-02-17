@@ -11,6 +11,8 @@ Documentation: |
 
   Expects to have `rsa-key-create` run before stage is called and
   the public key MUST be on the target machine.
+
+  Idempotent - checks to see if service is installed and will not re-run join-up.
 RequiredParams:
   - rsa/key-private
   - rsa/key-user
@@ -45,11 +47,20 @@ Templates:
 
         tasks:
 
+          - name: check if drpcli is running (makes join idempotent)
+            service_facts:
+
+          - name: "drpcli is installed - no further actions"
+            debug:
+              msg: "DRPCLI status is {{`{{ services['drpcli.service'].status }}`}}"
+            when: "'drpcli.service' in services"
+
           - name: create uuid file
             become: true
             copy:
               content: "{{.Machine.Uuid}}"
               dest: /etc/rs-uuid
+            when: "'drpcli.service' not in services"
 
           - name: download join-up script
             become: true
@@ -57,10 +68,12 @@ Templates:
               url: "{{.ProvisionerURL}}/machines/join-up.sh"
               dest: "./join-up.sh"
               mode: 0755
+            when: "'drpcli.service' not in services"
 
           - name: run join-up script
             become: true
             shell: "nohup ./join-up.sh >/dev/null 2>&1 &"
+            when: "'drpcli.service' not in services"
       EOF
 
       drpcli machines meta set $RS_UUID key icon to "level up alternate"
