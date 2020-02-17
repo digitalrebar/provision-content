@@ -16,7 +16,7 @@ Templates:
     set -e
 
     echo "Get ign.json file for post install"
-    /usr/bin/curl "{{.ProvisionerURL}}/machines/{{.Machine.Uuid}}/select-ign.json" -o /tmp/ign.json
+    /usr/bin/curl "{{ .ParamExpand "coreos/ignition-url" }}" -o /tmp/ign.json
 
     echo "Install coreos to disk"
     /usr/bin/coreos-install \
