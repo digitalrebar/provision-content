@@ -98,7 +98,7 @@ data:
         Match         *
         Host          {{ .Param "krib/log-target-gelf" }}
         Port          12201
-        Mode          udp
+        Mode          tcp
         Gelf_Short_Message_Key log
 
   parsers.conf: |
