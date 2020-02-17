@@ -28,16 +28,6 @@ Templates:
       drpcli machines meta set $RS_UUID key color to yellow
 
       {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
-      {{ if .ParamExists "helm/charts" -}}
-        {{ $helmcharts := .Param "helm/charts" -}}
-      {{ else -}}
-        {{ if .ParamExists "krib/helm-charts" -}}
-        {{ $helmcharts := .Param "krib/helm-charts" -}}
-        {{ end -}}
-        {{ if .ParamExists "edge-lab/helm-charts" -}}
-        {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
-        {{ end -}}
-      {{ end -}}
 
       if which helm ; then
         echo "found $(which helm) binary version $(helm version)"
