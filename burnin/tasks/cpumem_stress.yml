@@ -25,7 +25,9 @@ Templates:
     DURATION="{{.Param "burnin-cpumem-duration"}}m"
     echo 3 >/proc/sys/vm/drop_caches
     MEM="$(free -m |awk '/Mem/ {print $7}')"
-    MEM=$(( (MEM / NUMPROCS) - 128 ))
+    MEM=$(( (MEM / NUMPROCS) - ${{.Param "burnin-cpumum-memory-reserve"}} ))
+
+    echo "Running stress on $NUMPROCS processors for $DURATION with ${MEM}m locked on each CPU"
 
     stress-ng --cpu 0 --cpu-method=all \
           --vm 0 --vm-method=all --vm-locked --vm-keep --vm-bytes="${MEM}m" \
