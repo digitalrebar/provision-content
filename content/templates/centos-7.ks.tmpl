@@ -1,8 +1,9 @@
 # DigitalRebar Provision Centos-7 (and related distros) kickstart
 
-{{range .InstallRepos}}
-{{ .Install }}
-{{end}}
+url --url {{.ProvisionerURL}}/centos-8/install
+repo --name="BaseOS" --baseurl={{.ProvisionerURL}}/centos-8/install/BaseOS
+repo --name="AppStream" --baseurl={{.ProvisionerURL}}/centos-8/install/AppStream
+
 # key --skip
 # Disable geolocation for language and timezone
 # Currently broken by https://bugzilla.redhat.com/show_bug.cgi?id=1111717

@@ -1,8 +1,8 @@
 ---
-Name: "centos-8-install"
-Description: "CentOS-8 installer that points to the latest CentOS 8 release."
+Name: "centos-8.1.1911-install"
+Description: "CentOS-8.1.1911 installer that points to the latest CentOS 8.1.1911 release."
 Documentation: |
-  This BootEnv installs the CentOS 8 Minimal operating system.  Both x86_64
+  This BootEnv installs the CentOS 8.1.1911 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
 Meta:
   feature-flags: "change-stage-v2"
@@ -11,7 +11,7 @@ Meta:
   title: "Digital Rebar Community Content"
 OS:
   Family: "redhat"
-  Name: "centos-8"
+  Name: "centos-8.1.1911"
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-8.1.1911-x86_64-dvd1.iso"
@@ -22,7 +22,8 @@ OS:
         - "images/pxeboot/initrd.img"
       BootParams: >-
         ksdevice=bootif
-        inst.ks={{.Machine.Url}}/compute.ks
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
         inst.geoloc=0
         {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
@@ -37,7 +38,8 @@ OS:
         - "images/pxeboot/initrd.img"
       BootParams: >-
         ksdevice=bootif
-        inst.ks={{.Machine.Url}}/compute.ks
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
         inst.geoloc=0
         {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --

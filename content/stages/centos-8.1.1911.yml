@@ -1,7 +1,7 @@
 ---
-Name: "centos-8-install"
-Description: "CentOS 8 install stages.  References the latest CentOS 8 release"
-BootEnv: "centos-8-install"
+Name: "centos-8.1.1911-install"
+Description: "CentOS 8.1.1911 install stage."
+BootEnv: "centos-8.1.1911-install"
 Tasks:
   - "set-hostname"
   - "ssh-access"

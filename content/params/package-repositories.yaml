@@ -115,10 +115,29 @@ Schema:
       arch: x86_64
       url: https://mirrors.edge.kernel.org/centos/8.0.1905/BaseOS/x86_64/os/
       installSource: true
+    - tag: centos-8.1.1911
+      os:
+        - centos-8.1.1911
+      arch: x86_64
+      url: https://mirrors.edge.kernel.org/centos/8.1.1911/BaseOS/x86_64/os/
+      installSource: true
+    - tag: centos-8.0.1905
+      os:
+        - centos-8.0.1905
+      arch: aarch64
+      url: https://mirrors.edge.kernel.org/centos/8.0.1905/BaseOS/aarch64/os/
+      installSource: true
+    - tag: centos-8.1.1911
+      os:
+        - centos-8.1.1911
+      arch: aarch64
+      url: https://mirrors.edge.kernel.org/centos/8.1.1911/BaseOS/aarch64/os/
+      installSource: true
     - tag: centos-8-everything
       os:
         - centos-8
         - centos-8.0.1905
+        - centos-8.1.1911
       arch: x86_64
       url: https://mirrors.edge.kernel.org/centos/8/
       distribution: "8"
@@ -133,6 +152,7 @@ Schema:
       os:
         - centos-8
         - centos-8.0.1905
+        - centos-8.1.1911
       arch: aarch64
       url: http://mirrors.sonic.net/centos/8/
       distribution: "8"
@@ -147,6 +167,7 @@ Schema:
       os:
         - centos-8
         - centos-8.0.1905
+        - centos-8.1.1911
       arch: any
       url: http://mirrors.kernel.org/fedora-epel/8/Everything/$basearch
       distribution: "8"

@@ -14,9 +14,9 @@ OS:
   Name: "centos-8.0.1905"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-8-x86_64-1905-boot.iso"
-      IsoUrl: "http://sjc.edge.kernel.org/centos/8.0.1905/isos/x86_64/CentOS-8-x86_64-1905-boot.iso"
-      Sha256: "a7993a0d4b7fef2433e0d4f53530b63c715d3aadbe91f152ee5c3621139a2cbc"
+      IsoFile: "CentOS-8-x86_64-1905-dvd1.iso"
+      IsoUrl: "http://sjc.edge.kernel.org/centos/8.0.1905/isos/x86_64/CentOS-8-x86_64-1905-dvd1.iso"
+      Sha256: "ea17ef71e0df3f6bf1d4bf1fc25bec1a76d1f211c115d39618fe688be34503e8"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -30,9 +30,9 @@ OS:
         {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: "CentOS-8-aarch64-1905-boot.iso"
-      IsoUrl: "http://mirrors.sonic.net/centos/8.0.1905/isos/aarch64/CentOS-8-aarch64-1905-boot.iso"
-      Sha256: "18a211a826bd3dd4d034ddc529303bc2b5dc6e1b63ea311644d7698e7b67fb3e"
+      IsoFile: "CentOS-8-aarch64-1905-dvd1.iso"
+      IsoUrl: "http://mirrors.sonic.net/centos/8.0.1905/isos/aarch64/CentOS-8-aarch64-1905-dvd1.iso"
+      Sha256: "c950cf7599a2317e081506a3e0684f665ef9c8fe66963bf7492595d7c6ccc230"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
