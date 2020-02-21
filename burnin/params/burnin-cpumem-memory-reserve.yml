@@ -1,0 +1,13 @@
+---
+Name: "burnin-cpumem-memory-reserve"
+Description: "Memory (in MB) to reserve for sledgehammer per Proc"
+Documentation: |
+  Sledgehammer is an in-memory OS and needs some memory to operate.
+  This parameter allows for the tweaking of the reserve as needed.
+Schema:
+  type: "number"
+  default: 256
+Meta:
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
