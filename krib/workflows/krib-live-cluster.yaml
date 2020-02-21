@@ -13,5 +13,4 @@ Stages:
   - "kubernetes-install"
   - "etcd-config"
   - "krib-config"
-  - "krib-helm"
   - "krib-live-wait"
