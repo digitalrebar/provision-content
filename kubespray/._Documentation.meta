@@ -1,0 +1,20 @@
+Overview
+--------
+
+The Kubespray Content Pack is an example of how to create Params and Profiles in a way that will allow an operator to use drmachines.py as a dynamic inventory for use with the Kubespray playbooks.
+
+
+Usage
+=====
+
+Apply the etcd Profile to all machines you want to have the etcd role applied to. Next apply the kube-master profile to all
+the machines you want that role applied to. Next apply the kube-node to all machines you want that role applied to. Finally
+apply the k8s-deploy profile to all the machines you want in this deployment.
+
+Next using the drmachines.py as the dynamic inventory for ansible we can do the following:
+
+  ::
+
+    ansible-playbook k8s-deploy -i drmachines.py cluster.yml
+
+To set vars for the various roles create a param and apply it to either the machine for hostvars or to the profile for groupvars. A common example is `ansible_python_interpreter`.

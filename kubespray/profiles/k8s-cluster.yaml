@@ -1,9 +1,6 @@
 Name: "k8s-cluster"
 Description: "Auto: nodes supporting in the Kubernetes Cluster"
-Params:
-  ansible-children:
-    - "kube-node"
-    - "kube-master"
+
 Meta:
   icon: "ship"
   color: "blue"
