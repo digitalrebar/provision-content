@@ -617,8 +617,11 @@ Templates:
       echo "Making module/firmware archive"
       find lib |sort |cpio -o -R 0:0 --format=newc |xz -T0 -c >initrd/lib.cpio.xz
       rm -rf lib
-      echo "Staging kernel and busybox for stage1 initramfs"
+      echo "Staging bootloader, kernel and busybox for stage1 initramfs"
       cp /boot/$KERNEL /IMAGE/vmlinuz0
+      cp /boot/efi/EFI/centos/grubx64.efi /IMAGE/grubx64.efi
+      cp /boot/efi/EFI/centos/shimx64.efi /IMAGE/shimx64.efi
+      rpm -e grub2-efi-x64 shim-x64
       cd /IMAGE/initrd
       mkdir -p dev proc sys bin lib etc usr/share/udhcpc tmp newinitramfs
       curl -fgL -o bin/busybox http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/busybox-1.29.3.${ARCH}
@@ -667,9 +670,9 @@ Templates:
       # Tar it all up
       tarname=sledgehammer-$signature.{{.Machine.Arch}}.tar
       echo "Creating Sledgehammer $signature archive"
-      sha1sum vmlinuz0 stage1.img root.squashfs >sha1sums
+      sha1sum vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi >sha1sums
       mkdir $signature
-      mv sha1sums vmlinuz0 stage1.img root.squashfs $signature
+      mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
       tar cf $tarname $signature
       # Push back to dr-provision
       unset RS_TOKEN
