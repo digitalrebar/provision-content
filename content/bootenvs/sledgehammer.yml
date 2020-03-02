@@ -16,16 +16,18 @@ Meta:
   icon: "microchip"
   color: "green"
   title: "Digital Rebar Community Content"
+Loaders:
+  amd64-uefi: e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
-      Kernel: "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/vmlinuz0"
+      IsoFile: "sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
+      Kernel: "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/vmlinuz0"
       Initrds:
-        - "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/stage1.img"
+        - "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso

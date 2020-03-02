@@ -675,7 +675,6 @@ Templates:
       mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
       tar cf $tarname $signature
       # Push back to dr-provision
-      unset RS_TOKEN
       echo "Uploading Sledgehammer to dr-provision"
       drpcli isos upload $tarname as $tarname
       echo "$tarname uploaded to isos"

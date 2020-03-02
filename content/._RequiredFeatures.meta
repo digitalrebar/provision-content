@@ -1,1 +1,1 @@
-sane-exit-codes, job-exit-states, fsm-runner, workflows, default-workflow, http-range-header, roles, tenants, sprig, multiarch
+sane-exit-codes, job-exit-states, fsm-runner, workflows, default-workflow, http-range-header, roles, tenants, sprig, multiarch, overridable-bootloaders
