@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# creates a client in the Chef server using the previously configured admin credentials, and execute a chef-client run,
+# which will register a new node.
+#
+# The admin credentials are removed after the client creation
 
 set -xv
 
