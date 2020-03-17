@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+cd /etc/chef
+
+# this isn't the most pretty installation method, should revisit this
+curl -L https://omnitruck.chef.io/install.sh | bash || error_exit 'could not install chef'
+
+exit 0

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+CONF_DIR=/etc/chef
+# Do some chef pre-work
+/bin/mkdir -p $CONF_DIR
+/bin/mkdir -p /var/lib/chef
+/bin/mkdir -p /var/log/chef
+
+USER={{.Param "chef-bootstrap/user"}}
+NODE_NAME={{if .ParamExists "chef-bootstrap/node_name"}}{{.Param "chef-bootstrap/node_name"}}{{else}}$(hostname -f){{end}}
+
+# Create user key
+cat > $CONF_DIR/$USER.pem << EOF
+{{.Param "chef-bootstrap/user_key"}}
+EOF
+
+# Populate $CONF_DIR/client.rb
+cat > $CONF_DIR/client.rb << EOF
+log_location STDOUT
+chef_server_url "https://{{.Param "chef-bootstrap/chef_server"}}/organizations/{{.Param "chef-bootstrap/organization"}}/"
+node_name "$NODE_NAME"
+chef_license "accept"
+{{ if .ParamExists "chef-bootstrap/policy_name" -}}
+policy_name "{{.Param "chef-bootstrap/policy_name"}}"
+{{ end -}}
+{{ if .ParamExists "chef-bootstrap/policy_group" -}}
+policy_group "{{.Param "chef-bootstrap/policy_group"}}"
+{{ end -}}
+EOF
+
+{{ if .ParamExists "chef-bootstrap/encrypted_data_bag_secret" }}
+cat > $CONF_DIR/encrypted_data_bag_secret << EOF
+{{.Param "chef-bootstrap/encrypted_data_bag_secret" }}
+EOF
+
+{{ end }}
+# Populate the first boot file.
+# The "chef-bootstrap/first_boot" parameter takes precedence over "chef-bootstrap/policy_group"
+#  and "chef-bootstrap/policy_name"
+cat > "$CONF_DIR/first-boot.json" << EOF
+{{ if .ParamExists "chef-bootstrap/first_boot" }}
+{{.Param "chef-bootstrap/first_boot"}}
+{{ else if and .ParamExists "chef-bootstrap/policy_name" .ParamExists "chef-bootstrap/policy_group" }}
+{
+   "policy_group": "{{.Param "chef-bootstrap/policy_group"}}",
+   "policy_name": "{{.Param "chef-bootstrap/policy_name"}}"
+}
+{{ end }}
+EOF
+
+exit 0

@@ -1,0 +1,8 @@
+Description: A named run_list defined in a policy this node will belong to
+Meta:
+  color: blue
+  icon: book
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/named_runlist
+Schema:
+  type: string

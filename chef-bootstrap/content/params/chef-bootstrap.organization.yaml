@@ -1,0 +1,8 @@
+Description: The Chef organization this node belongs to
+Meta:
+  color: blue
+  icon: tag
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/organization
+Schema:
+  type: string

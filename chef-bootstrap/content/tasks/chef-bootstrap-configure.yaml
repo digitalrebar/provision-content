@@ -1,0 +1,24 @@
+---
+Name: chef-bootstrap-configure
+Description: A task to prepare for chef-client installation
+RequiredParams:
+  - "chef-bootstrap/organization"
+  - "chef-bootstrap/user"
+  - "chef-bootstrap/user_key"
+OptionalParams:
+  - "chef-bootstrap/node_name"
+  - "chef-bootstrap/environment"
+  - "chef-bootstrap/chef_server"
+  - "chef-bootstrap/policy_name"
+  - "chef-bootstrap/policy_group"
+  - "chef-bootstrap/first_boot"
+  - "chef-bootstrap/named_runlist"
+  - "chef-bootstrap.encrypted_data_bag_secret"
+Templates:
+- ID: chef-bootstrap-configure.sh.tmpl
+  Name: "Preflight Chef check"
+  Path: ""
+Meta:
+  color: orange
+  icon: server
+  title: Digital Rebar Community Content

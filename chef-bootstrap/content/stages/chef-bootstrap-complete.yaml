@@ -1,0 +1,7 @@
+---
+Name: chef-bootstrap-complete
+Description: "Stage that represents bootstrap completion of a machine to a Chef server"
+Meta:
+  icon: "check circle outline"
+  color: "green"
+  title: "Digital Rebar Community Content"

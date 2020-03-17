@@ -1,0 +1,8 @@
+Description: The Chef identifier for the registering node/client
+Meta:
+  color: blue
+  icon: tag
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/node_name
+Schema:
+  type: string

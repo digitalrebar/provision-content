@@ -1,0 +1,9 @@
+Description: If True we delete client and node if they already exist on the Chef Server
+Meta:
+  color: orange
+  icon: repeat
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/recreate_client
+Schema:
+  type: boolean
+  default: false

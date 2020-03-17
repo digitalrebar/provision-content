@@ -1,0 +1,8 @@
+Description: The user to authenticate as when bootstrapping the Chef node
+Meta:
+  color: blue
+  icon: user
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/user
+Schema:
+  type: string

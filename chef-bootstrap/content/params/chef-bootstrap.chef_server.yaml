@@ -1,0 +1,9 @@
+Description: The address or hostname corresponding to the Chef Server
+Meta:
+  color: blue
+  icon: tag
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/chef_server
+Schema:
+  type: string
+  default: chef-server

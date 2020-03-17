@@ -1,0 +1,9 @@
+Description: The Environment to add the node to, incompatible with PolicyFiles
+Meta:
+  color: blue
+  icon: server
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/environment
+Schema:
+  type: string
+  default: _default

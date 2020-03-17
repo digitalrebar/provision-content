@@ -1,0 +1,8 @@
+Description: The Policy Name to be applied to the node
+Meta:
+  color: blue
+  icon: book
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/policy_name
+Schema:
+  type: string

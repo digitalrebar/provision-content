@@ -1,0 +1,8 @@
+---
+Name: chef-bootstrap-start
+Description: "Stage that represents beginning of bootstrapping a machine to a Chef server"
+RunnerWait: true
+Meta:
+  color: purple
+  icon: spinner
+  title: Digital Rebar Community Content

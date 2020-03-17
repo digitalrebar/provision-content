@@ -1,0 +1,13 @@
+---
+Name: chef-bootstrap
+Description: "Stage to bootstrap a machine to a Chef server"
+Reboot: false
+RunnerWait: true
+Tasks:
+  - chef-bootstrap-configure
+  - chef-bootstrap-install
+  - chef-bootstrap-join
+Meta:
+  color: yellow
+  icon: dashboard
+  title: Digital Rebar Community Content

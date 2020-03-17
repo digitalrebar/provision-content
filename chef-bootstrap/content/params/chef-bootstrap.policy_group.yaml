@@ -1,0 +1,8 @@
+Description: The Policy Group this node belongs to
+Meta:
+  color: blue
+  icon: book
+  title: Digital Rebar Community Content
+Name: chef-bootstrap/policy_group
+Schema:
+  type: string
