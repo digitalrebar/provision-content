@@ -1,18 +1,17 @@
 ---
-Name: chef-bootstrap-example
-Description: Example profile for bootstrapping a node to Chef
+Name: "chef-bootstrap-example"
+Description: "Example profile for bootstrapping a node to Chef"
 Documentation: |
   Configures the machine to be processed by the chef-bootstrap workflow and tasks.
   Clone this profile and change/add values according to your environment.
-
 Params:
-  chef-bootstrap/chef_server: chef-server
-  chef-bootstrap/organization: my-org
-  chef-bootstrap/user: myuser
+  chef-bootstrap/chef_server: "chef-server"
+  chef-bootstrap/organization: "my-org"
+  chef-bootstrap/user: "myuser"
   chef-bootstrap/first_boot: '{"run_list":["role[base]"]}'
-  chef-bootstrap/environment: production
+  chef-bootstrap/environment: "production"
   chef-bootstrap/recreate_client: true
 Meta:
-  color: orange
-  icon: key
-  title: Digital Rebar Community Content
+  color: "orange"
+  icon: "key"
+  title: "Digital Rebar Community Content"

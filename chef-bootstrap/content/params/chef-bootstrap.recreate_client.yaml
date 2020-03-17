@@ -1,12 +1,12 @@
-Description: If True we delete client and node if they already exist on the Chef Server
+---
+Name: "chef-bootstrap/recreate_client"
+Description: "Recreate client and node objects if they already exist on the Chef Server"
 Documentation: |
-  - If True we delete client and node if they already exist on the Chef Server
-
-Meta:
-  color: orange
-  icon: repeat
-  title: Digital Rebar Community Content
-Name: chef-bootstrap/recreate_client
+  If ``true`` we delete client and node if they already exist on the Chef Server, before creating them.
 Schema:
-  type: boolean
+  type: "boolean"
   default: false
+Meta:
+  color: "orange"
+  icon: "repeat"
+  title: "Digital Rebar Community Content"

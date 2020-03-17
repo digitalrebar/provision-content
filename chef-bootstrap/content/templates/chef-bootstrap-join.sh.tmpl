@@ -6,48 +6,45 @@
 
 set -xv
 
-NODE_NAME={{ if .ParamExists "chef-bootstrap/node_name" }}{{ .Param "chef-bootstrap/node_name" }}{{ else }}$(hostname -f){{ end }}
-CONF_DIR='/etc/chef'
-KNIFE_CMD='knife'
-CHEF_CMD='chef-client'
-OPTIONS="-c $CONF_DIR/client.rb -u {{.Param "chef-bootstrap/user"}} --key $CONF_DIR/{{.Param "chef-bootstrap/user"}}.pem"
-FIRSTBOOT_JSON=$CONF_DIR/first-boot.json
+NODE_NAME={{ .Param "chef-bootstrap/node_name" }}
+OPTIONS="-c /etc/chef/client.rb -u {{.Param "chef-bootstrap/user"}} --key /etc/chef/{{.Param "chef-bootstrap/user"}}.pem"
+FIRSTBOOT_JSON=/etc/chef/first-boot.json
 
 # Fetch certificates
-$KNIFE_CMD ssl fetch $OPTIONS
+knife ssl fetch $OPTIONS
 
 # See if we already have a node object
-$KNIFE_CMD node show $NODE_NAME $OPTIONS >/dev/null
+knife node show $NODE_NAME $OPTIONS >/dev/null
 {{ if .Param "chef-bootstrap/recreate_client" }}
-[[ $? == 0 ]] && $KNIFE_CMD node delete $NODE_NAME -y $OPTIONS
+[[ $? == 0 ]] && knife node delete $NODE_NAME -y $OPTIONS
 {{ else }}
 [[ $? == 0 ]] && echo "Chef node $NODE_NAME already exists! exiting!" && exit 1
 {{ end }}
 
 # See if we already have a client object
-$KNIFE_CMD client show $NODE_NAME $OPTIONS >/dev/null
+knife client show $NODE_NAME $OPTIONS >/dev/null
 {{ if .Param "chef-bootstrap/recreate_client" }}
-[[ $? == 0 ]] && $KNIFE_CMD client delete $NODE_NAME -y $OPTIONS
+[[ $? == 0 ]] && knife client delete $NODE_NAME -y $OPTIONS
 {{ else }}
 [[ $? == 0 ]] && echo "Chef client $NODE_NAME already exists! exiting!" && exit 1
 {{ end }}
 
 # Create the new client object
-$KNIFE_CMD client create $NODE_NAME -d -f $CONF_DIR/client.pem $OPTIONS
+knife client create $NODE_NAME -d -f /etc/chef/client.pem $OPTIONS
 [[ $? != 0 ]] && echo "Error creating Chef client $NODE_NAME! exiting!" && exit 1
 
 # Cleanup the user key before we run chef-client to prevent permission issues during chef run
-rm -f $CONF_DIR/{{.Param "chef-bootstrap/user"}}.pem
+rm -f /etc/chef/{{.Param "chef-bootstrap/user"}}.pem
 
 # Execute the client run
 {{ if .ParamExists "chef-bootstrap/policy_name" }}
   {{ if .ParamExists "chef-bootstrap/named_runlist" }}
-$CHEF_CMD -j $FIRSTBOOT_JSON -n {{.Param "chef-bootstrap/named_runlist"}}
+chef-client -j $FIRSTBOOT_JSON -n {{.Param "chef-bootstrap/named_runlist"}}
   {{ else }}
-$CHEF_CMD -j $FIRSTBOOT_JSON
+chef-client -j $FIRSTBOOT_JSON
   {{ end }}
 {{ else}}
-$CHEF_CMD -j $FIRSTBOOT_JSON -E {{.Param "chef-bootstrap/environment"}}
+chef-client -j $FIRSTBOOT_JSON -E {{.Param "chef-bootstrap/environment"}}
 {{ end }}
 
 exit 0

@@ -1,11 +1,13 @@
 ---
-Name: "chef-bootstrap/chef_server"
+Name: "chef-bootstrap/chef_install_source"
 Description: "The address or hostname corresponding to the Chef Server"
 Documentation: |
-  The address or hostname corresponding to the Chef Server
+  The URI for a chef bash installer, i.e:
+
+    "https://omnitruck.chef.io/install.sh"
 Schema:
   type: "string"
-  default: "chef-server"
+  default: "https://omnitruck.chef.io/install.sh"
 Meta:
   color: "blue"
   icon: "tag"

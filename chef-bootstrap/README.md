@@ -22,11 +22,5 @@ then upload the bundle
 
 ```shell script
 chef-bootstrap/content$ cd ..
-chef-bootstrap$ drpcli -E https://<DRP ENPOINT URL>:8092 -U <ADMIN USER> -P <ADMIN PASSWORD> contents create chef-bootstrap.yaml 
-```
-
-or update if it already exists
-
-```shell script
-chef-bootstrap$ drpcli -E https://<DRP ENPOINT URL>:8092 -U <ADMIN USER> -P <ADMIN PASSWORD> contents update chef-bootstrap chef-bootstrap.yaml 
+chef-bootstrap$ drpcli -E https://<DRP ENPOINT URL>:8092 -U <ADMIN USER> -P <ADMIN PASSWORD> contents upload chef-bootstrap.yaml 
 ```

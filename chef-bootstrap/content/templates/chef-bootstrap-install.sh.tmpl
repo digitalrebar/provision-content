@@ -3,6 +3,6 @@
 cd /etc/chef
 
 # this isn't the most pretty installation method, should revisit this
-curl -L https://omnitruck.chef.io/install.sh | bash || error_exit 'could not install chef'
+curl -L {{.Param "chef-bootstrap/chef_install_source"}} | bash || error_exit 'could not install chef'
 
 exit 0
