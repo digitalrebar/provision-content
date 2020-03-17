@@ -1,6 +1,10 @@
 ---
 Name: chef-bootstrap-configure
 Description: A task to prepare for chef-client installation
+Documentation: |
+  Takes care of configuring client.rb file, setting up temporary validation/admin credentials and other
+  optional settings, like encrypted data bag secret, or first run user-defined json.
+
 RequiredParams:
   - "chef-bootstrap/organization"
   - "chef-bootstrap/user"

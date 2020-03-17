@@ -1,6 +1,10 @@
 ---
 Name: chef-bootstrap-join
 Description: A task to register a machine as a new Chef node/client
+Documentation: |
+  Takes care of creating a client in the Chef server, and executing a chef-client run, which will register a
+    new node.
+
 RequiredParams:
   - "chef-bootstrap/user"
   - "chef-bootstrap/recreate_client"

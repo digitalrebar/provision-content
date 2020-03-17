@@ -1,4 +1,7 @@
 Description: The address or hostname corresponding to the Chef Server
+Documentation: |
+  - The address or hostname corresponding to the Chef Server
+
 Meta:
   color: blue
   icon: tag

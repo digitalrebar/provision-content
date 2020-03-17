@@ -1,4 +1,7 @@
 Description: The Chef organization this node belongs to
+Documentation: |
+  - The Chef organization this node belongs to
+
 Meta:
   color: blue
   icon: tag

@@ -1,4 +1,7 @@
 Description: The Policy Group this node belongs to
+Documentation: |
+  - The Policy Group this node belongs to
+
 Meta:
   color: blue
   icon: book

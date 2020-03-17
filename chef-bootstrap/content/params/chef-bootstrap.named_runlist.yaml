@@ -1,4 +1,7 @@
 Description: A named run_list defined in a policy this node will belong to
+Documentation: |
+ - A named run_list defined in a policy this node will belong to
+
 Meta:
   color: blue
   icon: book

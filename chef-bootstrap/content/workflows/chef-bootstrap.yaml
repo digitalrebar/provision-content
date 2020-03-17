@@ -2,13 +2,7 @@
 Name: chef-bootstrap
 Description: Simple workflow to bootstrap a machine into Chef.
 Documentation: |
-  Sets the machine meta color and icon.  Clone the "colordemo" profile
-  and change the Param values to change the meta icon information and
-  set it on a Machine; or set the Params directly on the Machine you
-  wish to change the meta icon/color for.
-
-  Note: You may need to hit the "Refresh" button on the Machines page
-        to view the changes.
+  Simple showcase workflow for bootstraping a node into a Chef server's organization
 
 Stages:
   - chef-bootstrap-start

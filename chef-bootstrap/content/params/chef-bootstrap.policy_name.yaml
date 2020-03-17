@@ -1,4 +1,7 @@
 Description: The Policy Name to be applied to the node
+Documentation: |
+  - The Policy Name to be applied to the node
+
 Meta:
   color: blue
   icon: book

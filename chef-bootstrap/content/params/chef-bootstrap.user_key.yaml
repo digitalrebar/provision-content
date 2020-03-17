@@ -1,4 +1,7 @@
 Description: The Chef user private key
+Documentation: |
+  - The Chef user private key
+
 Meta:
   color: blue
   icon: key

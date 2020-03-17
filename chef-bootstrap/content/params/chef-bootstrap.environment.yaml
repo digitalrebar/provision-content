@@ -1,4 +1,7 @@
 Description: The Environment to add the node to, incompatible with PolicyFiles
+Documentation: |
+  - The Environment to add the node to, incompatible with PolicyFiles
+
 Meta:
   color: blue
   icon: server

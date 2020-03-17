@@ -1,4 +1,7 @@
 Description: The Chef identifier for the registering node/client
+Documentation: |
+  - The Chef identifier for the registering node/client
+
 Meta:
   color: blue
   icon: tag
