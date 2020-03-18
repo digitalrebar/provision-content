@@ -1,0 +1,38 @@
+---
+Name: "chef-bootstrap-configure"
+Description: "A task to prepare for chef-client installation"
+Documentation: |
+  Takes care of configuring client.rb file, setting up temporary validation/admin credentials and other
+  optional settings, like encrypted data bag secret, or first run user-defined json.
+RequiredParams:
+  - "chef-bootstrap/organization"
+  - "chef-bootstrap/user"
+  - "chef-bootstrap/user_key"
+OptionalParams:
+  - "chef-bootstrap/node_name"
+  - "chef-bootstrap/environment"
+  - "chef-bootstrap/chef_server"
+  - "chef-bootstrap/policy_name"
+  - "chef-bootstrap/policy_group"
+  - "chef-bootstrap/first_boot"
+  - "chef-bootstrap/named_runlist"
+  - "chef-bootstrap.encrypted_data_bag_secret"
+Templates:
+- ID: "chef-bootstrap-configure.sh.tmpl"
+  Name: "Minor preparations"
+- ID: "chef-bootstrap.etc.user.pem.tmpl"
+  Name: "Chef admin user key"
+  Path: '/etc/chef/{{.Param "chef-bootstrap/user"}}.pem'
+- ID: "chef-bootstrap.etc.client.rb.tmpl"
+  Name: "Chef client configuration"
+  Path: "/etc/chef/client.rb"
+- ID: "chef-bootstrap.etc.encrypted.data.bag.secret.tmpl"
+  Name: "Chef Encrypted Data Bag secret"
+  Path: "/etc/chef/encrypted_data_bag_secret"
+- ID: "chef-bootstrap.etc.first-boot.json.tmpl"
+  Name: "First boot attributes and run_list"
+  Path: "/etc/chef/first-boot.json"
+Meta:
+  color: "orange"
+  icon: "server"
+  title: "Digital Rebar Community Content"

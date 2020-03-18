@@ -1,0 +1,22 @@
+---
+Name: "chef-bootstrap-join"
+Description: "A task to register a machine as a new Chef node/client"
+Documentation: |
+  Takes care of creating a client in the Chef server, and executing a chef-client run, which will register a
+    new node.
+RequiredParams:
+  - "chef-bootstrap/user"
+  - "chef-bootstrap/node_name"
+  - "chef-bootstrap/recreate_client"
+OptionalParams:
+  - "chef-bootstrap/environment"
+  - "chef-bootstrap/policy_name"
+  - "chef-bootstrap/policy_group"
+  - "chef-bootstrap/named_runlist"
+Templates:
+- ID: "chef-bootstrap-join.sh.tmpl"
+  Name: "Chef join"
+Meta:
+  color: "orange"
+  icon: "server"
+  title: "Digital Rebar Community Content"

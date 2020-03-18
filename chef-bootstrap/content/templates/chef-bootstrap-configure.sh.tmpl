@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Setup required files for the first chef-client run
+
+# Make sure directories exist
+/bin/mkdir -p /etc/chef
+/bin/mkdir -p /var/lib/chef
+/bin/mkdir -p /var/log/chef
+
+# Make sure we have a node name
+{{if not (.ParamExists "chef-bootstrap/node_name")}}
+  drpcli machines set {{.Machine.UUID}} param "chef-bootstrap/node_name" to "$(hostname -f )"
+{{end}}
+
+exit 0

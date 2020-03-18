@@ -1,0 +1,15 @@
+---
+Name: "chef-bootstrap"
+Description: "Stage to bootstrap a machine to a Chef server"
+Documentation: |
+  The actual Chef Server bootstrap stage
+Reboot: false
+RunnerWait: true
+Tasks:
+  - "chef-bootstrap-configure"
+  - "chef-bootstrap-install"
+  - "chef-bootstrap-join"
+Meta:
+  color: "yellow"
+  icon: "dashboard"
+  title: "Digital Rebar Community Content"
