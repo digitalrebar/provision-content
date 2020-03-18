@@ -7,6 +7,7 @@ Reboot: false
 RunnerWait: true
 Tasks:
   - "chef-bootstrap-configure"
+  - "chef-bootstrap-setup"
   - "chef-bootstrap-install"
   - "chef-bootstrap-join"
 Meta:
