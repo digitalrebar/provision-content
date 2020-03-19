@@ -123,6 +123,8 @@ Templates:
       man-db
       mdadm
       {{if (eq .Machine.Arch "amd64")}}
+      grub2-efi-x64
+      shim-x64
       microcode_ctl
       {{end}}
       mktemp
