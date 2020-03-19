@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
+
+# An error exit function
+error_exit() {
+  echo "$1" 1>&2
+  exit 1
+}
+
 # Installs chef-client software
 cd /etc/chef
 
-# this isn't the most pretty installation method, should revisit this
-curl -L {{.Param "chef-bootstrap/chef_install_source"}} | bash || error_exit 'could not install chef'
+# should we support more parameters?
+curl -L {{.Param "chef-bootstrap/chef_install_source"}} | bash -s -- -c {{.Param "chef-bootstrap/chef_channel"}} -v {{.Param "chef-bootstrap/chef_version"}}|| error_exit 'could not install chef'
 
 exit 0

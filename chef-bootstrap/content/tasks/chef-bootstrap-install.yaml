@@ -5,6 +5,8 @@ Documentation: |
   Takes care of installing the chef-client software.
 RequiredParams:
   - "chef-bootstrap/chef_install_source"
+  - "chef-bootstrap/chef_channel"
+  - "chef-bootstrap/chef_version"
 Templates:
 - ID: "chef-bootstrap-install.sh.tmpl"
   Name: "Chef install"
