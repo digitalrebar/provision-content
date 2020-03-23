@@ -1,0 +1,16 @@
+---
+Name: "chef-bootstrap-install"
+Description: "A task to install chef client and tools"
+Documentation: |
+  Takes care of installing the chef-client software.
+RequiredParams:
+  - "chef-bootstrap/chef_install_source"
+  - "chef-bootstrap/chef_channel"
+  - "chef-bootstrap/chef_version"
+Templates:
+- ID: "chef-bootstrap-install.sh.tmpl"
+  Name: "Chef install"
+Meta:
+  color: "orange"
+  icon: "server"
+  title: "Digital Rebar Community Content"

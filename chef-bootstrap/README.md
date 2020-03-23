@@ -1,0 +1,26 @@
+# chef-bootstrap
+
+## Quickstart
+
+Clone the `chef-bootstrap-example` profile, edit the profile parameters to your case, and add the cloned profile to the 
+machine you want to bootstrap.
+
+Add the `chef-bootstrap` workflow to bootstrap your machine to your chef server and organization.
+
+The node name defaults to the machine's fqdn (`hostname -f` result)
+
+## Inject into DRP endpoint
+
+First create the bundle:
+
+```shell script
+chef-bootstrap$ cd content
+chef-bootstrap/content$ drpcli contents bundle ../chef-bootstrap.yaml
+```
+
+then upload the bundle 
+
+```shell script
+chef-bootstrap/content$ cd ..
+chef-bootstrap$ drpcli -E https://<DRP ENPOINT URL>:8092 -U <ADMIN USER> -P <ADMIN PASSWORD> contents upload chef-bootstrap.yaml 
+```

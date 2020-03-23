@@ -8,6 +8,10 @@ Meta:
   icon: pin
   title: Image Builder suite
   origin: rackn/image-builder
+ExtraClaims:
+  - scope: "files"
+    action: "*"
+    specific: "*"
 Templates:
   - Contents: ''
     ID: "image-capture.sh.tmpl"

@@ -1,0 +1,13 @@
+---
+Name: "chef-bootstrap/chef_channel"
+Description: "Specify Chef infra channel"
+Documentation: |
+  The source channel from where to get Chef Software, defaults to the stable channel
+
+Schema:
+  type: "string"
+  default: "stable"
+Meta:
+  color: "blue"
+  icon: "tag"
+  title: "Digital Rebar Community Content"

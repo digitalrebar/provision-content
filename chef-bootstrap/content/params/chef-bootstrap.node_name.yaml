@@ -1,0 +1,11 @@
+---
+Name: "chef-bootstrap/node_name"
+Description: "The Chef identifier for the registering node/client"
+Documentation: |
+  The Chef identifier for the registering node/client
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "tag"
+  title: "Digital Rebar Community Content"

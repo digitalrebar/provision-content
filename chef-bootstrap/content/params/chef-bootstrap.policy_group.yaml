@@ -1,0 +1,11 @@
+---
+Name: "chef-bootstrap/policy_group"
+Description: "The Policy Group this node belongs to"
+Documentation: |
+  The Policy Group this node belongs to
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Digital Rebar Community Content"

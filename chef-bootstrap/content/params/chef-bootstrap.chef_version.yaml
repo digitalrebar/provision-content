@@ -1,0 +1,13 @@
+---
+Name: "chef-bootstrap/chef_version"
+Description: "Specify Chef infra version"
+Documentation: |
+  The version of the Chef Software to install, defaults to the latest available
+
+Schema:
+  type: "string"
+  default: "latest"
+Meta:
+  color: "blue"
+  icon: "tag"
+  title: "Digital Rebar Community Content"

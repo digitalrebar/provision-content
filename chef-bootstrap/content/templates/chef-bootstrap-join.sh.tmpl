@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# creates a client in the Chef server using the previously configured admin credentials, and execute a chef-client run,
+# which will register a new node.
+#
+# The admin credentials are removed after the client creation
+
+set -xv
+
+NODE_NAME={{ .Param "chef-bootstrap/node_name" }}
+OPTIONS="-c /etc/chef/client.rb -u {{.Param "chef-bootstrap/user"}} --key /etc/chef/{{.Param "chef-bootstrap/user"}}.pem"
+FIRSTBOOT_JSON=/etc/chef/first-boot.json
+
+# Fetch certificates
+knife ssl fetch $OPTIONS
+
+# See if we already have a node object
+knife node show $NODE_NAME $OPTIONS >/dev/null
+{{ if .Param "chef-bootstrap/recreate_client" }}
+[[ $? == 0 ]] && knife node delete $NODE_NAME -y $OPTIONS
+{{ else }}
+[[ $? == 0 ]] && echo "Chef node $NODE_NAME already exists! exiting!" && exit 1
+{{ end }}
+
+# See if we already have a client object
+knife client show $NODE_NAME $OPTIONS >/dev/null
+{{ if .Param "chef-bootstrap/recreate_client" }}
+[[ $? == 0 ]] && knife client delete $NODE_NAME -y $OPTIONS
+{{ else }}
+[[ $? == 0 ]] && echo "Chef client $NODE_NAME already exists! exiting!" && exit 1
+{{ end }}
+
+# Create the new client object
+knife client create $NODE_NAME -d -f /etc/chef/client.pem $OPTIONS
+[[ $? != 0 ]] && echo "Error creating Chef client $NODE_NAME! exiting!" && exit 1
+
+# Cleanup the user key before we run chef-client to prevent permission issues during chef run
+rm -f /etc/chef/{{.Param "chef-bootstrap/user"}}.pem
+
+# Execute the client run
+{{ if .ParamExists "chef-bootstrap/policy_name" }}
+  {{ if .ParamExists "chef-bootstrap/named_runlist" }}
+chef-client -j $FIRSTBOOT_JSON -n {{.Param "chef-bootstrap/named_runlist"}}
+  {{ else }}
+chef-client -j $FIRSTBOOT_JSON
+  {{ end }}
+{{ else}}
+chef-client -j $FIRSTBOOT_JSON -E {{.Param "chef-bootstrap/environment"}}
+{{ end }}
+
+exit 0

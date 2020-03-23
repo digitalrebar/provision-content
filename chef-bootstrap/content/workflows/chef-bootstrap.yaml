@@ -1,0 +1,16 @@
+---
+Name: "chef-bootstrap"
+Description: "Simple workflow to bootstrap a machine into Chef"
+Documentation: |
+  Simple showcase workflow for bootstraping a node into a Chef server's organization
+Stages:
+  - "chef-bootstrap-start"
+  - "chef-bootstrap"
+  - "chef-bootstrap-complete"
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "Digital Rebar Community Content"
+
+
+

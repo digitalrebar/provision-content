@@ -1,0 +1,12 @@
+---
+Name: "chef-bootstrap/user_key"
+Description: "The Chef user private key"
+Documentation: |
+  The Chef user private key
+Secure: true
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "key"
+  title: "Digital Rebar Community Content"
