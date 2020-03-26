@@ -198,7 +198,8 @@ kubectl create -f /tmp/krib-default-psps.yaml
     get_param $KRIB_MASTER_CERTS_PARAM | jq -r . | base64 -d - | tar -zxvf -
     cd -
 
-    kubeadm init --config=/tmp/kubeadm.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 > /tmp/kubeadm.init.log
+    kubeadm config migrate --old-config /tmp/kubeadm.cfg --new-config /tmp/kubeadm-new.cfg
+    kubeadm init --config=/tmp/kubeadm-new.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 > /tmp/kubeadm.init.log
 
   fi
 
