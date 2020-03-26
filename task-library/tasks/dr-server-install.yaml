@@ -23,6 +23,12 @@ Documentation: |
 
   Create the `ha-token` using `drpcli users token rocketskates ttl 3y |jq -r '.Token'`
   All ha-* params are required for HA configuration.
+
+  *Developer Feature*
+  This featre enables rapid testing of new dr-server binaries.
+  When the adhoc param 'dr-server/replace-drp' is defined, the task will updated
+  the installed dr-provision binary with one from the download location provided.
+
 ExtraClaims:
   - scope: "files"
     action: "get"
@@ -114,7 +120,7 @@ Templates:
       download -L --remote-name-all "{{ .Param "dr-server/replace-drp" }}" -o $BIN
       chmod +x $BIN
       systemctl start dr-provision
-      echo "updated to $(dr-provision --version)"
+      echo "updated to $($BIN --version)"
       {{ end }}
 
       echo "Done"
