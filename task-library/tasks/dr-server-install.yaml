@@ -24,9 +24,12 @@ Documentation: |
   Create the `ha-token` using `drpcli users token rocketskates ttl 3y |jq -r '.Token'`
   All ha-* params are required for HA configuration.
 ExtraClaims:
-  - scope: "files, contents"
+  - scope: "files"
     action: "get"
     specific: "*"
+  - scope: "contents"
+    action: "get"
+    specific: "rackn-license"
 OptionalParams:
   - "dr-server/ha-id"
   - "dr-server/ha-address"
@@ -84,6 +87,10 @@ Templates:
 
           drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 contents upload rackn-license.json
 
+          {{ if not (.Param "dr-server/ha-passive") }}
+          echo "HA Token: $(drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 users token rocketskates ttl 3y |jq -r '.Token')"
+          {{ end }}
+
           {{ if .ParamExists "dr-server/zip-url" }}
           echo "Cleanup ZIP"
           rm dr-provision.zip
@@ -98,6 +105,17 @@ Templates:
         systemctl daemon-reload
         systemctl restart dr-provision
       fi
+
+      {{ if .ParamExists "dr-server/replace-drp" }}
+      # development only feature, ad hoc param replaces the binary from a known location
+      echo "WARNING: Replacing dr-provision binary from {{ .Param "dr-server/replace-drp" }}"
+      systemctl stop dr-provision
+      BIN=$(which dr-provision)
+      download -L --remote-name-all "{{ .Param "dr-server/replace-drp" }}" -o $BIN
+      chmod +x $BIN
+      systemctl start dr-provision
+      echo "updated to $(dr-provision --version)"
+      {{ end }}
 
       echo "Done"
       exit 0
