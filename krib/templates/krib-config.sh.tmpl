@@ -104,7 +104,6 @@ if [[ $MASTER_INDEX != notme ]] ; then
     cat $T >> /tmp/kubeadm.cfg && rm -f $T
     {{ end -}}
 
-    kubeadm config migrate --old-config /tmp/kubeadm.cfg --new-config /tmp/kubeadm-new.cfg
     kubeadm init --config=/tmp/kubeadm-new.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 | tee -a /tmp/kubeadm.init.log
 
     echo "Building certificate file."
@@ -199,7 +198,6 @@ kubectl create -f /tmp/krib-default-psps.yaml
     get_param $KRIB_MASTER_CERTS_PARAM | jq -r . | base64 -d - | tar -zxvf -
     cd -
 
-    kubeadm config migrate --old-config /tmp/kubeadm.cfg --new-config /tmp/kubeadm-new.cfg
     kubeadm init --config=/tmp/kubeadm-new.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 > /tmp/kubeadm.init.log
 
   fi
