@@ -63,14 +63,14 @@ Templates:
         echo "No HA configuration detected"
       fi
 
+      echo "getting license file"
+      drpcli contents show rackn-license > rackn-license.json
+
       if [[ "$(systemctl is-active dr-provision)" != "active" ]] ; then
 
         if drpcli files exists "bootstrap/install.sh"; then
-          RS_USER="rocketskates"
-          RS_PASS="r0cketsk8ts"
 
           echo "Download Components"
-          drpcli contents show rackn-license > rackn-license.json
           drpcli files download "bootstrap/install.sh" > install.sh
           {{ if .ParamExists "dr-server/zip-url" }}
           echo "Downloading zip from {{ .Param "dr-server/zip-url" }}"
@@ -80,22 +80,12 @@ Templates:
           {{ end }}
           chmod +x install.sh
 
-          unset RS_ENDPOINT
-          unset RS_TOKEN
-          unset RS_LOCAL_PROXY
-
           echo "Run Install.sh with DRP ID {{ $drpid }}" 
           ./install.sh install {{ if .ParamExists "dr-server/zip-url" -}}--zip-file=dr-provision.zip{{ end -}} \
-            --systemd \
             --drp-id={{ $drpid }} \
-            --no-content \
-            --startup
-
-          drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 contents upload rackn-license.json
-
-          {{ if not (.Param "dr-server/ha-passive") }}
-          echo "HA Token: $(drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 users token rocketskates ttl 3y |jq -r '.Token')"
-          {{ end }}
+            --systemd \
+            --no-content
+          systemctl stop dr-provision
 
           {{ if .ParamExists "dr-server/zip-url" }}
           echo "Cleanup ZIP"
@@ -108,19 +98,47 @@ Templates:
         fi
       else
         echo "DRP already installed, restarting in case config was changed"
-        systemctl daemon-reload
-        systemctl restart dr-provision
+        systemctl stop dr-provision
       fi
 
       {{ if .ParamExists "dr-server/replace-drp" }}
       # development only feature, ad hoc param replaces the binary from a known location
       echo "WARNING: Replacing dr-provision binary from {{ .Param "dr-server/replace-drp" }}"
-      systemctl stop dr-provision
       BIN=$(which dr-provision)
+      systemctl stop dr-provision
       download -L --remote-name-all "{{ .Param "dr-server/replace-drp" }}" -o $BIN
       chmod +x $BIN
-      systemctl start dr-provision
+      {{ if .ParamExists "dr-server/ha-address" }}
+      echo "just in case, clear the ha interface"
+      ip addr del {{ .Param "dr-server/ha-address" }} dev {{ .Param "dr-server/ha-interface" }} || true
+      {{ end }}
       echo "updated to $($BIN --version)"
+      {{ end }}
+
+      echo "start dr-provision"
+      systemctl daemon-reload
+      systemctl start dr-provision
+
+      RS_USER="rocketskates"
+      RS_PASS="r0cketsk8ts"
+      unset RS_ENDPOINT
+      unset RS_TOKEN
+      unset RS_LOCAL_PROXY
+
+      {{ if and (not (.Param "dr-server/ha-passive")) (.ParamExists "dr-server/ha-address") }}
+      echo "HA Token: $(drpcli -U $RS_USER -P $RS_PASS -E {{ .Param "dr-server/ha-address" }} users token rocketskates ttl 3y |jq -r '.Token')"
+      {{ end }}
+
+      {{ if or (not (.Param "dr-server/ha-passive")) (not (.ParamExists "dr-server/ha-id")) }}
+      if [[ -f rackn-license.json ]] ; then
+        echo "upload rackn-license"
+        drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 contents upload rackn-license.json
+        rm rackn-license.json
+      fi
+      echo "Test API"
+      drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 info get
+      {{ else }}
+      echo "DRP is passive - API is not active"
       {{ end }}
 
       echo "Done"
