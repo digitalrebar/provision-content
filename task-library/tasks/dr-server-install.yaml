@@ -93,7 +93,7 @@ Templates:
           {{ end }}
 
         else
-          echo "Could not find required installation files in /bootstrap"
+          echo "Could not find required install.sh file in /bootstrap"
           exit 1
         fi
       else
@@ -112,7 +112,7 @@ Templates:
       echo "just in case, clear the ha interface"
       ip addr del {{ .Param "dr-server/ha-address" }} dev {{ .Param "dr-server/ha-interface" }} || true
       {{ end }}
-      echo "updated to $($BIN --version)"
+      echo "$($BIN --version)"
       {{ end }}
 
       echo "start dr-provision"
@@ -126,7 +126,13 @@ Templates:
       unset RS_LOCAL_PROXY
 
       {{ if and (not (.Param "dr-server/ha-passive")) (.ParamExists "dr-server/ha-address") }}
+      {{ if not (.ParamExists "dr-server/ha-token") }}
       echo "HA Token: $(drpcli -U $RS_USER -P $RS_PASS -E {{ .Param "dr-server/ha-address" }} users token rocketskates ttl 3y |jq -r '.Token')"
+      {{ else }}
+      echo "HA Token already exists - no not regenerate"
+      {{ end }}
+      {{ else }}
+      echo "Not generating HA Token.  Machine must be NOT ha-passive and have ha-address"
       {{ end }}
 
       {{ if or (not (.Param "dr-server/ha-passive")) (not (.ParamExists "dr-server/ha-id")) }}
@@ -136,7 +142,7 @@ Templates:
         rm rackn-license.json
       fi
       echo "Test API"
-      drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 info get
+      drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 info status | jq .API
       {{ else }}
       echo "DRP is passive - API is not active"
       {{ end }}
