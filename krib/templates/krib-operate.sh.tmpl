@@ -121,12 +121,17 @@ echo ">>>"
 
 # Use a 6-min timeout so that actions against clusters which refuse to drain
 # certain pods will still succeed
+set +e
 case $OP in
-  drain|delete|cordon|uncordon)
+  drain|cordon|uncordon)
     kubectl $OP_CMD $NODE $OPTIONS \
       && echo ">>> Node '$NODE' successfully operated ('$OP_CMD') on ... " \
       || xiterr 1 "Node '$NODE' FAILED action $OP_CMD"
     ;;
+  # Special case, because some pods may never delete (like daemonsets)
+  delete)
+    timeout 120s kubectl $OP_CMD $NODE $OPTIONS
+    ;;    
   *) xiterr 1 "unknown action '$OP'" ;;
 esac
 
