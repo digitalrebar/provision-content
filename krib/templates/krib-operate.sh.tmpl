@@ -118,9 +118,13 @@ echo ">>>"
 #  uncordon:
 #    adds the node back in to the cluster, does not require additional options
 ###
+
+# Use a 6-min timeout so that actions against clusters which refuse to drain
+# certain pods will still succeed
+set +e
 case $OP in
   drain|delete|cordon|uncordon)
-    timout 360s kubectl $OP_CMD $NODE $OPTIONS \
+    timeout 360s kubectl $OP_CMD $NODE $OPTIONS \
       && echo ">>> Node '$NODE' successfully operated ('$OP_CMD') on ... " \
       || xiterr 1 "Node '$NODE' FAILED action $OP_CMD"
     ;;
