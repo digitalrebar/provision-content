@@ -33,7 +33,7 @@ OP_CMD="$OP"
 MSG=">>> Operation '$OP' is starting ..."
 case $OP in
   drain)      echo "$MSG"
-              OPTIONS="--ignore-daemonsets --delete-local-data"
+              OPTIONS="--ignore-daemonsets --delete-local-data --force"
     ;;
   delete)     echo "$MSG"
               OP_CMD="delete node"
@@ -121,10 +121,9 @@ echo ">>>"
 
 # Use a 6-min timeout so that actions against clusters which refuse to drain
 # certain pods will still succeed
-set +e
 case $OP in
   drain|delete|cordon|uncordon)
-    timeout 360s kubectl $OP_CMD $NODE $OPTIONS \
+    kubectl $OP_CMD $NODE $OPTIONS \
       && echo ">>> Node '$NODE' successfully operated ('$OP_CMD') on ... " \
       || xiterr 1 "Node '$NODE' FAILED action $OP_CMD"
     ;;
