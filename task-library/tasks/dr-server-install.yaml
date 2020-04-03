@@ -42,6 +42,7 @@ OptionalParams:
   - "dr-server/ha-token"
   - "dr-server/ha-passive"
   - "dr-server/zip-url"
+  - "dr-server/replace-drp"
 Templates:
   - ID: "dr-server-ha.conf.tmpl"
     Name: "dr-server-ha.conf."
