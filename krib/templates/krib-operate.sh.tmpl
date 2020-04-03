@@ -120,7 +120,7 @@ echo ">>>"
 ###
 case $OP in
   drain|delete|cordon|uncordon)
-    kubectl $OP_CMD $NODE $OPTIONS \
+    timout 360s kubectl $OP_CMD $NODE $OPTIONS \
       && echo ">>> Node '$NODE' successfully operated ('$OP_CMD') on ... " \
       || xiterr 1 "Node '$NODE' FAILED action $OP_CMD"
     ;;
