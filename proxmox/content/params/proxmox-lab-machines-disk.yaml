@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-machines-disk
+Description: The disk configuration for type machines virtual machines.
+Documentation: |
+  This param is used to define the value of the configuration for
+  type machines virtual machines.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: 100
+  type: number
+Secure: false
+

@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-machines-boot-order
+Description: The boot-order configuration for type machines virtual machines.
+Documentation: |
+  This param is used to define the value of the configuration for
+  type machines virtual machines.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: ncd
+  type: string
+Secure: false
+

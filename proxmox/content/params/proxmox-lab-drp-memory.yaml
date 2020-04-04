@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-drp-memory
+Description: The memory configuration for type drp virtual machines.
+Documentation: |
+  This param is used to define the value of the configuration for
+  type drp virtual machines.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: 4096
+  type: number
+Secure: false
+

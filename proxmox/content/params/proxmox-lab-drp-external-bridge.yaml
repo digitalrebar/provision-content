@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-drp-external-bridge
+Description: The external-bridge configuration for type drp virtual machines.
+Documentation: |
+  This param is used to define the value of the configuration for
+  type drp virtual machines.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: virbr0
+  type: string
+Secure: false
+

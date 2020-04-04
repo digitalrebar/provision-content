@@ -1,0 +1,23 @@
+---
+Name: proxmox/lab-base-tag
+Description: The base tag assigned to resources (eg bridge devices, etc.).
+Documentation: |
+  The base tag that is assigned to various resources used in the content pack
+  when configuring the student lab.  For example, network bridge devices.
+
+  This is also used when tearing things down.
+
+  .. note:: Do not add a trailing dash, one will be inserted between the prefix
+            and the numerical designator for the resource.
+
+  The default value is ``student``, which will produce bridge devices like ``br-student-1``.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: student
+  type: string
+Secure: false
+
