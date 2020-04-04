@@ -1,0 +1,17 @@
+---
+Name: proxmox/iso
+Description: The url of the Proxmox ISO that will be modified as a DRP Bootenv.
+Documentation: |
+  The URL that the ISO of the Proxmox install can be found at.  This ISO will be
+  modified to include the ISO as ``/proxmox.iso`` to enable network install of
+  Proxmox.  By default the ISO is not capable of installing via HTTP network path.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: http://get.rebar.digital/images/proxmox/proxmox-ve_6.1-1.iso
+  type: string
+Secure: false
+

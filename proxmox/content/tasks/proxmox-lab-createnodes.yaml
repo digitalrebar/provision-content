@@ -1,0 +1,82 @@
+---
+Name: proxmox-lab-createnodes
+Description: Set up the lab virtual machine nodes.
+Documentation: |
+  Set up the proxmox based lab virtual machines.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+RequiredParams:
+  - "proxmox/lab-student-count"
+  - "proxmox/lab-student-vms"
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Proxmox Lab setup virtual machines
+
+      set -e
+      PVENODE=$(hostname)
+      BASE="br-student-"
+      ISO_URL="http://isoredirect.centos.org/centos/8/isos/x86_64/CentOS-8.1.1911-x86_64-dvd1.iso"
+      ISO="$(basename $ISO_URL)"
+      SCOUNT={{ .Param "proxmox/lab-student-count" }}
+      TCOUNT={{ .Param "proxmox/lab-student-vms" }}
+
+      # Download CentOS-8 ISO if it's not already downloaded in the home directory
+      if [[ -f $HOME/$ISO ]]
+      then
+        echo "Cached ISO file exists, skipping download ('$ISO')."
+      else
+        wget -p $HOME $ISO_URL
+      fi
+
+      # Upload the CentOS-8 ISO to the proxmox ISO storage local repo unless it's already there
+      if $(pvesh get /nodes/${PVENODE}/storage/local/content --output-format json | jq -r '.[] | .volid' | grep "$ISO" > /dev/null)
+      then
+        echo "ISO found, skipping create ('$ISO').."
+      else
+        pvesh create /nodes/${PVENODE}/storage/local/upload --filename $ISO --content iso --tmpfilename $HOME/$ISO
+      fi
+
+      destroy_if_exists() {
+        local _vmid=$1
+        if pvesh get /nodes/${PVENODE}/qemu/${_vmid}/status/current
+        then
+          echo "Virtual Machine with ID '$_vmid' exists and being destroyed now..."
+          pvesh create /nodes/${PVENODE}/qemu/${_vmid}/status/stop
+          pvesh delete /nodes/${PVENODE}/qemu/${_vmid}
+        else
+          echo "Virtual Machine with ID '$_vmid' is safe to create..."
+        fi
+      }
+
+      for SNUM in $(seq $SCOUNT)
+      do
+        VMID=${SNUM}00
+        # Create student management node
+        destroy_if_exists $VMID
+        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot ncd --cores 4 --memory 4096 --net0 virtio,bridge=vmbr0,firewall=0 --net1 virtio,bridge=${BASE}${SNUM},firewall=0 --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:100 --ide2 local:iso/CentOS-8.1.1911-x86_64-dvd1.iso,media=cdrom
+
+        echo "Starting virtual machine '$VMID'..."
+        pvesh create /nodes/${PVENODE}/qemu/${VMID}/status/start
+
+        for TNUM in $(seq $TCOUNT)
+        do
+          # Create student target nodes
+          FNUM=$(printf "%02d" $TNUM)
+          VMID=${SNUM}${FNUM}
+          BRIDGE=${BASE}${SNUM}
+          destroy_if_exists $VMID
+          pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot ncd --cores 4 --memory 4096 --net0 virtio,bridge=${BRIDGE},firewall=0 --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:100
+        done
+      done
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-createnodes"
+    Path: ""

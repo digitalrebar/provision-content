@@ -1,0 +1,9 @@
+---
+Name: "proxmox-lab-destroy-all-vms"
+Description: "DESTROY ALL virtual machines on a proxmox host."
+Tasks:
+  - "proxmox-lab-destroy-all-vms"
+Meta:
+  icon: "download"
+  color: "red"
+  title: "Digital Rebar Community Content"

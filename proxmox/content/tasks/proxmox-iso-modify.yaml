@@ -1,0 +1,68 @@
+---
+Name: proxmox-iso-modify
+Description: Repackage the Proxmox ISO so it is PXE installable.
+Documentation: |
+  The Proxmox ISO is not installable via PXE by default.  However, with a
+  relatively simple modification, it can be PXE deployed.  This task rebuilds
+  the ISO as a Tar GZ (.tgz) which stages the unmodified ISO image as
+  /proxmox.iso in the ``boot/`` directory, along with the Kernel and InitRD
+  pieces for PXE bootstrap.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+RequiredParams: []
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Modify the Proxmox ISO to be network installable.
+
+      set -e
+
+      {{template "setup.tmpl" .}}
+
+      ISO={{ .Param "proxmox/iso" }}
+      NAME=$(basename $ISO | sed 's/\.iso$//g')
+
+      TMPDIR=$(mktemp /tmp/proxmox.tmp.XXXXXXXX)
+      BOOTDIR=$TMPDIR/boot
+      INITDIR=$TMPDIR/initrd.tmp
+      mkdir $BOOTDIR
+      mkdir $INITDIR
+      cd $BOOTDIR
+
+      echo ">>>  get and stage our ISO to our initrd internal"
+      wget $ISO -O $INITDIR/proxmox.iso
+      echo ">>>  extract the 'boot/' directory out of the ISO"
+      bsdtar -s "/boot/./" -xvf ./proxmox.iso boot/
+
+      echo ">>>  decompress the initrd"
+      gzip -d -S ".img" ./initrd.img
+
+      echo ">>>  explode out the initrd contents"
+      cd $INITDIR
+      cpio -i -d < $BOOTDIR/initrd
+
+      sed -i '/^.*cp \/etc\/hostid /a \ \ \ \ foobar' init
+      [[ -f /tmp/proxmox-render-agent.sh ]] && chmod +x /tmp/proxmox-render-agent.sh
+      /tmp/proxmox-render-agent.sh
+
+      echo ">>>  rebuild the initrd with the ISO embedded in it"
+      find . | cpio -H newc -o > $BOOTDIR/initrd
+      cd $BOOTDIR
+      echo ">>>  Compress the initrd"
+      gzip -9 -S ".img" initrd
+
+      echo ">>>  Make TGZ of the new PXE installable bootenv"
+      bsdtar -czvf $TMPDIR/$NAME.tgz .
+
+      exit 0
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-iso-modify"
+    Path: ""

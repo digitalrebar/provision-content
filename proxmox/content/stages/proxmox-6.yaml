@@ -1,0 +1,10 @@
+---
+Name: "proxmox-6-install"
+Description: "Proxmox 6 install stages."
+BootEnv: "proxmox-6-install"
+Tasks:
+  - "ssh-access"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

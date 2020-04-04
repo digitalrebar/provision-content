@@ -1,0 +1,59 @@
+---
+Name: "proxmox-6-rackn-install"
+Description: "Proxmox 6 installer rebuilt by RackN to PXE install."
+Documentation: |
+  This BootEnv installs the Proxmox system.  This is a rebuilt image from
+  the stock ISO to support PXE installation process, as the community released
+  ISO does not support PXE by default.
+
+Meta:
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+OS:
+  Family: "redhat"
+  Name: "proxmox-6-rackn"
+  SupportedArchitectures:
+    x86_64:
+      IsoFile: "proxmox-ve_6.1-1-rackn.tgz"
+      IsoUrl: "https://s3-us-west-2.amazonaws.com/get.rebar.digital/images/proxmox/proxmox-ve_6.1-1-rackn.tgz"
+      Sha256: "ad6d2aa66ef291c9a1182565f3fdcb7cc949bb7209389268ff468fda684f992b"
+      Kernel: "boot/linux26"
+      Initrds:
+        - "boot/initrd.img"
+      BootParams: >-
+        vga=791 video=vesafb:ywrap,mtrr ramdisk_size=16777216 rw quiet splash=silent
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
+RequiredParams:
+OptionalParams:
+  - "kernel-console"
+  - "kernel-options"
+  - "proxy-servers"
+Templates:
+  - Name: "kexec"
+    ID: "kexec.tmpl"
+    Path: "{{.Machine.Path}}/kexec"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+  - ID: "select-kickseed.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"
