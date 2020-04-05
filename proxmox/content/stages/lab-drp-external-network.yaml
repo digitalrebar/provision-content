@@ -1,0 +1,9 @@
+---
+Name: "lab-drp-external-network"
+Description: "Setup up DRP external network."
+Tasks:
+  - "lab-drp-external-network"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

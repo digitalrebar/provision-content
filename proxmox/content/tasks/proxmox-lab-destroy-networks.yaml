@@ -1,0 +1,40 @@
+---
+Name: proxmox-lab-destroy-networks
+Description: NUKES ALL bridge networks
+Documentation: |
+  Completely nukes all found bridge networks in the ``interfaces.d``
+  directory.  Used as a cleanup task before re-running a build.
+
+Meta:
+  color: red
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+RequiredParams: []
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Proxmox destroy all bridge networks
+
+      set -e
+      PVENODE=$(hostname)
+      TAG={{ .Param "proxmox/lab-base-tag" }}
+      BASE="br-${TAG}-"
+
+      cd /etc/network/interfaces.d/
+      for BR in $(ls -1 ${BASE}*)
+      do
+        echo "Taking down bridge interface '$BR'..."
+        ifdown $BR
+      done
+
+      echo "Nuke all configuration files matching /etc/network/interfaces.d/${BASE}\*..."
+      rm -f /etc/network/interfaces.d/${BASE}*
+
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-destroy-networks"
+    Path: ""

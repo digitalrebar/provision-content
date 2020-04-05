@@ -1,5 +1,5 @@
 ---
-Name: proxmox-setup-lab
+Name: proxmox-destroy-lab
 Description: Perform the student lab setup on a proxmox host.
 Documentation: |
   Sets up the bridge networks and creates virtual machine nodes on a proxmox
@@ -10,6 +10,5 @@ Meta:
   icon: download
   title: RackN Content
 Stages:
-  - kvm-enable-nested
-  - proxmox-lab-network
-  - proxmox-lab-createnodes
+  - proxmox-lab-destroy-all-vms
+  - proxmox-lab-destroy-networks

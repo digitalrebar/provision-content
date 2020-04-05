@@ -1,0 +1,47 @@
+---
+Name: kvm-enable-nested
+Description: Enabled KVM nested capability for hypervisor installs in VMs.
+Documentation: |
+  Determines if the machine is running Intel or AMD processors and sets
+  up the nested virtualization capability for hypervisors to work inside
+  virtual machines.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # KVM enable nested hypervisors mode.
+
+      set -e
+
+      VID=$(lscpu | grep "Vendor ID:" | awk ' { print $NF } ' | tr "[:upper:]" "[:lower:]")
+      echo "Detected processor type '$VID'..."
+      case $VID in
+        *intel*) VID="intel" ;;
+        *amd*)   VID="amd"   ;;
+        *)
+          echo "FATAL: Unsupported processor Vendor ID '$VID'."
+          exit 1
+          ;;
+      esac
+
+      echo "Injecting modules configuration for KVM nested mode..."
+      F="/etc/modprobe.d/kvm-nested.conf"
+      $(egrep "^options.*ignore_msrs=1" $F) || echo "options kvm ignore_msrs=1" >> $F
+      $(egrep "^options.*nested=y" $F) || echo "options kvm-$VID nested=y ept=y" >> $F
+
+      echo "Attempting to reload modules ... this WILL FAIL if there are running VMs..."
+      modprobe -r kvm_$VID kvm
+      modprobe kvm kvm_$VID
+
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "kvm-enable-nested"
+    Path: ""

@@ -33,19 +33,23 @@ Templates:
       D_MEMORY={{ .Param "proxmox/lab-drp-memory" }}
       D_BRIDGE={{ .Param "proxmox/lab-drp-external-bridge" }}
       D_DISK={{ .Param "proxmox/lab-drp-disk" }}
+      D_XTRA={{ .Param "proxmox/lab-pvesh-extra-config-drp" }}
       # machines
       M_BOOT={{ .Param "proxmox/lab-machines-boot-order" }}
       M_CORES={{ .Param "proxmox/lab-machines-cores" }}
       M_MEMORY={{ .Param "proxmox/lab-machines-memory" }}
       M_DISK={{ .Param "proxmox/lab-machines-disk" }}
+      M_XTRA={{ .Param "proxmox/lab-pvesh-extra-config-machines" }}
 
+      ############# skip for now
       # Download CentOS-8 ISO if it's not already downloaded in the home directory
-      if [[ -f $HOME/$ISO ]]
-      then
-        echo "Cached ISO file exists, skipping download ('$ISO')."
-      else
-        wget -p $HOME $ISO_URL
-      fi
+      #if [[ -f /root/$ISO ]]
+      #then
+      #  echo "Cached ISO file exists, skipping download ('$ISO')..."
+      #else
+      #  echo "Cached ISO file DOES NOT exist, getting it now ('$ISO')..."
+      #  wget -p $ISO_URL -O /root/$ISO
+      #fi
 
       # Upload the CentOS-8 ISO to the proxmox ISO storage local repo unless it's already there
       if $(pvesh get /nodes/${PVENODE}/storage/local/content --output-format json | jq -r '.[] | .volid' | grep "$ISO" > /dev/null)
@@ -73,7 +77,7 @@ Templates:
         BRIDGE=${BASE}${SNUM}
         # Create student management node
         destroy_if_exists $VMID
-        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $D_BOOT --cores $D_CORES --memory $D_MEMORY --net0 virtio,bridge=${D_BRIDGE},firewall=0 --net1 virtio,bridge=${BRIDGE} --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:$D_DISK --ide2 local:iso/${ISO},media=cdrom
+        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $D_BOOT --cores $D_CORES --memory $D_MEMORY --net0 virtio,bridge=${D_BRIDGE},firewall=0 --net1 virtio,bridge=${BRIDGE} --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:$D_DISK --ide2 local:iso/${ISO},media=cdrom $D_XTRA
 
         echo "Starting virtual machine '$VMID'..."
         pvesh create /nodes/${PVENODE}/qemu/${VMID}/status/start
@@ -85,7 +89,7 @@ Templates:
           VMID=${SNUM}${FNUM}
           BRIDGE=${BASE}${SNUM}
           destroy_if_exists $VMID
-          pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $M_BOOT --cores $M_CORES --memory $M_MEMORY --net0 virtio,bridge=${BRIDGE},firewall=0 --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:$M_DISK
+          pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $M_BOOT --cores $M_CORES --memory $M_MEMORY --net0 virtio,bridge=${BRIDGE},firewall=0 --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:$M_DISK $M_XTRA
         done
       done
     ID: ""

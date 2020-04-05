@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-pvesh-extra-config-machines
+Description: Add extra VM build-time configuration injected in to the pvesh command.
+Documentation: |
+  Allows an operator to inject extra configuration directives in to the pvesh
+  command that builds the target virtual machines.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: ""
+  type: string
+Secure: false
+
