@@ -34,7 +34,18 @@ Templates:
 
       for VMID in $(pvesh get /nodes/${PVENODE}/qemu --output-format json | jq -r '.[] | .vmid')
       do
-        destroy_if_exists $VMID
+        LOG=$(mktemp /tmp/destroy-vmid-$VMID-XXXXXXXXX.log)
+        echo "Destroy VMID $VMID at $(date)" > $LOG
+        LOGS="$LOGS $LOG"
+        destroy_if_exists $VMID > $LOG 2>&1 &
+      done
+
+      echo "Destroy logs:"
+      for LOG in $LOGS
+      do
+        echo "---------------------------------------------------------------------------"
+        cat $LOG
+        echo "---------------------------------------------------------------------------"
       done
     ID: ""
     Link: ""

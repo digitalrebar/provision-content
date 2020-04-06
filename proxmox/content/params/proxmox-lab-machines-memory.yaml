@@ -10,7 +10,7 @@ Meta:
   icon: database
   title: Digital Rebar Community Content
 Schema:
-  default: 4096
+  default: 8192
   type: number
 Secure: false
 

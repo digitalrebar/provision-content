@@ -32,13 +32,14 @@ Templates:
       esac
 
       echo "Injecting modules configuration for KVM nested mode..."
-      F="/etc/modprobe.d/kvm-nested.conf"
-      $(egrep "^options.*ignore_msrs=1" $F) || echo "options kvm ignore_msrs=1" >> $F
-      $(egrep "^options.*nested=y" $F) || echo "options kvm-$VID nested=y ept=y" >> $F
+      F="/etc/modprobe.d/kvm-$VID.conf"
+      grep -q "^options kvm ignore_msrs=1" $F > /dev/null 2>&1 || echo "options kvm ignore_msrs=1" >> $F
+      grep -q "^options.*nested=y" $F > /dev/null 2>&1 || echo "options kvm-$VID nested=y ept=y" >> $F
 
       echo "Attempting to reload modules ... this WILL FAIL if there are running VMs..."
       modprobe -r kvm_$VID kvm
-      modprobe kvm kvm_$VID
+      modprobe kvm
+      modprobe kvm_$VID
 
     ID: ""
     Link: ""

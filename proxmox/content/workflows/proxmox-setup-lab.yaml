@@ -12,4 +12,5 @@ Meta:
 Stages:
   - kvm-enable-nested
   - proxmox-lab-network
+  - proxmox-lab-accounts
   - proxmox-lab-createnodes

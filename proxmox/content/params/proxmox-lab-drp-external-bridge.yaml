@@ -10,7 +10,7 @@ Meta:
   icon: database
   title: Digital Rebar Community Content
 Schema:
-  default: virbr0
+  default: vmbr0
   type: string
 Secure: false
 
