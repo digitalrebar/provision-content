@@ -190,6 +190,12 @@ Templates:
   - ID: "default-grub.tmpl"
     Name: "grub-mac"
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+  - ID: "default-grub.tmpl"
+    Name: "grub-secure"
+    Path: "sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.HexAddress}}"
+  - ID: "default-grub.tmpl"
+    Name: "grub-secure-mac"
+    Path: 'sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
   - Name: "control.sh"
     Path: "{{.Machine.Path}}/control.sh"
     Contents: |

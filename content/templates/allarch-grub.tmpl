@@ -1,0 +1,30 @@
+set _kernel=linux
+set _module=initrd
+if [ "${grub_platform}" = "efi" -a "${grub_cpu}" != "arm64" ]; then
+    set _kernel=linuxefi
+    set _module=initrdefi
+fi
+function kernel { $_kernel "$@"; }
+function module { $_module "$@"; }
+if [ "${grub_cpu}" = "x86_64" ] ; then
+   kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
+   {{range $initrd := .Env.InitrdsFor "amd64"}}
+   module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
+   {{end}}
+   boot
+elif [ "${grub_cpu}" = "i386" ] ; then
+   kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
+   {{range $initrd := .Env.InitrdsFor "amd64"}}
+   module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
+   {{end}}
+   boot
+elif [ "${grub_cpu}" = "arm64" ] ; then
+   kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
+   {{range $initrd := .Env.InitrdsFor "arm64"}}
+   module (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
+   {{end}}
+   boot
+else
+   echo "No idea how to boot ${grub_cpu} ${grub_platform}"
+   sleep 60
+fi
