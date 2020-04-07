@@ -1,0 +1,9 @@
+---
+Name: "proxmox-lab-destroy-users"
+Description: "DESTROY created users on the system"
+Tasks:
+  - "proxmox-lab-destroy-users"
+Meta:
+  icon: "download"
+  color: "red"
+  title: "Digital Rebar Community Content"

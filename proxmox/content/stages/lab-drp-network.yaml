@@ -1,0 +1,17 @@
+---
+Name: "lab-drp-network"
+Description: "Setup up DRP external network."
+Documentation: |
+  Sets up the DRP for external IP Forwarding and masquerading (nat),
+  and the internal network for the virtual machines to connect to.
+
+  The initial setup is done using cloud-init per-once directive, as
+  the DRP Endpoint is built using the image-deploy service with the
+  embedded cloud-init.
+
+Tasks:
+  - "lab-drp-network"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-drp-sshkey-public
+Description: The public ssh key half for authorized_keys.
+Documentation: |
+  This param is used to define the ssh public key half that should be
+  installed in the DRP systems for student access.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE1Qhv3lpOAGYIWGux3yXcMo4ZuTv8WtGQu62WNHYWlY lab-student-key@drp-sps.com"
+  type: string
+Secure: false
+

@@ -1,0 +1,31 @@
+---
+Name: proxmox-lab-destroy-users
+Description: NUKES ALL users setup
+Documentation: |
+  Nukes the installed users.
+
+Meta:
+  color: red
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+RequiredParams: []
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Proxmox destroy users
+
+      set -e
+      PVENODE=$(hostname)
+
+      pveum acl delete /vms -user operator@pve -role PVEVMUser
+      pveum group delete operators
+      pveum user delete operator@pve
+
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-destroy-networks"
+    Path: ""

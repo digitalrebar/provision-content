@@ -1,0 +1,41 @@
+---
+Name: proxmox-lab-accounts
+Description: Set up the lab accounts on proxmox
+Documentation: |
+  Adds the ``operator`` account and group ``operators``, with
+  PVEVMUser role and rights to the ``/vms`` resources.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Proxmox Lab setup virtual machines
+
+      set -e
+      PVENODE=$(hostname)
+
+      echo "Setting up 'operator' user in group 'operators' with PVEVMUser privileges."
+      set -x
+
+      # nuke our users if they exist
+      pveum acl delete /vms -user operator@pve -role PVEVMUser || true
+      pveum group delete operators || true
+      pveum user delete operator@pve || true
+
+      pveum user add operator@pve -comment "Operator with PVEVMUser privileges"
+      pvesh set /access/password --userid operator@pve --password RocketSkates
+      pveum groupadd operators -c "Operator Group"
+      pveum aclmod /vms -group operators --roles PVEVMUser
+      set +x
+
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-accounts"
+    Path: ""
