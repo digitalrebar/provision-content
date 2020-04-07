@@ -4,6 +4,8 @@ Description: "Admin config file"
 Documentation: |
   Param is set (output) by the cluster building process
 
+  To use the file, save to `$HOME/.kube` or pass `--kubeconfig=[kube.config]` to the kubectl or other tools.
+
   If your cluster is using the default `cluster01` then tou can retrieve the `admin.conf` file using:
   `drpcli profiles get cluster01 param  k3s/admin-conf --decode > admin.conf`
 
@@ -15,3 +17,4 @@ Meta:
   color: "blue"
   icon: "file code"
   title: "Community Content Copyright RackN 2019"
+  downloadable: "kube.config"
