@@ -3,6 +3,7 @@ Name: "network-lldp"
 Description: "Run LLDP network discovery"
 Tasks:
   - "network-lldp"
+  - "gohai"
 Meta:
   icon: "exchange"
   color: "yellow"
