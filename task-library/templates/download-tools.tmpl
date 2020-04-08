@@ -32,5 +32,50 @@ with_backoff() {
 }
 
 download() {
+  {{ if .ParamExists "proxy-servers" -}}
+  PROXY="{{ index (.Param "proxy-servers") 0 }}"
+
+  if [[ -n "$PROXY" && "$PROXY" != "nil" ]]
+  then
+    if [ -z ${http_proxy+x} ]; then
+      local old_http_proxy="$http_proxy"
+    fi
+    if [ -z ${https_proxy+x} ]; then
+      local old_https_proxy="$https_proxy"
+    fi
+    export http_proxy="$PROXY"
+    export https_proxy="$PROXY"
+    local we_set_proxy=1
+  fi
+  {{ end -}}
+
+{{ if .ParamExists "no-proxy" -}}
+  if [ -z ${no_proxy+x} ]; then
+    local old_no_proxy="$no_proxy"
+  fi
+  export no_proxy="{{ .Param "no-proxy" | join "," }}"
+  local we_set_no_proxy=1
+{{ end }}
+
   with_backoff curl --connect-timeout 10 --max-time 360 --retry 1 --retry-delay 1 --retry-max-time 40 -sS "$@"
+
+  if [ -z ${we_set_proxy+x} ]; then
+    unset http_proxy
+    unset https_proxy
+
+    if [ -z ${old_http_proxy+x} ]; then
+      export http_proxy="$old_http_proxy"
+    fi
+    if [ -z ${old_https_proxy+x} ]; then
+      export https_proxy="$old_https_proxy"
+    fi
+  fi
+
+  if [ -z ${we_set_no_proxy+x} ]; then
+    unset no_proxy
+
+    if [ -z ${old_no_proxy+x} ]; then
+      export no_proxy="$old_no_proxy"
+    fi
+  fi
 }
