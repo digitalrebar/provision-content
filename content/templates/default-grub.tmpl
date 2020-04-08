@@ -1,4 +1,13 @@
+set _kernel=linux
+set _module=initrd
+if [ "${grub_platform}" = "efi" -a "${grub_cpu}" != "arm64" ]; then
+    set _kernel=linuxefi
+    set _module=initrdefi
+fi
+function kernel { $_kernel "$@"; }
+function module { $_module "$@"; }
 kernel (tftp)/{{.Env.PathFor "tftp" .Env.Kernel}} {{.Env.BootParams}} BOOTIF=01-${net_default_mac}
 {{range $initrd := .Env.Initrds}}
 module (tftp)/{{$.Env.PathFor "tftp" $initrd}}
 {{end}}
+boot
