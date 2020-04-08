@@ -39,7 +39,17 @@ chmod 600 $KEYS
 {{end}}
 
 echo "Updating SSHD default values"
+# This is Ubuntu-ish - so keep it - though it doesn't really work properly without the below as well.
 sed --in-place -r -e '/^#?PermitRootLogin/ s/^#//' -e '/^#?PermitRootLogin/ s/prohibit-password/{{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
+# Now always set it.
+sed --in-place -r -e '/PermitRootLogin/ s/PermitRootLogin .*/PermitRootLogin {{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
+
+{{if .ParamExists "access-ssh-root-mode" }}
+{{ if eq (.Param "access-ssh-root-mode") "yes" }}
+sed --in-place -r -e '/^#?PasswordAuthentication/ s/^#//' /etc/ssh/sshd_config
+sed --in-place -r -e '/PasswordAuthentication/ s/PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+{{ end }}
+{{ end }}
 
 # Restart sshd but os badness.
 . /etc/os-release
