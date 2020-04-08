@@ -72,6 +72,9 @@ Templates:
           exit 1
         fi
       done
+
+      yum -y install lldpd
+
     ID: ""
     Link: ""
     Meta: {}

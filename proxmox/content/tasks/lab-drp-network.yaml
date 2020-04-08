@@ -58,6 +58,8 @@ Templates:
 
       [[ -n "$PKGS" ]] && yum -y install $PKGS
 
+      rpm -q lldpd && { systemctl enable lldpd; systemctl start lldpd; } || echo "LLDPD not installed, not enabling"
+
     ID: ""
     Link: ""
     Meta: {}
