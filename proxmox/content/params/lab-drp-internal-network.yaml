@@ -1,0 +1,15 @@
+---
+Name: lab-drp-internal-network
+Description: Sets the internal interface for virtual machines (default eth1)
+Documentation: |
+  The virtual machine internal interface that machines will be connected to.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: eth1
+  type: string
+Secure: false
+

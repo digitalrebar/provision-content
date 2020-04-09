@@ -1,0 +1,82 @@
+---
+Name: proxmox-lab-network
+Description: Set up the lab network.
+Documentation: |
+  Set up the proxmox based lab network enviornment.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+RequiredParams:
+  - "proxmox/lab-student-count"
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Proxmox Lab Networking setup
+
+      set -e
+
+      TAG={{ .Param "proxmox/lab-base-tag" }}
+      BASE="br-${TAG}-"
+
+      if [[ ! -d /etc/network ]]
+      then
+        echo "FATAL: '/etc/network' directory does not exist"
+        exit 1
+      fi
+
+      if ! grep -q "^source /etc/network/interfaces.d" /etc/network/interfaces
+      then
+        mkdir -p /etc/network/interfaces.d
+        echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+      fi
+
+      COUNT={{ .Param "proxmox/lab-student-count" }}
+
+      echo "Destroying any potential pre-existing '${BASE}*' bridge interfaces..."
+      rm -f /etc/network/interfaces.d/${BASE}*
+
+      for NUM in $(seq $COUNT)
+      do
+        BR_FILE="/etc/network/interfaces.d/${BASE}${NUM}"
+        BRIDGE=${BASE}${NUM}
+        cat <<EOF > ${BR_FILE}
+      # setup isolated bridge ${NUM}
+      auto ${BRIDGE}
+        iface ${BRIDGE} inet manual
+        pre-up brctl addbr ${BRIDGE}
+        post-up ip link set ${BRIDGE} up
+        pre-down ip link set ${BRIDGE} down
+        post-down brctl delbr ${BRIDGE}
+
+      EOF
+
+        if [[ -f ${BR_FILE} ]]
+        then
+          echo "----------------------------------------------------------------------------------"
+          echo "Bridge interface config for '${BR_FILE}':"
+          cat ${BR_FILE}
+          echo "----------------------------------------------------------------------------------"
+          echo "Attempting to start up bridge '$BRIDGE'..."
+          ifup ${BRIDGE}
+          echo "----------------------------------------------------------------------------------"
+          echo "Running bridge configuration for '$BRIDGE'..."
+          ip a sh ${BRIDGE}
+          echo "----------------------------------------------------------------------------------"
+        else
+          echo ">>> FATAL: bridge file doesn't exist, create failed (for '$BR_FILE')"
+          exit 1
+        fi
+      done
+
+      yum -y install lldpd
+
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-network"
+    Path: ""

@@ -1,0 +1,22 @@
+---
+Name: proxmox/lab-drp-sshkey-private
+Description: The private SSH key for the lab DRP systems.
+Documentation: |
+  This param is used to define lab DRP systems private key.
+
+Meta:
+  color: red
+  icon: agent
+  title: Digital Rebar Community Content
+Schema:
+  default: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+    QyNTUxOQAAACBNUIb95aTgBmCFhrsd8l3DKOGbk7/FrRkLutljR2FpWAAAAKCYQKV4mECl
+    eAAAAAtzc2gtZWQyNTUxOQAAACBNUIb95aTgBmCFhrsd8l3DKOGbk7/FrRkLutljR2FpWA
+    AAAEATFG20OXzqXe1UTXPcPhDj9trTS7KJxXH0BpIjWob5BU1Qhv3lpOAGYIWGux3yXcMo
+    4ZuTv8WtGQu62WNHYWlYAAAAG2xhYi1zdHVkZW50LWtleUBkcnAtc3BzLmNvbQEC
+    -----END OPENSSH PRIVATE KEY-----
+  type: string
+Secure: false
+

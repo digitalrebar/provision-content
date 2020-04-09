@@ -1,0 +1,21 @@
+Available: true
+Bundle: ""
+Contents: |
+  DEFAULT {{.Env.Name}}
+  PROMPT 0
+  TIMEOUT 10
+  LABEL {{.Env.Name}}
+    KERNEL {{.Env.PathFor "tftp" .Env.Kernel}}
+    {{if .Env.Initrds}}
+    INITRD {{.Env.JoinInitrds "tftp"}}
+    {{end}}
+    APPEND {{.BootParams}}
+    IPAPPEND 2
+Description: ""
+Endpoint: ""
+Errors: []
+ID: default-pxelinux.tmpl
+Meta: {}
+ReadOnly: true
+Validated: true
+
