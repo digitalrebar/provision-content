@@ -5,6 +5,7 @@ Documentation: |
   Allows operators to determine the log level used for the containerd runtime (defaults to "info")
 
 Schema:
+  type: string
   enum:
     - trace
     - debug
