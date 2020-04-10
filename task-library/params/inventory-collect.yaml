@@ -38,6 +38,7 @@ Schema:
         DIMMSizes: "[.DMI.Memory.Devices|.?|map(select(.Size != 0)) | map(.Size / 1048576 | floor) | .[]]"
         NICs: ".Networking.Interfaces | map(select(.Sys.BusAddress != \\\"virtual\\\"))|length"
         NICInfo: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.Vendor+\\\" \\\"+.Model+\\\" \\\"+.Sys.BusAddress)"
+        NICSpeed: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map((.Speed|tostring)+\\\" \\\"+(.Duplex|tostring))"
         CPUs: ".System.ProcessorCount"
         CPUType: ".System.Processors[0].Model"
         CPUSpeed: ".System.Processors[0].Speed"
@@ -54,6 +55,7 @@ Schema:
         RaidTotalDisks: "[0]+ map(.Disks|length)|add"
         RaidDisks: "map(.Disks | length)"
         RaidDiskSizes: "map(.Disks | map(.Size))"
+        RaidDiskStatuses: "map(.Disks | map(.Status))"
 Meta:
   color: "green"
   icon: "handshake outline"
