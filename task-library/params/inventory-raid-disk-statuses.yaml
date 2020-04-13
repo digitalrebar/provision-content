@@ -1,6 +1,6 @@
 ---
-Name: "inventory/RaidDiskSizes"
-Description: "Flat Inventory for RaidDiskSizes an array of an array of sizes"
+Name: "inventory/RaidDiskStatuses"
+Description: "Flat Inventory for RaidDiskStatuses an array of an array of statuses of disks"
 Documentation: |
   From inventory/data, used for indexable data
 Schema:
@@ -8,7 +8,7 @@ Schema:
   items:
     type: "array"
     items:
-      type: "integer"
+      type: "string"
 Meta:
   color: "black"
   icon: "expand"
