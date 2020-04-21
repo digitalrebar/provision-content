@@ -3,10 +3,12 @@ Description: "Create Shared Profile & Elect Leader"
 Name: "cluster-setup"
 Documentation: |
   Creates the Cluster for Digital Rebar
-  1. will verify machine is in a shared profile
-  2. will create shared profile if missing
-  3. will add profile to machine if missing
-  4. will make machine leader if no leader is present
+
+    1. will verify machine is in a shared profile
+    2. will create shared profile if missing
+    3. will add profile to machine if missing
+    4. will make machine leader if no leader is present
+
 ExtraClaims:
   - scope: "profiles"
     action: "create,get,update"

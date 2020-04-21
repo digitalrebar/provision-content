@@ -4,10 +4,11 @@ Description: "A task to lock the machine at end of a bootstrap stage"
 Documentation: |
   Useful as the final task in a bootstrap sequence.
 
-  This task will set Machine.Lock = true to prevent accidential
+  This task will set ``Machine.Lock`` to ``true`` to prevent accidential
   operator actions on the DR Server bootstrap machine agent.  This is
   important because the bootstrap machine agent has administrative
   power on the DR Server and can cause issues is accidently run.
+
 Templates:
   - Name: "lock.sh"
     Path: ""

@@ -3,6 +3,7 @@ Name: "reset-workflow"
 Description: "Workflow to set before rebooting with reboot-workflow task."
 Documentation: |
   Workflow to set before rebooting system.
+
 Schema:
   type: "string"
 Meta:

@@ -4,15 +4,16 @@ Description: "Join DRP via Ansible"
 Documentation: |
   Runs an embedded Ansible Playbook to run the DRP join-up process.
 
-  Requires an `ansible` context.
+  Requires an ``ansible`` context.
 
-  Expects to be in a Workflow that allows the joined machine to continue 
+  Expects to be in a Workflow that allows the joined machine to continue
   Discovery and configuration steps as needed.
 
-  Expects to have `rsa-key-create` run before stage is called and
+  Expects to have ``rsa-key-create`` run before stage is called and
   the public key MUST be on the target machine.
 
   Idempotent - checks to see if service is installed and will not re-run join-up.
+
 RequiredParams:
   - rsa/key-private
   - rsa/key-user

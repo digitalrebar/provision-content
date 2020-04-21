@@ -1,10 +1,10 @@
 Description: A task to invoke a specific set of ansible playbooks pulled from git
 Documentation: |
-  Local Git-Based Ansible Playbooks
-  ---------------------------------
   A task to invoke a specific set of ansible playbooks pulled from git.
 
-  Required Param: `ansible/playbooks` - List of playbook git repos to run on the local machine
+  .. note:: Requires Param ``ansible/playbooks`` - List of playbook git repos
+            to run on the local machine.
+
 Meta:
   color: black
   feature-flags: sane-exit-codes

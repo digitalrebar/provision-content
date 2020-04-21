@@ -2,7 +2,8 @@
 Name: "inventory/DIMMs"
 Description: "Flat Inventory for DIMMs"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "integer"
 Meta:

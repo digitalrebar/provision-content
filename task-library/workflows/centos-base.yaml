@@ -5,9 +5,10 @@ Documentation: |
 
   After the install completes, the workflow installs the runner
   in a waiting state so that DRP will automatically detect and start a
-  new workflow if the Machine.Workflow is updated.
+  new workflow if the *Machine.Workflow* is updated.
 
-  NOTE: To enable, upload the CentOS ISO as per the centos-7 BootEnv
+  .. note:: To enable, upload the CentOS ISO as per the centos-7 BootEnv
+
 Stages:
   - centos-7-install
   - runner-service

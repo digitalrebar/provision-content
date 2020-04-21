@@ -3,6 +3,7 @@ Name: "dr-server/ha-id"
 Description: "Shared DRP-ID of the HA cluster"
 Documentation: |
   Should be unique for the Cluster (not overlap with the supporting DRPs)
+
 Schema:
   type: string
 Meta:

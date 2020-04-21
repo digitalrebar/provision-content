@@ -2,7 +2,8 @@
 Name: "inventory/ProductName"
 Description: "Flat Inventory for ProductNamea"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "string"
 Meta:

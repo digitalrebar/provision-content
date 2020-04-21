@@ -6,11 +6,12 @@ Documentation: |
 
   No default is set.
 
-  To preserve formatting, `|` is used instead of `\n`.
+  To preserve formatting, ``|`` is used instead of ``\n``.
 
   When writing the key inside a consuming task, you should use the following reference code:
-  
+
     ::
+
       tee id_rsa >/dev/null << EOF
       {{.Param "rsa/key-private" | replace "|" "\n" }}
       EOF

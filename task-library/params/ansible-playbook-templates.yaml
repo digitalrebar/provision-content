@@ -7,8 +7,9 @@ Documentation: |
   dynamically during a run.
 
   Output from a playbook can be passed to the next one in the list by setting
-  the `ansible/output` value.  This value gets passed as a variable into the
+  the ``ansible/output`` value.  This value gets passed as a variable into the
   next playbook as part of the params on the machine object json.
+
 Schema:
   type: "array"
   items:

@@ -2,7 +2,8 @@
 Name: "inventory/RaidDiskSizes"
 Description: "Flat Inventory for RaidDiskSizes an array of an array of sizes"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "array"
   items:

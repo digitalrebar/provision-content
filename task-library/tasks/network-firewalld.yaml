@@ -1,8 +1,10 @@
 ---
 Description: "A task to open ports in Firewalld"
 Documentation: |
-  Requires that firewall-cmd enabled system
-  Will reset the firewall at the end of the task
+  Requires that ``firewall-cmd`` enabled system.
+
+  Will reset the firewall at the end of the task.
+
 Name: "network-firewalld"
 RequiredParams:
   - network/firewalld-ports

@@ -2,8 +2,10 @@
 Name: "inventory/NICSpeed"
 Description: "Flat Inventory for NIC Speed (speed duplex)"
 Documentation: |
-  From inventory/data, used for indexable data.
+  From ``inventory/data``, used for indexable data.
+
   This reports the speed as a number and the duplex state as true/false.
+
 Schema:
   type: "array"
   items:

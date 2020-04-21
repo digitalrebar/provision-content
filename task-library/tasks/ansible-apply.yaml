@@ -3,17 +3,19 @@ Name: "ansible-apply"
 Description: "A task run Ansible Templates"
 Documentation: |
   Runs one or more Ansible Playbook templates as defined by the
-  `ansible/playbook-templates` variable in the stage calling the task.
+  ``ansible/playbook-templates`` variable in the stage calling the task.
 
-  Requires an `ansible` context.
+  Requires an ``ansible`` context.
 
-  Expects to have `rsa-key-create` run before stage is called
-  so that `rsa/*` params exist.
+  Expects to have ``rsa-key-create`` run before stage is called
+  so that ``rsa/*`` params exist.
 
-  Information can be chained together by having the playbook
-  write `[Machine.Uuid].json` as a file.  This will be saved on the
-  machine as `Param.ansible/output`.  The entire Machine JSON is passed into
-  the playbook as the `digitalrebar` variable so it is available.
+  Information can be chained together by having the playbook write
+  ``[Machine.Uuid].json`` as a file.  This will be saved on the
+  machine as ``Param.ansible/output``.  The entire Machine JSON is
+  passed into the playbook as the ``digitalrebar`` variable so it is
+  available.
+
 RequiredParams:
   - ansible/playbook-templates
   - rsa/key-public
