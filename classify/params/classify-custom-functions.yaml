@@ -9,30 +9,33 @@ Documentation: |
   classifer to provide custom function blocks to extend the tests and/or
   actions you can apply to the classifier.
 
-  .. highlight:: yaml
-  ::
-      # YAML example
-      - "my-classify-function-1.tmpl"
-      - "my-classify-function-2.tmpl"
+  **YAML Example**
 
-  .. highlight:: json
-  ::
-    # JSON example
-    [
-      "my-classify-function-1.tmpl",
-      "my-classify-function-2.tmpl"
-    ]
-  ..
+  .. code-block:: yaml
 
-  WARNING - The executing environment is Sledgehammer with BASH scripts. You
+    - "my-classify-function-1.tmpl"
+    - "my-classify-function-2.tmpl"
+
+  **JSON Example**
+
+  .. code-block:: javascript
+
+    {
+      [
+        "my-classify-function-1.tmpl",
+        "my-classify-function-2.tmpl"
+      ]
+    }
+
+  .. note:: The executing environment is Sledgehammer with BASH scripts. You
             must insure that the Function you inject operates correctly in
             this environment.  For reference, see the Functions in the existing
-            classifier Template "classify.sh.tmpl".
+            classifier Template ``classify.sh.tmpl``.
 
-  Any test functions should 'echo "pass"' or 'echo "fail"' to signal the test
+  Any test functions should ``echo "pass"`` or ``echo "fail"`` to signal the test
   condition status and should subsequently apply the given actions specified.
 
-  An example template named "has_inventory_value.tmpl" has been provided that
+  An example template named ``has_inventory_value.tmpl`` has been provided that
   the operator can use as an example test condition.
 
 Meta:
