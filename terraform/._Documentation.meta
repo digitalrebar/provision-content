@@ -1,9 +1,6 @@
 
 .. _component_terraform:
 
-Terraform Provider for Digital Rebar Provision
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 The following instructions to install the needed Digital Rebar Provision
 integrations to support Terraform.  Terraform integrations require that
 machines can reboot.
@@ -162,7 +159,7 @@ Users can set icons using
 
 
 Creating RAW Machines using Cloud IPMI plugins
-------------------------------------------
+----------------------------------------------
 
 The `drp_machine` resource relies on having a pool of machines already configured; however, you can use the `drp_raw_machine` resource to create machines in Digital Rebar Provision.  If you are using an IPMI plugin that supports creating machines, such as Packet or Virtualbox, and set the `machine-plugin` value then the plugin will create (and destroy) the associated machine in the target platform.  This can be a very powerful way to build and manage clusters.
 
