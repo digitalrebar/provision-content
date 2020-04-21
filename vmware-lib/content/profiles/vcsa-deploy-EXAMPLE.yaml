@@ -4,7 +4,7 @@ Description: "vcsa-deploy VCSA test profile"
 Documentation: |
   Runs ``vcsa-deploy`` to deploy a test VCSA deployment.  Requires that the VCSA
   configuration JSON file be saved to the context container as ``/tmp/template.json``
-   prior to the command being run.  
+  prior to the command being run.
 
   The ``vcsa-deploy-command`` task reads the ``vcsa-deploy/template-json`` Param
   and writes the referenced template to the temporary json location.

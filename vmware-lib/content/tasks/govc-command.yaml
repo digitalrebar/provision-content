@@ -7,7 +7,7 @@ Documentation: |
   task.
 
   The operator must also specify the remote vSphere ESXi or vCenter resource to
-  connect to, to execute `govc` commands against.  This is accomplished either
+  connect to, to execute ``govc`` commands against.  This is accomplished either
   by setting the ``govc/url`` Param, or the individual ``govc/username``,
   ``govc/password``, ``govc/node``, and optionally ``govc/port`` (if using a
   non-standrd Port.  See the documentation for each of those Params for more
