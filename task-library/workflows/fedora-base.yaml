@@ -7,7 +7,8 @@ Documentation: |
   in a waiting state so that DRP will automatically detect and start a
   new workflow if the Machine.Workflow is updated.
 
-  NOTE: To enable, upload the Fedora ISO as per the fedora-31 BootEnv
+  .. note:: To enable, upload the Fedora ISO as per the fedora-31 BootEnv
+
 Stages:
   - fedora-31-install
   - runner-service

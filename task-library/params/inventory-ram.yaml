@@ -2,7 +2,8 @@
 Name: "inventory/RAM"
 Description: "Flat Inventory for RAM"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "integer"
 Meta:

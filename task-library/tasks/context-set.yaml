@@ -10,7 +10,8 @@ Documentation: |
   transition to a runner when it starts.
 
   To code is written to allow both clearing BaseContext (set to "") or setting
-  to a known value.  If setting to a value, code ensures that the Context exits
+  to a known value.  If setting to a value, code ensures that the Context exits.
+
 RunnerWait: true
 RequiredParams:
   - "context/name"

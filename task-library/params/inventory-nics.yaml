@@ -2,7 +2,8 @@
 Name: "inventory/NICs"
 Description: "Flat Inventory for NICs"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "integer"
 Meta:

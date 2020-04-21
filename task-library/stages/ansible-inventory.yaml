@@ -3,6 +3,7 @@ Name: "ansible-inventory"
 Description: "Collect ansible setup module inventory data"
 Documentation: |
   Collects ansible inventory data from ansible's setup module.
+
 Tasks:
   - "ansible-inventory"
 Meta:

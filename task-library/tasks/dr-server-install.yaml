@@ -5,29 +5,35 @@ Documentation: |
   Installs DRP Server using the DRPCLI Runner.  Sets DRP-ID to Machine.Name
 
   The primary use cases for this task are
-  1) Creating a remote site for Multi-Site-Manager
-  2) Building an HA cluster of DR Servers
 
-  TODO: 
-  1) make user/password settable
+    1. Creating a remote site for Multi-Site-Manager
+    2. Building an HA cluster of DR Servers
 
-  Requires install.sh and dr-provision.zip to be in DRP files/bootstrap.
+  TODO:
 
-  Does nothing if DRP already installed
+    1. make user/password settable
 
-  If Manager installed, will register this DRP as an endpoint
+  Requires ``install.sh`` and ``dr-provision.zip`` to be in DRP ``files/bootstrap``.
 
-  *HA Configuration Notes* (enable by setting ha-id)*
+  Does nothing if DRP already installed.
+
+  If Manager installed, will register this DRP as an endpoint.
+
+  *HA Configuration Notes* (enable by setting ``ha-id``).
+
   It is anticipated at all HA machines share a profile since these settings are the
-  same (except ha-passive) for all HA cluster machines.
+  same (except ``ha-passive``) for all HA cluster machines.
 
-  Create the `ha-token` using `drpcli users token rocketskates ttl 3y |jq -r '.Token'`
-  All ha-* params are required for HA configuration.
+  Create the ``ha-token`` using ``drpcli users token rocketskates ttl 3y | jq -r '.Token'``
 
-  *Developer Feature*
+  All ``ha-*`` params are required for HA configuration.
+
+  **Developer Feature**
+
   This featre enables rapid testing of new dr-server binaries.
-  When the adhoc param 'dr-server/replace-drp' is defined, the task will updated
-  the installed dr-provision binary with one from the download location provided.
+
+  When the adhoc param ``dr-server/replace-drp`` is defined, the task will updated
+  the installed *dr-provision* binary with one from the download location provided.
 
 ExtraClaims:
   - scope: "files"

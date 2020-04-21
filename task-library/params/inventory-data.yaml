@@ -2,8 +2,10 @@
 Name: "inventory/data"
 Description: "Selected Machine Data"
 Documentation: |
-  Stores the data collected by the fieds set in inventory/collect
-  If inventory/integrity true, then used for comparision data
+  Stores the data collected by the fieds set in inventory/collect.  If
+  ``inventory/integrity`` is set to ``true``, then used for comparision
+  data.
+
 Schema:
   type: "object"
   default: {}

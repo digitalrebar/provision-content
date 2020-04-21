@@ -2,7 +2,8 @@
 Name: "inventory/NICInfo"
 Description: "Flat Inventory for NIC Info"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "array"
   items:

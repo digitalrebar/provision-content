@@ -2,20 +2,22 @@
 Name: "inventory/collect"
 Description: "Extra Params as Inventory Source (optional)"
 Documentation: |
-  Map of commands to run to collect Inventory Input
-  Each group includes the fields with jq maps to store
-  For example: adding "drpcli gohai" will use gohai JSON as input
-  Then jq will be run with provided values to collect inventory
-  into a inventory/data as a simple map.
+  Map of commands to run to collect Inventory Input Each group includes the
+  fields with jq maps to store.  For example; adding ``drpcli gohai`` will
+  use gohai JSON as input.  Then jq will be run with provided values to
+  collect inventory into a inventory/data as a simple map.
 
-  To work correctly, Commands should emit JSON
+  To work correctly, Commands should emit JSON.
 
   Special Options:
+
     * Change the command to parse JSON from other sources
     * Add JQargs to give hints into jq arguments before the parse string
 
   Gohai example:
+
     ::
+
       {
         gohai: {
           Command: "drpcli gohai",
@@ -26,6 +28,7 @@ Documentation: |
           }
         }
       }
+
 Schema:
   type: "object"
   default:

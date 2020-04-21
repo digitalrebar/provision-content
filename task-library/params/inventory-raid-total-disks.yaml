@@ -2,7 +2,8 @@
 Name: "inventory/RaidTotalDisks"
 Description: "Flat Inventory for RaidTotalDisks"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "integer"
 Meta:

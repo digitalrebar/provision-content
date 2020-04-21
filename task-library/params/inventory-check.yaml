@@ -2,10 +2,10 @@
 Name: "inventory/check"
 Description: "Fields to check from Gohai via JQ"
 Documentation: |
-  Using BASH REGEX, define a list of inventory data
-  fields to test using Regular Expressions.
-  Fields are tested in sequence, the first to fail
-  will halt the script
+  Using BASH REGEX, define a list of inventory data fields to test using
+  Regular Expressions.  Fields are tested in sequence, the first to fail
+  will halt the script.
+
 Schema:
   type: "object"
   additionalProperties:

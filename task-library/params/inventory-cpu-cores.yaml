@@ -2,7 +2,8 @@
 Name: "inventory/CPUCores"
 Description: "Flat Inventory for CPUCores"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "integer"
 Meta:

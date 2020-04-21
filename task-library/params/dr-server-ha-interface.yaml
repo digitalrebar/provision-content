@@ -3,6 +3,7 @@ Name: "dr-server/ha-interface"
 Description: "Network interface that DRP will manage for the Cluser IP"
 Documentation: |
   Must be one that machines being managed by DRP can access.
+
 Schema:
   type: string
   default: eth0

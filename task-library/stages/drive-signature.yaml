@@ -3,6 +3,7 @@ Name: "drive-signature"
 Description: "Calculate signatures for all drives"
 Documentation: |
   Builds a signature for each drive and stores that on the machine.
+
 Tasks:
   - "drive-signature"
 Meta:

@@ -2,7 +2,8 @@
 Name: "inventory/CPUType"
 Description: "Flat Inventory for CPUType"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "string"
 Meta:

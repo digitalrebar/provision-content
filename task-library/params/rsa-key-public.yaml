@@ -2,9 +2,10 @@
 Name: "rsa/key-public"
 Description: "Public RSA Key for SSH"
 Documentation: |
-  Public SSH Key
+  Public SSH Key.
 
   No default is set.
+
 Schema:
   type: "string"
 Meta:

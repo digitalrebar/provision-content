@@ -2,7 +2,8 @@
 Name: "rsa/key-user"
 Description: "User of RSA Key for SSH"
 Documentation: |
-  SSH Key User
+  SSH Key User.
+
 Schema:
   type: "string"
   default: "root"
