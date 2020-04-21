@@ -16,18 +16,17 @@ Documentation: |
   next.  The very last test in the example below would be a default
   in the event no previous tests matched.
 
-  Setting "continue: true" in this Param data structure will allow the
+  Setting ``continue: true`` in this Param data structure will allow the
   classifier to continue classifying after the first match.  This
-  effectively allows the operations to continue multiple tests/actions
+  effectively allows the operations to continue multiple *tests*/*actions*
   sequences, instead of exiting on first match.
 
   If none of the tests match, then the Machine will not be modified.
 
   The object should look like this.
 
-  .. highlight:: yaml
+  .. code-block:: yaml
 
-  ::
     - test: "has_mac 00:11:22:33:44:55"
       continue: true
       actions:
@@ -41,18 +40,17 @@ Documentation: |
     - test: "always"
       actions:
         - "change_workflow wait-for-input"
-  ..
 
-  In the above example, the "has_mac" test will be applied, if the test
-  passes, it would normally exit the Classifier.  However, the "continue"
-  operator has been set to "true", so the tests will continue to the next
-  ("in_subnet"), and subsequently if passing that test, will apply the
+  In the above example, the ``has_mac`` test will be applied, if the test
+  passes, it would normally exit the Classifier.  However, the ``continue``
+  operator has been set to ``true``, so the tests will continue to the next
+  (``in_subnet``), and subsequently if passing that test, will apply the
   actions specified.
 
   EXTENDING CLASSIFIER tests AND actions
 
-  The classifier can be extended to add custom "test" and "actions" groups.
-  See the "classify/custom-functions" Param for details.
+  The classifier can be extended to add custom *test* and *actions* groups.
+  See the ``classify/custom-functions`` Param for details.
 
 Schema:
   default: []
