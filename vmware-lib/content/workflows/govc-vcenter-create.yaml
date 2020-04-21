@@ -4,7 +4,7 @@ Description: "Run VMware govc command Context workflow"
 Documentation: |
   Creates a vCenter instance via the ``govc`` command.  Then waits
   for the API services to become available in vCenter, which should
-  signal that it's finally up and running.  This process can take
+  signal that it is finally up and running.  This process can take
   upwards of 60 minutes to complete.
 
 Stages:
