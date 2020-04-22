@@ -2,10 +2,10 @@
 Name: "edge-lab/helm-charts"
 Description: "Helm Charts to Install"
 Documentation: |
-  Install Helm Charts
-  -------------------
-
   .. _krib_helm:
+
+  Install Helm Charts
+  +++++++++++++++++++
 
   Array of charts to install via Helm.  The list will be followed in order.
 
