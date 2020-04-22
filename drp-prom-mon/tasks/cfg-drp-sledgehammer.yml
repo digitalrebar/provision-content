@@ -1,7 +1,8 @@
 ---
 Name: "cfg-drp-sledgehammer"
 Description: "A task to configure DRP sledgehammer"
-Documentation: ""
+Documentation: |
+  A task to configure DRP sledgehammer
 
 Meta:
   color: "orange"

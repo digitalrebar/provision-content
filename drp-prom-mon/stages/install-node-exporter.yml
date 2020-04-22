@@ -1,6 +1,8 @@
 ---
 Name: "install-node-exporter"
 Description: "Stage that installs and configures Node Exporter"
+Documentation: |
+  Stage that installs and configures Node Exporter
 Meta:
   color: "orange"
   icon: "dashboard"

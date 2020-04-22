@@ -1,7 +1,8 @@
 ---
 Name: "install-prometheus"
 Description: "A task to Install Prometheus"
-Documentation: ""
+Documentation: |
+  A task to Install Prometheus
 
 Meta:
   color: "orange"

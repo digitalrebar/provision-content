@@ -1,6 +1,8 @@
 ---
 Name: "install-prom-mon"
 Description: "Stage that installs Prometheus/Grafana monitoring"
+Documentation: |
+  Stage that installs Prometheus/Grafana monitoring
 Meta:
   color: "orange"
   icon: "dashboard"
