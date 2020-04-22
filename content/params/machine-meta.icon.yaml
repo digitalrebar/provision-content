@@ -1,4 +1,6 @@
-Description: The icon for machines icon
+Description: The icon for machine's icon
+Documentation: |
+  The icon for machine's icon
 Meta:
   color: blue
   icon: info

@@ -10,7 +10,9 @@ Documentation: |
   Additionally, the shell variable 'RS_DEBUG_ENABLE' is set to 1 (on)
   for Script authors to use.  This allows a construct like
 
-    (( $RS_DEBUG_ENABLE )) && run_debug_function
+    ::
+
+      (( $RS_DEBUG_ENABLE )) && run_debug_function
 
 Schema:
   type: "boolean"

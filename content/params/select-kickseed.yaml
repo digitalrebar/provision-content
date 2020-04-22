@@ -5,8 +5,10 @@ Documentation: |
   The name of a custom kickstart or preseed template to use.  If not defined, the
   default for each platform will be used, as follows
 
-    'net-seed.tmpl' for Debian/Ubuntu platforms
-    'centos-7.ks.tmpl' for CentOS 7 platforms
+    ::
+
+      'net-seed.tmpl' for Debian/Ubuntu platforms
+      'centos-7.ks.tmpl' for CentOS 7 platforms
 
 Schema:
   type: "string"

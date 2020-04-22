@@ -6,95 +6,99 @@ Documentation: |
   It includes dedicated OS installation repositories and more general ones.
 
   An example:
-    - tag: "centos-7-install" # Every repository needs a unique tag.
-      # A repository can be used by multiple operating systems.
-      # The usual example of this is the EPEL repository, which
-      # can be used by all of the RHEL variants of a given generation.
-      os:
-        - "centos-7"
-      # We also need to know what system architecture this repo is for.
-      # If this repo is valid for all arches (like a Debian or Ubuntu
-      # mirror), this can be set to "any", although it cannot be
-      # an installSource if that is the case
-      arch: x86_64
-      # If installSource is true, then the URL points directly
-      # to the location we should use for all OS install purposes
-      # save for fetching kernel/initrd pairs from (for now, we will
-      # still assume that they will live on the DRP server).
-      # When installSounrce is true, the os field must contain a single
-      # entry that is an exact match for the bootenv's OS.Name field.
-      installSource: true
-      # For redhat-ish distros when installSource is true,
-      # this URL must contain distro, component, and arch components,
-      # and as such they do not need to be further specified.
-      url: "http://mirrors.kernel.org/centos/7/os/x86_64"
-    - tag: "centos-7-everything"
-      # Since installSource is not true here,
-      # we can define several package sources at once by
-      # providing a distribution and a components section,
-      # and having the URL point at the top-level directory
-      # where everything is housed.
-      # DRP knows how to expand repo definitions for CentOS and
-      # ScientificLinux provided that they follow the standard
-      # mirror directory layout for each distro.
-      os:
-        - centos-7
-      arch: x86_64
-      url: "http://mirrors.kernel.org/centos"
-      distribution: "7"
-      components:
-        - atomic
-        - centosplus
-        - cloud
-        - configmanagement
-        - cr
-        - dotnet
-        - extras
-        - fasttrack
-        - opstools
-        - os
-        - paas
-        - rt
-        - sclo
-        - storage
-        - updates
-    - tag: "debian-9-install"
-      os:
-        - "debian-9"
-      arch: amd64
-      installSource: true
-      # Debian URLs always follow the same rules, no matter
-      # whether the OS install flag is set.  As such,
-      # you must always also specify the distribution and
-      # at least the main component, although you can also
-      # specify other components.
-      url: "http://mirrors.kernel.org/debian"
-      distribution: stretch
-      components:
-        - main
-        - contrib
-        - non-free
-    - tag: "debian-9-backports"
-      os:
-        - "debian-9"
-      arch: any
-      url: "http://mirrors.kernel.org/debian"
-      distribution: stretch-updates
-      components:
-        - main
-        - contrib
-        - non-free
-    - tag: "debian-9-security"
-      os:
-        - "debian-9"
-      arch: any
-      url: "http://security.debian.org/debian-security/"
-      securitySource: true
-      distribution: stretch/updates
-      components:
-        - contrib
-        - main
-        - non-free
+
+    ::
+
+      - tag: "centos-7-install" # Every repository needs a unique tag.
+        # A repository can be used by multiple operating systems.
+        # The usual example of this is the EPEL repository, which
+        # can be used by all of the RHEL variants of a given generation.
+        os:
+          - "centos-7"
+        # We also need to know what system architecture this repo is for.
+        # If this repo is valid for all arches (like a Debian or Ubuntu
+        # mirror), this can be set to "any", although it cannot be
+        # an installSource if that is the case
+        arch: x86_64
+        # If installSource is true, then the URL points directly
+        # to the location we should use for all OS install purposes
+        # save for fetching kernel/initrd pairs from (for now, we will
+        # still assume that they will live on the DRP server).
+        # When installSounrce is true, the os field must contain a single
+        # entry that is an exact match for the bootenv's OS.Name field.
+        installSource: true
+        # For redhat-ish distros when installSource is true,
+        # this URL must contain distro, component, and arch components,
+        # and as such they do not need to be further specified.
+        url: "http://mirrors.kernel.org/centos/7/os/x86_64"
+      - tag: "centos-7-everything"
+        # Since installSource is not true here,
+        # we can define several package sources at once by
+        # providing a distribution and a components section,
+        # and having the URL point at the top-level directory
+        # where everything is housed.
+        # DRP knows how to expand repo definitions for CentOS and
+        # ScientificLinux provided that they follow the standard
+        # mirror directory layout for each distro.
+        os:
+          - centos-7
+        arch: x86_64
+        url: "http://mirrors.kernel.org/centos"
+        distribution: "7"
+        components:
+          - atomic
+          - centosplus
+          - cloud
+          - configmanagement
+          - cr
+          - dotnet
+          - extras
+          - fasttrack
+          - opstools
+          - os
+          - paas
+          - rt
+          - sclo
+          - storage
+          - updates
+      - tag: "debian-9-install"
+        os:
+          - "debian-9"
+        arch: amd64
+        installSource: true
+        # Debian URLs always follow the same rules, no matter
+        # whether the OS install flag is set.  As such,
+        # you must always also specify the distribution and
+        # at least the main component, although you can also
+        # specify other components.
+        url: "http://mirrors.kernel.org/debian"
+        distribution: stretch
+        components:
+          - main
+          - contrib
+          - non-free
+      - tag: "debian-9-backports"
+        os:
+          - "debian-9"
+        arch: any
+        url: "http://mirrors.kernel.org/debian"
+        distribution: stretch-updates
+        components:
+          - main
+          - contrib
+          - non-free
+      - tag: "debian-9-security"
+        os:
+          - "debian-9"
+        arch: any
+        url: "http://security.debian.org/debian-security/"
+        securitySource: true
+        distribution: stretch/updates
+        components:
+          - contrib
+          - main
+          - non-free
+
 Schema:
   default:
     - tag: centos-7

@@ -5,10 +5,11 @@ Documentation: |
   This string defines the login policy for the root user.
 
   Possible values are:
-    without-password - default
-    yes
-    no
-    forced-commands-only
+
+  * without-password - default
+  * yes
+  * no
+  * forced-commands-only
 
 Schema:
   type: "string"

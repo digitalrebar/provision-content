@@ -1,0 +1,6 @@
+
+The drp-community-content is the required initial content package for Digital Rebar Provision.
+
+This contains the basic building blocks of all the rest of the system.  From basic bootenvs, stages,
+and workflows to templates and tasks, this content pack starts the whole process.
+
