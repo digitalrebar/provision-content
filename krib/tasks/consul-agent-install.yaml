@@ -12,7 +12,7 @@ Templates:
     Path: "/etc/systemd/system/consul-agent.service"
   - ID: "consul-agent-install.sh.tmpl"
     Name: "Configure consul agent"
-    Path: ""    
+    Path: ""
 Meta:
   icon: "book"
   color: "blue"

@@ -9,10 +9,12 @@ Documentation: |
   In addition - you may set the following Params on a Machine object
   to override the default behaviors of this stage:
 
-    krib/operate-action     - action to take (drain or uncordon)
-    krib/operate-on-node    - a Kubernetes node name to operate on
-    krib/operate-options    - command line arguments to pass to the
-                              'kubectl' command for the action
+    ::
+
+      krib/operate-action     - action to take (drain or uncordon)
+      krib/operate-on-node    - a Kubernetes node name to operate on
+      krib/operate-options    - command line arguments to pass to the
+                                'kubectl' command for the action
 
   If the 'krib/operate-on-node' Param is empty, the node that is
   currently running the Stage will be operated on.  Otherwise,

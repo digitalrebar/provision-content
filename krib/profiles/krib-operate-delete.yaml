@@ -7,7 +7,7 @@ Documentation: |
   allow the krib-operate task to do a delete operation.
 
   This profile is used by the krib-delete stage to allow a machine to
-  be deleted without changing the parameters on the machine. 
+  be deleted without changing the parameters on the machine.
 
   WARNING: This pattern destroys a kubernetes node.
 

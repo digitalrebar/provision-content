@@ -4,7 +4,7 @@ Description: "The target for remote syslog logs if running the krib-logging stag
 Documentation: |
   An IP outside the cluster designated configured to receive remote syslog logs
   on UDP 514
-  
+
 Schema:
   type: "string"
 Meta:

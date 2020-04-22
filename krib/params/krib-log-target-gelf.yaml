@@ -4,7 +4,7 @@ Description: "The target for GELF (Graylog) logs if running the krib-logging sta
 Documentation: |
   An IP outside the cluster designated configured to receive GELF (GrayLog) "The target for GELF (Graylog) "The target for GELF (Graylog) logs
   on UDP 2201
-  
+
 Schema:
   type: "string"
 Meta:

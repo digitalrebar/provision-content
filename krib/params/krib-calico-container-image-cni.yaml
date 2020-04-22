@@ -3,9 +3,9 @@ Name: "krib/calico-container-image-cni"
 Description: "Custom container image to use for Calico CNI"
 Documentation: |
   Allows operators to optionally override the container image used in the
-  Calico deployment. Possible use case would be pre-prepared images pushed to a 
+  Calico deployment. Possible use case would be pre-prepared images pushed to a
   local trusted registry
-  
+
 Schema:
   type: "string"
 Meta:

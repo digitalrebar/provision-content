@@ -4,13 +4,15 @@ Description: "Set the network provider types (eg 'flannel', 'calico')."
 Documentation: |
   This Param can be used to specify either 'flannel', 'calico', or 'weave'
   network providers for the Kubernetes cluster.  This is completed
-  using the provider specific YAML definition file. 
+  using the provider specific YAML definition file.
 
   The only supported providers are:
 
-    flannel
-    calico
-    weave
+    ::
+
+      flannel
+      calico
+      weave
 
   The default is 'flannel'.
 

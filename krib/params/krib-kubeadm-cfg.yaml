@@ -6,7 +6,7 @@ Documentation: |
   use for the 'kubeadm.cfg' used during the 'kubeadm init' process.
 
   The default behavior is to use the Parameterized 'kubeadm.cfg' from the
-  template named 'krib-kubeadm.cfg.tmpl'.  This config file is used in 
+  template named 'krib-kubeadm.cfg.tmpl'.  This config file is used in
   the 'krib-config.sh.tmpl' which is the main template script that drives
   the 'kubeadm' cluster init and configuration.
 

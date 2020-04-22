@@ -36,9 +36,9 @@ Templates:
       echo "==========================================================================="
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"     
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
-      
+
       sleep 1
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
@@ -88,11 +88,11 @@ Templates:
       echo "CA contains $CA_TEST"
       echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
       echo "==========================================================================="
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"            
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"
       echo "==========================================================================="
-      
+
       sleep 1
-      drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca            
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca
     else
       echo "  No CA root detected - no reset required"
     fi
@@ -116,7 +116,7 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done consul params reset"
-  Name: consul-reset  
+  Name: consul-reset
 - Contents: |-
     #!/bin/bash
     # Reset vault CA params
@@ -138,11 +138,11 @@ Templates:
       echo "CA contains $CA_TEST"
       echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
       echo "==========================================================================="
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"            
+      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"
       echo "==========================================================================="
-      
+
       sleep 1
-      drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca            
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca
     else
       echo "  No CA root detected - no reset required"
     fi
@@ -166,7 +166,7 @@ Templates:
     {{end -}}
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done vault params reset"
-  Name: vault-reset    
+  Name: vault-reset
 - Contents: |-
     #!/bin/bash
     # Reset KRIB params
@@ -191,7 +191,7 @@ Templates:
     # We might want to re-initialize a cluster using this machine, but without any
     # remanants of the old cluster. This script brutally removes any cluster-specific content,
     # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
- 
+
     kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
     systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
@@ -201,17 +201,17 @@ Templates:
 
     # Whether we're using containerd or dockerd, kill either
     pkill containerd || pkill dockerd
-    
+
     # Wipe out any persistent content
     rm -rf /var/lib/cni/
     rm -rf /var/lib/kubelet/*
     rm -rf /etc/cni/
     rm -rf /docker/etcd/*
     rm -rf /var/lib/containerd/*
-    rm -rf /var/lib/docker/*   
-    rm -rf /var/lib/rook/*    
+    rm -rf /var/lib/docker/*
+    rm -rf /var/lib/rook/*
     rm -rf /var/lib/consul/client
-    rm -rf /var/lib/consul/server    
+    rm -rf /var/lib/consul/server
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 
@@ -232,7 +232,7 @@ Templates:
       fi
     fi
     {{ end -}}
-  Name: KRIB wipe machine for cluster reinstall  
+  Name: KRIB wipe machine for cluster reinstall
 - Contents: |-
     #!/bin/bash
 
@@ -253,7 +253,7 @@ Templates:
       fi
     fi
     {{ end -}}
-  Name: KRIB wipe disks used for rook-ceph (if configured)  
+  Name: KRIB wipe disks used for rook-ceph (if configured)
 Meta:
   icon: "ship"
   color: "orange"

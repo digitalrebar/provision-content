@@ -12,10 +12,10 @@ Templates:
     Path: "/etc/vault/vault.hcl"
   - ID: "vault-policy-transit-only.hcl.tmpl"
     Name: "Vault policy for transit backend"
-    Path: "/etc/vault/policy-transit-only.hcl"  
+    Path: "/etc/vault/policy-transit-only.hcl"
   - ID: "vault-config.sh.tmpl"
     Name: "Configure vault"
-    Path: ""    
+    Path: ""
 Meta:
   icon: "book"
   color: "blue"
