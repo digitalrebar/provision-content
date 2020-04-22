@@ -4,7 +4,7 @@ Description: Basic RHEL Install Workflow, Register, and Runner
 Documentation: |
   This workflow includes the DRP Runner in RHEL provisioning process for DRP.
   It also will register the system with Redhat Subscription Manager.  Requires
-  the ``redhat/subscription-username`` and ``redhat/subscription-password`
+  the ``redhat/subscription-username`` and ``redhat/subscription-password``
   Params are specified with values that have entitlement for Redhat Server
   subscritpion.
 

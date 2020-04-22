@@ -1,6 +1,8 @@
 ---
 Name: "redhat-7.0-install"
 Description: "Install BootEnv for RedHat 7.0"
+Documentation: |
+  Install BootEnv for RedHat 7.0
 OS:
   Family: "redhat"
   Name: "redhat-7.0"

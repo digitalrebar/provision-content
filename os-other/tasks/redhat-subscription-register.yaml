@@ -1,6 +1,8 @@
 ---
 Name: "redhat-subscription-register"
 Description: "A task to register this Machine for Redhat Subscription Network and repos"
+Documentation: |
+  A task to register this Machine for Redhat Subscription Network and repos
 Meta:
   icon: "key"
   color: "blue"
