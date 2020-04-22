@@ -7,7 +7,7 @@ KRIB uses the `kubeadm <https://kubernetes.io/docs/setup/independent/create-clus
 
 KRIB does also support production, highly available (HA) deployments, with multiple masters.  To enable this configuration, we've chosen to manage the TLS certificates and etcd installation in the Workflow instead of using the kubeadm process.
 
-This document assumes you have your Digital Rebar Provisioning endpoint fully configured, tested, and working.  We assume that you are able to properly provision Machines in your environment as a base level requirement for use of the KRIB content add-on use.  See :ref:`_rs_krib` for step by step instructions.
+This document assumes you have your Digital Rebar Provisioning endpoint fully configured, tested, and working.  We assume that you are able to properly provision Machines in your environment as a base level requirement for use of the KRIB content add-on use.  See :ref:`rs_krib` for step by step instructions.
 
 .. note:: documentation source: https://github.com/digitalrebar/provision-content/blob/master/krib/._Documentation.meta
 
@@ -67,7 +67,7 @@ Install KRIB
 
 KRIB is a Content Pack and is installed in the standard method as any other Contents.   We need the ``krib.json`` content pack to fully support KRIB and install the helper utility contents for stage changes.
 
-Please review :ref:`_rs_krib` for step by step instructions.
+Please review :ref:`rs_krib` for step by step instructions.
 
 CLI Install
 ===========
