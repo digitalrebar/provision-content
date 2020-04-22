@@ -1,6 +1,8 @@
 ---
 Name: "install-grafana"
 Description: "Stage that installs and configures Grafana"
+Documentation: |
+  Stage that installs and configures Grafana
 Meta:
   color: "orange"
   icon: "dashboard"

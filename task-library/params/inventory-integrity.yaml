@@ -3,7 +3,7 @@ Name: "inventory/integrity"
 Description: "Fail if inventory been changed"
 Documentation: |
   Allows operators to compare new inventory/data to stored ``inventory/data``
-  on the machine.  If ``true``1 and values not match (after first run) then
+  on the machine.  If ``true`` and values not match (after first run) then
   Stage will fail.
 
 Schema:

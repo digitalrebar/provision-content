@@ -1,7 +1,8 @@
 ---
 Name: "install-drp"
 Description: "A task to install Digital Rebar Provision on a Machine."
-Documentation: ""
+Documentation: |
+  A task to install Digital Rebar Provision on a Machine.
 
 Meta:
   color: "orange"

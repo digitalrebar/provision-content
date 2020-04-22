@@ -11,14 +11,23 @@ Documentation: |
   functions.
 
   For 'kubectl drain' documentation, see the following URL:
-    https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#drain
+
+    ::
+
+      https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#drain
+
   For 'kubectl uncordin' doc, see the URL:
-    https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#uncordon
+
+    ::
+
+      https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#uncordon
 
   NOTE NOTE the following flags are set as default options in the
   Template for drain operations:
 
-    --ignore-daemonsets --delete-local-data
+    ::
+
+      --ignore-daemonsets --delete-local-data
 
   For 'drain' operations, if you override these defaults, you MOST LIKELY
   need to specify them for the drain operation to be successful.  You have

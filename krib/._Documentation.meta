@@ -1,7 +1,3 @@
-.. _component_krib:
-
-KRIB (Kubernetes Rebar Integrated Bootstrapping)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 License: KRIB is APLv2
 
@@ -14,6 +10,8 @@ KRIB does also support production, highly available (HA) deployments, with multi
 This document assumes you have your Digital Rebar Provisioning endpoint fully configured, tested, and working.  We assume that you are able to properly provision Machines in your environment as a base level requirement for use of the KRIB content add-on use.  See :ref:`_rs_krib` for step by step instructions.
 
 .. note:: documentation source: https://github.com/digitalrebar/provision-content/blob/master/krib/._Documentation.meta
+
+.. _component_krib:
 
 KRIB Video References
 ---------------------
@@ -146,21 +144,25 @@ You must writeable create a *Profile* from YAML (or JSON if you prefer) with the
 .. note:: The following commands should be applied to all of the Machines you wish to enroll in your KRIB cluster.  Each Machine needs to be referenced by the Digital Rebar Machine UUID.  This example shows how to collect the UUIDs, then you will need to assign them to the ``UUIDS`` variable.  We re-use this variable throughout the below documentation within the shell function named *my_machines*.  We also show the correct ``drpcli`` command that should be run for you by the helper function, for your reference.
 
 Create our helper shell function *my_machines*
+
   ::
 
     function my_machines() { for U in $UUIDS; do set -x; drpcli machines $1 $U $2; set +x; done; }
 
 List your Machines to determine which to apply the Profile to
+
   ::
 
     drpcli machines list | jq -r '.[] | "\(.Name) : \(.Uuid)"'
 
 IF YOU WANT to make ALL Machines in your endpoint use KRIB, do:
+
   ::
 
     export UUIDS=`drpcli machines list | jq -r '.[].Uuid'`
 
 Otherwise - individually add them to the *UUIDS* variable, like:
+
   ::
 
     export UUIDS="UUID_1 UUID_2 ... UUID_n"
@@ -196,11 +198,11 @@ The below example outlines the process for the UX.
 
 RackN assumes the use of CentOS 7 BootEnv during this process.  However, it should theoretically work on most of the BootEnvs.  We have not tested it, and your mileage will absolutely vary...
 
-1. create a *Profile* for the Kubernetes Cluster (e.g. ``my-k8s-cluster``) or clone the ``krib-example`` profile.
-2. add a *Param* to that *Profile*: ``krib/cluster-profile`` = ``my-k8s-cluster``
-2. add a *Param* to that *Profile*: ``etcd/cluster-profile`` = ``my-k8s-cluster``
-3. Add the *Profile* (eg ``my-k8s-cluster``) to all the machines you want in the cluster.
-4. Change workflow on all the machines to ``krib-install-cluster`` for install-to-local-disk, or to ``krib-live-cluster`` for the Live Boot/Immutable Kubernetes mode
+#. create a *Profile* for the Kubernetes Cluster (e.g. ``my-k8s-cluster``) or clone the ``krib-example`` profile.
+#. add a *Param* to that *Profile*: ``krib/cluster-profile`` = ``my-k8s-cluster``
+#. add a *Param* to that *Profile*: ``etcd/cluster-profile`` = ``my-k8s-cluster``
+#. Add the *Profile* (eg ``my-k8s-cluster``) to all the machines you want in the cluster.
+#. Change workflow on all the machines to ``krib-install-cluster`` for install-to-local-disk, or to ``krib-live-cluster`` for the Live Boot/Immutable Kubernetes mode
 
 Then wait for them to complete.  You can watch the Stage transitions via the Bulk Actions panel (which requires RackN Portal authentication to view).
 
@@ -213,6 +215,7 @@ Who is my Master?
 =================
 
 If you have not specified who the Kubernetes Master should be; and the master was chosen by election - you will need to determine which Machine is the cluster Master.
+
   ::
 
     # returns the Kubernetes cluster Machine UUID
@@ -222,6 +225,7 @@ Use ``kubectl`` - on Master
 ===========================
 
 You can log in to the Master node as identified above, and execute ``kubectl`` commands as follows:
+
   ::
 
       export KUBECONFIG=/etc/kubernetes/admin.conf
@@ -232,6 +236,7 @@ Use ``kubectl`` - from anywhere
 ===============================
 
 Once the Kubernetes cluster build has been completed, you may use the ``kubectl`` command to both verify and manage the cluster.  You will need to download the *conf* file with the appropriate tokens and information to connect to and authenticate your ``kubectl`` connections. Below is an example of doing this:
+
   ::
 
     # get the Admin configuration and tokens
@@ -266,18 +271,22 @@ Kubernetes Dashboard via Proxy
 ==============================
 
 You can get the admin-user security token with the following command:
+
   ::
-  
+
     kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
-    
-Now copy the token from the token part printed on-screen so you can paste it into the ``Enter token`` field of the dashboard log in screen.    
+
+Now copy the token from the token part printed on-screen so you can paste it into the ``Enter token`` field of the dashboard log in screen.
 
 Once you have obtained the ``admin.conf`` configuration file and security tokens, you may use ``kubectl`` in Proxy mode to the Master.  Simply open a separate terminal/console session to dedicate to the Proxy connection, and do:
+
   ::
 
     kubectl proxy
 
 Now, in a local web browser (on the same machine you executed the Proxy command) open the following URL:
+
+  ::
 
     http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
 
@@ -309,6 +318,7 @@ Rook Ceph Manager Dashboard
 If you install the rook via the `krib-helm` chart template and have ``krib-ingress-nginx`` stage in your workflow an ingress will be created so you can access the Ceph Manager Dashboard at ``https://rook-db.LOADBALANCER_IP.xip.io``.  The access url and cert-manager tls can also be configured by setting the appropriate params in your profile.   See ``example-rook-db-ingress`` profile.
 
 The default username is ``admin`` and you can get the generated password with the with the following command:
+
   ::
 
     kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode

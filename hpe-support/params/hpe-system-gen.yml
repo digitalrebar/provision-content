@@ -7,13 +7,17 @@ Documentation: |
   updates according to the system generation.
 
   Current known generations are:
-    * g7
-    * gen8
-    * gen9
-    * gen10
+
+  * g7
+  * gen8
+  * gen9
+  * gen10
 
   Generation will be determined automatically using the following code:
 
-    dmidecode |awk '/Product Name:/ { print tolower($NF); exit }'
+    ::
+
+      dmidecode |awk '/Product Name:/ { print tolower($NF); exit }'
+
 Schema:
   type: string

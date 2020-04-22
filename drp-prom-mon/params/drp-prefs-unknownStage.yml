@@ -1,7 +1,8 @@
 ---
 Name: "drp-prom-mon/drp-prefs-unknownStage"
 Description: "Set the Global Preferences for unknown Stage."
-Documentation: ""
+Documentation: |
+  Set the Global Preferences for unknown Stage.
 
 Schema:
   type: "string"

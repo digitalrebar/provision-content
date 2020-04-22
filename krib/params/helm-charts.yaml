@@ -2,10 +2,11 @@
 Name: "krib/helm-charts"
 Description: "Install Helm Charts"
 Documentation: |
-  Install Helm Charts
-  -------------------
 
   .. _krib_helm:
+
+  Install Helm Charts
+  ^^^^^^^^^^^^^^^^^^^
 
   Array of charts to install via Helm.  The list will be followed in order.
 

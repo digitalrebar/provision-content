@@ -1,7 +1,8 @@
 ---
 Name: "drp-prom-mon/drp-prefs-defaultBootenv"
 Description: "Set the Global Preferences for default Boot Environment."
-Documentation: ""
+Documentation: |
+  Set the Global Preferences for default Boot Environment.
 
 Schema:
   type: "string"

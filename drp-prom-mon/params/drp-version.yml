@@ -8,11 +8,13 @@ Documentation: |
   Set this to any value supported by the DRP installer script.
   Typically these values would be like the following
 
-    stable    = current production 'stable' release
-    tip       = current 'tip' release (usually tracks a few
-                commits behind 'master'
-    v3.7.3    = an explicit version to install - the leading
-                'v' is required in the version string
+    ::
+
+      stable    = current production 'stable' release
+      tip       = current 'tip' release (usually tracks a few
+                  commits behind 'master'
+      v3.7.3    = an explicit version to install - the leading
+                  'v' is required in the version string
 
 Schema:
   type: "string"

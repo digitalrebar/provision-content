@@ -15,10 +15,10 @@ Templates:
     Path: "/etc/vault/vault.hcl"
   - ID: "vault-env.sh.tmpl"
     Name: "Prepare env file for CLI vault usage"
-    Path: "/etc/vault/vault-env.sh"    
+    Path: "/etc/vault/vault-env.sh"
   - ID: "vault-install.sh.tmpl"
     Name: "Configure consul"
-    Path: ""    
+    Path: ""
 Meta:
   icon: "book"
   color: "blue"

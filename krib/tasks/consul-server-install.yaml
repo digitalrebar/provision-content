@@ -15,7 +15,7 @@ Templates:
     Path: "/etc/consul/consul-server-env.sh"
   - ID: "consul-server-install.sh.tmpl"
     Name: "Configure consul"
-    Path: ""    
+    Path: ""
 Meta:
   icon: "book"
   color: "blue"

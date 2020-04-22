@@ -13,7 +13,9 @@ Documentation: |
 
   If the Param 'drp-prom-mon/cluster-profile' is set to the value
 
-    prom-mon-single-node
+    ::
+
+      prom-mon-single-node
 
   Then the Stage will assume this is an all-in-one DRP/Prometheus/
   Node Exporter/Grafana platform - and you DO NOT have to set the

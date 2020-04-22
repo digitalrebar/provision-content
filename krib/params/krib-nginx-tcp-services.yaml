@@ -4,10 +4,14 @@ Description: "Nginx Controller TCP services"
 Documentation: |
   Array of optional TCP services you want to expose using Nginx Ingress Controller
   Example might be:
-     9000: "default/example-go:8080"
+
+    ::
+
+      9000: "default/example-go:8080"
+
   The services defined here will be inserted in a configmap named "tcp-services" in the "ingress-nginx" namespace. The
   ConfigMap can be updated later if you want to change/update services
-  
+
   See https://kubernetes.github.io/ingress-nginx/user-guide/exposing-tcp-udp-services/ for details
 Schema:
   type: "object"

@@ -1,7 +1,8 @@
 ---
 Name: "cfg-drp-cc"
 Description: "A task to install DRP community content"
-Documentation: ""
+Documentation: |
+  A task to install DRP community content
 
 Meta:
   color: "orange"

@@ -6,10 +6,12 @@ Documentation: |
 
   To join EXISTING machines or CLOUD machines into DRP, you can use run `join-up.sh`.
   Add the following line to the machines initialization script:
+
     ::
 
       #!/bin/bash
       curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
+
 Meta:
   feature-flags: "change-stage-v2"
   icon: "binoculars"

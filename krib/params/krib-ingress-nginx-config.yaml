@@ -3,7 +3,7 @@ Name: "krib/ingress-nginx-config"
 Description: "Specifies the YAML config file url to use for nginx ingress service install."
 Documentation: |
   Set this string to an HTTP or HTTPS reference for a YAML configuration to
-  use for nginx service install.  
+  use for nginx service install.
 Schema:
   type: "string"
   default: "https://github.com/kubernetes/ingress-nginx/raw/nginx-0.24.1/deploy/provider/cloud-generic.yaml"

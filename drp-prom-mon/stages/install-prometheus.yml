@@ -1,6 +1,8 @@
 ---
 Name: "install-prometheus"
 Description: "Stage that installs Prometheus monitoring"
+Documentation: |
+  Stage that installs Prometheus monitoring
 Meta:
   color: "orange"
   icon: "dashboard"

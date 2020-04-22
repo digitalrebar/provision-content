@@ -8,4 +8,4 @@ RequiredParams:
 Templates:
   - ID: "krib-runtime-install.sh.tmpl"
     Name: "Install a container runtime on a KRIB built Kubernetes node"
-    Path: ""  
+    Path: ""

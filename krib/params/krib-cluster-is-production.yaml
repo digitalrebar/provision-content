@@ -14,8 +14,10 @@ Documentation: |
   clean before building the cluster.  This is essentially a
   destructive pattern.
 
-    krib/cluster-admin-conf - the admin.conf file Param will be wiped
-    krib/cluster-join       - the Join token will be destroyed
+    ::
+
+      krib/cluster-admin-conf - the admin.conf file Param will be wiped
+      krib/cluster-join       - the Join token will be destroyed
 
   This allows for "fast reuse" patterns with building KRIB
   clusters, while also allowing a cluster to be marked Production

@@ -1,6 +1,8 @@
 ---
 Name: hpe-tools-install
 Description: Install HPE tooling from appropriate yum repositories
+Documentation: |
+  Install HPE tooling from appropriate yum repositories
 RequiredParams:
   - hpe-repo-urls
   - hpe-repo-versions

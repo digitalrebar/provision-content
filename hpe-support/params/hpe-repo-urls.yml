@@ -5,8 +5,8 @@ Documentation: |
   HPE systems require some base tooling to fully enable remote management
   and low-level hardware management.  The repository that this URL points
   at should provide the HP SUM tooling and the SSA tooling for managing RAID
-  controllers.  You can use the usual YUM variables here, along with
-  "$hpe_gen" for generation specific tooling.
+  controllers.  You can use the usual YUM variables here, along with "$hpe_gen"
+  for generation specific tooling.
 Schema:
   type: array
   items:

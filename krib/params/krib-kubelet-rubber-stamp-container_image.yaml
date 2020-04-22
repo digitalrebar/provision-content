@@ -3,9 +3,9 @@ Name: "krib/kubelet-rubber-stamp-container-image"
 Description: "Custom container image to use for kublet rubber stamp"
 Documentation: |
   Allows operators to optionally override the container image used in the
-  kubelt rubber stamp deployment. Possible use case would be pre-prepared images pushed to a 
+  kubelt rubber stamp deployment. Possible use case would be pre-prepared images pushed to a
   local trusted registry
-  
+
 Schema:
   type: "string"
 Meta:

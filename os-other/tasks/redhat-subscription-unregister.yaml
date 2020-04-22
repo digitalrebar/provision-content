@@ -1,6 +1,8 @@
 ---
 Name: "redhat-subscription-unregister"
 Description: "A task to unregister machine from Redhat Subscription Network"
+Documentation: |
+  A task to unregister machine from Redhat Subscription Network
 Meta:
   icon: "key"
   color: "blue"

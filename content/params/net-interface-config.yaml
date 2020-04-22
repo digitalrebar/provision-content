@@ -14,6 +14,8 @@ Documentation: |
 
   The default value of this parameter is:
 
+    ::
+
       bootif:
         dhcp4: true
 
@@ -28,6 +30,8 @@ Documentation: |
   the same thing as a device name, nor does it have to uniquely map to a single
   device.  For example, if we have a `net/interface-topology` of
 
+    ::
+
       network:
         version: 2
         ethernets:
@@ -36,6 +40,8 @@ Documentation: |
               name: onboard:*
 
   we can have all of them use DHCP4 and 6 to get their addresses like so:
+
+    ::
 
       onboards:
         dhcp4: true
