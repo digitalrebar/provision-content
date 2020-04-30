@@ -81,7 +81,7 @@ Templates:
               *STATUS*)
                 [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
-                [[ $failed = no && $line = *'Reboot Required to take effect'* ]] && this_one_reboot=true;;
+                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
@@ -108,7 +108,7 @@ Templates:
           if [[ $this_one_reboot = yes ]] ; then
               if [[ "{{$elem.File}}" =~ xcc ]] ; then
                   echo "Rebooting xcc"
-                  ipmitool mc reset cold
+                  /opt/OneCli/OneCli misc rebootbmc
                   while true ; do
                       ./attach-usb-lan.sh
                       /opt/OneCli/OneCli inventory getdevices && break
