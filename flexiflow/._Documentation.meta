@@ -1,5 +1,3 @@
-FlexiFlow
----------
 
 The FlexiFlow system allows an operator to dynamically inject new tasks
 in to an existing workflow based on a Parameter.  This allows for other
@@ -35,7 +33,7 @@ to jump in to another Workflow in an existing workflow.
 
 
 Operating FlexiFlow Stage Based Manipulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------
 
 Here is a brief outline of example usage of the FlexiFlow system utilizing
 the RackN defined stage.  In this example, we will define tasks to run in
@@ -200,7 +198,7 @@ type definition as specified in the *Create Parameter Definition* section above.
 
 
 Operating FlexiFlow Workflow Based Manipulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 The FlexiFlow content also allows you to add a Stage to a given workflow.  At that Stage,
 the system will reference the Param named ``flexiflow/workflow``.  The value of the
