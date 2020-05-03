@@ -7,8 +7,8 @@ echo "starting k3s install"
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
-if k3s kubectl get nodes ; then
-  echo "k3s kubectl works... no (re)install needed"
+if kubectl get nodes ; then
+  echo "kubectl works... no (re)install needed"
   exit 0
 fi
 
@@ -161,17 +161,20 @@ fi
 
 systemctl daemon-reload && systemctl start k3s
 
+echo "create symlink for kubectl"
+ln -sf k3s $INSTALL_DIR/kubectl
+
+echo "waiting 3 seconds"
+sleep 3
+
 if $CLUSTER_I_AM_LEADER; then
   # need more delay for leader
-  echo "waiting 10 seconds"
-  sleep 10
-  while [[ "$(k3s kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
+  while [[ "$(kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
     sleep 1
     echo "waiting for cluster to start (1 second)"
   done
-  echo "Verify install: k3s kubectl MUST succeed"
-  k3s kubectl get nodes
-  # TODO ADD CHECK (loop to eliminate sleep)
+  echo "Verify install: kubectl MUST succeed"
+  kubectl get nodes
   echo "Recording cluster admin config ..."
   drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param k3s/admin-conf to - < /etc/rancher/k3s/k3s.yaml
   if [[ -f /var/lib/rancher/k3s/server/node-token ]] ; then
