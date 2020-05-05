@@ -1,8 +1,9 @@
 ---
 Name: "classify"
-Description: "A task to classify machines into new workflows"
+Description: "A task to add classification data to Machines."
 Documentation: |
-  This will change the machines workflow and add profiles.
+  This will run specified ``test`` and ``action`` sequences to make
+  changes to a Machines object.
 
 Meta:
   color: "blue"

@@ -2,7 +2,16 @@
 Name: "classify"
 Description: "Classify machines based upon data"
 Documentation: |
-  Moves machines into new workflows based upon classification.
+  Applies classification test and action sequences to a Machine.  Operations
+  allow adding Params, Profiles, etc. to the Machine object.  Based on these
+  added values, subsequent stages in a workflow can utilize the information
+  that the classifier has added to a Machine.
+
+  Some examples including adding Profiles with BIOS configurations, lists
+  of Firmware versions to apply by the ``flash`` content pack, etc.  In
+  addition, you can use the ``flexiflow`` content pack to check if a specific
+  values in a Param has been set, and based on that, switch to a completely
+  new Workflow.
 
 Meta:
   color: "yellow"
