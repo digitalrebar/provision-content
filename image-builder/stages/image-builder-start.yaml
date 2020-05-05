@@ -3,7 +3,7 @@ Name: image-builder-start
 BootEnv: ""
 Description: Start the Image Builder process.
 Documentation: |
-  This is a "decorator" stage that marks the beginning of the
+  This is a *decorator* stage that marks the beginning of the
   image builder process.
 
 Meta:
