@@ -28,7 +28,7 @@ Documentation: |
     }
 
   .. note:: The executing environment is Sledgehammer with BASH scripts. You
-            must insure that the Function you inject operates correctly in
+            must ensure that the Function you inject operates correctly in
             this environment.  For reference, see the Functions in the existing
             classifier Template ``classify.sh.tmpl``.
 
