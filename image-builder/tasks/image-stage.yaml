@@ -1,6 +1,9 @@
 Name: image-builder-stage
 Description: A task to stage the Image Builder image to DRP.
-Documentation: ""
+Documentation: |
+  Copies the built image to a remote HTTP file server location.  Currently the only supported
+  HTTP file server is a DRP Endpoint, in the ``Files`` location.
+
 ReadOnly: true
 Meta:
   color: purple

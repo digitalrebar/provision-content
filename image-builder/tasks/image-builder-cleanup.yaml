@@ -1,6 +1,21 @@
 Name: image-builder-cleanup
 Description: Post provisioning cleanup tasks for image-builder
-Documentation: ""
+Documentation: |
+  This task calls the ``image-builder-cleanup.sh.tmpl`` Tempalte, which does
+  post-provisioning cleanup of the built image, prior to creating a root
+  filesystem tarball.  Some of the actions performed include:
+
+    * Perform package manager clean operations
+    * remove rescue kernels/initrds from the image
+    * zero out log files in ``/var/log``
+    * empty the RackN ``/etc/drpcli`` file
+    * wipe contents of ``/etc/resolv.conf``
+    * remove shell history
+
+  Please review the template carefully to insure the actions performed in the
+  template are consistent with the documentation above, and are indeed the actions
+  you want performed on your image.
+
 ReadOnly: true
 Meta:
   color: purple
