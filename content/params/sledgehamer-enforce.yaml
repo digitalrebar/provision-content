@@ -2,7 +2,11 @@
 Name: "sledgehammer/enforce"
 Description: "Should the system enforce being in sledgehammer"
 Documentation: |
-  Boolean parameter indicating if the enforce-sledgehammer task should ensure that the system is running in sledgehammer.
+  Boolean parameter indicating if the enforce-sledgehammer task should
+  ensure that the system is running in sledgehammer.
+
+  .. note:: This setting does not force a machine to boot into sledgehammer.
+
 Schema:
   type: "boolean"
   default: false
