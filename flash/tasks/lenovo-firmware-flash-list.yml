@@ -104,22 +104,22 @@ Templates:
               cat flash.{{$index}}/common_result.xml
               failed=yes;;
           esac
+        fi
 
-          if [[ $this_one_reboot = yes ]] ; then
-              if [[ "{{$elem.File}}" =~ xcc ]] ; then
-                  echo "Rebooting xcc"
-                  /opt/OneCli/OneCli misc rebootbmc
-                  while true ; do
-                      ./attach-usb-lan.sh
-                      /opt/OneCli/OneCli inventory getdevices && break
-                      echo "Not up yet"
-                      sleep 5
-                  done
-                  echo "BMC is back up"
-              else
-                  want_reboot=yes
-              fi
-          fi
+        if [[ $this_one_reboot = yes ]] ; then
+            if [[ "{{$elem.File}}" =~ xcc ]] ; then
+                echo "Rebooting xcc"
+                /opt/OneCli/OneCli misc rebootbmc
+                while true ; do
+                    ./attach-usb-lan.sh
+                    /opt/OneCli/OneCli inventory getdevices && break
+                    echo "Not up yet"
+                    sleep 5
+                done
+                echo "BMC is back up"
+            else
+                want_reboot=yes
+            fi
         fi
         rm -rf $TMPDIR
       {{ end }}
