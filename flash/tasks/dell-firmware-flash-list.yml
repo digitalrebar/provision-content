@@ -72,7 +72,7 @@ Templates:
              failed=yes;;
           5)
              echo "Unquailifed update for $FILENAME"
-             failed=yes;;
+             echo "Either missing or not applicable - skipping";;
           6)
              echo "Reboot started!! for $FILENAME"
              want_reboot=yes;;
