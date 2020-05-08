@@ -119,6 +119,8 @@ Templates:
             if [[ "{{$elem.File}}" =~ xcc ]] ; then
                 echo "Rebooting xcc"
                 ipmitool mc reset cold
+                # Wait for the reset to take effect.
+                sleep 20
                 set +e
                 while true ; do
                     ipmitool mc info && break
