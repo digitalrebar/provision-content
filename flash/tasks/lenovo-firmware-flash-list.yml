@@ -79,15 +79,17 @@ Templates:
           while read line; do
             case $line in
               *STATUS*)
+                echo "STATUS line is $line"
                 [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
-                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true
-                [[ $failed = no && $line = *'reboot required'* ]] && this_one_reboot=true
-                [[ $failed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=true
-                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=true
-                [[ $failed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=false
-                [[ $failed = no && $line = *'No reboot required'* ]] && this_one_reboot=false
-                [[ $failed = no && $line = *'no reboot required'* ]] && this_one_reboot=false;;
+                echo "REBOOT line is $line"
+                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'reboot required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=no
+                [[ $failed = no && $line = *'No reboot required'* ]] && this_one_reboot=no
+                [[ $failed = no && $line = *'no reboot required'* ]] && this_one_reboot=no;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
@@ -113,6 +115,7 @@ Templates:
         fi
 
         if [[ $this_one_reboot = yes ]] ; then
+            echo "Package {{$elem.File}} needs a reboot"
             if [[ "{{$elem.File}}" =~ xcc ]] ; then
                 echo "Rebooting xcc"
                 /opt/OneCli/OneCli misc rebootbmc
@@ -124,6 +127,7 @@ Templates:
                 done
                 echo "BMC is back up"
             else
+                echo "Want to reboot system"
                 want_reboot=yes
             fi
         fi
