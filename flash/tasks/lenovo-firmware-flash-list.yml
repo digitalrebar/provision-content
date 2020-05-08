@@ -118,13 +118,15 @@ Templates:
             echo "Package {{$elem.File}} needs a reboot"
             if [[ "{{$elem.File}}" =~ xcc ]] ; then
                 echo "Rebooting xcc"
-                /opt/OneCli/OneCli misc rebootbmc
+                ipmitool mc reset cold
+                set +e
                 while true ; do
-                    ./attach-usb-lan.sh
-                    /opt/OneCli/OneCli inventory getdevices && break
+                    ipmitool mc info && break
                     echo "Not up yet"
                     sleep 5
                 done
+                set -e
+                ./attach-usb-lan.sh
                 echo "BMC is back up"
             else
                 echo "Want to reboot system"
