@@ -123,12 +123,11 @@ Templates:
                 sleep 20
                 set +e
                 while true ; do
-                    ipmitool mc info && break
+                    ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
                     echo "Not up yet"
                     sleep 5
                 done
                 set -e
-                ./attach-usb-lan.sh
                 echo "BMC is back up"
             else
                 echo "Want to reboot system"
