@@ -84,7 +84,10 @@ Templates:
                 [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true
                 [[ $failed = no && $line = *'reboot required'* ]] && this_one_reboot=true
                 [[ $failed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=true
-                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=true;;
+                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=true
+                [[ $failed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=false
+                [[ $failed = no && $line = *'No reboot required'* ]] && this_one_reboot=false
+                [[ $failed = no && $line = *'no reboot required'* ]] && this_one_reboot=false;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
