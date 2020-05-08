@@ -1,0 +1,17 @@
+---
+Name: "chef-bootstrap-configure"
+Description: "A task to prepare for chef-bootstrap setup"
+Documentation: |
+  Takes care of making sure that "chef-bootstrap/node_name" param is set and Chef directories exist.
+
+  Using a separate task because we can't render the now chef-bootstrap-setup task contents before
+  having "chef-bootstrap/node_name" defined.
+OptionalParams:
+  - "chef-bootstrap/node_name"
+Templates:
+- ID: "chef-bootstrap-configure.sh.tmpl"
+  Name: "Minor preparations"
+Meta:
+  color: "orange"
+  icon: "server"
+  title: "Digital Rebar Community Content"

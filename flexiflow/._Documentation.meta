@@ -1,12 +1,9 @@
-FlexiFlow
------------------
 
 The FlexiFlow system allows an operator to dynamically inject new tasks
 in to an existing workflow based on a Parameter.  This allows for other
 content to build up Tasks to add an existing workflow flexibly.  Some
 examples may include adding specific tasks based on classification results
 from the Classify system, or other paths.
-
 
 **Stage Based Manipulation:**
 
@@ -20,7 +17,7 @@ occurances of that parameter at all levels of the system, (e.g. From
 the parameters on the machine, then profiles on machines, then parameters
 on the stage, ...).  This allows multiple resources to provide the FlexiFlow
 tasks that will eventually be run on the system.  Typically, Parameter orders
-of precedence would override earlier occurances of the Paramter values.
+of precedence would override earlier occurrences of the Parameter values.
 FlexiFlow does not follow that standard path.
 
 The Param that is referenced by ``flexiflow/list-parameter`` should be a
@@ -36,7 +33,7 @@ to jump in to another Workflow in an existing workflow.
 
 
 Operating FlexiFlow Stage Based Manipulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------
 
 Here is a brief outline of example usage of the FlexiFlow system utilizing
 the RackN defined stage.  In this example, we will define tasks to run in
@@ -48,22 +45,22 @@ Using the Stage and Task Injection
 
 In this example we will create a "my-flexiflow-discovery" workflow.
 
-	::
+  ::
 
-		Meta:
-  		color: grey
-  		icon: maagic
-		Name: my-flexiflow-discovery
-		Description: My flexiFlow Discovey Workflow
-		Stages:
-			- discover
-			- ipmi-inventory
-			- raid-inventory
-			- network-lldp
-			- inventory
-			- classify
-			- flexiflow-stage
-			- sledgehammer-wait
+    Meta:
+      color: grey
+      icon: magic
+    Name: my-flexiflow-discovery
+    Description: My flexiFlow Discovery Workflow
+    Stages:
+      - discover
+      - ipmi-inventory
+      - raid-inventory
+      - network-lldp
+      - inventory
+      - classify
+      - flexiflow-stage
+      - sledgehammer-wait
 
 Note that the ``flexiflow-stage`` is run after the ``classify`` stage.  A
 FlexiFlow stage can be added anywhere that conceptually makes sense.
@@ -85,13 +82,13 @@ same way that a custom named stage would be used.
 
 To define the custom list of tasks to execute, simply follow the below steps:
 
-	* Add the ``flexiflow/list-parameter`` param to the Machine
-	* The value of which is another Paramter that is an Array of Strings that lists tasks to add
- 	* An example is ``superflex`` (which would be the Arroy of Strings)
-  * Insure you c reate a Param with Array of Strings as the type definition (eg ``superflex``, defined as Array of Strings)
+  * Add the ``flexiflow/list-parameter`` param to the Machine
+  * The value of which is another Parameter that is an Array of Strings that lists tasks to add
+  * An example is ``superflex`` (which would be the Array of Strings)
+  * Insure you create a Param with Array of Strings as the type definition (eg ``superflex``, defined as Array of Strings)
   * Add the Param (eg ``superflex``) to the Machine with a list of tasks in the array
 
-If you createa a custom stage, you can *optionally* embed the Params that control
+If you create a custom stage, you can *optionally* embed the Params that control
 defining the list of Tasks to insert and/or the actual task list to insert.
 
 Here is an example Stage in YAML that defines which specific Param will contain
@@ -102,20 +99,20 @@ would build up the value of ``superflex`` tasks to execute dynamically.
   ::
 
     ---
-		Name: "my-superflex-stage"
-		Description: "Perform tasks defined by the 'superflex' Param."
-		Documentation: |
-			The Param 'superflex' is an array that will contain
-			the list of flexiflow tasks to run.
-		Params:
-  		flexiflow/list-parameter: "superflex"
-		Tasks:
-  		- "flexiflow-start"
-  		- "flexiflow-stop"
-		Meta:
-  		color: "orange"
-  		icon: "magic"
-  		title: "RackN Content"
+    Name: "my-superflex-stage"
+    Description: "Perform tasks defined by the 'superflex' Param."
+    Documentation: |
+      The Param 'superflex' is an array that will contain
+      the list of flexiflow tasks to run.
+    Params:
+      flexiflow/list-parameter: "superflex"
+    Tasks:
+      - "flexiflow-start"
+      - "flexiflow-stop"
+    Meta:
+      color: "orange"
+      icon: "magic"
+      title: "RackN Content"
 
 Note that as the ``Documentation`` field says; the ``flexiflow/list-parameter``
 for this Stage is defined as ``superflex``.  This Parameter must be defined
@@ -131,28 +128,28 @@ the control Parameter name to ``superflex``, and also defines the Tasks that
   ::
 
     ---
-		Name: "my-superflex-stage-v2"
-		Description: "Perform tasks to run that are defined by the 'superflex' Param."
-		Documentation: |
-			The Param 'superflex' is an array that will contain
-			the list of additional tasks to run.  The actual tasks that
+    Name: "my-superflex-stage-v2"
+    Description: "Perform tasks to run that are defined by the 'superflex' Param."
+    Documentation: |
+      The Param 'superflex' is an array that will contain
+      the list of additional tasks to run.  The actual tasks that
       are run are also listed in this Stage.
-		Params:
-  		flexiflow/list-parameter: superflex
+    Params:
+      flexiflow/list-parameter: superflex
       superflex:
         - task1
         - task2
         - task3
-		Tasks:
-  		- "flexiflow-start"
-  		- "flexiflow-stop"
-		Meta:
-  		color: "orange"
-  		icon: "magic"
-  		title: "RackN Content"
+    Tasks:
+      - "flexiflow-start"
+      - "flexiflow-stop"
+    Meta:
+      color: "orange"
+      icon: "magic"
+      title: "RackN Content"
 
 
-..note:: Warning!! The Params that are used in FlexiFlow MUST BE TYPE DFFINED correctly
+..note:: Warning!! The Params that are used in FlexiFlow MUST BE TYPE DEFINED correctly
          and added to the system before they are used.  This use case pattern does NOT
          support using adhoc Params.
 
@@ -160,43 +157,40 @@ the control Parameter name to ``superflex``, and also defines the Tasks that
 Create Parameter Definition
 ===========================
 
-It is critical that you correctly type define the Paramter that defines the
+It is critical that you correctly type define the Parameter that defines the
 list of tasks to run in advance of using the Parameter.  If you do not, you will
-receive a worning message and the task injection will fail.
+receive a warning message and the task injection will fail.
 
-An example type definition for the Paramter (using our ``superflex`` example
+An example type definition for the Parameter (using our ``superflex`` example
 above), would look like:
 
-	::
+  ::
 
-		---
-		Name: "superflex"
-		Description: "Defines the flexiflow list parameter."
-		Documentation: |
-  		This param defines the list of Tasks to execute for flexiflow
-  		during the stage run.  If left empty, no tasks will be run.
-
-		Schema:
-  		type: "array"
-  		items:
-    		type: "string"
-  		default: []
-		Meta:
-  		color: "blue"
-  		icon: "magic"
-  		title: "RackN Content"
-
+    ---
+    Name: "superflex"
+    Description: "Defines the flexiflow list parameter."
+    Documentation: |
+      This param defines the list of Tasks to execute for flexiflow
+      during the stage run.  If left empty, no tasks will be run.
+    Schema:
+      type: "array"
+      items:
+        type: "string"
+      default: []
+    Meta:
+      color: "blue"
+      icon: "magic"
+      title: "RackN Content"
 
 Possible Errors
 ===============
 
 Here is a list of some of the possible errors you may encounter.
 
+  ::
 
-	::
-
-		Failed to render actions: : template: :35:30: executing "flexiflow_start.sh" at <.ComposeParam>: error calling ComposeParam: Cannot compose freeform param superflex
-		Updated job for flexiflow-stage:flexiflow:flexiflow-start to incomplete
+    Failed to render actions: : template: :35:30: executing "flexiflow_start.sh" at <.ComposeParam>: error calling ComposeParam: Cannot compose freeform param superflex
+    Updated job for flexiflow-stage:flexiflow:flexiflow-start to incomplete
 
 In this case, the ``superflex`` list parameter must be defined in advance of using it,
 the operator has attempted to use the Parameter as an adhoc param.  Create a Param
@@ -204,7 +198,7 @@ type definition as specified in the *Create Parameter Definition* section above.
 
 
 Operating FlexiFlow Workflow Based Manipulation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 The FlexiFlow content also allows you to add a Stage to a given workflow.  At that Stage,
 the system will reference the Param named ``flexiflow/workflow``.  The value of the
@@ -213,5 +207,5 @@ on the system.
 
 Please review the ``test-flexiflow-workflow-main`` Workflow which will dynamically add the
 test workflow named ``test-flexiflow-workflow-include``.  This provides a working example
-of using the incldue workflow capability.
+of using the include workflow capability.
 

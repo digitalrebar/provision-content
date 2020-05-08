@@ -1,0 +1,18 @@
+---
+Name: "dr-server/replace-drp"
+Description: "Dev Use: download new dr-provision binary before starting service"
+Secure: true
+Documentation: |
+  Provide URL to replacement binary to be installed before ``systemctl start dr-provision``.
+
+  This is very helpful during development cycles when testing new DRP server components
+  as part of an automatied workflow with ``dr-server-install``.
+
+  WARNING: this overrides the catalog, it is NOT recommended for production installations!
+
+Schema:
+  type: string
+Meta:
+  color: "blue"
+  icon: "cube"
+  title: "RackN Copyright 2020"

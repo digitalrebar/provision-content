@@ -1,0 +1,18 @@
+---
+Name: "validate/record-parameters"
+Description: "A list of parameters to record for into validate/parameters"
+Documentation: |
+  This param defines a list of parameters to record their valies into
+  the validate/parameter on the machine.  This can be used to
+  generate a validation structure.
+
+  This assumes that inventory stage has been run on the machine.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

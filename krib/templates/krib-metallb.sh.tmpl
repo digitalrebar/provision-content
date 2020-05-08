@@ -24,15 +24,15 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   if ! which wget ; then
     install wget
   fi
-  
+
   wget -O /tmp/metallb.yaml {{ .Param "krib/metallb-config" }}
 {{$port := .Param "metallb/monitoring-port"}}
   sed -i 's/prometheus.io\/port: "7472"/prometheus.io\/port: "{{$port}}"/' /tmp/metallb.yaml
   sed -i 's/- --port=7472/- --port={{$port}}/' /tmp/metallb.yaml
   sed -i 's/containerPort: 7472/containerPort: {{$port}}/' /tmp/metallb.yaml
-{{$cpu := .Param "metallb/limits-cpu"}}  
+{{$cpu := .Param "metallb/limits-cpu"}}
   sed -i 's/cpu: 100m/cpu: {{$cpu}}/' /tmp/metallb.yaml
-{{$memory := .Param "metallb/limits-memory"}}  
+{{$memory := .Param "metallb/limits-memory"}}
   sed -i 's/memory: 100Mi/memory: {{$memory}}/' /tmp/metallb.yaml
 
   {{ if .ParamExists "krib/metallb-container-image-controller" }}
@@ -50,7 +50,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     kubectl delete -f /tmp/metallb.yaml
   fi
 
-{{$l2_ip_range := .Param "metallb/l2-ip-range"}} 
+{{$l2_ip_range := .Param "metallb/l2-ip-range"}}
   cat >/tmp/metallb-config.yaml <<EOFCONFIG
 ---
 apiVersion: v1
@@ -64,7 +64,7 @@ data:
     - name: loadbalanced
       protocol: layer2
       addresses:
-      - {{$l2_ip_range}}  
+      - {{$l2_ip_range}}
 EOFCONFIG
 
   kubectl apply -f /tmp/metallb.yaml
@@ -83,7 +83,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   if ! which wget ; then
     install wget
   fi
-  
+
   wget -O /tmp/metallb.yaml https://github.com/danderson/metallb/raw/{{ .Param "krib/metallb-version" }}/manifests/metallb.yaml
 
   # Replace references to "master" with the user-specified tag (if user has left the default at "master" this will have no effect)
@@ -94,9 +94,9 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   sed -i 's/prometheus.io\/port: "7472"/prometheus.io\/port: "{{$port}}"/' /tmp/metallb.yaml
   sed -i 's/- --port=7472/- --port={{$port}}/' /tmp/metallb.yaml
   sed -i 's/containerPort: 7472/containerPort: {{$port}}/' /tmp/metallb.yaml
-{{$cpu := .Param "metallb/limits-cpu"}}  
+{{$cpu := .Param "metallb/limits-cpu"}}
   sed -i 's/cpu: 100m/cpu: {{$cpu}}/' /tmp/metallb.yaml
-{{$memory := .Param "metallb/limits-memory"}}  
+{{$memory := .Param "metallb/limits-memory"}}
   sed -i 's/memory: 100Mi/memory: {{$memory}}/' /tmp/metallb.yaml
 
   {{ if .ParamExists "krib/metallb-container-image-controller" }}
@@ -114,8 +114,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     kubectl delete -f /tmp/metallb.yaml
   fi
 
-{{$l3_ip_range := .Param "metallb/l3-ip-range"}} 
-{{$l3_peer_address := .Param "metallb/l3-peer-address"}} 
+{{$l3_ip_range := .Param "metallb/l3-ip-range"}}
+{{$l3_peer_address := .Param "metallb/l3-peer-address"}}
 
   cat >/tmp/metallb-config.yaml <<EOFCONFIG
 ---
@@ -127,7 +127,7 @@ metadata:
 data:
   config: |
     peers:
-    - peer-address: {{$l3_peer_address}}  
+    - peer-address: {{$l3_peer_address}}
       peer-asn: 64501
       my-asn: 64500
     address-pools:
@@ -135,7 +135,7 @@ data:
       protocol: bgp
       avoid-buggy-ips: true
       addresses:
-      - {{$l3_ip_range}} 
+      - {{$l3_ip_range}}
 EOFCONFIG
 
   kubectl apply -f /tmp/metallb.yaml

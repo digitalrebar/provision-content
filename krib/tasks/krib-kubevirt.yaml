@@ -9,7 +9,7 @@ Documentation: |
 
   Recommend: you may want to add `intel_iommu=on` to the kernel-console param
 
-  The Config is provided from the kubevirt-configmap.cfg.tmpl template 
+  The Config is provided from the kubevirt-configmap.cfg.tmpl template
   instead of being downloaded from github.  Version updates should be reflected in the template.
   This approach allows for parameterization of the configuration map.
 

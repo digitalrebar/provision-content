@@ -5,7 +5,9 @@ Documentation: |
   This param will set the version of the 'install.sh' script
   to install this DRP instance with.
 
-  The only options supported are
+  The only options supported are:
+
+    ::
 
       stable
       tip

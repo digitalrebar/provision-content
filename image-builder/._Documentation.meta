@@ -2,7 +2,7 @@ Overview
 --------
 
 The image builder content pack allows an operator to create a workflow
-to build a **gold master** systemi and to capture a filesystem tarball image
+to build a **gold master** system and to capture a filesystem tarball image
 of that system as a single artifact image.  The image is suitable for
 deployment to new systems via the ``image-deploy`` plugin.
 
@@ -26,9 +26,10 @@ The basic process that this content pack employs is as follows:
   * stage the image to the DRP Endpoint in the ``files`` space for deployment
 
 The process is relatively opinionated in some aspects (repo management, installation
-of ``cloud-init`` for image deployment customizations, etc.).  It is entirely
-likely that you may need to customize either the Stages or specific tasks attached
-to the Stages to meet your use case requirements.
+of ``cloud-init`` for image deployment customizations, etc.).
+
+**It is entirely likely that you may need to customize either the Stages or specific
+tasks attached to the Stages to meet your use case requirements.**
 
 Tutorial Videos
 ===============
@@ -44,16 +45,11 @@ Uploading Images
 
 At the conclusion of the ``image-capture`` task (in the ``image-builder-linux`` stage),
 the image will be uploaded to the HTTP fileserver space on the DRP Endpoint.  To successfully
-upload the image, an account with administrative access to the DRP Endpoint must be used
-to authenticate to DRP.
+upload the image, the image builder content uses the ``ExtraClaims`` to add additional *scope*
+access to the ``files`` API service.  This is used to allow the use of ``drpcli files upload ....``
+command to store the image on the DRP Endpoint for use by the ``image-deploy`` plugin.
 
-It is not possible to use the Token system to render a token in the template for authorization.
-The Token system and rendering is limited by design to only allow a Machine to make changes
-related to that given Machine's object, and not administrative access to the DRP Endpoint.
-
-Please set the ``unsafe/rs-username`` and ``unsafe/rs-password`` Params to the username and
-password with RBAC permissions to upload files to the DRP Endpoint.  In future iterations of
-this tool, the Encrypted Params system will be used.
+The use of ``unsafe/rs-username`` and ``unsafe/rs-password`` Params are deprecated.
 
 Using the Image
 ===============
@@ -79,16 +75,37 @@ the ``image-deploy/image-url`` to:
 
   * {{ .ProvisionerURL }}/files/images/rhel-tarball-20190827-184435-cf99cd80eb.tgz
 
+Example Image Deploy Profile
+++++++++++++++++++++++++++++
+
+Below is an example Profile that could be used to reference an Image Builder built image
+for deployment by the ``image-deploy`` plugin.  Note that these values are examples and
+will be unique to your built image (YAML format).
+
+  ::
+
+    ---
+    Name: "my-image-deploy"
+    Meta:
+      color: "purple"
+      icon: "wizard"
+      title: "Built by Image Builder"
+    Params:
+      image-deploy/image-os: "linux"
+      image-deploy/image-type: "tgz"
+      image-deploy/image-url: "http://192.168.124.1:8091/files/images/rhel-tarball-20190827-184435-cf99cd80eb.tgz"
+      kexec-ok: true
+
+Note that the use of ``kexec-ok: true`` is not required, but often helpful in enabling
+extremely rapid image deployment capabilities.
+
 
 Prerequisites
 =============
 
 The image-builder content pack has Prerequisites necessary to operate correctly.  In addition
 to any content packs that define/describe BootEnvs and necessary workflow stages (for example
-RHEL 7.7 requiers ``os-other``, and use of ``runner-service`` requires ``task-library), the
-following explicite dependencies / requirements must also be installed:
-
-  * ``dev-library``: used for ``unsafe/rs-username`` and ``unsafe/rs-password`` params
+RHEL 7.7 requiers ``os-other``, and use of ``runner-service`` requires ``task-library``).
 
 Please ensure you have the appropriate content packs to support workflows for building images
 as desired.  The Preqrequisistes system does not call out content or plugins that are

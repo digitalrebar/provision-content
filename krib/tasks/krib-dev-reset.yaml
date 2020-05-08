@@ -3,13 +3,15 @@ Description: "DEV: Reset Profile values between Test Runs"
 Name: "krib-dev-reset"
 Documentation: |
   Clears Created Params: krib/*, etcd/*
+ExtraClaims:
+  - scope: "plugins"
+    action: "*"
+    specific: "*"
 RequiredParams:
   - krib/cluster-profile
   - etcd/cluster-profile
 OptionalParams:
   - krib/cluster-is-production
-  - unsafe/rs-username
-  - unsafe/rs-password
 Templates:
 - Contents: |-
     #!/bin/bash
@@ -45,25 +47,11 @@ Templates:
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
-      echo "Try to add unsafe/rs-username with value: <your-non-default-username>, and unsafe/rs-password with value: <your-non-default-password>, on your profile and re-run the krib-reset-cluster workflow"
 
       sleep 1
-      {{if .ParamExists "unsafe/rs-username"}}
-        USERNAME="{{.Param "unsafe/rs-username"}}"
-      {{else}}
-        USERNAME="rocketskates"
-      {{end}}          
-      {{if .ParamExists "unsafe/rs-password"}}
-        PASSWORD="{{.Param "unsafe/rs-password"}}"
-      {{else}}
-        PASSWORD="r0cketsk8ts"
-      {{end}}
-      HOLD_TOKEN=$RS_TOKEN
-      unset RS_TOKEN
-      drpcli -U "$USERNAME" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
-      drpcli -U "$USERNAME" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
-      drpcli -U "$USERNAME" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
-      export RS_TOKEN=$HOLD_TOKEN
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
     else
       echo "  No CA root detected - no reset required"
     fi
@@ -126,24 +114,8 @@ Templates:
       echo "==========================================================================="
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca"
       echo "==========================================================================="
-      echo "Try to add unsafe/rs-username with value: <your-non-default-username>, and unsafe/rs-password with value: <your-non-default-password>, on your profile and re-run the krib-reset-cluster workflow"
-
       sleep 1
-      {{if .ParamExists "unsafe/rs-username"}}
-        USERNAME="{{.Param "unsafe/rs-username"}}"
-      {{else}}
-        USERNAME="rocketskates"
-      {{end}}          
-      {{if .ParamExists "unsafe/rs-password"}}
-        PASSWORD="{{.Param "unsafe/rs-password"}}"
-      {{else}}
-        PASSWORD="r0cketsk8ts"
-      {{end}}
-
-      HOLD_TOKEN=$RS_TOKEN
-      unset RS_TOKEN
-      drpcli -U "$USERNAME" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca
-      export RS_TOKEN=$HOLD_TOKEN
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "consul/name"}}-ca
     else
       echo "  No CA root detected - no reset required"
     fi
@@ -209,23 +181,9 @@ Templates:
       echo "==========================================================================="
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca"
       echo "==========================================================================="
-      echo "Try to add unsafe/rs-username with value: <your-non-default-username>, and unsafe/rs-password with value: <your-non-default-password>, on your profile and re-run the krib-reset-cluster workflow"
 
       sleep 1
-      {{if .ParamExists "unsafe/rs-username"}}
-        USERNAME="{{.Param "unsafe/rs-username"}}"
-      {{else}}
-        USERNAME="rocketskates"
-      {{end}}          
-      {{if .ParamExists "unsafe/rs-password"}}
-        PASSWORD="{{.Param "unsafe/rs-password"}}"
-      {{else}}
-        PASSWORD="r0cketsk8ts"
-      {{end}}
-      HOLD_TOKEN=$RS_TOKEN
-      unset RS_TOKEN
-      drpcli -U "$USERNAME" -P "$PASSWORD" plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca
-      export RS_TOKEN=$HOLD_TOKEN
+      drpcli plugins runaction certs deleteroot certs/root {{.Param "vault/name"}}-ca
     else
       echo "  No CA root detected - no reset required"
     fi

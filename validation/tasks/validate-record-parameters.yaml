@@ -1,0 +1,38 @@
+---
+Name: "validate-record-parameters"
+Description: "Record the parameters on machine for validation"
+Documentation: |
+  This task records the values from the inventory/collect parameter
+  and stores them in the *validate/parameters* object format for
+  validation.  The default operation is equals.
+
+  This assumes that inventory as already been run.
+
+Meta:
+  icon: "plug"
+  color: "blue"
+  title: "RackN Content"
+Templates:
+  - Name: "validate-record-parameters.sh"
+    Contents: |
+      #!/usr/bin/env bash
+
+      set -e
+
+      {{ template "setup.tmpl" . }}
+
+      JSONSTR="{"
+      echo "=== COLLECTING INVENTORY ===="
+      {{range $index, $parm := .Param "validate/record-parameters"}}
+         {{if eq $parm "inventory/CPUSpeed" }}
+         JSONSTR="${JSONSTR}${COMMA} \"{{$parm}}\": { \"Op\": \"equal\", \"Values\": [ \"{{$.Param $parm}}\" ] }"
+         {{ else }}
+         JSONSTR="${JSONSTR}${COMMA} \"{{$parm}}\": { \"Op\": \"equal\", \"Values\": [ {{$.ParamAsJSON $parm}} ] }"
+         {{ end }}
+         COMMA=","
+      {{end}}
+      JSONSTR="${JSONSTR}}"
+
+      drpcli machines set $RS_UUID params validate/parameters to "$JSONSTR" >/dev/null
+
+      exit 0

@@ -1,0 +1,14 @@
+---
+Name: "rsa/key-user"
+Description: "User of RSA Key for SSH"
+Documentation: |
+  SSH Key User.
+
+Schema:
+  type: "string"
+  default: "root"
+Meta:
+  color: "black"
+  icon: "user"
+  title: "Digital Rebar Community Connect"
+  copyright: "RackN 2020"

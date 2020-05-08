@@ -1,6 +1,8 @@
 ---
 Name: "redhat-6.5-install"
 Description: "Install BootEnv for RedHat 6.5"
+Documentation: |
+  Install BootEnv for RedHat 6.5
 OS:
   Family: "redhat"
   Name: "redhat-6.5"

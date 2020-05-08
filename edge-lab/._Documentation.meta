@@ -1,0 +1,98 @@
+
+**Please see http://edgelab.digital for complete the reference architecture and additional documentation.**
+
+Assumptions:
+
+* the leader node have internet access for downloading `containerd` and `k3s` binaries
+* all nodes have have internet access for downloading containers
+* `drpcli` has been installed on client system
+
+Edge Lab requires Digital Rebar Platform tip (post v4.2) due to RPi install requirements.
+
+Building & Installing DRP on Edge Lab
+-------------------------------------
+
+Please see the documentation in https://github.com/digitalrebar/edgelab for building the physical environment.
+
+Setup Edge Lab Content
+----------------------
+
+Note: make sure that you `export RS_ENDPOINT` to your endpoint!
+
+Edge Lab (edge-lab) is available in the RackN Catalog, you
+can install it using `drpcli catalog item install edge-lab`
+This was done for you as part of the bootstrapping process.
+
+To manually create and upload:
+
+#. clone edge-lab with DRP content: `git clone https://github.com/digitalrebar/provision-content`
+#. got to the edge-lab content: `cd provision-content\edge-lab`
+#. build the content pack: `drpcli contents bundle edge-lab.yaml`
+#. install the `edge-lab` content pack: `drpcli contents upload edge-lab.yaml`
+
+If you make changes, you can repeat steps 3 and 4 to upload the latest content.
+
+Setup K3s Cluster
+-----------------
+
+Before starting, install `kubectl` has been installed on client system
+
+To build your cluster:
+
+#. select the nodes for installation and apply the `k3s-install` workflow
+#. wait for workflow to complete on leader
+#. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > admin.conf`
+
+To access on the DRP server or cluster:
+
+#. test with `kubectl --kubeconfig=admin.conf get nodes`
+
+To access from another system, use an SSH tunnel:
+
+#. setup an ssh tunnel: `ssh root@[host wifi ip] -L 6443:[leader node ip]:6443`
+#. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
+#. test with `kubectl --kubeconfig=admin.conf get nodes`
+
+Install OpenFaaS via Helm
+-------------------------
+
+The k3s install above will automatically include Helm v3 and run
+charts defined in the `edge-lab/helm-charts` param array.
+
+OpenFaaS is provided as an example in the `openfaas-base` profile.
+To include OpenFaaS in the k3s install, simply assign the
+`openfaas-base` profile on cluster leader (you can assign it to all
+cluster machines and it will be ignore on the non-leaders).
+
+Since the helm stages are idempotent, either include the profile
+before running the `k3s-install` workflow or re-run the workflow.
+
+The OpenFaaS helm chart install will write its password to the
+cluster profile using `openfaas/password`.
+
+
+Machine Reset
+-------------
+
+Setting a machine's workflow to `edge-lab-reboot-to-discover` will force the machine through a soft reboot process and back to discovery.
+
+To indicate that the machine has been rebooted, the icon is set to the red recycling image.  The icon will remain until it get's reset.
+
+The machine is avilable once it is marked Runnable again.
+
+
+Edge Lab Bootstrap
+------------------
+
+This content pack includes the steps needed to bootstrap the Edge Lab server.  This includes
+a workflow, stage, and tasks to:
+
+#. Download the required isos (sledgehammer rpi, but others as well).
+#. Set the default preferences to make Edge Lab work.
+#. Set up an ssh key pair if one does not exist and update the global profile with it.
+   This can be used to access the clients from the server.
+#. Create the default subnet for the Edge Lab.
+#. Lock the Machine to prevent unintented actions
+
+The start_me.sh script will install the edge-lab content pack and set the DRP server's workflow to the bootstrap
+workflow.  The status of bootstrapping can be tracked in the jobs for the DRP server.

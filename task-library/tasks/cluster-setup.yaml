@@ -1,0 +1,66 @@
+---
+Description: "Create Shared Profile & Elect Leader"
+Name: "cluster-setup"
+Documentation: |
+  Creates the Cluster for Digital Rebar
+
+    1. will verify machine is in a shared profile
+    2. will create shared profile if missing
+    3. will add profile to machine if missing
+    4. will make machine leader if no leader is present
+
+ExtraClaims:
+  - scope: "profiles"
+    action: "create,get,update"
+    specific: "*"
+Meta:
+  icon: "object group outline"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2019"
+Templates:
+- Contents: |-
+    #!/usr/bin/env bash
+    # Create Cluster Profile & Elect Leader
+    set -e
+
+    echo "Starting: Setup Cluster"
+
+    # Get access and who we are.
+    {{template "setup.tmpl" .}}
+
+    drpcli machines meta set $RS_UUID key color to yellow
+
+    {{template "cluster-shared.tmpl" .}}
+
+    if [[ {{ .Param "cluster/leader-count" }} > 1 ]]; then
+      echo "This script only supports SINGLE LEADER clusters"
+      exit 1
+    fi
+    echo "Verifying Cluster $CLUSTER_PROFILE has Param[cluster/leaders] (elect me if missing)"
+    if [[ $(jq length <<< "${CLUSTER_LEADERS}") < {{ .Param "cluster/leader-count" }} ]]; then
+      echo "Attempting to add Myself As Leader"
+      LEADER_NEW='{
+        "Address":"{{ .Machine.Address }}",
+        "Name":"{{ .Machine.Name }}",
+        "Uuid":"{{ .Machine.Uuid }}",
+      }'
+      if drpcli profiles add $CLUSTER_PROFILE param cluster/leaders to "[${LEADER_NEW}]"; then
+        echo "Won Race - I am now the leader"
+        CLUSTER_I_AM_LEADER=true
+        CLUSTER_LEADER_INDEX=0
+        drpcli machines meta set $RS_UUID key icon to anchor
+      else
+        echo "No Action: Lost Race - another machine became the leader"
+        drpcli machines meta set $RS_UUID key icon to ship
+      fi
+      CLUSTER_LEADERS=$(drpcli profiles get $CLUSTER_PROFILE param cluster/leaders)
+    else
+      echo "No Action: Leader is $(jq '.[0].Name' <<< "${CLUSTER_LEADERS}")"
+      drpcli machines meta set $RS_UUID key icon to ship
+    fi
+
+    echo "Complete: Setup Cluster"
+    exit 0
+  Name: cluster-setup

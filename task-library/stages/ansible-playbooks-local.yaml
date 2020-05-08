@@ -1,10 +1,11 @@
+---
 Description: Invoke ansible playbooks from git
 Documentation: |
-  Local Git-Based Ansible Playbooks
-  ---------------------------------
-  Invoke ansible playbooks from git
+  Invoke ansible playbooks from git.
 
-  Required Param: `ansible/playbooks` - List of playbook git repos to run on the local machin
+  .. note:: ``ansible/playbooks`` is a Required Param - List of playbook git
+            repos to run on the local machine.
+
 Meta:
   color: yellow
   icon: play

@@ -1,0 +1,16 @@
+---
+Name: proxmox/lab-student-vms
+Description: The number of student vms on each Proxmox server to setup.
+Documentation: |
+  This param is used to define the number of student vms to add to each Proxmox
+  host.
+
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+Schema:
+  default: 3
+  type: number
+Secure: false
+

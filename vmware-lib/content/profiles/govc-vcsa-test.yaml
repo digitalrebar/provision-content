@@ -1,0 +1,21 @@
+---
+Name: "govc-vcsa-test"
+Description: "govc VCSA deployment test profile"
+Documentation: |
+  Runs ``govc`` to deploy a test VCSA deployment.  Requires that the VCSA configuration
+  JSON file be saved to to the context container as ``/tmp/template.json`` prior to the
+  command being run.
+
+Meta:
+  color: "grey"
+  icon: "terminal"
+  title: "GOVC VCSA Test Profile"
+Params:
+  govc/command: "import.ova -options=/tmp/template.json http://192.168.124.1:8091/files/images/vcsa.ova"
+  govc/template-json: "vcsa-esxi-uefi.json.tmpl"
+  govc/url: "root:RocketSkates@192.168.124.4"
+  govc/insecure: true
+  govc/datastore: "datastore1"
+  govc/network: "VM Network"
+  govc/resource-pool: "*/Resources"
+Profiles: []

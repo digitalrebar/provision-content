@@ -6,26 +6,30 @@ Documentation: |
 
   To join EXISTING machines or CLOUD machines into DRP, you can use run `join-up.sh`.
   Add the following line to the machines initialization script:
+
     ::
 
       #!/bin/bash
       curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
+
 Meta:
   feature-flags: "change-stage-v2"
   icon: "binoculars"
   color: "blue"
   title: "Digital Rebar Community Content"
 OnlyUnknown: true
+Loaders:
+  amd64-uefi: e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
-      Kernel: "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/vmlinuz0"
+      IsoFile: "sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
+      Kernel: "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/vmlinuz0"
       Initrds:
-        - "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/stage1.img"
+        - "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -59,10 +63,105 @@ OS:
         {{.Param "kernel-options"}}
         --
         {{.Param "kernel-console"}}
+    rpi4:
+      Loader: "grubarm64.efi"
+      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9b5276ac5826520829aa73c149fe672fe2363656/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
+      Kernel: "rpi/kernel8.img"
+      Initrds:
+        - "rpi/stage1.img"
+      BootParams: >-
+        rootflags=loop
+        root=live:/sledgehammer.iso
+        rootfstype=auto
+        ro
+        liveimg
+        rd_NO_LUKS
+        rd_NO_MD
+        rd_NO_DM
+        provisioner.web={{.ProvisionerURL}}
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
 OptionalParams:
   - "kernel-console"
   - "kernel-options"
 Templates:
+  - Name: start4.elf
+    Link: '{{.Env.PathForArch "tftp" "rpi/start4.elf" "rpi4"}}'
+    Path: start4.elf
+  - Name: fixup4.dat
+    Link: '{{.Env.PathForArch "tftp" "rpi/fixup4.dat" "rpi4"}}'
+    Path: fixup4.dat
+  - Name: bcm2711-rpi-4-b.dtb
+    Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Path: bcm2711-rpi-4-b.dtb
+  - Name: rpi4b-cmdline.txt
+    Path: cmdline.txt
+    Contents: |
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF=discovery provisioner.web={{.ProvisionerURL}}
+  - Name: rpi4b-config.txt
+    Path: config.txt
+    Contents: |
+      # uncomment if you get no picture on HDMI for a default "safe" mode
+      #hdmi_safe=1
+
+      # uncomment this if your display has a black border of unused pixels visible
+      # and your display can output without overscan
+      disable_overscan=1
+
+      # uncomment the following to adjust overscan. Use positive numbers if console
+      # goes off screen, and negative if there is too much border
+      #overscan_left=16
+      #overscan_right=16
+      #overscan_top=16
+      #overscan_bottom=16
+
+      # uncomment to force a console size. By default it will be display's size minus
+      # overscan.
+      #framebuffer_width=1280
+      #framebuffer_height=720
+
+      # uncomment if hdmi display is not detected and composite is being output
+      #hdmi_force_hotplug=1
+
+      # uncomment to force a specific HDMI mode (this will force VGA)
+      #hdmi_group=1
+      #hdmi_mode=1
+
+      # uncomment to force a HDMI mode rather than DVI. This can make audio work in
+      # DMT (computer monitor) modes
+      #hdmi_drive=2
+
+      # uncomment to increase signal to HDMI, if you have interference, blanking, or
+      # no display
+      #config_hdmi_boost=4
+
+      # uncomment for composite PAL
+      #sdtv_mode=2
+
+      # Uncomment some or all of these to enable the optional hardware interfaces
+      #dtparam=i2c_arm=on
+      #dtparam=spi=on
+      #dtparam=i2s=on
+
+      # Uncomment this to enable infrared communication.
+      #dtoverlay=gpio-ir,gpio_pin=17
+      #dtoverlay=gpio-ir-tx,gpio_pin=18
+
+      # Enable audio (loads snd_bcm2835)
+      dtparam=audio=on
+
+      [pi4]
+      dtoverlay=vc4-fkms-v3d
+      max_framebuffers=2
+      arm_64bit=1
+      #device_tree_address=0x03000000
+
+      [all]
+      #dtoverlay=vc4-fkms-v3d
+      kernel {{.Env.PathForArch "tftp" (.Env.KernelFor "rpi4") "rpi4"}}
+      initramfs {{.Env.JoinInitrdsFor "tftp" "rpi4"}} followkernel
   - Name: "pxelinux"
     Path: "pxelinux.cfg/default"
     Contents: |
@@ -113,15 +212,6 @@ Templates:
   - Name: "grub"
     Path: "grub/grub.cfg"
     Contents: |
-      set _kernel=linux
-      set _module=initrd
-      $_kernel
-      if test $? != 18; then
-          set _kernel=linuxefi
-          set _module=initrdefi
-      fi
-      function kernel { $_kernel "$@"; }
-      function module { $_module "$@"; }
       if test -s (tftp)/grub/${net_default_mac}.cfg; then
         echo "Booting via MAC"
         source (tftp)/grub/${net_default_mac}.cfg
@@ -129,31 +219,15 @@ Templates:
         echo "Booting via IP"
         source (tftp)/grub/${net_default_ip}.cfg
       else
-        echo "Booting discovery for ${grub_cpu}"
-        source (tftp)/grub/${grub_cpu}.cfg
+        echo "Booting discovery"
+        source (tftp)/grub/discovery.cfg
       fi
-      boot
-  - Name: "grub-i386"
-    Path: "grub/i386.cfg"
-    Contents: |
-      kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
-      {{range $initrd := .Env.InitrdsFor "amd64"}}
-      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
-      {{end}}
-  - Name: "grub-x86_64"
-    Path: "grub/x86_64.cfg"
-    Contents: |
-      kernel linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
-      {{range $initrd := .Env.InitrdsFor "amd64"}}
-      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
-      {{end}}
-  - Name: "grub-arm64"
-    Path: "grub/arm64.cfg"
-    Contents: |
-      kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
-      {{range $initrd := .Env.InitrdsFor "arm64"}}
-      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
-      {{end}}
+  - Name: "grub-secure-discovery"
+    Path: "sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg"
+    ID: allarch-grub.tmpl
+  - Name: "grub-discovery"
+    Path: "grub/discovery.cfg"
+    ID: allarch-grub.tmpl
   - Name: "join-up.sh"
     Path: "machines/join-up.sh"
     Contents: |

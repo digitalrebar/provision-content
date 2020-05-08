@@ -1,0 +1,13 @@
+---
+Name: "context-clear"
+Description: "Prepare for (re)Discover - clear BaseContext"
+Params:
+  "context/name": ""
+Tasks:
+  - "context-set"
+  - "context:"
+Meta:
+  icon: "eraser"
+  color: "black"
+  title: "RackN Content"
+  copyright: "RackN 2019"

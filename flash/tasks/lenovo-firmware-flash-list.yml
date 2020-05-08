@@ -14,6 +14,17 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      function clean_curl() {
+          local _src=$1
+          local _dest=$2
+
+          echo "Downloading $_src"
+          curl -k -o $_dest $_src
+          if [[ $? != 0 ]] ; then
+              xiterr 1 "Failed to download $_dest from $_src"
+          fi
+      }
+
       chmod +x attach-usb-lan.sh
       ./attach-usb-lan.sh
 
@@ -46,16 +57,16 @@ Templates:
         {{ else }}
         FORCE=
         {{ end }}
+        {{ if $.Param "flash-list-force" }}
+        FORCE="--forceid $ID"
+        {{ end }}
 
-        {{ if hasPrefix "http:" $elem.File }}
-        curl -o $TMPDIR/$FILENAME {{$elem.File}}
-        curl -o $TMPDIR/$ID.xml "$DNAME/$ID.xml"
-        {{ else if hasPrefix "https:" $elem.File }}
-        curl -k -o $TMPDIR/$FILENAME {{$elem.File}}
-        curl -k -o $TMPDIR/$ID.xml "$DNAME/$ID.xml"
+        {{ if hasPrefix "http" $elem.File }}
+        clean_curl "{{$elem.File}}" "$TMPDIR/$FILENAME"
+        clean_curl "$DNAME/$ID.xml" "$TMPDIR/$ID.xml"
         {{ else }}
-        curl -o $TMPDIR/$FILENAME "{{$.ProvisionerURL}}/{{$elem.File}}"
-        curl -o $TMPDIR/$ID.xml "{{$.ProvisionerURL}}/$DNAME/$ID.xml"
+        clean_curl "{{$.ProvisionerURL}}/{{$elem.File}}" "$TMPDIR/$FILENAME"
+        clean_curl "{{$.ProvisionerURL}}/$DNAME/$ID.xml" "$TMPDIR/$ID.xml"
         {{ end }}
 
         set +e
@@ -70,7 +81,7 @@ Templates:
               *STATUS*)
                 [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
-                [[ $failed = no && $line = *'Reboot Required to take effect'* ]] && this_one_reboot=true;;
+                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
@@ -93,22 +104,22 @@ Templates:
               cat flash.{{$index}}/common_result.xml
               failed=yes;;
           esac
+        fi
 
-          if [[ $this_one_reboot = yes ]] ; then
-              if [[ "{{$elem.File}}" =~ xcc ]] ; then
-                  echo "Rebooting xcc"
-                  ipmitool mc reset cold
-                  while true ; do
-                      ./attach-usb-lan.sh
-                      /opt/OneCli/OneCli inventory getdevices && break
-                      echo "Not up yet"
-                      sleep 5
-                  done
-                  echo "BMC is back up"
-              else
-                  want_reboot=yes
-              fi
-          fi
+        if [[ $this_one_reboot = yes ]] ; then
+            if [[ "{{$elem.File}}" =~ xcc ]] ; then
+                echo "Rebooting xcc"
+                /opt/OneCli/OneCli misc rebootbmc
+                while true ; do
+                    ./attach-usb-lan.sh
+                    /opt/OneCli/OneCli inventory getdevices && break
+                    echo "Not up yet"
+                    sleep 5
+                done
+                echo "BMC is back up"
+            else
+                want_reboot=yes
+            fi
         fi
         rm -rf $TMPDIR
       {{ end }}

@@ -1,0 +1,110 @@
+---
+Description: "A task run govc commands"
+Name: "govc-command"
+Documentation: |
+  This task executes a given ``govc`` call in a container context.  The govc
+  command is defined via the Param ``govc/command``, which is required for this
+  task.
+
+  The operator must also specify the remote vSphere ESXi or vCenter resource to
+  connect to, to execute ``govc`` commands against.  This is accomplished either
+  by setting the ``govc/url`` Param, or the individual ``govc/username``,
+  ``govc/password``, ``govc/node``, and optionally ``govc/port`` (if using a
+  non-standrd Port.  See the documentation for each of those Params for more
+  details.
+
+  Many of the GoVC commands require a JSON configuration that defines more the
+  values for customizing.  In these cases, use the ``govc/template-json`` param
+  to define the Template to render inside of the GoVC container context.
+
+RequiredParams:
+  - "govc/command"
+OptionalParams:
+  - "govc/url"
+  - "govc/insecure"
+  - "govc/username"
+  - "govc/password"
+  - "govc/node"
+  - "govc/port"
+  - "govc/template-json"
+Templates:
+  - Name: "govc-command.sh"
+    Contents: |
+      #!/bin/bash
+      # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
+      # RackN Copyright 2020
+
+      set -e
+
+      {{ template "setup.tmpl" .}}
+
+      {{ if .ParamExists "govc/template-json" }}
+      {{ $dot := . -}}
+      {{ $template := .Param "govc/template-json" -}}
+      cat <<EOTMPL > /tmp/template.json
+      {{ $dot.CallTemplate $template $dot }}
+      EOTMPL
+
+      echo "===== BEGIN TEMPLATE DEBUG ===="
+      echo ""
+      echo "Using JSON Template for OVA: {{ $template }}"
+      echo ""
+      cat /tmp/template.json
+      echo ""
+      echo "===== END TEMPLATE DEBUG ===="
+      {{ end -}}
+
+      echo ""
+      echo "==== SETUP govc Command ===="
+      echo ""
+
+      CMD="{{ .ParamExpand "govc/command" }}"
+
+      URL={{ .ParamExpand "govc/url" }}
+
+      if test -n "$URL"
+      then
+        # govc/url is set, use it
+        echo "Using govc/url to set URL resource setting ... "
+      else
+        # govc/url not set, construct the URL
+        echo "Using govc/* individual Params to set URL resource setting ... "
+        U="{{ .Param "govc/username" }}"
+        S="{{ .Param "govc/password" }}"
+        N="{{ .ParamExpand "govc/node" }}"
+        P="{{ .Param "govc/port" }}"
+        URL="${U}:${S}@${N}"
+        [[ "$P" != "0" ]] && URL+=":$P"
+      fi
+      export GOVC_URL="$URL"
+
+      {{ if eq (.Param "govc/insecure") true -}}
+      export GOVC_INSECURE=1
+      {{ end -}}
+
+      ds='{{ .Param "govc/datastore" }}'
+      nw='{{ .Param "govc/network" }}'
+      rp='{{ .Param "govc/resource-pool" }}'
+      [[ -n $"GOVC_DATASTORE" ]] && export GOVC_DATASTORE="$ds"
+      [[ -n $"GOVC_NETWORK" ]] && export GOVC_NETWORK="$nw"
+      [[ -n $"GOVC_RESOURCE_POOL" ]] && export GOVC_RESOURCE_POOL="$rp"
+
+      echo "govc environment variables:"
+      env | grep -v grep | grep "GOVC_"
+
+      echo ""
+      echo "==== RUN 'govc $CMD' ===="
+      echo ""
+
+      govc $CMD
+
+      echo ""
+      echo "==== DONE ===="
+      echo ""
+
+      exit 0
+Meta:
+  icon: "terminal"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

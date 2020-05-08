@@ -72,3 +72,15 @@ Templates:
   - ID: "net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
+  - Name: grub-secure-mac
+    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    ID: default-grub.tmpl
+  - Name: grub-secure
+    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    ID: default-grub.tmpl
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'

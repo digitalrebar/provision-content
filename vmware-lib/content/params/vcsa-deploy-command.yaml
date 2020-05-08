@@ -1,0 +1,24 @@
+---
+Name: "vcsa-deploy/command"
+Description: "Command to for 'vcsa-deploy' to run."
+Documentation: |
+  ``vcsa-deploy`` command to run
+
+  Defaults to ``vcsa-deploy --help`` command.
+
+  Example of a valid command:
+
+    ::
+
+      install /tmp/template.json --accept-eula --acknowledge-ceip --verbose --log-dir /tmp/vcsa-deploy-logs --no-esx-ssl-verify
+
+  ``/tmp/template.json`` would be the template instantiated JSON config file that
+  describes the deployment options.
+
+Schema:
+  type: "string"
+  default: "--help"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

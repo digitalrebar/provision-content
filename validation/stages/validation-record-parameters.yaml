@@ -1,0 +1,16 @@
+---
+Name: "validation-record-parameters"
+Description: "Record baseline parameters for validation"
+Documentation: |
+  This stage allows for a system to record the values of an inventoried
+  system for use in validation later.  The stage will build a *validate/parameters*
+  that validates the parameters defined in *validate/record-parameters*.
+
+  This assumes that the *inventory* stage has already be run.
+
+Tasks:
+  - "validate-record-parameters"
+Meta:
+  color: "yellow"
+  icon: "bug"
+  title: "RackN Content"

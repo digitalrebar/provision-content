@@ -26,7 +26,7 @@ Documentatioin: |
   necessary in that case.  The default behavior only works correcly
   if this value is unset - so delete it.
 
-  Setting 'krib/cluster-masters' and/or 'etcd/servers' does require 
+  Setting 'krib/cluster-masters' and/or 'etcd/servers' does require
   filling out all three fields (Address, Name, and Uuid).
 
 Meta:

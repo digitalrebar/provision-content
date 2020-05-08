@@ -1,0 +1,24 @@
+---
+Description: "A task to lock the machine at end for Edge Lab"
+Name: "edge-lab-bootstrap-lock"
+Documentation: |
+  A task to lock the machine for Edge Lab
+Templates:
+  - Name: "lock.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      echo "Locking Machine"
+      drpcli machines meta set $RS_UUID key icon to "chess queen"
+      drpcli machines meta set $RS_UUID key color to "black"
+      drpcli machines update $RS_UUID '{"Locked":true}'
+
+Meta:
+  icon: "lock"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2019"

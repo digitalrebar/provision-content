@@ -1,0 +1,11 @@
+---
+Name: "edge-lab/reset-workflow"
+Description: "Workflow to set before rebooting system."
+Documentation: |
+  Workflow to set before rebooting system.
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "recycle"
+  title: "Community Content Copyright RackN 2019"

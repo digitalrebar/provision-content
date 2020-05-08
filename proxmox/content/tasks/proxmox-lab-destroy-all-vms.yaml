@@ -1,0 +1,54 @@
+---
+Name: proxmox-lab-destroy-all-vms
+Description: NUKES ALL virtual machines on the proxmox node.
+Documentation: |
+  Completely nukes all found Virtual Machines on a proxmox node.
+
+Meta:
+  color: red
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+RequiredParams: []
+Templates:
+  - Contents: |-
+      #!/usr/bin/env bash
+      # Proxmox destroy all virtual machines
+
+      set -e
+      PVENODE=$(hostname)
+
+      destroy_if_exists() {
+        local _vmid=$1
+        if pvesh get /nodes/${PVENODE}/qemu/${_vmid}/status/current
+        then
+          echo ">>> Virtual Machine with ID '$_vmid' exists and being destroyed now..."
+          pvesh create /nodes/${PVENODE}/qemu/${_vmid}/status/stop
+          pvesh delete /nodes/${PVENODE}/qemu/${_vmid}
+        else
+          echo ">>> Virtual Machine with ID '$_vmid' doesn't seem to exist any more..."
+        fi
+      }
+
+      for VMID in $(pvesh get /nodes/${PVENODE}/qemu --output-format json | jq -r '.[] | .vmid')
+      do
+        LOG=$(mktemp /tmp/destroy-vmid-$VMID-XXXXXXXXX.log)
+        echo "Destroy VMID $VMID at $(date)" > $LOG
+        LOGS="$LOGS $LOG"
+        destroy_if_exists $VMID > $LOG 2>&1 &
+      done
+
+      echo "Destroy logs:"
+      for LOG in $LOGS
+      do
+        echo "---------------------------------------------------------------------------"
+        cat $LOG
+        echo "---------------------------------------------------------------------------"
+      done
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-createnodes"
+    Path: ""

@@ -3,6 +3,7 @@
 /*.rst
 /*.json
 */._Version.meta
+*/content/._Version.meta
 key1*
 key2*
 e-info.tgz
@@ -14,3 +15,5 @@ drp
 /.idea/
 bin
 krib/krib.yaml
+edge-lab/edge-lab.yaml
+edge-lab/admin.conf

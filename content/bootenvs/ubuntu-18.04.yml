@@ -24,9 +24,9 @@ OS:
   Version: "18.04"
   SupportedArchitectures:
     amd64:
-      IsoFile: "ubuntu-18.04.3-server-amd64.iso"
-      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.3-server-amd64.iso"
-      IsoSha256: "7d8e0055d663bffa27c1718685085626cb59346e7626ba3d3f476322271f573e"
+      IsoFile: "ubuntu-18.04.4-server-amd64.iso"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.4-server-amd64.iso"
+      IsoSha256: "e2ecdace33c939527cbc9e8d23576381c493b071107207d2040af72595f8990b"
       Kernel: "install/netboot/ubuntu-installer/amd64/linux"
       Initrds:
         - "install/netboot/ubuntu-installer/amd64/initrd.gz"
@@ -44,9 +44,9 @@ OS:
         --
         {{.Param "kernel-console"}}
     arm64:
-      IsoFile: "ubuntu-18.04.3-server-arm64.iso"
-      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.3-server-arm64.iso"
-      IsoSha256: "59f141b7c3816dc4ef5ff5322b9225faa2c59d02225528f0f21d367628bde9b1"
+      IsoFile: "ubuntu-18.04.4-server-arm64.iso"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.4-server-arm64.iso"
+      IsoSha256: "8eb3c1866ca3b68e4cd22ec9d7c02f97f4d2b3713447370f3c252a4189116824"
       Kernel: "install/netboot/ubuntu-installer/arm64/linux"
       Loader: "grubarm64.efi"
       Initrds:
@@ -104,3 +104,15 @@ Templates:
   - ID: "net-post-install.sh.tmpl"
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
+  - Name: grub-secure-mac
+    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    ID: default-grub.tmpl
+  - Name: grub-secure
+    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    ID: default-grub.tmpl
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'

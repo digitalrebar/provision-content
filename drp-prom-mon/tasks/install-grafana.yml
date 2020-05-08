@@ -1,7 +1,8 @@
 ---
 Name: "install-grafana"
 Description: "A task to install Grafana."
-Documentation: ""
+Documentation: |
+  A task to install Grafana.
 
 Meta:
   color: "orange"

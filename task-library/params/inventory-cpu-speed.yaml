@@ -2,7 +2,8 @@
 Name: "inventory/CPUSpeed"
 Description: "Flat Inventory for CPUSpeed"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "string"
 Meta:

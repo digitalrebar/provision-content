@@ -1,0 +1,12 @@
+Description: The URL of the template to use for ignition.
+Documentation: |
+  The URL is used to reference the iginition URL.  The default
+  is the dynamic select ignition file type.
+Meta:
+  color: blue
+  icon: user circle
+  title: RackN Content
+Name: coreos/ignition-url
+Schema:
+  type: string
+  default: "{{.ProvisionerURL}}/machines/{{.Machine.Uuid}}/select-ign.json"

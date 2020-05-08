@@ -4,7 +4,7 @@ Description: "Machines in this cluster"
 Schema:
   type: "array"
   items:
-    type: "string"
+    type: "object"
   default: []
 Meta:
   color: "blue"

@@ -25,7 +25,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   download -L https://github.com/rook/rook/raw/v{{ .Param "rook/ceph-version" }}/cluster/examples/kubernetes/ceph/common.yaml \
     -o /tmp/rook-common.yaml
   download -L https://github.com/rook/rook/raw/v{{ .Param "rook/ceph-version" }}/cluster/examples/kubernetes/ceph/operator.yaml \
-    -o /tmp/rook-operator.yaml 
+    -o /tmp/rook-operator.yaml
   download -L https://github.com/rook/rook/raw/v{{ .Param "rook/ceph-version" }}/cluster/examples/kubernetes/ceph/cluster.yaml \
     -o /tmp/rook-cluster.yaml
   download -L https://github.com/rook/rook/raw/v{{ .Param "rook/ceph-version" }}/cluster/examples/kubernetes/ceph/storageclass.yaml \
@@ -59,7 +59,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # Create the common elements
   kubectl apply -f /tmp/rook-common.yaml
   kubectl apply -f /tmp/rook-operator.yaml
-  
+
   # Apply override to use the cluster range
   kubectl apply -f /tmp/rook-ceph-override.yaml
 
@@ -76,7 +76,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   # Make storageclass the default (could potentially override this in future with a param)
   kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-  
+
   # Create the dashboard
   kubectl apply -f /tmp/rook-ceph-dashboard-ingress.yaml
 

@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+# k3s part of Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+# Copyright RackN 2019
+set -e
+
+echo "starting k3s install"
+# Get access and who we are.
+{{ template "setup.tmpl" .}}
+
+if k3s kubectl get nodes ; then
+  echo "k3s kubectl works... no (re)install needed"
+  exit 0
+fi
+
+drpcli machines meta set $RS_UUID key color to yellow
+drpcli machines meta set $RS_UUID key icon to ship
+
+{{ template "cluster-shared.tmpl" .}}
+{{ template "download-tools.tmpl" .}}
+
+echo "setting up paths for arch $arch"
+case $arch in
+    amd64|x86_64) SHA256SUM="sha256sum-amd64.txt";;
+    arm64|aarch64) SHA256SUM="sha256sum-arm64.txt";;
+esac
+case $arch in
+    amd64|x86_64) ARCH="k3s";;
+    arm64|aarch64) ARCH="k3s-arm64";;
+    *)
+        echo "Unknown arch $arch"
+        exit 1;;
+esac
+
+# Fix hostname lookup
+echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
+
+TMP_DIR=/tmp/k3s-tmp
+INSTALL_DIR=/usr/bin
+SYSTEMD_DIR="/etc/systemd/system"
+BINARIES="$INSTALL_DIR/k3s"
+
+echo "Checking for $ARCH"
+if ! which k3s ; then
+  if $CLUSTER_I_AM_LEADER; then
+    drpcli machines meta set $RS_UUID key icon to download
+    if drpcli files exists "k3s/k3s"; then
+      echo "Found in DRP files/k3s - downloading from there"
+      drpcli files download "k3s/k3s" to $BINARIES
+    else
+      K3S_URL="{{ .Param "k3s/download-url" }}/download/{{ .Param "k3s/version" }}"
+      echo "Download k3s from $K3S_URL/${ARCH}"
+      download -L --remote-name-all "$K3S_URL/${ARCH}" -o $ARCH
+      echo "Download k3s checksum from $K3S_URL/${SHA256SUM}"
+      download -L --remote-name-all "$K3S_URL/${SHA256SUM}" -o ${SHA256SUM}
+
+      if grep -Fxq "$(sha256sum $ARCH)" $SHA256SUM ; then
+        echo "Checksum Test Pass"
+      else
+        echo "Checksum Does not match"
+        sha256sum $ARCH -c ${SHA256SUM}
+        exit 1
+      fi
+
+      mv $ARCH $BINARIES
+      drpcli files upload "$BINARIES" as "k3s/k3s"
+    fi
+    drpcli machines meta set $RS_UUID key icon to cog
+  else
+    echo "Not the leader - waiting for k3s/node-token to be defined"
+    drpcli machines meta set $RS_UUID key color to grey
+    cluster_wait_for_variable "k3s/node-token"
+    drpcli machines meta set $RS_UUID key color to yellow
+    echo "download binaries from DRP k3s/k3s"
+    drpcli files download "k3s/k3s" to $BINARIES
+  fi
+  if [ -f $BINARIES ] ; then
+    chmod +x $BINARIES
+  else
+    echo "$BINARIES not installed on system"
+    exit 1
+  fi
+else
+  echo "found $BINARIES binary, moving on..."
+fi
+
+echo "Installing k3s version: $(k3s -v)"
+
+if $CLUSTER_I_AM_LEADER ; then
+
+  echo "I am leader - run k3s server"
+
+  K3S_URL=https://{{ .Machine.Address }}:{{ .Param "k3s/api-port" }}
+  EXECSTART="${BINARIES} server --bind-address={{ .Machine.Address }} --https-listen-port={{ .Param "k3s/api-port" }}"
+  SYSTEMD_TYPE="notify"
+
+  drpcli machines meta set $RS_UUID key icon to anchor
+
+else
+
+  echo "I am a worker - run k3s agent"
+
+  cluster_wait_for_variable "k3s/node-token"
+
+  # we need to get the decoded version
+  K3S_TOKEN=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param k3s/node-token --decode)
+  ADMIN_CONFIG=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param k3s/admin-conf --decode)
+
+  echo "Running Agent: join with k3s/node-token value"
+  K3S_URL=$(jq -r '.clusters[0].cluster.server' <<< "$ADMIN_CONFIG")
+  EXECSTART="${BINARIES} agent --server ${K3S_URL} --token ${K3S_TOKEN}"
+  SYSTEMD_TYPE="exec"
+  # Set machine icon and color for KRIB cluster building
+  drpcli machines meta set $RS_UUID key icon to ship
+
+fi
+
+MODPROBE=$(which modprobe)
+
+if [[ ! -f /etc/systemd/system/k3s.service.env ]]; then
+  ## Build Systemd environment vars
+  echo "Attaching to K3s at $K3S_URL"
+  tee /etc/systemd/system/k3s.service.env >/dev/null << EOF
+K3S_URL=${K3S_URL}
+K3S_TOKEN=${K3S_TOKEN}
+EOF
+else
+  echo "No action: k3s.service.env file exists"
+fi
+
+if [[ ! -f /etc/systemd/system/k3s.service ]]; then
+  ## Build Systemd service
+  echo "Buiilding k3s.service file"
+  tee /etc/systemd/system/k3s.service >/dev/null << EOF
+[Unit]
+Description=K3s - Lightweight Kubernetes
+Documentation=https://k3s.io
+After=network-online.target
+
+[Service]
+Type=${SYSTEMD_TYPE}
+EnvironmentFile=/etc/systemd/system/k3s.service.env
+ExecStartPre=${MODPROBE} br_netfilter
+ExecStartPre=${MODPROBE} overlay
+ExecStart=${EXECSTART}
+KillMode=process
+Delegate=yes
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+else
+  echo "No action: k3s.service file exists"
+fi
+
+systemctl daemon-reload && systemctl start k3s
+
+if $CLUSTER_I_AM_LEADER; then
+  # need more delay for leader
+  echo "waiting 10 seconds"
+  sleep 10
+  while [[ "$(k3s kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
+    sleep 1
+    echo "waiting for cluster to start (1 second)"
+  done
+  echo "Verify install: k3s kubectl MUST succeed"
+  k3s kubectl get nodes
+  # TODO ADD CHECK (loop to eliminate sleep)
+  echo "Recording cluster admin config ..."
+  drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param k3s/admin-conf to - < /etc/rancher/k3s/k3s.yaml
+  if [[ -f /var/lib/rancher/k3s/server/node-token ]] ; then
+    # collect the cluster bootstrap token, then store it on the Param
+    echo "Recording cluster token ... (releases waiting workers)"
+    K3S_TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param k3s/node-token to "$K3S_TOKEN"
+  else
+    echo "halting, could not find /var/lib/rancher/k3s/server/node-token"
+    exit 1
+  fi
+fi
+
+drpcli machines meta set $RS_UUID key color to green
+echo "Finished k3s install successfully"
+exit 0

@@ -1,0 +1,11 @@
+---
+Name: lab-centos-image
+Description: "Deploy lab/training DRP endpoint."
+Documentation: ""
+Meta:
+  color: blue
+  icon: shuffle
+  title: RackN Content
+Stages:
+  - image-deploy
+  - image-deploy-cloud-init

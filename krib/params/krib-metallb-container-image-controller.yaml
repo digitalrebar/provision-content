@@ -3,9 +3,9 @@ Name: "krib/metallb-container-image-controller"
 Description: "Custom container image to use for MetalLB controller"
 Documentation: |
   Allows operators to optionally override the container image used in the
-  MetalLB controller deployment. Possible use case would be pre-prepared images pushed to a 
+  MetalLB controller deployment. Possible use case would be pre-prepared images pushed to a
   local trusted registry
-  
+
 Schema:
   type: "string"
 Meta:

@@ -1,0 +1,11 @@
+---
+Name: flash-ignore-signatures
+Description: Ignore signrature checking if applicable for the platform.
+Documentation: |
+  This parameter allows the system to ignore signatures if it is an option.
+  This applies to DELL flash updates.
+
+  This does NOT apply to the list flash method.
+Schema:
+  type: boolean
+  default: false

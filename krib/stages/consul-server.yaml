@@ -4,7 +4,7 @@ Description: "Configure a consul server cluster."
 RunnerWait: true
 Tasks:
   - "consul-server-install"
-  - "consul-server-config"  
+  - "consul-server-config"
 Meta:
   icon: "ship"
   color: "yellow"

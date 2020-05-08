@@ -12,7 +12,7 @@ Templates:
     Path: "/etc/consul.d/consul-server.json"
   - ID: "consul-server-config.sh.tmpl"
     Name: "Configure consul server"
-    Path: ""    
+    Path: ""
 Meta:
   icon: "book"
   color: "blue"

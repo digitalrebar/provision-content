@@ -1,0 +1,31 @@
+---
+Name: "govc/template-json"
+Description: "Render a template inside the govc context container."
+Documentation: |
+  Render the template named in this Param, to the govc context container.  Several
+  of the govc commands require a config file passed in to the command.  For example,
+  the OVA deploy option requires a JSON template to configure the deployed OVA.
+
+  This template will be rendered to ``/tmp/template.json`` inside the container
+  for use by the ``govc/command``.  For example, to deploy an OVA, save your OVA
+  JSON template to the DRP system, assign the template name to this Param, and
+  then set the ``govc/template`` accordingly.
+
+  Example:
+    ::
+
+      set Param ``govc/template-json`` to: ``vcsa-esxi-uefi.json``
+      which will be rendered to:  ``/tmp/template.json``
+      govc/command reference:  ``govc import.ova -options=/tmp/template.json OVA_LOCATION``
+      OVA_LOCATION: would be the resource URL for the ``user:password@address`` of ESXi or vCenter
+
+  Unfortunately, it appears the GoVC command is not able to utilize a remote HTTP path
+  as the JSON template input.  This is true at least up until version 0.22.0 of GoVC.
+
+
+Schema:
+  type: "string"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

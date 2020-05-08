@@ -1,0 +1,1366 @@
+meta:
+  Author: ""
+  CodeSource: ""
+  Color: ""
+  Copyright: ""
+  Description: Proxmox 6 Install
+  DisplayName: Proxmox 6 Install
+  DocUrl: ""
+  Documentation: |-
+    Proxmox
+    -------
+
+    This content pack managed deployment of Proxmox nodes and configuration for
+    sutdent training labs.  At some point in the future, this will likely be
+    broken out in to two content packs.
+
+    .. note:: Proxmox deployments are not designed to be automated, there are
+              serious challenges with automation.
+
+    This content pack currently uses a customized ISO to PXE boot and install
+    the Proxmox server over the network.  This is not the best approach.  The
+    correct approach for automation is to deploy a Debian Buster 10 system with
+    appropriate baseline configuration, then to install the Proxmox packages on
+    top of them.
+
+
+    Installation of Proxmox
+    =======================
+
+    Use the ``proxmox-rackn`` Bootenv to install Proxmox.  There is no workflow
+    for the installation.  Simply clear the existing workflow on the target
+    machine, then set the BootEnv.
+
+    You will need to log in to the console of the target machine and answer the
+    4 or 5 GUI based install form inputs.  Once that has been completed, the
+    rest of this content pack is fully automated.
+
+
+    Setup a Runner (Agent) for Workflow
+    +++++++++++++++++++++++++++++++++++
+
+    The RackN customized ISO does not (at this time) embed the Digital Rebar
+    Platform Runner (agent; drpcli) in to the ISO image.  This will be corrected
+    with automation rewrite to use Debian Buster and packages on top of Buster.
+
+    You will need to perform the following tasks to enable Workflow automation
+    of the Proxmox server - which the rest of this documentation relies on.
+
+      ::
+
+        # ssh to the Proxmox system
+        # initiate the DRP Join script process
+        wget http://$drp:8091/machines/join-up.sh | bash -s
+
+    This will create a new Machine Object for the Proxmox node.  You will need
+    to run the following Stages to install the AGent permanently, and optionally
+    install SSH access keys:
+
+      * runner-service (requires "task-library" content pack)
+      * access-keys
+
+
+    Configure Student Labs
+    ======================
+
+    The student labs can be configured by running the ``proxmox-lab-setup``
+    workflow on the target.
+
+
+    Destroying Lab Setup
+    ====================
+
+    The workflow ``proxmox-lab-destroy`` will destroy all virtual machines on the proxmox
+    node, then strip off any bridge configurations in /etc/network/interfaces.d
+  Icon: ""
+  License: ""
+  Name: proxmox-6-install
+  Order: ""
+  Prerequisites: ""
+  RequiredFeatures: ""
+  Source: ""
+  Tags: ""
+  Type: dynamic
+  Version: v20.04.04-181142
+sections:
+  bootenvs:
+    proxmox-6-install:
+      Available: false
+      BootParams: ""
+      Bundle: ""
+      Description: Proxmox 6 installer that points to the latest CentOS 7 release.
+      Documentation: |
+        This BootEnv installs the CentOS 7 Minimal operating system.  Both x86_64
+        and aarch64 architectures are supported.
+      Endpoint: ""
+      Errors: []
+      Initrds: []
+      Kernel: ""
+      Loaders: {}
+      Meta:
+        color: blue
+        feature-flags: change-stage-v2
+        icon: linux
+        title: Digital Rebar Community Content
+      Name: proxmox-6-install
+      OS:
+        Codename: ""
+        Family: redhat
+        IsoFile: ""
+        IsoSha256: ""
+        IsoUrl: ""
+        Name: proxmox-6
+        SupportedArchitectures:
+          x86_64:
+            BootParams: vga=791 video=vesafb:ywrap,mtrr ramdisk_size=16777216 rw quiet
+              splash=silent {{.Param "kernel-options"}} -- {{.Param "kernel-console"}}
+            Initrds:
+            - boot/initrd.img
+            IsoFile: proxmox-ve_6.1-1.iso
+            IsoUrl: https://s3-us-west-2.amazonaws.com/get.rebar.digital/images/proxmox/proxmox-ve_6.1-1.iso
+            Kernel: boot/linux26
+            Loader: ""
+            Sha256: 95434b81cf74fdb5f8ac3e341c55293e10dafd1a75d1be45668ccb25f7d3c93c
+        Version: ""
+      OnlyUnknown: false
+      OptionalParams:
+      - kernel-console
+      - kernel-options
+      - proxy-servers
+      ReadOnly: false
+      RequiredParams: null
+      Templates:
+      - Contents: ""
+        ID: kexec.tmpl
+        Link: ""
+        Meta: null
+        Name: kexec
+        Path: '{{.Machine.Path}}/kexec'
+      - Contents: ""
+        ID: proxmox-pxelinux.tmpl
+        Link: ""
+        Meta: null
+        Name: pxelinux
+        Path: pxelinux.cfg/{{.Machine.HexAddress}}
+      - Contents: ""
+        ID: default-ipxe.tmpl
+        Link: ""
+        Meta: null
+        Name: ipxe
+        Path: '{{.Machine.Address}}.ipxe'
+      - Contents: ""
+        ID: proxmox-pxelinux.tmpl
+        Link: ""
+        Meta: null
+        Name: pxelinux-mac
+        Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
+      - Contents: ""
+        ID: default-ipxe.tmpl
+        Link: ""
+        Meta: null
+        Name: ipxe-mac
+        Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+      - Contents: ""
+        ID: default-grub.tmpl
+        Link: ""
+        Meta: null
+        Name: grub
+        Path: grub/{{.Machine.Address}}.cfg
+      - Contents: ""
+        ID: default-grub.tmpl
+        Link: ""
+        Meta: null
+        Name: grub-mac
+        Path: grub/{{.Machine.MacAddr "grub"}}.cfg
+      - Contents: ""
+        ID: select-kickseed.tmpl
+        Link: ""
+        Meta: null
+        Name: compute.ks
+        Path: '{{.Machine.Path}}/compute.ks'
+      Validated: false
+    proxmox-6-rackn-install:
+      Available: false
+      BootParams: ""
+      Bundle: ""
+      Description: Proxmox 6 installer rebuilt by RackN to PXE install.
+      Documentation: |
+        This BootEnv installs the Proxmox system.  This is a rebuilt image from
+        the stock ISO to support PXE installation process, as the community released
+        ISO does not support PXE by default.
+      Endpoint: ""
+      Errors: []
+      Initrds: []
+      Kernel: ""
+      Loaders: {}
+      Meta:
+        color: blue
+        feature-flags: change-stage-v2
+        icon: linux
+        title: Digital Rebar Community Content
+      Name: proxmox-6-rackn-install
+      OS:
+        Codename: ""
+        Family: redhat
+        IsoFile: ""
+        IsoSha256: ""
+        IsoUrl: ""
+        Name: proxmox-6-rackn
+        SupportedArchitectures:
+          x86_64:
+            BootParams: vga=791 video=vesafb:ywrap,mtrr ramdisk_size=16777216 rw quiet
+              splash=silent {{.Param "kernel-options"}} -- {{.Param "kernel-console"}}
+            Initrds:
+            - boot/initrd.img
+            IsoFile: proxmox-ve_6.1-1-rackn.tgz
+            IsoUrl: https://s3-us-west-2.amazonaws.com/get.rebar.digital/images/proxmox/proxmox-ve_6.1-1-rackn.tgz
+            Kernel: boot/linux26
+            Loader: ""
+            Sha256: ad6d2aa66ef291c9a1182565f3fdcb7cc949bb7209389268ff468fda684f992b
+        Version: ""
+      OnlyUnknown: false
+      OptionalParams:
+      - kernel-console
+      - kernel-options
+      - proxy-servers
+      ReadOnly: false
+      RequiredParams: null
+      Templates:
+      - Contents: ""
+        ID: kexec.tmpl
+        Link: ""
+        Meta: null
+        Name: kexec
+        Path: '{{.Machine.Path}}/kexec'
+      - Contents: ""
+        ID: default-pxelinux.tmpl
+        Link: ""
+        Meta: null
+        Name: pxelinux
+        Path: pxelinux.cfg/{{.Machine.HexAddress}}
+      - Contents: ""
+        ID: default-ipxe.tmpl
+        Link: ""
+        Meta: null
+        Name: ipxe
+        Path: '{{.Machine.Address}}.ipxe'
+      - Contents: ""
+        ID: default-pxelinux.tmpl
+        Link: ""
+        Meta: null
+        Name: pxelinux-mac
+        Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
+      - Contents: ""
+        ID: default-ipxe.tmpl
+        Link: ""
+        Meta: null
+        Name: ipxe-mac
+        Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+      - Contents: ""
+        ID: default-grub.tmpl
+        Link: ""
+        Meta: null
+        Name: grub
+        Path: grub/{{.Machine.Address}}.cfg
+      - Contents: ""
+        ID: default-grub.tmpl
+        Link: ""
+        Meta: null
+        Name: grub-mac
+        Path: grub/{{.Machine.MacAddr "grub"}}.cfg
+      - Contents: ""
+        ID: select-kickseed.tmpl
+        Link: ""
+        Meta: null
+        Name: compute.ks
+        Path: '{{.Machine.Path}}/compute.ks'
+      Validated: false
+  params:
+    lab-drp-external-network:
+      Available: false
+      Bundle: ""
+      Description: Sets the DRP ip forwarding External interface (defautl "eth0"
+      Documentation: |
+        The virtual machine external interface that should be "publically" accessible
+        to the students.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: lab-drp-external-network
+      ReadOnly: false
+      Schema:
+        default: eth1
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/iso:
+      Available: false
+      Bundle: ""
+      Description: The url of the Proxmox ISO that will be modified as a DRP Bootenv.
+      Documentation: |
+        The URL that the ISO of the Proxmox install can be found at.  This ISO will be
+        modified to include the ISO as ``/proxmox.iso`` to enable network install of
+        Proxmox.  By default the ISO is not capable of installing via HTTP network path.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/iso
+      ReadOnly: false
+      Schema:
+        default: http://get.rebar.digital/images/proxmox/proxmox-ve_6.1-1.iso
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-base-tag:
+      Available: false
+      Bundle: ""
+      Description: The base tag assigned to resources (eg bridge devices, etc.).
+      Documentation: |
+        The base tag that is assigned to various resources used in the content pack
+        when configuring the student lab.  For example, network bridge devices.
+
+        This is also used when tearing things down.
+
+        .. note:: Do not add a trailing dash, one will be inserted between the prefix
+                  and the numerical designator for the resource.
+
+        The default value is ``student``, which will produce bridge devices like ``br-student-1``.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-base-tag
+      ReadOnly: false
+      Schema:
+        default: student
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-drp-boot-order:
+      Available: false
+      Bundle: ""
+      Description: The boot-order configuration for type drp virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type drp virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-drp-boot-order
+      ReadOnly: false
+      Schema:
+        default: ncd
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-drp-cores:
+      Available: false
+      Bundle: ""
+      Description: The cores configuration for type drp virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type drp virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-drp-cores
+      ReadOnly: false
+      Schema:
+        default: 4
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-drp-disk:
+      Available: false
+      Bundle: ""
+      Description: The disk configuration for type drp virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type drp virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-drp-disk
+      ReadOnly: false
+      Schema:
+        default: 100
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-drp-external-bridge:
+      Available: false
+      Bundle: ""
+      Description: The external-bridge configuration for type drp virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type drp virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-drp-external-bridge
+      ReadOnly: false
+      Schema:
+        default: virbr0
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-drp-memory:
+      Available: false
+      Bundle: ""
+      Description: The memory configuration for type drp virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type drp virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-drp-memory
+      ReadOnly: false
+      Schema:
+        default: 4096
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-machines-boot-order:
+      Available: false
+      Bundle: ""
+      Description: The boot-order configuration for type machines virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type machines virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-machines-boot-order
+      ReadOnly: false
+      Schema:
+        default: ncd
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-machines-cores:
+      Available: false
+      Bundle: ""
+      Description: The cores configuration for type machines virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type machines virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-machines-cores
+      ReadOnly: false
+      Schema:
+        default: 4
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-machines-disk:
+      Available: false
+      Bundle: ""
+      Description: The disk configuration for type machines virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type machines virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-machines-disk
+      ReadOnly: false
+      Schema:
+        default: 100
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-machines-memory:
+      Available: false
+      Bundle: ""
+      Description: The memory configuration for type machines virtual machines.
+      Documentation: |
+        This param is used to define the value of the configuration for
+        type machines virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-machines-memory
+      ReadOnly: false
+      Schema:
+        default: 4096
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-pvesh-extra-config-drp:
+      Available: false
+      Bundle: ""
+      Description: Add extra VM build-time configuration injected in to the pvesh
+        command.
+      Documentation: |
+        Allows an operator to inject extra configuration directives in to the pvesh
+        command that builds the DRP virtual machine.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-pvesh-extra-config-drp
+      ReadOnly: false
+      Schema:
+        default: ""
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-pvesh-extra-config-machines:
+      Available: false
+      Bundle: ""
+      Description: Add extra VM build-time configuration injected in to the pvesh
+        command.
+      Documentation: |
+        Allows an operator to inject extra configuration directives in to the pvesh
+        command that builds the target virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-pvesh-extra-config-machines
+      ReadOnly: false
+      Schema:
+        default: ""
+        type: string
+      Secure: false
+      Validated: false
+    proxmox/lab-student-count:
+      Available: false
+      Bundle: ""
+      Description: The number of student environments on each Proxmox server to setup.
+      Documentation: |
+        This param is used to define the number of students to add to each Proxmox
+        host.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-student-count
+      ReadOnly: false
+      Schema:
+        default: 4
+        type: number
+      Secure: false
+      Validated: false
+    proxmox/lab-student-vms:
+      Available: false
+      Bundle: ""
+      Description: The number of student vms on each Proxmox server to setup.
+      Documentation: |
+        This param is used to define the number of student vms to add to each Proxmox
+        host.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        icon: database
+        title: Digital Rebar Community Content
+      Name: proxmox/lab-student-vms
+      ReadOnly: false
+      Schema:
+        default: 3
+        type: number
+      Secure: false
+      Validated: false
+  stages:
+    kvm-enable-nested:
+      Available: false
+      BootEnv: ""
+      Bundle: ""
+      Description: Enable KVM nested hypervisor mode.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: yellow
+        icon: download
+        title: Digital Rebar Community Content
+      Name: kvm-enable-nested
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - kvm-enable-nested
+      Templates: []
+      Validated: false
+    lab-drp-external-network:
+      Available: false
+      BootEnv: ""
+      Bundle: ""
+      Description: Setup up DRP external network.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: yellow
+        icon: download
+        title: Digital Rebar Community Content
+      Name: lab-drp-external-network
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - lab-drp-external-network
+      Templates: []
+      Validated: false
+    proxmox-6-install:
+      Available: false
+      BootEnv: proxmox-6-install
+      Bundle: ""
+      Description: Proxmox 6 install stages.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: yellow
+        icon: download
+        title: Digital Rebar Community Content
+      Name: proxmox-6-install
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - ssh-access
+      Templates: []
+      Validated: false
+    proxmox-6-rackn-install:
+      Available: false
+      BootEnv: proxmox-6-rackn-install
+      Bundle: ""
+      Description: Proxmox 6 install stages (Rackn PXE build).
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: yellow
+        icon: download
+        title: Digital Rebar Community Content
+      Name: proxmox-6-rackn-install
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - ssh-access
+      Templates: []
+      Validated: false
+    proxmox-lab-createnodes:
+      Available: false
+      BootEnv: ""
+      Bundle: ""
+      Description: Proxmox lab setup all Virtual Machine nodes.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: yellow
+        icon: download
+        title: Digital Rebar Community Content
+      Name: proxmox-lab-createnodes
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - proxmox-lab-createnodes
+      Templates: []
+      Validated: false
+    proxmox-lab-destroy-all-vms:
+      Available: false
+      BootEnv: ""
+      Bundle: ""
+      Description: DESTROY ALL virtual machines on a proxmox host.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: red
+        icon: download
+        title: Digital Rebar Community Content
+      Name: proxmox-lab-destroy-all-vms
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - proxmox-lab-destroy-all-vms
+      Templates: []
+      Validated: false
+    proxmox-lab-destroy-networks:
+      Available: false
+      BootEnv: ""
+      Bundle: ""
+      Description: DESTROY ALL virtual machine bridge networks on a proxmox host.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: red
+        icon: download
+        title: Digital Rebar Community Content
+      Name: proxmox-lab-destroy-networks
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - proxmox-lab-destroy-networks
+      Templates: []
+      Validated: false
+    proxmox-lab-network:
+      Available: false
+      BootEnv: ""
+      Bundle: ""
+      Description: Proxmox lab network setup.
+      Documentation: ""
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: yellow
+        icon: download
+        title: Digital Rebar Community Content
+      Name: proxmox-lab-network
+      OptionalParams: []
+      Params: {}
+      Partial: false
+      Profiles: []
+      ReadOnly: false
+      Reboot: false
+      RequiredParams: []
+      RunnerWait: false
+      Tasks:
+      - proxmox-lab-network
+      Templates: []
+      Validated: false
+  tasks:
+    kvm-enable-nested:
+      Available: false
+      Bundle: ""
+      Description: Enabled KVM nested capability for hypervisor installs in VMs.
+      Documentation: |
+        Determines if the machine is running Intel or AMD processors and sets
+        up the nested virtualization capability for hypervisors to work inside
+        virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: kvm-enable-nested
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams: []
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # KVM enable nested hypervisors mode.
+
+          set -e
+
+          VID=$(lscpu | grep "Vendor ID:" | awk ' { print $NF } ' | tr "[:upper:]" "[:lower:]")
+          echo "Detected processor type '$VID'..."
+          case $VID in
+            *intel*) VID="intel" ;;
+            *amd*)   VID="amd"   ;;
+            *)
+              echo "FATAL: Unsupported processor Vendor ID '$VID'."
+              exit 1
+              ;;
+          esac
+
+          echo "Injecting modules configuration for KVM nested mode..."
+          F="/etc/modprobe.d/kvm-nested.conf"
+          $(egrep "^options.*ignore_msrs=1" $F) || echo "options kvm ignore_msrs=1" >> $F
+          $(egrep "^options.*nested=y" $F) || echo "options kvm-$VID nested=y ept=y" >> $F
+
+          echo "Attempting to reload modules ... this WILL FAIL if there are running VMs..."
+          modprobe -r kvm_$VID kvm
+          modprobe kvm kvm_$VID
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: kvm-enable-nested
+        Path: ""
+      Validated: false
+    lab-drp-external-network:
+      Available: false
+      Bundle: ""
+      Description: Set up the DRP ip forwarding, masquerading, etc.
+      Documentation: |
+        Set up DRP endpoint as an ip forwarding/masquerading gateway for the
+        student lab machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: lab-drp-external-network
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams: []
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # Lab DRP network setup
+
+          set -e
+
+          EXT={{ .Param "lab-drp-external-network" }}
+
+          echo "Setting up ip forwaarding ... "
+          sysctl net.ipv4.ip_forward=1
+          echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/50-ipv4_ip_forward.conf
+          echo "Adding MASQUERADING rules for nat translation..."
+          iptables -t nat -A POSTROUTING -o $EXT -j MASQUERADE
+
+          echo "Configuring static network on internal eth1 network..."
+          #
+          echo "
+          DEVICE=eth1
+          BOOTPROTO=none
+          ONBOOT=yes
+          PREFIX=24
+          IPADDR=192.168.1.1
+          " > /etc/sysconfig/network-scripts/ifcfg-eth1
+          systemctl restart network
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: proxmox-lab-network
+        Path: ""
+      Validated: false
+    proxmox-iso-modify:
+      Available: false
+      Bundle: ""
+      Description: Repackage the Proxmox ISO so it is PXE installable.
+      Documentation: |
+        The Proxmox ISO is not installable via PXE by default.  However, with a
+        relatively simple modification, it can be PXE deployed.  This task rebuilds
+        the ISO as a Tar GZ (.tgz) which stages the unmodified ISO image as
+        /proxmox.iso in the ``boot/`` directory, along with the Kernel and InitRD
+        pieces for PXE bootstrap.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: proxmox-iso-modify
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams: []
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # Modify the Proxmox ISO to be network installable.
+
+          set -e
+
+          {{template "setup.tmpl" .}}
+
+          ISO={{ .Param "proxmox/iso" }}
+          NAME=$(basename $ISO | sed 's/\.iso$//g')
+
+          TMPDIR=$(mktemp /tmp/proxmox.tmp.XXXXXXXX)
+          BOOTDIR=$TMPDIR/boot
+          INITDIR=$TMPDIR/initrd.tmp
+          mkdir $BOOTDIR
+          mkdir $INITDIR
+          cd $BOOTDIR
+
+          echo ">>>  get and stage our ISO to our initrd internal"
+          wget $ISO -O $INITDIR/proxmox.iso
+          echo ">>>  extract the 'boot/' directory out of the ISO"
+          bsdtar -s "/boot/./" -xvf ./proxmox.iso boot/
+
+          echo ">>>  decompress the initrd"
+          gzip -d -S ".img" ./initrd.img
+
+          echo ">>>  explode out the initrd contents"
+          cd $INITDIR
+          cpio -i -d < $BOOTDIR/initrd
+
+          sed -i '/^.*cp \/etc\/hostid /a \ \ \ \ foobar' init
+          [[ -f /tmp/proxmox-render-agent.sh ]] && chmod +x /tmp/proxmox-render-agent.sh
+          /tmp/proxmox-render-agent.sh
+
+          echo ">>>  rebuild the initrd with the ISO embedded in it"
+          find . | cpio -H newc -o > $BOOTDIR/initrd
+          cd $BOOTDIR
+          echo ">>>  Compress the initrd"
+          gzip -9 -S ".img" initrd
+
+          echo ">>>  Make TGZ of the new PXE installable bootenv"
+          bsdtar -czvf $TMPDIR/$NAME.tgz .
+
+          exit 0
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: proxmox-iso-modify
+        Path: ""
+      Validated: false
+    proxmox-lab-createnodes:
+      Available: false
+      Bundle: ""
+      Description: Set up the lab virtual machine nodes.
+      Documentation: |
+        Set up the proxmox based lab virtual machines.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: proxmox-lab-createnodes
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams:
+      - proxmox/lab-student-count
+      - proxmox/lab-student-vms
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # Proxmox Lab setup virtual machines
+
+          set -e
+          PVENODE=$(hostname)
+          TAG={{ .Param "proxmox/lab-base-tag" }}
+          BASE="br-$:{TAG}-"
+          ISO_URL="http://isoredirect.centos.org/centos/8/isos/x86_64/CentOS-8.1.1911-x86_64-dvd1.iso"
+          ISO="$(basename $ISO_URL)"
+          SCOUNT={{ .Param "proxmox/lab-student-count" }}
+          TCOUNT={{ .Param "proxmox/lab-student-vms" }}
+          # DRP
+          D_BOOT={{ .Param "proxmox/lab-drp-boot-order" }}
+          D_CORES={{ .Param "proxmox/lab-drp-cores" }}
+          D_MEMORY={{ .Param "proxmox/lab-drp-memory" }}
+          D_BRIDGE={{ .Param "proxmox/lab-drp-external-bridge" }}
+          D_DISK={{ .Param "proxmox/lab-drp-disk" }}
+          D_XTRA={{ .Param "proxmox/lab-pvesh-extra-config-drp" }}
+          # machines
+          M_BOOT={{ .Param "proxmox/lab-machines-boot-order" }}
+          M_CORES={{ .Param "proxmox/lab-machines-cores" }}
+          M_MEMORY={{ .Param "proxmox/lab-machines-memory" }}
+          M_DISK={{ .Param "proxmox/lab-machines-disk" }}
+          M_XTRA={{ .Param "proxmox/lab-pvesh-extra-config-machines" }}
+
+          ############# skip for now
+          # Download CentOS-8 ISO if it's not already downloaded in the home directory
+          #if [[ -f /root/$ISO ]]
+          #then
+          #  echo "Cached ISO file exists, skipping download ('$ISO')..."
+          #else
+          #  echo "Cached ISO file DOES NOT exist, getting it now ('$ISO')..."
+          #  wget -p $ISO_URL -O /root/$ISO
+          #fi
+
+          # Upload the CentOS-8 ISO to the proxmox ISO storage local repo unless it's already there
+          if $(pvesh get /nodes/${PVENODE}/storage/local/content --output-format json | jq -r '.[] | .volid' | grep "$ISO" > /dev/null)
+          then
+            echo "ISO found, skipping create ('$ISO').."
+          else
+            pvesh create /nodes/${PVENODE}/storage/local/upload --filename $ISO --content iso --tmpfilename $HOME/$ISO
+          fi
+
+          destroy_if_exists() {
+            local _vmid=$1
+            if pvesh get /nodes/${PVENODE}/qemu/${_vmid}/status/current
+            then
+              echo "Virtual Machine with ID '$_vmid' exists and being destroyed now..."
+              pvesh create /nodes/${PVENODE}/qemu/${_vmid}/status/stop
+              pvesh delete /nodes/${PVENODE}/qemu/${_vmid}
+            else
+              echo "Virtual Machine with ID '$_vmid' is safe to create..."
+            fi
+          }
+
+          for SNUM in $(seq $SCOUNT)
+          do
+            VMID=${SNUM}00
+            BRIDGE=${BASE}${SNUM}
+            # Create student management node
+            destroy_if_exists $VMID
+            pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $D_BOOT --cores $D_CORES --memory $D_MEMORY --net0 virtio,bridge=${D_BRIDGE},firewall=0 --net1 virtio,bridge=${BRIDGE} --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:$D_DISK --ide2 local:iso/${ISO},media=cdrom $D_XTRA
+
+            echo "Starting virtual machine '$VMID'..."
+            pvesh create /nodes/${PVENODE}/qemu/${VMID}/status/start
+
+            for TNUM in $(seq $TCOUNT)
+            do
+              # Create student target nodes
+              FNUM=$(printf "%02d" $TNUM)
+              VMID=${SNUM}${FNUM}
+              BRIDGE=${BASE}${SNUM}
+              destroy_if_exists $VMID
+              pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $M_BOOT --cores $M_CORES --memory $M_MEMORY --net0 virtio,bridge=${BRIDGE},firewall=0 --ostype l26 --scsihw virtio-scsi-pci --scsi0 local-lvm:$M_DISK $M_XTRA
+            done
+          done
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: proxmox-lab-createnodes
+        Path: ""
+      Validated: false
+    proxmox-lab-destroy-all-vms:
+      Available: false
+      Bundle: ""
+      Description: NUKES ALL virtual machines on the proxmox node.
+      Documentation: |
+        Completely nukes all found Virtual Machines on a proxmox node.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: red
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: proxmox-lab-destroy-all-vms
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams: []
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # Proxmox destroy all virtual machines
+
+          set -e
+          PVENODE=$(hostname)
+
+          destroy_if_exists() {
+            local _vmid=$1
+            if pvesh get /nodes/${PVENODE}/qemu/${_vmid}/status/current
+            then
+              echo ">>> Virtual Machine with ID '$_vmid' exists and being destroyed now..."
+              pvesh create /nodes/${PVENODE}/qemu/${_vmid}/status/stop
+              pvesh delete /nodes/${PVENODE}/qemu/${_vmid}
+            else
+              echo ">>> Virtual Machine with ID '$_vmid' doesn't seem to exist any more..."
+            fi
+          }
+
+          for VMID in $(pvesh get /nodes/${PVENODE}/qemu --output-format json | jq -r '.[] | .vmid')
+          do
+            destroy_if_exists $VMID
+          done
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: proxmox-lab-createnodes
+        Path: ""
+      Validated: false
+    proxmox-lab-destroy-networks:
+      Available: false
+      Bundle: ""
+      Description: NUKES ALL bridge networks
+      Documentation: |
+        Completely nukes all found bridge networks in the ``interfaces.d``
+        directory.  Used as a cleanup task before re-running a build.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: red
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: proxmox-lab-destroy-networks
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams: []
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # Proxmox destroy all bridge networks
+
+          set -e
+          PVENODE=$(hostname)
+          TAG={{ .Param "proxmox/lab-base-tag" }}
+          BASE="br-${TAG}-"
+
+          cd /etc/network/interfaces.d/
+          for BR in $(ls -1 ${BASE}*)
+          do
+            echo "Taking down bridge interface '$BR'..."
+            ifdown $BR
+          done
+
+          echo "Nuke all configuration files matching /etc/network/interfaces.d/${BASE}\*..."
+          rm -f /etc/network/interfaces.d/${BASE}*
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: proxmox-lab-destroy-networks
+        Path: ""
+      Validated: false
+    proxmox-lab-network:
+      Available: false
+      Bundle: ""
+      Description: Set up the lab network.
+      Documentation: |
+        Set up the proxmox based lab network enviornment.
+      Endpoint: ""
+      Errors: []
+      Meta:
+        color: blue
+        feature-flags: sane-exit-codes
+        icon: shopping cart
+        title: RackN Content
+      Name: proxmox-lab-network
+      OptionalParams: []
+      Prerequisites: []
+      ReadOnly: false
+      RequiredParams:
+      - proxmox/lab-student-count
+      Templates:
+      - Contents: |-
+          #!/usr/bin/env bash
+          # Proxmox Lab Networking setup
+
+          set -e
+
+          TAG={{ .Param "proxmox/lab-base-tag" }}
+          BASE="br-${TAG}-"
+
+          if [[ ! -d /etc/network ]]
+          then
+            echo "FATAL: '/etc/network' directory does not exist"
+            exit 1
+          fi
+
+          if ! grep -q "^source /etc/network/interfaces.d" /etc/network/interfaces
+          then
+            mkdir -p /etc/network/interfaces.d
+            echo "source /etc/network/interfaces.d/*" >> /etc/network/interfaces
+          fi
+
+          COUNT={{ .Param "proxmox/lab-student-count" }}
+
+          echo "Destroying any potential pre-existing '${BASE}*' bridge interfaces..."
+          rm -f /etc/network/interfaces.d/${BASE}*
+
+          for NUM in $(seq $COUNT)
+          do
+            BR_FILE="/etc/network/interfaces.d/${BASE}${NUM}"
+            BRIDGE=${BASE}${NUM}
+            cat <<EOF > ${BR_FILE}
+          # setup isolated bridge ${NUM}
+          auto ${BRIDGE}
+            iface ${BRIDGE} inet manual
+            pre-up brctl addbr ${BRIDGE}
+            post-up ip link set ${BRIDGE} up
+            pre-down ip link set ${BRIDGE} down
+            post-down brctl delbr ${BRIDGE}
+
+          EOF
+
+            if [[ -f ${BR_FILE} ]]
+            then
+              echo "----------------------------------------------------------------------------------"
+              echo "Bridge interface config for '${BR_FILE}':"
+              cat ${BR_FILE}
+              echo "----------------------------------------------------------------------------------"
+              echo "Attempting to start up bridge '$BRIDGE'..."
+              ifup ${BRIDGE}
+              echo "----------------------------------------------------------------------------------"
+              echo "Running bridge configuration for '$BRIDGE'..."
+              ip a sh ${BRIDGE}
+              echo "----------------------------------------------------------------------------------"
+            else
+              echo ">>> FATAL: bridge file doesn't exist, create failed (for '$BR_FILE')"
+              exit 1
+            fi
+          done
+        ID: ""
+        Link: ""
+        Meta: {}
+        Name: proxmox-lab-network
+        Path: ""
+      Validated: false
+  templates:
+    proxmox-ipxe.tmpl:
+      Available: false
+      Bundle: ""
+      Contents: |+
+        Available: true
+        Bundle: ""
+        Contents: |
+          #!ipxe
+          kernel {{.Env.PathFor "http" .Env.Kernel}} {{.BootParams}} BOOTIF=01-${netX/mac:hexhyp}
+          {{range $initrd := .Env.Initrds}}
+          initrd {{$.Env.PathFor "http" $initrd}}
+          {{end}}
+          boot
+        Description: ""
+        Endpoint: ""
+        Errors: []
+        ID: default-ipxe.tmpl
+        Meta: {}
+        ReadOnly: true
+        Validated: true
+
+      Description: ""
+      Endpoint: ""
+      Errors: []
+      ID: proxmox-ipxe.tmpl
+      Meta: {}
+      ReadOnly: false
+      Validated: false
+    proxmox-pxelinux.tmpl:
+      Available: false
+      Bundle: ""
+      Contents: |+
+        Available: true
+        Bundle: ""
+        Contents: |
+          DEFAULT {{.Env.Name}}
+          PROMPT 0
+          TIMEOUT 10
+          LABEL {{.Env.Name}}
+            KERNEL {{.Env.PathFor "tftp" .Env.Kernel}}
+            {{if .Env.Initrds}}
+            INITRD {{.Env.JoinInitrds "tftp"}}
+            {{end}}
+            APPEND {{.BootParams}}
+            IPAPPEND 2
+        Description: ""
+        Endpoint: ""
+        Errors: []
+        ID: default-pxelinux.tmpl
+        Meta: {}
+        ReadOnly: true
+        Validated: true
+
+      Description: ""
+      Endpoint: ""
+      Errors: []
+      ID: proxmox-pxelinux.tmpl
+      Meta: {}
+      ReadOnly: false
+      Validated: false
+  workflows:
+    proxmox-destroy-lab:
+      Available: false
+      Bundle: ""
+      Description: Perform the student lab setup on a proxmox host.
+      Documentation: |
+        Sets up the bridge networks and creates virtual machine nodes on a proxmox
+        host.
+      Endpoint: ""
+      Errors: null
+      Meta:
+        color: green
+        icon: download
+        title: RackN Content
+      Name: proxmox-destroy-lab
+      ReadOnly: false
+      Stages:
+      - proxmox-lab-destroy-all-vms
+      - proxmox-lab-destroy-networks
+      Validated: false
+    proxmox-setup-lab:
+      Available: false
+      Bundle: ""
+      Description: Perform the student lab setup on a proxmox host.
+      Documentation: |
+        Sets up the bridge networks and creates virtual machine nodes on a proxmox
+        host.
+      Endpoint: ""
+      Errors: null
+      Meta:
+        color: green
+        icon: download
+        title: RackN Content
+      Name: proxmox-setup-lab
+      ReadOnly: false
+      Stages:
+      - kvm-enable-nested
+      - proxmox-lab-network
+      - proxmox-lab-createnodes
+      Validated: false

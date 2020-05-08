@@ -1,0 +1,20 @@
+Name: "fedora-base"
+Description: "Basic Fedora Install Workflow + Runner"
+Documentation: |
+  This workflow includes the DRP Runner in Fedora provisioning process for DRP.
+
+  After the install completes, the workflow installs the runner
+  in a waiting state so that DRP will automatically detect and start a
+  new workflow if the Machine.Workflow is updated.
+
+  .. note:: To enable, upload the Fedora ISO as per the fedora-31 BootEnv
+
+Stages:
+  - fedora-31-install
+  - runner-service
+  - finish-install
+  - complete
+Meta:
+  color: green
+  icon: download
+  title: RackN Content

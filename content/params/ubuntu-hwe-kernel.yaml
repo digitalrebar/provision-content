@@ -9,13 +9,17 @@ Documentation: |
   WARNING - The "net-seed.tmpl" uses the BootEnv ".Env.OS.Version"
   value in the preseed configuration, like
 
-    d-i  base-installer/kernel/altmeta   string hwe-18.04
+    ::
+
+      d-i  base-installer/kernel/altmeta   string hwe-18.04
 
   You must verify that your Ubuntu version supports this syntax. For
   example, if you are booting "18.10", insure that the following
   is valid (see the ISO "preseeds" directory for valid examples)
 
-    d-i  base-installer/kernel/altmeta   string hwe-18.10
+    ::
+
+      d-i  base-installer/kernel/altmeta   string hwe-18.10
 
 Schema:
   type: boolean

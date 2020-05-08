@@ -1,0 +1,11 @@
+---
+Name: "chef-bootstrap/first_boot"
+Description: "A JSON formated string that defines the first chef run of a machine"
+Documentation: |
+  A JSON formated string that defines the first chef run of a machine
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "server"
+  title: "Digital Rebar Community Content"

@@ -1,0 +1,10 @@
+Name: "edge-lab-reboot-to-discover"
+Description: "Reboot system back into discover"
+Documentation: |
+  Reboot system back into discover
+Stages:
+  - "edge-lab-reboot-to-discover"
+Meta:
+  color: "red"
+  icon: "recycle"
+  copyright: "RackN 2019"

@@ -1,0 +1,16 @@
+---
+Name: "inventory/RaidDiskStatuses"
+Description: "Flat Inventory for RaidDiskStatuses an array of an array of statuses of disks"
+Documentation: |
+  From ``inventory/data``, used for indexable data.
+
+Schema:
+  type: "array"
+  items:
+    type: "array"
+    items:
+      type: "string"
+Meta:
+  color: "black"
+  icon: "expand"
+  title: "RackN Content"

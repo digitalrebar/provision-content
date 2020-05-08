@@ -1,7 +1,8 @@
 ---
 Name: "drp-prom-mon/skip-sledgehammer"
 Description: "Set to 'true' to skip installing Sledgehammer Discover Image"
-Documentation: ""
+Documentation: |
+  Set to 'true' to skip installing Sledgehammer Discover Image
 
 Schema:
   type: "boolean"

@@ -2,9 +2,11 @@
 Name: "inventory-check"
 Description: "A task JQs gohai data into a short list"
 Documentation: |
-  Using the inventory/collect parameter, filters the JSON command output
+  Using the ``inventory/collect`` parameter, filters the JSON command output
   into inventory/data hashmap for rendering and validation.
-  Will apply inventory/check for field valation
+
+  Will apply ``inventory/check`` for field valation.
+
 Meta:
   icon: "shopping cart"
   color: "blue"

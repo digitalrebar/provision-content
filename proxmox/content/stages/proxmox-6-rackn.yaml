@@ -1,0 +1,10 @@
+---
+Name: "proxmox-6-rackn-install"
+Description: "Proxmox 6 install stages (Rackn PXE build)."
+BootEnv: "proxmox-6-rackn-install"
+Tasks:
+  - "ssh-access"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

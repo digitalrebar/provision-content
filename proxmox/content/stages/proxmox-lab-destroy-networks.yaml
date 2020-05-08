@@ -1,0 +1,9 @@
+---
+Name: "proxmox-lab-destroy-networks"
+Description: "DESTROY ALL virtual machine bridge networks on a proxmox host."
+Tasks:
+  - "proxmox-lab-destroy-networks"
+Meta:
+  icon: "download"
+  color: "red"
+  title: "Digital Rebar Community Content"

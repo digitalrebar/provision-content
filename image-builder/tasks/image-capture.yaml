@@ -1,6 +1,18 @@
 Name: image-capture
-Description: A task to run the Image Builder suite.
-Documentation: ""
+Description: A task to run the Image Builder image capture.
+Documentation: |
+  The ``image-capture`` task brands the image with detail information to properly
+  identify the built image version, temestamps, etc.  The root filesystem will be
+  rolled up in to a Tar and GZip formatted archive (TGZ).
+
+  Last, the image will be uploaded to the DRP Endpoint in the HTTP/S **Files** file
+  server space for subsequent download and use by the ``image-deploy`` plugin.
+
+  This task requires the **ExtraClaims** capability for the ``files`` scope to be
+  able to authorize the Files upload.  Older versions of this content required a
+  Param defined set of Username/Password values to access the DRP Endpoint files
+  upload capability.
+
 ReadOnly: true
 Meta:
   color: purple
@@ -8,6 +20,10 @@ Meta:
   icon: pin
   title: Image Builder suite
   origin: rackn/image-builder
+ExtraClaims:
+  - scope: "files"
+    action: "*"
+    specific: "*"
 Templates:
   - Contents: ''
     ID: "image-capture.sh.tmpl"

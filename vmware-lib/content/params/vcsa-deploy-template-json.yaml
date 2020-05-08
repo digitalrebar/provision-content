@@ -1,0 +1,24 @@
+---
+Name: "vcsa-deploy/template-json"
+Description: "Render a template inside the vcsa-deploy context container."
+Documentation: |
+  Render the template named in this Param, to the vcsa-deploy context container.
+
+  This template will be rendered to ``/tmp/template.json`` inside the container
+  for use by the ``vcsa-deploy/command``.  For example, to deploy an OVA, save your OVA
+  JSON template to the DRP system, assign the template name to this Param, and
+  then set the ``vcsa-deploy/template-json`` Param accordingly.
+
+  Example:
+    ::
+
+      set Param ``vcsa-deploy/template-json`` to: ``vcsa-esxi-uefi.json``
+      # which will be rendered to:  ``/tmp/template.json``
+      set Param ``vcsa-deploy/command``:  ``vcsa-deploy install /tmp/template.json <OPTIONS>``
+
+Schema:
+  type: "string"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

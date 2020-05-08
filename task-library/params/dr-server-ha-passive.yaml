@@ -1,0 +1,13 @@
+---
+Name: "dr-server/ha-passive"
+Description: "Flag used to identify active and passive members of the HA cluster"
+Documentation: |
+  Only one DRP should be active.  All others should be passive (default).
+
+Schema:
+  type: boolean
+  default: true
+Meta:
+  color: "blue"
+  icon: "pause circle"
+  title: "RackN Copyright 2020"

@@ -16,16 +16,18 @@ Meta:
   icon: "microchip"
   color: "green"
   title: "Digital Rebar Community Content"
+Loaders:
+  amd64-uefi: e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/sledgehammer-c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1.amd64.tar"
-      Kernel: "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/vmlinuz0"
+      IsoFile: "sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
+      Kernel: "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/vmlinuz0"
       Initrds:
-        - "c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/stage1.img"
+        - "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -61,10 +63,112 @@ OS:
         {{.Param "kernel-options"}}
         --
         {{.Param "kernel-console"}}
+    rpi4:
+      Loader: "grubarm64.efi"
+      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9b5276ac5826520829aa73c149fe672fe2363656/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
+      Kernel: "rpi/kernel8.img"
+      Initrds:
+        - "rpi/stage1.img"
+      BootParams: >-
+        rootflags=loop
+        root=live:/sledgehammer.iso
+        rootfstype=auto
+        ro
+        liveimg
+        rd_NO_LUKS
+        rd_NO_MD
+        rd_NO_DM
+        provisioner.web={{.ProvisionerURL}}
+        rs.uuid={{.Machine.UUID}}
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
 OptionalParams:
   - "kernel-console"
   - "kernel-options"
 Templates:
+  - Name: start4.elf
+    Link: '{{.Env.PathForArch "tftp" "rpi/start4.elf" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/start4.elf'
+  - Name: fixup4.dat
+    Link: '{{.Env.PathForArch "tftp" "rpi/fixup4.dat" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/fixup4.dat'
+  - Name: bcm2711-rpi-4-b.dtb
+    Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/bcm2711-rpi-4-b.dtb'
+  - Name: kernel8.img
+    Link: '{{.Env.PathForArch "tftp" "rpi/kernel8.img" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/kernel8.img'
+  - Name: stage1.img
+    Link: '{{.Env.PathForArch "tftp" "rpi/stage1.img" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/stage1.img'
+  - Name: "rpi-cmdline.txt"
+    Path: '{{.Machine.MacAddr "rpi4"}}/cmdline.txt'
+    Contents: |
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF=discovery provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}}
+  - Name: rpi4b-config.txt
+    Path: '{{.Machine.MacAddr "rpi4"}}/config.txt'
+    Contents: |
+      # uncomment if you get no picture on HDMI for a default "safe" mode
+      #hdmi_safe=1
+
+      # uncomment this if your display has a black border of unused pixels visible
+      # and your display can output without overscan
+      disable_overscan=1
+
+      # uncomment the following to adjust overscan. Use positive numbers if console
+      # goes off screen, and negative if there is too much border
+      #overscan_left=16
+      #overscan_right=16
+      #overscan_top=16
+      #overscan_bottom=16
+
+      # uncomment to force a console size. By default it will be display's size minus
+      # overscan.
+      #framebuffer_width=1280
+      #framebuffer_height=720
+
+      # uncomment if hdmi display is not detected and composite is being output
+      #hdmi_force_hotplug=1
+
+      # uncomment to force a specific HDMI mode (this will force VGA)
+      #hdmi_group=1
+      #hdmi_mode=1
+
+      # uncomment to force a HDMI mode rather than DVI. This can make audio work in
+      # DMT (computer monitor) modes
+      #hdmi_drive=2
+
+      # uncomment to increase signal to HDMI, if you have interference, blanking, or
+      # no display
+      #config_hdmi_boost=4
+
+      # uncomment for composite PAL
+      #sdtv_mode=2
+
+      # Uncomment some or all of these to enable the optional hardware interfaces
+      #dtparam=i2c_arm=on
+      #dtparam=spi=on
+      #dtparam=i2s=on
+
+      # Uncomment this to enable infrared communication.
+      #dtoverlay=gpio-ir,gpio_pin=17
+      #dtoverlay=gpio-ir-tx,gpio_pin=18
+
+      # Enable audio (loads snd_bcm2835)
+      dtparam=audio=on
+
+      [pi4]
+      dtoverlay=vc4-fkms-v3d
+      max_framebuffers=2
+      arm_64bit=1
+      #device_tree_address=0x03000000
+
+      [all]
+      #dtoverlay=vc4-fkms-v3d
+      kernel kernel8.img
+      initramfs stage1.img
   - Name: "kexec"
     ID: "kexec.tmpl"
     Path: "{{.Machine.Path}}/kexec"
@@ -86,6 +190,12 @@ Templates:
   - ID: "default-grub.tmpl"
     Name: "grub-mac"
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+  - ID: "default-grub.tmpl"
+    Name: "grub-secure"
+    Path: "sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.HexAddress}}"
+  - ID: "default-grub.tmpl"
+    Name: "grub-secure-mac"
+    Path: 'sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
   - Name: "control.sh"
     Path: "{{.Machine.Path}}/control.sh"
     Contents: |

@@ -3,6 +3,7 @@ Name: "drive-signature"
 Description: "Generate a signature for each drive and record on machine"
 Documentation: |
   Generate a signature for each drive and record them on them machine.
+
 Meta:
   icon: "signup"
   color: "blue"

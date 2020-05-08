@@ -1,7 +1,8 @@
 ---
 Name: "cfg-drp-centos7"
 Description: "A task to configure DRP content bootenv Centos 7"
-Documentation: ""
+Documentation: |
+  A task to configure DRP content bootenv Centos 7
 
 Meta:
   color: "orange"

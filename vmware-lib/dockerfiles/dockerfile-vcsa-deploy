@@ -1,0 +1,44 @@
+FROM ubuntu:18.04
+
+# installing ovftool requires Ubuntu or similar distro - the installer
+# script is not tolerant of Distro environments like Alpine Linux
+
+MAINTAINER "The RackN Team <support@rackn.com>"
+
+WORKDIR /root
+
+ENV DRPCLI_VER="v4.2.0-beta9.2%2Bg0399c2aa752b79696319b3c07d39fc163157236c"
+
+ENV OVFTOOL_URL="https://get.rebar.digital/artifacts/vmtools"
+ENV OVFTOOL_VER="4.3.0-14746126"
+ENV OVFTOOL_PLATFORM="lin.x86_64"
+ENV OVFTOOL_FILE="VMware-ovftool-${OVFTOOL_VER}-${OVFTOOL_PLATFORM}.bundle"
+
+ENV DEPLOY_URL="https://get.rebar.digital/artifacts/vmtools"
+ENV DEPLOY_VER="6.7.0-15132721"
+ENV DEPLOY_PLATFORM="lin.x86_64"
+ENV DEPLOY_FILE="vcsa-deploy-${DEPLOY_VER}-${DEPLOY_PLATFORM}.tgz"
+
+#RUN apk add --no-cache bash wget libarchive-tools coreutils
+RUN apt -y update
+RUN apt -y install bash wget
+
+RUN wget --no-check-certificate ${OVFTOOL_URL}/${OVFTOOL_FILE}
+RUN chmod 755 /root/${OVFTOOL_FILE}
+RUN /root/${OVFTOOL_FILE} --eulas-agreed --console --required --install-bundle=/root/${OVFTOOL_FILE}
+RUN rm -f /root/${OVFTOOL_FILE}
+
+# Content must add PATH=/root/deploy:$PATH to access this correctly
+RUN wget --no-check-certificate ${DEPLOY_URL}/${DEPLOY_FILE}
+#RUN tar --transform="s/lin64/deploy/g" -xzf /root/${DEPLOY_FILE}
+#
+##### NEED to fix up path and create sym link for /usr/bin/vcsa-deploy
+#####      also copy in templates directories in to correct path location (see ISO)
+#
+RUN tar --transform="s/lin64/deploy/g" -xzf /root/${DEPLOY_FILE}
+
+#ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/arm64/linux/drpcli /usr/bin/
+COPY drpcli /usr/bin/drpcli
+RUN chmod 755 /usr/bin/drpcli
+RUN ln -s /usr/bin/drpcli /usr/bin/jq
+ENTRYPOINT /usr/bin/drpcli machines processjobs

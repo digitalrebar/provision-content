@@ -1,6 +1,8 @@
 ---
 Name: "windows-2012r2-install"
 Description: "WimPE-based windows install bootenv"
+Documentation: |
+  DEPRECATED Bootenv
 OS:
   Name: "windows-2012r2"
   IsoFile: "rebar-win2012r2.iso"

@@ -2,10 +2,14 @@
 Name: "cluster-sync"
 Description: "Waits till all machines complete (use after cluster-remove)"
 Documentation: |
-  Waits until no machines remain.  Use with cluster-remove
-  Typical cluster workflow is add->step->remove->sync
+  Waits until no machines remain.  Use with ``cluster-remove``.
+
+  Typical cluster workflow is ``add -> step -> remove -> sync``
+
   Where step or sync are optional.
-  See cluster-add task for more details
+
+  See ``cluster-add`` task for more details.
+
 Meta:
   icon: "object group"
   color: "blue"

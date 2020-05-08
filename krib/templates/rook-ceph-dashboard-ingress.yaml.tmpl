@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/server-snippet: |
       proxy_ssl_verify off;
-{{- if .ParamExists "certmanager/default-issuer-name" }}    
+{{- if .ParamExists "certmanager/default-issuer-name" }}
     certmanager.k8s.io/cluster-issuer: "{{ .Param "certmanager/default-issuer-name" }}"
 {{ end -}}
 spec:

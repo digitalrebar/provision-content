@@ -4,6 +4,7 @@ Description: "Verify drive signatures"
 Documentation: |
   Using the signatures on the machine, validate each drive's
   signature matches.
+
 Meta:
   icon: "signup"
   color: "blue"

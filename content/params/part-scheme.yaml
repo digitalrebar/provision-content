@@ -7,7 +7,9 @@ Documentation: |
 
   The string will be expanded into this template name:
 
-    part-seed-<string>.tmpl
+    ::
+
+      part-seed-<string>.tmpl
 
   e.g. softraid
 

@@ -2,11 +2,14 @@
 Name: "cluster-step"
 Description: "Waits for machine to be top of queue (use before cluster-remove!)"
 Documentation: |
-  Waits until machine is in Nth (or earlier) position
-  Replies on cluster-remove to advance queue
-  Typical cluster workflow is add->step->remove->sync
-  Where step or sync are optional.
-  See cluster-add task for more details
+  Waits until machine is in *Nth* (or earlier) position.
+
+  Replies on ``cluster-remove`` to advance queue.
+
+  Typical cluster workflow is ``add -> step -> remove -> sync``.
+
+  Where step or sync are optional.  See ``cluster-add`` task for more details.
+
 Meta:
   icon: "object group"
   color: "blue"

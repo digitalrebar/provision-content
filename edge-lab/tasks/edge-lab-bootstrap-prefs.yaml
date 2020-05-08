@@ -1,0 +1,24 @@
+---
+Description: "A task to set the default preferences for Edge Lab"
+Name: "edge-lab-bootstrap-prefs"
+Documentation: |
+  A task to set the default preferences for Edge lab.
+ExtraClaims:
+  - scope: "*"
+    action: "*"
+    specific: "*"
+Templates:
+  - Name: "prefs.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+      drpcli machines meta set $RS_UUID key icon to "wrench"
+      drpcli prefs set defaultWorkflow discover-base defaultStage discover defaultBootEnv sledgehammer unknownBootEnv discovery
+Meta:
+  icon: "wrench"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2019"

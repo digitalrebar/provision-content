@@ -5,8 +5,11 @@ Documentation: |
   Provide a custom /etc/docker/daemon.json
   See https://docs.docker.com/engine/reference/commandline/dockerd/
   For example:
+
     ::
+
       {"insecure-registries":["ci-repo.englab.juniper.net:5010"]}
+
 Schema:
   type: "object"
   properties:

@@ -1,0 +1,16 @@
+---
+Name: proxmox-setup-lab
+Description: Perform the student lab setup on a proxmox host.
+Documentation: |
+  Sets up the bridge networks and creates virtual machine nodes on a proxmox
+  host.
+
+Meta:
+  color: green
+  icon: download
+  title: RackN Content
+Stages:
+  - kvm-enable-nested
+  - proxmox-lab-network
+  - proxmox-lab-accounts
+  - proxmox-lab-createnodes

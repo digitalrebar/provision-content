@@ -8,8 +8,8 @@ function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf 
 
 (which subscription-manager > /dev/null 2>&1 ) || xiterr "Unable to locate 'subscription-manager' tool in PATH ($PATH)."
 
-{{ if .Param "redhat/subscription-username" }}UN={{ .Param "redhat/subscription-username" }}{{ else }}ERR=1{{ end }}
-{{ if .Param "redhat/subscription-password" }}PW={{ .Param "redhat/subscription-password" }}{{ else }}ERR=1{{ end }}
+{{ if .ParamExists "redhat/subscription-username" }}UN={{ .Param "redhat/subscription-username" }}{{ else }}ERR=1{{ end }}
+{{ if .ParamExists "redhat/subscription-password" }}PW={{ .Param "redhat/subscription-password" }}{{ else }}ERR=1{{ end }}
 (( $ERR )) && xiterr "Missing RHSM username or password info ('redhat/subscription-username' and 'redhat/subscription-password')"
 
 {{ range $key, $repos := .Param "redhat/subscription-repos" -}}

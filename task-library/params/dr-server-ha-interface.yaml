@@ -1,0 +1,13 @@
+---
+Name: "dr-server/ha-interface"
+Description: "Network interface that DRP will manage for the Cluser IP"
+Documentation: |
+  Must be one that machines being managed by DRP can access.
+
+Schema:
+  type: string
+  default: eth0
+Meta:
+  color: "blue"
+  icon: "id badge outline"
+  title: "RackN Copyright 2020"

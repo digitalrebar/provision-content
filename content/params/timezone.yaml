@@ -1,0 +1,17 @@
+---
+Name: "timezone"
+Description: "Timezone for the system"
+Documentation: |
+  The timezone for the system.  There is not a default.  This way if not set
+  the systems will not alter the system state.
+
+  This is currently used by the IPMI subsystem, but may be used in
+  future updates.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "time"
+  color: "blue"
+  title: "Digital Rebar Community Content"

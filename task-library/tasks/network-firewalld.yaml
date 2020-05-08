@@ -1,8 +1,10 @@
 ---
 Description: "A task to open ports in Firewalld"
 Documentation: |
-  Requires that firewall-cmd enabled system
-  Will reset the firewall at the end of the task
+  Requires that ``firewall-cmd`` enabled system.
+
+  Will reset the firewall at the end of the task.
+
 Name: "network-firewalld"
 RequiredParams:
   - network/firewalld-ports
@@ -15,24 +17,31 @@ Templates:
 
     {{template "setup.tmpl" .}}
 
+    echo "Looking for firewall-cmd: [$(which firewall-cmd)]"
     if which firewall-cmd >/dev/null 2>/dev/null ; then
-
-      {{range $index, $port := .Param "network/firewalld-ports" }}
-        echo "Rule {{$index}}: add-port {{$port}}"
-        firewall-cmd --permanent --add-port={{$port}}
-      {{else}}
-        echo "No network/firewalld-ports defined"
-      {{end}}
-
-      echo "restart firewall"
-      firewall-cmd --reload
-
-      echo "done"
-
+      echo "Found firewall-cmd, adding ports"
     else
-        echo "firewall not installed on system"
-        exit 1
+      echo "firewalld not installed on system, installing..."
+      yum install -y firewalld
     fi
+
+    {{range $index, $port := .Param "network/firewalld-ports" }}
+      {{ if contains "/" $port }}
+      PORT={{$port}}
+      {{ else }}
+      PORT={{$port}}/tcp
+      {{ end }}
+      echo "Rule {{$index}}: add-port $PORT"
+      firewall-cmd --permanent --add-port=$PORT
+    {{else}}
+      echo "No network/firewalld-ports defined"
+    {{end}}
+
+    echo "restart firewall"
+    firewall-cmd --reload
+
+    echo "done"
+
   Name: firewalld-ports
 Meta:
   icon: "fire"

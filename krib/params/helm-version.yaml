@@ -1,5 +1,5 @@
 ---
-Name: "helm/version"
+Name: "krib/helm-version"
 Description: "Version of the helm to use in cluster"
 Documentation: |
   Allows operators to determine the version of etcd to install

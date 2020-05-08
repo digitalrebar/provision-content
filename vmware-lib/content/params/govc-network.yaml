@@ -1,0 +1,17 @@
+---
+Name: "govc/network"
+Description: "Defines the vSphere network name to use for deploying OVAs"
+Documentation: |
+  Network of the ESXi/vCenter instance to use when deploying OVAs via the ``govc`` command.
+
+  For example, set to something like ``VM Network``.
+
+  Defaults to an empty (unused) value.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

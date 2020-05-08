@@ -1,6 +1,12 @@
 Name: image-reset-package-repos
 Description: Reset image repositories to desired defaults
-Documentation: ""
+Documentation: |
+  Resets the system package configuraiton back to "factory default" values.
+  During the image build process, it may be necessary to add in specific repos to
+  add/configure software packages in to the gold master image.  Once the image has
+  been built, it is often desired to reset to a clean state as if the system had
+  the default package configuration state.
+
 ReadOnly: true
 Meta:
   color: purple

@@ -5,7 +5,7 @@ Documentation: |
   Installs Helm and runs helm init (which installs Tiller) on the leader.
   This uses the Digital Rebar Cluster pattern so krib/cluster-profile must be set.
 
-  The install checks to see if tiller is running and may skip initialization. 
+  The install checks to see if tiller is running and may skip initialization.
 
   The tasks only run on the leader so it must be included in the workflow.  All other
   machines will be skipped so it is acceptable to run the task on all machines

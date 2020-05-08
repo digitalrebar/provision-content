@@ -1,0 +1,113 @@
+---
+Name: "ansible-apply"
+Description: "A task run Ansible Templates"
+Documentation: |
+  Runs one or more Ansible Playbook templates as defined by the
+  ``ansible/playbook-templates`` variable in the stage calling the task.
+
+  Requires an ``ansible`` context.
+
+  Expects to have ``rsa-key-create`` run before stage is called
+  so that ``rsa/*`` params exist.
+
+  Information can be chained together by having the playbook write
+  ``[Machine.Uuid].json`` as a file.  This will be saved on the
+  machine as ``Param.ansible/output``.  The entire Machine JSON is
+  passed into the playbook as the ``digitalrebar`` variable so it is
+  available.
+
+RequiredParams:
+  - ansible/playbook-templates
+  - rsa/key-public
+  - rsa/key-user
+  - rsa/key-private
+Templates:
+  - Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+
+      {{template "setup.tmpl" .}}
+
+      # we need a keypair for Ansible
+      echo "Retrieving SSH key from Machine Params rsa/key-*"
+      tee rsa-{{.Machine.Name}} >/dev/null << EOF
+      {{.Param "rsa/key-private" | replace "|" "\n" }}
+      EOF
+      chmod 600 rsa-{{.Machine.Name}}
+      tee rsa-{{.Machine.Name}}.pub >/dev/null << EOF
+      {{.Param "rsa/key-public"}}
+      EOF
+      chmod 644 rsa-{{.Machine.Name}}.pub
+
+      export ANSIBLE_HOST_KEY_CHECKING=False
+
+      {{ $machine := .Machine.Name -}}
+      {{ range $index, $template := (.Param "ansible/playbook-templates") -}}
+      {{ $playbook := printf "%s" $template -}}
+
+      ## Build Playbook
+      echo "============== Playbook {{$index}} =============="
+      echo "Building from Template {{ $playbook }}"
+      tee playbook.yaml >/dev/null << EOF
+      {{$.CallTemplate $playbook $}}
+      EOF
+
+      ## Pull data for playbook from Machine
+      ADDRESS=$(drpcli machines show $RS_UUID | jq -r .Address)
+      if [[ "$ADDRESS" == "" ]]; then
+        ADDRESS="localhost"
+      else
+        ADDRESS="$ADDRESS,"
+      fi
+      echo "Making DRP machine JSON available to playbook"
+      tee digitalrebar.json >/dev/null << EOF
+      { digitalrebar: $(drpcli machines show $RS_UUID)
+      }
+      EOF
+
+      echo "Run Playbook {{add $index 1}} using $(ansible-playbook --version)"
+      ansible-playbook \
+        -i $ADDRESS \
+        --private-key=rsa-{{$machine}} \
+        --extra-vars @digitalrebar.json \
+        playbook.yaml
+
+      # capture address (if any) from run
+      if [[ -f {{$machine}}-address.txt ]]; then
+        NEWADDRESS=$(cat {{$machine}}-address.txt)
+        echo "reading $NEWADDRESS from {{$machine}}-address.txt"
+        if [[ "$NEWADDRESS" == "REMOVE" ]]; then
+          echo "Remove address from machine"
+          drpcli machines update $RS_UUID "{\"Address\":\"\"}" | jq .Address
+        else
+          if [[ "$NEWADDRESS," == "$ADDRESS" ]]; then
+            echo "Address did not change, not saving"
+          else
+            echo "Saving $NEWADDRESS to Machine.Address"
+            drpcli machines update $RS_UUID "{\"Address\":\"$NEWADDRESS\"}" | jq .Address
+          fi
+        fi
+      else
+        echo "No address file from Playbook.  If desired, create {{$machine}}-address.txt"
+      fi
+
+      # capture results from run
+      if [[ -f {{$machine}}.json ]]; then
+        echo "Saving Ouput from {{$machine}}.json to Machine.Params anisble/output."
+        drpcli machines set $RS_UUID param ansible/output to - < {{$machine}}.json
+      else
+        echo "No output file from Playbook.  If desired, create {{$machine}}.json"
+      fi
+
+      {{ end }}
+
+      echo "Done"
+    Name: "Run Playbooks"
+Meta:
+  icon: "cog"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

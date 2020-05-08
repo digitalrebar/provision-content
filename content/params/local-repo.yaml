@@ -4,7 +4,7 @@ Description: "Indicates that the install should use the local exploded iso as th
 Documentation: |
   DEPRECATED: Do not use.
 
-  Boolean value that tells the install steps to only use the local exploded iso on the 
+  Boolean value that tells the install steps to only use the local exploded iso on the
   DRP server as the only installation repo.
 
 Schema:

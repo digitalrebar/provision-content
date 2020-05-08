@@ -1,6 +1,13 @@
 ---
 Name: sledgehammer-stage-bits
 Description: Stage Sledgehammer pieces needed for initial discovery and bootstrapping.
+ExtraClaims:
+  - scope: "contents"
+    action: "get"
+    specific: "*"
+  - scope: "isos"
+    action: "*"
+    specific: "*"
 Templates:
   - Name: sledgehammer-start-up.sh
     Path: /sbin/sledgehammer-start-up.sh
@@ -33,8 +40,12 @@ Templates:
           exit 1
       fi
       if [[ $(cat /proc/cmdline) =~ $bootif_re ]]; then
-          MAC="${BASH_REMATCH[1]//-/:}"
-          MAC="${MAC#*:}"
+          if [[ "${BASH_REMATCH[1]}" == "discovery" ]] ; then
+              MAC=$(cat /sys/class/net/eth0/address)
+          else
+              MAC="${BASH_REMATCH[1]//-/:}"
+              MAC="${MAC#*:}"
+          fi
       elif [[ -d /sys/firmware/efi ]]; then
           declare -A boot_entries
           bootent_re='^Boot([0-9]{4})'
@@ -215,6 +226,11 @@ Templates:
       postportdelay=$(grep -o 'provisioner.postportdelay=[^ ]*' /proc/cmdline)
       routedelay=$(grep -o 'provisioner.routedelay=[^ ]*' /proc/cmdline)
       wgetretrycount=$(grep -o 'provisioner.wgetretrycount=[^ ]*' /proc/cmdline)
+      if [[ "$bootif" == "BOOTIF=discovery" ]] ; then
+        bootif=$(cat /sys/class/net/eth0/address)
+        bootif=${bootif//:/-}
+        bootif="BOOTIF=01-$bootif"
+      fi
       test -z "$bootif" && fail "Missing required parameter BOOTIF"
       test -z "$nextone" && fail "Missing required parameter provisioner.web"
       ip6=$(echo $nextone | grep -o '\[[0-9a-fA-F:]*\]')
@@ -254,6 +270,9 @@ Templates:
       squashfs="$nextone/sledgehammer/$ARCH/$SIGNATURE/root.squashfs"
       if [ $ARCH == amd64 ]; then
           squashfs="$nextone/sledgehammer/$SIGNATURE/root.squashfs"
+      fi
+      if [ $ARCH == rpi4 ]; then
+          squashfs="$nextone/sledgehammer/rpi4/rpi/root.squashfs"
       fi
       # Loop because it can take some time to come up.
       count=0
@@ -598,8 +617,11 @@ Templates:
       echo "Making module/firmware archive"
       find lib |sort |cpio -o -R 0:0 --format=newc |xz -T0 -c >initrd/lib.cpio.xz
       rm -rf lib
-      echo "Staging kernel and busybox for stage1 initramfs"
+      echo "Staging bootloader, kernel and busybox for stage1 initramfs"
       cp /boot/$KERNEL /IMAGE/vmlinuz0
+      cp /boot/efi/EFI/centos/grubx64.efi /IMAGE/grubx64.efi
+      cp /boot/efi/EFI/centos/shimx64.efi /IMAGE/shimx64.efi
+      rpm -e grub2-efi-x64 shim-x64
       cd /IMAGE/initrd
       mkdir -p dev proc sys bin lib etc usr/share/udhcpc tmp newinitramfs
       curl -fgL -o bin/busybox http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/busybox-1.29.3.${ARCH}
@@ -642,18 +664,17 @@ Templates:
       cd initrd
       sed -i -e "s/::SIGNATURE::/$signature/" init
       sed -i -e "s/::BUILD_DATE::/$(date)/" init
-      sed -i -e "s/::SBV::/$(RS_TOKEN= drpcli -U rocketskates -P r0cketsk8ts contents show sledgehammer-builder | jq .meta.Version -r)/" init
+      sed -i -e "s/::SBV::/$(RS_TOKEN= drpcli contents show sledgehammer-builder | jq .meta.Version -r)/" init
       find |sort |cpio -o -R 0:0 --format=newc |gzip -9 >../stage1.img
       cd ..
       # Tar it all up
       tarname=sledgehammer-$signature.{{.Machine.Arch}}.tar
       echo "Creating Sledgehammer $signature archive"
-      sha1sum vmlinuz0 stage1.img root.squashfs >sha1sums
+      sha1sum vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi >sha1sums
       mkdir $signature
-      mv sha1sums vmlinuz0 stage1.img root.squashfs $signature
+      mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
       tar cf $tarname $signature
       # Push back to dr-provision
-      unset RS_TOKEN
       echo "Uploading Sledgehammer to dr-provision"
-      drpcli -U rocketskates -P r0cketsk8ts isos upload $tarname as $tarname
+      drpcli isos upload $tarname as $tarname
       echo "$tarname uploaded to isos"

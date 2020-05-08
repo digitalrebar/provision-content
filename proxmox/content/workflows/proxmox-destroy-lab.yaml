@@ -1,0 +1,15 @@
+---
+Name: proxmox-destroy-lab
+Description: Perform the student lab setup on a proxmox host.
+Documentation: |
+  Sets up the bridge networks and creates virtual machine nodes on a proxmox
+  host.
+
+Meta:
+  color: green
+  icon: download
+  title: RackN Content
+Stages:
+  - proxmox-lab-destroy-users
+  - proxmox-lab-destroy-all-vms
+  - proxmox-lab-destroy-networks
