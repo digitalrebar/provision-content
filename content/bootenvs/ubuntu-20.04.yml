@@ -1,0 +1,118 @@
+---
+Name: "ubuntu-20.04-install"
+Description: "Ubuntu-20.04 install"
+Documentation: |
+  Installs Ubuntu Bionic Beaver (18.04) LTS version.  This BootEnv will install
+  the General Available (GA) kernel.  If you wish to install the HWE (Hardware
+  Enablement) version, please use the Stage "ubuntu-18.04-hwe-install".
+
+  Both amd64 and arm64 architectures are supported.
+
+  NOTE - Default Ubuntu ISOs will attempt to check internet repositories, this
+  can cause problems during provisioning if your environment does not have
+  outbound access.  Workaround this by defining Options 3 (Gateway) and 6 (DNS)
+  for your Subnet settings.
+Meta:
+  color: "purple"
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  title: "Digital Rebar Community Content"
+OS:
+  Name: "ubuntu-20.04"
+  Family: "ubuntu"
+  Codename: "Focal Fossa"
+  Version: "20.04"
+  SupportedArchitectures:
+    amd64:
+      IsoFile: "ubuntu-20.04-live-server-amd64.iso"
+      IsoUrl: "https://releases.ubuntu.com/20.04/ubuntu-20.04-live-server-amd64.iso"
+      IsoSha256: "caf3fd69c77c439f162e2ba6040e9c320c4ff0d69aad1340a514319a9264df9f"
+      Kernel: "install/netboot/ubuntu-installer/amd64/linux"
+      Initrds:
+        - "install/netboot/ubuntu-installer/amd64/initrd.gz"
+      BootParams: >-
+        root=/dev/ram
+        debian-installer/locale=en_US.utf8
+        console-setup/layoutcode=us
+        keyboard-configuration/layoutcode=us
+        netcfg/dhcp_timeout=120
+        netcfg/choose_interface=auto
+        url={{.Machine.Url}}/seed
+        netcfg/get_hostname={{.Machine.Name}}
+        rw quiet
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
+    arm64:
+      IsoFile: "ubuntu-20.04-live-server-arm64.iso"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/20.04/release/ubuntu-20.04-live-server-arm64.iso"
+      IsoSha256: "46d5ee0843e5da7e170fa84b5f4e9e474456180659221ec6cc2dc60f6fcd1b06"
+      Kernel: "install/netboot/ubuntu-installer/arm64/linux"
+      Loader: "grubarm64.efi"
+      Initrds:
+        - "install/netboot/ubuntu-installer/arm64/initrd.gz"
+      BootParams: >-
+        root=/dev/ram
+        debian-installer/locale=en_US.utf8
+        console-setup/layoutcode=us
+        keyboard-configuration/layoutcode=us
+        netcfg/dhcp_timeout=120
+        netcfg/choose_interface=auto
+        url={{.Machine.Url}}/seed
+        netcfg/get_hostname={{.Machine.Name}}
+        rw quiet
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
+OnlyUnknown: false
+OptionalParams:
+  - part-scheme
+  - operating-system-disk
+  - provisioner-default-user
+  - provisioner-default-fullname
+  - provisioner-default-uid
+  - provisioner-default-password-hash
+  - kernel-console
+  - kernel-options
+  - proxy-servers
+  - dns-domain
+  - local-repo
+  - proxy-servers
+  - ntp-servers
+  - select-kickseed
+ReadOnly: true
+RequiredParams: []
+Templates:
+  - ID: "kexec.tmpl"
+    Name: "kexec"
+    Path: "{{.Machine.Path}}/kexec"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: "select-kickseed.tmpl"
+    Name: "seed"
+    Path: "{{.Machine.Path}}/seed"
+  - ID: "net-post-install.sh.tmpl"
+    Name: "net-post-install.sh"
+    Path: "{{.Machine.Path}}/post-install.sh"
+  - Name: grub-secure-mac
+    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    ID: default-grub.tmpl
+  - Name: grub-secure
+    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    ID: default-grub.tmpl
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
