@@ -81,7 +81,10 @@ Templates:
               *STATUS*)
                 [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
-                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true;;
+                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true
+                [[ $failed = no && $line = *'reboot required'* ]] && this_one_reboot=true
+                [[ $failed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=true
+                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=true;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
