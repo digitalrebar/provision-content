@@ -1,6 +1,84 @@
 ---
 Name: sledgehammer-stage-bits
 Description: Stage Sledgehammer pieces needed for initial discovery and bootstrapping.
+Documentaion: |
+  This task is responsible for transforming the OS installed by the
+  sledgehammer-install bootenv into a Sledgehammer image.  It is
+  structured as a series of Templates that are put in place and a
+  couple that are executed to strip out unwanted bits and package up
+  the rest.  The Templates are as follows:
+
+  * sledgehammer-start-up.sh
+
+    This script is run as a systemd service once Sledgehammer has
+    started.  It is responsible for making sure the image was booted
+    with the necessary kernel parameters and then downloading and
+    executing the machine-independent startup script from
+    dr-provision.
+
+  * sledgehammer-motd
+
+    This sets the default login banner.
+
+  * sledgehammer-ssh-config
+
+    This sets the default sshd configuration.  We default to allowing
+    root logins only via key based authentication and allowing sftp.
+
+  * sledgehammer-service
+
+    This is the systemd unit file that is responsible for starting
+    sledgehammer-start-up.sh when Sledgehammer boots.  It waits until
+    the network has been configured and is online before starting.
+
+  * sledgehammer-stage1-init
+
+    This script is run when the Sledgehammer kernel and initrd have
+    been loaded.  It is responsible for transferring the stage2 image
+    from dr-provision and transferring control to it.
+
+  * sledgehammer-stage1-udhcpc-config
+
+    This script is invoked by udhcpc whenever it gets or releases a lease.
+    It is responsible for actually configuring the network interface.
+
+  * squashfs-excludes
+
+    this file defines what will be excluded from the stage2 squashfs image.
+
+  * install-sipcalc, update-systemd, and update-parted
+
+    These install updated versions of various components we want to be
+    available on Sledgehammer.
+
+  * remove-unwanted-pkgs
+
+    This script is responsible for removing any packages and files
+    that we do not want in the final Sledgehammer image.
+
+  * fix-up-services
+
+    This script is responsible for making sure that all the services
+    we want to start when Sledgeahmmer starts are configured properly.
+    It also disables services that are not needed.
+
+  * prepare-stage-1
+
+    This script builds the stage1 initramfs.  This stage needs to be
+    just barely smart enough to pull down stage2, and should be as
+    small as possible to minimize the amount of data transferred over
+    tftp.
+
+  * make-stage-2
+
+    This script is responsible for making the stage2 initramfs.  It
+    compresses everything down using squashfs to make sure that the
+    image is as small as it gan get.
+
+  * make-sledgehammer
+
+    This script packages everything created by the previous steps and
+    uploads it to dr-provision.
 ExtraClaims:
   - scope: "contents"
     action: "get"
@@ -339,10 +417,12 @@ Templates:
       done
 
       echo "" >/proc/sys/kernel/hotplug
+      # pkill -9 here to keep udhcpc from releasing the IP
+      # address when we will want it back in a second or two.
       if [[ "$ip6" == "" ]] ; then
-          pkill udhcpc
+          pkill -9 udhcpc
       else
-          pkill udhcpc6
+          pkill -9 udhcpc6
       fi
       ip link set "$pxedev" down
 

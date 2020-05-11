@@ -1,6 +1,12 @@
 ---
 Name: "sledgehammer-install"
 Description: "Install bootenv for building Sledgehammer images"
+Documentation: |
+  This BootEnv is used as the basis for building Sledgehammer, our in-memory discovery
+  and inventory management environment.  This bootenv is reponsible for performing
+  a basic CentOS install on a sacrificial machine.  The tasks that run after the install
+  has finished are responsible for stripping out everything we do not need for Sledgehammer
+  to boot as an in-memory OS image and packaging everything up for distribution.
 OS:
   Family: "redhat"
   Name: "centos-7"
