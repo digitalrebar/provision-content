@@ -7,9 +7,9 @@
 v=$(drpcli machines get "{{.Machine.UUID}}" param "start-over" --aggregate | jq -r .)
 if [[ "$v" == "false" ]] ; then
     # Reset the current task list and mark the machine runnable.
-    drpcli machines remove "{{.Machine.UUID}}" param "start-over" 2>/dev/null >/dev/null || true
+    drpcli machines remove "{{.Machine.UUID}}" param "start-over" || true
     drpcli machines update "{{.Machine.UUID}}" '{ "Runnable": true }'
 else
     # Reset the current task list and mark the machine runnable.
     drpcli machines update "{{.Machine.UUID}}" '{ "Runnable": true, "CurrentTask": -1 }'
-fi
+fi &>/dev/null

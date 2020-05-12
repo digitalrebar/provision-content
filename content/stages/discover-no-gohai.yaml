@@ -7,6 +7,7 @@ Documentation: |
   Pre gohai/skip Parameter, used to run discovery without gohai action.
 BootEnv: "sledgehammer"
 Tasks:
+  - set-machine-ip-in-sledgehammer
   - "ssh-access"
 Meta:
   deprecated: "25 June 2018"

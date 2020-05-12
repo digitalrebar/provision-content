@@ -225,6 +225,9 @@ Templates:
       # used below.  Reset the token to the longer machine token.
       export RS_TOKEN="{{.GenerateInfiniteToken}}"
 
+      drpcli machines set "$RS_UUID" param gohai-inventory to '{}' &>/dev/null
+      drpcli gohai | drpcli machines set "$RS_UUID" param gohai-inventory to - &>/dev/null
+
       # If we do not have hardware addresses set on the machine, set them now.
       get_macs() {
           local maclist=""
@@ -243,9 +246,6 @@ Templates:
       # The machine does not have hardware addresses set, so set them
       if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
           drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}" &>/dev/null
-      fi
-      if [[ $IP && "$(jq -r '.Address' <<< "$json")" != $IP ]]; then
-          drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
       fi
       unset get_macs json
 

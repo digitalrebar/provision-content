@@ -1,0 +1,21 @@
+---
+Name: set-machine-ip-in-sledgehammer
+ExtraClaims:
+  - scope: "machines"
+    action: "list, get, update"
+    specific: "*"
+Templates:
+  - Name: set-machine-ip
+    Contents: |
+      #!/usr/bin/env bash
+      # This logic replicates what our DHCP server does
+      # behind the scenes to make sure that machines do not
+      # have conflicting addresses.  This works because
+      # and Address of 0.0.0.0 is unset.
+      addr='{{.Machine.Address}}'
+      [[ $IP && $addr != $IP ]] || exit 0
+      while read other; do
+          drpcli machines update "$other" '{"Address": "0.0.0.0"}'
+      done < <(drpcli machines list Address=$IP |jq -r '.[] |.Uuid')
+      drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
+      
