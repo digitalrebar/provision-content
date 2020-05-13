@@ -10,6 +10,7 @@ Documentation: |
   * Make sure the prefs are set correctly
   * Make and install a public/private key pair for ssh access to clients.
   * Make default subnet for the Edge Lab environment
+  * Create NFS share for shared storage
   * Lock the machine to prevent accidenty changes
 
 Tasks:
@@ -17,7 +18,8 @@ Tasks:
   - "edge-lab-bootstrap-prefs"
   - "edge-lab-bootstrap-ssh"
   - "edge-lab-bootstrap-subnet"
-  - "edge-lab-bootstrap-lock"
+  - "edge-lab-bootstrap-nfs"
+  - "bootstrap-lock"
 Meta:
   icon: "sort amount up"
   color: "yellow"
