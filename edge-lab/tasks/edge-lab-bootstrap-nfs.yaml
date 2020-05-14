@@ -8,6 +8,9 @@ ExtraClaims:
   - scope: "subnets"
     action: "get"
     specific: "edge-lab"
+  - scope: "profiles"
+    action: "*"
+    specific: "global"
 Templates:
   - Name: "build_key_add_it"
     Path: ""
@@ -20,16 +23,16 @@ Templates:
       echo "FAMILY set from os-release to:  '$FAMILY'"
 
       case $FAMILY in
-        redhat|centos) _pkgmgr="yum"; yum -y install epel-release ;;
-        debian|ubuntu) _pkgmgr="apt" ;;
+        redhat|centos) _pkgmgr="yum -y install nfs-utils"; yum -y install epel-release ;;
+        debian|ubuntu) _pkgmgr="apt -y install nfs-kernel-server"; apt update ;;
         *) >&2 echo "Unsupported package manager family '$FAMILY'."
            exit 1 ;;
       esac
 
       echo "starting NFS install"
 
-      if systemctl is-active nfs-server.service ; then
-        STATUS="$(systemctl is-active nfs-server.service && "inactive")"
+      if [systemctl is-active nfs-server.service] ; then
+        STATUS="$(systemctl is-active nfs-server.service)"
         echo "NSF-Server status ${STATUS}...."
         case $STATUS in
           active) echo "NFS-Server already running, do not reinstall."
@@ -37,13 +40,13 @@ Templates:
           failed) echo "NFS-Server in failed state - halting!"
             exit 1 ;;
           inactive) echo "install NFS-Server"
-            $_pkgmgr -y install nfs-server;;
+            $_pkgmgr ;;
           *) echo "NFS-Server in $STATUS state - halting!"
             exit 1 ;;
         esac
       else
         echo "install NFS-Server (is-active failed)"
-        $_pkgmgr -y install nfs-server
+        $_pkgmgr
       fi
         
       if [[ -e "/export/shared" ]]; then
@@ -52,6 +55,7 @@ Templates:
         echo "creating /export/shared"
         mkdir -p /export/shared
         chmod 777 /export/shared
+        touch /export/shared/test.0
       fi
 
       SUBNET=$(drpcli subnets show edge-lab | jq -r .Subnet)
@@ -61,11 +65,15 @@ Templates:
       /export/shared ${SUBNET}(rw,nohide,insecure,no_subtree_check,async)
       EOF
 
+      echo "saving the NFS mount"
+      drpcli profiles set "global" param "edge-lab/nfs-share" to "{{.ProvisionerAddress}}:/export/shared"
+
       systemctl enable nfs-server
       systemctl start nfs-server
       systemctl status nfs-server
 
-      exit 1
+      echo "done"
+      exit 0
 Meta:
   icon: "file text"
   color: "yellow"
