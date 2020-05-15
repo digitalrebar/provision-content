@@ -55,6 +55,7 @@ Templates:
         echo "creating /export/shared"
         mkdir -p /export/shared
         chmod 777 /export/shared
+        chown nobody:nogroup /export/shared
         touch /export/shared/test.0
       fi
 

@@ -9,6 +9,7 @@ Documentation: |
 Stages:
   - "cluster-setup"
   - "k3s-install"
+  - "edge-lab-install-dashboard"
   - "edge-lab-helm"
 Meta:
   color: "green"
