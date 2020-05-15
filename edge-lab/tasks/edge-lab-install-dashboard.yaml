@@ -1,0 +1,66 @@
+---
+Description: "Install Kubernetes Dashboard"
+Name: "edge-lab-install-dashboard"
+Documentation: |
+  Installs Dashboard on the Cluster.
+  Saves install token into k3s/dashboard-token
+  Note: will skip if the dashboard version does not start with v
+RequiredParams:
+  - cluster/profile
+  - cluster/leaders
+  - k3s/admin-conf
+  - edge-lab/dashboard-version
+OptionalParams:
+  - edge-lab/dashboard-token
+Templates:
+  - Name: "dashboard.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{ template "cluster-shared.tmpl" .}}
+
+      {{ if (hasPrefix "v" (.Param "edge-lab/dashboard-version"))}}
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
+        exit 0
+      fi
+
+      # dashboard requires the admin config
+      export KUBECONFIG="./admin.conf"
+      tee $KUBECONFIG >/dev/null << EOF
+      {{ .ParamAsJSON "k3s/admin-conf" }}
+      EOF
+      echo "testing cluster access"
+      kubectl --kubeconfig=$KUBECONFIG get nodes
+
+      echo "Apply Dashboard YAML"
+      kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/kubernetes/dashboard/{{ .Param "edge-lab/dashboard-version"}}/aio/deploy/recommended.yaml
+
+      sleep 10
+
+      echo "Create Service Accounts"
+      kubectl --kubeconfig=$KUBECONFIG create serviceaccount dashboard-admin-sa       
+      kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
+
+      echo "Save Dashboard Token"
+      token=$(kubectl --kubeconfig=$KUBECONFIG get secrets --output=json | jq -r '.items[] | select(.metadata.name|startswith("dashboard-admin-sa-token")) | .data.token')
+      drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "edge-lab/dashboard-token" to "$token"
+
+      echo "Save Dashboard Status"
+      kubectl --kubeconfig=$KUBECONFIG describe pods -n=kubernetes-dashboard
+
+      {{ else }}
+      echo "edge-lab/dashboard-version ({{ .Param "edge-lab/dashboard-version"}}) does not start with v"
+      {{ end }}
+      echo "Done"
+      exit 0
+
+Meta:
+  icon: "tv"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"
