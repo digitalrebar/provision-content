@@ -51,6 +51,8 @@ switch_to_control() {
             grep -q '^exit 0$' /tmp/control.sh && \
             head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
         echo "Could not load our control.sh!"
+        echo "Either the machine is not in the proper bootenv, or"
+        echo "the bootenv is broken and fell through to Sledgehammer"
         exit 1
     fi
     chmod 755 /tmp/control.sh
@@ -61,14 +63,23 @@ switch_to_control() {
     exit 1
 }
 
+# Create a new node for us.
+#
+# $1 = Number of tries.  If left unspecified, will try forever
 create_machine() {
-    # Create a new node for us,
-    while ! JSON="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                             \"Arch\": \"$ARCH\",
-                                             \"Meta\": {\"icon\":\"cloud\"},
-                                             \"HardwareAddrs\": $hwaddrs}")"; do
-        echo "We could not create a node for ourself, trying again."
-        sleep 5
+    local tries=${1:-0} i=1
+    while true; do
+        JSON="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
+                                         \"Arch\": \"$ARCH\",
+                                         \"HardwareAddrs\": $hwaddrs}")" && break
+        if ((tries == 0 || i <= tries)); then
+            echo "We could not create a node for ourself, trying again (try $i)"
+            ((i++))
+            sleep 5
+            continue
+        fi
+        echo "Tried $i times to create a node, giving up"
+        return 1
     done
     export RS_UUID="$(jq -r '.Uuid' <<< "$JSON")"
 }
