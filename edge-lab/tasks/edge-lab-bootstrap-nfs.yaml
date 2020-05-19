@@ -63,7 +63,7 @@ Templates:
       echo "creating shares for edge-lab subnet ${SUBNET}"
       tee /etc/exports >/dev/null << EOF
       /export        ${SUBNET}(rw,fsid=0,insecure,no_subtree_check,async)
-      /export/shared ${SUBNET}(rw,nohide,insecure,no_subtree_check,async)
+      /export/shared ${SUBNET}(rw,nohide,no_root_squash,insecure,no_subtree_check,async)
       EOF
 
       echo "saving the NFS mount"

@@ -44,9 +44,14 @@ else
        exit 1 ;;
   esac
   mkdir -p /mnt/nfs/share
-  mount {{ .Param "edge-lab/nfs-share" }} /mnt/nfs/share
+  if mount {{ .Param "edge-lab/nfs-share" }} /mnt/nfs/share ; then
+    echo "share mounted, not verified"
+  else
+    echo "could not mount share {{ .Param "edge-lab/nfs-share" }}"
+    exit 1
+  fi
   if [[ -f /mnt/nfs/share/test.0 ]] ; then
-    echo "share mounted and verified.  create machine directory"
+    echo "share verified.  create machine directory"
     mkdir -p /mnt/nfs/share/{{ .Machine.Name }}
     echo "attach k3s containerd to nfs containerd"
     mkdir -p /mnt/nfs/share/{{ .Machine.Name }}/containerd
