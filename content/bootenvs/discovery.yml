@@ -228,6 +228,9 @@ Templates:
   - Name: "grub-discovery"
     Path: "grub/discovery.cfg"
     ID: allarch-grub.tmpl
+  - Name: "common-bootstrap.sh"
+    Path: "machines/common-bootstrap.sh"
+    ID: discovery-common-bootstrap.sh.tmpl
   - Name: "join-up.sh"
     Path: "machines/join-up.sh"
     Contents: |
@@ -255,143 +258,31 @@ Templates:
       # CUMULUS-AUTOPROVISIONING
 
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-
-      # to be generic, we do NOT assume access to cloud provider APIs to determine things
-      get_macs() {
-          local maclist=""
-          local nic=""
-          for nic in /sys/class/net/*; do
-              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
-              maclist="$maclist,\"$(cat "$nic/address")\""
-          done
-          printf '[%s]' "${maclist#,}"
-      }
-
-      PROVISIONER_WEB="{{.ProvisionerURL}}"
-      ARCH="$(uname -m)"
-      case $ARCH in
-          amd64|x86_64) ARCH=amd64;;
-          arm64|aarch64) ARCH=arm64;;
-          *)
-              echo "Unknown arch $ARCH"
-              exit 1;;
-      esac
-      # Perform minimal required bootstrapping for discovery
-      export RS_TOKEN="{{.GenerateToken}}"
-      export RS_ENDPOINT="{{.ApiURL}}"
-      mkdir -p /usr/local/bin
-      grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
-      for tool in drpcli jq; do
-          which "$tool" &>/dev/null && continue
-          echo "Installing $tool in /usr/local/bin"
-          case $tool in
-              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
-              jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
-          esac
-          chmod 755 "/usr/local/bin/$tool"
-      done
-      unset tool
-
       set -x
+      curl -o /tmp/discovery-common-bootstrap.sh \
+          '{{.ProvisionerURL}}/machines/common-bootstrap.sh'
 
-      # Check just in case we pxe booted.
-      host_re='rs\.uuid=([^ ]+)'
-      if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
-        RS_UUID="${BASH_REMATCH[1]}"
-      fi
+      . /tmp/discovery-common-bootstrap.sh
 
-      # Check Hostname to find us
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        RS_UUID=$(drpcli machines list Name=$HOSTNAME | jq -r .[0].Uuid)
-        if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-          RS_UUID=$(drpcli machines show Name:$HOSTNAME | jq -r .Uuid)
-        fi
-      fi
-
-      # If no uuid, check to see if we have one stored from before
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        # See if we have already been created based on dropping uuid file
-        if [[ -f /etc/rs-uuid ]]; then
-            luuid="$(tail -n 1 /etc/rs-uuid)"
-            RS_UUID=$(drpcli machines list Uuid=$luuid | jq -r .[0].Uuid)
-            if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-              RS_UUID=$(drpcli machines show $luuid | jq -r .Uuid)
-            fi
-        fi
-      fi
-
-      # If we still don't have RS_UUID - check the IP address.
-      IP=""
-      BOOTDEV="eth0"
-      bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
-      bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
-      if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
-          IP="${BASH_REMATCH[1]}"
-      else
-          if [[ $(ip -6 -o addr show dev $BOOTDEV) =~ $bootdev_ip6_re ]]; then
-              IP="${BASH_REMATCH[1]}"
-          fi
-      fi
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        RS_UUID=$(drpcli machines list Address=$IP | jq -r .[0].Uuid)
-      fi
-
-      # If we still don't have a UUID, then create a machine
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        echo "Machine UUID file not found.  Adding $HOSTNAME..."
-
-        # Create a new node for us,
-        while ! JSON="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                             \"Address\": \"$IP\",
-                                             \"Arch\": \"$ARCH\",
-                                             \"Meta\": {\"icon\":\"cloud\"},
-                                             \"HardwareAddrs\": $(get_macs)}")"; do
-            echo "We could not create a node for ourself, trying again."
-            sleep 5
-        done
-        RS_UUID="$(jq -r '.Uuid' <<< "$JSON")"
-        echo "${RS_UUID}" > /etc/rs-uuid
-        echo "Machine $HOSTNAME added with UUID $RS_UUID"
-      else
-        echo "Machine $HOSTNAME found in DRPCLI! Using $RS_UUID"
-        echo "${RS_UUID}" > /etc/rs-uuid
-      fi
-
-      {{template "profile.tmpl" .}}
-
-      echo "$PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-      if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
-          grep -q '^exit 0$' /tmp/control.sh && \
-          head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
-          echo "Could not load our control.sh!"
-          exit 1
-      fi
-      chmod 755 /tmp/control.sh
-
-      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
-
-      echo "transfer from start-up to control script"
-
-      [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
-
-      echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-      exit 1
+      find_by_whoami ||
+          find_by_saved_uuid ||
+          find_by_hwaddrs ||
+          find_by_kernel_cmdline ||
+          find_by_hostname ||
+          create_machine ||
+          cannot_find_or_create
+      switch_to_control
   - Name: "start-up.sh"
     Path: "machines/start-up.sh"
     Contents: |
       #!/bin/bash
-      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
       set +x
+      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
-      get_macs() {
-          local maclist=""
-          local nic=""
-          for nic in /sys/class/net/*; do
-              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
-              maclist="$maclist,\"$(cat "$nic/address")\""
-          done
-          printf '[%s]' "${maclist#,}"
-      }
+      curl -o /tmp/discovery-common-bootstrap.sh \
+          '{{.ProvisionerURL}}/machines/common-bootstrap.sh'
+
+      . /tmp/discovery-common-bootstrap.sh
 
       if [[ ! -f /etc/systemd/network/20-bootif.network ]]; then
           get_param() {
@@ -455,29 +346,6 @@ Templates:
               fi
           fi
       fi
-      ARCH="$(uname -m)"
-      case $ARCH in
-          amd64|x86_64) ARCH=amd64;;
-          arm64|aarch64) ARCH=arm64;;
-          *)
-              echo "Unknown arch $ARCH"
-              exit 1;;
-      esac
-      # Perform minimal required bootstrapping for discovery
-      export RS_TOKEN="{{.GenerateToken}}"
-      export RS_ENDPOINT="{{.ApiURL}}"
-      mkdir -p /usr/local/bin
-      grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
-      for tool in drpcli jq; do
-          which "$tool" &>/dev/null && continue
-          echo "Installing $tool in /usr/local/bin"
-          case $tool in
-              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
-              jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
-          esac
-          chmod 755 "/usr/local/bin/$tool"
-      done
-      unset tool
 
       IP=""
       bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
@@ -490,54 +358,24 @@ Templates:
           fi
       fi
       # See if we have already been created.
-      if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
-          RS_UUID="${BASH_REMATCH[1]}"
-          json="$(drpcli machines show "$RS_UUID")"
-          # If we did not get a hostname from DHCP, get it from DigitalRebar Provision.
-          if [[ ! $HOSTNAME ]]; then
-              HOSTNAME="$(jq -r '.Name' <<< "$json")"
-          fi
-      else
-          # If we did not get a hostname from DHCP, generate one for ourselves.
-          [[ $HOSTNAME ]] || HOSTNAME="d${MAC//:/-}.${DOMAIN}"
+      find_by_whoami ||
+          find_by_hwaddrs ||
+          find_by_kernel_cmdline ||
+          create_machine ||
+          cannot_find_or_create
 
-          # Create a new node for us,
-          while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                               \"Address\": \"$IP\",
-                                               \"Arch\": \"$ARCH\",
-                                               \"HardwareAddrs\": $(get_macs)}")"; do
-              echo "We could not create a node for ourself, trying again."
-              sleep 5
-          done
-          RS_UUID="$(jq -r '.Uuid' <<< "$json")"
-
+      json="$(drpcli machines show "$RS_UUID")"
+      # If we did not get a hostname from DHCP, get it from DigitalRebar Provision.
+      if [[ ! $HOSTNAME ]]; then
+          HOSTNAME="$(jq -r '.Name' <<< "$json")"
       fi
-      echo "${RS_UUID}" > /etc/rs-uuid
-      # Set our hostname for everything else.
       if [ -f /etc/sysconfig/network ] ; then
           sed -i -e "s/HOSTNAME=.*/HOSTNAME=${HOSTNAME}/" /etc/sysconfig/network
       fi
       echo "${HOSTNAME#*.}" >/etc/domainname
       hostname "$HOSTNAME"
 
-      {{template "profile.tmpl" .}}
-
       # Force reliance on DNS
       echo '127.0.0.1 localhost' >/etc/hosts
-
-      if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
-          grep -q '^exit 0$' /tmp/control.sh && \
-          head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
-          echo "Could not load our control.sh!"
-          exit 1
-      fi
-      chmod 755 /tmp/control.sh
-
-      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
-
-      echo "transfer from start-up to control script"
-
-      [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
-
-      echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-      exit 1
+      switch_to_control
+      # /tmp/control.sh

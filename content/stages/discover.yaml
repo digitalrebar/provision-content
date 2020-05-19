@@ -11,9 +11,9 @@ Documentation: |
   machine is not using sledgehammer then use `discover-nobootenv`.
 BootEnv: "sledgehammer"
 Tasks:
-  - "enforce-sledgehammer"
-  - "gohai"
-  - "ssh-access"
+  - enforce-sledgehammer
+  - set-machine-ip-in-sledgehammer
+  - ssh-access
 Meta:
   icon: "spinner"
   color: "purple"
