@@ -11,10 +11,10 @@ Meta:
 OS:
   Name: "debian-9"
   Family: "debian"
-  IsoFile: "debian-9-amd64-mini.iso"
-  IsoSha256: "e93011cf474c91d89bc382efec825549a136c86f59794261834e1c6f17ed53d0"
-  IsoUrl: "http://mirrors.kernel.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/mini.iso"
-  Version: "9.6"
+  IsoFile: "debian-9.12.0-amd64-netinst.iso"
+  IsoSha256: "3c47f64693435b0b42b6ef59624edbffa7c4004317d9f9a3f04ecb6a4e30f191"
+  IsoUrl: "https://cdimage.debian.org/cdimage/archive/9.12.0/amd64/iso-cd/debian-9.12.0-amd64-netinst.iso"
+  Version: "9.12"
 Initrds:
   - "initrd.gz"
 Kernel: "linux"
