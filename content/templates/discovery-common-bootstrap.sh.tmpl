@@ -10,7 +10,7 @@ for nic in /sys/class/net/*; do
     macs+=($(cat "$nic/address"))
 done
 hwaddrs="$(printf '"%s",' "${macs[@]}")"
-hwaddrs="[${hawaddrs%,}]"
+hwaddrs="[${hwaddrs%,}]"
 maclist="$(printf '%s,' "${macs[@]}")"
 maclist="${maclist%,}"
 export PROVISIONER_WEB="{{.ProvisionerURL}}"
