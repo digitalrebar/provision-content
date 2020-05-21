@@ -1,5 +1,5 @@
 ---
-Name: "bootstrap-lock"
+Name: "bootstrap-lock-mc"
 Description: "A task to lock the machine at end of a bootstrap stage"
 Documentation: |
   Useful as the final task in a bootstrap sequence.
@@ -18,10 +18,10 @@ Templates:
       {{ template "setup.tmpl" . }}
 
       echo "Locking Machine"
-      drpcli machines meta set $RS_UUID key icon to "chess queen"
-      drpcli machines meta set $RS_UUID key color to "black"
-      drpcli machines update $RS_UUID '{"Locked":true}'
+      drpcli machines update $RS_UUID '{"Locked":true}' | jq .Name
 
+      echo "done"
+      exit 0
 Meta:
   icon: "lock"
   color: "yellow"

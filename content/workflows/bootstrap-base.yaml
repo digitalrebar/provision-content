@@ -1,0 +1,21 @@
+Name: "bootstrap-base"
+Description: "Bootstrap Basic Install"
+Documentation: |
+  Bootstrap Digital Rebar server for minimal operation.
+
+  REQUIRES that the Endpoint Agent has been enabled.
+
+  * Make sure Sledgehammer bootenvs are loaded for operation.
+  * Set the basic default preferences.
+  * Setup an ssh key pair and install it to the global profile.
+  * Locks the endpoint to prevent accidential operations
+
+  This is designed to be extended or replaced with a site specific bootstrap-base
+  that uses the base tasks but performs additional bootstrapping.
+
+Stages:
+  - "bootstrap-base"
+Meta:
+  color: "green"
+  icon: "sort amount up"
+  copyright: "RackN 2020"

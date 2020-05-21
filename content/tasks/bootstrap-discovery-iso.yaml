@@ -1,0 +1,43 @@
+---
+Description: "A task to download and install sledgehammer isos."
+Name: "bootstrap-discovery-iso"
+Documentation: |
+  This tasks downloads and uploads to DRP the sledgehammer isos.
+ExtraClaims:
+  - scope: "isos"
+    action: "*"
+    specific: "*"
+  - scope: "bootenvs"
+    action: "get"
+    specific: "discovery"
+Templates:
+  - Name: "iso_get.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+
+      {{ if .ParamExists "cloud/provider" }}
+        echo "Running in Cloud, skip ISOs"
+      {{ else }}
+      if drpcli bootenvs exists discovery; then
+        if [[ "$(drpcli isos list | jq -r '.[] | select(contains("sledgehammer"))')" == "" ]]; then
+          echo "No sledgehammer ISOS, upload discovery image(s)"
+          drpcli bootenvs uploadiso discovery
+        else
+          echo "Sledgehammer ISO(s) already uploaded:"
+          drpcli isos list | jq -r '.[] | select(contains("sledgehammer"))'
+        fi
+      else
+        echo "No discovery bootenv, skipping"
+      fi
+      {{ end }}
+
+      echo "done"
+      exit 0
+Meta:
+  icon: "dot circle outline"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2020"
