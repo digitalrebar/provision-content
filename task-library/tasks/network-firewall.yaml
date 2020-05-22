@@ -1,13 +1,13 @@
 ---
-Description: "A task to open ports in Firewalld"
+Description: "A task to open ports in Firewall"
 Documentation: |
-  Requires that ``firewall-cmd`` enabled system.
+  Requires that ``firewall-cmd`` or ``ufs`` to be enabled system.
 
   Will reset the firewall at the end of the task.
 
-Name: "network-firewalld"
+Name: "network-firewall"
 RequiredParams:
-  - network/firewalld-ports
+  - network/firewall-ports
 Templates:
 - Contents: |-
     #!/bin/bash
@@ -17,34 +17,42 @@ Templates:
 
     {{template "setup.tmpl" .}}
 
-    echo "Looking for firewall-cmd: [$(which firewall-cmd)]"
-    if which firewall-cmd >/dev/null 2>/dev/null ; then
-      echo "Found firewall-cmd, adding ports"
-    else
-      echo "firewalld not installed on system, installing..."
-      yum install -y firewalld
-    fi
+    FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
 
-    {{range $index, $port := .Param "network/firewalld-ports" }}
+    case $FAMILY in
+      redhat|centos) yum install -y firewall ;;
+      debian|ubuntu) sudo apt install -y ufw ;;
+      *) >&2 echo "Unsupported package manager family '$FAMILY'."
+         exit 1 ;;
+    esac
+
+    {{range $index, $port := .Param "network/firewall-ports" }}
       {{ if contains "/" $port }}
       PORT={{$port}}
       {{ else }}
       PORT={{$port}}/tcp
       {{ end }}
       echo "Rule {{$index}}: add-port $PORT"
-      firewall-cmd --permanent --add-port=$PORT
+      case $FAMILY in
+        redhat|centos) firewall-cmd --permanent --add-port=$PORT ;;
+        debian|ubuntu) sudo ufw allow $PORT ;;
+      esac
     {{else}}
-      echo "No network/firewalld-ports defined"
+      echo "No network/firewall-ports defined"
     {{end}}
 
     echo "restart firewall"
-    firewall-cmd --reload
+    case $FAMILY in
+      redhat|centos) firewall-cmd --reload ;;
+      debian|ubuntu) sudo ufw reload ;;
+    esac
+    
 
     echo "done"
 
-  Name: firewalld-ports
+  Name: firewall-ports
 Meta:
   icon: "fire"
   color: "blue"
-  title: "RackN Content Copyright 2019"
+  title: "RackN Content Copyright 2020"
   feature-flags: "sane-exit-codes"

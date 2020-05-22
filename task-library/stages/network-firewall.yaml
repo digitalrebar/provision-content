@@ -1,9 +1,9 @@
 ---
-Name: "network-firewalld"
-Description: "Configure Firewalld Ports"
+Name: "network-firewall"
+Description: "Configure Firewall Ports"
 RunnerWait: true
 Tasks:
-  - "network-firewalld"
+  - "network-firewall"
 Meta:
   icon: "fire"
   color: "yellow"
