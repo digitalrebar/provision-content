@@ -2,13 +2,19 @@
 Description: "Setup Containers for Docker-Context"
 Name: "bootstrap-contexts"
 Documentation: |
-  Multi-Step Docker-Context Boostrap:
+  Multi-Step Docker-Context Boostrap.
 
-  NOTE: You MUST define Docker-Contexts for this stage to work!
+  This task is idempotent.
 
-  1. Installs Docker on DRP Host
+  IMPORANT NOTES: 
+  * Stage installs Docker and the Docker Plugin even if you do not have Docker-Contexts defined
+  * Contexts are a licensed feature (the stage works, but Contexts will not)
+  * Contexts cannot be created as writable objects until AFTER the docker-context is installed
+
+  1. Installs Containerd and Docker-CE on DRP Host
   1. Installs the Docker-Context from Catalog
   1. Attempts to build & upload images for all Docker-Contexts
+  1. Initializes Docker for all Contexts
 
   Docker build files are discovered in the following precidence order:
   1. using Docker Buildfile from files/contexts/docker-build/[contextname]
@@ -38,8 +44,7 @@ Templates:
       {{template "setup.tmpl" .}}
 
       if [[ "$(drpcli contexts list Engine=docker-context | jq length)" == "0" ]]; then
-        echo "No Docker Contexts - taking no action"
-        exit 0
+        echo "No Docker Contexts"
       fi
 
       if ! which docker ; then
@@ -53,11 +58,13 @@ Templates:
         esac
         echo "Installing Docker-CE"      
         case $FAMILY in
-          redhat|centos) dnf install -y docker-ce docker-ce-cli;;
+          redhat|centos) dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.9-3.el7.x86_64.rpm https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.9-3.el7.x86_64.rpm ;;
           debian|ubuntu) apt install -y docker-ce docker-ce-cli ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1 ;;
         esac
+        sudo systemctl enable --now docker
+        sudo usermod -aG docker $USER
       fi
 
       echo "Starting Docker Service"
@@ -66,11 +73,16 @@ Templates:
 
       echo "Docker installed successfully"
 
-      echo "Install the Docker Context"
-      drpcli catalog item install docker-context
+      echo "Install Docker-Context"
+      if drpcli plugins exists docker-context; then
+        echo "Plugin Exists, skipping"
+      else
+        echo "Plugin Missing, install..."
+        drpcli catalog item install docker-context
+      fi
 
       echo "Check which files are uploaded"
-      drpcli files list contexts/docker-context && true
+      drpcli files list contexts/docker-context || true
 
       echo "Building the docker images if not already built."
       cp $(which drpcli) drpcli
