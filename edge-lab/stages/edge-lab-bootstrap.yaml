@@ -14,12 +14,9 @@ Documentation: |
   * Lock the machine to prevent accidenty changes
 
 Tasks:
-  - "edge-lab-bootstrap-isos"
-  - "edge-lab-bootstrap-prefs"
-  - "edge-lab-bootstrap-ssh"
   - "edge-lab-bootstrap-subnet"
   - "edge-lab-bootstrap-nfs"
-  - "bootstrap-lock"
+  - "bootstrap-lock-mc"
 Meta:
   icon: "sort amount up"
   color: "yellow"
