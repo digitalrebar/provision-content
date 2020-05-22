@@ -13,7 +13,7 @@ Documentation: |
   the workflow into a bootenv (potentially rebooting) when finished.
 Stages:
   - "discover"
-  - "network-firewalld"
+  - "network-firewall"
   - "runner-service"
   - "complete-nobootenv"
 Meta:
