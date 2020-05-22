@@ -1,0 +1,21 @@
+---
+Name: "bootstrap-advanced"
+Description: "Bootstrap Advanced Install"
+Documentation: |
+  Bootstrap stage to builds out an advanced setup
+
+  This augments the bootstrap-base.  It does NOT replace it.
+
+  Bootstrap Operations:
+  * Install Docker & Building Contexts if defined
+  * Lock the Machine
+  
+Tasks:
+  - "bootstrap-contexts"
+  - "bootstrap-lock-mc"
+Meta:
+  icon: "sort amount up"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+
