@@ -9,7 +9,6 @@ Documentation: |
   IMPORANT NOTES: 
   * Stage installs Docker and the Docker Plugin even if you do not have Docker-Contexts defined
   * Contexts are a licensed feature (the stage works, but Contexts will not)
-  * Contexts cannot be created as writable objects until AFTER the docker-context is installed
 
   1. Installs Containerd and Docker-CE on DRP Host
   1. Installs the Docker-Context from Catalog
@@ -52,14 +51,14 @@ Templates:
         echo "Installing Containerd"
         case $FAMILY in
           redhat|centos) dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm ;;
-          debian|ubuntu) apt install -y containerd.io ;;
+          debian|ubuntu) apt install -y containerd ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1 ;;
         esac
         echo "Installing Docker-CE"      
         case $FAMILY in
           redhat|centos) dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.9-3.el7.x86_64.rpm https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.9-3.el7.x86_64.rpm ;;
-          debian|ubuntu) apt install -y docker-ce docker-ce-cli ;;
+          debian|ubuntu) apt install -y docker.io ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1 ;;
         esac
