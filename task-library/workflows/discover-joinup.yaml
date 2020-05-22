@@ -12,8 +12,7 @@ Documentation: |
   Complete-nobootenv ensures that Digital Rebar does not force
   the workflow into a bootenv (potentially rebooting) when finished.
 Stages:
-  - "discover"
-  - "set-machine-ip"
+  - "discover-nobootenv"
   - "network-firewall"
   - "runner-service"
   - "complete-nobootenv"

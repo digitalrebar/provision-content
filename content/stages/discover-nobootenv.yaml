@@ -10,6 +10,7 @@ Documentation: |
   If you are using `sledgehammer` then use the regular `discover` Stage.
 Tasks:
   - "gohai"
+  - "set-machine-ip-in-joinup"
   - "ssh-access"
 Meta:
   icon: "spinner"
