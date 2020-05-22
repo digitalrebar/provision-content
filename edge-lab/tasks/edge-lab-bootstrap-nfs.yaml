@@ -55,7 +55,12 @@ Templates:
         echo "creating /export/shared"
         mkdir -p /export/shared
         chmod 777 /export/shared
-        chown nobody:nogroup /export/shared
+        case $FAMILY in
+          redhat|centos) chown nfsnobody:nfsnobody /exports/test/ ;;
+          debian|ubuntu) chown nobody:nogroup /export/shared ;;
+          *) >&2 echo "Unsupported package manager family '$FAMILY'."
+             exit 1 ;;
+        esac
         touch /export/shared/test.0
       fi
 
