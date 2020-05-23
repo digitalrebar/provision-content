@@ -50,7 +50,7 @@ Templates:
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
         echo "Installing Containerd"
         case $FAMILY in
-          redhat|centos) dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm ;;
+          redhat|centos) yum install -y dnf; dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm ;;
           debian|ubuntu) apt install -y containerd ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1 ;;
