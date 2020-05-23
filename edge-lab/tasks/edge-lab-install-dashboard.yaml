@@ -5,6 +5,10 @@ Documentation: |
   Installs Dashboard on the Cluster.
   Saves install token into k3s/dashboard-token
   Note: will skip if the dashboard version does not start with v
+
+  To start the dashboard, use `kubectl proxy` then open
+  http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+
 RequiredParams:
   - cluster/profile
   - cluster/leaders
@@ -13,6 +17,29 @@ RequiredParams:
 OptionalParams:
   - edge-lab/dashboard-token
 Templates:
+  - Name: "dashboard-adminuser.yaml"
+    Path: ""
+    Contents: |
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: admin-user
+        namespace: kubernetes-dashboard
+  - Name: "cluster-binding.yaml"
+    Path: ""
+    Contents: |
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: admin-user
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+      - kind: ServiceAccount
+        name: admin-user
+        namespace: kubernetes-dashboard
   - Name: "dashboard.sh"
     Path: ""
     Contents: |
@@ -45,8 +72,13 @@ Templates:
       kubectl --kubeconfig=$KUBECONFIG create serviceaccount dashboard-admin-sa       
       kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
 
+      echo "Create Admin User"
+      kubectl --kubeconfig=$KUBECONFIG apply -f dashboard-adminuser.yaml
+      kubectl --kubeconfig=$KUBECONFIG apply -f cluster-binding.yaml
+
       echo "Save Dashboard Token"
-      token=$(kubectl --kubeconfig=$KUBECONFIG get secrets --output=json | jq -r '.items[] | select(.metadata.name|startswith("dashboard-admin-sa-token")) | .data.token')
+      tokenraw=$(kubectl --kubeconfig=$KUBECONFIG get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .data.token')
+      token=$(echo $tokenraw | base64 --decode)
       drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "edge-lab/dashboard-token" to "$token"
 
       echo "Save Dashboard Status"
