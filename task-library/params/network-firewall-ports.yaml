@@ -1,6 +1,6 @@
 ---
-Name: "network/firewalld-ports"
-Description: "Enable Ports for Firewalld"
+Name: "network/firewall-ports"
+Description: "Enable Ports for Firewall"
 Documentation: |
   Map of ports to open for Firewalld including the ``/tcp`` or ``/udp`` filter.
 

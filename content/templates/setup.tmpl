@@ -58,6 +58,8 @@ case $arch in
         xiterr 1 "Unknown arch $(uname -m)";;
 esac
 
+osfamily=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+
 INSTALL_DIR=/usr/local/bin
 if grep -q coreos /etc/os-release ; then
   INSTALL_DIR=/opt/bin

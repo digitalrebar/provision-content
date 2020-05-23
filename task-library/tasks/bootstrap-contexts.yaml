@@ -1,0 +1,161 @@
+---
+Description: "Setup Containers for Docker-Context"
+Name: "bootstrap-contexts"
+Documentation: |
+  Multi-Step Docker-Context Boostrap.
+
+  This task is idempotent.
+
+  IMPORANT NOTES: 
+  * Stage installs Docker and the Docker Plugin even if you do not have Docker-Contexts defined
+  * Contexts are a licensed feature (the stage works, but Contexts will not)
+
+  1. Installs Containerd and Docker-CE on DRP Host
+  1. Installs the Docker-Context from Catalog
+  1. Attempts to build & upload images for all Docker-Contexts
+  1. Initializes Docker for all Contexts
+
+  Docker build files are discovered in the following precidence order:
+  1. using Docker Buildfile from files/contexts/docker-build/[contextname]
+  1. using URL from Meta.Imagepull
+  1. using Docker Buildfile downloaded Context Meta.Dockerfile
+  1. using Docker Image from Context Meta.Dockerpull
+  Once downloaded and built, they are uploaded to the correct files location
+ExtraClaims:
+  - scope: "files"
+    action: "*"
+    specific: "*"
+  - scope: "contexts"
+    action: "*"
+    specific: "*"
+  - scope: "plugins"
+    action: "*"
+    specific: "docker-context"
+  - scope: "plugin_providers"
+    action: "*"
+    specific: "*"
+Templates:
+  - Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      if [[ "$(drpcli contexts list Engine=docker-context | jq length)" == "0" ]]; then
+        echo "No Docker Contexts"
+      fi
+
+      if ! which docker ; then
+        FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+        echo "Installing Containerd"
+        case $FAMILY in
+          redhat|centos) dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm ;;
+          debian|ubuntu) apt install -y containerd ;;
+          *) >&2 echo "Unsupported package manager family '$FAMILY'."
+             exit 1 ;;
+        esac
+        echo "Installing Docker-CE"      
+        case $FAMILY in
+          redhat|centos) dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-19.03.9-3.el7.x86_64.rpm https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.9-3.el7.x86_64.rpm ;;
+          debian|ubuntu) apt install -y docker.io ;;
+          *) >&2 echo "Unsupported package manager family '$FAMILY'."
+             exit 1 ;;
+        esac
+        sudo systemctl enable --now docker
+        sudo usermod -aG docker $USER
+      fi
+
+      echo "Starting Docker Service"
+      systemctl daemon-reload
+      systemctl restart docker
+
+      echo "Docker installed successfully"
+
+      echo "Install Docker-Context"
+      if drpcli plugins exists docker-context; then
+        echo "Plugin Exists, skipping"
+      else
+        echo "Plugin Missing, install..."
+        drpcli catalog item install docker-context
+      fi
+
+      echo "Check which files are uploaded"
+      drpcli files list contexts/docker-context || true
+
+      echo "Building the docker images if not already built."
+      cp $(which drpcli) drpcli
+      raw=$(drpcli contexts list Engine=docker-context)
+      contexts=$(jq -r ".[].Name" <<< "${raw}")
+      i=0
+      for context in $contexts; do
+        image=$(jq -r ".[$i].Image" <<< "${raw}")
+        echo "=== Uploading Container for $context named [$image] using [$context-dockerfile] ==="
+        container_sum=$(drpcli files exists "contexts/docker-context/$image" || true)
+        imagepull=$(jq -r ".[$i].Meta.Imagepull" <<< "${raw}")
+        if [[ "$container_sum" == "" ]]; then
+          if [[ -f /root/$context.tar ]]; then
+            echo "  Skipping Build (found Container Tar /root/$context.tar)"
+            echo "  Uploading Container from /root/$context.tar"
+            drpcli files upload /root/$context.tar as "contexts/docker-context/$image"
+          elif [[ -f /root/$context.tar.gz ]]; then
+            echo "  Skipping Build (found Container Tar /root/$context.tar.gz)"
+            echo "  Uploading Container from /root/$context.tar.gz"
+            drpcli files upload /root/$context.tar.gz as "contexts/docker-context/$image"
+          elif [[ "$imagepull" != "null" ]]; then
+            echo "  Uploading Container from $imagepull"
+            drpcli files upload $imagepull as "contexts/docker-context/$image"
+          else
+            echo "  Building Container --tag=$image --file=$context-dockerfile"
+            dockerbuild=$(drpcli files exists "contexts/docker-build/$context" || true)
+            dockerpull=$(jq -r ".[$i].Meta.Dockerpull" <<< "${raw}")
+            dockerfile=$(jq -r ".[$i].Meta.Dockerfile" <<< "${raw}")
+            if [[ "$dockerbuild" != "" ]]; then
+              echo "    pulling dockerfile from contexts/docker-build/$context"
+              drpcli files download contexts/docker-build/$context > $context-dockerfile
+              docker build --tag=$image --file="$context-dockerfile" .
+            elif [[ "$dockerfile" != "null" ]]; then
+              echo "    pulling dockerfile from $dockerfile"
+              curl -fsSL $dockerfile -o $context-dockerfile
+              docker build --tag=$image --file="$context-dockerfile" .
+            elif [[ "$dockerpull" != "null" ]]; then
+              echo "    pulling docker image from $dockerpull"
+              docker pull $dockerpull
+            else
+              echo "!! Stopping context-bootstrap - missing Docker image for $context"
+              exit 1
+            fi
+            docker save $image > /root/$context.tar
+            gzip /root/$context.tar
+            echo "  Uploading Container from /root/$context.tar.gz"
+            drpcli files upload /root/$context.tar.gz as "contexts/docker-context/$image"
+            echo "  cleanup by removing files"
+            [[ -f /root/$context.tar ]] && rm /root/$context.tar
+            [[ -f /root/$context.tar.gz ]] && rm /root/$context.tar.gz
+          fi
+        else
+          echo "  Found $container_sum in files/contexts/docker-context, skipping upload"
+        fi
+        i=$(($i + 1))
+      done
+
+      echo "Populate the contexts"
+      i=0
+      for context in $contexts; do
+        image=$(jq -r ".[$i].Image" <<< "${raw}")
+        echo "Installing Container for $context named from $image"
+        drpcli plugins runaction docker-context imageUpload \
+          context/image-name ${image} \
+          context/image-path files/contexts/docker-context/${image}
+        i=$(($i + 1))
+      done
+
+      echo "done"
+      exit 0
+    Name: "docker-context"
+Meta:
+  icon: "boxes"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

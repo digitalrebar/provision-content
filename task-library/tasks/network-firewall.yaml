@@ -1,0 +1,58 @@
+---
+Description: "A task to open ports in Firewall"
+Documentation: |
+  Requires that ``firewall-cmd`` or ``ufs`` to be enabled system.
+
+  Will reset the firewall at the end of the task.
+
+Name: "network-firewall"
+RequiredParams:
+  - network/firewall-ports
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # update firewall rules
+
+    set -e
+
+    {{template "setup.tmpl" .}}
+
+    FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+
+    case $FAMILY in
+      redhat|centos) yum install -y firewall ;;
+      debian|ubuntu) sudo apt install -y ufw ;;
+      *) >&2 echo "Unsupported package manager family '$FAMILY'."
+         exit 1 ;;
+    esac
+
+    {{range $index, $port := .Param "network/firewall-ports" }}
+      {{ if contains "/" $port }}
+      PORT={{$port}}
+      {{ else }}
+      PORT={{$port}}/tcp
+      {{ end }}
+      echo "Rule {{$index}}: add-port $PORT"
+      case $FAMILY in
+        redhat|centos) firewall-cmd --permanent --add-port=$PORT ;;
+        debian|ubuntu) sudo ufw allow $PORT ;;
+      esac
+    {{else}}
+      echo "No network/firewall-ports defined"
+    {{end}}
+
+    echo "restart firewall"
+    case $FAMILY in
+      redhat|centos) firewall-cmd --reload ;;
+      debian|ubuntu) sudo ufw reload ;;
+    esac
+    
+
+    echo "done"
+
+  Name: firewall-ports
+Meta:
+  icon: "fire"
+  color: "blue"
+  title: "RackN Content Copyright 2020"
+  feature-flags: "sane-exit-codes"

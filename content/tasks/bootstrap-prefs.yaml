@@ -1,0 +1,39 @@
+---
+Description: "A task to set the default preferences for initial setup"
+Name: "bootstrap-prefs"
+Documentation: |
+  A task to set the default preferences for default install.
+
+  NOTE: Will NOT change prefs if `defaultWorkflow` is set.
+
+  Also sets the Icon for the machine.
+ExtraClaims:
+  - scope: "*"
+    action: "*"
+    specific: "*"
+Templates:
+  - Name: "prefs.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      if [[ "$(drpcli prefs list | jq -r '.defaultWorkflow | length')" == "0" ]]; then
+        drpcli machines meta set $RS_UUID key icon to "chess queen"
+        drpcli machines meta set $RS_UUID key color to "black"
+        echo "defaultWorkflow NOT set, setting to good defaults"
+        drpcli prefs set defaultWorkflow discover-base defaultStage discover defaultBootEnv sledgehammer unknownBootEnv discovery | jq .defaultWorkflow
+      else
+        echo "defaultWorkflow set, skipping pref changes"
+      fi
+
+      echo "done"
+      exit 0
+Meta:
+
+  icon: "wrench"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2020"
