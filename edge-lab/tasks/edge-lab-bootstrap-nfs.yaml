@@ -31,7 +31,7 @@ Templates:
 
       echo "starting NFS install"
 
-      if [systemctl is-active nfs-server.service] ; then
+      if systemctl is-active nfs-server.service ; then
         STATUS="$(systemctl is-active nfs-server.service)"
         echo "NSF-Server status ${STATUS}...."
         case $STATUS in
