@@ -35,3 +35,8 @@ Templates:
     Contents: |
       #!ipxe
       {{.Param "custom-ipxe"}}
+Meta:
+  color: "blue"
+  icon: "inbox"
+  title: "Community Content"
+  copyright: "RackN 2020"

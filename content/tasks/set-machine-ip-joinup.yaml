@@ -7,6 +7,8 @@ Documentation: /
 
   This is needed when using the Join-Up process in clouds
   where no DHCP is used and machines are assigned fixed addresses.
+
+  Needed in >v4.3 because IP setting was removed from join-up.sh
 Templates:
   - Name: set-machine-ip
     Contents: |
@@ -33,3 +35,9 @@ Templates:
       
       echo "done"
       exit 0
+Meta:
+  icon: "magnet"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

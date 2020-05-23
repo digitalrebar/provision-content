@@ -1,5 +1,13 @@
 ---
 Name: set-machine-ip-in-sledgehammer
+Description: Save the Machine IP in Sledgehammer
+Documentation: /
+  This logic replicates what our DHCP server does
+  behind the scenes to make sure that machines do not
+  have conflicting addresses.  This works because
+  and Address of 0.0.0.0 is unset.
+  
+  Needed in >v4.3 because IP setting was removed from join-up.sh
 ExtraClaims:
   - scope: "machines"
     action: "list, get, update"
@@ -18,4 +26,9 @@ Templates:
           drpcli machines update "$other" '{"Address": "0.0.0.0"}'
       done < <(drpcli machines list Address=$IP |jq -r '.[] |.Uuid')
       drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
-      
+Meta:
+  icon: "magnet"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

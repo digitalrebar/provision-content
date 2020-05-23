@@ -172,3 +172,9 @@ Templates:
          grub2-install "$drive"
       fi
       umount /boot
+Meta:
+  icon: "pen square"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

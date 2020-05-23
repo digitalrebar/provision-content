@@ -15,3 +15,9 @@ Templates:
           exit 1
       fi
       drpcli net autogen {{.Machine.UUID}}
+Meta:
+  icon: "talk"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"
