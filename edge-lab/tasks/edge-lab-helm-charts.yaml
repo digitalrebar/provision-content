@@ -110,7 +110,11 @@ Templates:
         {{ range $key, $after := $chart.postkubectl -}}
         echo "running kubectl {{$after}} (save to {{$key}})"
         OUTPUT=$(kubectl --kubeconfig=$KUBECONFIG {{$after}})
-        drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        if [[ $(drpcli -T $PROFILE_TOKEN get $CLUSTER_PROFILE param {{$key}}) == "null" ]] ; then
+          drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        else
+          drpcli -T $PROFILE_TOKEN profiles set $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        fi
         {{ else }}
         echo "No kubectl after steps"
         {{ end }}
