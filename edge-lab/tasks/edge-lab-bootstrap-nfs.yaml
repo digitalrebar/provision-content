@@ -56,8 +56,8 @@ Templates:
         mkdir -p /export/shared
         chmod 777 /export/shared
         case $FAMILY in
-          redhat|centos) chown nfsnobody:nfsnobody /exports/test/ ;;
-          debian|ubuntu) chown nobody:nogroup /export/shared ;;
+          redhat|centos) chown -R nobody /export/shared ;;
+          debian|ubuntu) chown -R nobody:nogroup /export/shared ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1 ;;
         esac
@@ -74,7 +74,7 @@ Templates:
       echo "saving the NFS mount"
       drpcli profiles set "global" param "edge-lab/nfs-share" to "{{.ProvisionerAddress}}:/export/shared"
 
-      systemctl enable nfs-server
+      systemctl enable --now nfs-server
       systemctl start nfs-server
       systemctl status nfs-server
 

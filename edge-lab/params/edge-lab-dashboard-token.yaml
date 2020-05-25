@@ -4,6 +4,9 @@ Description: "Dashboard Login Token"
 Documentation: |
   Param is set (output) by the Dashboard install process
 
+  To start the dashboard, use `kubectl proxy` then open
+  http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+
   Note: this is stored as a secure object so the decode is required
 Secure: true
 Schema:

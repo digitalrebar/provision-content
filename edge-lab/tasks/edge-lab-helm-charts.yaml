@@ -42,13 +42,32 @@ Templates:
       {{ .ParamAsJSON "k3s/admin-conf" }}
       EOF
       echo "testing cluster access"
-      k3s kubectl --kubeconfig=$KUBECONFIG get nodes
+      kubectl --kubeconfig=$KUBECONFIG get nodes
 
       {{ range $index, $chart := $helmcharts -}}
 
       echo "{{$index}}==== Installing {{$chart.name}} (from {{$chart.chart}}) ===="
 
       if [[ "$(helm list -o json --filter '{{$chart.name}}' | jq length)" == "0" ]] ; then
+
+        {{ if $chart.git }}
+        echo "cloning repo from {{$chart.git}}"
+        if ! which git ; then
+          FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+          echo "installing git for $FAMILY"
+          case $FAMILY in
+            redhat|centos) yum -y install git ;;
+            debian|ubuntu) apt -y install git ;;
+            *) >&2 echo "Unsupported package manager family '$FAMILY'."
+               exit 1 ;;
+          esac
+        fi
+        {{ range $index, $clone := $chart.git -}}
+        git clone "{{$clone}}"
+        {{ end -}}
+        {{ else -}}
+        echo "no git clone"
+        {{ end -}}
 
         {{ if $chart.targz }}
         echo "retrieving chart from {{$chart.targz}}"
@@ -71,7 +90,7 @@ Templates:
 
         {{ range $index, $before := $chart.prekubectl -}}
         echo "running kubectl {{$before}}"
-        k3s kubectl --kubeconfig=$KUBECONFIG {{$before}}
+        kubectl --kubeconfig=$KUBECONFIG {{$before}}
         {{ else }}
         echo "No kubectl before steps"
         {{ end }}
@@ -91,7 +110,7 @@ Templates:
 
         {{ range $key, $after := $chart.postkubectl -}}
         echo "running kubectl {{$after}} (save to {{$key}})"
-        OUTPUT=$(k3s kubectl --kubeconfig=$KUBECONFIG {{$after}})
+        OUTPUT=$(kubectl --kubeconfig=$KUBECONFIG {{$after}})
         drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
         {{ else }}
         echo "No kubectl after steps"

@@ -10,6 +10,8 @@ echo "starting k3s install"
 if kubectl get nodes ; then
   echo "kubectl works... no (re)install needed"
   exit 0
+else 
+  echo "no kubectl, install k3s"
 fi
 
 drpcli machines meta set $RS_UUID key color to yellow
@@ -30,6 +32,13 @@ case $arch in
         echo "Unknown arch $arch"
         exit 1;;
 esac
+
+if which setenforce ; then
+  echo "this is a lab...setting SELinux to permissive"
+  setenforce Permissive
+else
+  echo "no SELinux setenforce, skipping"
+fi
 
 {{ if .ParamExists "edge-lab/nfs-share" }}
 FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
@@ -164,7 +173,7 @@ fi
 
 if [[ ! -f /etc/systemd/system/k3s.service ]]; then
   ## Build Systemd service
-  echo "Buiilding k3s.service file"
+  echo "Building k3s.service file"
   tee /etc/systemd/system/k3s.service >/dev/null << EOF
 [Unit]
 Description=K3s - Lightweight Kubernetes
@@ -190,6 +199,7 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 EOF
+chmod 0755 /etc/systemd/system/k3s.service
 else
   echo "No action: k3s.service file exists"
 fi
