@@ -53,12 +53,11 @@ Templates:
         {{ if $chart.git }}
         echo "cloning repo from {{$chart.git}}"
         if ! which git ; then
-          FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
-          echo "installing git for $FAMILY"
-          case $FAMILY in
+          echo "installing git for $osfamily"
+          case $osfamily in
             redhat|centos) yum -y install git ;;
             debian|ubuntu) apt -y install git ;;
-            *) >&2 echo "Unsupported package manager family '$FAMILY'."
+            *) >&2 echo "Unsupported package manager family '$osfamily'."
                exit 1 ;;
           esac
         fi
@@ -128,7 +127,6 @@ Templates:
       drpcli machines meta set $RS_UUID key color to green
       echo "Done"
       exit 0
-
 Meta:
   icon: "map outline"
   color: "yellow"
