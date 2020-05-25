@@ -82,6 +82,16 @@ Templates:
             sha256sum helm.tar.gz
             exit 1
           fi
+          if tar --version ; then
+            echo "tar installed, no action"
+          else
+            case $osfamily in
+              redhat|centos) sudo yum install -y tar ;;
+              debian|ubuntu) sudo apt install -y tar ;;
+              *) >&2 echo "Unsupported package manager family '$osfamily'."
+                 exit 1 ;;
+            esac
+          fi
           tar -zxvf helm.tar.gz
           if [[ -e linux-$arch/helm ]] ; then
             echo "save downloaded files to helm/helm for next pass"
