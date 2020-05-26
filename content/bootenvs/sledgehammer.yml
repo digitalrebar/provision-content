@@ -65,11 +65,11 @@ OS:
         {{.Param "kernel-console"}}
     rpi4:
       Loader: "grubarm64.efi"
-      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9b5276ac5826520829aa73c149fe672fe2363656/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      Kernel: "rpi/kernel8.img"
+      IsoFile: "sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/e50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      Kernel: "rpi-5.4.34/kernel8.img"
       Initrds:
-        - "rpi/stage1.img"
+        - "rpi-5.4.34/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -89,29 +89,32 @@ OptionalParams:
   - "kernel-options"
 Templates:
   - Name: start4.elf
-    Link: '{{.Env.PathForArch "tftp" "rpi/start4.elf" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/start4.elf" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/start4.elf'
   - Name: fixup4.dat
-    Link: '{{.Env.PathForArch "tftp" "rpi/fixup4.dat" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/fixup4.dat" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/fixup4.dat'
   - Name: bcm2711-rpi-4-b.dtb
-    Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/bcm2711-rpi-4-b.dtb" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/bcm2711-rpi-4-b.dtb'
   - Name: kernel8.img
-    Link: '{{.Env.PathForArch "tftp" "rpi/kernel8.img" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/kernel8.img" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/kernel8.img'
   - Name: stage1.img
-    Link: '{{.Env.PathForArch "tftp" "rpi/stage1.img" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/stage1.img" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/stage1.img'
+  - Name: root.squashfs
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/root.squashfs" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/root.squashfs'
   - Name: "rpi-cmdline.txt"
     Path: '{{.Machine.MacAddr "rpi4"}}/cmdline.txt'
     Contents: |
-      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF=discovery provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}}
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait initrd=stage1.img rw BOOTIF=discovery provisioner.web={{.ProvisionerURL}}
   - Name: rpi4b-config.txt
     Path: '{{.Machine.MacAddr "rpi4"}}/config.txt'
     Contents: |
       # uncomment if you get no picture on HDMI for a default "safe" mode
-      #hdmi_safe=1
+      hdmi_safe=1
 
       # uncomment this if your display has a black border of unused pixels visible
       # and your display can output without overscan
