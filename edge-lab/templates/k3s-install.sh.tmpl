@@ -7,7 +7,7 @@ echo "starting k3s install"
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
-if kubectl get nodes ; then
+if kubectl get nodes 2>/dev/null >/dev/null ; then
   echo "kubectl works... no (re)install needed"
   exit 0
 else 
@@ -33,9 +33,13 @@ case $arch in
         exit 1;;
 esac
 
-if which setenforce ; then
-  echo "this is a lab...setting SELinux to permissive"
-  setenforce Permissive
+if which setenforce 2>/dev/null >/dev/null ; then
+  if sestatus | grep disabled 2>/dev/null >/dev/null ; then
+    echo "SELinux status disabled, no action required"
+  else
+    echo "this is a lab...setting SELinux to permissive"
+    setenforce Permissive
+  fi
 else
   echo "no SELinux setenforce, skipping"
 fi
@@ -84,10 +88,10 @@ SYSTEMD_DIR="/etc/systemd/system"
 BINARIES="$INSTALL_DIR/k3s"
 
 echo "Checking for $ARCH"
-if ! which k3s ; then
+if ! which k3s 2>/dev/null >/dev/null ; then
   if $CLUSTER_I_AM_LEADER; then
     drpcli machines meta set $RS_UUID key icon to download
-    if drpcli files exists "k3s/k3s-$arch"; then
+    if drpcli files exists "k3s/k3s-$arch" 2>/dev/null >/dev/null ; then
       echo "Found in DRP files/k3s - downloading from there"
       drpcli files download "k3s/k3s-$arch" to $BINARIES
     else
