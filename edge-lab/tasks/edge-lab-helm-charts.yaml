@@ -42,13 +42,31 @@ Templates:
       {{ .ParamAsJSON "k3s/admin-conf" }}
       EOF
       echo "testing cluster access"
-      k3s kubectl --kubeconfig=$KUBECONFIG get nodes
+      kubectl --kubeconfig=$KUBECONFIG get nodes
 
       {{ range $index, $chart := $helmcharts -}}
 
       echo "{{$index}}==== Installing {{$chart.name}} (from {{$chart.chart}}) ===="
 
       if [[ "$(helm list -o json --filter '{{$chart.name}}' | jq length)" == "0" ]] ; then
+
+        {{ if $chart.git }}
+        echo "cloning repo from {{$chart.git}}"
+        if ! which git ; then
+          echo "installing git for $osfamily"
+          case $osfamily in
+            redhat|centos) yum -y install git ;;
+            debian|ubuntu) apt -y install git ;;
+            *) >&2 echo "Unsupported package manager family '$osfamily'."
+               exit 1 ;;
+          esac
+        fi
+        {{ range $index, $clone := $chart.git -}}
+        git clone "{{$clone}}"
+        {{ end -}}
+        {{ else -}}
+        echo "no git clone"
+        {{ end -}}
 
         {{ if $chart.targz }}
         echo "retrieving chart from {{$chart.targz}}"
@@ -71,7 +89,7 @@ Templates:
 
         {{ range $index, $before := $chart.prekubectl -}}
         echo "running kubectl {{$before}}"
-        k3s kubectl --kubeconfig=$KUBECONFIG {{$before}}
+        kubectl --kubeconfig=$KUBECONFIG {{$before}}
         {{ else }}
         echo "No kubectl before steps"
         {{ end }}
@@ -91,8 +109,12 @@ Templates:
 
         {{ range $key, $after := $chart.postkubectl -}}
         echo "running kubectl {{$after}} (save to {{$key}})"
-        OUTPUT=$(k3s kubectl --kubeconfig=$KUBECONFIG {{$after}})
-        drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        OUTPUT=$(kubectl --kubeconfig=$KUBECONFIG {{$after}})
+        if [[ $(drpcli -T $PROFILE_TOKEN get $CLUSTER_PROFILE param {{$key}}) == "null" ]] ; then
+          drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        else
+          drpcli -T $PROFILE_TOKEN profiles set $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        fi
         {{ else }}
         echo "No kubectl after steps"
         {{ end }}
@@ -109,7 +131,6 @@ Templates:
       drpcli machines meta set $RS_UUID key color to green
       echo "Done"
       exit 0
-
 Meta:
   icon: "map outline"
   color: "yellow"

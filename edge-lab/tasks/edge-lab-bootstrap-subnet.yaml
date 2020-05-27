@@ -2,9 +2,11 @@
 Description: "A task to set the default subnet for Edge Lab"
 Name: "edge-lab-bootstrap-subnet"
 Documentation: |
-  A task to set the default subnet for Edge Lab
+  A task to set the default subnet for Edge Lab.
+
+  If running in a cloud provide, subnet is created but disabled.
 ExtraClaims:
-  - scope: "*"
+  - scope: "subnets"
     action: "*"
     specific: "*"
 Templates:
@@ -29,7 +31,7 @@ Templates:
           "title": "User added"
         },
         "Name": "edge-lab",
-        "Enabled": true,
+        "Enabled": {{ if .ParamExists "cloud/provider" }}false{{else}}true{{end}},
         "Proxy": false,
         "Unmanaged": false,
         "Subnet": "10.3.14.0/24",

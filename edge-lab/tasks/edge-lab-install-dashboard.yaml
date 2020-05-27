@@ -1,0 +1,109 @@
+---
+Description: "Install Kubernetes Dashboard"
+Name: "edge-lab-install-dashboard"
+Documentation: |
+  Installs Dashboard on the Cluster.
+  Saves install token into k3s/dashboard-token
+  Note: will skip if the dashboard version does not start with v
+
+  To start the dashboard, use `kubectl proxy` then open
+  http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+
+RequiredParams:
+  - cluster/profile
+  - cluster/leaders
+  - k3s/admin-conf
+  - edge-lab/dashboard-version
+OptionalParams:
+  - edge-lab/dashboard-token
+Templates:
+  - Name: "dashboard-adminuser.yaml"
+    Path: "dashboard-adminuser.yaml"
+    Contents: |-
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: admin-user
+        namespace: kubernetes-dashboard
+  - Name: "cluster-binding.yaml"
+    Path: "cluster-binding.yaml"
+    Contents: |-
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: admin-user
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+      subjects:
+      - kind: ServiceAccount
+        name: admin-user
+        namespace: kubernetes-dashboard
+  - Name: "dashboard.sh"
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{ template "cluster-shared.tmpl" .}}
+
+      {{ if (hasPrefix "v" (.Param "edge-lab/dashboard-version"))}}
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
+        exit 0
+      fi
+
+      # dashboard requires the admin config
+      export KUBECONFIG="./admin.conf"
+      tee $KUBECONFIG >/dev/null << EOF
+      {{ .ParamAsJSON "k3s/admin-conf" }}
+      EOF
+      echo "testing cluster access"
+      kubectl --kubeconfig=$KUBECONFIG get nodes
+
+      echo "Apply Dashboard YAML"
+      if kubectl --kubeconfig=$KUBECONFIG get namespace kubernetes-dashboard ; then
+        echo "kubernetes-dashboard namespace exists, skipping"
+      else
+        kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/kubernetes/dashboard/{{ .Param "edge-lab/dashboard-version"}}/aio/deploy/recommended.yaml
+        sleep 10
+      fi
+
+      echo "Create Service Accounts"
+      kubectl --kubeconfig=$KUBECONFIG create serviceaccount dashboard-admin-sa || true
+      kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa || true
+
+      echo "Create Admin User"
+      if [[ -f dashboard-adminuser.yaml ]] ; then
+        kubectl --kubeconfig=$KUBECONFIG apply -f dashboard-adminuser.yaml || true
+        kubectl --kubeconfig=$KUBECONFIG apply -f cluster-binding.yaml || true
+      else
+        echo "missing key files"
+        exit 1
+      fi
+
+      echo "Save Dashboard Token"
+      userid=$(kubectl --kubeconfig=$KUBECONFIG get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .metadata.name')
+      tokenraw=$(kubectl --kubeconfig=$KUBECONFIG get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .data.token')
+      token=$(echo $tokenraw | base64 --decode)
+      {{ if .ParamExists "edge-lab/dashboard-token" }}
+      drpcli -T $PROFILE_TOKEN profiles set $CLUSTER_PROFILE param "edge-lab/dashboard-token" to "$token"
+      {{ else }}
+      drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "edge-lab/dashboard-token" to "$token"
+      {{ end }}
+
+      echo "Save Dashboard Status"
+      kubectl --kubeconfig=$KUBECONFIG describe pods -n=kubernetes-dashboard
+
+      {{ else }}
+      echo "edge-lab/dashboard-version ({{ .Param "edge-lab/dashboard-version"}}) does not start with v"
+      {{ end }}
+      echo "Done"
+      exit 0
+Meta:
+  icon: "tv"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

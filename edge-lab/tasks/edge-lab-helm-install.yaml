@@ -54,11 +54,11 @@ Templates:
         {{ end -}}
       {{ end -}}
 
-      if which helm ; then
+      if which helm 2>/dev/null >/dev/null ; then
         echo "found $(which helm) binary version $(helm version), moving on..."
       else
         BINARIES="/usr/local/bin/helm"
-        if drpcli files exists "helm/helm"; then
+        if drpcli files exists "helm/helm" 2>/dev/null >/dev/null ; then
           echo "Found in DRP helm/helm - downloading from there"
           drpcli files download "helm/helm" to $BINARIES
         else
@@ -81,6 +81,16 @@ Templates:
             echo "Checksum Does not match: $(cat helm.tar.gz.sha256)"
             sha256sum helm.tar.gz
             exit 1
+          fi
+          if tar --version 2>/dev/null >/dev/null ; then
+            echo "tar installed, no action"
+          else
+            case $osfamily in
+              redhat|centos) sudo yum install -y tar ;;
+              debian|ubuntu) sudo apt install -y tar ;;
+              *) >&2 echo "Unsupported package manager family '$osfamily'."
+                 exit 1 ;;
+            esac
           fi
           tar -zxvf helm.tar.gz
           if [[ -e linux-$arch/helm ]] ; then

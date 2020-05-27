@@ -7,9 +7,11 @@ echo "starting k3s install"
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
-if k3s kubectl get nodes ; then
-  echo "k3s kubectl works... no (re)install needed"
+if kubectl get nodes 2>/dev/null >/dev/null ; then
+  echo "kubectl works... no (re)install needed"
   exit 0
+else 
+  echo "no kubectl, install k3s"
 fi
 
 drpcli machines meta set $RS_UUID key color to yellow
@@ -31,6 +33,52 @@ case $arch in
         exit 1;;
 esac
 
+if which setenforce 2>/dev/null >/dev/null ; then
+  if sestatus | grep disabled 2>/dev/null >/dev/null ; then
+    echo "SELinux status disabled, no action required"
+  else
+    echo "this is a lab...setting SELinux to permissive"
+    setenforce Permissive
+  fi
+else
+  echo "no SELinux setenforce, skipping"
+fi
+
+{{ if .ParamExists "edge-lab/nfs-share" }}
+FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+echo "Installing NFS client for :  '$FAMILY'"
+if [[ -f /mnt/nfs/share/test.0 ]] ; then
+  echo "share already mounted, skipping"
+else
+  case $FAMILY in
+    redhat|centos) sudo yum -y install nfs-utils ;;
+    debian|ubuntu) sudo apt -y install nfs-common ;;
+    *) >&2 echo "Unsupported package manager family '$FAMILY'."
+       exit 1 ;;
+  esac
+  mkdir -p /mnt/nfs/share
+  if mount {{ .Param "edge-lab/nfs-share" }} /mnt/nfs/share ; then
+    echo "share mounted, not verified"
+  else
+    echo "could not mount share {{ .Param "edge-lab/nfs-share" }}"
+    exit 1
+  fi
+  if [[ -f /mnt/nfs/share/test.0 ]] ; then
+    echo "share verified.  create machine directory"
+    mkdir -p /mnt/nfs/share/{{ .Machine.Name }}
+    echo "attach k3s containerd to nfs containerd"
+    mkdir -p /mnt/nfs/share/{{ .Machine.Name }}/containerd
+    mkdir -p /run/k3s/containerd
+    ln -s /mnt/nfs/share/{{ .Machine.Name }}/containerd /run/k3s/containerd
+  else
+    echo "cannot find shared file { .Param "edge-lab/nfs-share" }}/test.0"
+    exit 1
+  fi
+fi
+{{ else }}
+echo "No NFS share avilable, skipping"
+{{ end }}
+
 # Fix hostname lookup
 echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
 
@@ -40,12 +88,12 @@ SYSTEMD_DIR="/etc/systemd/system"
 BINARIES="$INSTALL_DIR/k3s"
 
 echo "Checking for $ARCH"
-if ! which k3s ; then
+if ! which k3s 2>/dev/null >/dev/null ; then
   if $CLUSTER_I_AM_LEADER; then
     drpcli machines meta set $RS_UUID key icon to download
-    if drpcli files exists "k3s/k3s"; then
+    if drpcli files exists "k3s/k3s-$arch" 2>/dev/null >/dev/null ; then
       echo "Found in DRP files/k3s - downloading from there"
-      drpcli files download "k3s/k3s" to $BINARIES
+      drpcli files download "k3s/k3s-$arch" to $BINARIES
     else
       K3S_URL="{{ .Param "k3s/download-url" }}/download/{{ .Param "k3s/version" }}"
       echo "Download k3s from $K3S_URL/${ARCH}"
@@ -62,7 +110,7 @@ if ! which k3s ; then
       fi
 
       mv $ARCH $BINARIES
-      drpcli files upload "$BINARIES" as "k3s/k3s"
+      drpcli files upload "$BINARIES" as "k3s/k3s-$arch"
     fi
     drpcli machines meta set $RS_UUID key icon to cog
   else
@@ -70,8 +118,8 @@ if ! which k3s ; then
     drpcli machines meta set $RS_UUID key color to grey
     cluster_wait_for_variable "k3s/node-token"
     drpcli machines meta set $RS_UUID key color to yellow
-    echo "download binaries from DRP k3s/k3s"
-    drpcli files download "k3s/k3s" to $BINARIES
+    echo "download binaries from DRP k3s/k3s-$arch"
+    drpcli files download "k3s/k3s-$arch" to $BINARIES
   fi
   if [ -f $BINARIES ] ; then
     chmod +x $BINARIES
@@ -90,7 +138,7 @@ if $CLUSTER_I_AM_LEADER ; then
   echo "I am leader - run k3s server"
 
   K3S_URL=https://{{ .Machine.Address }}:{{ .Param "k3s/api-port" }}
-  EXECSTART="${BINARIES} server --bind-address={{ .Machine.Address }} --https-listen-port={{ .Param "k3s/api-port" }}"
+  EXECSTART="${BINARIES} server --bind-address={{ .Machine.Address }} --node-label=worker --https-listen-port={{ .Param "k3s/api-port" }} --node-label=worker"
   SYSTEMD_TYPE="notify"
 
   drpcli machines meta set $RS_UUID key icon to anchor
@@ -107,7 +155,7 @@ else
 
   echo "Running Agent: join with k3s/node-token value"
   K3S_URL=$(jq -r '.clusters[0].cluster.server' <<< "$ADMIN_CONFIG")
-  EXECSTART="${BINARIES} agent --server ${K3S_URL} --token ${K3S_TOKEN}"
+  EXECSTART="${BINARIES} agent --server ${K3S_URL} --node-label=worker --token ${K3S_TOKEN}"
   SYSTEMD_TYPE="exec"
   # Set machine icon and color for KRIB cluster building
   drpcli machines meta set $RS_UUID key icon to ship
@@ -129,7 +177,7 @@ fi
 
 if [[ ! -f /etc/systemd/system/k3s.service ]]; then
   ## Build Systemd service
-  echo "Buiilding k3s.service file"
+  echo "Building k3s.service file"
   tee /etc/systemd/system/k3s.service >/dev/null << EOF
 [Unit]
 Description=K3s - Lightweight Kubernetes
@@ -155,23 +203,29 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 EOF
+chmod 0755 /etc/systemd/system/k3s.service
 else
   echo "No action: k3s.service file exists"
 fi
 
 systemctl daemon-reload && systemctl start k3s
 
+echo "create symlinks for kubectl and others"
+ln -sf k3s $INSTALL_DIR/kubectl
+ln -sf k3s $INSTALL_DIR/crictl
+ln -sf k3s $INSTALL_DIR/ctr
+
+echo "waiting 3 seconds"
+sleep 3
+
 if $CLUSTER_I_AM_LEADER; then
   # need more delay for leader
-  echo "waiting 10 seconds"
-  sleep 10
-  while [[ "$(k3s kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
+  while [[ "$(kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
     sleep 1
     echo "waiting for cluster to start (1 second)"
   done
-  echo "Verify install: k3s kubectl MUST succeed"
-  k3s kubectl get nodes
-  # TODO ADD CHECK (loop to eliminate sleep)
+  echo "Verify install: kubectl MUST succeed"
+  kubectl get nodes
   echo "Recording cluster admin config ..."
   drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param k3s/admin-conf to - < /etc/rancher/k3s/k3s.yaml
   if [[ -f /var/lib/rancher/k3s/server/node-token ]] ; then
