@@ -129,7 +129,7 @@ find_by_saved_uuid() {
     fi
     luuid="$(tail -n 1 /etc/rs-uuid)"
     export RS_UUID=$(drpcli machines show $luuid | jq -r .Uuid)
-    if [[ !$RS_UUID || $RS_UUID = null ]]; then
+    if [[ -z $RS_UUID || $RS_UUID = null ]]; then
         echo "Saved UUID does not map back to a machine"
         unset RS_UUID
         return 1
