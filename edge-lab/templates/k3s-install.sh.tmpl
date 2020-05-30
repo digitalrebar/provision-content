@@ -45,11 +45,8 @@ else
 fi
 
 {{ if .ParamExists "edge-lab/nfs-share" }}
-FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
-echo "Installing NFS client for :  '$FAMILY'"
-if [[ -f /mnt/nfs/share/test.0 ]] ; then
-  echo "share already mounted, skipping"
-else
+  FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+  echo "Installing NFS client for :  '$FAMILY'"
   case $FAMILY in
     redhat|centos) sudo yum -y install nfs-utils ;;
     debian|ubuntu) sudo apt -y install nfs-common ;;
@@ -57,27 +54,80 @@ else
        exit 1 ;;
   esac
   mkdir -p /mnt/nfs/share
-  if mount {{ .Param "edge-lab/nfs-share" }} /mnt/nfs/share ; then
-    echo "share mounted, not verified"
-  else
-    echo "could not mount share {{ .Param "edge-lab/nfs-share" }}"
-    exit 1
+  if [[ ! -f /mnt/nfs/share/test.0 ]] ; then
+    if mount {{ .Param "edge-lab/nfs-share" }} /mnt/nfs/share ; then
+      echo "share mounted, not verified"
+      echo "General shared storage available at /mnt/nfs/share"
+    else
+      echo "could not mount share {{ .Param "edge-lab/nfs-share" }}"
+      exit 1
+    fi
   fi
   if [[ -f /mnt/nfs/share/test.0 ]] ; then
-    echo "share verified.  create machine directory"
+    echo "share verified.  create machine directory for remote storage"
     mkdir -p /mnt/nfs/share/{{ .Machine.Name }}
-    echo "attach k3s containerd to nfs containerd"
-    mkdir -p /mnt/nfs/share/{{ .Machine.Name }}/containerd
-    mkdir -p /run/k3s/containerd
-    ln -s /mnt/nfs/share/{{ .Machine.Name }}/containerd /run/k3s/containerd
+    echo "Machine specific remote storage available at /mnt/nfs/share/{{.Machine.Name}}"
   else
-    echo "cannot find shared file { .Param "edge-lab/nfs-share" }}/test.0"
+    echo "cannot find shared file {{ .Param "edge-lab/nfs-share" }}/test.0"
     exit 1
   fi
-fi
 {{ else }}
-echo "No NFS share avilable, skipping"
+  echo "No NFS share avilable, skipping"
 {{ end }}
+
+# NFS and the sledgehammer OS filesystem can't be used by the k3s containerd overlayfs system.
+# We need a storage area.  This will be mounted on /mnt/storage and containerd will be linked to it.
+# Check for a scsi device or a ssd card
+#
+mkdir -p /mnt/storage
+# if sda is present, check to use it or blow it away
+if lsblk /dev/sda 2>/dev/null >/dev/null ; then
+  echo "Checking for first scsi device"
+  rebuild=true
+  if lsblk /dev/sda1 2>/dev/null >/dev/null ; then
+    echo "Found existing partition on /dev/sda"
+    rebuild=false
+    mount /dev/sda1 /mnt/storage
+    fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
+    if [[ "$fstype" != "xfs" ]] ; then
+      echo "Not xfs filesystem, rebuild it"
+      umount /mnt/storage
+      rebuild=true
+    fi
+  else
+    echo "no filesystem found on /dev/sda - rebuild it"
+  fi
+
+  if [[ $rebuild == true ]] ; then
+    echo "Rebuilding the filesystems"
+    wipefs -a /dev/sda
+    parted /dev/sda mklabel GPT
+    parted /dev/sda mkpart primary 2048s 100%
+    mkfs -t xfs /dev/sda1
+    mount /dev/sda1 /mnt/storage
+  fi
+else
+  echo "Checking for SSD"
+  # ssd check and mount the partition in place.
+  # This is really RPI specific.
+  if lsblk /dev/mmcblk0 2>/dev/null >/dev/null ; then
+    echo "Mounting the SSD for /mnt/storage"
+    mount /dev/mmcblk0p2 /mnt/storage
+  fi
+fi
+
+# Reset the storage if it isn't ours.
+echo "Checking for storage marker"
+if [[ "$(cat /mnt/storage/marker)" != "$RS_UUID" ]] ; then
+  echo "Marker didn't match.  Reset the container space"
+  rm -rf /mnt/storage/containerd
+  echo -n "$RS_UUID" > /mnt/storage/marker
+fi
+mkdir -p /mnt/storage/containerd
+
+# Link to attached storage if there.
+mkdir -p /var/lib/rancher/k3s/agent
+ln -s /mnt/storage/containerd /var/lib/rancher/k3s/agent/containerd
 
 # Fix hostname lookup
 echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts

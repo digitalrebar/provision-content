@@ -48,7 +48,7 @@ Templates:
         echo "install NFS-Server (is-active failed)"
         $_pkgmgr
       fi
-        
+
       if [[ -e "/export/shared" ]]; then
         echo "/export/shared file space exists, do not create"
       else
@@ -77,6 +77,7 @@ Templates:
       systemctl enable --now nfs-server
       systemctl start nfs-server
       systemctl status nfs-server
+      exportfs -a
 
       echo "done"
       exit 0
