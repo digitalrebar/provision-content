@@ -121,6 +121,8 @@ Templates:
             elif [[ "$dockerpull" != "null" ]]; then
               echo "    pulling docker image from $dockerpull"
               docker pull $dockerpull
+              echo "    tagging $dockerpull as $image"
+              docker tag $dockerpull $image
             else
               echo "!! Stopping context-bootstrap - missing Docker image for $context"
               exit 1
