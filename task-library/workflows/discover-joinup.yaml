@@ -13,7 +13,6 @@ Documentation: |
   the workflow into a bootenv (potentially rebooting) when finished.
 Stages:
   - "discover-nobootenv"
-  - "network-firewall"
   - "runner-service"
   - "complete-nobootenv"
 Meta:
