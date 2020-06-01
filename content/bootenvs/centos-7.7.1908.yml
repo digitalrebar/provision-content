@@ -11,6 +11,7 @@ Meta:
   title: "Digital Rebar Community Content"
 Loaders:
   amd64-uefi: EFI/BOOT/BOOTX64.EFI
+  arm64-uefi: EFI/BOOT/grubaa64.efi
 OS:
   Family: "redhat"
   Name: "centos-7.7.1908"
@@ -77,10 +78,10 @@ Templates:
     Name: "grub-mac"
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - Name: grub-secure-mac
-    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
     ID: default-grub.tmpl
   - Name: grub-secure
-    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
     ID: default-grub.tmpl
   - ID: "select-kickseed.tmpl"
     Name: "compute.ks"

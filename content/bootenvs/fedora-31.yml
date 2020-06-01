@@ -59,10 +59,10 @@ Templates:
     Name: "grub-mac"
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - Name: grub-secure-mac
-    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
     ID: default-grub.tmpl
   - Name: grub-secure
-    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
     ID: default-grub.tmpl
   - ID: "select-kickseed.tmpl"
     Name: "compute.ks"
