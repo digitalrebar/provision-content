@@ -80,50 +80,63 @@ fi
 # Check for a scsi device or a ssd card
 #
 mkdir -p /mnt/storage
-# if sda is present, check to use it or blow it away
-if lsblk /dev/sda 2>/dev/null >/dev/null ; then
-  echo "Checking for first scsi device"
-  rebuild=true
-  if lsblk /dev/sda1 2>/dev/null >/dev/null ; then
-    echo "Found existing partition on /dev/sda"
-    rebuild=false
-    mount /dev/sda1 /mnt/storage
-    fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
-    if [[ "$fstype" != "xfs" ]] ; then
-      echo "Not xfs filesystem, rebuild it"
-      umount /mnt/storage
-      rebuild=true
-    fi
+
+echo "Attempting to mount attached storage from edge-lab/mount-devices"
+{{range $index, $device := (.Param "edge-lab/mount-devices") }}
+  echo "=============== {{$index}}: {{$device.partition}} ==============="
+  if grep -qs {{$device.mount}} /proc/mounts ; then
+    echo "{{$device.mount}} already mounted, cannot redefine at {{$device.partition}}... skipping"
   else
-    echo "no filesystem found on /dev/sda - rebuild it"
+    echo "attempting to mount {{$device.mount}} from {{$device.partition}}"
+    if lsblk {{$device.disk}} 2>/dev/null >/dev/null ; then
+      echo "found disk {{$device.disk}}, checking partition {{$device.partition}}"
+      rebuild={{$device.rebuild}}
+      if lsblk {{$device.partition}} 2>/dev/null >/dev/null ; then
+        rebuild=false
+        echo "found partition {{$device.partition}}, mounting to {{$device.mount}}"
+        if mount {{$device.partition}} {{$device.mount}} ; then
+          fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
+          if [[ "$fstype" != "{{$device.type}}" ]] ; then
+            echo "Was $fstype filesystem, needed {{$device.type}} filesystem. rebuild it"
+            rebuild=true
+            umount {{$device.mount}}
+          else
+            echo "Partition is already {{$device.type}}, no change needed"
+          fi
+        else
+          echo "could not mount {{$device.partition}} {{$device.mount}}, moving on..."
+        fi
+      else
+        echo "no disk {{$device.disk}}, trying next disk in array"
+      fi
+      if [[ $rebuild == true ]] ; then
+        wipefs -a {{$device.disk}}
+        parted {{$device.disk}} mklabel GPT
+        parted {{$device.disk}} mkpart primary 2048s 100%
+        mkfs -t {{$device.type}} {{$device.partition}}
+        mount {{$device.partition}} {{$device.mount}}
+      fi
+    else
+      echo "no {{$device.disk}} found, moving on..."
+    fi
   fi
+{{else}}
+  echo "no attached storage drives defined"
+{{end}}
 
-  if [[ $rebuild == true ]] ; then
-    echo "Rebuilding the filesystems"
-    wipefs -a /dev/sda
-    parted /dev/sda mklabel GPT
-    parted /dev/sda mkpart primary 2048s 100%
-    mkfs -t xfs /dev/sda1
-    mount /dev/sda1 /mnt/storage
+if grep -qs /mnt/storage /proc/mounts ; then
+  # Reset the storage if it isn't ours.
+  echo "Checking for storage marker"
+  if [[ "$(cat /mnt/storage/marker)" != "$RS_UUID" ]] ; then
+    echo "Marker didn't match.  Reset the container space"
+    rm -rf /mnt/storage/containerd
+    echo -n "$RS_UUID" > /mnt/storage/marker
   fi
+  mkdir -p /mnt/storage/containerd
 else
-  echo "Checking for SSD"
-  # ssd check and mount the partition in place.
-  # This is really RPI specific.
-  if lsblk /dev/mmcblk0 2>/dev/null >/dev/null ; then
-    echo "Mounting the SSD for /mnt/storage"
-    mount /dev/mmcblk0p2 /mnt/storage
-  fi
+  echo "HALTING: Install requires external storage."
+  exit 1
 fi
-
-# Reset the storage if it isn't ours.
-echo "Checking for storage marker"
-if [[ "$(cat /mnt/storage/marker)" != "$RS_UUID" ]] ; then
-  echo "Marker didn't match.  Reset the container space"
-  rm -rf /mnt/storage/containerd
-  echo -n "$RS_UUID" > /mnt/storage/marker
-fi
-mkdir -p /mnt/storage/containerd
 
 # Link to attached storage if there.
 mkdir -p /var/lib/rancher/k3s/agent
