@@ -37,7 +37,7 @@ RUN wget --no-check-certificate ${DEPLOY_URL}/${DEPLOY_FILE}
 #
 RUN tar --transform="s/lin64/deploy/g" -xzf /root/${DEPLOY_FILE}
 
-ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/arm64/linux/drpcli /usr/bin/
+ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/amd64/linux/drpcli /usr/bin/
 RUN chmod 755 /usr/bin/drpcli
 RUN ln -s /usr/bin/drpcli /usr/bin/jq
 ENTRYPOINT /usr/bin/drpcli machines processjobs

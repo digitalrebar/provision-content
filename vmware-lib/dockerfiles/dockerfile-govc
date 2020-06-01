@@ -17,7 +17,7 @@ RUN mv govc_linux_amd64 /usr/bin/govc
 RUN chmod 755 /usr/bin/govc
 RUN rm -f govc_linux_amd64.gz
 
-ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/arm64/linux/drpcli /usr/bin/
+ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/amd64/linux/drpcli /usr/bin/
 #COPY drpcli /usr/bin/drpcli
 RUN chmod 755 /usr/bin/drpcli
 RUN ln -s /usr/bin/drpcli /usr/bin/jq
