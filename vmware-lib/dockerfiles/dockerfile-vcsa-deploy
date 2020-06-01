@@ -7,7 +7,7 @@ MAINTAINER "The RackN Team <support@rackn.com>"
 
 WORKDIR /root
 
-ENV DRPCLI_VER="v4.2.0-beta9.2%2Bg0399c2aa752b79696319b3c07d39fc163157236c"
+ENV DRPCLI_VER="v4.3.0-beta13.4%2Bg7112569c3d75b3e5d6261070ec4085078c1273d5"
 
 ENV OVFTOOL_URL="https://get.rebar.digital/artifacts/vmtools"
 ENV OVFTOOL_VER="4.3.0-14746126"
@@ -37,8 +37,7 @@ RUN wget --no-check-certificate ${DEPLOY_URL}/${DEPLOY_FILE}
 #
 RUN tar --transform="s/lin64/deploy/g" -xzf /root/${DEPLOY_FILE}
 
-#ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/arm64/linux/drpcli /usr/bin/
-COPY drpcli /usr/bin/drpcli
+ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/arm64/linux/drpcli /usr/bin/
 RUN chmod 755 /usr/bin/drpcli
 RUN ln -s /usr/bin/drpcli /usr/bin/jq
 ENTRYPOINT /usr/bin/drpcli machines processjobs

@@ -7,7 +7,7 @@ MAINTAINER "The RackN Team <support@rackn.com>"
 
 ENV GOVC_VER="v0.22.1"
 ENV GOVC_SHA="0579871b00a2112fb7c5d1a92a4cefe1322bd74e"
-ENV DRPCLI_VER="v4.2.1-dev.2+g40ecaf1e69b716c30b0705635195d2ff879c4b04"
+ENV DRPCLI_VER="v4.3.0-beta13.4%2Bg7112569c3d75b3e5d6261070ec4085078c1273d5"
 
 RUN apk add --no-cache bash
 
