@@ -23,14 +23,14 @@ Documentation: |
       [
         {
           disk: "/dev/mmcblk0",
-          partition: "/dev/mmcblkp1"
+          partition: "/dev/mmcblkp1",
           mount: "/mnt/storage",
           type: "xfs",
           rebuild: true
         }
         {
           disk: "/dev/sda",
-          partition: "/dev/sda1"
+          partition: "/dev/sda1",
           mount: "/mnt/storage",
           type: "xfs",
           rebuild: true

@@ -98,7 +98,7 @@ echo "Attempting to mount attached storage from edge-lab/mount-devices"
           fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
           if [[ "$fstype" != "{{$device.type}}" ]] ; then
             echo "Was $fstype filesystem, needed {{$device.type}} filesystem. rebuild it"
-            rebuild=true
+            rebuild={{$device.rebuild}}
             umount {{$device.mount}}
           else
             echo "Partition is already {{$device.type}}, no change needed"
@@ -110,11 +110,14 @@ echo "Attempting to mount attached storage from edge-lab/mount-devices"
         echo "no disk {{$device.disk}}, trying next disk in array"
       fi
       if [[ $rebuild == true ]] ; then
+        echo "do rebuild disk flag set - will wipefs and partition"
         wipefs -a {{$device.disk}}
         parted {{$device.disk}} mklabel GPT
         parted {{$device.disk}} mkpart primary 2048s 100%
         mkfs -t {{$device.type}} {{$device.partition}}
         mount {{$device.partition}} {{$device.mount}}
+      else
+        echo "do not rebuild disk (request was rebuild={{$device.rebuild}})"
       fi
     else
       echo "no {{$device.disk}} found, moving on..."
