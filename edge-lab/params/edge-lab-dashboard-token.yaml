@@ -13,5 +13,6 @@ Schema:
   type: string
 Meta:
   color: "blue"
+  clipboard: "yes"
   icon: "file archive"
   title: "Community Content Copyright RackN 2020"
