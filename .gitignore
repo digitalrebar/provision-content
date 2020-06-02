@@ -22,3 +22,4 @@ edge-lab/admin.conf
 edge-lab/kube.config
 task-library/task-library.yaml
 bundle.yaml
+rel_notes
