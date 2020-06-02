@@ -47,11 +47,18 @@ case $OS_FAMILY in
     if [[ "$OS_TYPE" == "ubuntu" ]]
     then
       case $OS_VER in
-        14.04) RELEASE="trusty" ;;
-        16.04) RELEASE="xenial" ;;
-        17.04) RELEASE="zesty"  ;;
-        17.10) RELEASE="artful" ;;
-        18.04) RELEASE="bionic" ;;
+        14.04) RELEASE="trusty"  ;;
+        14.10) RELEASE="utopic"  ;;
+        16.04) RELEASE="xenial"  ;;
+        16.10) RELEASE="yakkety" ;;
+        17.04) RELEASE="zesty"   ;;
+        17.10) RELEASE="artful"  ;;
+        18.04) RELEASE="bionic"  ;;
+        18.10) RELEASE="cosmic"  ;;
+        19.04) RELEASE="disco"   ;;
+        19.10) RELEASE="eoan"    ;;
+        20.04) RELEASE="focal"   ;;
+        20.10) RELEASE="groovy"  ;;
         *) echo "Unable to reset repos for this version ... please fix me ... "
           exit 1
             ;;
