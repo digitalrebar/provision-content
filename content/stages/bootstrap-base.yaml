@@ -15,7 +15,6 @@ Tasks:
   - "bootstrap-ssh"
   - "bootstrap-discovery-iso"
   - "bootstrap-prefs"
-  - "bootstrap-lock-mc"
 Meta:
   icon: "sort amount up"
   color: "yellow"

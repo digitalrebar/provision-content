@@ -20,6 +20,8 @@ Documentation: |
 Stages:
   - "bootstrap-base"
   - "bootstrap-advanced"
+  - "lock-machine"
+  - "complete-nobootenv"
 Meta:
   color: "green"
   icon: "sort amount up"

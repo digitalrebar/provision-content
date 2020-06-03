@@ -12,7 +12,6 @@ Documentation: |
   
 Tasks:
   - "bootstrap-contexts"
-  - "bootstrap-lock-mc"
 Meta:
   icon: "sort amount up"
   color: "yellow"
