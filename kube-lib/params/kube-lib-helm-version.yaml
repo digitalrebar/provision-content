@@ -1,0 +1,13 @@
+---
+Name: "kube-lib/helm-version"
+Description: "Version of the Helm v3 to use in cluster"
+Documentation: |
+  Allows operators to determine the version of Helm to install
+Schema:
+  type: "string"
+  default: "latest"
+Meta:
+  color: "blue"
+  icon: "hashtag"
+  title: "Community Content"
+  render: "semver"

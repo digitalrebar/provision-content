@@ -1,0 +1,13 @@
+---
+Name: "kube-lib/helm-download-url"
+Description: "Base URL for downloading Helm"
+Documentation: |
+  Allows operators to determine where to get the Helm version
+Schema:
+  type: "string"
+  default: "https://get.helm.sh"
+Meta:
+  color: "blue"
+  icon: "download"
+  clipboard: "yes"
+  title: "Community Content"

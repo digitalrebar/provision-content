@@ -1,0 +1,65 @@
+---
+Name: "kube-lib-legacy-migration"
+Description: "Migrate KRIB and k3s/EdgeLab params into Kube-Lib"
+Documentation: |
+  This stage helps with legacy migration by automatically
+  remapping params defined by other content packs into the kube-lib ones.
+
+  NOTE: will fail if BOTH are present.
+Templates:
+  - Name: "legacy-migration.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+      {{ template "cluster-shared.tmpl" .}}
+
+      echo "checking k3s/admin-conf >> kube-lib/kube-config"
+      {{ if and (.ParamExists "k3s/admin-conf") (not (.ParamExists "kube-lib/kube-config")) }}
+        echo "  found param, migrating..."
+        drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "kube-lib/kube-config" to '{{ .ParamAsJSON "k3s/admin-conf" }}'
+      {{ else }}
+        echo "  not found, not param migrated"
+      {{ end }}
+
+      echo "checking krib/cluster-admin-conf >> kube-lib/kube-config"
+      {{ if and (.ParamExists "krib/cluster-admin-conf") (not (.ParamExists "kube-lib/kube-config")) }}
+        echo "  found param, migrating..."
+        drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "kube-lib/kube-config" to '{{ .ParamAsJSON "krib/cluster-admin-conf" }}'
+      {{ else }}
+        echo "  not found, not param migrated"
+      {{ end }}
+
+      echo "checking edge-lab/helm-charts >> kube-lib/helm-charts"
+      {{ if .ParamExists "edge-lab/helm-charts" }}
+        if [[ "$(echo '{{.ParamAsJSON "kube-lib/helm-charts"}}' | jq length)" == "0" ]]; then
+          echo "  target empty and found param, migrating..."
+          drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "kube-lib/helm-charts" to '{{ .ParamAsJSON "edge-lab/helm-charts" }}' | jq length
+        else
+          echo "  target populated, taking no action"
+        fi
+      {{ else }}
+        echo "  not found, not param migrated"
+      {{ end }}
+
+      {{ if .ParamExists "krib/helm-charts" }}
+        if [[ "$(echo '{{.ParamAsJSON "kube-lib/helm-charts"}}' | jq length)" == "0" ]]; then
+          echo "  target empty and found param, migrating..."
+          drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param "kube-lib/helm-charts" to '{{ .ParamAsJSON "krib/helm-charts" }}' | jq length
+        else
+          echo "  target populated, taking no action"
+        fi
+      {{ else }}
+        echo "  not found, not param migrated"
+      {{ end }}
+
+      echo "Done"
+      exit 0
+
+Meta:
+  icon: "exchange"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

@@ -1,0 +1,17 @@
+---
+Name: "kube-lib/dashboard-version"
+Description: "Kubernetes Dashboard version"
+Documentation: |
+  Version of Dashboard to install.
+
+  Note: Required "v" prefix or task Will skip Dashboard install. 
+
+  Override the default in cluster or global profile to use a different version.
+Schema:
+  type: "string"
+  default: "v2.0.1"
+Meta:
+  color: "blue"
+  icon: "hashtag"
+  title: "Community Content Copyright RackN 2020"
+  render: "semver"
