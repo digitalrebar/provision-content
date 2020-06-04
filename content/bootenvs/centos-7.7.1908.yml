@@ -14,6 +14,7 @@ Loaders:
   arm64-uefi: EFI/BOOT/grubaa64.efi
 OS:
   Family: "redhat"
+  Version: "7"
   Name: "centos-7.7.1908"
   SupportedArchitectures:
     x86_64:

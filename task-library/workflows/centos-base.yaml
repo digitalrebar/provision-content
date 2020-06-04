@@ -7,10 +7,10 @@ Documentation: |
   in a waiting state so that DRP will automatically detect and start a
   new workflow if the *Machine.Workflow* is updated.
 
-  .. note:: To enable, upload the CentOS ISO as per the centos-7 BootEnv
+  .. note:: To enable, upload the CentOS ISO as per the centos-8 BootEnv
 
 Stages:
-  - centos-7-install
+  - centos-8-install
   - runner-service
   - finish-install
   - complete
