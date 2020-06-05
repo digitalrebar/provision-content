@@ -1,6 +1,8 @@
 # DigitalRebar Provision Centos-8 (and related distros) kickstart
 
-url --url={{.ProvisionerURL}}/centos-8/install
+{{range .InstallRepos}}
+{{ .Install }}
+{{end}}
 # key --skip
 # Disable geolocation for language and timezone
 # Currently broken by https://bugzilla.redhat.com/show_bug.cgi?id=1111717
@@ -31,7 +33,7 @@ reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 %packages
 {{ $packages := index (.Param "kickstart-base-packages") .Env.OS.Name -}}
 {{ if not $packages -}}
-{{ $packages = index (.Param "kickstart-base-packages") .Env.OS.Family -}}
+{{ $packages = index (.Param "kickstart-base-packages") .Env.OS.FamilyName -}}
 {{ end -}}
 {{ if not $packages -}}
 {{ $packages = index (.Param "kickstart-base-packages") "unknown" -}}
