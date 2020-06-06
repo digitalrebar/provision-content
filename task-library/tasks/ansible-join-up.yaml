@@ -48,6 +48,10 @@ Templates:
 
         tasks:
 
+          - name: Wait for the instances to boot by checking the ssh port
+            wait_for_connection:
+              timeout: 300
+
           - name: check if drpcli is running (makes join idempotent)
             service_facts:
 
@@ -77,8 +81,7 @@ Templates:
             when: "'drpcli.service' not in services"
       EOF
 
-      drpcli machines meta set $RS_UUID key icon to "level up alternate"
-      drpcli machines meta set $RS_UUID key color to "yellow"
+      echo "Prevent the task list from restarting!"
       drpcli machines set $RS_UUID param start-over to false
 
       echo "Run Join-Up Playbook using $(ansible-playbook --version)"
