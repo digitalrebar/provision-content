@@ -113,9 +113,9 @@ Schema:
       arch: aarch64
       url: http://mirror.centos.org/altarch/7/os/aarch64/
       installSource: true
-    - tag: centos-7.6.1810
+    - tag: centos-7.8.2003
       os:
-        - centos-7.6.1810
+        - centos-7.8.2003
       arch: x86_64
       url: http://mirrors.edge.kernel.org/centos/7.6.1810/os/x86_64/
       installSource: true
@@ -126,6 +126,8 @@ Schema:
         - centos-7.4.1708
         - centos-7.5.1804
         - centos-7.6.1810
+        - centos-7.7.1908
+        - centos-7.8.2003
       arch: x86_64
       url: "http://mirrors.edge.kernel.org/centos"
       distribution: "7"
@@ -146,6 +148,8 @@ Schema:
         - centos-7.4.1708
         - centos-7.5.1804
         - centos-7.6.1810
+        - centos-7.7.1908
+        - centos-7.8.2003
       arch: aarch64
       url: "http://mirror.centos.org/altarch"
       distribution: "7"
@@ -163,9 +167,53 @@ Schema:
         - centos-7.4.1708
         - centos-7.5.1804
         - centos-7.6.1810
+        - centos-7.7.1908
+        - centos-7.8.2003
       arch: any
       url: http://mirrors.kernel.org/fedora-epel/7/$basearch
       distribution: "7"
+    - tag: centos-8
+      os:
+        - centos-8
+      arch: x86_64
+      url: https://mirrors.edge.kernel.org/centos/8/BaseOS/x86_64/os
+      installSource: true
+    - tag: centos-8.1.1911
+      os:
+        - centos-8.1.1911
+      arch: x86_64
+      url: http://mirrors.edge.kernel.org/centos/8.1.1911/BaseOS/x86_64/os
+      installSource: true
+    - tag: centos-8-everything
+      os:
+        - centos-8
+        - centos-8.1.1911
+      arch: x86_64
+      url: "http://mirrors.edge.kernel.org/centos"
+      distribution: "8"
+      components:
+        - AppStream
+        - BaseOS
+        - Devel
+        - HighAvailability
+        - PowerTools
+        - centosplus
+        - extras
+        - fasttrack
+    - tag: epel-8-everything
+      os:
+        - centos-8
+        - centos-8.1.1911
+      arch: any
+      url: http://mirrors.kernel.org/fedora-epel/8/Everything/$basearch
+      distribution: "8"
+    - tag: epel-8-modular
+      os:
+        - centos-8
+        - centos-8.1.1911
+      arch: any
+      url: http://mirrors.kernel.org/fedora-epel/8/Modular/$basearch
+      distribution: "8"
     - tag: ubuntu-16.04
       os:
         - ubuntu-16.04

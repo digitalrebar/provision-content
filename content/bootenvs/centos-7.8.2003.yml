@@ -1,6 +1,6 @@
 ---
-Name: "centos-7-install"
-Description: "CentOS-7 installer that points to the latest CentOS 7 release."
+Name: "centos-7.8.2003-install"
+Description: "CentOS-7.8.2003 install bootenv"
 Documentation: |
   This BootEnv installs the CentOS 7 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
@@ -15,7 +15,7 @@ Loaders:
 OS:
   Family: "redhat"
   Version: "7"
-  Name: "centos-7"
+  Name: "centos-7.7.1908"
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-7-x86_64-Minimal-2003.iso"
@@ -29,9 +29,9 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
-        {{.Param "kernel-options"}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
-        {{.Param "kernel-console"}}
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
     aarch64:
       Loader: "grubarm64.efi"
       IsoFile: "CentOS-7-aarch64-Minimal-2003.iso"
@@ -45,9 +45,9 @@ OS:
         ks={{.Machine.Url}}/compute.ks
         method={{.Env.InstallUrl}}
         inst.geoloc=0
-        {{.Param "kernel-options"}}
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
         --
-        {{.Param "kernel-console"}}
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"

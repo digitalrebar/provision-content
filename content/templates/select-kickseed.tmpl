@@ -27,9 +27,9 @@
   {{$selectKickSeed := (printf "%s" (.Param "select-kickseed")) -}}
   {{.CallTemplate $selectKickSeed .}}
 {{else -}}
-  {{if (eq "redhat" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
-  {{if (eq "centos" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
-  {{if (eq "fedora" .Env.OS.Family) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
-  {{if (eq "debian" .Env.OS.Family) -}} {{template "net-seed.tmpl" .}} {{end -}}
-  {{if (eq "ubuntu" .Env.OS.Family) -}} {{template "net-seed.tmpl" .}} {{end -}}
+  {{if and (eq "redhat" .Env.OS.FamilyName) (.Env.OS.VersionEq "7") -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
+  {{if and (eq "redhat" .Env.OS.FamilyName) (.Env.OS.VersionEq "8") -}} {{template "centos-8.ks.tmpl" .}} {{end -}}
+  {{if (eq "fedora" .Env.OS.FamilyName) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
+  {{if (eq "debian" .Env.OS.FamilyName) -}} {{template "net-seed.tmpl" .}} {{end -}}
+  {{if (eq "ubuntu" .Env.OS.FamilyName) -}} {{template "net-seed.tmpl" .}} {{end -}}
 {{end -}}
