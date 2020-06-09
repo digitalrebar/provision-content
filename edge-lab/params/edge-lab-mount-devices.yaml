@@ -26,14 +26,16 @@ Documentation: |
           partition: "/dev/mmcblkp1",
           mount: "/mnt/storage",
           type: "xfs",
-          rebuild: true
+          rebuild: true,
+          comment: "example"
         }
         {
           disk: "/dev/sda",
           partition: "/dev/sda1",
           mount: "/mnt/storage",
           type: "xfs",
-          rebuild: true
+          rebuild: true,
+          comment: "put something here"
         }
       ]
 
@@ -44,16 +46,19 @@ Schema:
       mount: "/mnt/storage"
       type: "ext4"
       rebuild: false
+      comment: "EdgeLab rpi-client sd card"
     - disk: "/dev/mmcblk0"
       partition: "/dev/mmcblk0p1"
       mount: "/mnt/storage"
       type: "xfs"
       rebuild: true
+      comment: "blank RPi sd card"
     - disk: "/dev/sda"
       partition: "/dev/sda1"
       mount: "/mnt/storage"
       type: "xfs"
-      rebuild: true
+      rebuild: false
+      comment: "EdgeLab rpi-client sd card"
   type: array
   items:
     required:
@@ -62,6 +67,7 @@ Schema:
       - mount
       - type
       - rebuild
+      - comment
     properties:
       disk:
         type: string

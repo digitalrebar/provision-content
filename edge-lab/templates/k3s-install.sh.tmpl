@@ -81,64 +81,69 @@ fi
 #
 mkdir -p /mnt/storage
 
-echo "Attempting to mount attached storage from edge-lab/mount-devices"
-{{range $index, $device := (.Param "edge-lab/mount-devices") }}
-  echo "=============== {{$index}}: {{$device.partition}} ==============="
-  if grep -qs {{$device.mount}} /proc/mounts ; then
-    echo "{{$device.mount}} already mounted, cannot redefine at {{$device.partition}}... skipping"
-  else
-    echo "attempting to mount {{$device.mount}} from {{$device.partition}}"
-    if lsblk {{$device.disk}} 2>/dev/null >/dev/null ; then
-      echo "found disk {{$device.disk}}, checking partition {{$device.partition}}"
-      rebuild={{$device.rebuild}}
-      if lsblk {{$device.partition}} 2>/dev/null >/dev/null ; then
-        rebuild=false
-        echo "found partition {{$device.partition}}, mounting to {{$device.mount}}"
-        if mount {{$device.partition}} {{$device.mount}} ; then
-          fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
-          if [[ "$fstype" != "{{$device.type}}" ]] ; then
-            echo "Was $fstype filesystem, needed {{$device.type}} filesystem. rebuild it"
-            rebuild={{$device.rebuild}}
-            umount {{$device.mount}}
-          else
-            echo "Partition is already {{$device.type}}, no change needed"
-          fi
-        else
-          echo "could not mount {{$device.partition}} {{$device.mount}}, moving on..."
-        fi
-      else
-        echo "no disk {{$device.disk}}, trying next disk in array"
-      fi
-      if [[ $rebuild == true ]] ; then
-        echo "do rebuild disk flag set - will wipefs and partition"
-        wipefs -a {{$device.disk}}
-        parted {{$device.disk}} mklabel GPT
-        parted {{$device.disk}} mkpart primary 2048s 100%
-        mkfs -t {{$device.type}} {{$device.partition}}
-        mount {{$device.partition}} {{$device.mount}}
-      else
-        echo "do not rebuild disk (request was rebuild={{$device.rebuild}})"
-      fi
-    else
-      echo "no {{$device.disk}} found, moving on..."
-    fi
-  fi
-{{else}}
-  echo "no attached storage drives defined"
-{{end}}
-
-if grep -qs /mnt/storage /proc/mounts ; then
-  # Reset the storage if it isn't ours.
-  echo "Checking for storage marker"
-  if [[ "$(cat /mnt/storage/marker)" != "$RS_UUID" ]] ; then
-    echo "Marker didn't match.  Reset the container space"
-    rm -rf /mnt/storage/containerd
-    echo -n "$RS_UUID" > /mnt/storage/marker
-  fi
+if grep -qsE '/dev/sd[a-c](.*)[xfs|ext4]' /proc/mounts ; then
+  echo "Found suitable local storage, skipping mounting"
   mkdir -p /mnt/storage/containerd
 else
-  echo "HALTING: Install requires external storage."
-  exit 1
+  echo "Attempting to mount attached storage from edge-lab/mount-devices"
+  {{range $index, $device := (.Param "edge-lab/mount-devices") }}
+    echo "=============== {{$index}}. {{$device.partition}}: {{$device.comment}} ==============="
+    if grep -qs {{$device.mount}} /proc/mounts ; then
+      echo "{{$device.mount}} already mounted, cannot redefine at {{$device.partition}}... skipping"
+    else
+      echo "attempting to mount {{$device.mount}} from {{$device.partition}}"
+      if lsblk {{$device.disk}} 2>/dev/null >/dev/null ; then
+        echo "found disk {{$device.disk}}, checking partition {{$device.partition}}"
+        rebuild={{$device.rebuild}}
+        if lsblk {{$device.partition}} 2>/dev/null >/dev/null ; then
+          rebuild=false
+          echo "found partition {{$device.partition}}, mounting to {{$device.mount}}"
+          if mount {{$device.partition}} {{$device.mount}} ; then
+            fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
+            if [[ "$fstype" != "{{$device.type}}" ]] ; then
+              echo "Was $fstype filesystem, needed {{$device.type}} filesystem. rebuild it"
+              rebuild={{$device.rebuild}}
+              umount {{$device.mount}}
+            else
+              echo "Partition is already {{$device.type}}, no change needed"
+            fi
+          else
+            echo "could not mount {{$device.partition}} {{$device.mount}}, moving on..."
+          fi
+        else
+          echo "no disk {{$device.disk}}, trying next disk in array"
+        fi
+        if [[ $rebuild == true ]] ; then
+          echo "do rebuild disk flag set - will wipefs and partition"
+          wipefs -a {{$device.disk}}
+          parted {{$device.disk}} mklabel GPT
+          parted {{$device.disk}} mkpart primary 2048s 100%
+          mkfs -t {{$device.type}} {{$device.partition}}
+          mount {{$device.partition}} {{$device.mount}}
+        else
+          echo "do not rebuild disk (request was rebuild={{$device.rebuild}})"
+        fi
+      else
+        echo "no {{$device.disk}} found, moving on..."
+      fi
+    fi
+  {{else}}
+    echo "no attached storage drives defined"
+  {{end}}
+
+  if grep -qs /mnt/storage /proc/mounts ; then
+    # Reset the storage if it isn't ours.
+    echo "Checking for storage marker"
+    if [[ "$(cat /mnt/storage/marker)" != "$RS_UUID" ]] ; then
+      echo "Marker didn't match.  Reset the container space"
+      rm -rf /mnt/storage/containerd
+      echo -n "$RS_UUID" > /mnt/storage/marker
+    fi
+    mkdir -p /mnt/storage/containerd
+  else
+    echo "HALTING: Install requires external storage."
+    exit 1
+  fi
 fi
 
 # Link to attached storage if there.
