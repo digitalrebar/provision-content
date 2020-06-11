@@ -4,7 +4,8 @@
 RackN Task Library
 ------------------
 
-This content package is used to collect useful stages and operations for Digital Rebar.
+This content package is a collection of useful stages and operations for Digital Rebar. It also includes several handy workflows like the CentOS base, Fedora base, and Ubuntu base workflows.
+You can also find many handy stages in this like the network-lldp stage which can be added to your discovery to add additional networking information discovered by lldp.
 
 .. _component_task_library_cluster:
 

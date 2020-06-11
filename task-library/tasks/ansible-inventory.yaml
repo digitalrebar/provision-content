@@ -3,7 +3,7 @@ Name: "ansible-inventory"
 Description: "Add ansible setup module data as a value on the machine"
 Documentation: |
   Install ansible, if needed, and record the setup module ansible variables
-  onto the machine as parameter, ansible-inventory.
+  onto the machine as parameter named ansible-inventory.
 
 Meta:
   icon: "shopping cart"

@@ -3,6 +3,8 @@ Name: "ansible-inventory"
 Description: "Collect ansible setup module inventory data"
 Documentation: |
   Collects ansible inventory data from ansible's setup module.
+  .. note::
+  This will attempt to install ansible if it is not already installed.
 
 Tasks:
   - "ansible-inventory"

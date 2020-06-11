@@ -2,7 +2,7 @@
 Name: "bootstrap-advanced"
 Description: "Bootstrap Advanced Install"
 Documentation: |
-  Bootstrap stage to builds out an advanced setup
+  Bootstrap stage to build out an advanced setup
 
   This augments the bootstrap-base.  It does NOT replace it.
 
