@@ -342,11 +342,11 @@ Schema:
         - contrib
         - main
         - non-free
-    - tag: sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1
+    - tag: sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f
       os:
-        - sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1
+        - sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f
       arch: amd64
-      url: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/c7305a9ba2c6b12351530c4a9021fd5e07ef1ce1/"
+      url: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f/"
       installSource: true
   type: "array"
   items:
