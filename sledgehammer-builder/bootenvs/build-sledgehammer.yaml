@@ -56,12 +56,12 @@ Templates:
   - ID: "default-grub.tmpl"
     Name: "grub-mac"
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
-  - ID: "default-grub.tmpl"
-    Name: "grub-secure"
-    Path: "sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f/grub.cfg-{{.Machine.HexAddress}}"
-  - ID: "default-grub.tmpl"
-    Name: "grub-secure-mac"
-    Path: 'sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+  - Name: grub-secure-mac
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    ID: default-grub.tmpl
+  - Name: grub-secure
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    ID: default-grub.tmpl
   - Name: "sledgehammer.ks"
     Path: "{{.Machine.Path}}/sledgehammer.ks"
     Contents: |
