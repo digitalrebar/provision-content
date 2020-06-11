@@ -447,7 +447,7 @@ Templates:
           'alsa-firmware'
           'firewalld'
           'i*-firmware'
-          mariadb-libs
+          postfix
           mozjs17
           plymouth
           selinux-policy-targeted)
