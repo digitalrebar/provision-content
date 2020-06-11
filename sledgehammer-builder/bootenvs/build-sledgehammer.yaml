@@ -58,10 +58,10 @@ Templates:
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - ID: "default-grub.tmpl"
     Name: "grub-secure"
-    Path: "sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.HexAddress}}"
+    Path: "sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f/grub.cfg-{{.Machine.HexAddress}}"
   - ID: "default-grub.tmpl"
     Name: "grub-secure-mac"
-    Path: 'sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: 'sledgehammer/46e1a213a0e9b54e413369a0bcb22ed6a97cfc9f/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
   - Name: "sledgehammer.ks"
     Path: "{{.Machine.Path}}/sledgehammer.ks"
     Contents: |
