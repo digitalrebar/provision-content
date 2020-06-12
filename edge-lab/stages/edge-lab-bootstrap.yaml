@@ -15,7 +15,6 @@ Documentation: |
 
 Tasks:
   - "edge-lab-bootstrap-subnet"
-  - "edge-lab-bootstrap-nfs"
 Meta:
   icon: "sort amount up"
   color: "yellow"

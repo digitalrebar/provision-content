@@ -11,6 +11,7 @@ Stages:
   - "k3s-install"
   - "edge-lab-install-dashboard"
   - "edge-lab-helm"
+  - "complete-nobootenv"
 Meta:
   color: "green"
   icon: "ship"

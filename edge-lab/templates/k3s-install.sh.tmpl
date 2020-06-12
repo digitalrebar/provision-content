@@ -14,8 +14,12 @@ else
   echo "no kubectl, install k3s"
 fi
 
+if $CLUSTER_I_AM_LEADER ; then
+  drpcli machines meta set $RS_UUID key icon to anchor
+else
+  drpcli machines meta set $RS_UUID key icon to ship
+fi
 drpcli machines meta set $RS_UUID key color to yellow
-drpcli machines meta set $RS_UUID key icon to ship
 
 {{ template "cluster-shared.tmpl" .}}
 {{ template "download-tools.tmpl" .}}
@@ -161,7 +165,6 @@ BINARIES="$INSTALL_DIR/k3s"
 echo "Checking for $ARCH"
 if ! which k3s 2>/dev/null >/dev/null ; then
   if $CLUSTER_I_AM_LEADER; then
-    drpcli machines meta set $RS_UUID key icon to download
     if drpcli files exists "k3s/k3s-$arch" 2>/dev/null >/dev/null ; then
       echo "Found in DRP files/k3s - downloading from there"
       drpcli files download "k3s/k3s-$arch" to $BINARIES
@@ -183,12 +186,9 @@ if ! which k3s 2>/dev/null >/dev/null ; then
       mv $ARCH $BINARIES
       drpcli files upload "$BINARIES" as "k3s/k3s-$arch"
     fi
-    drpcli machines meta set $RS_UUID key icon to cog
   else
     echo "Not the leader - waiting for k3s/node-token to be defined"
-    drpcli machines meta set $RS_UUID key color to grey
     cluster_wait_for_variable "k3s/node-token"
-    drpcli machines meta set $RS_UUID key color to yellow
     echo "download binaries from DRP k3s/k3s-$arch"
     drpcli files download "k3s/k3s-$arch" to $BINARIES
   fi
@@ -212,8 +212,6 @@ if $CLUSTER_I_AM_LEADER ; then
   EXECSTART="${BINARIES} server --bind-address={{ .Machine.Address }} --node-label=worker --https-listen-port={{ .Param "k3s/api-port" }} --node-label=worker"
   SYSTEMD_TYPE="notify"
 
-  drpcli machines meta set $RS_UUID key icon to anchor
-
 else
 
   echo "I am a worker - run k3s agent"
@@ -228,8 +226,6 @@ else
   K3S_URL=$(jq -r '.clusters[0].cluster.server' <<< "$ADMIN_CONFIG")
   EXECSTART="${BINARIES} agent --server ${K3S_URL} --node-label=worker --token ${K3S_TOKEN}"
   SYSTEMD_TYPE="exec"
-  # Set machine icon and color for KRIB cluster building
-  drpcli machines meta set $RS_UUID key icon to ship
 
 fi
 

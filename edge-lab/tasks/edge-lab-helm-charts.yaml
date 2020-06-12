@@ -25,7 +25,6 @@ Templates:
       fi
 
       echo "Run helm on the leader (skip for workers)..."
-      drpcli machines meta set $RS_UUID key color to yellow
 
       {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
 
@@ -128,7 +127,6 @@ Templates:
       echo "No charts included in helm/charts to install"
       {{ end -}}
 
-      drpcli machines meta set $RS_UUID key color to green
       echo "Done"
       exit 0
 Meta:
