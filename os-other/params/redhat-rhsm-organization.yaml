@@ -11,7 +11,11 @@ Documentation: |
 
     * RHSN Portal: https://access.redhat.com/management
 
-  The ``redhat/rhsm-organization`` and ``redhat/rhsm-activation`` values are
+  This Params does NOT have a defined *default* value, as the kickstart template uses
+  the non-existence (``.ParamExists``) check to trigger injecting the ``rhsm``
+  directive.
+
+  .. note:: The ``redhat/rhsm-organization`` and ``redhat/rhsm-activation`` values are
   **BOTH** required Params if the install time activation is requested.
 
 Meta:

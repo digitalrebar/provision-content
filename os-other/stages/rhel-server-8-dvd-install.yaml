@@ -1,6 +1,6 @@
 ---
-Name: rhel-server-dvd-8-install
-BootEnv: rhel-server-dvd-8-install
+Name: rhel-server-8-dvd-install
+BootEnv: rhel-server-8-dvd-install
 Description: RHEL Server 8 install stages.  Using full dvd ISO.
 Documentation: |
   Uses the RHEL 8 server full dvd ISO to install.  Enables installation from local

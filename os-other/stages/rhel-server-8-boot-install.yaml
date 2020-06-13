@@ -1,9 +1,9 @@
 ---
-Name: rhel-server-8-install
-BootEnv: rhel-server-8-install
-Description: RHEL Server 8 install stages.  Using base ISO.
+Name: rhel-server-8-boot-install
+BootEnv: rhel-server-8-boot-install
+Description: RHEL Server 8 install stages.  Using boot (minimal) ISO.
 Documentation: |
-  Uses the RHEL 8 server base ISO to install.  Enables installation from local
+  Uses the RHEL 8 server boot ISO (minimal) to install.  Enables installation from local
   ISO as the repo source.
 
   Note that ``centos-drp-only-repos`` is valid with Redhat systems.
