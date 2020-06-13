@@ -1,0 +1,22 @@
+---
+Name: "redhat/rhsm-organization"
+Description: "RedHat Subscription Network organization information"
+Documentation: |
+  Specifies the Redhat Subscription Network information used by the installation
+  process to register systems during installs.
+
+  The the subscription must be activated in advance for systems to be registered
+  during installation.  This is typically done through the RHSN web portal, or
+  other tools.
+
+    * RHSN Portal: https://access.redhat.com/management
+
+  The ``redhat/rhsm-organization`` and ``redhat/rhsm-activation`` values are
+  **BOTH** required Params if the install time activation is requested.
+
+Meta:
+  icon: "file"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "string"

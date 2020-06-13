@@ -1,0 +1,16 @@
+---
+Name: "provisioner-access-key"
+Description: "Defines the SSH public key half during installation - if supported by installer"
+Documentation: |
+  Used in the RHEL and possibly other BootEnvs to configure/enable SSH server access
+  during installtion.  If this Param is set with a Publich SSH key half, then the
+  system will attempt to configure it as an ``authorized_keys``.  In addition, the
+  ``provisioner-default-username`` must be specfied.
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "Digital Rebar Community Content"

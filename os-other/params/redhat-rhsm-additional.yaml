@@ -1,0 +1,45 @@
+---
+Name: "redhat/rhsm-additional"
+Description: "RedHat Subscription Network additional options information"
+Documentation: |
+  Specifies the Redhat Subscription Network information used by the installation
+  process to register systems during installs.
+
+  The the subscription must be activated in advance for systems to be registered
+  during installation.  This is typically done through the RHSN web portal, or
+  other tools.
+
+    * RHSN Portal: https://access.redhat.com/management
+
+  The ``redhat/rhsm-organization`` and ``redhat/rhsm-activation`` values are
+  required Params if the install time activation is requested.
+
+  The *additional* RHSN install time options can be added to the kickstart ``rhsm``
+  directive via the use of this Param.  Specify the free-form command line options to
+  supplement the *Organization* and *Activation* details.
+
+  Example value for this string:
+
+    * ``--connect-to-insights --proxy=https://proxy.local:8080``
+
+  The currently documented list of options are as follows:
+
+    ::
+
+      --organization=       - Uses the organization id to register and install RHEL from the CDN.
+      --activation-key=     - Uses the activation key to register and install RHEL from the CDN.
+                              Multiple keys can be used, as long as the activation keys are
+                              registered to your subscription.
+      --connect-to-insights - Connects the target system to Red Hat Insights.
+      --proxy=              - Sets the HTTP proxy.
+      --server-hostname=    - Sets the server hostname. Use this option if you are running
+                              Satellite Server or performing internal testing.
+      --rhsm-baseurl=       - Sets the rhs
+
+Meta:
+  icon: "file"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "string"
+  default: ""

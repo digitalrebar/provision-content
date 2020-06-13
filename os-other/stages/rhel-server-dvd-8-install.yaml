@@ -1,0 +1,25 @@
+---
+Name: rhel-server-dvd-8-install
+BootEnv: rhel-server-dvd-8-install
+Description: RHEL Server 8 install stages.  Using full dvd ISO.
+Documentation: |
+  Uses the RHEL 8 server full dvd ISO to install.  Enables installation from local
+  ISO as the repo source.
+
+  Note that ``centos-drp-only-repos`` is valid with Redhat systems.
+Meta:
+  color: blue
+  icon: download
+  title: Digital Rebar Community Content
+OptionalParams: []
+Params: {}
+Partial: false
+Profiles: []
+Reboot: false
+RequiredParams: []
+RunnerWait: true
+Tasks:
+  - set-hostname
+  - ssh-access
+  - configure-network
+Templates: []
