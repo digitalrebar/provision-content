@@ -30,7 +30,6 @@ Templates:
       fi
 
       echo "Run helm on the leader (skip for workers)..."
-      drpcli machines meta set $RS_UUID key color to yellow
 
       {{ if .ParamExists "cluster/profile" -}}
       CLUSTER_PROFILE={{.Param "cluster/profile"}}
@@ -108,7 +107,6 @@ Templates:
       fi
 
       echo "Running helm version $(helm version)"
-      drpcli machines meta set $RS_UUID key color to green
       echo "Done"
       exit 0
 
