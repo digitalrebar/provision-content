@@ -1,0 +1,18 @@
+---
+Name: "terraform/tfstate"
+Description: "Terraform.tfstate json file (as a param)"
+Documentation: |
+  JSON stored value of the terraform.tfstate file.
+
+  Copied from the machine before terraform-apply task.
+  Saved back to machine after terraform-apply task.
+
+  If missing, Terraform is run without a state file!
+Schema:
+  type: "object"
+Meta:
+  color: "blue"
+  downloadable: "terraform.tfstate"
+  icon: "map outline"
+  title: "RackN Content"
+  copyright: "RackN 2020"

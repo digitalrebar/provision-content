@@ -1,0 +1,194 @@
+---
+Name: "terraform-apply"
+Description: "A task run Terraform Plans"
+Documentation: |
+  Runs one or more Terraform Plan templates as defined by the
+  ``terraform/plan-templates`` variable in the stage calling the task.
+
+  Requires an ``terraform`` context.
+
+  The ``terraform apply`` is only called once.  All plans in the list 
+  are generated first.  If sequential operations beyond the plan are needed, use
+  multiple calls to this task.
+
+  Information can be chained together by having the plan output saved
+  on the machine as ``Param.terraform-var/[output var]``.
+
+  Only Name, UUID, Address of the Machine are automatically passed into the plan;
+  however, the plans can use the .Param and .ParamExists template 
+  to pull any value needed.
+
+  Terraform State is stored as a Param 'terraform/tfstate' the Machine after first
+  execution.  It is then retrieved for all subsequent runs so that Terraform
+  is able to correctly use it's state values.
+
+  Notes:
+  * having SSH keys requires using the 'rsa-key-create' generator task.
+  * if creating cloud machines, use the 'ansible-join-up' task for join
+RequiredParams:
+  - "terraform/plan-templates"
+  - "terraform/plan-action"
+OptionalParams:
+  - terraform/tfstate
+  - rsa/key-user
+  - rsa/key-public
+Templates:
+  - Name: "DRP Variables"
+    Path: "tf.vars"
+    Contents: |-
+      # automatically added by DRP terraform-apply
+      variable "drp_url" {
+        type      = string
+        default   = "{{ .ProvisionerURL }}"
+      }
+      {{ if .ParamExists "rsa/key-public" }}variable "ssh_key" {
+        type      = string
+        default   = "{{ .Param "rsa/key-public" }}"
+      }{{ end }}
+      {{ if .ParamExists "rsa/key-user" }}variable "ssh_user" {
+        type      = string
+        default   = "{{ .Param "rsa/key-user" }}"
+      }{{ end }}
+      variable "machine_uuid" {
+        type      = string
+        default   = "{{ .Machine.Uuid }}"
+      }
+      variable "machine_name" {
+        type      = string
+        default   = "{{ .Machine.Name }}"
+      }
+      variable "machine_addr" {
+        type      = string
+        default   = "{{ .Machine.Address }}"
+      }
+      # end auto block
+
+  - Name: "terraform-apply.sh"
+    Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+
+      {{template "setup.tmpl" .}}
+
+      {{ if $.ParamExists "rs-debug-enable" }}
+      showplan={{ if eq ($.Param "rs-debug-enable") true }}true{{else}}false{{end}}
+      {{ end }}
+      tfstate="set"
+      success=true
+      echo "Retrieving terraform.tfstate file from machine"
+      {{ if .ParamExists "terraform/tfstate" }}
+      tee terraform.tfstate > /dev/null << EOF
+      {{ .ParamAsJSON "terraform/tfstate" }}
+      EOF
+      if [[ $showplan == true ]]; then
+        echo "DEBUG: terraform.tfstate"
+        cat terraform.tfstate | jq .
+      fi
+      {{ else }}
+      tfstate="add"
+      if [[ -e terraform.tfstate ]] ; then
+        echo "WARNING: tfstate file exists: uploading now, keeping in place"
+        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
+      else
+        echo "no terraform/tfstate exists"
+      fi
+      {{ end }}
+      
+      {{ $machine := .Machine.Name -}}
+      {{ $action := .Param "terraform/plan-action" -}}
+      {{ range $index, $plan := (.Param "terraform/plan-templates") -}}
+      {{ $plan := printf "%s" $plan -}}
+
+      ## Build Plan
+      echo "============== Build Plan {{$index}}: {{$plan}} =============="
+      echo "Building from Template {{ $plan }}"
+      tee {{$plan}}.tf >/dev/null << EOF
+      $(cat tf.vars)
+      # >> start of {{$plan}}
+      {{$.CallTemplate $plan $}}
+      # << end of {{$plan}}
+      EOF
+
+      if [[ $showplan == true ]]; then
+        echo "DEBUG: {{$plan}}.tf"
+        cat {{$plan}}.tf
+      fi
+
+      echo "^^^^^ end of {{$plan}} loop ^^^^^ "
+      {{ end }}
+
+      echo "=== INIT $(terraform version) ===="
+
+      terraform init -no-color
+
+      if [[ $showplan == true ]]; then
+        echo "=== PLAN (DEBUG) TERRAFORM ===="
+        terraform plan -no-color
+      fi
+
+      echo "=== RUN {{ $action }} TERRAFORM ===="
+
+      if terraform {{ $action }} -no-color -auto-approve ; then
+
+        echo "terraform {{ $action }} succeeded!"
+
+        {{ if eq "apply" $action }}
+
+        out=$(terraform output --json | jq .)
+        if [[ $showplan == true ]]; then
+          echo "DEBUG: output"
+          echo "capturing terraform output: $out"
+        fi
+        ip=$(jq -r '.machine_ip.value' <<< ${out})
+        if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+          echo "Detected IP from TF, Updateing Machine IP to $ip"
+          drpcli machines update $RS_UUID "{\"Address\":\"$ip\"}" | jq .Address
+        else
+          echo "No IP address (machine_ip.value) detected in terraform output"
+        fi
+
+        # capture all the output vars in the parms
+        echo "uploading other keys from terraform output"
+        for key in $(jq -r 'keys[]' <<< ${out}); do
+          echo "  adding $key to machine"
+          drpcli machines set $RS_UUID param "terraform-var/$key" to "$(jq -r ".$key.value" <<< ${out})"
+        done
+
+        {{ else }}
+            {{ if .ParamExists "terraform-var/machine_ip" }}          
+              echo "Clear IP and terraform-var/machine_ip when performing destroy with IP"
+              drpcli machines update $RS_UUID "{\"Address\":\"\"}" | jq .Address
+              drpcli machines remove $RS_UUID param terraform-var/machine_ip
+            {{ else }}
+              echo "Does not set IP, do not clear IP"
+            {{ end }}
+        {{ end }}
+
+      else
+
+        success=false
+        echo "terraform {{ $action }} failed!"
+
+      fi
+
+      if [[ -e terraform.tfstate ]] ; then
+        echo "Saving terraform.tfstate file to machine"
+        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
+      else
+        echo "no terraform.state file exists - cannot save"
+      fi
+
+      if [[ $success != true ]] ; then
+        echo "Did not succeed - fail"
+        exit 1
+      fi
+
+      echo "done"
+      exit 0
+Meta:
+  icon: "map"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
