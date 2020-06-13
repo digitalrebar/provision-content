@@ -35,7 +35,7 @@ firewall --disabled
 #firewall --enabled --port=8091,8092
 #auth --passalgo=sha512 --enableshadow
 auth --passalgo=sha512 --useshadow
-selinux --disabled
+selinux --{{.Param "provisioner-selinux"}}
 
 # Partition clearing information
 bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
