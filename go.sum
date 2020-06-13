@@ -12,7 +12,7 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e/go.mod h1:YTIHhz/QFSYnu/EhlF2SpU2Uk+32abacUYA5ZPljz1A=
 github.com/digitalrebar/logger v0.3.0/go.mod h1:zH2t4FBhzVxZJTg+eaPzNCRL50nlcRLxWurfTsl5jWE=
-github.com/digitalrebar/provision/v4 v4.3.1/go.mod h1:YxgvzqguuRQGjroUJWZ0fI/ufauWByPzmFSPzxsQelQ=
+github.com/digitalrebar/provision/v4 v4.4.0-alpha00/go.mod h1:YxgvzqguuRQGjroUJWZ0fI/ufauWByPzmFSPzxsQelQ=
 github.com/digitalrebar/tftp v2.1.0+incompatible/go.mod h1:k1tcsyQwHE72oTU5sfXPJdOCHFiZUt3M2BdYdHsfw6c=
 github.com/digitalrebar/tftp/v3 v3.0.0/go.mod h1:OEQX1RPK9eiehWKXeZMbYiRLJ3JJLaB68vj7IR7LvOM=
 github.com/elithrar/simple-scrypt v1.3.0/go.mod h1:U2XQRI95XHY0St410VE3UjT7vuKb1qPwrl/EJwEqnZo=
