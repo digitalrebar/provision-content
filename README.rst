@@ -31,6 +31,7 @@ Examples of different content packs found here are as follows:
 directory              used for
 =====================  ============================================================
 content/               main "drp-community-content" pack
+task-library/          A library of tasks and helper functions
 krib/                  Kubernetes Rebar Integrated Bootstrap content pack
 rose/                  Rebar OpenStack Environment - single node master and cluster
 sledgehammer-builder/  contains the Sledgehammer Builder content
