@@ -16,7 +16,9 @@ Templates:
           local _dest=$2
 
           echo "Downloading $_src"
-          curl -k -o $_dest $_src
+          set +e
+          curl -L -f -k -o $_dest $_src
+          set -e
           if [[ $? != 0 ]] ; then
               xiterr 1 "Failed to download $_dest from $_src"
           fi
