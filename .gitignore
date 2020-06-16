@@ -14,3 +14,5 @@ drp
 /.idea/
 bin
 krib/krib.yaml
+rel_notes
+rebar-catalog
