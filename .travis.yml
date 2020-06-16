@@ -16,6 +16,7 @@ script:
 - cp tools/ssh-config ~/.ssh/config
 - chmod 600 ~/.ssh/config
 - "./tools/package.sh"
+- "./tools/build_rel_notes.sh"
 - "./tools/publish.sh"
 after_script:
 - tools/notify.sh digitalrebar/provision-content
