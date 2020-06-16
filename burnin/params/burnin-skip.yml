@@ -5,6 +5,7 @@ Schema:
   type: "boolean"
   default: false
 Meta:
+  type: "input"
   color: "blue"
   icon: "fire"
   title: "RackN Content"

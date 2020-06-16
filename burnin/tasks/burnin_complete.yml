@@ -4,6 +4,7 @@ Description: "Burn-In completed successfully"
 RequiredParams:
 - "burnin-skip"
 Meta:
+  type: "complete"
   color: "blue"
   icon: "fire"
   title: "RackN Content"

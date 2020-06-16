@@ -11,6 +11,6 @@ Tasks:
   - "ssh-access"
 Meta:
   deprecated: "25 June 2018"
-  icon: "ban"
-  color: "grey"
+  icon: "spinner"
+  color: "purple"
   title: "Digital Rebar Community Content"

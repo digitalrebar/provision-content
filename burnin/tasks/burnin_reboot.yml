@@ -6,6 +6,7 @@ RequiredParams:
 - "burnin-reboot-progress"
 - "burnin-reboot-skip"
 Meta:
+  type: "reboot"
   color: "blue"
   icon: "fire"
   title: "RackN Content"

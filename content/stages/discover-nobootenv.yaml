@@ -14,7 +14,7 @@ Tasks:
   - "ssh-access"
 Meta:
   icon: "spinner"
-  color: "blue"
+  color: "purple"
   title: "Digital Rebar Community Content"
   license: "APLv2"
   copyright: "RackN 2020"
