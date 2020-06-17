@@ -5,6 +5,7 @@ BootEnv: "sledgehammer"
 Tasks:
   - "burnin_reboot"
 Meta:
+  type: "reboot"
   color: "yellow"
   icon: "fire"
   title: "RackN Content"

@@ -7,6 +7,7 @@ Tasks:
   - "disk_stress"
   - "burnin_complete"
 Meta:
+  type: "build"
   color: "yellow"
   icon: "fire"
   title: "RackN Content"

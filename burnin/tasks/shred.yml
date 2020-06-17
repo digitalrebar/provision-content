@@ -2,6 +2,7 @@
 Name: "shred"
 Description: "Removes data from drives"
 Meta:
+  type: "destroy"
   color: "blue"
   icon: "fire"
   title: "RackN Content"
