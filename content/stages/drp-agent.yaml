@@ -1,0 +1,9 @@
+---
+Name: "drp-agent"
+Description: "Stage to install the drpcli as a machine agent"
+Tasks:
+  - "drp-agent-install"
+Meta:
+  icon: "motorcycle"
+  color: "yellow"
+  title: "RackN Content"

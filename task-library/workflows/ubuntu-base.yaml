@@ -11,7 +11,7 @@ Documentation: |
 
 Stages:
   - ubuntu-18.04-install
-  - runner-service
+  - drp-agent
   - finish-install
   - complete
 Meta:

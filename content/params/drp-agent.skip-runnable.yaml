@@ -1,0 +1,6 @@
+---
+Name: drp-agent/skip-runnable
+Description: Controls whether drpcli running in agent mode should refrain from making the machine Runnable.
+Schema:
+  type: boolean
+  default: false

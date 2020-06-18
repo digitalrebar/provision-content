@@ -1,0 +1,16 @@
+---
+Name: drp-agent/auto-update
+Description: Whether to allow the agent to automatically update itself on startup.
+Documentation: |
+  When drpcli is starting up in agent mode, it has the capability to
+  check in with the provisioner to see if the binary the provisioner
+  os providing is different than the one on the local machine.  If
+  that is the case, then the agent will download the current version
+  and use that, assuming that dr-provision has the `agent-auto-update`
+  feature.
+
+  This functionality does not work on Windows due to not being able to
+  remove running binaries.  For now.
+Schema:
+  type: boolean
+  default: true

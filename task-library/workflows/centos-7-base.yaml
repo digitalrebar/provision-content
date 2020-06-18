@@ -11,7 +11,7 @@ Documentation: |
 
 Stages:
   - centos-7-install
-  - runner-service
+  - drp-agent
   - finish-install
   - complete
 Meta:

@@ -20,7 +20,7 @@ Stages:
   - image-builder-start
   - centos-7-install
   - ssh-access
-  - runner-service
+  - drp-agent
   - image-builder-linux
   - finish-install
 

@@ -200,6 +200,9 @@ Templates:
   - ID: "default-grub.tmpl"
     Name: "grub-secure-mac"
     Path: 'sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+  - ID: drp-agent-cfg.yaml.tmpl
+    Name: agent-cfg
+    Path: "{{.Machine.Path}}/agent-cfg.yml"
   - Name: "control.sh"
     Path: "{{.Machine.Path}}/control.sh"
     Contents: |
@@ -224,6 +227,13 @@ Templates:
       shopt -s extglob
       export PS4="${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): "
       cp /usr/share/zoneinfo/GMT /etc/localtime
+      # Set up for the agent
+      mkdir -p /var/lib/drp-agent/
+      curl -fgLo /var/lib/drp-agent/agent-cfg.yml "{{.Machine.Url}}/agent-cfg.yml"
+      cat >/etc/sysconfig/drp-agent <<EOF
+      IP=$IP
+      EOF
+      drpcli agent install
 
       # This will contain a token appropriate for the path being
       # used below.  Reset the token to the longer machine token.
@@ -260,7 +270,8 @@ Templates:
       fi
 
       {{template "reset-workflow.tmpl" .}}
-      {{template "runner.tmpl" .}}
+      drpcli agent start
+      echo "Follow along with job logs using journalctl -u drp-agent"
 
       # The last line in this script must always be exit 0!!
       exit 0

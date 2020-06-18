@@ -10,7 +10,7 @@ Meta:
 ReadOnly: false
 Stages:
   - "centos-7-install"
-  - "runner-service"
+  - "drp-agent"
   - "finish-install"
   - "krib-runtime-install"
   - "kubernetes-install"
