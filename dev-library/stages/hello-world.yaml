@@ -1,0 +1,22 @@
+---
+Name: "hello-world"
+Meta:
+  color: "blue"
+  icon: "bullhorn"
+  title: "RackN"
+Partial: false
+Description: "Simple 'hello world' workflow test."
+Documentation: |
+  This is a simple stage that will run a small shell script (sh, or ps1 - depending
+  on Operating System).  It will simply print a hello world output.
+
+Templates: []
+RequiredParams: []
+OptionalParams: []
+Params: {}
+BootEnv: ""
+Tasks:
+  - "hello-world"
+Profiles: []
+Reboot: false
+RunnerWait: true
