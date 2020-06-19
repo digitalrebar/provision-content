@@ -33,7 +33,6 @@ keyboard --vckeymap=us --xlayouts='us'
 rootpw --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1{{end}}
 firewall --disabled
 #firewall --enabled --port=8091,8092
-#auth --passalgo=sha512 --enableshadow
 auth --passalgo=sha512 --useshadow
 selinux --{{.Param "provisioner-selinux"}}
 
@@ -59,9 +58,8 @@ skipx
 reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 
 # Network information
-#network  --bootproto=dhcp --device=ens18 --ipv6=auto --activate
 network  --hostname={{ if .ParamExists "hostname" }}{{ .Param "hostname" }}{{ else }}{{ .Machine.ShortName }}{{ end -}}
-{{ if .ParamExists "provisioner-network-config" }} network {{ .Param "provisioner-network-config" }}{{ else }}network --bootproto=dhcp{{ end -}}
+{{ if .ParamExists "provisioner-network-config" }} network {{ .ParamExpand "provisioner-network-config" }}{{ else }}network --bootproto=dhcp{{ end -}}
 
 # System services
 #services --enabled="chronyd"
