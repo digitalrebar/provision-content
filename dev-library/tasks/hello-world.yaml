@@ -1,0 +1,69 @@
+---
+Name: hello-world
+Description: "hello world task"
+Documentation: |
+  This task runs a simple "hello world" style script on the target machine.
+
+  The templates in this task support Windows, Linux, MacOS X, and ESXi
+  operating systems.
+
+  This is often used as a quick confirmation that end-to-end workflow is executing
+  and running tasks successfully.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: bullhorn
+  title: RackN
+OptionalParams: []
+Prerequisites: []
+ReadOnly: false
+RequiredParams: []
+Templates:
+- Name: hello-world.ps1
+  Meta:
+    OS: "windows"
+  Contents: |-
+    # Powershell script
+
+    Write-Output ""
+    Write-Output ">>>>>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    Write-Output ""
+
+    Write-Output "Hello World - the date is:"
+    date
+
+    Write-Output ""
+    Write-Output "This machines name is:"
+    Write-Output ""
+    hostname
+
+    Write-Output ""
+    Write-Output ">>>>>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    Write-Output ""
+
+    Exit 0
+- Name: hello-world.sh
+  Meta:
+    OS: "linux,darwin"
+  Contents: |-
+    #!/usr/bin/env sh
+
+    echo ""
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    echo ""
+
+    echo "Hello World - the date is:"
+    echo ""
+    date
+
+    echo ""
+    echo "This machines name is:"
+    echo ""
+    hostname
+
+    echo ""
+    echo ">>>>>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    echo ""
+
+    exit 0
