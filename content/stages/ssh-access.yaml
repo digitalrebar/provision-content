@@ -1,9 +1,13 @@
 ---
 Name: "ssh-access"
 Description: "Stage that installs SSH keys and configure SSH access policy"
+Documentation: |
+  Installs SSH keys onto systems
+  Pulls keys from multiple locations: access-keys, access-keys-shared, and access-keys-global
 Tasks:
   - "ssh-access"
 Meta:
+  type: "credential"
   icon: "key"
   color: "yellow"
   title: "Digital Rebar Community Content"
