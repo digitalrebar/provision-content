@@ -1,0 +1,7 @@
+{{ if .ParamExists "proxy-servers" -}}
+export http_proxy="{{ index (.Param "proxy-servers") 0 }}"
+export https_proxy="{{ index (.Param "proxy-servers") 0 }}"
+{{ end -}}
+{{ if .ParamExists "no-proxy" -}}
+export no_proxy="{{ .Param "no-proxy" | join "," }}"
+{{ end -}}

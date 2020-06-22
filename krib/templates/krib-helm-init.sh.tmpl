@@ -5,6 +5,11 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+{{ template "download-tools.tmpl" .}}
+
+# get_helm.sh script needs proxy exported
+{{ template "krib-runtime-proxy.tmpl" .}}
+
 echo "Configure helm on the master (skip for minions)..."
 
 {{if .ParamExists "krib/cluster-profile" -}}
@@ -49,6 +54,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
       {{ if eq $helmversion "latest" -}}
       # curl has exit code 23... meh
       set +e
+      # FIXME: this will be rate limited!
       HELM_VERSION=$(curl -skX GET "https://api.github.com/repos/helm/helm/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]')
       set -e
       {{ else -}}

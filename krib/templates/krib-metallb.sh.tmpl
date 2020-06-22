@@ -5,6 +5,8 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+{{ template "download-tools.tmpl" .}}
+
 # these need to be before krib-lib template
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
@@ -21,11 +23,10 @@ MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 
 if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
-  if ! which wget ; then
-    install wget
-  fi
 
-  wget -O /tmp/metallb.yaml {{ .Param "krib/metallb-config" }}
+  download -o /tmp/metallb-namespace.yaml https://raw.githubusercontent.com/metallb/metallb/{{ .Param "krib/metallb-version" }}/manifests/namespace.yaml
+  download -o /tmp/metallb.yaml https://raw.githubusercontent.com/metallb/metallb/{{ .Param "krib/metallb-version" }}/manifests/metallb.yaml
+
 {{$port := .Param "metallb/monitoring-port"}}
   sed -i 's/prometheus.io\/port: "7472"/prometheus.io\/port: "{{$port}}"/' /tmp/metallb.yaml
   sed -i 's/- --port=7472/- --port={{$port}}/' /tmp/metallb.yaml
@@ -48,6 +49,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   if [[ -n $(kubectl get namespaces | grep -w metallb-system) ]] ; then
     echo "Purging existing metallb install"
     kubectl delete -f /tmp/metallb.yaml
+  else
+    kubectl apply -f /tmp/metallb-namespace.yaml
   fi
 
 {{$l2_ip_range := .Param "metallb/l2-ip-range"}}
@@ -80,11 +83,9 @@ MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 
 if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
-  if ! which wget ; then
-    install wget
-  fi
 
-  wget -O /tmp/metallb.yaml https://github.com/danderson/metallb/raw/{{ .Param "krib/metallb-version" }}/manifests/metallb.yaml
+  download -o /tmp/metallb-namespace.yaml https://raw.githubusercontent.com/metallb/metallb/{{ .Param "krib/metallb-version" }}/manifests/namespace.yaml
+  download -o /tmp/metallb.yaml https://raw.githubusercontent.com/metallb/metallb/{{ .Param "krib/metallb-version" }}/manifests/metallb.yaml
 
   # Replace references to "master" with the user-specified tag (if user has left the default at "master" this will have no effect)
   sed -i 's/speaker:master/speaker:{{ .Param "krib/metallb-version" }}/' /tmp/metallb.yaml
@@ -112,6 +113,8 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   if [[ -n $(kubectl get namespaces | grep -w metallb-system) ]] ; then
     echo "Purging existing metallb install"
     kubectl delete -f /tmp/metallb.yaml
+  else
+    kubectl apply -f /tmp/metallb-namespace.yaml
   fi
 
 {{$l3_ip_range := .Param "metallb/l3-ip-range"}}
