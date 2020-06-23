@@ -11,6 +11,7 @@ Schema:
   default: 'console=ttyS0,115200 console=tty0'
 
 Meta:
+  type: "config"
   icon: "desktop"
   color: "blue"
   title: "Digital Rebar Community Content"

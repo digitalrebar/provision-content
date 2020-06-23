@@ -3,6 +3,7 @@ Name: "complete"
 Description: "Stage that represents workflow completion to local disk boot but leaves the runner running."
 BootEnv: "local"
 Meta:
+  type: "complete"
   icon: "check circle outline"
   color: "green"
   title: "Digital Rebar Community Content"

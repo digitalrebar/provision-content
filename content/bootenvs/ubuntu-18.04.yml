@@ -13,6 +13,7 @@ Documentation: |
   outbound access.  Workaround this by defining Options 3 (Gateway) and 6 (DNS)
   for your Subnet settings.
 Meta:
+  type: "os"
   color: "purple"
   feature-flags: "change-stage-v2"
   icon: "linux"

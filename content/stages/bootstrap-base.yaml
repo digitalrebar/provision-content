@@ -16,6 +16,7 @@ Tasks:
   - "bootstrap-discovery-iso"
   - "bootstrap-prefs"
 Meta:
+  type: "setup"
   icon: "sort amount up"
   color: "yellow"
   title: "Community Content"

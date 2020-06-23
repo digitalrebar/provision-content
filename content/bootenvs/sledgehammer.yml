@@ -12,6 +12,7 @@ Documentation: |
   Many maintenance and hardware related workflows require to be run from the
   Sledgehammer BootEnv.
 Meta:
+  type: "sledgehammer"
   feature-flags: "change-stage-v2"
   icon: "microchip"
   color: "green"

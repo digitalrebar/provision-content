@@ -1,5 +1,6 @@
 Description: A task to set the color and icon for a machine
 Meta:
+  type: "value"
   color: blue
   icon: info
   feature-flags: "sane-exit-codes"

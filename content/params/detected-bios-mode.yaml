@@ -15,6 +15,7 @@ Schema:
     - uefi
   default: unknown
 Meta:
+  type: "value"
   icon: meh
   color: green
   title: "Digital Rebar Community Content"

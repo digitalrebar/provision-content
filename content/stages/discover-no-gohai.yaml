@@ -10,6 +10,7 @@ Tasks:
   - set-machine-ip-in-sledgehammer
   - "ssh-access"
 Meta:
+  type: "deprecated"
   deprecated: "25 June 2018"
   icon: "spinner"
   color: "purple"

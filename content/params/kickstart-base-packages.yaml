@@ -48,3 +48,7 @@ Schema:
       - curl
       - efibootmgr
       - tar
+Meta:
+  type: "config"
+  icon: "linux"
+  color: "blue"

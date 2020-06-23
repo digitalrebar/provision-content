@@ -112,3 +112,6 @@ Schema:
   default:
     network:
       version: 2
+Meta:
+  type: "config"
+  icon: "chip"

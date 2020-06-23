@@ -5,6 +5,7 @@ Documentation: |
   This BootEnv installs the CentOS 8 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
 Meta:
+  type: "os"
   feature-flags: "change-stage-v2"
   icon: "linux"
   color: "blue"

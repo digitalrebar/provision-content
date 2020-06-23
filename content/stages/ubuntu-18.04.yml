@@ -12,6 +12,7 @@ Documentation: |
   is valid for your version of Ubuntu (this was tested working with 18.04).
 
 Meta:
+  type: "os"
   color: yellow
   icon: download
   title: Digital Rebar Community Content

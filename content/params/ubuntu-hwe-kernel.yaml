@@ -25,6 +25,7 @@ Schema:
   type: boolean
   default: false
 Meta:
+  type: "os"
   icon: "repeat"
   color: "yellow"
   title: "Digital Rebar Community Content"

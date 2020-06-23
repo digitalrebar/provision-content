@@ -16,6 +16,7 @@ Templates:
       fi
       drpcli net autogen {{.Machine.UUID}}
 Meta:
+  type: "config"
   icon: "talk"
   color: "yellow"
   title: "Community Content"

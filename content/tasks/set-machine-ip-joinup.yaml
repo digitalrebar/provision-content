@@ -36,6 +36,7 @@ Templates:
       echo "done"
       exit 0
 Meta:
+  type: "config"
   icon: "magnet"
   color: "yellow"
   title: "Community Content"

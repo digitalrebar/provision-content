@@ -10,6 +10,7 @@ Schema:
   type: "string"
 
 Meta:
+  type: "value"
   icon: "disk outline"
   color: "blue"
   title: "Digital Rebar Community Content"

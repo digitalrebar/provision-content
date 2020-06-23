@@ -6,6 +6,7 @@ Documentation: |
 Schema:
   type: "string"
 Meta:
+  type: "value"
   icon: "map"
   color: "blue"
   title: "Digital Rebar Community Content"

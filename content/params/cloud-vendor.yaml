@@ -4,10 +4,11 @@ Description: "Cloud Provider"
 Documentation: |
   The cloud provider detected by join-up script in discovery
 
-  Known types: aws
+  Known types: aws, google, azure, linode
 Schema:
   type: "string"
 Meta:
+  type: "value"
   icon: "cloud"
   color: "blue"
   title: "Digital Rebar Community Content"

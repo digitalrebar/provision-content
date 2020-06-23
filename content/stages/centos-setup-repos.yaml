@@ -4,6 +4,7 @@ Description: "Setup repos based upon the package-repositories parameter on the m
 Tasks:
   - "centos-drp-only-repos"
 Meta:
+  type: "url"
   icon: "search"
   color: "yellow"
   title: "Digital Rebar Community Content"

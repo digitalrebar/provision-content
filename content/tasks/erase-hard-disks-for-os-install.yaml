@@ -5,6 +5,7 @@ Description: |
   process.  This includes LVM metadata, partition tables, software RAID signatures,
   and the first and last megabyte of any partitions and disks.
 Meta:
+  type: "erase"
   feature-flags: "sane-exit-codes"
   icon: "erase"
   color: "blue"

@@ -11,6 +11,7 @@ Schema:
   type: "boolean"
 
 Meta:
+  type: "deprecated"
   icon: "database"
   color: "blue"
   title: "Digital Rebar Community Content"

@@ -462,6 +462,7 @@ Schema:
       bootloc:
         type: string
 Meta:
+  type: "setup"
   icon: "book"
   color: "blue"
   title: "Digital Rebar Community Content"

@@ -3,6 +3,7 @@ Name: "sledgehammer-wait"
 Description: "Wait for more tasks in sledgehammer - useful for debugging"
 BootEnv: "sledgehammer"
 Meta:
+  type: "waiting"
   icon: "hand paper"
   color: "blue"
   title: "Digital Rebar Community Content"

@@ -4,3 +4,7 @@ Description: "Write the discovery image to a local disk for test boot purposes"
 Tasks:
   - erase-hard-disks-for-os-install
   - write-sledgehammer-to-disk
+Meta:
+  type: sledgehammer
+  icons: disk
+  color: violet

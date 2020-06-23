@@ -11,6 +11,7 @@ Schema:
   type: "boolean"
   default: false
 Meta:
+  type: "sledgehammer"
   icon: "search minus"
   color: "blue"
   title: "Digital Rebar Community Content"
