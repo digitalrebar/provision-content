@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+# set machine object Name based on 'hostname'
+
+# set to 'sh' type for ESXi compatibility
+
+{{ template "setup.tmpl" . }}
+
+NAME=$(drpcli machines get $RS_UUID param hostname | jq -r '.')
+CURRENT={{.Machine.Name}}
+
+if [[ "$NAME" == "$CURRENT" ]]
+then
+  echo ">>> My current name ('$CURRENT') matches requested hostname ('$NAME'), nothing done."
+  exit 0
+fi
+
+if [[ -n "$NAME" && "$NAME" != "null" ]]
+then
+  drpcli machines exists Name:$NAME 2> /dev/null && OK=0 || OK=1
+  if (( $OK ))
+  then
+    drpcli machines update $RS_UUID "{\"Name\":\"$NAME\"}" | jq -r '.Name'
+  else
+    echo "FATAL: A Machine with name '$NAME' exists already, can't rename Machine (UUID: $RS_UUID)"
+    exit 1
+  fi
+else
+  echo ">>> Param 'hostname' not found on Machine ('$RS_UUID') - not changing name."
+fi
+
+exit 0
