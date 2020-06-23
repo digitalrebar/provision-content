@@ -30,6 +30,7 @@ Templates:
         fi
       {{end -}}
 Meta:
+  type: "discover"
   icon: "search"
   color: "blue"
   title: "Digital Rebar Community Content"

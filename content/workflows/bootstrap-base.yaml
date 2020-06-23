@@ -18,6 +18,7 @@ Stages:
   - "lock-machine"
   - "complete-nobootenv"
 Meta:
+  type: "setup"
   color: "green"
   icon: "sort amount up"
   copyright: "RackN 2020"

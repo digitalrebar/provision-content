@@ -15,6 +15,7 @@ Tasks:
   - set-machine-ip-in-sledgehammer
   - ssh-access
 Meta:
+  type: "discover"
   icon: "spinner"
   color: "purple"
   title: "Digital Rebar Community Content"

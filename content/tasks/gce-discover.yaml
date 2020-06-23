@@ -38,6 +38,7 @@ Templates:
       fi
       exit 0
 Meta:
+  type: "discover"
   icon: "cloud"
   color: "blue"
   title: "RackN Content"

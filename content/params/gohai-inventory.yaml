@@ -13,6 +13,7 @@ Schema:
   type: "object"
   default: {}
 Meta:
+  type: "discover"
   icon: "search"
   color: "blue"
   title: "Digital Rebar Community Content"

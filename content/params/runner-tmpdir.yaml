@@ -17,6 +17,7 @@ Schema:
   type: string
   default: ''
 Meta:
+  type: "config"
   icon: "folder"
   color: "blue"
   title: "Digital Rebar Community Content"

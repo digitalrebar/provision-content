@@ -2,6 +2,7 @@ Description: The icon for machine's icon
 Documentation: |
   The icon for machine's icon
 Meta:
+  type: "value"
   color: blue
   icon: info
   title: RackN Content

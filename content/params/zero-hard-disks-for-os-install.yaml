@@ -11,6 +11,7 @@ Schema:
   type: boolean
   default: false
 Meta:
+  type: "cleanup"
   title: Digital Rebar Community Content
   icon: "disk outline"
   color: "blue"

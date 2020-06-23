@@ -11,6 +11,7 @@ Schema:
   type: boolean
   default: true
 Meta:
+  type: "install"
   icon: "repeat"
   color: "yellow"
   title: "Digital Rebar Community Content"

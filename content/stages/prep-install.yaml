@@ -7,6 +7,7 @@ BootEnv: "sledgehammer"
 Tasks:
   - "erase-hard-disks-for-os-install"
 Meta:
+  type: "erase"
   icon: "disk outline"
   color: "yellow"
   title: "Digital Rebar Community Content"

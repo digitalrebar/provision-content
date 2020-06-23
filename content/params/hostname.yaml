@@ -18,6 +18,7 @@ Documentation: |
 Schema:
   type: "string"
 Meta:
+  type: "id"
   icon: "tag"
   color: "blue"
   title: "Digital Rebar Community Content"

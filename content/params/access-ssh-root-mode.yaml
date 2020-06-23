@@ -15,6 +15,7 @@ Schema:
   type: "string"
 
 Meta:
+  type: "value"
   icon: "unlock"
   color: "blue"
   title: "Digital Rebar Community Content"

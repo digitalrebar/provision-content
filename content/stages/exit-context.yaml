@@ -6,3 +6,6 @@ Documentation: |
   to the default context.  This stage provides that.
 Tasks:
   - 'context:'
+Meta:
+  type: "reset"
+  icon: "shuffle"

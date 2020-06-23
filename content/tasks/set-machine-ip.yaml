@@ -27,6 +27,7 @@ Templates:
       done < <(drpcli machines list Address=$IP |jq -r '.[] |.Uuid')
       drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
 Meta:
+  type: "config"
   icon: "magnet"
   color: "yellow"
   title: "Community Content"

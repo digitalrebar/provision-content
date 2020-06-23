@@ -31,7 +31,7 @@ Templates:
       echo "done"
       exit 0
 Meta:
-
+  type: "setup"
   icon: "wrench"
   color: "yellow"
   title: "Community Content"

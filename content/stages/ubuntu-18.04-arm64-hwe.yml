@@ -3,6 +3,7 @@ Name: ubuntu-18.04-arm64-hwe-install
 BootEnv: ubuntu-18.04-arm64-hwe-install
 Description: Ubuntu 18.04 ARM64 HWE Kernel installation stage.
 Meta:
+  type: "os"
   color: yellow
   icon: download
   title: Digital Rebar Community Content

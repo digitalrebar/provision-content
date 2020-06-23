@@ -11,6 +11,7 @@ Meta:
   color: "orange"
   title: "Digital Rebar Community Content"
 OS:
+  type: "os"
   Name: "ubuntu-16.04"
   Family: "ubuntu"
   IsoFile: "ubuntu-16.04.6-server-amd64.iso"

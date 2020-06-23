@@ -8,6 +8,7 @@ Templates:
     Name: "Force node to install from drp hosted repos"
     Path: ""
 Meta:
+  type: "os"
   icon: "key"
   color: "blue"
   title: "Digital Rebar Community Content"

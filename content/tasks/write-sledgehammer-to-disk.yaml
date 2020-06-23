@@ -2,6 +2,8 @@
 Name: write-sledgehammer-to-disk
 Description: Writes the current Sledgehammer image to the local disk.
 Meta:
+  type: "sledgehammer"
+  icon: "disk"
   feature-flags: "sane-exit-codes"
 Prerequisites:
   - erase-hard-disks-for-os-install

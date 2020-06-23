@@ -13,6 +13,7 @@ Tasks:
   - "set-machine-ip-in-joinup"
   - "ssh-access"
 Meta:
+  type: "discover"
   icon: "spinner"
   color: "purple"
   title: "Digital Rebar Community Content"

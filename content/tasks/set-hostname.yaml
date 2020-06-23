@@ -6,6 +6,7 @@ Templates:
     Name: "Set the hostname on the machine"
     Path: ""
 Meta:
+  type: "id"
   icon: "key"
   color: "blue"
   title: "Digital Rebar Community Content"

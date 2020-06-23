@@ -4,6 +4,7 @@ Description: "Debian 9 install BootEnv"
 Documentation: |
   This BootEnv installs Debian 9 via the "mini" ISO file.
 Meta:
+  type: "os"
   feature-flags: "change-stage-v2"
   icon: "linux"
   color: "black"

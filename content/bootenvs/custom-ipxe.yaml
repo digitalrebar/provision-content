@@ -36,6 +36,7 @@ Templates:
       #!ipxe
       {{.Param "custom-ipxe"}}
 Meta:
+  type: "setup"
   color: "blue"
   icon: "inbox"
   title: "Community Content"
