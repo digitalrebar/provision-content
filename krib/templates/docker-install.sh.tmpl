@@ -44,6 +44,14 @@ cat /etc/docker/daemon.json
 echo "Skipping custom etc/docker/daemon.json: No docker/daemon defined"
 {{end}}
 
+{{ if .Param "docker/apply-http-proxy" }}
+mkdir -p /etc/systemd/system/docker.service.d/
+cat <<EOF >/etc/systemd/system/docker.service.d/proxy.conf
+[Service]
+Environment="HTTP_PROXY={{ index (.Param "proxy-servers") 0 }}" "HTTPS_PROXY={{ index (.Param "proxy-servers") 0 }}"{{if .ParamExists "no-proxy" }} "NO_PROXY={{ .Param "no-proxy" | join "," }}"{{ end }}
+EOF
+{{ end }}
+
 echo "Starting Docker Service"
 service docker enable
 service docker start
