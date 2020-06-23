@@ -11,11 +11,13 @@ Documentation: |
   public key for that name.
 
   Parameter YAML format:
-  
+
     ::
+
       access-keys:
         greg:  ssh-rsa key
-        greg2:  ssh-rsa key    
+        greg2:  ssh-rsa key
+
 Schema:
   type: "object"
   additionalProperties:

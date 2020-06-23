@@ -9,21 +9,24 @@ Documentation: |
   The template does nothing if access-keys, access-keys-sharedm AND access-keys-global are undefined
 
   Optional Parameters:
-    access-keys
-    access-keys-shared
-    access-keys-global
-    access-ssh-root-mode
-  
+  * access-keys
+  * access-keys-shared
+  * access-keys-global
+  * access-ssh-root-mode
+
   Parameter YAML format:
-  
-    access-keys:
-      greg:  ssh-rsa key
-      greg2:  ssh-rsa key
-    access-ssh-root-mode: "without-password|yes|no|forced-commands-only"
-  
+
+    ::
+
+      access-keys:
+        greg:  ssh-rsa key
+        greg2:  ssh-rsa key
+      access-ssh-root-mode: "without-password|yes|no|forced-commands-only"
+
   Defaults:
-    access-keys - empty
-    access-ssh-root-mode - defaults to "without-password" if unspecified
+  * access-keys - empty
+  * access-ssh-root-mode - defaults to "without-password" if unspecified
+
 OptionalParams:
   - "access-keys"
   - "access-keys-shared"
