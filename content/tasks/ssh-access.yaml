@@ -1,14 +1,40 @@
 ---
 Description: "A task to put root ssh keys in place"
 Name: "ssh-access"
+Documentation: |
+  This task populates the root's authorized keys file
+  and makes sure that the sshd config for PermitRootLogin is populated.
+
+  Runs as part of a shell script for kickstart or net-post-install.
+  The template does nothing if access-keys, access-keys-sharedm AND access-keys-global are undefined
+
+  Optional Parameters:
+    access-keys
+    access-keys-shared
+    access-keys-global
+    access-ssh-root-mode
+  
+  Parameter YAML format:
+  
+    access-keys:
+      greg:  ssh-rsa key
+      greg2:  ssh-rsa key
+    access-ssh-root-mode: "without-password|yes|no|forced-commands-only"
+  
+  Defaults:
+    access-keys - empty
+    access-ssh-root-mode - defaults to "without-password" if unspecified
 OptionalParams:
   - "access-keys"
+  - "access-keys-shared"
+  - "access-keys-global"
   - "access-ssh-root-mode"
 Templates:
   - ID: "access-keys.sh.tmpl"
     Name: "Put access keys in place for root user"
     Path: ""
 Meta:
+  type: "credential"
   icon: "key"
   color: "blue"
   title: "Digital Rebar Community Content"

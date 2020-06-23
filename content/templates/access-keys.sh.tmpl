@@ -21,14 +21,26 @@
 # access-ssh-root-mode - defaults to "without-password" if unspecified
 #
 
-{{if .ParamExists "access-keys"}}
+{{if or (.ParamExists "access-keys") (or (.ParamExists "access-keys-global") (.ParamExists "access-shared")) }}
 KEYS=/root/.ssh/authorized_keys
 TMP_KEYS=$(mktemp /tmp/authorized_keys.tmp.XXXXXXX)
 echo "Putting ssh access keys for root in place"
 mkdir -p /root/.ssh
 cat >>$KEYS <<EOFSSHACCESS
+{{if .ParamExists "access-keys" -}}
 {{range $key := .Param "access-keys" -}}
 {{$key}}
+{{end -}}
+{{end -}}
+{{if .ParamExists "access-keys-shared" -}}
+{{range $key := .Param "access-keys-shared" -}}
+{{$key}}
+{{end -}}
+{{end -}}
+{{if .ParamExists "access-keys-global" -}}
+{{range $key := .Param "access-keys-global" -}}
+{{$key}}
+{{end -}}
 {{end -}}
 EOFSSHACCESS
 # if the we are called multiple times we get duplicate keys, lets fix that
