@@ -69,6 +69,9 @@ EOFCONFIG
 
   kubectl apply -f /tmp/metallb.yaml
   kubectl apply -f /tmp/metallb-config.yaml
+  if [[ -z $(kubectl get secrets -n metallb-system | grep memberlist) ]] ; then
+    kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+  fi
 else
   echo "I was not the leader, skipping metallb install"
 fi
@@ -140,6 +143,9 @@ EOFCONFIG
 
   kubectl apply -f /tmp/metallb.yaml
   kubectl apply -f /tmp/metallb-config.yaml
+  if [[ -z $(kubectl get secrets -n metallb-system | grep memberlist) ]] ; then
+    kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+  fi
 else
   echo "I was not the leader, skipping metallb install"
 fi
