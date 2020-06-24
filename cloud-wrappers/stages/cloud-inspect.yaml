@@ -1,12 +1,12 @@
 ---
-Name: "aws-discover"
+Name: "cloud-inspect"
 Description: "Stage to dynamically determine if machine is in AWS and record metadata"
 Documentation: |
   Collect information about AWS cloud
 Tasks:
-  - "aws-discover"
+  - "cloud-inspect"
 Meta:
-  type: "discover"
+  type: "fetch"
   icon: "cloud"
-  color: "yellow"
+  color: "blue"
   title: "RackN Content"

@@ -1,0 +1,14 @@
+---
+Name: "google/boot-disk-image"
+Description: "Google Boot Disk Image"
+Documentation: |
+  Provision AWS O/S Image
+Schema:
+  type: "string"
+  default: "centos-8-v20200618"
+Meta:
+  type: "os"
+  color: "black"
+  icon: "disk outline"
+  title: "RackN Content"
+  clipboard: "uuid"

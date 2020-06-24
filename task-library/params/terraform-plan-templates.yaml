@@ -11,7 +11,7 @@ Schema:
   type: "array"
   items:
     type: "string"
-
+  default: []
 Meta:
   icon: "map outline"
   color: "blue"

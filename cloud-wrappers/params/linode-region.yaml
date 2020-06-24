@@ -1,0 +1,13 @@
+---
+Name: "linode/region"
+Description: "Linode Region"
+Documentation: |
+  Provisioning to Region for Linode
+Schema:
+  type: "string"
+  default: "us-west"
+Meta:
+  type: "setting"
+  color: "green"
+  icon: "map outline"
+  title: "RackN Content"

@@ -1,0 +1,17 @@
+---
+Name: "aws/security-groups"
+Description: "Security Groups for AWS access"
+Documentation: |
+  These should alreday be defined.  If omitted, will create
+  a basic security group with SSH, HTTP and HTTPS inbound
+Schema:
+  type: "array"
+  items:
+    type: "string"
+Meta:
+  type: "value"
+  icon: "group"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  password: "showable"
+  clipboard: "cut"

@@ -9,4 +9,5 @@ Meta:
   type: "id"
   icon: "hashtag"
   color: "blue"
+  clipboard: "handy"
   title: "Digital Rebar Community Content"

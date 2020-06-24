@@ -1,0 +1,18 @@
+---
+Name: "cloud-provision"
+Description: "Provision Cloud Instance with Terraform Context"
+Params:
+  terraform/plan-action: "apply"
+Tasks:
+  - "context:runner"
+  - "cloud-validate"
+  - "rsa-key-create"
+  - "context:terraform"
+  - "terraform-apply"
+  - "context:ansible"
+  - "ansible-join-up"
+Meta:
+  type: "build"
+  icon: "cloud upload"
+  color: "brown"
+  title: "RackN Content"

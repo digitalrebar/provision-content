@@ -1,0 +1,91 @@
+---
+Name:  "cloud-inspect"
+Description: "A task to discover cloud metadata of a node automatically."
+Documentation: |
+  Collect internal API information about a cloud instance
+RequiresParams:
+
+Templates:
+  - Name: "discover-cloud-metadata"
+    Contents: |
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      {{ if .ParamExists "cloud/provider" }}
+
+      # Ubuntu Path is different than Centos Path - fix it.
+      export PATH=$PATH:/usr/bin:/usr/sbin:/bin:/sbin
+
+      {{ if eq "aws" (.Param "cloud/provider") }}
+      echo "============================= AWS INSPECT ============================="
+      INSTANCEID=$(curl -sfL http://169.254.169.254/latest/meta-data/instance-id)
+      echo "Looking for {{ .Param "cloud/provider"}} Instance ID, found \"$INSTANCEID\""
+
+      if [[ $INSTANCEID != "" && $INSTANCEID != "null" ]] ; then
+          drpcli machines set $RS_UUID param cloud/instance-id to "\"$INSTANCEID\"" 
+
+          for key in public-ipv4 public-hostname instance-type placement/availability-zone; do
+              value=$(curl -sfL http://169.254.169.254/latest/meta-data/${key})
+              echo "Setting cloud/$key from API to $value"
+              drpcli machines set $RS_UUID param cloud/$key to "\"$value\"" 
+          done
+          unset key
+      else
+          echo "Could not find a AWS Instance ID - Skipping"
+      fi
+      {{ end }}
+
+
+      {{ if eq "google" (.Param "cloud/provider") }}
+      echo "============================= GOOGLE INSPECT ============================="
+      INSTANCEID=$(curl -sfL -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/id)
+      echo "Looking for {{ .Param "cloud/provider"}} Instance ID, found \"$INSTANCEID\""
+
+      if [[ $INSTANCEID != "" && $INSTANCEID != "null" ]] ; then
+          drpcli machines set $RS_UUID param cloud/instance-id to "\"$INSTANCEID\"" 
+
+          value=$(curl -sfL -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/machine-type)
+          drpcli machines set $RS_UUID param cloud/instance-type to "$value" 
+
+          value=$(curl -sfL -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/zone)
+          drpcli machines set $RS_UUID param cloud/placement/availability-zone to "$value" 
+
+          value=$(curl -sfL -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
+          drpcli machines set $RS_UUID param cloud/public-ipv4 to "$value" 
+
+          unset value
+      else
+          echo "Could not find a GCE Instance ID - Skipping"
+      fi
+      {{ end }}
+
+      {{ if eq "linode" (.Param "cloud/provider") }}
+      echo "============================= LINODE INSPECT ============================="
+
+        {{ if .ParamExists "terraform-var/instance_id" }}
+        drpcli machines set $RS_UUID param cloud/instance-id to "\"{{ int (.Param "terraform-var/instance_id") }}\""
+        {{ end }}
+
+        {{ if .ParamExists "terraform-var/machine_ip" }}
+        drpcli machines set $RS_UUID param cloud/public-ipv4  to "{{ .Param "terraform-var/machine_ip" }}"
+        {{ end }}
+
+      {{ end }}
+
+      {{ else }}
+        echo "You must define which cloud is being used!"
+        drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the cloud/provider!"}'
+        exit 1
+      {{ end }}
+
+      echo "done"
+      exit 0
+Meta:
+  type: "fetch"
+  icon: "cloud"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

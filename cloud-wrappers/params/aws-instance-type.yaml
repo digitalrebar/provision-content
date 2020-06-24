@@ -1,0 +1,13 @@
+---
+Name: "aws/instance-type"
+Description: "Cloud Instance Type"
+Documentation: |
+  The type of resource assigned by the cloud provider
+Schema:
+  type: "string"
+  default: "t2.micro"
+Meta:
+  type: "value"
+  icon: "shopping bag"
+  color: "blue"
+  title: "Digital Rebar Community Content"

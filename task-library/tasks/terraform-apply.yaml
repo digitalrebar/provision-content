@@ -22,12 +22,17 @@ Documentation: |
   execution.  It is then retrieved for all subsequent runs so that Terraform
   is able to correctly use it's state values.
 
+  For developers: use the `terraform/plan-automation` parameter if you needed
+  have a task that uses terraform behind the scenes.  This parameter is automatically
+  removed from machines (not profiles!) automatically on destroy.
+
   Notes:
   * having SSH keys requires using the 'rsa-key-create' generator task.
   * if creating cloud machines, use the 'ansible-join-up' task for join
 RequiredParams:
-  - "terraform/plan-templates"
-  - "terraform/plan-action"
+  - terraform/plan-action
+  - terraform/plan-automation
+  - terraform/plan-templates
 OptionalParams:
   - terraform/tfstate
   - rsa/key-user
@@ -98,7 +103,8 @@ Templates:
       
       {{ $machine := .Machine.Name -}}
       {{ $action := .Param "terraform/plan-action" -}}
-      {{ range $index, $plan := (.Param "terraform/plan-templates") -}}
+      {{ $templates := concat (.Param "terraform/plan-automation") (.Param "terraform/plan-templates") -}}
+      {{ range $index, $plan := $templates -}}
       {{ $plan := printf "%s" $plan -}}
 
       ## Build Plan
@@ -134,9 +140,11 @@ Templates:
 
         echo "terraform {{ $action }} succeeded!"
 
-        {{ if eq "apply" $action }}
-
         out=$(terraform output --json | jq .)
+
+        {{ if eq "apply" $action }}
+        echo "******** APPLY POST ACTIONS ***********"
+
         if [[ $showplan == true ]]; then
           echo "DEBUG: output"
           echo "capturing terraform output: $out"
@@ -153,10 +161,11 @@ Templates:
         echo "uploading other keys from terraform output"
         for key in $(jq -r 'keys[]' <<< ${out}); do
           echo "  adding $key to machine"
-          drpcli machines set $RS_UUID param "terraform-var/$key" to "$(jq -r ".$key.value" <<< ${out})"
+          drpcli machines set $RS_UUID param "terraform-var/$key" to "\"$(jq -r ".$key.value" <<< ${out})\""
         done
 
         {{ else }}
+            echo "******** DESTROY POST ACTIONS ***********"
             {{ if .ParamExists "terraform-var/machine_ip" }}          
               echo "Clear IP and terraform-var/machine_ip when performing destroy with IP"
               drpcli machines update $RS_UUID "{\"Address\":\"\"}" | jq .Address
@@ -164,20 +173,27 @@ Templates:
             {{ else }}
               echo "Does not set IP, do not clear IP"
             {{ end }}
+            echo "Always try to remove terraform/plan-automation, OK if fails"
+            drpcli machines remove $RS_UUID param terraform/plan-automation || true
         {{ end }}
 
       else
-
         success=false
         echo "terraform {{ $action }} failed!"
 
       fi
 
       if [[ -e terraform.tfstate ]] ; then
-        echo "Saving terraform.tfstate file to machine"
-        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
+        if [[ "$(cat terraform.tfstate | jq -r '.resources | length')" == "0" ]] ; then
+          echo "Removing empty terraform.tfstate file"
+          drpcli machines remove $RS_UUID terraform/tfstate || true
+        else
+          echo "Saving terraform.tfstate file to machine"
+          drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
+        fi
       else
         echo "no terraform.state file exists - cannot save"
+        drpcli machines remove $RS_UUID remove terraform/tfstate || true
       fi
 
       if [[ $success != true ]] ; then
