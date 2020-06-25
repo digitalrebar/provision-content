@@ -1,0 +1,27 @@
+---
+Name: sledgehammer-customize
+Description: Add extra packages that Sledgehammer needs.
+Documentation: |
+  This task allows you to customize Sledgehammer by programatically
+  inserting extra tasks via the 'sledgehammer/customize-tasks' param.
+Templates:
+  - Name: install-sipcalc
+    Contents: |
+      #!/usr/bin/env bash
+      #!/bin/bash
+      # 'arch' is built for "x86_64", "aarch64, "armv7hl"
+      # for ARM arch types - not tested yet
+      # orig source location: https://koji.fedoraproject.org/koji/packageinfo?packageID=8762
+      arch=$(uname -p)
+      mkdir -p /tmp/extra-packages
+      cd /tmp/extra-packages
+      dnf -y install stress
+      wget https://s3-us-west-2.amazonaws.com/rackn-sledgehammer/sipcalc-1.1.6-15.fc30.$arch.rpm
+      wget https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/29/Everything/x86_64/os/Packages/s/stress-ng-0.07.29-7.fc29.x86_64.rpm
+      dnf -y localinstall *.rpm
+  - Name: add-customization-tasks
+    Contents: |
+      #!/usr/bin/env bash
+      moreTasks="{{ .Param "sledgehammer/customize-tasks" | join " "}}"
+      [[ $moreTasks ]] || exit 0
+      drpcli machines tasks add $RS_UUID at 0 $moreTasks

@@ -1,0 +1,21 @@
+---
+Name: sledgehammer/customize-tasks
+Description: A list of extra tasks to add to customize Sledgehammer
+Documentation: |
+  If you want to build a customized Sledgehammer, the supported way to
+  do it is to create additional tasks to perform whatever other
+  customization steps you want to perform, and then add them to this
+  list.  They will be performed after the built-in extra package
+  installation, and before discarding unneeded packages and conversion
+  to a Sledgeahmmer image.
+
+  Any extra customization tasks should make sure that no extra bits
+  wind up in the final Sledghammer image. THis includes removing any
+  unneedeed documentation, source code, or additional packages and files
+  that are not needed to support proper operation of Sledgehammer.
+Schema:
+  type: array
+  items:
+    type: string
+  default: []
+  

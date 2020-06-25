@@ -9,4 +9,11 @@ Documentation: |
   image that everyone will be able to use.
 BootEnv: sledgehammer-install
 Tasks:
-  - sledgehammer-stage-bits
+  - sledgehammer-place-start-up
+  - sledgehammer-place-stage1-assets
+  - centos-drp-only-repos
+  - sledgehammer-customize
+  - sledgehammer-prepare-for-image-creation
+  - sledgehammer-create-stage1
+  - sledgehammer-create-stage2
+  - sledgehammer-create-image

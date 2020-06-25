@@ -1,0 +1,16 @@
+---
+Name: sledgehammer/enable-services
+Description: Services to ensure are enabled on booting to Sledgehammer
+Documentation: |
+  Sledgehammer needs several different services enabled in order to operate
+  properly.
+Schema:
+  type: array
+  items:
+    type: string
+  default:
+    - systemd-networkd.service
+    - systemd-resolved.service
+    - systemd-networkd-wait-online.service
+    - sledgehammer.service
+    - chronyd.service

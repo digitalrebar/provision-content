@@ -1,0 +1,14 @@
+---
+Name: sledgehammer/extra-packages
+Description: Extra pacakges from standard install repos to add to Sledgehammer
+Documentation: |
+  If you need to add extra packages to Sledgeahmmer that are available
+  from the usual install repos and/or EPEL, you can do so via this
+  parameter.  You need to take care that the settings for the
+  sledgehammer/unwanted-packages leave enough of these dependencies
+  alone to allow for proper package operation.
+Schema:
+  type: array
+  items:
+    type: string
+  default: []

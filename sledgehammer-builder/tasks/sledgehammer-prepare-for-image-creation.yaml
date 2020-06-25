@@ -1,0 +1,63 @@
+---
+Name: sledgehammer-prepare-for-image-creation
+Description: Prepare to capturing a Sledgehammer image.
+Documentation: |
+  This task prepares the installed OS before we capture it as a
+  bootable Sledgehammer image.  It is responsible for removing any
+  unneeded packages, files, and other data that is not required for
+  Sledgehammer to perform its tasks.  It also arranges for all the
+  services to be set up properly.
+Templates:
+  - Name: remove-unwanted-pkgs
+    Contents: |
+      #!/bin/bash
+      chmod 755 /sbin/sledgehammer-start-up.sh
+      echo "Removing unwanted packages"
+      dnf -y autoremove {{ .Param "sledgehammer/unwanted-packages" |join " " }}
+      echo "Removing unwanted locales"
+      cd /usr/share/locale
+      mv locale.alias en en_US ..
+      rm -rf *
+      mv ../locale.alias ../en ../en_US .
+      cd /usr/lib/locale
+      localedef --list-archive | \
+          fgrep -v -e 'en_US' -e 'en_US.utf8' | \
+          xargs localedef --delete-from-archive
+      mv locale-archive locale-archive.tmpl
+      build-locale-archive
+      echo "Removing unwanted kernel modules"
+      bk="$(cd /boot && echo config-*)"
+      bk="${bk#config-}"
+      cd /lib/modules/$bk/kernel
+      rm -rf {{ .Param "sledgehammer/unwanted-kernel-modules" |join " " }}
+      cd /lib/
+      depmod -a "$bk"
+      echo "Removing unwanted firmware"
+      # Take only the firmware our modules will need.
+      while read -r mod; do
+          while read -r fw; do
+              [[ -f firmware/$fw ]] || continue
+              mkdir -p "firmware.new/${fw%/*}"
+              mv "firmware/$fw" "firmware.new/$fw"
+          done < <(modinfo -F firmware "$mod")
+      done < <(find modules -type f -name '*.ko*')
+      rm -rf firmware
+      mv firmware.new firmware
+      cd /
+      echo "Restoring Selinux file contexts"
+      restorecon -r -F -i -p .
+  - Name: fix-up-services
+    Contents: |
+      #!/bin/bash
+      {{ range (.Param "sledgehammer/disable-services") }}
+      systemctl disable {{ . }}
+      {{ end }}
+      cd /lib/systemd/system
+      rm -f basic.target.wants/rhel-autorelabel-mark.service \
+          basic.target.wants/rhel-autorelabel.service \
+          basic.target.wants/selinux-policy-migrate-local-changes@minimum.service || :
+      rm -f /etc/fstab || :
+      touch /etc/fstab
+      {{ range (.Param "sledgehammer/enable-services") }}
+      systemctl enable {{ . }}
+      {{ end }}
