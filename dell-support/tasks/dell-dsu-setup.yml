@@ -9,6 +9,7 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       {{ template "setup.tmpl" . }}
+      . /etc/os-release
       baseurl="{{.ParamExpand "dell-dsu-base-url"}}"
       release="{{.Param "dell-dsu-block-release"}}"
 
@@ -45,7 +46,7 @@ Templates:
 
       [${REPO_NAME}_dependent]
       name=${REPO_NAME}_dependent
-      baseurl=${url}/os_dependent/RHEL7_64/
+      baseurl=${url}/os_dependent/RHEL${VERSION_ID}_64/
       gpgcheck=${checksig}
       enabled=1
       EOF
