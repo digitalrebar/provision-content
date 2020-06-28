@@ -1,0 +1,15 @@
+---
+Description: "Install the packer builder tools on the system."
+Name: "packer-builder-intall-tools"
+Documentation: |
+  Installs Packer, Packer Plugins, Vagrant, and other required tools on the
+  target platform in preparation of the image builds.
+
+Templates:
+  - ID: "packer-builder-intall-tools.sh.tmpl"
+    Name: "packer-builder-intall-tools"
+Meta:
+  icon: "caret square down"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"

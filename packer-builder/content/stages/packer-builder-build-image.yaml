@@ -1,0 +1,9 @@
+---
+Name: "packer-builder-build-image"
+Description: "Start an Image Build via the Packer Builder tooling"
+Tasks:
+  - "packer-builder-build-image"
+Meta:
+  icon: "clone outline"
+  color: "blue"
+  title: "RackN Content"

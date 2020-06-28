@@ -1,0 +1,19 @@
+---
+Name: "packer-builder/make-override"
+Description: "Specify a completely custom 'make' command to build the target."
+Documentation: |
+  This Param, if it has a value set, will allow the operator to pass a custom
+  ``make`` command invocation in to the packer builder system.  This allows for
+  easier execution/run of builds with unique options or values set to affect
+  the *Makefile* build tartet runs.
+
+  An example valid ``make`` command is as follows:
+
+    * ``TMPDIR=$(pwd)/tmp PACKER_OPTIONS="-var-file=variables.json" PACKER_LOG=1 make build-windows-10-1909-libvirt``
+
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "file alternate outline"
+  title: "RackN Content"

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Get the packer build json and build scripts
+
+
+# git pull the repo location/directory for the packer-builder/packer/ content
+git init
+git remote add origin https://github.com/digitalrebar/provision-content.git
+git fetch origin
+git checkout origin/v4 -- packer-builder/packer
+
+echo "Repo directory 'packer-builder/packer' checked out."
+ls packer-builder/packer/
+
