@@ -35,27 +35,28 @@ Documentation: |
 
 Schema:
   type: "string"
-  enum:
-    - linux-ubuntu-1804-virtualbox
-    - linux-ubuntu-1804-libvirt
-    - windows-10-libvirt
-    - windows-10-virtualbox
-    - windows-10-vsphere
-    - windows-10-1903-libvirt
-    - windows-10-1903-virtualbox
-    - windows-10-1909-libvirt
-    - windows-10-1909-virtualbox
-    - windows-2012-r2-virtualbox
-    - windows-2012-r2-libvirt
-    - windows-2016-libvirt
-    - windows-2016-virtualbox
-    - windows-2016-vsphere
-    - windows-2019-libvirt
-    - windows-2019-uefi-libvirt
-    - windows-2019-uefi-virtualbox
-    - windows-2019-virtualbox
-    - windows-2019-vsphere
   default: ""
+  enum:
+    - ""
+    - "linux-ubuntu-1804-virtualbox"
+    - "linux-ubuntu-1804-libvirt"
+    - "windows-10-libvirt"
+    - "windows-10-virtualbox"
+    - "windows-10-vsphere"
+    - "windows-10-1903-libvirt"
+    - "windows-10-1903-virtualbox"
+    - "windows-10-1909-libvirt"
+    - "windows-10-1909-virtualbox"
+    - "windows-2012-r2-virtualbox"
+    - "windows-2012-r2-libvirt"
+    - "windows-2016-libvirt"
+    - "windows-2016-virtualbox"
+    - "windows-2016-vsphere"
+    - "windows-2019-libvirt"
+    - "windows-2019-uefi-libvirt"
+    - "windows-2019-uefi-virtualbox"
+    - "windows-2019-virtualbox"
+    - "windows-2019-vsphere"
 Meta:
   color: "green"
   icon: "terminal"

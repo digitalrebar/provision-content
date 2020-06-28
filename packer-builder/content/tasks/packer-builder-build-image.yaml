@@ -14,10 +14,13 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      WORK={{ .Param "packer-builder/work-dir" }}
+      cd $WORK
+
       TARGET={{ .Param "packer-builder/build-image" }}
-      OVERRIDE={{ .Param "packer-builder/make-override" }}
-      VAR_FILE="variables.json"
-      {{ if .ParamExists "packer-builder/var-file" }}VAR_FILE={{ .Param "packer-builder/var-file" }}{{ end }}
+      {{ if .ParamExists "packer-builder/make-override" }}{{ .Param "packer-builder/make-override" }}{{ end }}
+      VF={{ .Param "packer-builder/var-file" }}
+      [[ -n "$VF" ]] && VAR_FILE="$VF" || VAR_FILE="variables.json"
 
       [[ -z "$TARGET" ]] && xiterr 1 "No build target specified in 'packer-builder/build-image' Param."
 

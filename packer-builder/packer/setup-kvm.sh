@@ -17,6 +17,7 @@ main() {
       [[ -z "$inst" ]] && xiterr 1 "oops, how to install on '$osfamily'? (it ain't 'yum' or 'dnf')."
       PKGS="libvirt libvirt-python iptables-services virt-install OVMF"
       setup_redhat $VERSION_ID
+       $inst -y makecache
       POST="ln -s /usr/share/OVMF/x86/OVMF_CODE.fd /usr/share/OVMF/OVMF.fd"
     ;;
     debian|ubuntu)
@@ -24,6 +25,7 @@ main() {
        PKGS="qemu libvirt-bin python-libvirt vagrant-libvirt libvirt-clients libvirt-daemon-system virtinst ovmf"
        add-apt-repository -y ppa:jacob/virtualisation
        setup_debian $VERSION_ID
+       $inst -y update
        POST="echo 'nothing to do in POST'"
     ;;
     *) xiterr 1 "Ask my masters for help, I don't know what to do for '$osfamily'."
@@ -33,7 +35,10 @@ main() {
   $inst -y install qemu-kvm libguestfs-tools bridge-utils iptables util-linux unbound curl wget jq virt-viewer spice-vdagent $PKGS
   eval $POST
 
-  virt-host-validate
+  # unfortunately "warn" level errors (non-fatal) are reported as with Exit code 1
+  # which will blow up our automation - for now we're capturing this output for
+  # informational /logging purposes
+  virt-host-validate || true
 }
 
 setup_redhat() {

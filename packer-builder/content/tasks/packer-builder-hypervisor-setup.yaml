@@ -5,7 +5,7 @@ Documentation: |
   Installs the hypervisor for the packer builder image builds.
 
 Templates:
-  - ID: "packer-builder-hypervisor-setup.sh.tmpl"
+  - Name: "packer-builder-hypervisor-setup"
     Contents: |
       #!/usr/bin/env bash
       # Set up hypervisor on target platform; based on 'packer-builder/hypervisor' Param.

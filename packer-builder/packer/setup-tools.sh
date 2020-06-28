@@ -2,10 +2,6 @@
 
 # quick and dirty setup of Packer on a system
 
-# NEED TO SETUP / CHECK TOOLING:
-# virt-tar-out
-# qemu-img
-
 set -e
 
 PKR_VER="1.6.0"
@@ -21,19 +17,22 @@ echo "# install bsdtar"
 if ! which bsdtar > /dev/null 2>&1
 then
   case $osfamily in
-    centos|redhat|fedora|oel) 
+    centos|redhat|fedora|oel)
       inst=$(which yum 2> /dev/null)
       [[ -z "$inst" ]] && inst=$(which dnf 2> /dev/null)
       [[ -z "$inst" ]] && xiterr 1 "oops, how to install on '$osfamily'? (it ain't 'yum' or 'dnf')."
+      $inst -y makecache
       PKGS="xz"
     ;;
-    debian|ubuntu) inst=apt
-    PKGS="xz-utils"
+    debian|ubuntu)
+      inst=apt
+      apt -y update
+      PKGS="xz-utils"
     ;;
     *) echo "Ask my masters for help, I don't know what to do for '$osfamily'."; exit 1;;
   esac
 
-  $inst -y install bsdtar $PKGS
+  $inst -y install bsdtar git wget curl $PKGS
 else
   echo "'bsdtar' found in PATH, continuing"
 fi

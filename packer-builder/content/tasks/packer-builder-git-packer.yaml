@@ -9,8 +9,28 @@ Documentation: |
   directory on the Machine this is run from.
 
 Templates:
-  - ID: "packer-builder-git-packer.sh.tmpl"
-    Name: "packer-builder-git-packer"
+  - Name: "packer-builder-git-packer"
+    Contents: |
+      #!/usr/bin/env bash
+      # Get the packer build json and build scripts
+
+
+      WORK={{ .Param "packer-builder/work-dir" }}
+
+      mkdir -p $WORK
+      cd $WORK
+      echo "Available space in the filesystem for '$WORK' work directory:"
+      df -hl .
+
+      # git pull the repo location/directory for the packer-builder/packer/ content
+      git init
+      git remote add origin https://github.com/digitalrebar/provision-content.git
+      git fetch origin
+      git checkout origin/{{ .Param "packer-builder/git-branch" }} -- packer-builder/packer
+
+      echo "Repo directory 'packer-builder/packer' checked out."
+      ls packer-builder/packer/
+
 Meta:
   icon: "cart arrow down"
   color: "blue"
