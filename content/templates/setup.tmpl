@@ -70,7 +70,7 @@ mkdir -p $INSTALL_DIR
 
 if ! which drpcli ; then
     echo "Installing drpcli in $INSTALL_DIR"
-    curl -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
+    curl --noproxy '*' -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
     chmod 755 "$INSTALL_DIR/drpcli"
 else
     INSTALL_DIR="$(dirname $(which drpcli))"
