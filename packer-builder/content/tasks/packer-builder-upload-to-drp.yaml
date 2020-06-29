@@ -1,0 +1,52 @@
+---
+Name: "packer-builder-upload-to-drp"
+Description: "Upload all Images specified in the 'packer-builer/upload-image' param"
+Documentation: |
+  The param ``packer-builder/upload-image`` gets set with a list of built
+  images that are finalized and ready for Image Deploy via DRP.
+
+  Uploads it to the Digital Rebar Files service location.  If an image exists
+  at the specified path, it'll be overwritten.
+
+ExtraClaims:
+  - scope: "files"
+    action: "post"
+    specific: "/images/builder/*"
+  - scope: "files"
+    action: "delete"
+    specific: "/images/builder/*"
+
+Templates:
+  - Name: "packer-builder-build-image"
+    Meta:
+
+    Contents: |
+      #!/usr/bin/env bash
+      # Upload packer builder images to the Files server /images/builder location
+      # NOTE: Requires ExtraClaims to POST the files
+
+      {{ template "setup.tmpl" . }}
+
+      IMAGE={{ .Param "packer-builder/upload-image" }}
+
+      [[ -z "$IMAGE" ]] && xiterr 1 "No image specified in 'packer-builder/upload-image' Param."
+
+      if [[ -r "$IMAGE" ]]
+      then
+        echo ""
+        echo ">>> Beginning image upload for:  '$IMAGE'"
+        drpcli files upload "$IMAGE" as "$IMAGE"
+        echo ">>> COMPLETED image upload for:  '$IMAGE'"
+        echo ""
+      else
+        xiterr 1 "Unable to read image '$IMAGE' on target system."
+      fi
+
+      echo ">>> Removing Param ('packer-builder/upload-image') from machine since upload succeeded."
+      drpcli machines remove $RS_UUID param "packer-builder/upload-image"
+
+Meta:
+  icon: "caret square down"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"
