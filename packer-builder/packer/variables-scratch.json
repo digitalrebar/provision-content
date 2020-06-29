@@ -1,0 +1,9 @@
+{
+  "disk_size": "20480",
+  "output_directory": "/scratch/output",
+  "complete_directory": "/scratch/complete",
+  "winrm_username": "vagrant",
+  "winrm_password": "vagrant",
+  "ssh_username": "rocketskates",
+  "ssh_password": "RocketSkates"
+}

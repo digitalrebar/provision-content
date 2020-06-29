@@ -1,0 +1,18 @@
+---
+Name: "packer-builder/work-dir"
+Description: "The base directory to do all image build work out of."
+Documentation: |
+  This param specifies the base working directory for all of the Image Build
+  activitiy to be hosted from.
+
+  The default location is ``/builder``.
+
+  .. warning:: This directory must be on a filesystem with sufficient space for the builds that need to be performed.
+
+Schema:
+  type: "string"
+  default: "/builder"
+Meta:
+  color: "green"
+  icon: "file alternate outline"
+  title: "RackN Content"

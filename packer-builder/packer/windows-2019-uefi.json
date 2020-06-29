@@ -1,0 +1,175 @@
+{
+  "variables": {
+    "disk_size": "20480",
+    "output_directory": "output",
+    "complete_directory": "complete",
+    "winrm_username": "vagrant",
+    "winrm_password": "vagrant",
+    "iso_url": "https://software-download.microsoft.com/download/pr/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso",
+    "iso_checksum": "549bca46c055157291be6c22a3aaaed8330e78ef4382c99ee82c896426a1cee1",
+    "iso_checksum_type": "sha256"
+  },
+  "builders": [
+    {
+      "name": "windows-2019-uefi-amd64-libvirt",
+      "type": "qemu",
+      "accelerator": "kvm",
+      "cpus": 2,
+      "memory": 4096,
+      "qemuargs": [
+        ["-cpu", "host"],
+        ["-soundhw", "hda"],
+        ["-usbdevice", "tablet"],
+        ["-device", "virtio-net,netdev=user.0"],
+        ["-vga", "qxl"],
+        ["-drive", "file=/usr/share/OVMF/OVMF_CODE.fd,if=pflash,format=raw,unit=0,readonly=on"],
+        ["-drive", "file=windows-2019-uefi-amd64-libvirt.nvram,if=pflash,format=raw,unit=1"],
+        ["-device", "virtio-serial-pci"],
+        ["-chardev", "socket,path=/tmp/{{.Name}}-qga.sock,server,nowait,id=qga0"],
+        ["-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0"]
+	["-display", "vnc=password=off"]
+      ],
+      "headless": false,
+      "format": "qcow2",
+      "output_directory": "{{user `output_directory`}}/{{build_name}}",
+      "disk_size": "{{user `disk_size`}}",
+      "disk_interface": "virtio",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "communicator": "winrm",
+      "winrm_username": "{{user `winrm_username`}}",
+      "winrm_password": "{{user `winrm_password`}}",
+      "winrm_timeout": "4h",
+      "shutdown_command": "shutdown /s /t 0 /f /d p:4:1 /c \"Packer Shutdown\"",
+      "http_directory": ".",
+      "floppy_files": [
+        "windows-2019-uefi/autounattend.xml",
+        "scripts/winrm.ps1",
+        "drivers/vioserial/2k19/amd64/*.cat",
+        "drivers/vioserial/2k19/amd64/*.inf",
+        "drivers/vioserial/2k19/amd64/*.sys",
+        "drivers/viostor/2k19/amd64/*.cat",
+        "drivers/viostor/2k19/amd64/*.inf",
+        "drivers/viostor/2k19/amd64/*.sys",
+        "drivers/NetKVM/2k19/amd64/*.cat",
+        "drivers/NetKVM/2k19/amd64/*.inf",
+        "drivers/NetKVM/2k19/amd64/*.sys",
+        "drivers/qxldod/2k19/amd64/*.cat",
+        "drivers/qxldod/2k19/amd64/*.inf",
+        "drivers/qxldod/2k19/amd64/*.sys"
+      ]
+    },
+    {
+      "name": "windows-2019-uefi-amd64-virtualbox",
+      "type": "virtualbox-iso",
+      "guest_os_type": "Windows2019_64",
+      "guest_additions_mode": "attach",
+      "guest_additions_interface": "sata",
+      "headless": true,
+      "cpus": 2,
+      "memory": 4096,
+      "vboxmanage": [
+        ["storagectl", "{{.Name}}", "--name", "IDE Controller", "--remove"],
+        ["modifyvm", "{{.Name}}", "--vrde", "off"],
+        ["modifyvm", "{{.Name}}", "--graphicscontroller", "vboxsvga"],
+        ["modifyvm", "{{.Name}}", "--vram", "128"],
+        ["modifyvm", "{{.Name}}", "--accelerate3d", "on"],
+        ["modifyvm", "{{.Name}}", "--usb", "on"],
+        ["modifyvm", "{{.Name}}", "--mouse", "usbtablet"],
+        ["modifyvm", "{{.Name}}", "--audio", "none"],
+        ["modifyvm", "{{.Name}}", "--nictype1", "82540EM"],
+        ["modifyvm", "{{.Name}}", "--nictype2", "82540EM"],
+        ["modifyvm", "{{.Name}}", "--nictype3", "82540EM"],
+        ["modifyvm", "{{.Name}}", "--nictype4", "82540EM"]
+      ],
+      "output_directory": "{{user `output_directory`}}/{{build_name}}",
+      "disk_size": "{{user `disk_size`}}",
+      "hard_drive_interface": "sata",
+      "iso_interface": "sata",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "communicator": "winrm",
+      "winrm_username": "{{user `winrm_username`}}",
+      "winrm_password": "{{user `winrm_password`}}",
+      "winrm_timeout": "4h",
+      "shutdown_command": "shutdown /s /t 0 /f /d p:4:1 /c \"Packer Shutdown\"",
+      "floppy_files": [
+        "windows-2019/autounattend.xml",
+        "scripts/winrm.ps1"
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "script": "scripts/disable-windows-updates.ps1"
+    },
+    {
+      "type": "powershell",
+      "inline": "Uninstall-WindowsFeature Windows-Defender"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/virtualbox-prevent-vboxsrv-resolution-delay.ps1"
+    },
+    {
+      "type": "windows-restart"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/provision.ps1"
+    },
+    {
+      "type": "windows-update"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/enable-remote-desktop.ps1"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/provision-openssh.ps1"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/install-chocolatey.ps1"
+    },
+    {
+      "type": "windows-restart"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/install-choco-packages.ps1"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/provision-cloudbase-init.ps1"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/rackn-setup.ps1"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/eject-media.ps1"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/optimize.ps1"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "execute_command": ["/bin/sh", "-c", "{{.Vars}} {{.Script}} {{build_name}} {{user `output_directory`}} {{user `complete_directory`}}"],
+      "script": "scripts/processor-precheck.sh"
+    },
+    {
+      "type": "vagrant",
+      "output": "{{user `output_directory`}}/{{build_name}}/{{build_name}}.box",
+      "vagrantfile_template": "templates/Vagrantfile-uefi.template"
+    }
+  ]
+}

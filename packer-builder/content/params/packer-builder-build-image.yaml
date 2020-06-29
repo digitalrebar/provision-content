@@ -1,0 +1,63 @@
+---
+Name: "packer-builder/build-image"
+Description: "Select the image build to run."
+Documentation: |
+  Defines the image build to run on the packer builder system.
+
+  There is no default value specified, if this Param is not set
+  to a value, no image builds will be completed.
+
+  .. warning:: `Read the github repo status <https://github.com/digitalrebar/provision-content/tree/v4/packer-builder/packer/STATUS.md>`_
+               file for details on builds that have been verified working.  This is a changing
+               list as the packer build images are tested.
+
+  The list of available builds in the *Makefile* are as follows:
+
+    * ``linux-ubuntu-1804-virtualbox``
+    * ``linux-ubuntu-1804-libvirt``
+    * ``windows-10-libvirt``
+    * ``windows-10-virtualbox``
+    * ``windows-10-vsphere``
+    * ``windows-10-1903-libvirt``
+    * ``windows-10-1903-virtualbox``
+    * ``windows-10-1909-libvirt``
+    * ``windows-10-1909-virtualbox``
+    * ``windows-2012-r2-virtualbox``
+    * ``windows-2012-r2-libvirt``
+    * ``windows-2016-libvirt``
+    * ``windows-2016-virtualbox``
+    * ``windows-2016-vsphere``
+    * ``windows-2019-libvirt``
+    * ``windows-2019-uefi-libvirt``
+    * ``windows-2019-uefi-virtualbox``
+    * ``windows-2019-virtualbox``
+    * ``windows-2019-vsphere``
+
+Schema:
+  type: "string"
+  default: ""
+  enum:
+    - ""
+    - "linux-ubuntu-1804-virtualbox"
+    - "linux-ubuntu-1804-libvirt"
+    - "windows-10-libvirt"
+    - "windows-10-virtualbox"
+    - "windows-10-vsphere"
+    - "windows-10-1903-libvirt"
+    - "windows-10-1903-virtualbox"
+    - "windows-10-1909-libvirt"
+    - "windows-10-1909-virtualbox"
+    - "windows-2012-r2-virtualbox"
+    - "windows-2012-r2-libvirt"
+    - "windows-2016-libvirt"
+    - "windows-2016-virtualbox"
+    - "windows-2016-vsphere"
+    - "windows-2019-libvirt"
+    - "windows-2019-uefi-libvirt"
+    - "windows-2019-uefi-virtualbox"
+    - "windows-2019-virtualbox"
+    - "windows-2019-vsphere"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

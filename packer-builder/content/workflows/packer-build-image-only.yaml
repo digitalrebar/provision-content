@@ -1,0 +1,17 @@
+---
+Name: "packer-build-image-only"
+Description: "Run only the image build stage of Packer Builder content."
+Documentation: |
+  This workflow only attempts to perform an image build on the target machine,
+  according to the ``packer-builder/build-image`` Param define build target.
+
+  .. warning:: It is assumed the remote Machine that is running this content has
+               already been prepared, hypervisor installed, and the Packer Builder
+               packer JSON config and components cloned in place already.
+
+Stages:
+  - "packer-builder-build-image"
+Meta:
+  color: "purple"
+  icon: "clone"
+  title: "RackN Content"

@@ -1,0 +1,40 @@
+---
+Name: "packer-builder-build-image"
+Description: "Start a Packer Builder image build."
+Documentation: |
+  Starts the Packer Builder image build for a given build target.
+  The Build target is specified by the ``packer-builder/build-image``
+  param setting.
+
+Templates:
+  - Name: "packer-builder-build-image"
+    Contents: |
+      #!/usr/bin/env bash
+      # Start a Packer Builder image build
+
+      {{ template "setup.tmpl" . }}
+
+      WORK={{ .Param "packer-builder/work-dir" }}
+      cd $WORK
+
+      TARGET={{ .Param "packer-builder/build-image" }}
+      {{ if .ParamExists "packer-builder/make-override" }}{{ .Param "packer-builder/make-override" }}{{ end }}
+      VF={{ .Param "packer-builder/var-file" }}
+      [[ -n "$VF" ]] && VAR_FILE="$VF" || VAR_FILE="variables.json"
+
+      [[ -z "$TARGET" ]] && xiterr 1 "No build target specified in 'packer-builder/build-image' Param."
+
+      cd packer-builder/packer/ || xiterr 1 "Could not 'cd packer-builder/packer/', run the 'packer-builder-build-prep' Stage first."
+
+      if [[ -n "$OVERRIDE" ]]
+      then
+        $OVERRIDE
+      else
+        TMPDIR=$(pwd)/tmp PACKER_NO_COLOR=1 PACKER_OPTIONS="-var-file=$VAR_FILE" PACKER_LOG=1 make build-$TARGET
+      fi
+
+Meta:
+  icon: "caret square down"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"

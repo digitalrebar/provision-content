@@ -1,0 +1,15 @@
+---
+Name: "packer-builder-prep"
+Description: "Run the tools and setup tasks to prepare the system for image builds."
+Documentation: |
+  This Stage installs prerequisite tools and installs the Hypervisor as defined
+  by the ``packer-builder/hypervisor`` Param value.  By default this will be the
+  KVM/Libvirt/Qemu build solution.
+
+Tasks:
+  - "packer-builder-intall-tools"
+  - "packer-builder-hypervisor-setup"
+Meta:
+  icon: "clone outline"
+  color: "blue"
+  title: "RackN Content"

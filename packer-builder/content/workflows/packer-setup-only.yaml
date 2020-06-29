@@ -1,0 +1,16 @@
+---
+Name: "packer-setup-only"
+Description: "Only setup Packer Builder tools and hypervisor."
+Documentation: |
+  This workflow prepares a CentOS or Ubuntu target system with tooling
+  for Packer and installs a Hypervisor to perform image builds.
+
+  No image build process is started.
+
+Stages:
+  - "packer-builder-prep"
+  - "packer-builder-git-packer"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

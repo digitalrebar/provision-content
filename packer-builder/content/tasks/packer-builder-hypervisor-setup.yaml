@@ -1,0 +1,39 @@
+---
+Description: "Install the hypervisor for the packer builder."
+Name: "packer-builder-hypervisor-setup"
+Documentation: |
+  Installs the hypervisor for the packer builder image builds.
+
+Templates:
+  - Name: "packer-builder-hypervisor-setup"
+    Contents: |
+      #!/usr/bin/env bash
+      # Set up hypervisor on target platform; based on 'packer-builder/hypervisor' Param.
+
+      {{ template "setup.tmpl" . }}
+
+      TYPE={{ .Param "packer-builder/hypervisor" }}
+
+      case $TYPE in
+        kvm)
+      {{ template "packer-builder-hypervisor-setup-kvm.sh.tmpl" . }}
+        ;;
+        virtualbox)
+          echo "Incmoplete - 'virtualbox' not available in content yet."
+          exit 1
+        ;;
+        vsphere)
+          echo "Incmoplete - 'vsphere' not available in content yet."
+          exit 1
+        ;;
+        *)
+          echo "FATAL: Unsupported hypervisor type '$TYPE'"
+          exit 1
+        ;;
+      esac
+
+Meta:
+  icon: "caret square down outline"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"
