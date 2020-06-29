@@ -21,7 +21,7 @@ ReadOnly: true
 Stages:
   - rhel-server-7-install
   - redhat-subscription-register
-  - runner-service
+  - drp-agent
   - finish-install
   - complete
 Validated: true

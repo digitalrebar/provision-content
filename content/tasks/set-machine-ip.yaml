@@ -6,7 +6,7 @@ Documentation: /
   behind the scenes to make sure that machines do not
   have conflicting addresses.  This works because
   and Address of 0.0.0.0 is unset.
-  
+
   Needed in >v4.3 because IP setting was removed from join-up.sh
 ExtraClaims:
   - scope: "machines"
@@ -21,7 +21,14 @@ Templates:
       # have conflicting addresses.  This works because
       # and Address of 0.0.0.0 is unset.
       addr='{{.Machine.Address}}'
-      [[ $IP && $addr != $IP ]] || exit 0
+      if [[ ! $IP ]]; then
+          echo "IP environment variable not set, not fixing up addresses"
+          exit 0
+      fi
+      if [[ $IP = $addr ]]; then
+          echo "IP already set to $addr, no action needed"
+          exit 0
+      fi
       while read other; do
           drpcli machines update "$other" '{"Address": "0.0.0.0"}'
       done < <(drpcli machines list Address=$IP |jq -r '.[] |.Uuid')

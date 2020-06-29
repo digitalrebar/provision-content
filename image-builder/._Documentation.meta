@@ -165,7 +165,7 @@ Prerequisites
 
 The image-builder content pack has Prerequisites necessary to operate correctly.  In addition
 to any content packs that define/describe BootEnvs and necessary workflow stages (for example
-RHEL 7.7 requiers ``os-other``, and use of ``runner-service`` requires ``task-library``).
+RHEL 7.7 requiers ``os-other``).
 
 Please ensure you have the appropriate content packs to support workflows for building images
 as desired.  The Preqrequisistes system does not call out content or plugins that are

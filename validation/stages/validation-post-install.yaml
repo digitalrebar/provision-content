@@ -4,7 +4,7 @@ Description: "Perform validation tasks post-install"
 Documentation: |
   This is a RackN predefined stage designed to be executed in the final
   installed operating system.  This stage requires that the installed OS
-  is utilizing the ``runner-service`` or ESXi ``agent-install`` stages
+  is utilizing the ``drp-agent``, ``runner-service`` or ESXi ``agent-install`` stages
   to execute Worfklow in the installed OS.
 
 Params:

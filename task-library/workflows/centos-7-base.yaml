@@ -1,5 +1,5 @@
-Name: "centos-base"
-Description: "Basic CentOS Install Workflow + Runner"
+Name: "centos-7-base"
+Description: "Basic CentOS 7 Install Workflow + Runner"
 Documentation: |
   This workflow includes the DRP Runner in CentOS provisioning process for DRP.
 
@@ -7,10 +7,10 @@ Documentation: |
   in a waiting state so that DRP will automatically detect and start a
   new workflow if the *Machine.Workflow* is updated.
 
-  .. note:: To enable, upload the CentOS ISO as per the centos-8 BootEnv
+  .. note:: To enable, upload the CentOS 7 ISO as per the centos-7 BootEnv
 
 Stages:
-  - centos-8-install
+  - centos-7-install
   - drp-agent
   - finish-install
   - complete

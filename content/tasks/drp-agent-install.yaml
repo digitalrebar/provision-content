@@ -1,0 +1,33 @@
+---
+Description: "Install drpcli as an agent"
+Name: "drp-agent-install"
+Templates:
+  - Name: "drpcli.etc"
+    Path: "/etc/drpcli"
+    Meta:
+      OS: linux
+    Contents: |
+      RS_ENDPOINT='{{.ApiURL}}'
+      RS_TOKEN='{{.GenerateInfiniteToken}}'
+      RS_UUID='{{.Machine.UUID}}'
+  - ID: drp-agent-cfg.yaml.tmpl
+    Name: config-linux
+    Path: /var/lib/drp-agent/agent-cfg.yml
+    Meta:
+      OS: linux
+  - ID: drp-agent-cfg.yaml.tmpl
+    Name: config-windows
+    Path: 'C:/Windows/System32/config/systemprofile/AppData/Local/rackn/drp-agent'
+    Meta:
+      OS: windows
+  - Name: agent-install-linux
+    Meta:
+      OS: linux
+    Contents: |
+      #!/usr/bin/env sh
+      exec drpcli agent install
+Meta:
+  icon: "motorcycle"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

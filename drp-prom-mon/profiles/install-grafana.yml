@@ -6,7 +6,7 @@ Documentation: |
 
   The Operating System must be installed already, and the
   Agent (drpcli) must be installed and running (which can
-  be done via the 'runner-service' stage.
+  be done via the 'runner-service' or 'drp-agent' stage.
 
 Meta:
   color: "orange"
