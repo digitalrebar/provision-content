@@ -30,7 +30,7 @@ Templates:
       then
         $OVERRIDE
       else
-        TMPDIR=$(pwd)/tmp PACKER_OPTIONS="-var-file=$VAR_FILE" PACKER_LOG=1 make build-$TARGET
+        TMPDIR=$(pwd)/tmp PACKER_NO_COLOR=1 PACKER_OPTIONS="-var-file=$VAR_FILE" PACKER_LOG=1 make build-$TARGET
       fi
 
 Meta:
