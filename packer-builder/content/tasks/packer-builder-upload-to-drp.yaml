@@ -13,6 +13,9 @@ ExtraClaims:
     action: "post"
     specific: "/images/builder/*"
   - scope: "files"
+    action: "*"
+    specific: "*"
+  - scope: "files"
     action: "delete"
     specific: "/images/builder/*"
 
@@ -30,14 +33,21 @@ Templates:
       IMAGE={{ .Param "packer-builder/upload-image" }}
 
       [[ -z "$IMAGE" ]] && xiterr 1 "No image specified in 'packer-builder/upload-image' Param."
-      UPLOADED="images/builder/$(basename $IMAGE)"
+      UPLOAD="images/builder/$(basename $IMAGE)"
+      SIZE=$(ls -l $IMAGE | awk ' { print $5 } ' )
+      HUMAN=$(ls -lh $IMAGE | awk ' { print $5 } ' )
+
+      [[ "$SIZE" -ge 1000000000 ]] && MSG="Your image size ($HUMAN) is greater than 1GB, it may take a long time" || MSG="Your upload image size is '$HUMAN'"
 
       if [[ -r "$IMAGE" ]]
       then
         echo ""
-        echo ">>> Beginning image upload for:  '$IMAGE'"
-        drpcli files upload "$IMAGE" as "$UPLOADED"
-        echo ">>> COMPLETED image upload for:  '$IMAGE'"
+        echo ">>> Source image file to upload:  '$IMAGE'"
+        echo ">>> Uploaded image location set to:  '$UPLOAD'"
+        echo ">>> NOTE - $MSG, and no progress display will be shown."
+        echo ">>> Upload process has been initiated ... please wait a while ... "
+        time drpcli files upload "$IMAGE" as "$UPLOAD"
+        echo ">>> COMPLETED image upload!"
         echo ""
       else
         xiterr 1 "Unable to read image '$IMAGE' on target system."
