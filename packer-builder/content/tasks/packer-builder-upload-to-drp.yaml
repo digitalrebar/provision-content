@@ -30,12 +30,13 @@ Templates:
       IMAGE={{ .Param "packer-builder/upload-image" }}
 
       [[ -z "$IMAGE" ]] && xiterr 1 "No image specified in 'packer-builder/upload-image' Param."
+      UPLOADED="images/builder/$(basename $IMAGE)"
 
       if [[ -r "$IMAGE" ]]
       then
         echo ""
         echo ">>> Beginning image upload for:  '$IMAGE'"
-        drpcli files upload "$IMAGE" as "$IMAGE"
+        drpcli files upload "$IMAGE" as "$UPLOADED"
         echo ">>> COMPLETED image upload for:  '$IMAGE'"
         echo ""
       else
