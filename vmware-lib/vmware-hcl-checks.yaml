@@ -1,0 +1,15 @@
+---
+Name: "vmware-hcl-checks"
+Description: "Run VMware vSphere ESXi/VSAN HCL compat and install checks"
+Documentation: ""
+Meta:
+  color: "blue"
+  icon: "search"
+  title: "RackN"
+ReadOnly: true
+Stages:
+  - "vmware-esxi-hcl-install"
+  - "vmware-esxi-hcl-validate"
+  - "vmware-vsan-hcl-install"
+  - "vmware-vsan-hcl-validate"
+  - "sledgehammer-wait"

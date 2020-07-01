@@ -2,7 +2,7 @@
 
 # commands to run after building container tar files
 
-contexts="vcsa-deploy-context:latest govc-context:latest"
+contexts="vcsa-deploy-context:latest govc-context:latest context-runner-context:latest"
 
 # run as:  CONTEXT=1 ./drpcli-commands.sh
 # if you want to run the context upload to DRP - if they are not already in
@@ -18,13 +18,13 @@ main () {
     # should plumb version tags in here
     image="digitalrebar-$name"
 
-    drpcli files upload dockerfile-$name.tar as "contexts/docker-context/$image"
+    drpcli files upload dockerfiles/dockerfile-$name.tar as "contexts/docker-context/$image"
 
     (( $CONTEXT )) && contexts || echo "Skipping check/create contexts (must already be in your content packs, eh?)."
 
     echo "Installing Container for $context named from $image"
-    drpcli plugins runaction docker-context imageUpload \
-      context/image-name ${image} \
+    drpcli plugins runaction docker-context imageUpload         \
+      context/image-name ${image}                               \
       context/image-path files/contexts/docker-context/${image}
   done
 }

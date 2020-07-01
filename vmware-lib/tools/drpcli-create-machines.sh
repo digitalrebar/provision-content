@@ -9,5 +9,5 @@
 ###
 
 # prefix w/ 'zz' to sort last - and create 2 for now
-drpcli machines create  '{"Name": "zz-govc-1", "Meta": {"BaseContext": "govc"}'
-drpcli machines create  '{"Name": "zz-govc-2", "Meta": {"BaseContext": "govc"}'
+drpcli machines create '{"Meta": {"BaseContext": "govc"}, "Name": "zz-govc-1" }'
+drpcli machines create '{"Meta": {"BaseContext": "govc"}, "Name": "zz-govc-2" }'

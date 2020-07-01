@@ -30,7 +30,7 @@ OptionalParams:
 Templates:
   - Name: "govc-command.sh"
     Contents: |
-      #!/bin/bash
+      #!/usr/bin/env bash
       # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
       # RackN Copyright 2020
 
@@ -58,36 +58,27 @@ Templates:
       echo "==== SETUP govc Command ===="
       echo ""
 
-      CMD="{{ .ParamExpand "govc/command" }}"
+      CMD='{{ .ParamExpand "govc/command" }}'
 
-      URL={{ .ParamExpand "govc/url" }}
-
-      if test -n "$URL"
-      then
+      {{ if ( .Param "govc/url" ) }}
+        {{ $URL := .ParamExpand "govc/url" }}
         # govc/url is set, use it
-        echo "Using govc/url to set URL resource setting ... "
-      else
+        echo "Using 'govc/url' to set URL resource setting ... "
+      {{ else }}
         # govc/url not set, construct the URL
         echo "Using govc/* individual Params to set URL resource setting ... "
-        U="{{ .Param "govc/username" }}"
-        S="{{ .Param "govc/password" }}"
-        N="{{ .ParamExpand "govc/node" }}"
-        P="{{ .Param "govc/port" }}"
-        URL="${U}:${S}@${N}"
-        [[ "$P" != "0" ]] && URL+=":$P"
-      fi
-      export GOVC_URL="$URL"
+        {{ $U := .Param "govc/username" }}
+        {{ $S := .Param "govc/password" }}
+        {{ $N := .ParamExpand "govc/node" }}
+        {{ $R := printf "%s:%s@%s" $U $S $N }}
+        {{ if ( .Param "govc/port" ) }}{{ $P := .Param "govc/port" | toString }}{{ $URL = printf "%s:%s" $R $P }}{{ end }}
+      {{ end }}
 
-      {{ if eq (.Param "govc/insecure") true -}}
-      export GOVC_INSECURE=1
-      {{ end -}}
-
-      ds='{{ .Param "govc/datastore" }}'
-      nw='{{ .Param "govc/network" }}'
-      rp='{{ .Param "govc/resource-pool" }}'
-      [[ -n $"GOVC_DATASTORE" ]] && export GOVC_DATASTORE="$ds"
-      [[ -n $"GOVC_NETWORK" ]] && export GOVC_NETWORK="$nw"
-      [[ -n $"GOVC_RESOURCE_POOL" ]] && export GOVC_RESOURCE_POOL="$rp"
+      export GOVC_URL='{{ $URL }}'
+      {{ if eq (.Param "govc/insecure") true -}} export GOVC_INSECURE=1 {{ end -}}
+      {{ if ( .Param "govc/datastore" ) }}export GOVC_DATASTORE='{{ .Param "govc/datastore" }}'{{ end }}
+      {{ if ( .Param "govc/network" ) }}export GOVC_NETWORK='{{ .Param "govc/network" }}'{{ end }}
+      {{ if ( .Param "govc/resource-pool" ) }}export GOVC_RESOURCE_POOL='{{ .Param "govc/resource-pool" }}'{{ end }}
 
       echo "govc environment variables:"
       env | grep -v grep | grep "GOVC_"

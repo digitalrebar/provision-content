@@ -1,0 +1,18 @@
+---
+Name: "esxi-vsan-670u1-install"
+Description: "Install ESXi 6.7.0u1 and VSAN"
+Documentation: |
+  Installs the ESXi instance for the vCloud Builder node.
+
+  .. note: This should use ``esxi/install-version`` param set with a generic Stage
+
+Meta:
+  color: "yellow"
+  icon: "shuffle"
+  title: "RackN"
+ReadOnly: true
+Stages:
+  - "vcf-builder-settings"
+  - "esxi-670u1-install"
+  - "finish-install"
+  - "complete"
