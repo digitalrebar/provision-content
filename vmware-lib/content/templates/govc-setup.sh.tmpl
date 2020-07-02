@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# setup the enviornment to execute a 'govc' command
+
+echo ""
+echo "==== SETUP govc Command ===="
+echo ""
+
+{{ $url := "" }} {{ $p := "" }}
+
+{{ if ( .Param "govc/url" ) }}
+  {{ $url = .ParamExpand "govc/url" }}
+  # govc/url is set, use it
+  echo "Using 'govc/url' to set URL resource setting ... "
+{{ else }}
+  # govc/url not set, construct the URL
+  echo "Using govc/* individual Params to set URL resource setting ... "
+  {{ $u := .Param "govc/username" }}
+  {{ $s := .Param "govc/password" }}
+  {{ $n := .ParamExpand "govc/node" }}
+  {{ if ( .Param "govc/port" ) }}{{ $p := .Param "govc/port" | toString }}{{ $p = printf ":%s" $p }}{{ end }}
+  {{ $url = printf "%s:%s@%s%s" $u $s $n $p }}
+{{ end -}}
+
+export GOVC_URL='{{ $url }}'
+{{ if eq (.Param "govc/insecure") true -}}export GOVC_INSECURE=1{{ end }}
+{{ if ( .Param "govc/datastore" )       }}export GOVC_DATASTORE='{{ .Param "govc/datastore" }}'{{ end }}
+{{ if ( .Param "govc/network" )         }}export GOVC_NETWORK='{{ .Param "govc/network" }}'{{ end }}
+{{ if ( .Param "govc/resource-pool" )   }}export GOVC_RESOURCE_POOL='{{ .Param "govc/resource-pool" }}'{{ end }}
+
+echo "govc environment variables:"
+env | grep -v grep | grep "GOVC_"

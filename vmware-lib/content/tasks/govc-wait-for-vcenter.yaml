@@ -1,6 +1,6 @@
 ---
-Name: "govc-wait-for-vcenter"
 Description: "A task wait for vCenter API availability"
+Name: "govc-wait-for-vcenter"
 Documentation: |
   Simple task to wait until the remote vSphere deployed resource responds correctly
   to a ``govc about`` request call.
@@ -22,8 +22,9 @@ Templates:
       set -e
       set -o noglob
 
-      # we render to this filepath location inside the container for use by govc
-      TMPL=/tmp/template.json
+      # The template MUST be rendered to this filepath location inside the
+      # container for use by govc.  This is handled in the govc-command task.
+      TMPL=/ova/template.json
       JQ=$(which jq)
       [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
       [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
@@ -38,17 +39,7 @@ Templates:
         fi
       fi
 
-      {{ if .ParamExists "govc/template-json" -}}
-      echo "Attempting to write '$TMPL' file from 'govc/template-json' defined template."
-      {{ $dot := . -}}
-      {{ $template := .Param "govc/template-json" -}}
-      cat <<EOTMPL > $TMPL
-      {{ $dot.CallTemplate $template $dot }}
-      EOTMPL
-      {{ else -}}
-      echo "Failed to render template from 'govc/template-json'"
-      exit 1
-      {{ end -}}
+      [[ ! -r "$TMPL" ]] && xiterr 1 "Unable to read JSON template '$TMPL', make sure previous tasks render this for us."
 
       U="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.username") | .Value')"
       P="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.password") | .Value')"

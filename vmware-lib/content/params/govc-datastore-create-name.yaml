@@ -1,0 +1,15 @@
+---
+Name: "govc/datastore-create-name"
+Description: "Defines the name of the Datastore to be created."
+Documentation: |
+  The name of the datastore to be created.
+
+  Defaults to ``datastore1`` if not otherwise defined.
+
+Schema:
+  type: "string"
+  default: "datastore1"
+Meta:
+  color: "green"
+  icon: "hdd"
+  title: "RackN Content"

@@ -12,6 +12,6 @@ Schema:
   type: "string"
   default: ""
 Meta:
-  color: "green"
-  icon: "terminal"
+  color: "blue"
+  icon: "hdd"
   title: "RackN Content"

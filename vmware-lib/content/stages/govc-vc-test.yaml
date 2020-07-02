@@ -1,0 +1,15 @@
+---
+Name: "govc-vc-test"
+Description: "govc test stage"
+Params:
+  govc/command: "import.ova -options=/ova/template.json"
+Tasks:
+  - "context:govc"
+  - "govc-datastore-create"
+  - "govc-ova-stage"
+  - "govc-command"
+  - "govc-wait-for-vcenter"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

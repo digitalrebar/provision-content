@@ -1,0 +1,16 @@
+---
+Name: "govc-ova-stage"
+Description: "Stage the OVA referenced in 'govc/ova-location' in the container."
+Documentation: |
+  This stage makes the OVA referenced in ``govc/ova-location`` availabe in the
+  container for the _govc_ command's use.  It will be saved as ``/ova/import.ova``
+  inside the container, which will be appended to the ``govc`` command if the
+  argument _import.ova_ is found in the command line call.
+
+Tasks:
+  - "context:govc"
+  - "govc-ova-stage"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"
