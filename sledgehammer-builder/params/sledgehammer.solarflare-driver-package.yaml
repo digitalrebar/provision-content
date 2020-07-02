@@ -1,0 +1,9 @@
+---
+Name: sledgehammer/solarflare-driver-package
+Description: The direct URL to download the Solarflare Ethernet drivers from
+Documentation: |
+  Tis param points at the Solarflare source tarball that should be used
+  to install current Solarflare Ethernet drivers from.
+Schema:
+  type: string
+  default: 'https://support.solarflare.com/index.php/component/cognidox/?file=SF-103848-LS-52_Solarflare_NET_driver_source_RPM.zip&task=download&format=raw&id=1945'

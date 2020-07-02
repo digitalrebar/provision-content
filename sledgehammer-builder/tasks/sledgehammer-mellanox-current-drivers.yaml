@@ -1,0 +1,50 @@
+---
+Name: sledgehammer-mellanox-current-drivers
+Description: Install updated Mellanox drivers in Sledgehammer
+Documentation: |
+  This task installs up-to-date Mellanox drivers from the sourec
+  package defined in the sledgehammer/mellanox-driver-package param.
+
+  This task is not included in Sledgehammer by default -- to include it,
+  add it to sledgehammer/customize-tasks and rebuild Sledgehammer.
+
+  Please note that a Sledgeahmmer image built using this task will not
+  be compatible with UEFI Secure Boot, as the resulting kernel modules
+  will not be signed by the CentOS signing authority.
+
+  Please also note that this task is designed to only install the Ethernet
+  drivers, not the RDMA or Infiniband driver set.  If you need those, you may need to
+  spin your own custom version of Sledgehammer using a new task.
+Templates:
+  - Name: install-drivers
+    Contents: |
+      #!/bin/bash
+      mkdir -p /tmp/mellanox-install
+      cd /tmp/mellanox-install
+      pkg='{{.Param  "sledgehammer/mellanox-driver-package"}}'
+      curl -fgLO "$pkg"
+      fname="${pkg##*/}"
+      tar xzf "$fname"
+      cd "${fname%.*}"
+      kv="$(rpm -q kernel)"
+      kv="${kv#kernel-}"
+      [[ -e preinstalled ]] || rpm -qa >preinstalled
+      dnf -y install perl-File-Tempdir \
+          perl-Term-ANSIColor \
+          kernel-rpm-macros \
+          kernel-devel \
+          make \
+          gdb-headless \
+          rpm-build \
+          lsof \
+          gcc \
+          elfutils-libelf-devel
+      ./install.pl -k "$kv" \
+          -s "/lib/modules/$kv/build" \
+          --kernel-only \
+          --eth-only \
+          -b
+      rpm -qa >postinstalled
+      sort preinstalled postinstalled |uniq -u |xargs rpm -e
+      cd RPMS/*/$(uname -m)/COMMON/
+      dnf -y localinstall kmod-mlnx-en-5*.rpm mlnx-en-utils*.rpm
