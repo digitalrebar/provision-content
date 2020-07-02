@@ -1,6 +1,12 @@
 ---
 Name: "govc-wait-for-vcenter"
-Description: "Use 'govc about' to check for API access to vCenter"
+Description: "Wait for API access to the newly deployed vCenter instance."
+Documentation: |
+  This Stage blocks and waits until the vCenter service API is fully
+  avaialble after deployment.  The stage uses the _govc about_ which
+  requires API access to get the _about_ details from the remote
+  API service.
+
 Tasks:
   - "context:govc"
   - "govc-wait-for-vcenter"

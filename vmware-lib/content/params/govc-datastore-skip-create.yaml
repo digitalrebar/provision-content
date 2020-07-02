@@ -1,0 +1,16 @@
+---
+Name: "govc/datastore-skip-create"
+Description: "If set to 'true', skips creating a new datastore."
+Documentation: |
+  Boolean ``true``/``false`` value - determines if the datastore Stage creation
+  in a workflow should skip creating a datastore.
+
+  Defaults to ``true`` - skipping creating a datastore.
+
+Schema:
+  type: "boolean"
+  default: true
+Meta:
+  color: "green"
+  icon: "hdd"
+  title: "RackN Content"

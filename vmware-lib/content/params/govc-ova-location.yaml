@@ -1,0 +1,22 @@
+---
+Name: "govc/ova-location"
+Description: "Deployment Resource OVA URL location to deploy from via govc/command"
+Documentation: |
+  The URL location of the OVA Resource to deploy via the ``govc/command``.
+
+  The OVA will be downloaded inside the Context container and used by the ``govc``
+  command to deploy the resource.  This could be a _VMware vCenter Server Appliance_
+  (VCSA), NSX-T OVA, or any other deployable OVA format appliance device.
+
+  This Parameter can utilize Digital Rebar Golang Templating constructs, which will
+  be expanded appropriately when called.  For example:
+
+    * ``{{ .ProvisionerURL }}/files/images/vcsa/foo.vcsa``
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

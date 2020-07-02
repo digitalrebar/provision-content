@@ -2,15 +2,38 @@
 Name: "govc-create-vcenter"
 Description: "Run VMware govc command Context workflow"
 Documentation: |
-  Creates a vCenter instance via the ``govc`` command.  Then waits
-  for the API services to become available in vCenter, which should
-  signal that it is finally up and running.  This process can take
-  upwards of 60 minutes to complete.
+  This workflow first stages the VCSA OVA inside the container context,
+  creates a vCenter instance via the ``govc`` command, and then waits
+  for the API services to become available in vCenter.
 
+  This process can take upwards of 60 minutes to complete.
+
+  The deployment is controlled by the following Param settings.
+
+  **OVA param**
+
+    * ``govc-ova-location`` 
+
+  **vSphere ESXi deployment target**
+
+    * ``govc/url``
+
+  or
+
+    * ``govc/username``
+    * ``govc/password``
+    * ``govc/node``
+    * ``govc/port`` _(optional)_
+
+  The VCSA OVA file must be staged and made available, and referenced in
+  the ``govc/ova-location`` Param.  See the full documentation for additional
+  configuration Params that are available.
+  
 Stages:
-  - "govc-command"
+  - "govc-datastore-create"
+  - "govc-ova-stage"
+  - "govc-vcenter-create"
   - "govc-wait-for-vcenter"
-  - "complete-nobootenv"
 Meta:
   color: "purple"
   icon: "terminal"

@@ -19,7 +19,9 @@ Templates:
       {{ if .ParamExists "vcsa-deploy/template-json" }}
       {{ $dot := . -}}
       {{ $template := .Param "vcsa-deploy/template-json" -}}
-      cat <<EOTMPL > /tmp/template.json
+      mkdir -p /ova
+      rm -f /ova/template.json
+      cat <<EOTMPL > /ova/template.json
       {{ $dot.CallTemplate $template $dot }}
       EOTMPL
 
@@ -27,7 +29,7 @@ Templates:
       echo ""
       echo "Using JSON Template for OVA: {{ $template }}"
       echo ""
-      cat /tmp/template.json
+      cat /ova/template.json
       echo ""
       echo "===== END TEMPLATE DEBUG ===="
       {{ end -}}

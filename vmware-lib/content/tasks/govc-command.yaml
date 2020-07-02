@@ -1,6 +1,6 @@
 ---
-Description: "A task run govc commands"
 Name: "govc-command"
+Description: "A task to run govc commands against remote vSphere vCenter or ESXi instances"
 Documentation: |
   This task executes a given ``govc`` call in a container context.  The govc
   command is defined via the Param ``govc/command``, which is required for this
@@ -17,6 +17,15 @@ Documentation: |
   values for customizing.  In these cases, use the ``govc/template-json`` param
   to define the Template to render inside of the GoVC container context.
 
+  If an OVA file is found inside the container at ``/ova/import.ova``, and if the
+  base argument of _import.ova_ is found in the _govc_ command, then the path
+  and OVA name will be appended to the command sequence.
+
+  Documentation and usage examples for ``govc`` can be found on the GoVMOMI
+  website at:
+
+    * https://github.com/vmware/govmomi/blob/master/govc/USAGE.md
+
 RequiredParams:
   - "govc/command"
 OptionalParams:
@@ -30,7 +39,7 @@ OptionalParams:
 Templates:
   - Name: "govc-command.sh"
     Contents: |
-      #!/bin/bash
+      #!/usr/bin/env bash
       # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
       # RackN Copyright 2020
 
@@ -40,57 +49,35 @@ Templates:
 
       {{ if .ParamExists "govc/template-json" }}
       {{ $dot := . -}}
-      {{ $template := .Param "govc/template-json" -}}
-      cat <<EOTMPL > /tmp/template.json
-      {{ $dot.CallTemplate $template $dot }}
+      {{ $govctmpl := .Param "govc/template-json" -}}
+      mkdir -p /ova
+      rm -f /ova/template.json
+      cat <<EOTMPL > /ova/template.json
+      {{ $dot.CallTemplate $govctmpl $dot }}
       EOTMPL
 
       echo "===== BEGIN TEMPLATE DEBUG ===="
       echo ""
-      echo "Using JSON Template for OVA: {{ $template }}"
+      echo "Using JSON Template for OVA: {{ $govctmpl }}"
       echo ""
-      cat /tmp/template.json
+      cat /ova/template.json
       echo ""
       echo "===== END TEMPLATE DEBUG ===="
       {{ end -}}
 
-      echo ""
-      echo "==== SETUP govc Command ===="
-      echo ""
+      {{ template "govc-setup.sh.tmpl" . }}
 
-      CMD="{{ .ParamExpand "govc/command" }}"
+      CMD='{{ .Param "govc/command" }}'
 
-      URL={{ .ParamExpand "govc/url" }}
-
-      if test -n "$URL"
+      if echo $CMD | grep -q "import.ova"
       then
-        # govc/url is set, use it
-        echo "Using govc/url to set URL resource setting ... "
-      else
-        # govc/url not set, construct the URL
-        echo "Using govc/* individual Params to set URL resource setting ... "
-        U="{{ .Param "govc/username" }}"
-        S="{{ .Param "govc/password" }}"
-        N="{{ .ParamExpand "govc/node" }}"
-        P="{{ .Param "govc/port" }}"
-        URL="${U}:${S}@${N}"
-        [[ "$P" != "0" ]] && URL+=":$P"
+        if [[ -r "/ova/import.ova" ]]
+        then
+          CMD="$CMD /ova/import.ova"
+        else
+          xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
+        fi
       fi
-      export GOVC_URL="$URL"
-
-      {{ if eq (.Param "govc/insecure") true -}}
-      export GOVC_INSECURE=1
-      {{ end -}}
-
-      ds='{{ .Param "govc/datastore" }}'
-      nw='{{ .Param "govc/network" }}'
-      rp='{{ .Param "govc/resource-pool" }}'
-      [[ -n $"GOVC_DATASTORE" ]] && export GOVC_DATASTORE="$ds"
-      [[ -n $"GOVC_NETWORK" ]] && export GOVC_NETWORK="$nw"
-      [[ -n $"GOVC_RESOURCE_POOL" ]] && export GOVC_RESOURCE_POOL="$rp"
-
-      echo "govc environment variables:"
-      env | grep -v grep | grep "GOVC_"
 
       echo ""
       echo "==== RUN 'govc $CMD' ===="

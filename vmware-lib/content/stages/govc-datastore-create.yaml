@@ -1,0 +1,22 @@
+---
+Name: "govc-datastore-create"
+Description: "Run govc command to create a datastore on the remote vSphere ESXi node"
+Documentation: |
+  This Stage runs a _govc_ command to create a datastore on the ESXi instance.
+  The Param ``govc/datastore-device`` will be used as the backing volume for
+  the datastore defined by name in ``govc/datastore-name``.
+
+  If not specified, the defaults for device are "first found device", and the name
+  of the datastore will be set to "datastore1".
+
+OptionalParams:
+  - govc/datastore-create-disk
+  - govc/datastore-create-name
+  - govc/datastore-skip-create
+Tasks:
+  - "context:govc"
+  - "govc-datastore-create"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"
