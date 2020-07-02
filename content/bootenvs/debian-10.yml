@@ -1,45 +1,42 @@
 ---
-Name: "debian-9-install"
-Description: "Debian 9 install BootEnv"
+Name: "debian-10-install"
+Description: "Debian 10 install BootEnv"
 Documentation: |
-  This BootEnv installs Debian 9 via the "mini" ISO file.
+  This BootEnv installs Debian 10 via netinst ISO file.
 Meta:
   feature-flags: "change-stage-v2"
   icon: "linux"
   color: "black"
   title: "Digital Rebar Community Content"
 OS:
-  Name: "debian-9"
+  Name: "debian-10"
   Family: "debian"
-  IsoFile: "debian-9.12.0-amd64-netinst.iso"
-  IsoSha256: "3c47f64693435b0b42b6ef59624edbffa7c4004317d9f9a3f04ecb6a4e30f191"
-  IsoUrl: "https://cdimage.debian.org/cdimage/archive/9.12.0/amd64/iso-cd/debian-9.12.0-amd64-netinst.iso"
-  Version: "9"
-Initrds:
-  - "initrd.gz"
-Kernel: "linux"
-BootParams: >-
-  priority=critical
-  console-tools/archs=at
-  console-setup/charmap=UTF-8
-  console-keymaps-at/keymap=us
-  popularity-contest/participate=false
-  passwd/root-login=false
-  keyboard-configuration/xkb-keymap=us
-  netcfg/get_domain=unassigned-domain
-  console-setup/ask_detect=false
-  debian-installer/locale=en_US.utf8
-  console-setup/layoutcode=us
-  keyboard-configuration/layoutcode=us
-  netcfg/dhcp_timeout=120
-  netcfg/choose_interface=auto
-  url={{.Machine.Url}}/seed
-  netcfg/get_hostname={{.Machine.Name}}
-  root=/dev/ram
-  rw
-  quiet
-  {{.Param "kernel-options"}}
-  {{.Param "kernel-console"}}
+  Version: "10"
+  SupportedArchitectures:
+    amd64:
+      Initrds:
+        - "initrd.gz"
+      Kernel: "linux"
+      BootParams: >-
+        auto
+        preseed/url={{.Machine.Url}}/seed
+        netcfg/enable=true
+        hostname={{.Machine.ShortName}}
+        console-setup/charmap=UTF-8
+        console-keymaps-at/keymap=us
+        popularity-contest/participate=false
+        passwd/root-login=false
+        keyboard-configuration/xkb-keymap=us
+        netcfg/get_domain=unassigned-domain
+        console-setup/ask_detect=false
+        debian-installer/locale=en_US.utf8
+        console-setup/layoutcode=us
+        keyboard-configuration/layoutcode=us
+        hw-detect/load_firmware=true
+        rw
+        quiet
+        {{.Param "kernel-options"}}
+        {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "part-scheme"

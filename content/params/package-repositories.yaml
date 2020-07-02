@@ -308,14 +308,57 @@ Schema:
         - restricted
         - universe
         - multiverse
+    - tag: debian-10
+      os:
+        - "debian-10"
+      arch: amd64
+      installSource: true
+      url: "http://deb.debian.org/debian"
+      distribution: buster
+      bootloc: http://deb.debian.org/debian/dists/buster/main/installer-amd64/current/images/netboot/debian-installer/amd64/
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-10-updates"
+      os:
+        - "debian-10"
+      arch: any
+      url: "http://deb.debian.org/debian"
+      distribution: buster-updates
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-10-backports"
+      os:
+        - "debian-10"
+      arch: any
+      url: "http://deb.debian.org/debian"
+      distribution: buster-backports
+      components:
+        - main
+        - contrib
+        - non-free
+    - tag: "debian-10-security"
+      os:
+        - "debian-10"
+      arch: any
+      url: "http://security.debian.org/debian-security/"
+      securitySource: true
+      distribution: buster/updates
+      components:
+        - contrib
+        - main
+        - non-free
     - tag: debian-9-install
       os:
         - "debian-9"
       arch: amd64
       installSource: true
-      url: "http://mirrors.kernel.org/debian"
+      url: "http://deb.debian.org/debian"
       distribution: stretch
-      bootloc: http://mirrors.kernel.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/debian-installer/amd64/
+      bootloc: http://deb.debian.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/debian-installer/amd64/
       components:
         - main
         - contrib
@@ -324,7 +367,7 @@ Schema:
       os:
         - "debian-9"
       arch: any
-      url: "http://mirrors.kernel.org/debian"
+      url: "http://deb.debian.org/debian"
       distribution: stretch-updates
       components:
         - main
@@ -334,7 +377,7 @@ Schema:
       os:
         - "debian-9"
       arch: any
-      url: "http://mirrors.kernel.org/debian"
+      url: "http://deb.debian.org/debian"
       distribution: stretch-backports
       components:
         - main
