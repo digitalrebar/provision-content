@@ -2,7 +2,7 @@
 Name: rhel-server-8-dvd-install
 Description: Install BootEnv for RedHat 8 - full DVD ISO
 Documentation: |
-  This BootEnv installs the RHEL Server 8 operating system from the full dvd ISO.
+  This BootEnv installs the RHEL Server 8 operating system from the full dvd ISO. By default, it will install as a trial with no registration. This is specified by the redhat/subscription-username parameter with the default username of "trial" and redhat/subscription-password blank. Adding a password and/or changing the username will be verified by RedHat's servers and the install will hang if it fails. You can also completely skip registration even with the username and password parameters set by adding the redhat/subscription-skip-activation parameter.
 Meta:
   color: red
   feature-flags: change-stage-v2
@@ -33,7 +33,8 @@ OS:
 Loaders:
   amd64-uefi: EFI/BOOT/BOOTX64.EFI
 OnlyUnknown: false
-RequiredParams: []
+RequiredParams:
+  - redhat/subscription-username
 OptionalParams:
   - kernel-console
   - kernel-options
@@ -51,9 +52,7 @@ OptionalParams:
   - redhat/subscription-gpg-keys
   - redhat/subscription-password
   - redhat/subscription-repos
-  - redhat/subscription-repos
   - redhat/subscription-skip-activation
-  - redhat/subscription-username
 Templates:
   - Name: kexec
     ID: kexec.tmpl

@@ -3,6 +3,7 @@
 
 {{ template "setup.tmpl" .}}
 {{ if eq (.Param "redhat/subscription-skip-activation") true }}echo "Skipping RHSM setup."; exit 0{{ end }}
+{{ if and ( eq "trial" ( .Param "redhat/subscription-username" ) ) ( not ( .ParamExists "redhat/subscription-password" ) ) -}}echo "Skipping RHSM setup due to trial username and no password parameter."; exit 0{{ end }}
 
 function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
 
