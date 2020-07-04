@@ -58,7 +58,7 @@ skipx
 reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 
 # Network information
-network  --hostname={{ if .ParamExists "hostname" }}{{ .Param "hostname" }}{{ else }}{{ .Machine.ShortName }}{{ end -}}
+network --hostname={{ if .ParamExists "hostname" }}{{ .Param "hostname" }}{{ else }}{{ .Machine.ShortName }}{{ end }}
 {{ if .ParamExists "provisioner-network-config" }} network {{ .ParamExpand "provisioner-network-config" }}{{ else }}network --bootproto=dhcp{{ end -}}
 
 # System services
@@ -82,37 +82,39 @@ network  --hostname={{ if .ParamExists "hostname" }}{{ .Param "hostname" }}{{ el
 {{$element}}
 {{end -}}
 {{end -}}
-
 kexec-tools
-
-###############
-############### SCAP and other security profiles need to be parameterized/selectable
-###############
-
-# extra packages - installed by stock 8.2 with PCI-DSS SCAP
-aide
-libreswan
-opensc
-openscap
-openscap-scanner
-pcsc-lite
-scap-security-guide
+{{ if eq ( .Param "oscap/enabled") true -}}
+# extra packages to be installed for SCAP
+{{ range $index, $pkgs := (.Param "oscap/configuration") -}}
+{{ if eq $index "packages" -}}
+{{ range $pkg := $pkgs -}}
+{{ $pkg }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
 %end
 
-# SCAP (PCI-DSS) enablement
+{{ if eq ( .Param "oscap/enabled") true -}}
+# SCAP profile configuration
 %addon org_fedora_oscap
-    content-type = scap-security-guide
-    profile = xccdf_org.ssgproject.content_profile_pci-dss
+{{ range $index, $profiles := (.Param "oscap/configuration") -}}
+{{ if eq $index "profile" -}}
+{{ range $profile := $profiles -}}
+    {{ $profile }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
 %end
+{{ end -}}
 
 %addon com_redhat_kdump --enable --reserve-mb='auto'
-
 %end
 
 %anaconda
-pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty
-pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok
-pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+{{ range $index, $pwpolicy := (.Param "redhat/pwpolicy") -}}
+{{ $pwpolicy }}
+{{ end -}}
 %end
 
 %post
