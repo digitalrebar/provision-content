@@ -1,0 +1,14 @@
+---
+Name: "google/project-id"
+Description: "Google Cloud Project"
+Documentation: |
+  NO DEFAULT!  You must supply a project name.
+
+  Provisioning to Project for Google Cloud
+Schema:
+  type: "string"
+Meta:
+  type: "value"
+  color: "blue"
+  icon: "group"
+  title: "RackN Content"

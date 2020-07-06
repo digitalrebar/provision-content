@@ -1,0 +1,13 @@
+---
+Name: "google/zone"
+Description: "Google Cloud Zone"
+Documentation: |
+  Provisioning to Zone for Google Cloud
+Schema:
+  type: "string"
+  default: "us-central1-a"
+Meta:
+  type: "value"
+  color: "green"
+  icon: "map outline"
+  title: "RackN Content"

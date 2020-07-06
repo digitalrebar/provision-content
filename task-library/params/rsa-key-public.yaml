@@ -9,7 +9,10 @@ Documentation: |
 Schema:
   type: "string"
 Meta:
+  type: "key"
   color: "black"
   icon: "key"
   title: "Digital Rebar Community Connect"
   copyright: "RackN 2020"
+  downloadable: "id_rsa.pub"
+  clipboard: "clippy"

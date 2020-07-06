@@ -1,0 +1,13 @@
+---
+Name: "linode/instance-image"
+Description: "linode Machine Instance Type"
+Documentation: |
+  Provision Linode O/S Image
+Schema:
+  type: "string"
+  default: "linode/centos7"
+Meta:
+  type: "os"
+  color: "black"
+  icon: "disk outline"
+  title: "RackN Content"

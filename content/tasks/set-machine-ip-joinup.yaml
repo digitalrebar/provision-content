@@ -27,11 +27,14 @@ Templates:
           fi
       fi
 
-      echo "Address determined to be $IP"
       addr='{{.Machine.Address}}'
-      [[ $IP && $addr != $IP ]] || exit 0
-      echo "Address not set, updating"
-      drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
+      echo "O/S Address determined to be $IP.  Machine.Address = $addr"
+      if [[ $IP && $addr == '<nil>' ]] ; then
+        echo "Address not set, updating"
+        drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
+      else
+        echo "Did not set/reset address: Detected = $IP and Machine.Address = $addr"
+      fi
       
       echo "done"
       exit 0

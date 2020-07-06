@@ -1,0 +1,30 @@
+---
+Name:  "cloud-cleanup"
+Description: "A task to remove cloud metadata after decommission."
+Documentation: |
+  Remove collected internal API information about a cloud instance
+RequiresParams:
+
+Templates:
+  - Name: "cleanup-cloud-metadata"
+    Contents: |
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      items="cloud/instance-id cloud/instance-type cloud/placement/availability-zone cloud/public-hostname cloud/public-ipv4"
+      for p in $items; do
+        echo "removing param $p from {{ .Machine.Name }}"
+        drpcli machines remove $RS_UUID param $p || true
+      done
+
+      echo "done"
+      exit 0
+Meta:
+  type: "cleanup"
+  icon: "cloud"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
