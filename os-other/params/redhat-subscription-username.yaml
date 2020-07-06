@@ -5,6 +5,8 @@ Documentation: |
   Specifies the Redhat Subscription Manager username for activating this
   redhat server with.
 
+  Defaults to "trial" and combined with no password parameter will install the system in trial mode with no registration. Changing the username and/or password parameter will cause a subscription attempt with the specified parameters. Registration can be skipped even with a username and password specified by setting the "redhat/subscription-skip-activation" parameter to true.
+
   The username must have entitlement rights to actiave a subscription for
   Redhat Server Enterprise Linux.
 
@@ -14,3 +16,4 @@ Meta:
   title: "Digital Rebar Community Content"
 Schema:
   type: "string"
+  default: "trial"

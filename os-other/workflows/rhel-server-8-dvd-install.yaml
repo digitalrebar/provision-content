@@ -1,0 +1,24 @@
+---
+Name: rhel-server-8-dvd-install
+Description: Basic RHEL 8 Install (full dvd) Workflow + Runner
+Documentation: |
+  This workflow includes the DRP Runner in RHEL provisioning process for DRP.
+
+  After the install completes, the workflow installs the runner
+  in a waiting state so that DRP will automatically detect and start a
+  new workflow if the Machine.Workflow is updated.
+
+  .. note:: To enable, upload the RHEL ISO as per the ``rhel-server-8-dvd-install`` BootEnv
+
+Meta:
+  color: red
+  icon: linux
+  title: RackN Content
+Stages:
+  - rhel-server-8-dvd-install
+  - redhat-subscription-register
+  - centos-setup-repos
+  - runner-service
+  - finish-install
+  - complete
+

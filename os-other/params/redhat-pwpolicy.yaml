@@ -1,0 +1,47 @@
+---
+Name: "redhat/pwpolicy"
+Description: "An array of 'pwpolicy' configurations for the Kickstart"
+Documentation: |
+  This Param is an array of configuration values to add in to the Kickstart
+  to define the *pwpolicy* directive.  By default, the password policy will
+  be set to:
+
+    ::
+
+      pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+      pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok
+      pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty
+
+  Here are some examples of setting this Param:
+
+  YAML format:
+
+    ::
+
+      redhat/pwpolicy:
+        - "pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty"
+        - "pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok"
+        - "pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty"
+
+
+  JSON format:
+    ::
+
+      [
+        "pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty",
+        "pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok",
+        "pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty"
+      ]
+
+Meta:
+  icon: "file-alt"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default:
+    - "pwpolicy root --minlen=6 --minquality=1 --notstrict --nochanges --notempty"
+    - "pwpolicy user --minlen=6 --minquality=1 --notstrict --nochanges --emptyok"
+    - "pwpolicy luks --minlen=6 --minquality=1 --notstrict --nochanges --notempty"
