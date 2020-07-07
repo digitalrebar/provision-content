@@ -1,0 +1,11 @@
+---
+Name: sledgehammer/mellanox-driver-package
+Description: The direct URL to download the Mellanox Ethernet drivers from
+Documentation: |
+  THis param points at the Mellanox EN source tarball that should be used
+  to install current Mellanox Ehternet drivers from.  Please note that
+  this task only installs the basic Ethernet driver packages, it does not
+  attempt to install the drivers that enable Infiniband or RDMA.
+Schema:
+  type: string
+  default: 'http://www.mellanox.com/downloads/ofed/MLNX_EN-5.0-1.0.0.0/MLNX_EN_SRC-5.0-1.0.0.0.tgz'

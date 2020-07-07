@@ -1,0 +1,36 @@
+---
+Name: sledgehammer/unwanted-kernel-modules
+Description: Kernel modules to omit from Sledgehammer
+Documentation: |
+  The default kernel in Sledgeahmmer includes a lot of additional modules
+  that are neither required nor wanted ion a datacenter provisioning
+  enviromnent.  This parameter controls which drivers we will get rid of.
+Schema:
+  type: array
+  items:
+    type: string
+  default:
+    - drivers/bluetooth
+    # Graphics accelleration.  Deleting this allows us
+    # to remove quite a few large firmware blobs.
+    - drivers/gpu
+    # ISDN support.  Also pulls in several large-ish firmware blobs.
+    - drivers/isdn
+    # CANbus.  You probably are not using this in a datacenter.
+    - drivers/net/can
+    # Wireless.
+    - drivers/net/wireless
+    # Asynchronus transfer mode.  You probably don't have an inordinate
+    # fondness for 53 byte packets transferred over USB.
+    - drivers/usb/atm
+    # USB imaging device support.
+    - drivers/usb/image
+    # Some crazy IoT low power network that uses IPv6 natively.
+    - net/6lowpan
+    # We removed all the drivers, so we don't need the protocol side either.
+    - net/bluetooth
+    # Ditto
+    - net/wireless
+    # Silence is golden. You wouldn't be able to hear anything over
+    # the fans anyways.
+    - sound

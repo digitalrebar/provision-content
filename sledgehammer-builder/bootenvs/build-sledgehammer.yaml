@@ -12,7 +12,7 @@ Loaders:
   arm64-uefi: EFI/BOOT/grubaa64.efi
 OS:
   Family: "redhat"
-  Name: "centos-7"
+  Name: "centos-8"
   SupportedArchitectures:
     x86_64:
       Kernel: "images/pxeboot/vmlinuz"
@@ -87,10 +87,8 @@ Templates:
       %packages
       OpenIPMI
       OpenIPMI-tools
-      aic94xx-firmware
       audit
       authconfig
-      banner
       basesystem
       bash
       bsdtar
@@ -100,6 +98,7 @@ Templates:
       curl
       dhclient
       dmidecode
+      dnf
       dosfstools
       e2fsprogs
       efibootmgr
@@ -141,15 +140,17 @@ Templates:
       nfs-utils
       ntfs-3g
       ntfsprogs
-      ntp
       openssh-clients
       openssh-server
       openssl-libs
       parted
       passwd
       pciutils
+      perl-interpreter
       policycoreutils
       procps-ng
+      python2
+      python36
       rootfiles
       rpm
       rsyslog
@@ -157,11 +158,8 @@ Templates:
       setup
       shadow-utils
       squashfs-tools
-      stress
-      stress-ng
       sudo
       systemd
-      systemd-resolved
       systemd-networkd
       tar
       unzip
@@ -174,6 +172,9 @@ Templates:
       xz
       yum
       zlib
+      {{ range (.Param "sledgehammer/extra-packages") }}
+      {{ . }}
+      {{ end }}
       %end
 
       %pre

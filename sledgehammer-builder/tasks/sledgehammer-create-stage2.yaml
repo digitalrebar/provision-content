@@ -1,0 +1,32 @@
+---
+Name: sledgehammer-create-stage2
+Description: Create the stage 2 squashfs image for Sledgehammer
+Documentation: |
+  This task creates the live squashfs image for Sledgehammer.
+  It is what will wind up ruinning from memory.
+Templates:
+  - Name: create-stage-2
+    Contents: |
+      #!/bin/bash
+      [[ -f /IMAGE/root.squashfs ]] && exit 0
+      echo "Creating root.squashfs.  This may take upwards of 10 minutes"
+      # Clean up resolv.conf now.
+      rm -f /etc/resolv.conf || :
+      mkdir -p /run/systemd/resolve
+      touch /run/systemd/resolve/resolv.conf
+      ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+      # Remove /etc/machine-id
+      rm -f /etc/machine-id || :
+      # Make stage2 first
+      mkdir -p /IMAGE/rootfs
+      grep -q IMAGE/rootfs /proc/self/mounts || mount --bind -o ro / /IMAGE/rootfs
+      cd /IMAGE
+      {{if (eq .Machine.Arch "amd64")}}
+      mksquashfs rootfs root.squashfs.working -comp xz -Xbcj x86 -no-exports -wildcards -ef excludes
+      {{ else if (eq .Machine.Arch "arm64")}}
+      mksquashfs rootfs root.squashfs.working -comp xz -Xbcj arm,armthumb -no-exports -wildcards -ef excludes
+      {{ else }}
+      mksquashfs rootfs root.squashfs.working -comp xz -no-exports -wildcards -ef excludes
+      {{end}}
+      mv root.squashfs.working root.squashfs
+      umount /IMAGE/rootfs

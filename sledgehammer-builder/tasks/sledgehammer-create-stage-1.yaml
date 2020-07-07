@@ -1,0 +1,99 @@
+---
+Name: sledgehammer-create-stage1
+Description: Create the filesystem for the stage 1 initramfs.
+Documentation: |
+  We need the stage1 image to be as small as we can get it, and
+  still be possible to load the stage2 image.  That means
+  that the stage1 image has little more than busybox, a few required
+  modules, and a swuashfs that contains only modules that may be required
+  for fetching the stage2 image.
+Templates:
+  - Name: prepare-stage-1
+    Contents: |
+      #!/bin/bash
+      ARCH={{.Machine.Arch}}
+      bk="$(cd /boot && echo config-*)"
+      bk="${bk#config-}"
+      KERNEL="vmlinuz-${bk}"
+      cd /IMAGE
+      # Make module archive, trimming out things not needed to netboot.
+      [[ -d lib ]] && rm -rf lib
+      mkdir -p lib/modules
+      echo "Copying over required modules and firmware"
+      cp -a "/lib/modules/$bk" lib/modules
+      cd "lib/modules/$bk/kernel"
+      rm -rf drivers/media \
+          drivers/ata \
+          drivers/bluetooth \
+          drivers/cdrom \
+          drivers/firewire \
+          drivers/gpu \
+          drivers/hid \
+          drivers/hwmon \
+          drivers/input/misc \
+          drivers/isdn \
+          drivers/md \
+          drivers/mfd \
+          drivers/mmc \
+          drivers/mtd \
+          drivers/net/can \
+          drivers/net/wireless \
+          drivers/nvme \
+          drivers/parport \
+          drivers/pcmcia \
+          drivers/scsi \
+          drivers/uio \
+          drivers/usb/atm \
+          drivers/usb/image \
+          drivers/usb/misc \
+          drivers/usb/serial \
+          drivers/usb/storage \
+          drivers/uwb \
+          fs/btrfs \
+          fs/ceph \
+          fs/cifs \
+          fs/cramfs \
+          fs/dlm \
+          fs/exofs \
+          fs/ext4 \
+          fs/fat \
+          fs/fuse \
+          fs/gfs2 \
+          fs/isofs \
+          fs/jbd2 \
+          fs/nfs \
+          fs/nfs_common \
+          fs/nfsd \
+          fs/udf \
+          fs/xfs \
+          net/6lowpan \
+          net/bluetooth \
+          net/bridge \
+          net/can \
+          net/ceph \
+          net/openvswitch \
+          net/wireless \
+          sound
+      cd /IMAGE
+      depmod -b $PWD -a "$bk"
+      # Take only the firmware our modules will need.
+      while read -r mod; do
+          while read -r fw; do
+              [[ -f /lib/firmware/$fw ]] || continue
+              mkdir -p "lib/firmware/${fw%/*}"
+              cp "/lib/firmware/$fw" "lib/firmware/$fw"
+          done < <(modinfo -F firmware "$mod")
+      done < <(find lib/modules -type f -name '*.ko*')
+      echo "Making module/firmware archive"
+      find lib |sort |cpio -o -R 0:0 --format=newc |xz -T0 -c >initrd/lib.cpio.xz
+      rm -rf lib
+      echo "Staging bootloader, kernel and busybox for stage1 initramfs"
+      cp /boot/$KERNEL /IMAGE/vmlinuz0
+      cp /boot/efi/EFI/centos/grubx64.efi /IMAGE/grubx64.efi
+      cp /boot/efi/EFI/centos/shimx64.efi /IMAGE/shimx64.efi
+      rpm -e grub2-efi-x64 shim-x64
+      cd /IMAGE/initrd
+      mkdir -p dev proc sys bin lib etc usr/share/udhcpc tmp newinitramfs
+      curl -fgL -o bin/busybox http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/busybox-1.29.3.${ARCH}
+      (cd bin && chmod 755 busybox && ./busybox --install .)
+      chmod 755 init usr/share/udhcpc/default.script

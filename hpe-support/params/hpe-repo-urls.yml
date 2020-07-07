@@ -20,13 +20,13 @@ Schema:
       url: 'https://downloads.linux.hpe.com/SDR/repo/mcp/centos/$releasever/$basearch/$mcp_ver/'
       requireToken: false
     - name: hpsum
-      url: 'https://downloads.linux.hpe.com/SDR/repo/hpsum/redhat/7/$basearch/$hpsum_ver/'
+      url: 'https://downloads.linux.hpe.com/SDR/repo/hpsum/redhat/$releasever/$basearch/$hpsum_ver/'
       requireToken: false
     - name: spp
-      url: 'https://downloads.linux.hpe.com/SDR/repo/spp-$hpe_gen/rhel/7/$basearch/$spp_ver/'
+      url: 'https://downloads.linux.hpe.com/SDR/repo/spp-$hpe_gen/rhel/$releasever/$basearch/$spp_ver/'
       requireToken: false
     - name: stk
-      url: 'https://downloads.linux.hpe.com/SDR/repo/stk/rhel/7/$basearch/$stk_ver/'
+      url: 'https://downloads.linux.hpe.com/SDR/repo/stk/rhel/$releasever/$basearch/$stk_ver/'
       requireToken: false
     - name: fwpp
       url: 'https://downloads.linux.hpe.com/SDR/repo/fwpp-$hpe_gen/$fwpp_ver/'

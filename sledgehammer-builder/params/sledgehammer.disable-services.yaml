@@ -1,0 +1,15 @@
+---
+Name: sledgehammer/disable-services
+Description: Services to ensure are disabled on booting to Sledgehammer
+Documentation: |
+  CentOS has serveral services enabled by default that we don't need
+  in Sledgeahmmer.  This param controls the ones we will disable.
+Schema:
+  type: array
+  items:
+    type: string
+  default:
+    - kdump.service
+    - auditd.service
+    - irqbalance.service
+    - remote-fs.target
