@@ -18,14 +18,22 @@ Templates:
 
     {{template "setup.tmpl" .}}
 
-    icon=$(drpcli machines meta get $RS_UUID icon)
-    color=$(drpcli machines meta get $RS_UUID color)
+    if icon=$(drpcli machines meta get $RS_UUID icon) ; then
+      echo "icon is $icon"
+    else
+      icon='server'
+    fi
+    if color=$(drpcli machines meta get $RS_UUID color) ; then
+      echo "icon color is $color"
+    else
+      icon='black'
+    fi
 
     {{ $wait := (.Param "dev/wait-time") }}
     {{ range $index, $icon := (.Param "dev/wait-icons") -}}
       echo "wait cycle {{$index}}"
       drpcli machines meta set $RS_UUID key icon to "{{$icon}}"
-      drpcli machines meta set $RS_UUID key color to "green"
+      drpcli machines meta set $RS_UUID key color to "brown"
       sleep {{ $wait }}
     {{ else -}}
       echo "no icons defined, no wait"
