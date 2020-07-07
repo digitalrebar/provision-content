@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# install tools in prep of KVM install
+
+set -e
+
+osfamily=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+
+xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+
+case $osfamily in
+  centos|redhat|fedora|oel)
+    inst=$(which yum 2> /dev/null)
+    [[ -z "$inst" ]] && inst=$(which dnf 2> /dev/null)
+    [[ -z "$inst" ]] && xiterr 1 "oops, how to install on '$osfamily'? (it ain't 'yum' or 'dnf')."
+    $inst -y makecache
+    PKGS="xz"
+  ;;
+  debian|ubuntu)
+    export DEBIAN_FRONTEND=noninteractive
+    inst='apt'
+    apt -y update
+    apt -y install apt-utils
+    PKGS="xz-utils"
+  ;;
+  *) echo "Ask my masters for help, I don't know what to do for '$osfamily'."; exit 1;;
+esac
+
+TOOLS="bsdtar git wget curl $PKGS"
+printf "# install tools :: %s\n" "$TOOLS"
+$inst -y install $TOOLS
+
+exit 0

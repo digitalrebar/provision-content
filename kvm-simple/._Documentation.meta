@@ -1,0 +1,20 @@
+KVM Simple
+----------
+
+This content pack does a very fast and opinionated basic (simple)
+installation of KVM on the following systems:
+
+  * CentOS 7
+  * CentOS 8
+  * Ubuntu 18.04
+
+Other distros that track compatibility with the above versions, package
+names, and command structures may potentially work too.
+
+No post-install configuration or setup of the KVM environment is done
+at this time.  For example, no Bridges or network related configurations
+for the Virtual machines.
+
+Additionally - the default DHCP service (likely ``dnsmasq``) is still running,
+which may present a potential conflict with the DRP Endpoint DHCP services
+if they are on the same Layer 2 network as the KVM hypervisor systems.

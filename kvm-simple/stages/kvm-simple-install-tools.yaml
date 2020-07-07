@@ -1,0 +1,12 @@
+---
+Name: "kvm-simple-install-tools"
+Description: "Install prep tools for KVM hypervisor install."
+Documentation: |
+  This Stage installs nice to have tools for the KVM Hypervisor.
+
+Tasks:
+  - "kvm-simple-intall-tools"
+Meta:
+  icon: "clone outline"
+  color: "blue"
+  title: "RackN Content"
