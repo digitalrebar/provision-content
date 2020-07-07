@@ -11,6 +11,7 @@ Stages:
   - "packer-builder-prep"
   - "packer-builder-git-packer"
   - "packer-builder-build-image"
+  - "packer-builder-upload-to-drp"
 Meta:
   color: "purple"
   icon: "terminal"

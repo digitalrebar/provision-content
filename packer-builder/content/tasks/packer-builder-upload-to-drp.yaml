@@ -1,0 +1,63 @@
+---
+Name: "packer-builder-upload-to-drp"
+Description: "Upload all Images specified in the 'packer-builer/upload-image' param"
+Documentation: |
+  The param ``packer-builder/upload-image`` gets set with a list of built
+  images that are finalized and ready for Image Deploy via DRP.
+
+  Uploads it to the Digital Rebar Files service location.  If an image exists
+  at the specified path, it'll be overwritten.
+
+ExtraClaims:
+  - scope: "files"
+    action: "post"
+    specific: "/images/builder/*"
+  - scope: "files"
+    action: "*"
+    specific: "*"
+  - scope: "files"
+    action: "delete"
+    specific: "/images/builder/*"
+
+Templates:
+  - Name: "packer-builder-build-image"
+    Meta:
+
+    Contents: |
+      #!/usr/bin/env bash
+      # Upload packer builder images to the Files server /images/builder location
+      # NOTE: Requires ExtraClaims to POST the files
+
+      {{ template "setup.tmpl" . }}
+
+      IMAGE={{ .Param "packer-builder/upload-image" }}
+
+      [[ -z "$IMAGE" ]] && xiterr 1 "No image specified in 'packer-builder/upload-image' Param."
+      UPLOAD="images/builder/$(basename $IMAGE)"
+      SIZE=$(ls -l $IMAGE | awk ' { print $5 } ' )
+      HUMAN=$(ls -lh $IMAGE | awk ' { print $5 } ' )
+
+      [[ "$SIZE" -ge 1000000000 ]] && MSG="Your image size ($HUMAN) is greater than 1GB, it may take a long time" || MSG="Your upload image size is '$HUMAN'"
+
+      if [[ -r "$IMAGE" ]]
+      then
+        echo ""
+        echo ">>> Source image file to upload:  '$IMAGE'"
+        echo ">>> Uploaded image location set to:  '$UPLOAD'"
+        echo ">>> NOTE - $MSG, and no progress display will be shown."
+        echo ">>> Upload process has been initiated ... please wait a while ... "
+        time drpcli files upload "$IMAGE" as "$UPLOAD"
+        echo ">>> COMPLETED image upload!"
+        echo ""
+      else
+        xiterr 1 "Unable to read image '$IMAGE' on target system."
+      fi
+
+      echo ">>> Removing Param ('packer-builder/upload-image') from machine since upload succeeded."
+      drpcli machines remove $RS_UUID param "packer-builder/upload-image"
+
+Meta:
+  icon: "caret square down"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"

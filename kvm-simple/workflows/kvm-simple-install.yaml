@@ -1,0 +1,14 @@
+---
+Name: "kvm-simple-install"
+Description: "Setup KVM hypervisor installation and tools."
+Documentation: |
+  This workflow installs KVM Hypervisor and a few supporting
+  tools.
+
+Stages:
+  - "kvm-simple-install-tools"
+  - "kvm-simple-kvm-setup"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

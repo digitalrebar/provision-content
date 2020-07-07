@@ -33,6 +33,24 @@ Templates:
         TMPDIR=$(pwd)/tmp PACKER_NO_COLOR=1 PACKER_OPTIONS="-var-file=$VAR_FILE" PACKER_LOG=1 make build-$TARGET
       fi
 
+      # our Packer Builder produces the following in the 'complete' directory:
+      #   real directory: windows-10-1909-amd64-libvirt
+      # Param definition: windows-10-1909-libvirt
+      # We have to inject 'amd64' because (for now), the only architecture supported
+      # is amd64.fix this in future if we add more architectures
+      H=$(echo $TARGET | awk -F"-" ' { print $NF } ')
+      T=$(echo $TARGET | sed "s/$H/amd64-$H/")
+      IMAGE="$WORK/packer-builder/packer/complete/$T/$T.img.xz"
+
+      if [[ -r "$IMAGE" ]]
+      then
+        drpcli machines set $RS_UUID param packer-builder/upload-image to "$IMAGE"
+      else
+        echo ">>> DEBUG:"
+        find $WORK
+        xiterr 1 "Built image was not found to set upload Param ('packer-builder/upload-image') (tried: '$IMAGE')"
+      fi
+
 Meta:
   icon: "caret square down"
   color: "blue"

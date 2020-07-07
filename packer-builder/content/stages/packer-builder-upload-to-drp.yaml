@@ -1,0 +1,14 @@
+---
+Name: "packer-builder-upload-to-drp"
+Description: "Upload an image to DRP specified by the 'packer-builder/upload-image' param"
+Documentation: |
+  This stage uploads an image that is specified in the Param named ``packer-builder/upload-image``,
+  to the DRP endpoint.  This is typically used after the ``packer-builder-build-image``
+  Stage to push the image to DPR for deployment by the *Image Deploy* plugin.
+
+Tasks:
+  - "packer-builder-upload-to-drp"
+Meta:
+  icon: "upload"
+  color: "green"
+  title: "RackN Content"

@@ -1,0 +1,15 @@
+---
+Description: "Install tools on the system."
+Name: "kvm-simple-intall-tools"
+Documentation: |
+  Installs prerequisite and useful to have tools for the KVM hypervisor
+  environment.
+
+Templates:
+  - Name: "kvm-simple-intall-tools"
+    ID: "kvm-simple-intall-tools.sh.tmpl"
+Meta:
+  icon: "caret square down"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"
