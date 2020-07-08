@@ -1,0 +1,23 @@
+---
+Name: "EXAMPLE-govc-about-test"
+Description: "EXAMPLE govc command profile"
+Documentation: |
+  .. warning:: THIS IS AN EXAMPLE - you must modify values to fit your
+               local environment appropriately.
+
+  Runs the simple ``govc about`` command on a test ESXi instance.
+
+  .. note:: Running the ``govc-command`` Workflow without a ``govc/command``
+            Param value setting will also run the ``govc about`` test.
+
+Meta:
+  color: "grey"
+  icon: "terminal"
+  title: "EXAMPLE GOVC Profile"
+Params:
+  govc/command: "about"
+  govc/url: "192.168.124.4"
+  govc/username: "root"
+  govc/password: "RocketSkates"
+  govc/insecure: true
+Profiles: []

@@ -7,11 +7,11 @@ Documentation: |
   task.
 
   The operator must also specify the remote vSphere ESXi or vCenter resource to
-  connect to, to execute ``govc`` commands against.  This is accomplished either
-  by setting the ``govc/url`` Param, or the individual ``govc/username``,
-  ``govc/password``, ``govc/node``, and optionally ``govc/port`` (if using a
-  non-standrd Port.  See the documentation for each of those Params for more
-  details.
+  connect to, to execute ``govc`` commands against.  This is accomplished
+  by setting the ``govc/url`` Param, and the individual ``govc/username``,
+  ``govc/password``, and optionally ``govc/port`` (if using a non-standard Port).
+
+  See the documentation for each of those Params for more details.
 
   Many of the GoVC commands require a JSON configuration that defines more the
   values for customizing.  In these cases, use the ``govc/template-json`` param
@@ -28,13 +28,15 @@ Documentation: |
 
 RequiredParams:
   - "govc/command"
-OptionalParams:
   - "govc/url"
-  - "govc/insecure"
   - "govc/username"
   - "govc/password"
-  - "govc/node"
+OptionalParams:
+  - "govc/insecure"
   - "govc/port"
+  - "govc/ova-location"
+  - "govc/ova-type"
+  - "govc/ova-version"
   - "govc/template-json"
 Templates:
   - Name: "govc-command.sh"

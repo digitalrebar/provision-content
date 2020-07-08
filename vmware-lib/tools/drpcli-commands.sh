@@ -2,12 +2,12 @@
 
 # commands to run after building container tar files
 
-contexts="vcsa-deploy-context:latest govc-context:latest context-runner-context:latest"
+#contexts="vcsa-deploy-context:latest govc-context:latest context-runner-context:latest"
+contexts="vcsa-deploy-context:latest govc-context:latest"
 
-# run as:  CONTEXT=1 ./drpcli-commands.sh
-# if you want to run the context upload to DRP - if they are not already in
-# another content pack
-SKIP_CONTEXT=${CONTEXT:-0}
+# run as:  CONTEXT=0 ./drpcli-commands.sh
+# if your contexts are already installed on the DRP Endpoint
+SKIP_CONTEXT=${CONTEXT:-1}
 
 set -e
 
@@ -20,7 +20,7 @@ main () {
 
     drpcli files upload dockerfiles/dockerfile-$name.tar as "contexts/docker-context/$image"
 
-    (( $CONTEXT )) && contexts || echo "Skipping check/create contexts (must already be in your content packs, eh?)."
+    context $name $image
 
     echo "Installing Container for $context named from $image"
     drpcli plugins runaction docker-context imageUpload         \
@@ -29,22 +29,24 @@ main () {
   done
 }
 
-contexts() {
-  if drpcli contexts exists $name > /dev/null 2>&1
-  then
-    echo "context ('$name') already exists - doing nothing"
-  else
+context() {
+  local _name=$1
+  local _image=$2
 
-    echo ""
-    echo "Assuming your RS_ENDPOINT and other env vars are set right to address your DRP Endpoint."
-    echo ""
+  echo "Checking context name '$_name' with image tag '$_image'".
+
+  if drpcli contexts exists $_name > /dev/null 2>&1
+  then
+    echo "context ('$_name') already exists - doing nothing, hopefully it's right !!!"
+  else
+    echo "creating context '$_name' from tag '$_image' now ... "
 
     cat <<EOF | drpcli contexts create -
 ---
-Name: "$name"
-Description: "$name context using image $image"
+Name: "$_name"
+Description: "$_name context using image $_image"
 Engine: "docker-context"
-Image: "$image"
+Image: "$_image"
 Meta:
   icon: "cube"
   color: "blue"

@@ -11,6 +11,7 @@ Documentation: |
 
 Stages:
   - "govc-command"
+  - "govc-complete"
 Meta:
   color: "purple"
   icon: "terminal"
