@@ -41,16 +41,39 @@ Templates:
 
       [[ ! -r "$TMPL" ]] && xiterr 1 "Unable to read JSON template '$TMPL', make sure previous tasks render this for us."
 
-      U="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.username") | .Value')"
+      U="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.username") | .Value' | cut -d"@" -f1)"
+      D="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.domain-name") | .Value')"
       P="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.vmdir.password") | .Value')"
       A="$(cat $TMPL | $JQ -r '.PropertyMapping | .[] | select(.Key=="guestinfo.cis.appliance.net.addr") | .Value')"
-      VCENTER_URL="https://${U}:${P}@${A}/sdk"
+
+      T={{ .Param "govc/ova-type" }}
+      V={{ .Param "govc/ova-version" }}
+      RULE="${T}:${V}"
+
+      if [[ "$RULE" != ":" ]]
+      then
+       echo "Requesting OVA processing rule override for '$RULE'."
+        case "$RULE" in
+          vcsa:7)  echo "Overriding '$U' username with 'administrator'."
+                   U="administrator"
+          ;;
+          *)  echo "Requested a rule override, but no processing rule found for '$RULE'"
+              echo "Supported rules are 'vcsa:7'"
+          ;;
+        esac
+      else
+        echo "NOTICE: no 'govc/ova-type' and 'govc/ova-version' rules applied."
+      fi
+
+      # this worked in vcsa 6.x but not 7.x
+      #VCENTER_URL="https://${U}:${P}@${A}/sdk"
 
       # set up timer/loops in seconds - yes it can take a REALLY long time for VCSA to
       # fully come up on the network - benchmarked 45 minutes in some cases
       COUNTER=0
       TIMER=30
       LOOPS=120
+      NOT_SEEN=1
       (( WAIT = LOOPS * TIMER ))
 
       echo ""
@@ -60,13 +83,34 @@ Templates:
       echo ""
 
       run_govc() {
-        local _cmd="govc about -persist-session=false -k=true -u=$VCENTER_URL > /tmp/about.txt 2>&1"
+        # set as local scope, so if we switch back control previous values are retained
+        local GOVC_USERNAME GOVC_PASSWORD GOVC_URL
+        export GOVC_USERNAME="${U}@${D}"
+        export GOVC_PASSWORD="${P}"
+        export GOVC_URL="${A}"
+        local _cmd="govc about -persist-session=false -k=true > /tmp/about.txt 2>&1"
+
+        if (( $NOT_SEEN ))
+        then
+          echo "GOVC environment variables:"
+          echo "---------------------------"
+          if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+          then
+            echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+            env | grep -v grep | grep "GOVC_"
+          else
+            echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+            env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+          fi
+          NOT_SEEN=0
+        fi
+
         if eval $_cmd
         then
           return 0
         else
           echo ""
-          echo "!!! failed command:  '$_cmd'"
+          echo ">>> VCSA Not Ready:  '$_cmd'"
           echo ""
           return 1
         fi
@@ -76,7 +120,7 @@ Templates:
       do
         if run_govc
         then
-          echo "'govc about' returned results, API appears to be up, with returned info of:"
+          echo "API appears to be up, returned the following info:"
           echo ""
           cat /tmp/about.txt
           COMPLETE="true"

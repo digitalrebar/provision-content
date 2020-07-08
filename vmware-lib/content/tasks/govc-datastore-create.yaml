@@ -7,12 +7,11 @@ Documentation: |
 RequiredParams:
   - "govc/datastore-create-disk"
   - "govc/datastore-create-name"
-OptionalParams:
   - "govc/url"
-  - "govc/insecure"
   - "govc/username"
   - "govc/password"
-  - "govc/node"
+OptionalParams:
+  - "govc/insecure"
   - "govc/port"
 Templates:
   - Name: "govc-create-datastore.sh"
@@ -53,6 +52,7 @@ Templates:
         then
           DISK=$(echo "$AVAIL" | head -1)
         else
+          echo "*****************************************************"
           xiterr 1 "No available disks to create datastore on."
         fi
       }

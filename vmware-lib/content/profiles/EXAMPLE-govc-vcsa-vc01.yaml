@@ -1,7 +1,10 @@
 ---
-Name: "govc-vcsa-vc01"
-Description: "govc VCSA deployment test profile for ewr1 test environment"
+Name: "EXAMPLE-govc-vcsa-vc01"
+Description: "EXAMPLE govc VCSA deployment test profile"
 Documentation: |
+  .. warning:: THIS IS AN EXAMPLE - you must modify values to fit your
+               local environment appropriately.
+
   Runs ``govc`` to deploy a test VCSA deployment.  Requires that the VCSA configuration
   JSON file be saved to the context container as ``/tmp/template.json`` prior to the
   command being run.
@@ -12,11 +15,16 @@ Documentation: |
 Meta:
   color: "grey"
   icon: "terminal"
-  title: "GOVC VCSA Test Profile"
+  title: "EXAMPLE GOVC VCSA Profile"
 Params:
-  govc/command: "import.ova -options=/tmp/template.json http://147.75.65.75:8091/files/images/vcsa.ova"
+  govc/command: "import.ova"
+  govc/ova-location: "http://10.10.10:8091/files/images/vcsa-7.ova"
+  govc/ova-type: "vcsa"
+  govc/ova-version: "7"
   govc/template-json: "govc-vcsa-vc01.json.tmpl"
-  govc/url: "root:RocketSkates1!@139.178.66.98"
+  govc/url: "10.10.10.98"
+  govc/username: "root"
+  govc/password: "RocketSkates1"
   govc/insecure: true
   govc/datastore: "datastore1"
   govc/network: "VM Network"

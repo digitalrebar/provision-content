@@ -11,7 +11,7 @@ Documentation: |
     * ``docker pull digitalrebar/govc``
 
 Engine: "docker-context"
-Image: "digitalrebar/govc"
+Image: "digitalrebar-govc"
 Meta:
   color: blue
   icon: terminal

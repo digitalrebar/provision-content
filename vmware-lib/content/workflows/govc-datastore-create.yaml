@@ -25,6 +25,7 @@ Documentation: |
 
 Stages:
   - "govc-datastore-create"
+  - "govc-complete"
 Meta:
   color: "purple"
   icon: "terminal"

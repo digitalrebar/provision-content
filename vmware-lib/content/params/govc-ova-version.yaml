@@ -1,0 +1,27 @@
+---
+Name: "govc/ova-version"
+Description: "The OVA appliance version that is being deployed (optional - maybe)."
+Documentation: |
+  The version of the OVA Resource that is deployed via the ``govc/command``.
+
+  Various OVA appliances exhibit unique and strange behaviors that need to be
+  accounted for by the Digital Rebar deployment tooling at times.
+
+  For example, the VCSA 6.x OVA deployment; when complete, uses 'root@vsphere.local'
+  account name.  This is used by the ``govc-wait-for-vcenter`` task to verify
+  the API is fully up, and the deployment is complete.  *However*, in VCSA 7.x
+  the username is secretly and mystically changed to 'administrator@vsphere.local'.
+
+  Setting the ``govc/ova-type`` to ``vcsa``, and this Param to ``7``, allows the
+  tooling to switch auth accounts.
+
+  In the future, if unique rules in various places are required, then the combination
+  of "ova-type" and "ova-version" can be codified in the tooling to react accordingly.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

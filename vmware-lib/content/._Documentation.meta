@@ -177,3 +177,11 @@ Example Profile for vCenter deployment:
 Save the above to file, and use drpcli to add to your Endpoint (eg ``drpcli profiles create vcenter.yaml``,
 then add the Profile to the Context Machine that will deploy the vCenter VCSA OVA.
 
+
+Example GOVC Usage
+==================
+
+A (begining of) a collection of useful resources for understanding how to
+use ``govc`` to manage vSphere resources.
+
+  * `Collabnix Labs: Managing vSphere with GOVC <https://github.com/collabnix/govc>`_

@@ -1,23 +1,24 @@
 #!/usr/bin/env bash
 # build docker container TGZ from the dockerfiles/* files
 
-CONTAINERS=${*:-"$(ls -1 dockerfiles/dockerfile-*)"}
+CONTAINERS=${*:-"$(ls -1 dockerfiles/dockerfile-* | grep -v "\.tar$")"}
 
 set -e
 
 for C in $CONTAINERS
 do
-  N=$(echo $C | sed 's/^dockerfile-//')
-  I="digitalrebar/$N"
+  D=$(dirname $C)
+  N=$(echo $C | sed "s|^$D/dockerfile-||")
+  I="digitalrebar-$N"
   T="${C}.tar"
 
-  [[ -r "$T" ]] && rm -f $T
+  [[ -r "$D/$T" ]] && rm -f $D/$T
 
   echo ">>> BUILDING $I"
-  docker build . --file=$C --tag=$I
-  docker save $I > $T
+  docker build . --file=$D/$C --tag=$I
+  docker save $I > $D/$T
 
-  [[ -s "$T" ]] && echo ">>> SAVED as $T" || echo "!!!!!!!!!! zero length: $T"
+  [[ -s "$D/$T" ]] && echo ">>> SAVED as $T" || echo "!!!!!!!!!! zero length: $D/$T"
 
   echo ""
 done

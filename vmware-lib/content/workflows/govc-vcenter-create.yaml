@@ -16,24 +16,32 @@ Documentation: |
 
   **vSphere ESXi deployment target**
 
+  required:
+
     * ``govc/url``
-
-  or
-
     * ``govc/username``
     * ``govc/password``
-    * ``govc/node``
-    * ``govc/port`` _(optional)_
+
+  optional:
+
+    * ``govc/port``
+    * ``govc/ova-location``
+    * ``govc/ova-type``
+    * ``govc/ova-version``
 
   The VCSA OVA file must be staged and made available, and referenced in
   the ``govc/ova-location`` Param.  See the full documentation for additional
   configuration Params that are available.
+
+  .. note:: The ``govc-ova-stage`` Stage downloads and stages an OVA based on
+            the ``govc/ova-location`` URL.
   
 Stages:
   - "govc-datastore-create"
   - "govc-ova-stage"
   - "govc-vcenter-create"
   - "govc-wait-for-vcenter"
+  - "govc-complete"
 Meta:
   color: "purple"
   icon: "terminal"
