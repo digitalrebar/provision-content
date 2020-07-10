@@ -9,16 +9,16 @@ for C in $CONTAINERS
 do
   D=$(dirname $C)
   N=$(echo $C | sed "s|^$D/dockerfile-||")
-  I="digitalrebar-$N"
+  I="$N"
   T="${C}.tar"
 
-  [[ -r "$D/$T" ]] && rm -f $D/$T
+  [[ -r "$T" ]] && rm -f $T
 
   echo ">>> BUILDING $I"
-  docker build . --file=$D/$C --tag=$I
-  docker save $I > $D/$T
+  docker build . --file=$C --tag=$I
+  docker save $I > $T
 
-  [[ -s "$D/$T" ]] && echo ">>> SAVED as $T" || echo "!!!!!!!!!! zero length: $D/$T"
+  [[ -s "$T" ]] && echo ">>> SAVED as $T" || echo "!!!!!!!!!! zero length: $T"
 
   echo ""
 done

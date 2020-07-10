@@ -11,7 +11,7 @@ Documentation: |
     * ``docker pull digitalrebar/vcsa-deploy``
 
 Engine: "docker-context"
-Image: "digitalrebar-vcsa-deploy"
+Image: "vcsa-deploy:latest"
 Meta:
   color: orange
   icon: terminal

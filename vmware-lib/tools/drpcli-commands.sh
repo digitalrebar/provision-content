@@ -15,8 +15,9 @@ main () {
   for context in $contexts
   do
     name=$(echo $context | sed 's/-context:.*$//g' )
+    ver=$(echo $context | sed 's/^.*-context:\(.*\)$/\1/g' )
     # should plumb version tags in here
-    image="digitalrebar-$name"
+    image="$name:$ver"
 
     drpcli files upload dockerfiles/dockerfile-$name.tar as "contexts/docker-context/$image"
 
@@ -37,7 +38,8 @@ context() {
 
   if drpcli contexts exists $_name > /dev/null 2>&1
   then
-    echo "context ('$_name') already exists - doing nothing, hopefully it's right !!!"
+    echo "context ('$_name') already exists - doing nothing, hopefully it's right"
+    echo "if 'vmware-lib' was installed already, then it was added by that"
   else
     echo "creating context '$_name' from tag '$_image' now ... "
 
