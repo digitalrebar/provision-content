@@ -159,9 +159,14 @@
   ],
   "post-processors": [
     {
-      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}} {{user `complete_directory`}} {{build_name}}"],
+      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
       "type": "shell-local",
-      "script": "scripts/post-processor-check.sh"
+      "inline": "scripts/post-processor-check.sh {{user `complete_directory`}} {{build_name}}"
+    },
+    {
+      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
+      "type": "shell-local",
+      "inline": "scripts/post-processor-convert.sh {{user `complete_directory`}} {{build_name}}"
     },
     {
       "type": "vagrant",
