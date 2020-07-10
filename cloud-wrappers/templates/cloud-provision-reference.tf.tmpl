@@ -84,7 +84,7 @@ resource "aws_instance" "drp_node" {
 		Name 		= "{{ .Machine.Name }}"
 		DRP_ID		= "{{ .Machine.Uuid }}"
 		Provisoner	= "DigitalRebar"
-	{{ range $i, $p := .Machine.Profiles -}}
+	{{ range $i, $p := .Machine.Profiles }}
 		{{$p}}		= "DRP-Profile{{$i}}"
 	{{- end }} }
 	{{ if .ParamExists "rsa/key-public" -}}
