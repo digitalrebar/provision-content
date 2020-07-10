@@ -15,10 +15,8 @@ main() {
       inst=$(which yum 2> /dev/null)
       [[ -z "$inst" ]] && inst=$(which dnf 2> /dev/null)
       [[ -z "$inst" ]] && xiterr 1 "oops, how to install on '$osfamily'? (it ain't 'yum' or 'dnf')."
-      PKGS="libvirt libvirt-python iptables-services virt-install OVMF"
       setup_redhat $VERSION_ID
        $inst -y makecache
-      POST="ln -s /usr/share/OVMF/x86/OVMF_CODE.fd /usr/share/OVMF/OVMF.fd"
     ;;
     debian|ubuntu)
        inst=apt
@@ -44,6 +42,8 @@ main() {
 setup_redhat() {
 case $1 in
   7)
+    echo "Setting up Repos for CentOS 7..."
+    PKGS="libvirt libvirt-python iptables-services virt-install OVMF"
 cat << EOF-REPO > /etc/yum.repos.d/CentOS-Virt.repo
 # CentOS-Virt
 [virt-libvirt-latest]
@@ -62,6 +62,12 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 EOF-REPO
     yum -y makecache
     yum -y install epel-release
+    POST="ln -s /usr/share/OVMF/x86/OVMF_CODE.fd /usr/share/OVMF/OVMF.fd"
+  ;;
+  8)
+    echo "CentOS 8 OS detected..."
+    PKGS="libvirt virt-install OVMF"
+    dnf -y install epel-release
   ;;
   *)
     xiterr 1 "Don't know how to do '$ID' version '$1' package repo setup for KVM. [in setup_redhat()]"
