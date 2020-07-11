@@ -52,6 +52,6 @@ else
   drpcli catalog item install vmware-lib
 fi
 
-tools/dockerhub-containers.sh
+#tools/dockerhub-containers.sh
 tools/drpcli-commands.sh
 tools/drpcli-create-machines.sh

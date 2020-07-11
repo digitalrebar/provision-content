@@ -1,15 +1,15 @@
 ---
-Name: "govc-wait-for-vcenter"
-Description: "Wait for API access to the newly deployed vCenter instance."
+Name: "govc-wait-for-ova"
+Description: "Wait for API access to the newly deployed OVA instance."
 Documentation: |
-  This Stage blocks and waits until the vCenter service API is fully
+  This Stage blocks and waits until the deployed OVA service API is fully
   avaialble after deployment.  The stage uses the _govc about_ which
   requires API access to get the _about_ details from the remote
   API service.
 
 Tasks:
   - "context:govc"
-  - "govc-wait-for-vcenter"
+  - "govc-wait-for-ova"
 Meta:
   icon: "terminal"
   color: "black"

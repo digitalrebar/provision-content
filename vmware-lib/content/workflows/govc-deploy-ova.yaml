@@ -1,0 +1,48 @@
+---
+Name: "govc-deploy-ova"
+Description: "Use 'govc' context to deploy OVA resources to vSphere"
+Documentation: |
+  This workflow first stages the a specified OVA inside the container context,
+  creates an appliance from teh deployed OVA via the ``govc`` command, and then waits
+  for the API services to become available.
+
+  This process can take upwards of 60 minutes to complete.
+
+  The deployment is controlled by the following Param settings.
+
+  **OVA location param**
+
+    * ``govc-ova-location`` = URL location of the OVA appliance
+
+  **vSphere ESXi deployment target**
+
+  required:
+
+    * ``govc/url`` = URL for the vSphere target to deploy the OVA to (eg. ESXi or vCenter)
+    * ``govc/username`` = Username on the vSphere target to deploy to
+    * ``govc/password`` = Password on the vSphere target to deploy to
+    * ``govc-ova-location`` = URL location of the OVA appliance
+
+  optional:
+
+    * ``govc/port`` = optional non-standard port of the govc/url
+    * ``govc/ova-type`` = used (along with govc/ova-version) to create custom rules
+    * ``govc/ova-version`` = used (along with govc/ova-type) to create custom rules
+
+  The VCSA OVA file must be staged and made available, and referenced in
+  the ``govc/ova-location`` Param.  See the full documentation for additional
+  configuration Params that are available.
+
+  .. note:: The ``govc-stage-ova`` Stage downloads and stages an OVA based on
+            the ``govc/ova-location`` URL.
+  
+Stages:
+  - "govc-datastore-create"
+  - "govc-stage-ova"
+  - "govc-deploy-ova"
+  - "govc-wait-for-ova"
+  - "govc-complete"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

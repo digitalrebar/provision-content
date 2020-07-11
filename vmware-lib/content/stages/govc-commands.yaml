@@ -1,17 +1,15 @@
 ---
-Name: "govc-vcenter-create"
-Description: "Run govc command in GoVMOMI enabled context container."
+Name: "govc-commands"
+Description: "Run govc commands in GoVMOMI enabled context container."
 Documentation: |
-  This Stage runs a _govc_ command specified by the ``govc/command``
+  This Stage runs a _govc_ command specified by the ``govc/commands``
   Parameter in the _govc_ context container.  If not command is
   specified, the default action is to simply run ``govc about`` against
   the remote specified ESXi or vCenter API service.
 
-Params:
-  govc/command: "import.ova -options=/ova/template.json"
 Tasks:
   - "context:govc"
-  - "govc-command"
+  - "govc-commands"
 Meta:
   icon: "terminal"
   color: "black"

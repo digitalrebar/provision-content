@@ -7,7 +7,7 @@ Documentation: |
 
   Runs the simple ``govc about`` command on a test ESXi instance.
 
-  .. note:: Running the ``govc-command`` Workflow without a ``govc/command``
+  .. note:: Running the ``govc-command`` Workflow without a ``govc/commands``
             Param value setting will also run the ``govc about`` test.
 
 Meta:
@@ -15,7 +15,8 @@ Meta:
   icon: "terminal"
   title: "EXAMPLE GOVC Profile"
 Params:
-  govc/command: "about"
+  govc/commands:
+    - "about"
   govc/url: "192.168.124.4"
   govc/username: "root"
   govc/password: "RocketSkates"

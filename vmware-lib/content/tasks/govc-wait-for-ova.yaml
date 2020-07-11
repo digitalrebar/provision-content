@@ -1,6 +1,6 @@
 ---
-Description: "A task wait for vCenter API availability"
-Name: "govc-wait-for-vcenter"
+Description: "A task wait for appliance OVA API to become available"
+Name: "govc-wait-for-ova"
 Documentation: |
   Simple task to wait until the remote vSphere deployed resource responds correctly
   to a ``govc about`` request call.
@@ -9,10 +9,10 @@ RequiredParams:
   - "govc/template-json"
 OptionalParams:
 Templates:
-  - Name: "govc-wait-for-vcenter.sh"
+  - Name: "govc-wait-for-ova.sh"
     Contents: |
       #!/bin/bash
-      # Wait for vCenter API to become available.
+      # Wait for OVA API to become available.
       # RackN Copyright 2020
 
       {{ template "setup.tmpl" .}}

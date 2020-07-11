@@ -3,7 +3,7 @@ Name: "govc/url"
 Description: "ESXi or vCenter URL resource to connect to."
 Documentation: |
   The VMware ESXi or vCenter URL resource to connect to, to execute a
-  ``govc/command`` against.
+  ``govc/commands`` against.
 
   * Example:  ``192.168.1.10``
   * Example:  ``vc01.example.com``
@@ -15,6 +15,7 @@ Documentation: |
   Required:
   ::
 
+    govc/url:  192.168.124.109
     govc/username:  root
     govc/password:  s3cr3t
 
