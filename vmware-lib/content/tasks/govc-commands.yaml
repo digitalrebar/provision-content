@@ -88,12 +88,9 @@ Templates:
         if [[ -r "/ova/import.ova" ]]
         then
           CMD="$CMD /ova/import.ova"
-          POST_RUN='[[ -r /ova/template.json ]] && rm -f /ova/template.json'
         else
           xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
         fi
-      else
-        POST_RUN=""
       fi
 
       # sigh ... are we going to need to throttle calls with sleep timers and other fun stuff ? 
@@ -107,7 +104,6 @@ Templates:
       echo ""
       echo "==== DONE ===="
       echo ""
-      [[ -n "$POST_RUN" ]] && eval $POST_RUN
       {{ end -}}
 
       exit 0
