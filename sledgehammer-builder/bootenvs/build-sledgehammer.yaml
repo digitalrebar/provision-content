@@ -179,7 +179,7 @@ Templates:
 
       %pre
       {{ range $intf := .Param "sledgehammer/extra-ifs" }}
-      dhclient --no-pid {{ $intf }}
+      nmcli con add type ethernet con-name {{ $intf }} ifname {{ $intf }}
       {{end}}
       %end
 
