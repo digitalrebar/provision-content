@@ -55,6 +55,8 @@ Templates:
 
       [[ -r /ova/template.json ]] && rm -f /ova/template.json
 
+      TMPL=""
+
       {{ if .ParamExists "govc/template-json" -}}
       {{ $dot := . -}}
       {{ $govctmpl := .Param "govc/template-json" -}}
@@ -62,6 +64,8 @@ Templates:
       cat <<EOTMPL > /ova/template.json
       {{ $dot.CallTemplate $govctmpl $dot }}
       EOTMPL
+
+      TMPL="-options=/ova/template.json"
 
       echo "===== BEGIN TEMPLATE DEBUG ===="
       echo ""
@@ -87,7 +91,7 @@ Templates:
       then
         if [[ -r "/ova/import.ova" ]]
         then
-          CMD="$CMD /ova/import.ova"
+          CMD="$CMD $TMPL /ova/import.ova"
         else
           xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
         fi

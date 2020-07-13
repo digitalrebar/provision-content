@@ -29,6 +29,13 @@ Templates:
       which wget > /dev/null 2>&1 && { CMD="wget"; OPTS="-O"; }
       mkdir -p /ova
       OVA='{{ .ParamExpand "govc/ova-location" }}'
+      [[ -z "$OVA" ]] && xiterr 1 "No OVA supplied in 'govc/ova-location' param."
+      if wget --spider "$OVA"
+      then
+        echo "OVA URL appears to be accessible"
+      else
+        xiterr 1 "URL test failed, unable to get OVA URL: '$OVA'"
+      fi
       echo "Getting OVA: '$OVA'"
       $CMD $OPTS /ova/import.ova "$OVA"
       {{ else -}}
