@@ -1,10 +1,11 @@
 ---
-Name: "govc-command"
+Name: "govc-commands"
 Description: "A task to run govc commands against remote vSphere vCenter or ESXi instances"
 Documentation: |
-  This task executes a given ``govc`` call in a container context.  The govc
-  command is defined via the Param ``govc/command``, which is required for this
-  task.
+  This task executes a series of ``govc`` calls in a container context.  The govc
+  command is defined via the Param ``govc/commands``, which is required for this
+  task.  The ``govc/commands`` Param is an array of govc command to execute in
+  the container.
 
   The operator must also specify the remote vSphere ESXi or vCenter resource to
   connect to, to execute ``govc`` commands against.  This is accomplished
@@ -26,8 +27,11 @@ Documentation: |
 
     * https://github.com/vmware/govmomi/blob/master/govc/USAGE.md
 
+  .. warning:: Only a single OVA deploy action (``import.ova``) can be specified in
+               the command sequnce.
+
 RequiredParams:
-  - "govc/command"
+  - "govc/commands"
   - "govc/url"
   - "govc/username"
   - "govc/password"
@@ -45,18 +49,27 @@ Templates:
       # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
       # RackN Copyright 2020
 
+      # govc documentation and usage examples:
+      #
+      #   https://github.com/vmware/govmomi/blob/master/govc/USAGE.md
+
       set -e
 
       {{ template "setup.tmpl" .}}
 
-      {{ if .ParamExists "govc/template-json" }}
+      [[ -r /ova/template.json ]] && rm -f /ova/template.json
+
+      TMPL=""
+
+      {{ if .ParamExists "govc/template-json" -}}
       {{ $dot := . -}}
       {{ $govctmpl := .Param "govc/template-json" -}}
       mkdir -p /ova
-      rm -f /ova/template.json
       cat <<EOTMPL > /ova/template.json
       {{ $dot.CallTemplate $govctmpl $dot }}
       EOTMPL
+
+      TMPL="-options=/ova/template.json"
 
       echo "===== BEGIN TEMPLATE DEBUG ===="
       echo ""
@@ -69,27 +82,37 @@ Templates:
 
       {{ template "govc-setup.sh.tmpl" . }}
 
-      CMD='{{ .Param "govc/command" }}'
+      COUNT=0
+      {{ range $key, $cmd := ( .Param "govc/commands" ) -}}
+      $(echo "{{ $cmd }}" | grep -q "import.ova") && (( COUNT++ )) || true
+      [[ $COUNT -ge 2 ]] && exit 1 || true
+      {{ end -}}
+
+      {{ range $cmd := ( .Param "govc/commands" ) -}}
+      CMD='{{ $cmd }}'
 
       if echo $CMD | grep -q "import.ova"
       then
         if [[ -r "/ova/import.ova" ]]
         then
-          CMD="$CMD /ova/import.ova"
+          CMD="$CMD $TMPL /ova/import.ova"
         else
           xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
         fi
       fi
 
+      # sigh ... are we going to need to throttle calls with sleep timers and other fun stuff ? 
       echo ""
-      echo "==== RUN 'govc $CMD' ===="
+      echo "==== RUN GOVC COMMAND ===="
       echo ""
 
+      echo ">>> GOVC: $CMD"
       govc $CMD
 
       echo ""
       echo "==== DONE ===="
       echo ""
+      {{ end -}}
 
       exit 0
 Meta:

@@ -17,7 +17,8 @@ Meta:
   icon: "terminal"
   title: "EXAMPLE GOVC VCSA Profile"
 Params:
-  govc/command: "import.ova"
+  govc/commands:
+    - "import.ova"
   govc/ova-location: "http://10.10.10:8091/files/images/vcsa-7.ova"
   govc/ova-type: "vcsa"
   govc/ova-version: "7"

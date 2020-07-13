@@ -2,7 +2,7 @@
 Name: "govc/ova-version"
 Description: "The OVA appliance version that is being deployed (optional - maybe)."
 Documentation: |
-  The version of the OVA Resource that is deployed via the ``govc/command``.
+  The version of the OVA Resource that is deployed via the ``govc/commands``.
 
   Various OVA appliances exhibit unique and strange behaviors that need to be
   accounted for by the Digital Rebar deployment tooling at times.

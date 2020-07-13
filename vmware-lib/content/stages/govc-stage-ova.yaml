@@ -1,5 +1,5 @@
 ---
-Name: "govc-ova-stage"
+Name: "govc-stage-ova"
 Description: "Stage the OVA referenced in 'govc/ova-location' in the container."
 Documentation: |
   This stage makes the OVA referenced in ``govc/ova-location`` availabe in the
@@ -9,7 +9,7 @@ Documentation: |
 
 Tasks:
   - "context:govc"
-  - "govc-ova-stage"
+  - "govc-stage-ova"
 Meta:
   icon: "terminal"
   color: "black"
