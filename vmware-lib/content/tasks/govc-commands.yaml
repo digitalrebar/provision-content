@@ -49,6 +49,10 @@ Templates:
       # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
       # RackN Copyright 2020
 
+      # govc documentation and usage examples:
+      #
+      #   https://github.com/vmware/govmomi/blob/master/govc/USAGE.md
+
       set -e
 
       {{ template "setup.tmpl" .}}
