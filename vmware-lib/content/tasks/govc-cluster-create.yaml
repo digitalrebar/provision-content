@@ -51,8 +51,8 @@ Templates:
         echo "CMD: govc $_args"
         govc $_args
       }
-
-      {{ .ParamExists "esxi/insecure-password" }}{{ $pass := .Param "esxi/insecure-password" }}{{ else }}{{ $pass :- "RocketSkates"}}{{ end -}}
+      {{ $pass := "" }}
+      {{ if .ParamExists "esxi/insecure-password" }}{{ $pass = ( .Param "esxi/insecure-password" ) }}{{ else }}{{ $pass = "RocketSkates"}}{{ end -}}
       USERNAME="root"
       DC='{{ .Param "govc/datacenter-name" }}
       CLUSTER='{{ .Param "govc/cluster-name" }}
