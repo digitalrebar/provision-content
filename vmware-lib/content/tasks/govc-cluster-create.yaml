@@ -1,0 +1,143 @@
+---
+Description: "A task wait for appliance OVA API to become available"
+Name: "govc-cluster-create"
+Documentation: |
+  This task will create a cluster, file it in the ``govc/cluster-folder`` if
+  provided, and enroll all Machines with the same cluster designation defined
+  by the Param ``govc/cluster-name``.
+
+RequiredParams:
+  - "govc/cluster-name"
+OptionalParams:
+  - "govc/cluster-folder"
+Templates:
+  - Name: "govc-cluster-create.sh"
+    Contents: |
+      #!/bin/bash
+      # Cluster create and enrollment task.
+      # RackN Copyright 2020
+
+      ###
+      #  NOTICE:  This template relies on the 'govc/cluster-name' being set
+      #           to a cluster name to operate on.  Additionally, each Machine
+      #           that belongs in the specified cluster MUST ALSO have the
+      #           Param set with the name of the clsuter.
+      ###
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" .}}
+
+      ### govc-setup.sh.tmpl
+      {{ template "govc-setup.sh.tmpl" .}}
+
+      set -e
+
+      JQ=$(which jq)
+      [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
+      [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
+      [[ -z "$JQ" ]] && JQ=$(which gojq)     || true
+      if [[ -z "$JQ" ]]; then
+        D="$(which drpcli)"
+        if [[ -n "$D" ]]; then
+          ln -s $D /usr/local/bin/drpjq
+          JQ="/usr/local/bin/drpjq"
+        else
+          xiterr 1 "Unable to find 'jq' or alternative to use."
+        fi
+      fi
+
+      run_govc() {
+        local _args="$*"
+        echo "CMD: govc $_args"
+        govc $_args
+      }
+
+      {{ .ParamExists "esxi/insecure-password" }}{{ $pass := .Param "esxi/insecure-password" }}{{ else }}{{ $pass :- "RocketSkates"}}{{ end -}}
+      USERNAME="root"
+      DC='{{ .Param "govc/datacenter-name" }}
+      CLUSTER='{{ .Param "govc/cluster-name" }}
+      OPTIONS='{{ .Param "govc/cluster-options" }}
+      FOLDER='{{ .Param "govc/cluster-folder" }}
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'govc/cluster-name' not specified"
+      MEMBERS=$(drpcli machines list govc/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+
+      echo "Starting create operation with the following information:"
+      echo "---------------------------------------------------------"
+      echo ""
+      echo "     Datacenter:  '$DC'"
+      echo "         Folder:  '$FOLDER'"
+      echo "        Cluster:  '$CLUSTER'"
+      echo "Cluster Options:  '$OPTIONS'"
+      echo "        Members:  '$MEMBERS'"
+      echo ""
+
+      if [[ -n "$DC" ]]
+      then
+        if govc datacenter.info "$DC" > /dev/null 2>&1
+        then
+          echo "Datacenter '$DC' exists already."
+        else
+          run_govc datacenter.create "$DC"
+        fi
+      else
+        echo "!!! NOTICE: 'govc/datacenter-name' not specified"
+      fi
+
+      # This will need recursion to handle Folder path, since there appears
+      # to be no option to create Parents automatically.
+      if [[ -n "$FOLDER" ]]
+      then
+        if govc folder.info "$FOLDER" > /dev/null 2>&1
+        then
+          echo "Folder '$FOLDER' exists already."
+        else
+          run_govc folder.create "$FOLDER"
+        fi
+      else
+        echo "No folder specified in 'govc/cluster-folder'."
+      fi
+
+      if [[ -n "$CLUSTER" ]]
+      then
+        # there appears to be no 'cluster.info' to test if exists - this is cheating but works
+        if govc cluster.rule.info -cluster "$CLUSTER" > /dev/null 2>&1
+        then
+          echo "Cluster '$CLUSTER' exists already."
+        else
+          [[ -n "$FOLDER" ]] && FOLD="-folder=\"$FOLDER\""
+          run_govc cluster.creaate $FOLD "$CLUSTER"
+        fi
+
+        if [[ -n "$OPTIONS" ]]
+        then
+          if govc cluster.rule.info -cluster "$CLUSTER" > /dev/null 2>&1
+          then
+            run_govc cluster.change $OPTIONS "$CLUSTER"
+          else
+            xiterr 1 "'govc/options' specified, but no 'govc/cluster-name' exists - failed create step?"
+          fi
+        else
+          echo "No options specified in 'govc/cluster-options' to alter cluster with."
+        fi
+
+        # now add Members to the cluster
+        if [[ -n "$MEMBERS" ]]
+        then
+          for MEMBER in $MEMBERS
+          do
+            THUMB='{{ .Param "esxi/thumbprint-sha1" }}'
+            [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
+            cluster.add -cluster "$CLUSTER" -hostname "$MEMBER" -username "$USERNAME" -password '{{ $pass }}' $PRINT
+          done
+        else
+          echo "No members with 'govc/cluster-name' found to operate on."
+        fi
+      else
+        echo "!!! NOTICE:  'govc/cluster-name' was not set, no cluster operations performed."
+      fi
+
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

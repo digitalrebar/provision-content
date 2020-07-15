@@ -1,0 +1,17 @@
+---
+Name: "govc/cluster-name"
+Description: "Defines the Cluster name that this Machine belongs to."
+Documentation: |
+  A simple string name of the cluster that the Machine belongs to.
+
+  For example, if the ``govc/cluster-name`` is set to ``honey-nut``, then
+  all Machines with this param set to the same value will be acted on
+  by subsequent Stages that reference the ``govc/cluster-name``.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

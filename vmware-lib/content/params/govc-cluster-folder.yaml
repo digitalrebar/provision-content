@@ -1,0 +1,18 @@
+---
+Name: "govc/cluster-folder"
+Description: "Defines the folder name that the cluster should be added to ."
+Documentation: |
+  A simple string of the folder name that the cluster should be added to
+  for inventory management.
+
+  For example, if the ``govc/cluster-name`` is set to ``honey-nut``, and
+  the ``govc/cluster-folder`` is set to ``cereal``, then the Cluster
+  will be added to the ``cereal`` folder when it is created.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"
