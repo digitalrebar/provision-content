@@ -92,6 +92,8 @@ Templates:
         echo "!!! NOTICE: 'govc/datacenter-name' not specified"
       fi
 
+      export GOVC_DATACENTER="$DC"
+
       # This will need recursion to handle Folder path, since there appears
       # to be no option to create Parents automatically.
       if [[ -n "$FOLDER" ]]
@@ -114,7 +116,7 @@ Templates:
           echo "Cluster '$CLUSTER' exists already."
         else
           [[ -n "$FOLDER" ]] && FOLD="-folder=\"$FOLDER\""
-          run_govc cluster.creaate $FOLD "$CLUSTER"
+          run_govc cluster.create $FOLD "$CLUSTER"
         fi
 
         if [[ -n "$OPTIONS" ]]
