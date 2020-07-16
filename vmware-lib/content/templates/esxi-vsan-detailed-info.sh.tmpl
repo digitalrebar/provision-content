@@ -1,0 +1,105 @@
+#!/usr/bin/env sh
+# Get detailed VSAN information and debug dump
+# RackN Copyright 2020
+
+### setup.tmpl
+{{ template "setup.tmpl" .}}
+
+### this template
+# turn off exit on error
+set +e
+
+sep() {
+  echo ""
+  echo "-----------------------------------------------------------------------"
+}
+
+is_govc(){
+  if env | grep GOVC_ > /dev/null
+  then
+    if which govc > /dev/null 2>&
+    then
+      echo 1
+    else
+      echo 0
+    fi
+  else
+    echo 0
+  fi
+}
+got_govc=$(is_govc)
+
+# If our GOVC_ environment vars are provided in this scripts environment
+# we will switch to use it to make the call, instead of assuming native
+# esxcli command inside of ESXi
+cmd() {
+  if (( $got_govc ))
+  then
+      _cmd="govc host.esxcli"
+  else
+    if which esxcli > /dev/null 2>&
+    then
+      _cmd="esxcli"
+    else
+      xiterr 1 "Expected to find 'esxcli' binary, but not PATH ('$PATH')."
+    fi
+  fi
+
+  eval $_cmd $*
+}
+
+get_info() {
+  sep
+  echo "Verify which VMkernel adapters are used for vSAN communication."
+  cmd vsan network list
+
+  sep
+  echo "List storage disks claimed by vSAN."
+  cmd vsan storage list
+
+  sep
+  echo "Get vSAN cluster information."
+  cmd vsan cluster get
+
+  sep
+  echo "Get vSAN cluster health status."
+  cmd vsan health
+
+  sep
+  echo "Get vSAN cluster debug information."
+  cmd vsan debug
+
+  sep
+  echo "Debug vSAN physical disks."
+  cmd vsan debug disk
+
+  sep
+  echo "Debug vSAN objects."
+  cmd vsan debug object
+
+  sep
+  echo "Debug vSAN resyncing objects."
+  cmd vsan debug resync
+
+  sep
+  echo "Debug vSAN disk controllers."
+  cmd vsan debug controller
+
+  sep
+  echo "Debug vSAN limits."
+  cmd vsan debug limit
+
+  sep
+  echo "Debug vSAN VMDKs."
+  cmd vsan debug vmdk
+
+  echo ""
+
+} # end get_info()
+
+if (( $got_govc ))
+then
+  echo "Driving this tool has not been completed... "
+else
+  get_info
+fi

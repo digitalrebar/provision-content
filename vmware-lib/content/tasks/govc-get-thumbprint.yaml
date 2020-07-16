@@ -5,6 +5,15 @@ Documentation: |
   Gets the SHA-1 thumbprint from an ESXi host via the ``govc`` command, and
   stores it on the Machine object as ``govc/thumbprint-sha1``.
 
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
 RequiredParams:
   - "govc/cluster-name"
 OptionalParams: []
@@ -51,8 +60,3 @@ Templates:
         echo "No members to find thumbprints for found with govc/cluster-name Param set"
       fi
 
-Meta:
-  icon: "terminal"
-  color: "purple"
-  title: "Digital Rebar Community Content"
-  feature-flags: "sane-exit-codes"

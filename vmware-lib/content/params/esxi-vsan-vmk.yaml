@@ -1,0 +1,15 @@
+---
+Name: "esxi/vsan-vmk"
+Description: "Defines which vmk interface to configure for VSAN."
+Documentation: |
+  Defines the VMK device to use for VSAN configuration on the vSphere ESXi host.
+
+  Defaults to ``vmk1`` if not otherwise defined.
+
+Schema:
+  type: "string"
+  default: "vmk1"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

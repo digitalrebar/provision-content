@@ -6,6 +6,15 @@ Documentation: |
   provided, and enroll all Machines with the same cluster designation defined
   by the Param ``govc/cluster-name``.
 
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
 RequiredParams:
   - "govc/cluster-name"
 OptionalParams:
@@ -136,8 +145,3 @@ Templates:
         echo "!!! NOTICE:  'govc/cluster-name' was not set, no cluster operations performed."
       fi
 
-Meta:
-  icon: "terminal"
-  color: "purple"
-  title: "Digital Rebar Community Content"
-  feature-flags: "sane-exit-codes"
