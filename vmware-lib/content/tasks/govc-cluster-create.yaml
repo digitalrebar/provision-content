@@ -138,7 +138,13 @@ Templates:
           do
             THUMB='{{ .Param "esxi/thumbprint-sha1" }}'
             [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
-            run_govc cluster.add -cluster "$CLUSTER" -hostname "$MEMBER" -username "$USERNAME" -password '{{ $pass }}' $PRINT
+            ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+            if [[ -n "$ADDR" ]]
+            then
+              run_govc cluster.add -cluster "$CLUSTER" -hostname "$ADDR" -username "$USERNAME" -password '{{ $pass }}' $PRINT
+            else
+              xiterr 1 "Unable to get '$MEMBER' IP Address."
+            fi
           done
         else
           echo "No members with 'govc/cluster-name' found to operate on."
