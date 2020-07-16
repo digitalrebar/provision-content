@@ -138,7 +138,7 @@ Templates:
           do
             THUMB='{{ .Param "esxi/thumbprint-sha1" }}'
             [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
-            cluster.add -cluster "$CLUSTER" -hostname "$MEMBER" -username "$USERNAME" -password '{{ $pass }}' $PRINT
+            run_govc cluster.add -cluster "$CLUSTER" -hostname "$MEMBER" -username "$USERNAME" -password '{{ $pass }}' $PRINT
           done
         else
           echo "No members with 'govc/cluster-name' found to operate on."
