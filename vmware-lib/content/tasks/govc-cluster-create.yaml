@@ -63,10 +63,10 @@ Templates:
       {{ $pass := "" }}
       {{ if .ParamExists "esxi/insecure-password" }}{{ $pass = ( .Param "esxi/insecure-password" ) }}{{ else }}{{ $pass = "RocketSkates"}}{{ end -}}
       USERNAME="root"
-      DC='{{ .Param "govc/datacenter-name" }}
-      CLUSTER='{{ .Param "govc/cluster-name" }}
-      OPTIONS='{{ .Param "govc/cluster-options" }}
-      FOLDER='{{ .Param "govc/cluster-folder" }}
+      DC='{{ .Param "govc/datacenter-name" }}'
+      CLUSTER='{{ .Param "govc/cluster-name" }}'
+      OPTIONS='{{ .Param "govc/cluster-options" }}'
+      FOLDER='{{ .Param "govc/cluster-folder" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'govc/cluster-name' not specified"
       MEMBERS=$(drpcli machines list govc/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
