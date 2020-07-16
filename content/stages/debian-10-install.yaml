@@ -1,0 +1,11 @@
+---
+Name: "debian-10-install"
+Description: "Debian 10 install stage.  References the latest Debian 10 image"
+BootEnv: "debian-10-install"
+Tasks:
+  - "debian-drp-only-repos"
+  - "ssh-access"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
