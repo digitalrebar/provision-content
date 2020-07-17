@@ -143,7 +143,7 @@ Templates:
         }
 
         cluster_add() {
-          ADD_LOG=$(mktemp /tmp/cluster-add.$$.XXXXXXXX.log)
+          ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
           echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
           run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $PRINT > $ADD_LOG
