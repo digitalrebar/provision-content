@@ -34,6 +34,22 @@ Templates:
 
       run_govc() {
         local _args="$*"
+        local GOVC_USERNAME GOVC_PASSWORD GOVC_URL GOVC_INSECURE ADDR
+        {{ $pass := "" -}}
+        {{ if .ParamExists "esxi/insecure-password" }}{{ $pass = ( .Param "esxi/insecure-password" ) }}{{ else }}{{ $pass = "RocketSkates"}}{{ end }}
+        ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+        if [[ -n "$ADDR" ]]
+        then
+          GOVC_URL=147.75.108.19
+        else
+          xiterr 1 "unable to get IP address for '$MEMBER'"
+        fi
+        GOVC_PASSWORD='{{ $pass }}'
+        GOVC_INSECURE=1
+        GOVC_USERNAME=root
+        echo "GOVC Environment:"
+        env | grep GOVC_
+        echo ""
         echo "CMD: govc $_args"
         govc $_args
       }
