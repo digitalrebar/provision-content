@@ -163,7 +163,8 @@ Templates:
           for MEMBER in $MEMBERS
           do
             THUMB='{{ .Param "esxi/thumbprint-sha1" }}'
-            DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
+            #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
+            DNAME=$(drpcli machines get $RS_UUID param dns-domain | jq -r '.')
             ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
             [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
 
