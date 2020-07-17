@@ -1,0 +1,12 @@
+---
+Name: "esxi-vsan-configure-host"
+Description: "Configure a vSphere ESXi host for VSAN cluster."
+Documentation: |
+  This stage configures a vSphere ESXi host for VSAN cluster.
+
+Tasks:
+  - "esxi-vsan-configure-host"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

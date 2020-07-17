@@ -131,21 +131,59 @@ Templates:
           echo "No options specified in 'govc/cluster-options' to alter cluster with."
         fi
 
+        # try to set based on Machien Name, FQDN, or fallback to IP Address
+        # TODO:  This needs enhanced in conjunction with the govc context container
+        #        to support DNS record checks in the future.
+        get_member_name() {
+          {{ if .ParamExists "govc/member-add-by-ip-address" }}
+          echo $ADDR
+          {{ else }}
+          echo $MEMBER.$DNAME
+          {{ end }}
+        }
+
+        cluster_add() {
+          ADD_LOG=$(mktemp /tmp/cluster-add.$$.XXXXXXXX.log)
+          echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
+          echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
+          run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $PRINT > $ADD_LOG
+          echo ">>> 'cluster.add' operation for '$MEMBER' completed"
+          echo ""
+          echo ">>>>>>>>>>>>>>>>>>>>>>> START cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
+          cat $ADD_LOG
+          echo ">>>>>>>>>>>>>>>>>>>>>>>> END cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
+          echo ""
+        }
+
         # now add Members to the cluster
         if [[ -n "$MEMBERS" ]]
         then
+          # nuke all old logs, in case there are any left over from previous runs
+          rm -f /tmp/cluster\.add*\.log
           for MEMBER in $MEMBERS
           do
             THUMB='{{ .Param "esxi/thumbprint-sha1" }}'
-            [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
+            DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
             ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+            [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
+
+            HNAME=$(get_member_name)
             if [[ -n "$ADDR" ]]
             then
-              run_govc cluster.add -cluster "$CLUSTER" -hostname "$ADDR" -username "$USERNAME" -password '{{ $pass }}' $PRINT
+              cluster_add &
             else
               xiterr 1 "Unable to get '$MEMBER' IP Address."
             fi
+
+            # reset our variables for next run cleanliness
+            unset THUMB HNAME ADDR
           done
+
+          # wait for all members to complete adding
+          wait
+
+          echo "All cluster member 'cluster.add' operations have completed."
+
         else
           echo "No members with 'govc/cluster-name' found to operate on."
         fi
