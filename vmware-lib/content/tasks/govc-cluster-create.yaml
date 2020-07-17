@@ -135,11 +135,8 @@ Templates:
         # TODO:  This needs enhanced in conjunction with the govc context container
         #        to support DNS record checks in the future.
         get_member_name() {
-          {{ if .ParamExists "govc/member-add-by-ip-address" }}
           echo $ADDR
-          {{ else }}
-          echo $MEMBER.$DNAME
-          {{ end }}
+          # echo $MEMBER.$DNAME
         }
 
         cluster_add() {
