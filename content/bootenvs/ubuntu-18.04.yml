@@ -26,7 +26,7 @@ OS:
   SupportedArchitectures:
     amd64:
       IsoFile: "ubuntu-18.04.4-server-amd64.iso"
-      IsoUrl: "http://cdimage.ubuntu.com/ubuntu/releases/18.04.4/release/ubuntu-18.04.4-server-amd64.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.4-server-amd64.iso"
       IsoSha256: "e2ecdace33c939527cbc9e8d23576381c493b071107207d2040af72595f8990b"
       Kernel: "install/netboot/ubuntu-installer/amd64/linux"
       Initrds:
@@ -46,7 +46,7 @@ OS:
         {{.Param "kernel-console"}}
     arm64:
       IsoFile: "ubuntu-18.04.4-server-arm64.iso"
-      IsoUrl: "http://cdimage.ubuntu.com/ubuntu/releases/18.04.4/release/ubuntu-18.04.4-server-arm64.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.4-server-arm64.iso"
       IsoSha256: "8eb3c1866ca3b68e4cd22ec9d7c02f97f4d2b3713447370f3c252a4189116824"
       Kernel: "install/netboot/ubuntu-installer/arm64/linux"
       Loader: "grubarm64.efi"
