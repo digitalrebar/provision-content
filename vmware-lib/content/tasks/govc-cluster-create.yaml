@@ -79,6 +79,7 @@ Templates:
       echo "        Cluster:  '$CLUSTER'"
       echo "Cluster Options:  '$OPTIONS'"
       echo "        Members:  '$MEMBERS'"
+      echo "   VSAN Enabled:  '$VSAN_ENABLED'"
       echo ""
 
       if [[ -n "$DC" ]]
@@ -120,7 +121,7 @@ Templates:
           run_govc cluster.create $FOLD "$CLUSTER"
         fi
 
-        {{ if .Param "esxi/vsan-vmknic-ip" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}
+        {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
 
         if [[ "$VSAN_ENABLED" == "true" ]]
         then
