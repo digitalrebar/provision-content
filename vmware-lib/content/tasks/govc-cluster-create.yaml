@@ -2,9 +2,9 @@
 Description: "A task wait for appliance OVA API to become available"
 Name: "govc-cluster-create"
 Documentation: |
-  This task will create a cluster, file it in the ``govc/cluster-folder`` if
+  This task will create a cluster, file it in the ``esxi/cluster-folder`` if
   provided, and enroll all Machines with the same cluster designation defined
-  by the Param ``govc/cluster-name``.
+  by the Param ``esxi/cluster-name``.
 
 ExtraClaims:
   - scope: "machines"
@@ -16,9 +16,9 @@ Meta:
   title: "Digital Rebar Community Content"
   feature-flags: "sane-exit-codes"
 RequiredParams:
-  - "govc/cluster-name"
+  - "esxi/cluster-name"
 OptionalParams:
-  - "govc/cluster-folder"
+  - "esxi/cluster-folder"
 Templates:
   - Name: "govc-cluster-create.sh"
     Contents: |
@@ -27,7 +27,7 @@ Templates:
       # RackN Copyright 2020
 
       ###
-      #  NOTICE:  This template relies on the 'govc/cluster-name' being set
+      #  NOTICE:  This template relies on the 'esxi/cluster-name' being set
       #           to a cluster name to operate on.  Additionally, each Machine
       #           that belongs in the specified cluster MUST ALSO have the
       #           Param set with the name of the clsuter.
@@ -63,12 +63,13 @@ Templates:
       {{ $pass := "" }}
       {{ if .ParamExists "esxi/insecure-password" }}{{ $pass = ( .Param "esxi/insecure-password" ) }}{{ else }}{{ $pass = "RocketSkates"}}{{ end -}}
       USERNAME="root"
-      DC='{{ .Param "govc/datacenter-name" }}'
-      CLUSTER='{{ .Param "govc/cluster-name" }}'
-      OPTIONS='{{ .Param "govc/cluster-options" }}'
-      FOLDER='{{ .Param "govc/cluster-folder" }}'
-      [[ -z "$CLUSTER" ]] && xiterr 1 "'govc/cluster-name' not specified"
-      MEMBERS=$(drpcli machines list govc/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      DC='{{ .Param "esxi/datacenter-name" }}'
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      OPTIONS='{{ .Param "esxi/cluster-options" }}'
+      VSAN_ENABLED='{{ .Param "govc/vsan-enabled" }}'
+      FOLDER='{{ .Param "esxi/cluster-folder" }}'
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
       echo "Starting create operation with the following information:"
       echo "---------------------------------------------------------"
@@ -89,7 +90,7 @@ Templates:
           run_govc datacenter.create "$DC"
         fi
       else
-        echo "!!! NOTICE: 'govc/datacenter-name' not specified"
+        echo "!!! NOTICE: 'esxi/datacenter-name' not specified"
       fi
 
       export GOVC_DATACENTER="$DC"
@@ -105,7 +106,7 @@ Templates:
           run_govc folder.create "$FOLDER"
         fi
       else
-        echo "No folder specified in 'govc/cluster-folder'."
+        echo "No folder specified in 'esxi/cluster-folder'."
       fi
 
       if [[ -n "$CLUSTER" ]]
@@ -119,16 +120,34 @@ Templates:
           run_govc cluster.create $FOLD "$CLUSTER"
         fi
 
+        {{ if .Param "esxi/vsan-vmknic-ip" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}
+
+        if [[ "$VSAN_ENABLED" == "true" ]]
+        then
+          echo "Enabling VSAN on cluster members."
+
+          if ! echo "$OPTIONS" | grep -q "--vsan-enabled"
+          then
+            echo "Appending '--vsan-enabled' option to cluster options."
+            echo "If '--vsan-autoclaim' is desired, you must set it on 'esxi/cluster-options' and rebuild."
+            OPTIONS="--vsan-enabled $OPTIONS"
+          fi
+
+          esxcli vsan network ip set -i $VMK -T=vsan
+        else
+          echo "Cluster is being created without initial VSAN support ('esxi/vsan-enabled' = false)"
+        fi
+
         if [[ -n "$OPTIONS" ]]
         then
           if govc cluster.rule.info -cluster "$CLUSTER" > /dev/null 2>&1
           then
             run_govc cluster.change $OPTIONS "$CLUSTER"
           else
-            xiterr 1 "'govc/options' specified, but no 'govc/cluster-name' exists - failed create step?"
+            xiterr 1 "'govc/options' specified, but no 'esxi/cluster-name' exists - failed create step?"
           fi
         else
-          echo "No options specified in 'govc/cluster-options' to alter cluster with."
+          echo "No options specified in 'esxi/cluster-options' to alter cluster with."
         fi
 
         # try to set based on Machien Name, FQDN, or fallback to IP Address
@@ -183,9 +202,9 @@ Templates:
           echo "All cluster member 'cluster.add' operations have completed."
 
         else
-          echo "No members with 'govc/cluster-name' found to operate on."
+          echo "No members with 'esxi/cluster-name' found to operate on."
         fi
       else
-        echo "!!! NOTICE:  'govc/cluster-name' was not set, no cluster operations performed."
+        echo "!!! NOTICE:  'esxi/cluster-name' was not set, no cluster operations performed."
       fi
 

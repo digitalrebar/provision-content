@@ -1,5 +1,5 @@
 ---
-Name: "govc/datacenter-name"
+Name: "esxi/datacenter-name"
 Description: "Defines the Datacenter name to create or manipulate."
 Documentation: |
   A simple string name of the Datacenter that should be either created,

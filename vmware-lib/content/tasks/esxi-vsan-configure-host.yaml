@@ -30,21 +30,26 @@ Templates:
       IP='{{ .Param "esxi/vsan-vmknic-ip" }}'
       NM='{{ .Param "esxi/vsan-vmknic-netmask" }}'
 
-      esxcli network vswitch standard add -v $VSW
-      esxcli network vswitch standard uplink add -v $VSW -u $VMN
-      esxcfg-vswitch -A $PGR $VSW
+      # TODO: select Standard/Distributed vSwitch, check if exists, build if not
+      #esxcli network vswitch standard add -v $VSW
+      #esxcli network vswitch standard uplink add -v $VSW -u $VMN
+      #esxcfg-vswitch -A $PGR $VSW
 
-      if [[ -z "$IP" && -z "$NM" ]]
-      then
-        echo "esxi/vmknic-ip and netmask are both emptying, assuming existing configuration is correct"
-      else
-        [[ -z "$IP" ]] && xiterr 1 "No value defined for 'esxi/vsan-vmknic-ip'"
-        [[ -z "$NM" ]] && xiterr 1 "No value defined for 'esxi/vsan-vmknic-netmask'"
-        esxcfg-vmknic -a -i $NM -n $NM -p $PGR
-      fi
+      #if [[ -z "$IP" && -z "$NM" ]]
+      #then
+      #  echo "esxi/vmknic-ip and netmask are both emptying, assuming existing configuration is correct"
+      #else
+      #  [[ -z "$IP" ]] && xiterr 1 "No value defined for 'esxi/vsan-vmknic-ip'"
+      #  [[ -z "$NM" ]] && xiterr 1 "No value defined for 'esxi/vsan-vmknic-netmask'"
+      #  esxcfg-vmknic -a -i $IP -n $NM -p $PGR
+      #fi
 
       # verify vmkernel interface has vsan
       esxcfg-vmknic -l
 
-      esxcli vsan network ip add -i $VMK
+      # adding a new interface:
+      #esxcli vsan network ip add -i $VMK
+
+      # changing existing interface to support VSAN
+      esxcli vsan network ip set -i $VMK -T=vsan
 

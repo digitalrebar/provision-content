@@ -1,5 +1,5 @@
 ---
-Description: "Gets detailed VSAN information and debug data of an ESXi host."
+Description: "Build VSAN cluster."
 Name: "esxi-vsan-build-cluster"
 Documentation: |
   Build a VSAN cluster from previously configured VSAN hosts.

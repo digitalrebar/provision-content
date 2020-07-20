@@ -1,5 +1,5 @@
 ---
-Name: "govc/cluster-options"
+Name: "esxi/cluster-options"
 Description: "Optional Cluster configuration at creation time."
 Documentation: |
   A simple string of space separated arguments of cluster configuration.
@@ -16,7 +16,7 @@ Documentation: |
       -drs-enabled -vsan-enabled -vsan-autoclaim
 
 
-  .. note:: Use of this param requires that ``govc/cluster-name`` is set to define
+  .. note:: Use of this param requires that ``esxi/cluster-name`` is set to define
             which cluster to operate on.
 
 Schema:

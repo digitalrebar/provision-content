@@ -15,10 +15,10 @@ Meta:
   title: "Digital Rebar Community Content"
   feature-flags: "sane-exit-codes"
 RequiredParams:
-  - "govc/cluster-name"
+  - "esxi/cluster-name"
 OptionalParams: []
 Templates:
-  - Name: "govc-wait-for-ova.sh"
+  - Name: "govc-get-thumbprint.sh"
     Contents: |
       #!/bin/bash
       # Record the SHA-1 thumbprint of an ESXi host
@@ -32,31 +32,16 @@ Templates:
 
       set -e
 
-      run_govc() {
-        local _args="$*"
-        local GOVC_USERNAME GOVC_PASSWORD GOVC_URL GOVC_INSECURE ADDR
-        {{ $pass := "" -}}
-        {{ if .ParamExists "esxi/insecure-password" }}{{ $pass = ( .Param "esxi/insecure-password" ) }}{{ else }}{{ $pass = "RocketSkates"}}{{ end }}
-        ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
-        if [[ -n "$ADDR" ]]
-        then
-          GOVC_URL=147.75.108.19
-        else
-          xiterr 1 "unable to get IP address for '$MEMBER'"
-        fi
-        GOVC_PASSWORD='{{ $pass }}'
-        GOVC_INSECURE=1
-        GOVC_USERNAME=root
-        echo "GOVC Environment:"
-        env | grep GOVC_
-        echo ""
-        echo "CMD: govc $_args"
-        govc $_args
+      get_thumb() {
+        local _member="$1"
+        ADDR=$(drpcli machines show Name:$_member --slim=Params,Meta | jq -r '.Address')
+        [[ -z "$ADDR" ]] && xiterr 1 "unable to get IP address for '$MEMBER'"
+        govc about.cert -k -u "$ADDR" -thumbprint | awk '{print $2}'
       }
 
-      CLUSTER='{{ .Param "govc/cluster-name" }}
-      [[ -z "$CLUSTER" ]] && xiterr 1 "'govc/cluster-name' not specified"
-      MEMBERS=$(drpcli machines list govc/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
       echo "Starting create operation with the following information:"
       echo "---------------------------------------------------------"
@@ -69,10 +54,10 @@ Templates:
       then
         for MEMBER in $MEMBERS
         do
-          THUMB=$(govc about.cert -k -u "$MEMBER" -thumbprint | awk '{print $2}')
+          THUMB=$(get_thumb "$MEMBER")
           drpcli machines set Name:$MEMBER param esxi/thumbprint-sha1 to "$THUMB"
         done
       else
-        echo "No members to find thumbprints for found with govc/cluster-name Param set"
+        echo "No members to find thumbprints for found with esxi/cluster-name Param set"
       fi
 

@@ -14,8 +14,8 @@ Meta:
   icon: "terminal"
   title: "EXAMPLE GOVC VCSA Profile"
 Params:
-  govc/datacenter-name: "dc01"
-  govc/cluster-folder: "/dc01"
-  govc/cluster-name: "cluster01"
-  govc/cluster-options: "-vsan-enabled -vsan-autoclaim"
+  esxi/datacenter-name: "dc01"
+  esxi/cluster-folder: "/dc01"
+  esxi/cluster-name: "cluster01"
+  esxi/cluster-options: "-vsan-enabled -vsan-autoclaim"
 Profiles: []
