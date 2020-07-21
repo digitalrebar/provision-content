@@ -66,7 +66,7 @@ Templates:
       DC='{{ .Param "esxi/datacenter-name" }}'
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       OPTIONS='{{ .Param "esxi/cluster-options" }}'
-      VSAN_ENABLED='{{ .Param "govc/vsan-enabled" }}'
+      VSAN_ENABLED='{{ .Param "esxi/vsan-enabled" }}'
       FOLDER='{{ .Param "esxi/cluster-folder" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
       MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
@@ -136,7 +136,7 @@ Templates:
 
           esxcli vsan network ip set -i $VMK -T=vsan
         else
-          echo "Cluster is being created without initial VSAN support ('esxi/vsan-enabled' = false)"
+          echo "Cluster is being created without initial VSAN support (param 'esxi/vsan-enabled' set to '$VSAN_ENABLED')"
         fi
 
         if [[ -n "$OPTIONS" ]]
