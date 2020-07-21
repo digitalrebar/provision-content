@@ -2,12 +2,25 @@
 Name: "esxi/cluster-folder"
 Description: "Defines the folder name that the cluster should be added to ."
 Documentation: |
-  A simple string of the folder name that the cluster should be added to
+  A string of the folder name that the cluster should be added to
   for inventory management.
 
   For example, if the ``esxi/cluster-name`` is set to ``honey-nut``, and
   the ``esxi/cluster-folder`` is set to ``cereal``, then the Cluster
   will be added to the ``cereal`` folder when it is created.
+
+  Multi-level paths are allowed (eg ``/cereal/honey-nut/box``).  Parent directories
+  that do not exist will be created in order appropriately.
+
+  The string will be interpreted and expanded by the Golang Templating engine
+  at time of use, so an example construct as follows is allowed:
+
+    * ``/{{ .Param "esxi/datacenter-name" }}/{{ .Param "esxi/cluster-name" }}``
+
+  If the values of the above params have been set to *dc01* and *cluster01*
+  (respectively), then the rendered result will be:
+
+    * ``/dc01/cluster01``
 
 Schema:
   type: "string"

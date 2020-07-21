@@ -18,11 +18,14 @@ Meta:
 RequiredParams:
   - "esxi/cluster-name"
 OptionalParams:
+  - "esxi/datacenter-name"
   - "esxi/cluster-folder"
+  - "esxi/cluster-options"
+  - "esxi/vsan-enabled"
 Templates:
   - Name: "govc-cluster-create.sh"
     Contents: |
-      #!/bin/bash
+      #!/usr/bin/env bash
       # Cluster create and enrollment task.
       # RackN Copyright 2020
 
@@ -67,7 +70,7 @@ Templates:
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       OPTIONS='{{ .Param "esxi/cluster-options" }}'
       VSAN_ENABLED='{{ .Param "esxi/vsan-enabled" }}'
-      FOLDER='{{ .Param "esxi/cluster-folder" }}'
+      FOLDER='{{ .ParamExpand "esxi/cluster-folder" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
       MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
@@ -96,23 +99,48 @@ Templates:
 
       export GOVC_DATACENTER="$DC"
 
-      # This will need recursion to handle Folder path, since there appears
-      # to be no option to create Parents automatically.
+      make_folder() {
+        local _folder
+        if [[ -n "$_folder" ]]
+        then
+          if govc folder.info "$_folder" > /dev/null 2>&1
+          then
+            echo "Folder '$_folder' exists already."
+          else
+            run_govc folder.create "$_folder"
+          fi
+        else
+          echo "NOTICE: No folder specified to create in make_folder()"
+        fi
+      }
+
       if [[ -n "$FOLDER" ]]
       then
-        if govc folder.info "$FOLDER" > /dev/null 2>&1
-        then
-          echo "Folder '$FOLDER' exists already."
-        else
-          run_govc folder.create "$FOLDER"
-        fi
-      else
-        echo "No folder specified in 'esxi/cluster-folder'."
+        # separate path parts in to array
+        while read <<< $(dirname $FOLDER)
+        do
+          [[ "$DIR" == "/" ]] && break
+          DIRS+=($DIR)
+          DIR=$(dirname $DIR)
+        done
+        DIR=""
+
+        # reverse array of DIRS (if extdebug; BASH_ARGV in reverse order)
+        rev() { DIRS=("${BASH_ARGV[@]}"); }
+        shopt -s extdebug
+        rev "${DIRS[@]}"
+        shopt -u extdebug
+        for DIR in ${DIRS[*]}
+        do
+          echo "Attempting to make '$DIR' Folder..."
+          make_folder $DIR
+        done
       fi
 
       if [[ -n "$CLUSTER" ]]
       then
-        # there appears to be no 'cluster.info' to test if exists - this is cheating but works
+        # there appears to be no 'cluster.info' to test if exists
+        # this is overloading cluster.rule.info but works
         if govc cluster.rule.info -cluster "$CLUSTER" > /dev/null 2>&1
         then
           echo "Cluster '$CLUSTER' exists already."
