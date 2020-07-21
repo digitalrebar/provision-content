@@ -71,6 +71,7 @@ Templates:
       OPTIONS='{{ .Param "esxi/cluster-options" }}'
       VSAN_ENABLED='{{ .Param "esxi/vsan-enabled" }}'
       FOLDER='{{ .ParamExpand "esxi/cluster-folder" }}'
+      {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
       MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
@@ -83,6 +84,7 @@ Templates:
       echo "Cluster Options:  '$OPTIONS'"
       echo "        Members:  '$MEMBERS'"
       echo "   VSAN Enabled:  '$VSAN_ENABLED'"
+      echo "       VSAN VMK:  '$VMK'"
       echo ""
 
       if [[ -n "$DC" ]]
@@ -118,22 +120,14 @@ Templates:
           run_govc cluster.create $FOLD "$CLUSTER"
         fi
 
-        {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
-
         if [[ "$VSAN_ENABLED" == "true" ]]
         then
-          echo "Enabling VSAN on cluster members."
-
           if ! echo "$OPTIONS" | grep -q "--vsan-enabled"
           then
             echo "Appending '--vsan-enabled' option to cluster options."
             echo "If '--vsan-autoclaim' is desired, you must set it on 'esxi/cluster-options' and rebuild."
             OPTIONS="--vsan-enabled $OPTIONS"
           fi
-
-          esxcli vsan network ip set -i $VMK -T=vsan
-        else
-          echo "Cluster is being created without initial VSAN support (param 'esxi/vsan-enabled' set to '$VSAN_ENABLED')"
         fi
 
         if [[ -n "$OPTIONS" ]]
@@ -148,6 +142,36 @@ Templates:
           echo "No options specified in 'esxi/cluster-options' to alter cluster with."
         fi
 
+        # operates on MEMBER (ESXi node) - not on vCenter
+        setup_vsan() {
+          local GOVC_URL=$MEMBER
+          local GOVC_USERNAME=root
+          local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+          local GOVC_PASSWORD=""
+          local GOVC_INSECURE=1
+          # turn off shell history if there are exclamations in password
+          set +o history
+          set +o histexpand
+          local P=$(drpcli machines get $RS_UUID param esxi/insecure-password | jq -r '.' || true)
+          [[ -n "$P" ]] && GOVC_PASSWORD="$P" || GOVC_PASSWORD="RocketSkates"
+
+          for DEV in $(govc host.esxcli --formatter=keyvalue vsan network list | grep VmkNicName | cut -d"=" -f2)
+          do
+            VMKS="$VMKS $DEV"
+          done
+
+          if echo $VMKS | grep -q $VMK
+          then
+            echo "VSAN is configured on '$VMK' already."
+          else
+            govc host.esxcli vsan network ip add -i $VMK >> $ADD_LOG
+            # changing existing interface to support VSAN
+            # govc host.esxcli vsan network ip set -i $VMK -T=vsan
+          fi
+          set -o history
+          set -o histexpand
+        }
+
         # try to set based on Machien Name, FQDN, or fallback to IP Address
         # TODO:  This needs enhanced in conjunction with the govc context container
         #        to support DNS record checks in the future.
@@ -156,17 +180,23 @@ Templates:
           # echo $MEMBER.$DNAME
         }
 
+        # uses variable MEMBER to operate against
         cluster_add() {
-          ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
           echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
-          run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $PRINT > $ADD_LOG
+          run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $PRINT >> $ADD_LOG
           echo ">>> 'cluster.add' operation for '$MEMBER' completed"
           echo ""
           echo ">>>>>>>>>>>>>>>>>>>>>>> START cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
           cat $ADD_LOG
           echo ">>>>>>>>>>>>>>>>>>>>>>>> END cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
           echo ""
+        }
+
+        # uses variable MEMBER to operate against
+        setup_cluster() {
+          [[ "$VSAN_ENABLED" == "true" ]] && setup_vsan
+          cluster_add
         }
 
         # now add Members to the cluster
@@ -181,11 +211,13 @@ Templates:
             DNAME=$(drpcli machines get $RS_UUID param dns-domain | jq -r '.')
             ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
             [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
+            ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
+            > $ADD_LOG
 
             HNAME=$(get_member_name)
             if [[ -n "$ADDR" ]]
             then
-              cluster_add &
+              setup_cluster &
             else
               xiterr 1 "Unable to get '$MEMBER' IP Address."
             fi
