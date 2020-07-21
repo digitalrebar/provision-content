@@ -31,7 +31,7 @@ Templates:
       {{ template "setup.tmpl" . }}
 
       ### govc-setup.sh.tmpl
-      {{ template "govc-setup..sh.tmpl" . }}
+      {{ template "govc-setup.sh.tmpl" . }}
 
       VSW='{{ .Param "esxi/vsan-vswitch-standard" }}'
       VMN='{{ .Param "esxi/vsan-vmnic" }}'

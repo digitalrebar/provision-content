@@ -5,6 +5,8 @@
 #######        the Datacenter name (eg 'dc01').  This error condition
 #######        is NOT HANDLED in this code.
 
+DC='{{ .Param "esxi/cluster-name" }}'
+
 make_folder() {
   local _folder="$1"
   local _bad_msg="received bad folder ('$_folder'), not attempting to make"
@@ -13,11 +15,11 @@ make_folder() {
     # a couple of quick safety checks
     [[ "$_folder" == "/" ]] && { echo "$_bad_msg"; return 0; }
     [[ "$_folder" == "." ]] && { echo "$_bad_msg"; return 0; }
-    if govc folder.info "$_folder" > /dev/null 2>&1
+    if govc folder.info "$_folder" -dc="$DC" > /dev/null 2>&1
     then
       echo "Folder '$_folder' exists already."
     else
-      run_govc folder.create "$_folder"
+      run_govc folder.create "$_folder" -dc="$DC"
     fi
   else
     echo "NOTICE: No folder specified to create in make_folder()"
@@ -41,7 +43,13 @@ then
   shopt -u extdebug
   for DIR in ${DIRS[*]}
   do
-    echo "Attempting to make '$DIR' Folder..."
-    make_folder "$DIR"
+    if [[ "/$DC" == "$DIR" ]]
+    then
+      echo ">>> Datacenter named '$DC', requested folder '$DIR', can't create folder with"
+      echo ">>> same name as Datacenter.  Skipping and trying any potential remaining parts."
+    else
+      echo "Attempting to make '$DIR' Folder..."
+      make_folder "$DIR"
+    fi
   done
 fi

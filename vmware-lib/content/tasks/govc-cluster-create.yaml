@@ -102,7 +102,7 @@ Templates:
       ###
       #  FOLDER CREATE options moved to template 'govc-folder-create.sh.tmpl'
       #  not called here - as there are problems with conflicting Datacenter and
-      #  folder name handling.
+      #  folder name handling. (See CLUSTER, create in FOLD construct also)
       ###
       [[ -n "$FOLDER" ]] && printf '!!!\n!!! FOLDER CREATE process disabled, needs help\n!!!\n'
 
@@ -114,7 +114,7 @@ Templates:
         then
           echo "Cluster '$CLUSTER' exists already."
         else
-          [[ -n "$FOLDER" ]] && FOLD="-folder=\"$FOLDER\""
+          # [[ -n "$FOLDER" ]] && FOLD="-folder=\"$FOLDER\""
           run_govc cluster.create $FOLD "$CLUSTER"
         fi
 
