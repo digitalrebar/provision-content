@@ -1,8 +1,16 @@
 ---
-Description: "Gets detailed VSAN information and debug data of an ESXi host."
+Description: "Configure a vSphere ESXi host for VSAN use in a cluster."
 Name: "esxi-vsan-configure-host"
 Documentation: |
-  Configure VSAN on a vSphere ESXi host.
+  Configure VSAN on a vSphere ESXi host.  This should be done prior to deployment
+  of vCenter for optimal results.
+
+  The ``esxi/vsan-vmk`` Param should be used to define the VMware Kerenel device
+  to use for VSAN operations.  If this param is not set, then the value set in
+  ``esxi/network-firstboot-vmk`` will be used.  The default value will fall through
+  to ``vmk0`` if neither of these Params have been set by an operator.
+
+  This script is intended to run on an ESXi host.
 
 Meta:
   icon: "terminal"
@@ -10,7 +18,9 @@ Meta:
   title: "Digital Rebar Community Content"
   feature-flags: "sane-exit-codes"
 RequiredParams: []
-OptionalParams: []
+OptionalParams:
+  - "esxi/vsan-vmk"
+  - "esxi/network-firstboot-vmk"
 Templates:
   - Name: "esxi-vsan-configure-host.sh"
     Contents: |
@@ -31,6 +41,7 @@ Templates:
       NM='{{ .Param "esxi/vsan-vmknic-netmask" }}'
 
       # TODO: select Standard/Distributed vSwitch, check if exists, build if not
+
       #esxcli network vswitch standard add -v $VSW
       #esxcli network vswitch standard uplink add -v $VSW -u $VMN
       #esxcfg-vswitch -A $PGR $VSW
@@ -44,12 +55,29 @@ Templates:
       #  esxcfg-vmknic -a -i $IP -n $NM -p $PGR
       #fi
 
-      # verify vmkernel interface has vsan
-      esxcfg-vmknic -l
+      ENABLED=$(esxcli --formatter=keyvalue vsan cluster get | grep "^VsanClusterGet.Enabled" | cut -d "=" -f2)
 
-      # adding a new interface:
-      #esxcli vsan network ip add -i $VMK
+      if [[ "$ENABLED" == "true" ]]
+      then
+        echo "VSAN services are enabled on cluster"
+      else
+        echo "Dumping VSAN information:"
+        esxcli vsan cluster get || true
+        xiterr 1 "VSAN is not configured on this ESXi node ('{{ .Machine.Name }}')"
+      fi
 
-      # changing existing interface to support VSAN
-      esxcli vsan network ip set -i $VMK -T=vsan
+      for K in $(esxcli --formatter=keyvalue vsan network list | grep VmkNicName | cut -d"=" -f2)
+      do
+        VMKS="$VMKS $K"
+      done
+
+      if echo $VMKS | grep -q $VMK
+      then
+        echo "VSAN is configured on '$VMK' already."
+      else
+        esxcli vsan network ip add -i $VMK
+        # changing existing interface to support VSAN
+        # esxcli vsan network ip set -i $VMK -T=vsan
+      fi
+
 

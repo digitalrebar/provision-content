@@ -99,46 +99,12 @@ Templates:
 
       export GOVC_DATACENTER="$DC"
 
-      make_folder() {
-        local _folder
-        local _bad_msg="received bad folder ('$_folder'), not attempting to make"
-        if [[ -n "$_folder" ]]
-        then
-          # a couple of quick safety checks
-          [[ "$_folder" == "/" ]] && { echo "$_bad_msg"; return 0; }
-          [[ "$_folder" == "." ]] && { echo "$_bad_msg"; return 0; }
-          if govc folder.info "$_folder" > /dev/null 2>&1
-          then
-            echo "Folder '$_folder' exists already."
-          else
-            run_govc folder.create "$_folder"
-          fi
-        else
-          echo "NOTICE: No folder specified to create in make_folder()"
-        fi
-      }
-
-      if [[ -n "$FOLDER" ]]
-      then
-        # separate path parts in to array
-        while read <<< $(dirname $FOLDER)
-        do
-          [[ "$FOLDER" == "/" ]] && break
-          DIRS+=($FOLDER)
-          FOLDER=$(dirname $FOLDER)
-        done
-
-        # reverse array of DIRS (if extdebug; BASH_ARGV is set in reverse order)
-        rev() { DIRS=("${BASH_ARGV[@]}"); }
-        shopt -s extdebug
-        rev "${DIRS[@]}"
-        shopt -u extdebug
-        for DIR in ${DIRS[*]}
-        do
-          echo "Attempting to make '$DIR' Folder..."
-          make_folder $DIR
-        done
-      fi
+      ###
+      #  FOLDER CREATE options moved to template 'govc-folder-create.sh.tmpl'
+      #  not called here - as there are problems with conflicting Datacenter and
+      #  folder name handling.
+      ###
+      [[ -n "$FOLDER" ]] && printf '!!!\n!!! FOLDER CREATE process disabled, needs help\n!!!\n'
 
       if [[ -n "$CLUSTER" ]]
       then
