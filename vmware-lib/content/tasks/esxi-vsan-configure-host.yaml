@@ -36,7 +36,7 @@ Templates:
       VSW='{{ .Param "esxi/vsan-vswitch-standard" }}'
       VMN='{{ .Param "esxi/vsan-vmnic" }}'
       PGR='{{ .Param "esxi/vsan-portgroup" }}'
-      VMK='{{ .Param "esxi/vsan-vmk" }}'
+      {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
       IP='{{ .Param "esxi/vsan-vmknic-ip" }}'
       NM='{{ .Param "esxi/vsan-vmknic-netmask" }}'
 
@@ -66,9 +66,9 @@ Templates:
         xiterr 1 "VSAN is not configured on this ESXi node ('{{ .Machine.Name }}')"
       fi
 
-      for K in $(esxcli --formatter=keyvalue vsan network list | grep VmkNicName | cut -d"=" -f2)
+      for DEV in $(esxcli --formatter=keyvalue vsan network list | grep VmkNicName | cut -d"=" -f2)
       do
-        VMKS="$VMKS $K"
+        VMKS="$VMKS $DEV"
       done
 
       if echo $VMKS | grep -q $VMK
