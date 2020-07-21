@@ -101,8 +101,12 @@ Templates:
 
       make_folder() {
         local _folder
+        local _bad_msg="received bad folder ('$_folder'), not attempting to make"
         if [[ -n "$_folder" ]]
         then
+          # a couple of quick safety checks
+          [[ "$_folder" == "/" ]] && { echo "$_bad_msg"; return 0; }
+          [[ "$_folder" == "." ]] && { echo "$_bad_msg"; return 0; }
           if govc folder.info "$_folder" > /dev/null 2>&1
           then
             echo "Folder '$_folder' exists already."
@@ -119,13 +123,12 @@ Templates:
         # separate path parts in to array
         while read <<< $(dirname $FOLDER)
         do
-          [[ "$DIR" == "/" ]] && break
-          DIRS+=($DIR)
-          DIR=$(dirname $DIR)
+          [[ "$FOLDER" == "/" ]] && break
+          DIRS+=($FOLDER)
+          FOLDER=$(dirname $FOLDER)
         done
-        DIR=""
 
-        # reverse array of DIRS (if extdebug; BASH_ARGV in reverse order)
+        # reverse array of DIRS (if extdebug; BASH_ARGV is set in reverse order)
         rev() { DIRS=("${BASH_ARGV[@]}"); }
         shopt -s extdebug
         rev "${DIRS[@]}"
