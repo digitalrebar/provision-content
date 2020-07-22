@@ -1,0 +1,12 @@
+---
+Name: "govc-vsan-cluster-get"
+Description: "Get VSAN cluster info on ESXi host."
+Documentation: |
+  Get VSAN cluster info on ESXi hosts.
+
+Tasks:
+  - "govc-vsan-cluster-get"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

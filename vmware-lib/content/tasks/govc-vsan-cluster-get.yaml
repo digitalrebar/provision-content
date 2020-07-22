@@ -1,0 +1,135 @@
+---
+Description: "Get VSAN cluster membership info on an ESXi host."
+Name: "govc-vsan-cluster-get"
+Documentation: |
+  DESTROY the VSAN cluster membership on a given ESXi host.
+
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams: []
+OptionalParams: []
+Templates:
+  - Name: "esxi-vsan-cluster-get.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # VSAN destroy 
+      # RackN Copyright 2020
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" .}}
+
+      ### govc-setup.sh.tmpl
+      {{ template "govc-setup.sh.tmpl" .}}
+
+      set -e
+
+      JQ=$(which jq)
+      [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
+      [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
+      [[ -z "$JQ" ]] && JQ=$(which gojq)     || true
+      if [[ -z "$JQ" ]]; then
+        D="$(which drpcli)"
+        if [[ -n "$D" ]]; then
+          ln -s $D /usr/local/bin/drpjq
+          JQ="/usr/local/bin/drpjq"
+        else
+          xiterr 1 "Unable to find 'jq' or alternative to use."
+        fi
+      fi
+
+      export GOVC_PERSIST_SESSION=false
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+
+      echo ""
+      echo "      Cluster to operate on: '$CLUSTER'"
+      echo "Found members to operate on: '$MEMBERS'"
+      echo ""
+
+      {{ $pass := "" }}
+
+      vsan_cluster_get() {
+        local _state _pass _msg
+        local _no_vsan_msg="vSAN Clustering is not enabled on this host"
+        local GOVC_URL=$(get_member_name $MEMBER)
+        local GOVC_USERNAME=root
+        local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        local GOVC_PASSWORD=""
+        local GOVC_INSECURE=1
+        # turn off shell history if there are exclamations in password
+        _pass=$(drpcli machines get $RS_UUID param esxi/insecure-password | jq -r '.' || true)
+        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
+
+        echo ""
+        echo ">>>>>>>>>>>>>>>>>>>>>>> START get log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
+        echo ""
+
+        _msg="Running 'govc' with the following credentials ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+
+        echo "RUN: govc host.esxcli vsan cluster get"
+        govc host.esxcli vsan cluster get
+        echo "EXIT CODE: $?"
+        echo ""
+        echo ">>>>>>>>>>>>>>>>>>>>>>>> END get log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
+      }
+
+      # try to set based on Machien Name, FQDN, or fallback to IP Address
+      # TODO:  This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        echo $ADDR
+        # echo $MEMBER.$DNAME
+      }
+
+      # iterate over members of cluster an destroy VSAN
+      if [[ -n "$MEMBERS" ]]
+      then
+        rm -f /tmp/cluster-get-*\.log
+        for MEMBER in $MEMBERS
+        do
+          #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
+          ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+          GET_LOG=/tmp/cluster-get-$$-$MEMBER.$ADDR.log
+
+          HNAME=$(get_member_name)
+          if [[ -n "$ADDR" ]]
+          then
+            vsan_cluster_get >> $GET_LOG 2>&1 &
+          else
+            xiterr 1 "Unable to get '$MEMBER' IP Address."
+          fi
+        done
+
+        # wait for all members to complete
+        wait
+        LOGS=$(ls /tmp/cluster-get-*\.log)
+        for LOG in $LOGS
+        do
+          echo "LOG: $LOG"
+          cat $LOG
+          echo ""
+        done
+        rm -f /tmp/cluster-get*.log
+      else
+        echo "No members with 'esxi/cluster-name' found to operate on."
+      fi

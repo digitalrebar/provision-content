@@ -1,0 +1,12 @@
+---
+Name: "govc-vsan-destroy-cluster"
+Description: "Destroy VSAN on ESXi host."
+Documentation: |
+  Destroy VSAN on ESXi hosts.
+
+Tasks:
+  - "govc-vsan-destroy-cluster"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"
