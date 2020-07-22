@@ -235,6 +235,7 @@ Templates:
             then
               echo "Starting cluster setup for '$MEMBER'."
               if (( $IS_FIRST ))
+              then
                 echo ">>> Initializing first cluster member..."
                 setup_cluster
                 echo ">>> Sleep to let things settle ..."
