@@ -25,10 +25,7 @@ Templates:
   - Name: "esxi-vsan-configure-host.sh"
     Contents: |
       #!/usr/bin/env sh
-      # Configure VSAN on an ESXi host via govc
-
-      ### govc-setup.sh.tmpl
-      {{ template "govc-setup.sh.tmpl" . }}
+      # Configure VSAN on an ESXi host via ESXi workflow
 
       VSW='{{ .Param "esxi/vsan-vswitch-standard" }}'
       VMN='{{ .Param "esxi/vsan-vmnic" }}'

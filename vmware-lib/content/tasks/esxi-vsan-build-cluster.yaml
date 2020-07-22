@@ -29,9 +29,7 @@ Templates:
       ### setup.tmpl
       {{ template "setup.tmpl" . }}
 
-      ### govc-setup.sh.tmpl
-      {{ template "govc-setup..sh.tmpl" . }}
-
+      echo "This task has not been completed or tested.  Exiting with error."
       exit 1
 
       # incomplete
