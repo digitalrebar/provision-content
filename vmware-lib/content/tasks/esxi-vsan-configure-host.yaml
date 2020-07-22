@@ -27,6 +27,8 @@ Templates:
       #!/usr/bin/env sh
       # Configure VSAN on an ESXi host via ESXi workflow
 
+      function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+
       VSW='{{ .Param "esxi/vsan-vswitch-standard" }}'
       VMN='{{ .Param "esxi/vsan-vmnic" }}'
       PGR='{{ .Param "esxi/vsan-portgroup" }}'
@@ -57,7 +59,7 @@ Templates:
       else
         echo "Dumping VSAN information:"
         esxcli vsan cluster get || true
-        xiterr 1 "VSAN is not configured on this ESXi node ('{{ .Machine.Name }}')"
+        xiterr 1 "VSAN is not enabled (set 'esxi/vsan-enabled' to 'true') for this ESXi node ('{{ .Machine.Name }}')"
       fi
 
       for DEV in $(esxcli --formatter=keyvalue vsan network list | grep VmkNicName | cut -d"=" -f2)
