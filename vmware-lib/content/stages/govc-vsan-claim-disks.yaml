@@ -13,5 +13,5 @@ Meta:
   icon: "terminal"
   color: "green"
   title: "RackN Content"
-Stages:
+Tasks:
   - "govc-vsan-claim-disks"
