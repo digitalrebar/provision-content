@@ -5,7 +5,10 @@ Documentation: |
   Get VSAN cluster info on ESXi hosts.
 
 Tasks:
+  - "context:govc"
   - "govc-vsan-cluster-get"
+Params:
+  esxi/vsan-operations: "cluster-list"
 Meta:
   icon: "terminal"
   color: "black"

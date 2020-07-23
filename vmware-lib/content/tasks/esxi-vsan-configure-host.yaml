@@ -51,6 +51,10 @@ Templates:
       #  esxcfg-vmknic -a -i $IP -n $NM -p $PGR
       #fi
 
+      esxcli vsan network ip add -i $VMK
+
+      exit 0
+      # skipping all validation steps / path for now - this needs trued up
       ENABLED=$(esxcli --formatter=keyvalue vsan cluster get | grep "^VsanClusterGet.Enabled" | cut -d "=" -f2)
 
       if [[ "$ENABLED" == "true" ]]

@@ -5,7 +5,10 @@ Documentation: |
   Destroy VSAN on ESXi hosts.
 
 Tasks:
+  - "context:govc"
   - "govc-vsan-destroy-cluster"
+Params:
+  esxi/vsan-operations: "cluster-destroy"
 Meta:
   icon: "terminal"
   color: "black"

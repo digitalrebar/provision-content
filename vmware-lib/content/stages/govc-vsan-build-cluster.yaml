@@ -1,11 +1,14 @@
 ---
-Name: "esxi-vsan-build-cluster"
+Name: "govc-vsan-build-cluster"
 Description: "Build cluster from VSAN hosts."
 Documentation: |
   Build VSAN cluster from VSAN configured hosts.
 
 Tasks:
-  - "esxi-vsan-build-cluster"
+  - "context:govc"
+  - "govc-vsan-build-cluster"
+Params:
+  esxi/vsan-operations: "build-cluster"
 Meta:
   icon: "terminal"
   color: "black"

@@ -2,8 +2,9 @@
 
 # commands to run after building container tar files
 
+[[ -n "$*" ]] && contexts="$*"
 #contexts="vcsa-deploy-context:latest govc-context:latest context-runner-context:latest"
-contexts="vcsa-deploy-context:latest govc-context:latest"
+contexts=${contexts:-"vcsa-deploy-context:latest govc-context:latest pyvmomi-context:latest"}
 
 # run as:  CONTEXT=0 ./drpcli-commands.sh
 # if your contexts are already installed on the DRP Endpoint

@@ -1,0 +1,24 @@
+---
+Name: "esxi/vsan-operations"
+Description: "Operations to perform on VSAN cluster, typically set at the Stage level"
+Documentation: |
+  Defines the VSAN cluster operations to perform on the cluster or cluster
+  members defined by ``esxi/cluster-name``.  Typically this Param will be
+  given a value(s) on a Stage, which drives a specific set of behaviors.
+
+  Some example Param values include:
+
+    * ``cluster-build``
+    * ``cluster-destroy``
+    * ``cluster-list``
+
+  These Param values must be supported operations within the Task(s) that are
+  using them.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

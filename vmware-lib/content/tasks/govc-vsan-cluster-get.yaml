@@ -86,9 +86,13 @@ Templates:
           env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
         fi
 
-        echo "RUN: govc host.esxcli vsan cluster get"
+        echo ">>>"
+        echo ">>> RUN: govc host.esxcli 'vsan network list'"
+        govc host.esxcli vsan network list
+        echo ""
+        echo ">>>"
+        echo ">>> RUN: govc host.esxcli 'vsan cluster get'"
         govc host.esxcli vsan cluster get
-        echo "EXIT CODE: $?"
         echo ""
         echo ">>>>>>>>>>>>>>>>>>>>>>>> END get log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
       }

@@ -1,0 +1,22 @@
+---
+Name: "esxi/cluster-profile"
+Description: "The name of a cluster to record cluster-wide state information on."
+Documentation: |
+  Set this to the name of a Profile, which will be used to store cluster wide state
+  information on for cluster build/operational management.
+
+  For example, set this to:
+
+    * ``my-esxi-cluster-info``
+
+  A profile of this name will be used to read/write data to in relation to cluster
+  operations and coordination.
+
+Schema:
+  type: "string"
+  default: ""
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

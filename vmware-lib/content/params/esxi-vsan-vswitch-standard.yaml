@@ -9,7 +9,7 @@ Documentation: |
 
 Schema:
   type: "string"
-  default: "vSwitch1"
+  default: "vSwitch0"
 Meta:
   color: "green"
   icon: "terminal"
