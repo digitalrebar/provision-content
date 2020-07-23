@@ -49,7 +49,8 @@ Templates:
       {{ end }}
 
       OPS='{{ .Param "esxi/vsan-operations" }}'
-      [[ -z "$OPS" ]] && xiterr 1 "No operations ('esxi/vsan-operations') specified."
+      # [[ -z "$OPS" ]] && xiterr 1 "No operations ('esxi/vsan-operations') specified."
+      [[ -z "$OPS" ]] && OPS="claim-disks"
 
       {{ if .ParamExists "esxi/vsan-nodes-override" }}
       NODES="{{ .Param "esxi/vsan-nodes-override" }}"
