@@ -181,20 +181,20 @@ Templates:
       }
 
       get_boot_disks() {
-        DISKS_BOOT=$(jq -r '.[] | select(.IsBootDevice | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
+        DISKS_BOOT=$(jq -r 'select(.IsBootDevice | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
         echo "Found disks marked as boot disks:"
         printf "%s\n" "$DISKS_BOOT"
         
       }
 
       get_ssd_disks() {
-        DISKS_SSD=$(jq -r '.[] | select(.IsSSD | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
+        DISKS_SSD=$(jq -r 'select(.IsSSD | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
         echo "Found disks with type SSD:"
         printf "%s\n" "$DISKS_SSD"
       }
      
       get_spinning_disks() {
-        DISKS_SPIN=$(jq -r '.[] | select(.IsSSD | .[0]!="false") | "\(.Device | .[0])"' $DISK_JSON)
+        DISKS_SPIN=$(jq -r 'select(.IsSSD | .[0]!="false") | "\(.Device | .[0])"' $DISK_JSON)
         echo "Found disks with type spinning:"
         printf "%s\n" "$DISKS_SPINSSD"
       }
@@ -234,7 +234,6 @@ Templates:
       #    * Make rest Capacity
       ###
       rule_simple() {
-        echo "In 'rule_simple' disk claiming function..."
         get_ssd_disks
         get_spinning_disks
         get_boot_disks
