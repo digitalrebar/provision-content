@@ -181,14 +181,14 @@ Templates:
       }
 
       get_boot_disks() {
-        DISKS_BOOT=$(jq -r 'select(.IsBootDevice | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
+        DISKS_BOOT=$(jq -r 'select(.IsBootDevice | .[0]=="true") | "\(.Device | .[0])"' $DISK_JSON)
         echo "Found disks marked as boot disks:"
         printf "%s\n" "$DISKS_BOOT"
         
       }
 
       get_ssd_disks() {
-        DISKS_SSD=$(jq -r 'select(.IsSSD | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
+        DISKS_SSD=$(jq -r 'select(.IsSSD | .[0]=="true") | "\(.Device | .[0])"' $DISK_JSON)
         echo "Found disks with type SSD:"
         printf "%s\n" "$DISKS_SSD"
       }
@@ -205,7 +205,7 @@ Templates:
         # get disks - select only Physical and Local types
         govc host.esxcli -json storage core device list | jq -cM '.Values | .[] | select(.DriveType.[0]=="physical" and .IsLocal.[0]=="true")' > $DISK_JSON
         echo "Found Disks on system after discarded non-local and non-physical:"
-        jq '"Device: \(.Device | .[0]) IsSSD: \(.IsSSD | .[0])"' $DISK_JSON
+        jq -r '"Device: \(.Device | .[0]) IsSSD: \(.IsSSD | .[0])"' $DISK_JSON
 
         case $_rule in
           simple) rule_simple ;;
