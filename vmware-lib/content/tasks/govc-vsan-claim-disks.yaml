@@ -209,7 +209,6 @@ Templates:
 
         case $_rule in
           simple) rule_simple ;;
-          ;;
           *)
             xiterr 1 "Unsupported disk claim rule '$_rule'."
           ;;
