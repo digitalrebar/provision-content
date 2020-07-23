@@ -1,0 +1,246 @@
+---
+Name: "govc-vsan-claim-disks"
+Description: "Claim available disks for VSAN."
+Documentation: |
+  Uses selection rule listed in ``esxi/vsan-disk-selection-rule`` to select
+  disks to use for VSAN claimed use.
+
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+  - scope: "profiles"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - "esxi/vsan-enabled"
+  - "esxi/cluster-name"
+  - "esxi/cluster-profile"
+  - "esxi/vsan-disk-selection-rule"
+OptionalParams:
+  - "esxi/insecure-password"
+  - "esxi/vsan-nodes-override"
+  - "esxi/vsan-data/sub-cluster-uuid"
+Templates:
+  - Name: "esxi-vsan-cluster-operations.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # Build the VSAN cluster from the hosts.
+      
+      ### setup.tmpl
+      {{ template "setup.tmpl" . }}
+
+      ### esxi-vsan-cluster-operations.sh
+      ON='{{ .Param "esxi/vsan-enabled" }}'
+      [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
+
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+
+      {{ if .ParamExists "esxi/cluster-profile" -}}
+      CLUSTER_PROFILE='{{ .Param "esxi/cluster-profile" }}'
+      {{ else -}}
+      xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not been assigned."
+      {{ end }}
+
+      OPS='{{ .Param "esxi/vsan-operations" }}'
+      [[ -z "$OPS" ]] && xiterr 1 "No operations ('esxi/vsan-operations') specified."
+
+      {{ if .ParamExists "esxi/vsan-nodes-override" }}
+      NODES="{{ .Param "esxi/vsan-nodes-override" }}"
+      {{ else -}}
+      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      {{ end }}
+
+      SELECTION_RULE='{{ .Param "esxi/vsan-disk-selection-rule" }}'
+
+      # additional global vars used throughout functions
+      NODE= GOVC_URL="" GOVC_USERNAME="" GOVC_DATACENTER="" GOVC_PASSWORD="" GOVC_INSECURE="" GOVC_DATASTORE="" GOVC_RESOURCE_POOL=""
+      DISK_JSON="" DISKS_BOOT="" DISKS_VSAN="" DISKS_VMFS="" DISKS_CACHE="" DISKS_CAPACITY=""
+
+      # TODO: handle geting PARAM_SCUUID if set and using it for 'join' operations
+      SCUUID=
+
+      main() {
+        drpcli profiles exists "$CLUSTER_PROFILE" > /dev/null 2>&1 || profile_create
+        echo "nodes list:  $NODES"
+        echo ""
+
+        for NODE in $NODES
+        do
+          ADDR=$(get_member_name)
+          DISK_JSON=/tmp/claim-disks-$$.$NODE.$ADDR.log
+          HDR=1
+          hdr
+          set_govc_env $NODE
+          H="+---------------------------------- ($NODE) ----------------------------------+"
+
+          [[ "$OPS" =~ ^custom.* ]] && { OPS="custom"; CMD=$(echo "$@" | sed 's/^custom //'); }
+          for OP in $OPS
+          do
+            case "$OP" in
+              # main cluster operations
+              claim-disks)      
+                hdr
+                claim_disks $SELECTION_RULE
+              ;;
+              *)
+                echo "Unknown operation '$OP'."
+                echo "try:    claim-disks"
+                echo " or:    custom <govc command>"
+                exit 1
+              ;;
+            esac
+            echo ""
+            HDR=0
+          done
+        done
+
+        J=$(jobs)
+        [[ -n "$J" ]] && { printf "\nWaiting on any BG jobs...\n"; wait; } || true
+      } # end main
+
+      profile_create() {
+        local _profile
+        _name="$CLUSTER_PROFILE"
+        _profile='{ "Name": "'$_name'", "Description": "ESXi Cluster Data Profile (auto-generated)", "Meta": { "color": "purple", "icon": "world", "title": "ESXi Cluster Data" }, "Params": {}, "Profiles": [] }'
+        echo "$_profile" | drpcli profiles create -
+      }
+
+      profile_write() {
+        _name="$CLUSTER_PROFILE"
+        _param="$1"
+        shift 1
+        _value="$*"
+        drpcli profiles exists "$_name" > /dev/null 2>&1 || profile_create
+        drpcli profiles set "$_name" param "$_param" to "$_value"
+      }
+
+      param_get() {
+        local _param=$(drpcli profiles get "$_name" param "$_param" | jq -r '.')
+        [[ -n "$_param" && "$_param" != "null" ]] && echo "$_param"
+      }
+
+      # TODO:  Try to set based on Machien Name, FQDN, or fallback to IP Address.
+      #        This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
+        echo $ADDR
+      }
+
+      set_govc_env() {
+        export GOVC_URL=$(get_member_name $NODE)
+        export GOVC_USERNAME=root
+        export GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        export GOVC_INSECURE=1
+        export GOVC_DATASTORE=""
+        export GOVC_RESOURCE_POOL=""
+        _pass=$(drpcli machines get $RS_UUID param esxi/insecure-password | jq -r '.' || true)
+        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
+        export GOVC_PASSWORD
+
+        _msg="Running 'govc' with the following credentials ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+      }
+
+      cst() { cmd $CMD; }
+      hdr() { (( $HDR )) && printf "$H\n"; }
+      cmd() { printf ">>> ($NODE): govc $*\n\n"; govc $*; }
+      about() { cmd about; }
+
+      # must have DISK_JSON populated with machines disk structures
+      get_vsan_claimed_disks() {
+        DISKS_VSAN=$(govc host.esxcli -json vsan storage list | jq -r '.Values | .[] | .Device | .[]' | sort -u || true)
+        echo "Found VSAN claimed disks:"
+        printf "%s\n" "$DISKS_VSAN"
+      }
+
+      get_vmfs_claimed_disks() {
+        DISKS_VMFS=$(govc host.esxcli -json storage vmfs extent list | jq -r '.Values | .[] | .DeviceName | .[]' | sort -u || true)
+        echo "Found disks with VMFS volumes:"
+        printf "%s\n" "$DISKS_VMFS"
+      }
+
+      get_boot_disks() {
+        DISKS_BOOT=$(jq -r '.[] | select(.IsBootDevice | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
+        echo "Found disks marked as boot disks:"
+        printf "%s\n" "$DISKS_BOOT"
+        
+      }
+
+      get_ssd_disks() {
+        DISKS_SSD=$(jq -r '.[] | select(.IsSSD | .[0]!="true") | "\(.Device | .[0])"' $DISK_JSON)
+        echo "Found disks with type SSD:"
+        printf "%s\n" "$DISKS_SSD"
+      }
+     
+      get_spinning_disks() {
+        DISKS_SPIN=$(jq -r '.[] | select(.IsSSD | .[0]!="false") | "\(.Device | .[0])"' $DISK_JSON)
+        echo "Found disks with type spinning:"
+        printf "%s\n" "$DISKS_SPINSSD"
+      }
+
+      claim_disks() {
+        local _rule="$1"
+
+        # get disks - select only Physical and Local types
+        govc host.esxcli -json storage core device list | jq -cM '.Values | .[] | select(.DriveType.[0]=="physical" and .IsLocal.[0]=="true")' > $DISK_JSON
+        echo "Found Disks on system after discarded non-local and non-physical:"
+        jq '"Device: \(.Device | .[0]) IsSSD: \(.IsSSD | .[0])"' $DISK_JSON
+
+        case $_rule in
+          simple) rule_simple ;;
+          ;;
+          *)
+            xiterr 1 "Unsupported disk claim rule '$_rule'."
+          ;;
+        esac
+     
+      }
+
+      ###
+      #  Uses simple filter rules to return list of Cache and Capacity
+      #  disks.  Rules:
+      #
+      #    * List all available disks
+      #    * Subtract IsBootDisk
+      #    * Subtract has VMFS volumes
+      #    * Subtract VSAN claimed
+      #
+      #  MUST have a remainder with - minimum:
+      #    * 2 disks total
+      #    * 1 of which must be an SSD type
+      #
+      #  Will Use Disks with these rules
+      #    * Make first IsSSD true Cache
+      #    * Make rest Capacity
+      ###
+      rule_simple() {
+        echo "In 'rule_simple' disk claiming function..."
+        get_ssd_disks
+        get_spinning_disks
+        get_boot_disks
+        get_vsan_claimed_disks
+        get_vmfs_claimed_disks
+      }
+
+      main $*
+      
