@@ -6,7 +6,7 @@ Documentation: |
 
 Tasks:
   - "context:govc"
-  - "govc-vsan-destroy-cluster"
+  - "govc-vsan-cluster-operations"
 Params:
   esxi/vsan-operations: "cluster-destroy"
 Meta:

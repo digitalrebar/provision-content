@@ -1,12 +1,12 @@
 ---
-Name: "govc-vsan-cluster-get"
+Name: "govc-vsan-cluster-list"
 Description: "Get VSAN cluster info on ESXi host."
 Documentation: |
   Get VSAN cluster info on ESXi hosts.
 
 Tasks:
   - "context:govc"
-  - "govc-vsan-cluster-get"
+  - "govc-vsan-cluster-operations"
 Params:
   esxi/vsan-operations: "cluster-list"
 Meta:
