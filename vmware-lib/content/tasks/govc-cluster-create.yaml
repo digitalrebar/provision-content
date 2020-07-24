@@ -154,6 +154,17 @@ Templates:
 
         # uses variable MEMBER to operate against
         cluster_add() {
+          if [[ "$VSAN_ENABLED" == "true" ]]
+          then
+            if govc host.esxcli vsan network list > /dev/null 2>&1
+            then
+              echo ">>> VMK $VMK appears to have VSAN type already"
+            else
+              echo ">>> adding VMK $VMK with VSAN type"
+              run_govc host.esxcli vsan network ip add -i $VMK
+            fi
+          fi
+
           echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
           echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
           run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $PRINT >> $ADD_LOG
