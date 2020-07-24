@@ -43,8 +43,7 @@ function fixup_path() {
   for _add_path in $(echo $* | sed 's/[:,]/ /g')
   do
     mkdir -p $_add_path
-    # inject colons to avoid partial match failures
-    grep -q ":$_add_path" <<< ":$PATH:" || export PATH="$PATH:$_add_path"
+    echo ":$PATH:" | grep -q ":$_add_path" || export PATH="$PATH:$_add_path"
   done
 }
 
