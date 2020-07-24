@@ -44,6 +44,9 @@ Templates:
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
 
       {{ if .ParamExists "esxi/cluster-profile" -}}
+      {{ if eq ( .Param "esxi/cluster-profile" ) "" -}}
+      xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') exists but has an empty value."
+      {{ end -}}
       CLUSTER_PROFILE='{{ .Param "esxi/cluster-profile" }}'
       {{ else -}}
       xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not been assigned."
@@ -66,20 +69,30 @@ Templates:
       DISK_JSON="" DISKS_BOOT="" DISKS_VSAN="" DISKS_VMFS="" DISKS_CACHE="" DISKS_CAPACITY=""
 
       main() {
-        local _my_args
+        local _my_args _fatal_msg
         drpcli profiles exists "$CLUSTER_PROFILE" > /dev/null 2>&1 || profile_create
         echo "nodes list:  $NODES"
         echo ""
-
+        echo "----------------------------------------------------------------------------------------"
+        {{ if eq ( .Param "esxi/vsan-zero-count-fatal" ) true -}}
+        echo ">> NOTICE: 'esxi/vsan-zero-count-fatal' is 'true'"
+        echo "           any single node failure to acquire disks is a fatal condition"
+        {{ else -}}
+        echo ">> NOTICE: 'esxi/vsan-zero-count-fatal' is 'false'"
+        echo "           any single node failure to acquire disks is hunky dory"
+        {{ end }}
+        echo "----------------------------------------------------------------------------------------"
+        echo ""
+        
         for NODE in $NODES
         do
           ADDR=$(get_member_name)
           DISK_JSON=/tmp/claim-disks-$$.$NODE.$ADDR.log
           DISKS=/tmp/disks-$$.$NODE.$ADDR.log
           HDR=1
+          H="+---------------------------------- ($NODE) ----------------------------------+"
           hdr
           set_govc_env $NODE
-          H="+---------------------------------- ($NODE) ----------------------------------+"
 
           [[ "$OPS" =~ ^custom.* ]] && { OPS="custom"; CMD=$(echo "$@" | sed 's/^custom //'); }
           for OP in $OPS
@@ -110,22 +123,23 @@ Templates:
             echo "govc host.esxcli vsan storage add $_my_args"
             echo ""
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-          else
-            echo "+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+"
-            echo ""
-            echo " OOPS: no disks found, but 'esxi/vsan-zero-count-fatal' says"
-            echo "       we soldier on without VSAN disks on this VSAN NODE"
-            echo ""
-            echo "+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+"
           fi
 
           echo ""
+
+          rm -rf $DISK_JSON $DISKS
         done
 
         J=$(jobs)
         [[ -n "$J" ]] && { printf "\nWaiting on any BG jobs...\n"; wait; } || true
       } # end main
 
+      ###
+      #  Generate the 'vsan storage add ...' arguments
+      #  Input:  none
+      #  Variables Required: DISKS_CACHE DISKS_CAPACITY
+      #  Output: returns text string '-s <disk> -s <disk> -d <disk> -d <disk> ...'
+      ###
       build_args() {
         local _args
         for D in $DISKS_CACHE;    do _args="$_args -s $D"; done
@@ -249,10 +263,13 @@ Templates:
       claim_disks() {
         local _rule="$1"
 
-        # get disks - select only Physical and Local types
-        govc host.esxcli -json storage core device list | jq -cM '.Values | .[] | select(.DriveType.[0]=="physical" and .IsLocal.[0]=="true")' > $DISK_JSON
-        echo "Found Disks on system after discarded non-local and non-physical:"
+        # get disks - select only Physical or Logical Drive Types of Local types
+        echo ""
+        echo ">>> Getting initial disk list (with select only Physical or Logical Drive Types of Local types)..."
+        govc host.esxcli -json storage core device list | jq -cM '.Values | .[] | select(((.DriveType | .[0]=="logical") or (.DriveType | .[0]=="physical")) and (.IsLocal | .[0]=="true"))' > $DISK_JSON
+        echo ">>> Found disks on system:"
         jq -r '"Device: \(.Device | .[0]) IsSSD: \(.IsSSD | .[0]) IsSAS: \(.IsSAS | .[0]) IsBootDevice: \(.IsBootDevice | .[0])"' $DISK_JSON
+        echo ""
 
         case $_rule in
           simple) rule_simple ;;
@@ -287,6 +304,21 @@ Templates:
         echo ""
       }
 
+      exit_if_fatal_check() {
+        local _msg="$*"
+        local _is_fatal="{{ .Param "esxi/vsan-zero-count-fatal" }}"
+        
+        if [[ "$_is_fatal" == "true" ]]
+        then
+          xiterr 1 "Fatal on zero count exit requested - $_msg"
+        else
+          echo ">>> Failed cache/capacity check ($_msg), but not fatally exiting."
+          echo ">>> Deselecting all found DISKS_CACHE and DISKS_CAPACITY due to rule failure."
+          DISKS_CACHE=""
+          DISKS_CAPACITY=""
+        fi
+      }
+
       ###
       #  Uses simple filter rules to return list of Cache and Capacity
       #  disks.  Rules:
@@ -305,26 +337,37 @@ Templates:
       #    * Make rest Capacity
       ###
       rule_simple() {
-        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total _dcap _dcac
+        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total _dcap _dcac _fatal_msg
         local _limit="64000"
 
         # size:(ssd|spin):device
         jq -r '"\(.Size | .[0]):\(.IsSSD | .[0]):\(.Device | .[0])"' $DISK_JSON | sed -e 's/true/ssd/' -e 's/false/spin/' > $DISKS
-        _count_ssd=$(get_ssd_disks | wc -l)
-        _count_tot=$(cat $DISKS | wc -l)
-        #_count_spn=$(get_spinning_disks | wc -l)
-        
+        _count_ssd=$(cat $DISKS | grep ":ssd:" | wc -l || true)
+        _count_tot=$(cat $DISKS | wc -l || true)
+        #_count_spn=$(cat $DISKS | grep -v ":ssd:" | wc -l || true)
+
+        echo "Starting disk list"
+        echo "size:(ssd|spin):device_name"
+        echo "--------------------------------------------"
+        cat $DISKS
+        echo ""
         echo "Found TOTAL count  :  $_count_tot"
         echo "Found SSD count    :  $_count_ssd"
         echo "Found non-SSD count:  $(( _count_tot - _count_ssd ))"
         
-        [[ "$_count_ssd" == "0" ]] && xiterr 1 "Require at least 1 (one) SSD type disk for Cache"
-        [[ "$_count_tot" < "2"  ]] && xiterr 1 "Require minimum of 2 (two) disks for Cache and Capacity"
-
-        echo "Starting disk list"
-        echo "size:(ssd|spin):device"
-        echo "--------------------------------------------"
-        cat $DISKS
+        _fatal_msg="Failed minimum checks - either zero (0) SSD or less than two (2) total disks"
+        if [[ "$_count_ssd" -eq "0" || "$_count_tot" -lt "2"  ]]
+        then
+          {{ if eq ( .Param "esxi/vsan-zero-count-fatal" ) true -}}
+          xiterr 1 "$_fatal_msg"
+          {{ else -}}
+          echo ">>> $_fatal_msg"
+          echo ">>> HOWEVER - 'esxi/vsan-zero-count-fatal' is set to 'false', so soldiering on..."
+          return 0
+          {{ end }}
+        else
+          echo ">>> Passed minimum disk checks - one or more SSD, and at least 2 disks total"
+        fi
 
         filter_out disk_by_size "le" "$_limit"
         print_current_disks "... after fail 'le $_limit' filter"
@@ -359,21 +402,6 @@ Templates:
 
         echo "   ASSIGNED Cache Disk: $_dcac"
         echo "ASSIGNED Capacity Disk: $_dcap"
-      }
-
-      exit_if_fatal_check() {
-        local _msg="$*"
-        local _is_fatal="{{ .Param "esxi/vsan-zero-count-fatal" }}"
-        
-        if [[ "$_is_fatal" == "true" ]]
-        then
-          xiterr 1 "Fatal on zero count exit requested - $_msg"
-        else
-          echo ">>> Failed cache/capacity check ($_msg), but not fatally exiting."
-          echo ">>> Deselecting all found DISKS_CACHE and DISKS_CAPACITY due to rule failure."
-          DISKS_CACHE=""
-          DISKS_CAPACITY=""
-        fi
       }
 
       main $*

@@ -1,5 +1,5 @@
 ---
-Name: "govc-vsan-destroy-cluster"
+Name: "govc-vsan-cluster-destroy"
 Description: "Destroy VSAN on ESXi host."
 Documentation: |
   Destroy VSAN on ESXi hosts.
