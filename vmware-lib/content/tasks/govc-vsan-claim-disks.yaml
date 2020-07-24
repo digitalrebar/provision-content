@@ -334,11 +334,12 @@ Templates:
         local _msg="$*"
         local _is_fatal="{{ .Param "esxi/vsan-zero-count-fatal" }}"
         
-        if [[ "$_is_fatal == "true" ]]
+        if [[ "$_is_fatal" == "true" ]]
         then
           xiterr 1 "Fatal on zero count exit requested - $_msg"
         else
-          echo ">>> Failed cache/capacity check ($_msg), but not fatally exiting.  Wiping DISKS_CACHE and DISKS_CAPACITY."
+          echo ">>> Failed cache/capacity check ($_msg), but not fatally exiting."
+          echo ">>> Wiping DISKS_CACHE and DISKS_CAPACITY."
           DISKS_CACHE=""
           DISKS_CAPACITY=""
         fi
