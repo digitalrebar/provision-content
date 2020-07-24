@@ -80,7 +80,7 @@ Templates:
 
       main() {
         drpcli profiles exists "$CLUSTER_PROFILE" > /dev/null 2>&1 || profile_create
-        echo "nodes list:  $NODES"
+        echo "           nodes list:  $NODES"
         echo ""
 
         for NODE in $NODES
@@ -91,6 +91,7 @@ Templates:
           H="+---------------------------------- ($NODE) ----------------------------------+"
 
           [[ "$OPS" =~ ^custom.* ]] && { OPS="custom"; CMD=$(echo "$@" | sed 's/^custom //'); }
+          echo "requesteed operations:  $NODES"
           for OP in $OPS
           do
             case "$OP" in
@@ -192,7 +193,7 @@ Templates:
       }
 
       cst() { cmd $CMD; }
-      hdr() { (( $HDR )) && printf "$H\n"; }
+      hdr() { (( $HDR )) && printf "$H\n"; printf "running operation: $OP\n"; }
       cmd() { printf ">>> ($NODE): govc $*\n\n"; govc $*; }
       about() { cmd about; }
       cluster_build() { (( $IS_FIRST )) && cluster_new || cluster_join;  }
