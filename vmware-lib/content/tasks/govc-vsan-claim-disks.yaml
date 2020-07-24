@@ -236,7 +236,7 @@ Templates:
         local _filter=$($1)
         local _tmp=/tmp/remove-tmp.$$.$NODE.ADDR.txt
 
-        for _remove in $(cat $_filter)
+        for _remove in $_filter
         do
           echo "(filter: $1) filtering out: $_remove"
           grep -v "$_remove" $DISKS > $_tmp
