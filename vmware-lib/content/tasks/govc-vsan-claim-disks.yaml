@@ -223,7 +223,27 @@ Templates:
       get_spinning_disks() {
         DISKS_SPIN=$(jq -r 'select(.IsSSD | .[0]!="false") | "\(.Device | .[0])"' $DISK_JSON)
         #echo "Found disks with type spinning:"
-        printf "%s\n" "$DISKS_SPINSSD"
+        printf "%s\n" "$DISKS_SPIN"
+      }
+
+      disk_by_size() {
+        local _comp="$1"              
+        local _limit="$2"              
+        local _entry _limit _disk _filter
+        for _entry in $(cat $DISKS)
+        do
+          _size=$(echo $_entry | cut -d ":" -f 1)
+          _disk=$(echo $_entry | awk -F ":" ' { print $NF } ')
+          case $_comp in
+            "eq") [[ "$_size" -eq "$_limit" ]] && _filter="$_filter $_disk" || true ;;
+            "lt") [[ "$_size" -lt "$_limit" ]] && _filter="$_filter $_disk" || true ;;
+            "le") [[ "$_size" -le "$_limit" ]] && _filter="$_filter $_disk" || true ;;
+            "gt") [[ "$_size" -gt "$_limit" ]] && _filter="$_filter $_disk" || true ;;
+            "ge") [[ "$_size" -ge "$_limit" ]] && _filter="$_filter $_disk" || true ;;
+            *) xiterr 1 "Invalid comparison test for disk_by_size() - expect one of: eq, lt, le, gt, ge" ;;
+          esac
+        done
+        printf "%s\n" "$_filter"
       }
 
       claim_disks() {
@@ -232,7 +252,7 @@ Templates:
         # get disks - select only Physical and Local types
         govc host.esxcli -json storage core device list | jq -cM '.Values | .[] | select(.DriveType.[0]=="physical" and .IsLocal.[0]=="true")' > $DISK_JSON
         echo "Found Disks on system after discarded non-local and non-physical:"
-        jq -r '"Device: \(.Device | .[0]) IsSSD: \(.IsSSD | .[0]) IsSAS: \(.Device | .[0]) IsBootDevice: \(.IsBootDevice | .[0])"' $DISK_JSON
+        jq -r '"Device: \(.Device | .[0]) IsSSD: \(.IsSSD | .[0]) IsSAS: \(.IsSAS | .[0]) IsBootDevice: \(.IsBootDevice | .[0])"' $DISK_JSON
 
         case $_rule in
           simple) rule_simple ;;
@@ -247,13 +267,13 @@ Templates:
       # to be filtered out of the $DISKS file
       filter_out() {
         local _remove
-        local _filter=$($1)
+        local _filter=$($*)
         local _tmp=/tmp/remove-tmp.$$.$NODE.ADDR.txt
 
         for _remove in $_filter
         do
           echo "(filter: $1) filtering out: $_remove"
-          grep -v "$_remove" $DISKS > $_tmp
+          grep -v "$_remove" $DISKS > $_tmp || true
           cp $_tmp $DISKS
         done
         
@@ -285,7 +305,8 @@ Templates:
       #    * Make rest Capacity
       ###
       rule_simple() {
-        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total
+        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total _dcap _dcac
+        local _limit="64000"
 
         # size:(ssd|spin):device
         jq -r '"\(.Size | .[0]):\(.IsSSD | .[0]):\(.Device | .[0])"' $DISK_JSON | sed -e 's/true/ssd/' -e 's/false/spin/' > $DISKS
@@ -305,6 +326,9 @@ Templates:
         echo "--------------------------------------------"
         cat $DISKS
 
+        filter_out disk_by_size "le" "$_limit"
+        print_current_disks "... after fail 'le $_limit' filter"
+
         filter_out get_boot_disks
         print_current_disks "... after BOOT disks filtered"
 
@@ -320,14 +344,21 @@ Templates:
         DISKS_CAPACITY=$(grep -v "$DISKS_CACHE" $DISKS | awk -F":" ' { print $NF } ' || true)
         _found_spin_count=$(echo $DISKS_CAPACITY | wc -w)
 
-        (( _found_total = _found_cache_count + _found_spin_count ))
+        echo "DEBUG - _found_cache_count == $_found_cache_count"
+        echo "DEBUG - _found_spin_count  == $_found_spin_count"
+
+        _found_total=$(echo $(( _found_cache_count + _found_spin_count )))
+        echo "DEBUG - _found_total       == $_found_total"
 
         [[ "$_found_total" < "2" ]] && exit_if_fatal_check "less than 2 total disks found" || true
         [[ "$_found_cache_count" == "0" ]] && exit_if_fatal_check "cache count found ZERO" || true
         [[ "$_found_spin_count" == "0" ]] && exit_if_fatal_check "capacity count found was ZERO" || true
 
-        echo "   ASSIGNED Cache Disk: $DISKS_CACHE"
-        echo "ASSIGNED Capacity Disk: $DISKS_CAPACITY"
+        [[ -n "$DISKS_CACHE" ]] && _dcac="$DISKS_CACHE" || _dcac="<<< none >>>"
+        [[ -n "$DISKS_CAPACITY" ]] && _dcap="$DISKS_CAPACITY" || _dcap="<<< none >>>"
+
+        echo "   ASSIGNED Cache Disk: $_dcac"
+        echo "ASSIGNED Capacity Disk: $_dcap"
       }
 
       exit_if_fatal_check() {
@@ -339,7 +370,7 @@ Templates:
           xiterr 1 "Fatal on zero count exit requested - $_msg"
         else
           echo ">>> Failed cache/capacity check ($_msg), but not fatally exiting."
-          echo ">>> Wiping DISKS_CACHE and DISKS_CAPACITY."
+          echo ">>> Deselecting all found DISKS_CACHE and DISKS_CAPACITY due to rule failure."
           DISKS_CACHE=""
           DISKS_CAPACITY=""
         fi
