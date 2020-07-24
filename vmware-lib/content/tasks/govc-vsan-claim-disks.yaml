@@ -116,7 +116,7 @@ Templates:
         local _args
         for D in $DISKS_CACHE;    do _args="$_args -s $D"; done
         for D in $DISKS_CAPACITY; do _args="$_args -d $D"; done
-        echo "$_args" | awk '{$1=$1;print}')'
+        echo "$_args" | awk '{$1=$1;print}'
       }
 
       profile_create() {
