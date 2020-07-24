@@ -22,6 +22,7 @@ RequiredParams:
   - "esxi/cluster-name"
   - "esxi/cluster-profile"
   - "esxi/vsan-disk-selection-rule"
+  - "esxi/vsan-zero-count-fatal"
 OptionalParams:
   - "esxi/insecure-password"
   - "esxi/vsan-nodes-override"
@@ -65,6 +66,7 @@ Templates:
       DISK_JSON="" DISKS_BOOT="" DISKS_VSAN="" DISKS_VMFS="" DISKS_CACHE="" DISKS_CAPACITY=""
 
       main() {
+        local _my_args
         drpcli profiles exists "$CLUSTER_PROFILE" > /dev/null 2>&1 || profile_create
         echo "nodes list:  $NODES"
         echo ""
@@ -99,12 +101,24 @@ Templates:
             HDR=0
           done
 
-          echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-          echo ""
-          echo "COMMAND TO RUN:"
-          echo "govc host.esxcli vsan storage add $(build_args)"
-          echo ""
-          echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+          if [[ -n "$DISKS_CACHE" && -n "$DISKS_CAPACITY" ]]
+          then
+            _my_args=$(build_args)
+            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            echo ""
+            echo "COMMAND TO RUN:"
+            echo "govc host.esxcli vsan storage add $_my_args"
+            echo ""
+            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+          else
+            echo "+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+"
+            echo ""
+            echo " OOPS: no disks found, but 'esxi/vsan-zero-count-fatal' says"
+            echo "       we soldier on without VSAN disks on this VSAN NODE"
+            echo ""
+            echo "+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!+"
+          fi
+
           echo ""
         done
 
@@ -271,7 +285,7 @@ Templates:
       #    * Make rest Capacity
       ###
       rule_simple() {
-        local _count_ssd _count_spn _count_tot
+        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total
 
         # size:(ssd|spin):device
         jq -r '"\(.Size | .[0]):\(.IsSSD | .[0]):\(.Device | .[0])"' $DISK_JSON | sed -e 's/true/ssd/' -e 's/false/spin/' > $DISKS
@@ -300,10 +314,34 @@ Templates:
         filter_out get_vmfs_claimed_disks
         print_current_disks "... after VMFS disks filtered"
 
-        DISKS_CACHE=$(cat $DISKS | grep ":ssd:" | sort -n | head -1 | awk -F":" ' { print $NF } ')
+        DISKS_CACHE=$(cat $DISKS | grep ":ssd:" | sort -n | head -1 | awk -F":" ' { print $NF } ' || true)
+        _found_cache_count=$(echo $DISKS_CACHE | wc -w)
+
+        DISKS_CAPACITY=$(grep -v "$DISKS_CACHE" $DISKS | awk -F":" ' { print $NF } ' || true)
+        _found_spin_count=$(echo $DISKS_CAPACITY | wc -w)
+
+        (( _found_total = _found_cache_count + _found_spin_count ))
+
+        [[ "$_found_total" < "2" ]] && exit_if_fatal_check "less than 2 total disks found" || true
+        [[ "$_found_cache_count" == "0" ]] && exit_if_fatal_check "cache count found ZERO" || true
+        [[ "$_found_spin_count" == "0" ]] && exit_if_fatal_check "capacity count found was ZERO" || true
+
         echo "   ASSIGNED Cache Disk: $DISKS_CACHE"
-        DISKS_CAPACITY=$(grep -v "$DISKS_CACHE" $DISKS | awk -F":" ' { print $NF } ')
         echo "ASSIGNED Capacity Disk: $DISKS_CAPACITY"
+      }
+
+      exit_if_fatal_check() {
+        local _msg="$*"
+        local _is_fatal="{{ .Param "esxi/vsan-zero-count-fatal" }}"
+        
+        if [[ "$_is_fatal == "true" ]]
+        then
+          xiterr 1 "Fatal on zero count exit requested - $_msg"
+        else
+          echo ">>> Failed cache/capacity check ($_msg), but not fatally exiting.  Wiping DISKS_CACHE and DISKS_CAPACITY."
+          DISKS_CACHE=""
+          DISKS_CAPACITY=""
+        fi
       }
 
       main $*
