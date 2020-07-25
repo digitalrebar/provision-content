@@ -109,13 +109,90 @@ Templates:
       fi
 
       export GOVC_DATACENTER="$DC"
-
       ###
       #  FOLDER CREATE options moved to template 'govc-folder-create.sh.tmpl'
       #  not called here - as there are problems with conflicting Datacenter and
       #  folder name handling. (See CLUSTER, create in FOLD construct also)
       ###
       [[ -n "$FOLDER" ]] && printf '>>>\n>>> FOLDER CREATE process disabled, needs help\n>>>\n'
+
+      # try to set based on Machien Name, FQDN, or fallback to IP Address
+      # TODO:  This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        echo $ADDR
+        # echo $MEMBER.$DNAME
+      }
+
+      set_vmk_on_host() {
+        local GOVC_URL=$(get_member_name $NODE)
+        local GOVC_USERNAME=root
+        local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        local GOVC_INSECURE=1
+        local GOVC_DATASTORE=""
+        local GOVC_RESOURCE_POOL=""
+
+        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
+        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
+        export GOVC_PASSWORD
+
+        _msg="Running 'govc' with the following credentials ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+
+          echo "DEBUG"
+          echo "DEBUG"
+          govc about
+          govc host.info
+          echo "DEBUG"
+          echo "DEBUG"
+
+        if govc host.esxcli vsan network list > /dev/null 2>&1
+        then
+          echo ">>> VMK $VMK appears to have VSAN type already"
+        else
+          echo ">>> adding VMK $VMK with VSAN type"
+          _args="host.esxcli vsan network ip add -i $VMK"
+          echo "CMD: govc $_args"
+          govc $_args
+        fi
+
+      } # end set_vmk_on_host()
+
+      # uses variable MEMBER to operate against
+      cluster_add() {
+        [[ "$VSAN_ENABLED" == "true" ]] && set_vmk_on_host || true
+
+        echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
+        echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
+          echo "DEBUG"
+          echo "DEBUG"
+          govc about
+          govc host.info
+          echo "DEBUG"
+          echo "DEBUG"
+
+        run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $THUMB >> $ADD_LOG
+        echo ">>> 'cluster.add' operation for '$MEMBER' completed"
+
+        echo ""
+        echo ">>>>>>>>>>>>>>>>>>>>>>> START cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
+        cat $ADD_LOG
+        echo ">>>>>>>>>>>>>>>>>>>>>>>> END cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
+        echo ""
+        rm -f $ADD_LOG
+      } # end cluster_add()
 
       if [[ -n "$CLUSTER" ]]
       then
@@ -151,73 +228,36 @@ Templates:
           echo "No options specified in 'esxi/cluster-options' to alter cluster with."
         fi
 
-        # try to set based on Machien Name, FQDN, or fallback to IP Address
-        # TODO:  This needs enhanced in conjunction with the govc context container
-        #        to support DNS record checks in the future.
-        get_member_name() {
-          echo $ADDR
-          # echo $MEMBER.$DNAME
-        }
-
-        # uses variable MEMBER to operate against
-        cluster_add() {
-          if [[ "$VSAN_ENABLED" == "true" ]]
-          then
-            if govc host.esxcli vsan network list > /dev/null 2>&1
-            then
-              echo ">>> VMK $VMK appears to have VSAN type already"
-            else
-              echo ">>> adding VMK $VMK with VSAN type"
-              run_govc host.esxcli vsan network ip add -i $VMK
-            fi
-          fi
-
-          echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
-          echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
-          run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $PRINT >> $ADD_LOG
-          echo ">>> 'cluster.add' operation for '$MEMBER' completed"
-
-          echo ""
-          echo ">>>>>>>>>>>>>>>>>>>>>>> START cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
-          cat $ADD_LOG
-          echo ">>>>>>>>>>>>>>>>>>>>>>>> END cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
-          echo ""
-          rm -f $ADD_LOG
-        }
-
-        # first member gets to be leader for VSAN, wait for it to finish first
-        IS_FIRST=1
-
         # now add Members to the cluster
         [[ -z "$MEMBERS" ]] && xiterr 1 "No members with 'esxi/cluster-name' found to operate on."
           
-          # nuke all old logs, in case there are any left over from previous runs
-          rm -f /tmp/cluster\.add*\.log
-          for MEMBER in $MEMBERS
-          do
-            THUMB="$(drpcli machines get Name:$MEMBER param esxi/thumbprint-sha1 | jq -r '.' || true)"
-            #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
-            ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
-            [[ -n "$THUMB" ]] && PRINT="-thumbprint $THUMB" || PRINT="-noverify"
-            ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
-            echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
+        # nuke all old logs, in case there are any left over from previous runs
+        rm -f /tmp/cluster\.add*\.log
+        for MEMBER in $MEMBERS
+        do
+          THUMB="$(drpcli machines get Name:$MEMBER param esxi/thumbprint-sha1 | jq -r '.' || true)"
+          #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
+          ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+          [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
+          ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
+          echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
 
-            HNAME=$(get_member_name)
-            if [[ -n "$ADDR" ]]
-            then
-              echo "Starting cluster setup for '$MEMBER'."
-              cluster_add &
-            else
-              xiterr 1 "Unable to get '$MEMBER' IP Address."
-            fi
 
-            # reset our variables for next run cleanliness
-          done
+          HNAME=$(get_member_name)
+          if [[ -n "$ADDR" ]]
+          then
+            echo "Starting cluster setup for '$MEMBER'."
+            #cluster_add &
+            cluster_add
+          else
+            xiterr 1 "Unable to get '$MEMBER' IP Address."
+          fi
+        done
 
-          # wait for all members to complete adding
-          wait
+        # wait for all members to complete adding
+        wait
 
-          echo "All cluster member 'cluster.add' operations have completed."
+        echo "All cluster member 'cluster.add' operations have completed."
 
       else
         echo "NOTICE:  'esxi/cluster-name' was not set, no cluster operations performed."
