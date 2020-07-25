@@ -131,12 +131,12 @@ Templates:
         local GOVC_INSECURE=1
         local GOVC_DATASTORE=""
         local GOVC_RESOURCE_POOL=""
+        local GOVC_PASSWORD
 
         _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
         [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
-        export GOVC_PASSWORD
 
-        _msg="Running 'govc' with the following credentials ... "
+        _msg="Running 'govc' with the following credentials against '$HNAME' ... "
 
         if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
         then
@@ -150,13 +150,6 @@ Templates:
           echo "$_msg"
           env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
         fi
-
-          echo "DEBUG"
-          echo "DEBUG"
-          govc about
-          govc host.info
-          echo "DEBUG"
-          echo "DEBUG"
 
         if govc host.esxcli vsan network list > /dev/null 2>&1
         then
@@ -176,13 +169,6 @@ Templates:
 
         echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
         echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
-          echo "DEBUG"
-          echo "DEBUG"
-          govc about
-          govc host.info
-          echo "DEBUG"
-          echo "DEBUG"
-
         run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $THUMB >> $ADD_LOG
         echo ">>> 'cluster.add' operation for '$MEMBER' completed"
 
@@ -241,7 +227,6 @@ Templates:
           [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
           ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
-
 
           HNAME=$(get_member_name)
           if [[ -n "$ADDR" ]]
