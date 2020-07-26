@@ -189,6 +189,6 @@
       "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
       "type": "shell-local",
       "inline": "scripts/rackn-drp-upload.sh {{user `complete_directory`}} {{build_name}}"
-    },
+    }
   ]
 }
