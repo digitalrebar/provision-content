@@ -124,7 +124,7 @@ Templates:
             # a tag to it to all it to be capacityFlash
             # ridiculous ... I know ... but there it is ...
             for CAP in $DISKS_CAPACITY
-            done
+            do
               TYPE=$(grep "$CAP" $DISKS | cut -d ":" -f2)
               if [[ "$TYPE" = "ssd" ]]
               then
