@@ -140,7 +140,7 @@ Templates:
       }
 
       set_vmk_on_host() {
-        local _has_vsan _vmk
+        local _has_vsan _vmk _pass
         local GOVC_URL=$(get_member_name $NODE)
         local GOVC_USERNAME=root
         local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
@@ -148,6 +148,10 @@ Templates:
         local GOVC_DATASTORE=""
         local GOVC_RESOURCE_POOL=""
         local GOVC_PASSWORD
+
+        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
+        [[ -z "$_pass" && "$_pass" == "null" ]] && _pass="RocketSkates" || true
+        GOVC_PASSWORD="$_pass"
 
         _msg="Running 'govc' with the following credentials against '$HNAME' ... "
 
@@ -181,9 +185,6 @@ Templates:
 
       # uses variable MEMBER to operate against
       cluster_add() {
-        local _pass
-        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
-        [[ -z "$_pass" && "$_pass" == "null" ]] && _pass="RocketSkates" || true
 
         [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
         [[ "$VSAN_ENABLED" == "true" ]] && set_vmk_on_host || true
