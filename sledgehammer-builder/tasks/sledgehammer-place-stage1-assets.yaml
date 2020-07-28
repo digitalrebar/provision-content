@@ -96,7 +96,7 @@ Templates:
       postportdelay=${postportdelay#*=}
       routedelay=${routedelay#*=}
       wgetretrycount=${wgetretrycount#*=}
-      wgetretrycount=${wgetretrycount:-10}
+      wgetretrycount=${wgetretrycount:-65}
 
       pxedev=""
       for dev in /sys/class/net/*; do
