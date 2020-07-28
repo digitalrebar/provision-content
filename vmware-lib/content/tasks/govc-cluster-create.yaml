@@ -150,7 +150,7 @@ Templates:
         local GOVC_PASSWORD
 
         _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
-        [[ -z "$_pass" && "$_pass" == "null" ]] && _pass="RocketSkates" || true
+        [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
         GOVC_PASSWORD="$_pass"
 
         _msg="Running 'govc' with the following credentials against '$HNAME' ... "
