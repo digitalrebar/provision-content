@@ -64,6 +64,7 @@ Templates:
         echo "CMD: govc $_args"
         govc $_args
       }
+
       USERNAME="root"
       DC='{{ .Param "esxi/datacenter-name" }}'
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
@@ -188,9 +189,9 @@ Templates:
 
         [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
         [[ "$VSAN_ENABLED" == "true" ]] && set_vmk_on_host || true
+        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
+        [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
 
-        echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
-        echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
         run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password "$_pass" $THUMB >> $ADD_LOG
         echo ">>> 'cluster.add' operation for '$MEMBER' completed"
 
@@ -210,6 +211,9 @@ Templates:
         then
           echo "Cluster '$CLUSTER' exists already."
         else
+
+        echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
+        echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
           # [[ -n "$FOLDER" ]] && FOLD="-folder=\"$FOLDER\""
           run_govc cluster.create $FOLD "$CLUSTER"
         fi
