@@ -64,8 +64,6 @@ Templates:
         echo "CMD: govc $_args"
         govc $_args
       }
-      {{ $pass := "" }}
-      {{ if .ParamExists "esxi/insecure-password" }}{{ $pass = ( .Param "esxi/insecure-password" ) }}{{ else }}{{ $pass = "RocketSkates"}}{{ end -}}
       USERNAME="root"
       DC='{{ .Param "esxi/datacenter-name" }}'
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
@@ -124,7 +122,25 @@ Templates:
         # echo $MEMBER.$DNAME
       }
 
+      get_vmk_device() {
+        _vmk=$(drpcli machines get Name:$MEMBER param esxi/vsan-vmk | jq -r '.' || true)
+        if [[ -n "$_vmk" && "$_vmk" != "null" ]]
+        then
+          echo "Found VMK device '$_vmk' from 'esxi/vsan-vmk' param..."
+        else
+          echo "'esxi/vsan-vmk' has no assigned value, checking 'esxi/network-firstboot-vmk'..."
+          _vmk=$(drpcli machines get Name:$MEMBER param esxi/network-firstboot-vmk| jq -r '.' || true)
+          [[ -z "$_vmk" || "$_vmk" == "null" ]] && echo "No value assigned by 'esxi/network-firstboot-vmk' ... " || true
+        fi
+
+        [[ -z "$_vmk" || "$_vmk" == "null" ]] && { _vmk="vmk0"; echo "Falling back to default 'vmk0'."; } || true
+
+        echo "Using VMK device '$VMK' for VSAN traffic ... "
+        VMK="$_vmk"
+      }
+
       set_vmk_on_host() {
+        local _has_vsan _vmk
         local GOVC_URL=$(get_member_name $NODE)
         local GOVC_USERNAME=root
         local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
@@ -132,9 +148,6 @@ Templates:
         local GOVC_DATASTORE=""
         local GOVC_RESOURCE_POOL=""
         local GOVC_PASSWORD
-
-        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
-        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
 
         _msg="Running 'govc' with the following credentials against '$HNAME' ... "
 
@@ -151,7 +164,10 @@ Templates:
           env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
         fi
 
-        if govc host.esxcli vsan network list > /dev/null 2>&1
+        get_vmk_device
+
+        _has_vsan=$(govc host.esxcli vsan network list 2> /dev/null)
+        if [[ -n "$_has_vsan" ]]
         then
           echo ">>> VMK $VMK appears to have VSAN type already"
         else
@@ -165,11 +181,16 @@ Templates:
 
       # uses variable MEMBER to operate against
       cluster_add() {
+        local _pass
+        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
+        [[ -z "$_pass" && "$_pass" == "null" ]] && _pass="RocketSkates" || true
+
+        [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
         [[ "$VSAN_ENABLED" == "true" ]] && set_vmk_on_host || true
 
         echo ">>> Running cluster.add for '$MEMBER' with IP address '$ADDR'"
         echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
-        run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password '{{ $pass }}' $THUMB >> $ADD_LOG
+        run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password "$_pass" $THUMB >> $ADD_LOG
         echo ">>> 'cluster.add' operation for '$MEMBER' completed"
 
         echo ""
@@ -216,7 +237,7 @@ Templates:
 
         # now add Members to the cluster
         [[ -z "$MEMBERS" ]] && xiterr 1 "No members with 'esxi/cluster-name' found to operate on."
-          
+
         # nuke all old logs, in case there are any left over from previous runs
         rm -f /tmp/cluster\.add*\.log
         for MEMBER in $MEMBERS
@@ -224,7 +245,7 @@ Templates:
           THUMB="$(drpcli machines get Name:$MEMBER param esxi/thumbprint-sha1 | jq -r '.' || true)"
           #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
           ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
-          [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
+          PASS=$(drpcli machines get Name:$NODE param esxi/insecure-password | jq -r '.' || true)
           ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
 

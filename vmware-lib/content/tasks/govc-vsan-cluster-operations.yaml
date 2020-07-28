@@ -42,7 +42,7 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       # Build the VSAN cluster from the hosts.
-      
+
       ### setup.tmpl
       {{ template "setup.tmpl" . }}
 
@@ -113,11 +113,11 @@ Templates:
               cluster-leave)    ( hdr; cluster_leave; ) &   ;;
               cluster-join)     ( hdr; cluster_join; ) &    ;;
               custom)           hdr; cst                    ;;
-              host-has-vsan) 
+              host-has-vsan)
                 hdr
                 host_has_vsan && cluster_get || echo "No VSAN cluster config"
               ;;
-              vmk-has-vsan)  
+              vmk-has-vsan)
                 hdr
                 (( vmk_has_vsan )) && net-list || echo "No VSAN type on VSAN cluster"
               ;;
@@ -176,7 +176,7 @@ Templates:
         export GOVC_DATASTORE=""
         export GOVC_RESOURCE_POOL=""
         hdr
-        _pass=$(drpcli machines get $RS_UUID param esxi/insecure-password | jq -r '.' || true)
+        _pass=$(drpcli machines get Name:$NODE param esxi/insecure-password | jq -r '.' || true)
         [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
         export GOVC_PASSWORD
 
@@ -213,13 +213,13 @@ Templates:
         return 0
       }
 
-      cluster_leave() { 
+      cluster_leave() {
         host_has_vsan                                      \
           && cmd host.esxcli vsan cluster leave            \
           || echo "No VSAN cluster config to remove."
       }
 
-      cluster_get() { 
+      cluster_get() {
         local _status="No VSAN cluster on host."
         local _cmd="host.esxcli vsan cluster get"
         local _msg=">>> ($NODE): $_cmd"
@@ -229,30 +229,30 @@ Templates:
         return 0
       }
 
-      vmk_disable() { 
+      vmk_disable() {
         vmk_has_vsan                                       \
           && cmd host.vnic.service -enable=false vsan $VMK \
           || { echo "No VSAN type on $VMK"; return; }
         sleep 1
 
-        vmk_has_vsan && xiterr 1 "failed to disable $VMK" || echo "Disabled." 
+        vmk_has_vsan && xiterr 1 "failed to disable $VMK" || echo "Disabled."
       }
 
-      vmk_set() { 
+      vmk_set() {
         vmk_has_vsan                                       \
           && echo "'$VMK' has VSAN type set ... "          \
           || cmd host.esxcli vsan network ip add -i $VMK
       }
 
-      cluster_join() { 
+      cluster_join() {
         local _m="MISSING SubClusterUUID from Master !!"
         [[ -z "$SCUUID" ]] && xiterr 1"$_m"
         vmk_set
-        cmd host.esxcli vsan cluster join -u $SCUUID 
+        cmd host.esxcli vsan cluster join -u $SCUUID
         cluster_get
       }
 
-      cluster_new() { 
+      cluster_new() {
         (( host_has_vsan )) && xiterr 1 "VSAN already configured" || true
         vmk_set
         (( host_has_vsan ))                                \
@@ -274,4 +274,4 @@ Templates:
       }
 
       main $*
-      
+

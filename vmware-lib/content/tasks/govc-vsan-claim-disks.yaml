@@ -32,7 +32,7 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       # Build the VSAN cluster from the hosts.
-      
+
       ### setup.tmpl
       {{ template "setup.tmpl" . }}
 
@@ -83,7 +83,7 @@ Templates:
         {{ end }}
         echo "----------------------------------------------------------------------------------------"
         echo ""
-        
+
         for NODE in $NODES
         do
           ADDR=$(get_member_name)
@@ -99,7 +99,7 @@ Templates:
           do
             case "$OP" in
               # main cluster operations
-              claim-disks)      
+              claim-disks)
                 hdr
                 claim_disks $SELECTION_RULE
               ;;
@@ -119,8 +119,8 @@ Templates:
             _my_args=$(build_args)
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
             echo ""
-            echo "COMMAND TO RUN:"
-            echo "govc host.esxcli vsan storage add $_my_args"
+            echo "COMMAND TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
+            govc host.esxcli vsan storage add $_my_args
             echo ""
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
           fi
@@ -337,7 +337,7 @@ Templates:
       #    * Make rest Capacity
       ###
       rule_simple() {
-        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total _dcap _dcac _fatal_msg
+        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total _dcap _dcac _fatal_msg _tmp
         local _limit="64000"
 
         # size:(ssd|spin):device
@@ -354,7 +354,7 @@ Templates:
         echo "Found TOTAL count  :  $_count_tot"
         echo "Found SSD count    :  $_count_ssd"
         echo "Found non-SSD count:  $(( _count_tot - _count_ssd ))"
-        
+
         _fatal_msg="Failed minimum checks - either zero (0) SSD or less than two (2) total disks"
         if [[ "$_count_ssd" -eq "0" || "$_count_tot" -lt "2"  ]]
         then
@@ -381,21 +381,36 @@ Templates:
         filter_out get_vmfs_claimed_disks
         print_current_disks "... after VMFS disks filtered"
 
+        echo ""
+        echo "DEBUG DEBUG DEBUG"
+        echo "DISKS set to:"
+        cat $DISKS
+        echo "DEBUG DEBUG DEBUG"
+        echo ""
+
         DISKS_CACHE=$(cat $DISKS | grep ":ssd:" | sort -n | head -1 | awk -F":" ' { print $NF } ' || true)
         _found_cache_count=$(echo $DISKS_CACHE | wc -w)
+        #for ca in $(echo "$DISKS_CACHE")
+        #do
+        #  echo "Removing Cache disk '$ca' from DISKS list..."
+        #  cat $DISKS | grep -v "$ca" > $_tmp
+        #  cp $_tmp $DISKS
+        #done
+        echo "Assigning Cache disk: $DISKS_CACHE"
 
         DISKS_CAPACITY=$(grep -v "$DISKS_CACHE" $DISKS | awk -F":" ' { print $NF } ' || true)
         _found_spin_count=$(echo $DISKS_CAPACITY | wc -w)
+        echo "Assigning Capacity disk: $DISKS_CAPACITY"
 
-        echo "DEBUG - _found_cache_count == $_found_cache_count"
-        echo "DEBUG - _found_spin_count  == $_found_spin_count"
+        #echo "DEBUG - _found_cache_count == $_found_cache_count"
+        #echo "DEBUG - _found_spin_count  == $_found_spin_count"
 
         _found_total=$(echo $(( _found_cache_count + _found_spin_count )))
-        echo "DEBUG - _found_total       == $_found_total"
+        #echo "DEBUG - _found_total       == $_found_total"
 
-        [[ "$_found_total" < "2" ]] && exit_if_fatal_check "less than 2 total disks found" || true
-        [[ "$_found_cache_count" == "0" ]] && exit_if_fatal_check "cache count found ZERO" || true
-        [[ "$_found_spin_count" == "0" ]] && exit_if_fatal_check "capacity count found was ZERO" || true
+        [[ "$_found_total" -lt "2" ]] && exit_if_fatal_check "less than 2 total disks found" || true
+        [[ "$_found_cache_count" -eq "0" ]] && exit_if_fatal_check "cache count found ZERO" || true
+        [[ "$_found_spin_count" -eq "0" ]] && exit_if_fatal_check "capacity count found was ZERO" || true
 
         [[ -n "$DISKS_CACHE" ]] && _dcac="$DISKS_CACHE" || _dcac="<<< none >>>"
         [[ -n "$DISKS_CAPACITY" ]] && _dcap="$DISKS_CAPACITY" || _dcap="<<< none >>>"
@@ -405,4 +420,4 @@ Templates:
       }
 
       main $*
-      
+
