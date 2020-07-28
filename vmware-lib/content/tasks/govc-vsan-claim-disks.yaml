@@ -66,7 +66,7 @@ Templates:
 
       # additional global vars used throughout functions
       NODE="" GOVC_URL="" GOVC_USERNAME="" GOVC_DATACENTER="" GOVC_PASSWORD="" GOVC_INSECURE="" GOVC_DATASTORE="" GOVC_RESOURCE_POOL=""
-      DISK_JSON="" DISKS_BOOT="" DISKS_VSAN="" DISKS_VMFS="" DISKS_CACHE="" DISKS_CAPACITY=""
+      DISKS="" DISK_JSON="" DISKS_BOOT="" DISKS_VSAN="" DISKS_VMFS="" DISKS_CACHE="" DISKS_CAPACITY=""
 
       main() {
         local _my_args _fatal_msg
@@ -119,7 +119,22 @@ Templates:
             _my_args=$(build_args)
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
             echo ""
-            echo "COMMAND TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
+
+            # if SSD type is assigned to Capacity pool, we have to add
+            # a tag to it to all it to be capacityFlash
+            # ridiculous ... I know ... but there it is ...
+            for CAP in $DISKS_CAPACITY
+            done
+              TYPE=$(grep "$CAP" $DISKS | cut -d ":" -f2)
+              if [[ "$TYPE" = "ssd" ]]
+              then
+                echo "Disk '$CAP' is SSD type, adding tag 'capacityFlash' to it..."
+                ehco "CMD TO RUN: 'govc host.esxcli vsan storage tag add -d $CAP -t capacityFlash'"
+                govc host.esxcli vsan storage tag add -d "$CAP" -t capacityFlash
+              fi
+            done
+
+            echo "CMD TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
             govc host.esxcli vsan storage add $_my_args
             echo ""
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
@@ -225,7 +240,7 @@ Templates:
         DISKS_BOOT=$(jq -r 'select(.IsBootDevice | .[0]=="true") | "\(.Device | .[0])"' $DISK_JSON)
         #echo "Found disks marked as boot disks:"
         printf "%s\n" "$DISKS_BOOT"
-        
+
       }
 
       get_ssd_disks() {
@@ -233,16 +248,16 @@ Templates:
         #echo "Found disks with type SSD:"
         printf "%s\n" "$DISKS_SSD"
       }
-     
-      get_spinning_disks() {
-        DISKS_SPIN=$(jq -r 'select(.IsSSD | .[0]!="false") | "\(.Device | .[0])"' $DISK_JSON)
-        #echo "Found disks with type spinning:"
-        printf "%s\n" "$DISKS_SPIN"
+
+      get_capacity_disks() {
+        DISKS_CAPACITY=$(jq -r 'select(.IsSSD | .[0]!="false") | "\(.Device | .[0])"' $DISK_JSON)
+        #echo "Found disks with type capacity:"
+        printf "%s\n" "$DISKS_CAPACITY"
       }
 
       disk_by_size() {
-        local _comp="$1"              
-        local _limit="$2"              
+        local _comp="$1"
+        local _limit="$2"
         local _entry _limit _disk _filter
         for _entry in $(cat $DISKS)
         do
@@ -277,7 +292,7 @@ Templates:
             xiterr 1 "Unsupported disk claim rule '$_rule'."
           ;;
         esac
-     
+
       }
 
       # pass in a function as ARGv1 which will provide a list of devices
@@ -293,7 +308,7 @@ Templates:
           grep -v "$_remove" $DISKS > $_tmp || true
           cp $_tmp $DISKS
         done
-        
+
         rm -rf $_tmp
       }
 
@@ -307,7 +322,7 @@ Templates:
       exit_if_fatal_check() {
         local _msg="$*"
         local _is_fatal="{{ .Param "esxi/vsan-zero-count-fatal" }}"
-        
+
         if [[ "$_is_fatal" == "true" ]]
         then
           xiterr 1 "Fatal on zero count exit requested - $_msg"
@@ -337,7 +352,7 @@ Templates:
       #    * Make rest Capacity
       ###
       rule_simple() {
-        local _count_ssd _count_spn _count_tot _found_cache_count _found_spin_count _found_total _dcap _dcac _fatal_msg _tmp
+        local _count_ssd _count_spn _count_tot _found_cache_count _found_capacity_count _found_total _dcap _dcac _fatal_msg _tmp _cap
         local _limit="64000"
 
         # size:(ssd|spin):device
@@ -381,13 +396,6 @@ Templates:
         filter_out get_vmfs_claimed_disks
         print_current_disks "... after VMFS disks filtered"
 
-        echo ""
-        echo "DEBUG DEBUG DEBUG"
-        echo "DISKS set to:"
-        cat $DISKS
-        echo "DEBUG DEBUG DEBUG"
-        echo ""
-
         DISKS_CACHE=$(cat $DISKS | grep ":ssd:" | sort -n | head -1 | awk -F":" ' { print $NF } ' || true)
         _found_cache_count=$(echo $DISKS_CACHE | wc -w)
         #for ca in $(echo "$DISKS_CACHE")
@@ -399,18 +407,13 @@ Templates:
         echo "Assigning Cache disk: $DISKS_CACHE"
 
         DISKS_CAPACITY=$(grep -v "$DISKS_CACHE" $DISKS | awk -F":" ' { print $NF } ' || true)
-        _found_spin_count=$(echo $DISKS_CAPACITY | wc -w)
+        _found_capacity_count=$(echo $DISKS_CAPACITY | wc -w)
         echo "Assigning Capacity disk: $DISKS_CAPACITY"
-
-        #echo "DEBUG - _found_cache_count == $_found_cache_count"
-        #echo "DEBUG - _found_spin_count  == $_found_spin_count"
-
-        _found_total=$(echo $(( _found_cache_count + _found_spin_count )))
-        #echo "DEBUG - _found_total       == $_found_total"
+        _found_total=$(echo $(( _found_cache_count + _found_capacity_count )))
 
         [[ "$_found_total" -lt "2" ]] && exit_if_fatal_check "less than 2 total disks found" || true
         [[ "$_found_cache_count" -eq "0" ]] && exit_if_fatal_check "cache count found ZERO" || true
-        [[ "$_found_spin_count" -eq "0" ]] && exit_if_fatal_check "capacity count found was ZERO" || true
+        [[ "$_found_capacity_count" -eq "0" ]] && exit_if_fatal_check "capacity count found was ZERO" || true
 
         [[ -n "$DISKS_CACHE" ]] && _dcac="$DISKS_CACHE" || _dcac="<<< none >>>"
         [[ -n "$DISKS_CAPACITY" ]] && _dcap="$DISKS_CAPACITY" || _dcap="<<< none >>>"
