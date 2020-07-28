@@ -199,7 +199,7 @@ Templates:
         export GOVC_DATASTORE=""
         export GOVC_RESOURCE_POOL=""
         _pass=$(drpcli machines get $RS_UUID param esxi/insecure-password | jq -r '.' || true)
-        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
+        [[ -n "$_pass" || "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
         export GOVC_PASSWORD
 
         _msg="Running 'govc' with the following credentials ... "
