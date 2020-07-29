@@ -1,0 +1,22 @@
+---
+Name: "install-drp"
+Description: "Install Digital Rebar Provision on a Machine."
+Documentation: |
+  This workflow installs Digital Rebar Provision on a machine. It
+  currently defaults to install 'stable' version in the
+  'production' install mode (not 'isolated').
+
+  Future versions of this content will give you the ability
+  to customize your install via Params.
+
+  This stage requires a supported Operating System with the
+  runner service running (drpcli agent).
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-drp"
+Stages:
+  - install-drp
+  - complete
+

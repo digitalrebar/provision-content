@@ -1,0 +1,10 @@
+---
+Name: "install-saltstack"
+Description: "Stage that installs Saltstack minion or master"
+RunnerWait: true
+Tasks:
+  - "install-saltstack"
+Meta:
+  icon: "key"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

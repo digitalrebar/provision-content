@@ -1,0 +1,13 @@
+---
+Description: "A task to install saltstack minion or master"
+Name: "install-saltstack"
+OptionalParams:
+  - "salt-master"
+Templates:
+  - ID: "install-saltstack.sh.tmpl"
+    Name: "Install saltstack minion or master"
+    Path: ""
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

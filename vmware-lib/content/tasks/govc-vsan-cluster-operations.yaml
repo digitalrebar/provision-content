@@ -1,0 +1,277 @@
+---
+Name: "govc-vsan-cluster-operations"
+Description: "Build VSAN cluster."
+Documentation: |
+  Build a VSAN cluster.  Requires at minimum; the following Params to be
+  set:
+
+    * ``esxi/vsan-enabled`` - set to 'true' to enable VSAN cluster building (defaults to 'false')
+    * ``esxi/cluster-name`` - on each ESXi host that will become part of the cluster
+    * ``esxi/cluster-profile`` - the name of a Profile that will store Cluster state data
+    * ``esxi/vsan-operations`` - the Operations to perform on the VSAN cluster
+
+  The primary three operations that are run on VSAN clusters:
+
+    #. ``cluster-build`` - create a cluster, assumes clean unconfigured state
+    #. ``cluster-destroy`` - wipe a cluster out completely
+    #. ``cluster-list`` - show the current cluster vSAN network and cluster state
+
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+  - scope: "profiles"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - "esxi/vsan-enabled"
+  - "esxi/cluster-name"
+  - "esxi/cluster-profile"
+  - "esxi/vsan-operations"
+OptionalParams:
+  - "esxi/insecure-password"
+  - "esxi/vsan-nodes-override"
+  - "esxi/vsan-data/sub-cluster-uuid"
+Templates:
+  - Name: "esxi-vsan-cluster-operations.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # Build the VSAN cluster from the hosts.
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" . }}
+
+      ### esxi-vsan-cluster-operations.sh
+      ON='{{ .Param "esxi/vsan-enabled" }}'
+      [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
+
+      IS_FIRST=1
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+      {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
+
+      {{ if .ParamExists "esxi/cluster-profile" -}}
+      {{ if eq ( .Param "esxi/cluster-profile" ) "" -}}
+      xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') exists but has an empty value."
+      {{ end -}}
+      CLUSTER_PROFILE='{{ .Param "esxi/cluster-profile" }}'
+      {{ else -}}
+      xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not been assigned."
+      {{ end }}
+
+      OPS='{{ .Param "esxi/vsan-operations" }}'
+      [[ -z "$OPS" ]] && xiterr 1 "No operations ('esxi/vsan-operations') specified."
+
+      PARAM_SCUUID="esxi/vsan-data/sub-cluster-uuid"
+
+      {{ if .ParamExists "esxi/vsan-nodes-override" }}
+      NODES="{{ .Param "esxi/vsan-nodes-override" }}"
+      {{ else -}}
+      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      {{ end }}
+
+      # additional global vars used throughout functions
+      NODE= GOVC_URL="" GOVC_USERNAME="" GOVC_DATACENTER="" GOVC_PASSWORD="" GOVC_INSECURE="" GOVC_DATASTORE="" GOVC_RESOURCE_POOL=""
+
+      # TODO: handle geting PARAM_SCUUID if set and using it for 'join' operations
+      SCUUID=
+      H="+---------------------------------- ( %s ) ----------------------------------+"
+
+      main() {
+        drpcli profiles exists "$CLUSTER_PROFILE" > /dev/null 2>&1 || profile_create
+        echo "          nodes list:  $NODES"
+        echo "requested operations:  $OPS"
+        echo ""
+
+        for NODE in $NODES
+        do
+          HDR=1
+          hdr
+          set_govc_env $NODE
+
+          [[ "$OPS" =~ ^custom.* ]] && { OPS="custom"; CMD=$(echo "$@" | sed 's/^custom //'); }
+          for OP in $OPS
+          do
+            case "$OP" in
+              # main cluster operations
+              cluster-build)    hdr; cluster_build          ;;
+              cluster-list)     hdr; cluster_list           ;;
+              cluster-destroy)  ( hdr; cluster_destroy; ) & ;;
+
+              # supporting operations
+              about)            hdr; about                  ;;
+              vmk-set)          hdr; vmk_set                ;;
+              vmk-disable)      hdr; vmk_disable            ;;
+              net-list)         hdr; net_list               ;;
+              cluster-new)      hdr; cluster_new            ;;
+              cluster-get)      hdr; cluster_get            ;;
+              cluster-leave)    ( hdr; cluster_leave; ) &   ;;
+              cluster-join)     ( hdr; cluster_join; ) &    ;;
+              custom)           hdr; cst                    ;;
+              host-has-vsan)
+                hdr
+                host_has_vsan && cluster_get || echo "No VSAN cluster config"
+              ;;
+              vmk-has-vsan)
+                hdr
+                (( vmk_has_vsan )) && net-list || echo "No VSAN type on VSAN cluster"
+              ;;
+              *)
+                echo "Unknown operation '$OP'."
+                echo "try:    cluster-build vmk-set net-list cluster-get cluster-leave"
+                echo "        cluster-join vmk-has-vsan host-has-vsan about vmk-disable"
+                echo "        cluster-list"
+                echo " or:    custom <govc command>"
+                exit 1
+              ;;
+            esac
+            echo ""
+            HDR=0
+          done
+        done
+
+        J=$(jobs)
+        [[ -n "$J" ]] && { printf "\nWaiting on any BG jobs...\n"; wait; } || true
+      } # end main
+
+      profile_create() {
+        local _profile
+        _name="$CLUSTER_PROFILE"
+        _profile='{ "Name": "'$_name'", "Description": "ESXi Cluster Data Profile (auto-generated)", "Meta": { "color": "purple", "icon": "world", "title": "ESXi Cluster Data" }, "Params": {}, "Profiles": [] }'
+        echo "$_profile" | drpcli profiles create -
+      }
+
+      profile_write() {
+        _name="$CLUSTER_PROFILE"
+        _param="$1"
+        shift 1
+        _value="$*"
+        drpcli profiles exists "$_name" > /dev/null 2>&1 || profile_create
+        drpcli profiles set "$_name" param "$_param" to "$_value"
+      }
+
+      param_get() {
+        local _param=$(drpcli profiles get "$_name" param "$_param" | jq -r '.')
+        [[ -n "$_param" && "$_param" != "null" ]] && echo "$_param"
+      }
+
+      # TODO:  Try to set based on Machien Name, FQDN, or fallback to IP Address.
+      #        This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
+        echo $ADDR
+      }
+
+      set_govc_env() {
+        export GOVC_URL=$(get_member_name $NODE)
+        export GOVC_USERNAME=root
+        export GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        export GOVC_INSECURE=1
+        export GOVC_DATASTORE=""
+        export GOVC_RESOURCE_POOL=""
+        hdr
+        _pass=$(drpcli machines get Name:$NODE param esxi/insecure-password | jq -r '.' || true)
+        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
+        export GOVC_PASSWORD
+
+        _msg="Running 'govc' with the following credentials ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+      }
+
+      cst() { cmd $CMD; }
+      hdr() { (( $HDR )) && printf "$H\n" "$NODE"; }
+      cmd() { printf ">>> ($NODE): govc $*\n\n"; govc $*; }
+      about() { cmd about; }
+      cluster_build() { (( $IS_FIRST )) && cluster_new || cluster_join;  }
+      cluster_list() { net_list; cluster_get; }
+      host_has_vsan() { govc host.esxcli vsan cluster get > /dev/null 2>&1 && return 0 || return 1; }
+      cluster_destroy() { cluster_leave; vmk_disable; }
+
+      net_list() {
+        local _cmd="govc host.esxcli vsan network list"
+        local _msg=">>> ($NODE): $_cmd"
+        local _list="$(eval $_cmd || true)"
+        [[ -n "$_list" ]] && printf "%s\n\n%s\n" "$_msg" "$_list" || printf "%s\n\n%s\n" "$_msg" "$VMK does not have VSAN type."
+        return 0
+      }
+
+      cluster_leave() {
+        host_has_vsan                                      \
+          && cmd host.esxcli vsan cluster leave            \
+          || echo "No VSAN cluster config to remove."
+      }
+
+      cluster_get() {
+        local _status="No VSAN cluster on host."
+        local _cmd="host.esxcli vsan cluster get"
+        local _msg=">>> ($NODE): $_cmd"
+        host_has_vsan                                      \
+          && eval cmd $_cmd                                \
+          || printf "%s\n\n%s\n" "$_msg" "$_status"
+        return 0
+      }
+
+      vmk_disable() {
+        vmk_has_vsan                                       \
+          && cmd host.vnic.service -enable=false vsan $VMK \
+          || { echo "No VSAN type on $VMK"; return; }
+        sleep 1
+
+        vmk_has_vsan && xiterr 1 "failed to disable $VMK" || echo "Disabled."
+      }
+
+      vmk_set() {
+        vmk_has_vsan                                       \
+          && echo "'$VMK' has VSAN type set ... "          \
+          || cmd host.esxcli vsan network ip add -i $VMK
+      }
+
+      cluster_join() {
+        local _m="MISSING SubClusterUUID from Master !!"
+        [[ -z "$SCUUID" ]] && xiterr 1"$_m"
+        vmk_set
+        cmd host.esxcli vsan cluster join -u $SCUUID
+        cluster_get
+      }
+
+      cluster_new() {
+        (( host_has_vsan )) && xiterr 1 "VSAN already configured" || true
+        vmk_set
+        (( host_has_vsan ))                                \
+          && xiterr 1 "VSAN cluster exists on host"        \
+          || cmd host.esxcli vsan cluster new
+        sleep 5
+        host_has_vsan && cluster_get || xiterr 1 "VSAN build failed"
+        SCUUID=$(govc host.esxcli vsan cluster get | grep "^SubClusterUUID:.*$" | awk ' { print $NF } ')
+        profile_write "$PARAM_SCUUID" "$SCUUID"
+        echo "SubClusterUUID: $SCUUID"
+        IS_FIRST=0
+      }
+
+      vmk_has_vsan() {
+        govc host.vnic.info --json                                                               \
+          | jq -r '.Info | .[] | select(.Device=="'$VMK'") | .Services | .[] | contains("vsan")' \
+          | grep -q "true"
+        return $?
+      }
+
+      main $*
+

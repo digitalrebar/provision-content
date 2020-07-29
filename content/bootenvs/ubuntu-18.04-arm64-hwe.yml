@@ -22,7 +22,7 @@ OS:
   SupportedArchitectures:
     arm64:
       IsoFile: "ubuntu-18.04.4-server-arm64.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.4-server-arm64.iso"
+      IsoUrl: "http://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.4-server-arm64.iso"
       IsoSha256: "8eb3c1866ca3b68e4cd22ec9d7c02f97f4d2b3713447370f3c252a4189116824"
       Kernel: "install/hwe-netboot/ubuntu-installer/arm64/linux"
       Loader: "grubarm64.efi"

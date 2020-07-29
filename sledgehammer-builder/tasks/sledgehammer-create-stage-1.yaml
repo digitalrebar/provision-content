@@ -35,6 +35,7 @@ Templates:
           drivers/md \
           drivers/mfd \
           drivers/mmc \
+          drivers/mtd \
           drivers/net/can \
           drivers/net/wireless \
           drivers/nvme \

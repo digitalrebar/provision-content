@@ -41,7 +41,7 @@ OS:
   SupportedArchitectures:
     amd64:
       IsoFile: "ubuntu-20.04-live-server-amd64.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/20.04/ubuntu-20.04-live-server-amd64.iso"
+      IsoUrl: "https://releases.ubuntu.com/20.04/ubuntu-20.04-live-server-amd64.iso"
       IsoSha256: "caf3fd69c77c439f162e2ba6040e9c320c4ff0d69aad1340a514319a9264df9f"
       Kernel: "casper/vmlinuz"
       Initrds:

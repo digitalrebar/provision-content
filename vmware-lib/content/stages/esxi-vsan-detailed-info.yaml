@@ -1,0 +1,12 @@
+---
+Name: "esxi-vsan-detailed-info"
+Description: "Shows detailed and debug Info on a VSAN host."
+Documentation: |
+  This stage shows detailed VSAN host info and debug data information.
+
+Tasks:
+  - "esxi-vsan-detailed-info"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

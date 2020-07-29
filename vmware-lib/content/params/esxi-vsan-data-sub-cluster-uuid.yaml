@@ -1,0 +1,17 @@
+---
+Name: "esxi/vsan-data/sub-cluster-uuid"
+Description: "Recorded VSAN Data for SubClusterUUID cluster management"
+Documentation: |
+  Recorded value by tasks which contains the VSAN SubClusterUUID used for
+  cluster join operations.
+
+  This is set by content, you should not set this, unless you are adding VSAN
+  members to an existing VSAN cluster that was NOT created by Digital Rebar.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

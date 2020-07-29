@@ -10,16 +10,12 @@ Documentation: |
   This is often used as a quick confirmation that end-to-end workflow is executing
   and running tasks successfully.
 
-  The output message can be customized by setting the param ``hello/message`` to
-  a unique string.  The default is just *Hello World*.
-
 Meta:
   color: blue
   feature-flags: sane-exit-codes
   icon: bullhorn
   title: RackN
-OptionalParams:
-  - "hello/message"
+OptionalParams: []
 Prerequisites: []
 ReadOnly: false
 RequiredParams: []
@@ -41,11 +37,6 @@ Templates:
     Write-Output "This machines name is:"
     Write-Output ""
     hostname
-
-    Write-Output ""
-    Write-Output "The 'hello world' message has been set to:"
-    Write-Output ""
-    Write-Output "{{ .Param "hello/message" }}"
 
     Write-Output ""
     Write-Output ">>>>>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -70,11 +61,6 @@ Templates:
     echo "This machines name is:"
     echo ""
     hostname
-
-    echo ""
-    echo "The 'hello world' message has been set to:"
-    echo ""
-    echo "{{ .Param "hello/message" }}"
 
     echo ""
     echo ">>>>>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<"

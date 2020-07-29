@@ -1,0 +1,24 @@
+---
+Name: "install-prometheus"
+Description: "Install Prometheus - you MUST clone and apply to Machines"
+Documentation: |
+  You MUST define the ``drp-prom-mon/cluster-profile`` Param if
+  you are configuring for Node Exporter and Prometheus services.
+
+  The ``cfg-node-exporter.sh.tmpl`` Template will collect the Machines
+  IP Address and add the Param ``drp-prom-mon/node-exporter`` to the
+
+  cluster profile.  DO NOT create the Param, otherwise, the template
+  will fail with an error.
+
+  The Prometheus configuration task will use the Param to write the
+  config appropriately for the service to scrape the Node Exporter.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-prometheus"
+Stages:
+  - install-prometheus
+  - complete
+

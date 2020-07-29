@@ -1,0 +1,63 @@
+---
+Description: "Gets the SHA-1 thumbprint of an ESXi host and stores it as Param on Machine."
+Name: "govc-get-thumbprint"
+Documentation: |
+  Gets the SHA-1 thumbprint from an ESXi host via the ``govc`` command, and
+  stores it on the Machine object as ``govc/thumbprint-sha1``.
+
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - "esxi/cluster-name"
+OptionalParams: []
+Templates:
+  - Name: "govc-get-thumbprint.sh"
+    Contents: |
+      #!/bin/bash
+      # Record the SHA-1 thumbprint of an ESXi host
+      # RackN Copyright 2020
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" .}}
+
+      ### govc-setup.sh.tmpl
+      {{ template "govc-setup.sh.tmpl" .}}
+
+      set -e
+
+      get_thumb() {
+        local _member="$1"
+        ADDR=$(drpcli machines show Name:$_member --slim=Params,Meta | jq -r '.Address')
+        [[ -z "$ADDR" ]] && xiterr 1 "unable to get IP address for '$MEMBER'"
+        govc about.cert -k -u "$ADDR" -thumbprint | awk '{print $2}'
+      }
+
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+
+      echo "Starting create operation with the following information:"
+      echo "---------------------------------------------------------"
+      echo ""
+      echo "        Cluster:  '$CLUSTER'"
+      echo "        Members:  '$MEMBERS'"
+      echo ""
+
+      if [[ -n "$MEMBERS" ]]
+      then
+        for MEMBER in $MEMBERS
+        do
+          THUMB=$(get_thumb "$MEMBER")
+          drpcli machines set Name:$MEMBER param esxi/thumbprint-sha1 to "$THUMB"
+        done
+      else
+        echo "No members to find thumbprints for found with esxi/cluster-name Param set"
+      fi
+

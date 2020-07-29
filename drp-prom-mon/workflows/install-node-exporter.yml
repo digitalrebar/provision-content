@@ -1,0 +1,22 @@
+---
+Name: "install-node-exporter"
+Description: "Install Node Exporter - MUST clone this and apply to Machines"
+Documentation: |
+  Installs the Node Exporter on a target machine.
+
+  You MUST set the ``drp-prom-mon/cluster-profile`` Param to the
+  name of the Profile that stores your cluster state if you are
+  configuring for Node Exporter and Prometheus services.
+
+  The ``cfg-node-exporter.sh.tmpl`` Template will collect the Machines
+  IP Address and add the Param ``drp-prom-mon/node-exporter`` to the
+  cluster profile.  DO NOT create the Param, otherwise, the template
+  will fail with an error.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-node-exporter"
+Stages:
+  - install-node-exporter
+  - complete

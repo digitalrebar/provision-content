@@ -1,0 +1,42 @@
+---
+Name: proxmox-6-rackn-install
+Description: Install the Proxmox Hypervisor on a machine.
+Documentation: |
+  The Proxmox hypervisor installation currently uses and requires a customized ISO
+  image that modifies the ISO to support PXE boot.  By default the Proxmox released
+  ISO does not install via PXE.
+
+  Additionally, there is ABSOLUTELY ZERO automation capability to configure the
+  Proxmox hypervisor during installation time.  Today you must have a console access
+  to each Proxmox instance to answer the install time GUI questions.  Yes, this is
+  terrible.
+
+  .. note:: Because there is no automation during the ISO installation phase, you will
+            need to mark the Machine complete, and set the BootEnv to Local, otherwise
+            the installer will continually loop on reboots.
+
+  Once the installation quesions have been answered, you will need to manually join
+  the new Hypervisor to your DRP endpoint.  To do so, log in to the Proxmox shell
+  (user/pass you provided during the GUI install questions).  Do the following:
+
+    * ``curl -sk https//:<DRP_IP>:8092/machines/join-up.sh | bash -s --``
+    * Once the join-up runs, on the new Machine Object in DRP, run ``runner-service`` Stage
+
+  This process creates a new Machine object for the Proxmox hypervisor.  The join-up.sh
+  does this, but it does not install the resident start/stop scripts for the DRP
+  Agent to remain resident.  The ``runner-service`` Stage creates the proper startup
+  services and settings to maintain a resident Agent service.
+
+  From this point forward, you can run Workflow actions.
+
+  *TODO*:  Instead of using a modified proxmox appliance install path, use the Debian Buster
+  BootEnv, and install Proxmox via packages.  This will make the management path a lot
+  easier for integrating the Agent and workflow.
+
+Meta:
+  color: blue
+  icon: shuffle
+  title: RackN Content
+Stages:
+  - prep-install
+  - proxmox-6-rackn-install

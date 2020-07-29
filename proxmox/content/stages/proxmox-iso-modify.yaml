@@ -1,0 +1,10 @@
+---
+Name: "proxmox-iso-modify"
+Description: "Modify the Proxmox ISO to PXE boot and add 'join-up.sh'."
+BootEnv: "sledgehammer"
+Tasks:
+  - "proxmox-iso-modify"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

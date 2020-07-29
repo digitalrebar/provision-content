@@ -20,7 +20,7 @@ OS:
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-7-x86_64-Minimal-1810.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-x86_64-Minimal-1810.iso"
+      IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7.6.1810/isos/x86_64/CentOS-7-x86_64-Minimal-1810.iso"
       Sha256: "38d5d51d9d100fd73df031ffd6bd8b1297ce24660dc8c13a3b8b4534a4bd291c"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
@@ -37,7 +37,7 @@ OS:
       Loader: "grubarm64.efi"
       IsoFile: "CentOS-7-aarch64-Minimal-1810.iso"
       Sha256: "864596b2fb971c8d8c0f3618981cca4725f6c2347f6eb2f130e0aefa3413c0ef"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-aarch64-Minimal-1810.iso"
+      IsoUrl: "http://ftp.osuosl.org/pub/centos-altarch/7.6.1810/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"

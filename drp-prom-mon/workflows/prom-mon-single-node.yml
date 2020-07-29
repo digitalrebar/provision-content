@@ -1,0 +1,26 @@
+---
+Name: "prom-mon-single-node"
+Description: "drp-prom-mon single-node (drp, node-exporter, prometheus, grafana)"
+Documentation: |
+  This workflow defins the install of a drp-prom-mon cluster in one step.
+  DRP, Node Exporter, Prometheus, and Grafana components will be
+  installed.  All pieces are installed on a single Machine.
+
+  The 'drp-prom-mon/node-exporter' is set to loopback address because
+  we are only running on a single machine instance.
+
+  The Machines must have a supported OS installed, and the 'drpcli'
+  runner Agent must be running.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "prom-mon-single-node"
+Stages:
+  - start-prom-mon-single-node
+  - install-drp
+  - install-node-exporter
+  - install-prom-mon
+  - finish-install
+  - complete
+

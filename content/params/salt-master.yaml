@@ -1,0 +1,17 @@
+---
+Name: "salt-master"
+Description: "IP Address or Hostname of the salt master."
+Documentation: |
+  The IP or Hostname of the salt master that the minions will be
+  connected to.
+
+  If a hostname, then it must resolve correctly in DNS
+
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

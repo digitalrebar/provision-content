@@ -1,0 +1,21 @@
+---
+Name: "esxi/vsan-leader"
+Description: "Defines the VSAN leader to initialize the cluster."
+Documentation: |
+  The Digital Rebar machine name of the three members defined in the
+  ``esxi/vsan-members`` array, responsible for the cluster initialization.
+
+  This leader will initialize the VSAN cluster and provide the VSAN
+  Cluster UUID for the remaining members to join the cluster.
+
+  .. note:: This pattern should be moved to the cluster mechanisms in
+            the task-library content.
+
+Schema:
+  type: "string"
+  default: ""
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

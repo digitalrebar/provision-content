@@ -16,7 +16,7 @@ OS:
   Family: "ubuntu"
   IsoFile: "ubuntu-16.04.6-server-amd64.iso"
   IsoSha256: "16afb1375372c57471ea5e29803a89a5a6bd1f6aabea2e5e34ac1ab7eb9786ac"
-  IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/16.04/ubuntu-16.04.4-server-arm64.iso"
+  IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.6-server-amd64.iso"
   Version: "16.04"
 Initrds:
   - "install/netboot/ubuntu-installer/amd64/initrd.gz"

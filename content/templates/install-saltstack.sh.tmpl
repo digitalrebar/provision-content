@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+# This template uses the salt-bootstrap method of installing a Saltstack
+# master or a minion. 
+#
+# The following params defines the Saltstack master to use for the minion
+# configurations
+# salt-master:
+#   master:  1.2.3.4
+#
+# For saltstack, we need to provide keys for the master and the minion, and
+# we need to inject the public keys for the minion in to the master config.
+#
+#
+
+{{if .ParamExists "salt-master"}}
+echo "Putting ssh access keys for root in place"
+mkdir -p /root/.ssh
+cat >>/root/.ssh/authorized_keys <<EOFSSHACCESS
+### BEGIN Access Keys GENERATED CONTENT
+{{range $key := .Param "access-keys"}}
+{{$key}}
+{{end}}
+### END Access Keys GENERATED CONTENT
+EOFSSHACCESS
+chmod 600 /root/.ssh/authorized_keys
+{{end}}
+
+echo "Updating SSHD default values"
+sed --in-place -r -e '/^#?PermitRootLogin/ s/^#//' -e '/^#?PermitRootLogin/ s/prohibit-password/{{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
+
+# Restart sshd but os badness.
+. /etc/os-release
+# Ignore error because we may run in a place that doesn't have ssh installed
+if [[ "$ID" == "ubuntu" || "$ID" == "debian" ]] ; then
+    echo "Restarting ssh"
+    service ssh restart || true
+else
+    echo "Restarting sshd"
+    service sshd restart || true
+fi
+
+echo "Finished updating access keys successfully"
+exit 0

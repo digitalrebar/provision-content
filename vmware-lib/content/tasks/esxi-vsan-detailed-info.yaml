@@ -1,0 +1,22 @@
+---
+Description: "Gets detailed VSAN information and debug data of an ESXi host."
+Name: "esxi-vsan-detailed-info"
+Documentation: |
+  Gets detailed info and VSAN debug data from a specific ESXi host.
+
+  .. note:: Future usage of this tasks will set GOVC_* variables in a
+            bash script, and then include the "esxi-vsan-detailed-info.sh.tmpl"
+            template which drives the primary debug/info get process
+
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams: []
+OptionalParams: []
+Templates:
+  - ID: "esxi-vsan-detailed-info.sh.tmpl"
+    Name: "esxi-vsan-detailed-info"
+    Contents: ""
+    Path: ""

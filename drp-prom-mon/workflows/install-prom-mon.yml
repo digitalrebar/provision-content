@@ -1,0 +1,24 @@
+---
+Name: "install-prom-mon"
+Description: "Install Prometheus and Grafana both"
+Documentation: |
+  Installs the Prometheus and Grafana tools, and configures a
+  Node Exporter for Prometheus.
+
+  You MUST specify th profile in ``drp-prom-mon/cluster-name`` Param
+  if you are configuring for Node Exporter and Prometheus services.
+
+  The ``cfg-node-exporter.sh.tmpl`` Template will collect the Machines
+  IP Address and add the Param ``drp-prom-mon/node-exporter`` in the
+  the cluster profile.  DO NOT add the Param, otherwise, the template
+  will fail with an error.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-prom-mon"
+
+Stages:
+  - install-prometheus
+  - install-grafana
+  - complete

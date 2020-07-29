@@ -1,0 +1,18 @@
+---
+Name: "install-grafana"
+Description: "Install Grafana"
+Documentation: |
+  Extremely simple workflow to install Grafana on a Machine.
+
+  The Operating System must be installed already, and the
+  Agent (drpcli) must be installed and running (which can
+  be done via the 'runner-service' stage.
+
+Meta:
+  color: "orange"
+  icon: "dashboard"
+  title: "install-grafana"
+Stages:
+  - install-grafana
+  - complete
+

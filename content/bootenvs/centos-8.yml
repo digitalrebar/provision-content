@@ -20,7 +20,7 @@ OS:
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-8.1.1911-x86_64-dvd1.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.1.1911-x86_64-dvd1.iso"
+      IsoUrl: "https://mirrors.edge.kernel.org/centos/8.1.1911/isos/x86_64/CentOS-8.1.1911-x86_64-dvd1.iso"
       Sha256: "3ee3f4ea1538e026fff763e2b284a6f20b259d91d1ad5688f5783a67d279423b"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
@@ -36,7 +36,7 @@ OS:
     aarch64:
       Loader: "grubarm64.efi"
       IsoFile: "CentOS-8.1.1911-aarch64-dvd1.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.1.1911-aarch64-dvd1.iso"
+      IsoUrl: "https://mirrors.edge.kernel.org/centos/8.1.1911/isos/aarch64/CentOS-8.1.1911-aarch64-dvd1.iso"
       Sha256: "357f34e86a28c86aaf1661462ef41ec4cf5f58c120f46e66e1985a9f71c246e3"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
