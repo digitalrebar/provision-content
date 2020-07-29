@@ -53,4 +53,4 @@ Templates:
           efibootmgr -o "${current},${order}"
       fi
       efibootmgr -D || :
-      efivootmgr -v || :
+      efibootmgr -v || :
