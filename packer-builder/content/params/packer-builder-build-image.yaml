@@ -21,6 +21,7 @@ Documentation: |
     * ``windows-10-1903-libvirt``
     * ``windows-10-1903-virtualbox``
     * ``windows-10-1909-libvirt``
+    * ``windows-10-1909-uefi-libvirt``
     * ``windows-10-1909-virtualbox``
     * ``windows-2012-r2-virtualbox``
     * ``windows-2012-r2-libvirt``
@@ -46,6 +47,7 @@ Schema:
     - "windows-10-1903-libvirt"
     - "windows-10-1903-virtualbox"
     - "windows-10-1909-libvirt"
+    - "windows-10-1909-uefi-libvirt"
     - "windows-10-1909-virtualbox"
     - "windows-2012-r2-virtualbox"
     - "windows-2012-r2-libvirt"

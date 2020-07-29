@@ -43,6 +43,6 @@ For More Documentation
 ----------------------
 
 More complete documentation for the Digital Rebar content pack and automation can
-be foun din the usual doc location - which is:
+be found in the usual documentation location - which is:
 
   * https://provision.readthedocs.io/

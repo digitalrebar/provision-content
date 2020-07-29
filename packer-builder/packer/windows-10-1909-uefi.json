@@ -5,13 +5,13 @@
     "complete_directory": "complete",
     "winrm_username": "vagrant",
     "winrm_password": "vagrant",
-    "iso_url": "https://software-download.microsoft.com/download/pr/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso",
-    "iso_checksum": "549bca46c055157291be6c22a3aaaed8330e78ef4382c99ee82c896426a1cee1",
+    "iso_url": "https://software-download.microsoft.com/download/pr/18363.418.191007-0143.19h2_release_svc_refresh_CLIENTENTERPRISEEVAL_OEMRET_x64FRE_en-us.iso",
+    "iso_checksum": "9ef81b6a101afd57b2dbfa44d5c8f7bc94ff45b51b82c5a1f9267ce2e63e9f53",
     "iso_checksum_type": "sha256"
   },
   "builders": [
     {
-      "name": "windows-2019-uefi-amd64-libvirt",
+      "name": "windows-10-1909-amd64-libvirt",
       "type": "qemu",
       "accelerator": "kvm",
       "cpus": 2,
@@ -23,11 +23,11 @@
         ["-device", "virtio-net,netdev=user.0"],
         ["-vga", "qxl"],
         ["-drive", "file=/usr/share/OVMF/OVMF_CODE.fd,if=pflash,format=raw,unit=0,readonly=on"],
-        ["-drive", "file=windows-2019-uefi-amd64-libvirt.nvram,if=pflash,format=raw,unit=1"],
+        ["-drive", "file=windows-10-1909-uefi-amd64-libvirt.nvram,if=pflash,format=raw,unit=1"],
         ["-device", "virtio-serial-pci"],
         ["-chardev", "socket,path=/tmp/{{.Name}}-qga.sock,server,nowait,id=qga0"],
-        ["-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0"]
-	      ["-display", "vnc=password=off"]
+        ["-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0"],
+        ["-display", "vnc=password=off"]
       ],
       "headless": false,
       "format": "qcow2",
@@ -44,26 +44,26 @@
       "shutdown_command": "shutdown /s /t 0 /f /d p:4:1 /c \"Packer Shutdown\"",
       "http_directory": ".",
       "floppy_files": [
-        "windows-2019-uefi/autounattend.xml",
+        "windows-10/autounattend.xml",
         "scripts/winrm.ps1",
-        "drivers/vioserial/2k19/amd64/*.cat",
-        "drivers/vioserial/2k19/amd64/*.inf",
-        "drivers/vioserial/2k19/amd64/*.sys",
-        "drivers/viostor/2k19/amd64/*.cat",
-        "drivers/viostor/2k19/amd64/*.inf",
-        "drivers/viostor/2k19/amd64/*.sys",
-        "drivers/NetKVM/2k19/amd64/*.cat",
-        "drivers/NetKVM/2k19/amd64/*.inf",
-        "drivers/NetKVM/2k19/amd64/*.sys",
-        "drivers/qxldod/2k19/amd64/*.cat",
-        "drivers/qxldod/2k19/amd64/*.inf",
-        "drivers/qxldod/2k19/amd64/*.sys"
+        "drivers/vioserial/w10/amd64/*.cat",
+        "drivers/vioserial/w10/amd64/*.inf",
+        "drivers/vioserial/w10/amd64/*.sys",
+        "drivers/viostor/w10/amd64/*.cat",
+        "drivers/viostor/w10/amd64/*.inf",
+        "drivers/viostor/w10/amd64/*.sys",
+        "drivers/NetKVM/w10/amd64/*.cat",
+        "drivers/NetKVM/w10/amd64/*.inf",
+        "drivers/NetKVM/w10/amd64/*.sys",
+        "drivers/qxldod/w10/amd64/*.cat",
+        "drivers/qxldod/w10/amd64/*.inf",
+        "drivers/qxldod/w10/amd64/*.sys"
       ]
     },
     {
-      "name": "windows-2019-uefi-amd64-virtualbox",
+      "name": "windows-10-1909-amd64-virtualbox",
       "type": "virtualbox-iso",
-      "guest_os_type": "Windows2019_64",
+      "guest_os_type": "Windows10_64",
       "guest_additions_mode": "attach",
       "guest_additions_interface": "sata",
       "headless": true,
@@ -83,8 +83,8 @@
         ["modifyvm", "{{.Name}}", "--nictype3", "82540EM"],
         ["modifyvm", "{{.Name}}", "--nictype4", "82540EM"]
       ],
-      "output_directory": "{{user `output_directory`}}/{{build_name}}",
       "disk_size": "{{user `disk_size`}}",
+      "output_directory": "{{user `output_directory`}}/{{build_name}}",
       "hard_drive_interface": "sata",
       "iso_interface": "sata",
       "iso_url": "{{user `iso_url`}}",
@@ -96,7 +96,7 @@
       "winrm_timeout": "4h",
       "shutdown_command": "shutdown /s /t 0 /f /d p:4:1 /c \"Packer Shutdown\"",
       "floppy_files": [
-        "windows-2019/autounattend.xml",
+        "windows-10/autounattend.xml",
         "scripts/winrm.ps1"
       ]
     }
@@ -108,7 +108,11 @@
     },
     {
       "type": "powershell",
-      "inline": "Uninstall-WindowsFeature Windows-Defender"
+      "inline": "<# disable Windows Defender #> Set-MpPreference -DisableRealtimeMonitoring $true; Set-ItemProperty -Path 'HKLM:/SOFTWARE/Policies/Microsoft/Windows Defender' -Name DisableAntiSpyware -Value 1"
+    },
+    {
+      "type": "powershell",
+      "inline": "<# disable OneDrive #> $k = 'HKLM:/SOFTWARE/Policies/Microsoft/Windows/OneDrive'; mkdir $k | Out-Null; Set-ItemProperty -Path $k -Name DisableFileSyncNGSC -Value 1"
     },
     {
       "type": "powershell",
@@ -116,6 +120,10 @@
     },
     {
       "type": "windows-restart"
+    },
+    {
+      "type": "powershell",
+      "script": "scripts/libvirt-fix-cpu-driver.ps1"
     },
     {
       "type": "powershell",
@@ -144,6 +152,9 @@
       "script": "scripts/install-choco-packages.ps1"
     },
     {
+      "type": "windows-restart"
+    },
+    {
       "type": "powershell",
       "script": "scripts/provision-cloudbase-init.ps1"
     },
@@ -162,9 +173,9 @@
   ],
   "post-processors": [
     {
-      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
-      "type": "shell-local",
-      "inline": "scripts/post-processor-check.sh {{user `complete_directory`}} {{build_name}}"
+      "type": "vagrant",
+      "output": "{{user `complete_directory`}}/{{build_name}}/{{.BuildName}}.box",
+      "vagrantfile_template": "templates/Vagrantfile.template"
     },
     {
       "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
