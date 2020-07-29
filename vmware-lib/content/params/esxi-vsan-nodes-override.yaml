@@ -1,0 +1,18 @@
+---
+Name: "esxi/vsan-nodes-override"
+Description: "If set, overrides which Nodes to operate commands against."
+Documentation: |
+  Normally ESXi clusters are grouped by use of the ``esxi/cluster-name`` param.
+  Machines belonging to the same cluster name are operated on as a full set.
+
+  However, an operator can override which Nodes to operate on, by setting this
+  param.  The value is a space separated list of machine Names.
+
+  There is no default value.
+
+Schema:
+  type: "string"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

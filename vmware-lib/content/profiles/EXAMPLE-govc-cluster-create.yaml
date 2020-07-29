@@ -1,0 +1,21 @@
+---
+Name: "EXAMPLE-govc-cluster-create"
+Description: "EXAMPLE govc cluster create profile"
+Documentation: |
+  .. warning:: THIS IS AN EXAMPLE - you must modify values to fit your
+               local environment appropriately.
+
+  Defines ``govc`` related Params for creating and manipulating cluster
+  create operations.  See individual Param documentation for the values
+  and usage of the Params.
+
+Meta:
+  color: "grey"
+  icon: "terminal"
+  title: "EXAMPLE GOVC VCSA Profile"
+Params:
+  esxi/datacenter-name: "dc01"
+  esxi/cluster-folder: "/dc01"
+  esxi/cluster-name: "cluster01"
+  esxi/cluster-options: "-vsan-enabled -vsan-autoclaim"
+Profiles: []

@@ -1,0 +1,28 @@
+---
+Name: "esxi/cluster-options"
+Description: "Optional Cluster configuration at creation time."
+Documentation: |
+  A simple string of space separated arguments of cluster configuration.
+
+  Supported values are defined by the GoVC ``cluster.change`` directive,
+  which is documented at:
+
+    * https://github.com/vmware/govmomi/blob/master/govc/USAGE.md#clusterchange
+
+  Example setting of this Param:
+
+    ::
+
+      -drs-enabled -vsan-enabled -vsan-autoclaim
+
+
+  .. note:: Use of this param requires that ``esxi/cluster-name`` is set to define
+            which cluster to operate on.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

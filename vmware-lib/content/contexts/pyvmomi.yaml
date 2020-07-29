@@ -1,0 +1,18 @@
+---
+Name: "pyvmomi"
+Description: "pyvmomi context using container image digitalrebar-pyvmomi"
+Documentation: |
+  Container context with PyVMOMI Python tooling in it.
+
+  You can pull the container image from docker hub for both Docker and
+  Podman environments, eg:
+
+    * ``docker pull digitalrebar/govc:latest``
+
+Engine: "docker-context"
+Image: "pyvmomi:latest"
+Meta:
+  color: blue
+  icon: terminal
+  title: RackN Content
+

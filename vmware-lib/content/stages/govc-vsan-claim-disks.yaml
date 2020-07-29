@@ -1,0 +1,17 @@
+---
+Name: "govc-vsan-claim-disks"
+Description: "Claim and Assign disks to VSAN"
+Documentation: |
+  This Stage claims **ALL** available disks on a vSphere ESXi node for use
+  by VSAN.
+
+  Disk claiming filtering rules can be selected by setting the Param value
+  ``esxi/vsan-disk-selection-rule" to a supported value.  The default value is
+  to use the *simple* selection rule.  See the Param for further documentation.
+
+Meta:
+  icon: "terminal"
+  color: "green"
+  title: "RackN Content"
+Tasks:
+  - "govc-vsan-claim-disks"

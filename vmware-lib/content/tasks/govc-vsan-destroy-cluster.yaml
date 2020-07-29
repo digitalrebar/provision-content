@@ -1,0 +1,163 @@
+---
+Description: "DESTROY VSAN cluster membership on an ESXi host."
+Name: "govc-vsan-destroy-cluster"
+Documentation: |
+  DESTROY the VSAN cluster membership on a given ESXi host.
+
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams: []
+OptionalParams: []
+Templates:
+  - Name: "esxi-vsan-destroy-cluster.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # VSAN destroy 
+      # RackN Copyright 2020
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" .}}
+
+      ### govc-setup.sh.tmpl
+      {{ template "govc-setup.sh.tmpl" .}}
+
+      set -e
+
+      JQ=$(which jq)
+      [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
+      [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
+      [[ -z "$JQ" ]] && JQ=$(which gojq)     || true
+      if [[ -z "$JQ" ]]; then
+        D="$(which drpcli)"
+        if [[ -n "$D" ]]; then
+          ln -s $D /usr/local/bin/drpjq
+          JQ="/usr/local/bin/drpjq"
+        else
+          xiterr 1 "Unable to find 'jq' or alternative to use."
+        fi
+      fi
+
+      export GOVC_PERSIST_SESSION=false
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+
+      echo ""
+      echo "      Cluster to operate on: '$CLUSTER'"
+      echo "Found members to operate on: '$MEMBERS'"
+      echo ""
+
+      run_govc() {
+        local _args="$*"
+        echo "CMD: govc $_args"
+        govc $_args
+      }
+      {{ $pass := "" }}
+
+      destroy_vsan() {
+        local _state _pass _msg _res
+        local _no_vsan_msg="vSAN Clustering is not enabled on this host"
+        local GOVC_URL=$(get_member_name $MEMBER)
+        local GOVC_USERNAME=root
+        local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        local GOVC_PASSWORD=""
+        local GOVC_INSECURE=1
+        # turn off shell history if there are exclamations in password
+        _pass=$(drpcli machines get $RS_UUID param esxi/insecure-password | jq -r '.' || true)
+        [[ -n "$_pass" && "$_pass" != "null" ]] && GOVC_PASSWORD="$_pass" || GOVC_PASSWORD="RocketSkates"
+
+        echo ">>>>>>>>>>>>>>>>>>>>>>> START destroy vsan log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
+        echo ""
+        _msg="Running 'govc' with the following credentials ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+
+        _res=$(govc host.esxcli vsan cluster get | grep -q "Enabled:.*true")
+        if [[ "$_res" =~ .*Enabled.*true.* ]]
+        then
+        echo "enabled"
+        _state="enabled"
+        else
+        echo "unconfigured"
+        _state="unconfigured"
+        fi
+
+        if [[ "$_state" == "enabled" ]]
+        then
+          echo ">>>"
+          echo ">>> VSAN on '$MEMBER' is configured ... destroying ... (can take a few minutes)"
+          echo ">>> FOUND cluster information:"
+          echo "$_state"
+          echo ">>> "
+          echo ">>> RUNNING: govc host.esxcli vsan cluster leave"
+          govc host.esxcli vsan cluster leave
+          govc host.esxcli vsan cluster get | grep -q "Enabled:.* true" && _state="enabled" || _state="unconfigured"
+          [[ "$_state" == "unconfigured"  ]] && echo ">>> Successfully destroyed." || xiterr 1 "unable to destroy on '$MEMBER'"
+        else
+          echo ">>>"
+          echo ">>> '$MEMBER' is not configured with VSAN cluster, not attempting to destroy."
+          echo ">>>"
+        fi
+
+        echo ""
+        echo ">>>>>>>>>>>>>>>>>>>>>>>> END destroy vsan log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
+      }
+
+      # try to set based on Machien Name, FQDN, or fallback to IP Address
+      # TODO:  This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        echo $ADDR
+        # echo $MEMBER.$DNAME
+      }
+
+      if [[ -z "$MEMBERS" ]]
+      then
+        echo "No members with 'esxi/cluster-name' found to operate on."
+        exit 0
+      fi
+
+      # iterate over members of cluster and destroy VSAN
+      rm -f /tmp/cluster-destroy-*\.log
+
+      for MEMBER in $MEMBERS
+      do
+        #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
+        ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+        DESTROY_LOG=/tmp/cluster-destroy-$$.$MEMBER.$ADDR.log
+
+        HNAME=$(get_member_name)
+        if [[ -n "$ADDR" ]]
+        then
+          destroy_vsan > $DESTROY_LOG 2>&1 &
+          sleep 3
+        else
+          xiterr 1 "Unable to get '$MEMBER' IP Address."
+        fi
+      done
+
+      # wait for all members to complete adding
+      wait
+      LOGS=$(ls -1 /tmp/cluster-destroy-*\.log)
+      for LOG in $LOGS
+      do
+        cat $LOG
+      done
+      rm -f /tmp/cluster-destroy*.log
