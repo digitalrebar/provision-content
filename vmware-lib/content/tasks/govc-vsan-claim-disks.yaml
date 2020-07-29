@@ -129,7 +129,7 @@ Templates:
               if [[ "$TYPE" = "ssd" ]]
               then
                 echo "Disk '$CAP' is SSD type, adding tag 'capacityFlash' to it..."
-                ehco "CMD TO RUN: 'govc host.esxcli vsan storage tag add -d $CAP -t capacityFlash'"
+                echo "CMD TO RUN: 'govc host.esxcli vsan storage tag add -d $CAP -t capacityFlash'"
                 govc host.esxcli vsan storage tag add -d "$CAP" -t capacityFlash
               fi
             done
