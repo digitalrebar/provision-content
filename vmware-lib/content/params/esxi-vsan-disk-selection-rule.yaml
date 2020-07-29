@@ -1,0 +1,24 @@
+---
+Name: "esxi/vsan-disk-selection-rule"
+Description: "Defines the VSAN disk selection rules for claiming disks."
+Documentation: |
+  An array of strings, each of which defines a supported disk selection
+  rule used in ``govc-vsan-claim-disks`` Task.
+
+  Current supported rules are:
+
+    * ``simple``
+
+  Future iterations of the task will support injecting additional Templates
+  with custom rules for selection.
+
+Schema:
+  type: "string"
+  default: "simple"
+  enum:
+    - "simple"
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

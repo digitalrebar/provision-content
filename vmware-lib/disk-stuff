@@ -1,0 +1,588 @@
+
+
+
+host.esxcli -json vsan storage list | jq -r '.Values | .[] | .Device | .[]'
+# JSON output
+govc host.esxcli -json storage core device list  | jq -r '.Values | .[] | "\(.Device | .[0]) :: \(.IsBootDevice | .[0]) :: \(.IsSSD | .[0]) :: \(.DriveType | .[0])"'
+# returns - HOTT haas lab environment:
+
+naa.55cd2e414e3266d2 :: false :: true :: physical
+naa.5002538a48315450 :: true :: true :: physical
+naa.55cd2e414e34210c :: false :: true :: physical
+naa.500056b31c408dfd :: false :: false :: physical
+
+# here's filtering above (get non-boot devices :
+govc host.esxcli -json storage core device list  | drpjq -r '.Values | .[] | select(.IsBootDevice | .[0]!="true") | select(.IsSSD | .[0]=="true") | "\(.Device | .[0]) :: \(.IsBootDevice | .[0]) :: \(.IsSSD | .[0]) :: \(.DriveType | .[0])"'
+
+# Dell SPS lab - single disk array
+naa.61866da0bbc5270026a7af66172095e0 :: true :: false :: logical
+
+# list devices that have a VMFS volume on them
+govc host.esxcli -json storage vmfs extent list | jq -r '.Values | .[] | .DeviceName | .[]' | sort -u
+# returns
+naa.5002538a48315450
+
+# list VSAN storage
+govc host.esxcli -json vsan storage list | jq -r '.Values | .[] | .Device | .[]'
+# returns only devices claimed by VSAN, like:
+naa.55cd2e414e3266d2
+naa.55cd2e414e34210c
+
+
+GOAL:
+ * List available disks
+ * Subtract IsBootDisk (storage core device list)
+ * Subtract has VMFS volumes (storage vmfs extent list)
+ * Subtract VSAN claimed (vsan storage list)
+
+MUST have a remainder with - minimum:
+ * 2 disks
+ * 1 IsSSD true
+
+Make first IsSSD true Cache
+Make rest Capacity
+
+
+
+
+# JSON returned from above command (without filtering)
+# has 3 physical disks, plus one weird controller iterated thing
+
+[
+  {
+    "DIXEnabled": [
+      "false"
+    ],
+    "DIXGuardType": [
+      "NO GUARD SUPPORT"
+    ],
+    "DevfsPath": [
+      "/vmfs/devices/disks/naa.55cd2e414e3266d2"
+    ],
+    "Device": [
+      "naa.55cd2e414e3266d2"
+    ],
+    "DeviceMaxQueueDepth": [
+      "32"
+    ],
+    "DeviceType": [
+      "Direct-Access "
+    ],
+    "DisplayName": [
+      "Local ATA Disk (naa.55cd2e414e3266d2)"
+    ],
+    "DriveType": [
+      "physical"
+    ],
+    "EmulatedDIXDIFEnabled": [
+      "false"
+    ],
+    "HasSettableDisplayName": [
+      "true"
+    ],
+    "IsBootDevice": [
+      "false"
+    ],
+    "IsBootUSBDevice": [
+      "false"
+    ],
+    "IsLocal": [
+      "true"
+    ],
+    "IsLocalSASDevice": [
+      "true"
+    ],
+    "IsOffline": [
+      "false"
+    ],
+    "IsPerenniallyReserved": [
+      "false"
+    ],
+    "IsPseudo": [
+      "false"
+    ],
+    "IsRDMCapable": [
+      "true"
+    ],
+    "IsRemovable": [
+      "false"
+    ],
+    "IsSAS": [
+      "true"
+    ],
+    "IsSSD": [
+      "true"
+    ],
+    "IsSharedClusterwide": [
+      "false"
+    ],
+    "IsUSB": [
+      "false"
+    ],
+    "IsVVOLPE": [
+      "false"
+    ],
+    "Model": [
+      "SSDSC2KB960G7R  "
+    ],
+    "MultipathPlugin": [
+      "NMP"
+    ],
+    "NoofoutstandingIOswithcompetingworlds": [
+      "32"
+    ],
+    "NumberofPhysicalDrives": [
+      "1"
+    ],
+    "OtherUIDs": [
+      "vml.020000000055cd2e414e3266d2535344534332"
+    ],
+    "PIActivated": [
+      "false"
+    ],
+    "PIProtectionMask": [
+      "NO PROTECTION"
+    ],
+    "PIType": [
+      "0"
+    ],
+    "ProtectionEnabled": [
+      "false"
+    ],
+    "QueueFullSampleSize": [
+      "0"
+    ],
+    "QueueFullThreshold": [
+      "0"
+    ],
+    "RAIDLevel": [
+      "NA"
+    ],
+    "Revision": [
+      "DL5C"
+    ],
+    "SCSILevel": [
+      "6"
+    ],
+    "Size": [
+      "915715"
+    ],
+    "Status": [
+      "on"
+    ],
+    "SupportedGuardTypes": [
+      "NO GUARD SUPPORT"
+    ],
+    "ThinProvisioningStatus": [
+      "yes"
+    ],
+    "VAAIStatus": [
+      "unsupported"
+    ],
+    "Vendor": [
+      "ATA     "
+    ]
+  },
+  {
+    "DIXEnabled": [
+      "false"
+    ],
+    "DIXGuardType": [
+      "NO GUARD SUPPORT"
+    ],
+    "DevfsPath": [
+      "/vmfs/devices/disks/naa.5002538a48315450"
+    ],
+    "Device": [
+      "naa.5002538a48315450"
+    ],
+    "DeviceMaxQueueDepth": [
+      "254"
+    ],
+    "DeviceType": [
+      "Direct-Access "
+    ],
+    "DisplayName": [
+      "Local SAMSUNG Disk (naa.5002538a48315450)"
+    ],
+    "DriveType": [
+      "physical"
+    ],
+    "EmulatedDIXDIFEnabled": [
+      "false"
+    ],
+    "HasSettableDisplayName": [
+      "true"
+    ],
+    "IsBootDevice": [
+      "true"
+    ],
+    "IsBootUSBDevice": [
+      "false"
+    ],
+    "IsLocal": [
+      "true"
+    ],
+    "IsLocalSASDevice": [
+      "true"
+    ],
+    "IsOffline": [
+      "false"
+    ],
+    "IsPerenniallyReserved": [
+      "false"
+    ],
+    "IsPseudo": [
+      "false"
+    ],
+    "IsRDMCapable": [
+      "true"
+    ],
+    "IsRemovable": [
+      "false"
+    ],
+    "IsSAS": [
+      "true"
+    ],
+    "IsSSD": [
+      "true"
+    ],
+    "IsSharedClusterwide": [
+      "false"
+    ],
+    "IsUSB": [
+      "false"
+    ],
+    "IsVVOLPE": [
+      "false"
+    ],
+    "Model": [
+      "MZILS400HEGR0D3 "
+    ],
+    "MultipathPlugin": [
+      "NMP"
+    ],
+    "NoofoutstandingIOswithcompetingworlds": [
+      "32"
+    ],
+    "NumberofPhysicalDrives": [
+      "1"
+    ],
+    "OtherUIDs": [
+      "vml.02000000005002538a483154504d5a494c5334"
+    ],
+    "PIActivated": [
+      "false"
+    ],
+    "PIProtectionMask": [
+      "NO PROTECTION"
+    ],
+    "PIType": [
+      "0"
+    ],
+    "ProtectionEnabled": [
+      "false"
+    ],
+    "QueueFullSampleSize": [
+      "0"
+    ],
+    "QueueFullThreshold": [
+      "0"
+    ],
+    "RAIDLevel": [
+      "NA"
+    ],
+    "Revision": [
+      "DWL7"
+    ],
+    "SCSILevel": [
+      "6"
+    ],
+    "Size": [
+      "381554"
+    ],
+    "Status": [
+      "on"
+    ],
+    "SupportedGuardTypes": [
+      "NO GUARD SUPPORT"
+    ],
+    "ThinProvisioningStatus": [
+      "yes"
+    ],
+    "VAAIStatus": [
+      "unsupported"
+    ],
+    "Vendor": [
+      "SAMSUNG "
+    ]
+  },
+  {
+    "DIXEnabled": [
+      "false"
+    ],
+    "DIXGuardType": [
+      "NO GUARD SUPPORT"
+    ],
+    "DevfsPath": [
+      "/vmfs/devices/disks/naa.55cd2e414e34210c"
+    ],
+    "Device": [
+      "naa.55cd2e414e34210c"
+    ],
+    "DeviceMaxQueueDepth": [
+      "32"
+    ],
+    "DeviceType": [
+      "Direct-Access "
+    ],
+    "DisplayName": [
+      "Local ATA Disk (naa.55cd2e414e34210c)"
+    ],
+    "DriveType": [
+      "physical"
+    ],
+    "EmulatedDIXDIFEnabled": [
+      "false"
+    ],
+    "HasSettableDisplayName": [
+      "true"
+    ],
+    "IsBootDevice": [
+      "false"
+    ],
+    "IsBootUSBDevice": [
+      "false"
+    ],
+    "IsLocal": [
+      "true"
+    ],
+    "IsLocalSASDevice": [
+      "true"
+    ],
+    "IsOffline": [
+      "false"
+    ],
+    "IsPerenniallyReserved": [
+      "false"
+    ],
+    "IsPseudo": [
+      "false"
+    ],
+    "IsRDMCapable": [
+      "true"
+    ],
+    "IsRemovable": [
+      "false"
+    ],
+    "IsSAS": [
+      "true"
+    ],
+    "IsSSD": [
+      "true"
+    ],
+    "IsSharedClusterwide": [
+      "false"
+    ],
+    "IsUSB": [
+      "false"
+    ],
+    "IsVVOLPE": [
+      "false"
+    ],
+    "Model": [
+      "SSDSC2KB960G7R  "
+    ],
+    "MultipathPlugin": [
+      "NMP"
+    ],
+    "NoofoutstandingIOswithcompetingworlds": [
+      "32"
+    ],
+    "NumberofPhysicalDrives": [
+      "1"
+    ],
+    "OtherUIDs": [
+      "vml.020000000055cd2e414e34210c535344534332"
+    ],
+    "PIActivated": [
+      "false"
+    ],
+    "PIProtectionMask": [
+      "NO PROTECTION"
+    ],
+    "PIType": [
+      "0"
+    ],
+    "ProtectionEnabled": [
+      "false"
+    ],
+    "QueueFullSampleSize": [
+      "0"
+    ],
+    "QueueFullThreshold": [
+      "0"
+    ],
+    "RAIDLevel": [
+      "NA"
+    ],
+    "Revision": [
+      "DL5C"
+    ],
+    "SCSILevel": [
+      "6"
+    ],
+    "Size": [
+      "915715"
+    ],
+    "Status": [
+      "on"
+    ],
+    "SupportedGuardTypes": [
+      "NO GUARD SUPPORT"
+    ],
+    "ThinProvisioningStatus": [
+      "yes"
+    ],
+    "VAAIStatus": [
+      "unsupported"
+    ],
+    "Vendor": [
+      "ATA     "
+    ]
+  },
+  {
+    "DIXEnabled": [
+      "false"
+    ],
+    "DIXGuardType": [
+      "NO GUARD SUPPORT"
+    ],
+    "DevfsPath": [
+      "/vmfs/devices/genscsi/naa.500056b31c408dfd"
+    ],
+    "Device": [
+      "naa.500056b31c408dfd"
+    ],
+    "DeviceMaxQueueDepth": [
+      "254"
+    ],
+    "DeviceType": [
+      "Enclosure Svc Dev"
+    ],
+    "DisplayName": [
+      "Local DP Enclosure Svc Dev (naa.500056b31c408dfd)"
+    ],
+    "DriveType": [
+      "physical"
+    ],
+    "EmulatedDIXDIFEnabled": [
+      "false"
+    ],
+    "HasSettableDisplayName": [
+      "true"
+    ],
+    "IsBootDevice": [
+      "false"
+    ],
+    "IsBootUSBDevice": [
+      "false"
+    ],
+    "IsLocal": [
+      "true"
+    ],
+    "IsLocalSASDevice": [
+      "true"
+    ],
+    "IsOffline": [
+      "false"
+    ],
+    "IsPerenniallyReserved": [
+      "false"
+    ],
+    "IsPseudo": [
+      "false"
+    ],
+    "IsRDMCapable": [
+      "true"
+    ],
+    "IsRemovable": [
+      "false"
+    ],
+    "IsSAS": [
+      "true"
+    ],
+    "IsSSD": [
+      "false"
+    ],
+    "IsSharedClusterwide": [
+      "false"
+    ],
+    "IsUSB": [
+      "false"
+    ],
+    "IsVVOLPE": [
+      "false"
+    ],
+    "Model": [
+      "BP14G+EXP       "
+    ],
+    "MultipathPlugin": [
+      "NMP"
+    ],
+    "NoofoutstandingIOswithcompetingworlds": [
+      "32"
+    ],
+    "NumberofPhysicalDrives": [
+      "1"
+    ],
+    "OtherUIDs": [
+      "vml.020d000000500056b31c408dfd42503134472b"
+    ],
+    "PIActivated": [
+      "false"
+    ],
+    "PIProtectionMask": [
+      "NO PROTECTION"
+    ],
+    "PIType": [
+      "0"
+    ],
+    "ProtectionEnabled": [
+      "false"
+    ],
+    "QueueFullSampleSize": [
+      "0"
+    ],
+    "QueueFullThreshold": [
+      "0"
+    ],
+    "RAIDLevel": [
+      "NA"
+    ],
+    "Revision": [
+      "2.46"
+    ],
+    "SCSILevel": [
+      "6"
+    ],
+    "Size": [
+      "0"
+    ],
+    "Status": [
+      "on"
+    ],
+    "SupportedGuardTypes": [
+      "NO GUARD SUPPORT"
+    ],
+    "ThinProvisioningStatus": [
+      "unknown"
+    ],
+    "VAAIStatus": [
+      "unsupported"
+    ],
+    "Vendor": [
+      "DP      "
+    ]
+  }
+]

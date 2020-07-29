@@ -1,0 +1,15 @@
+---
+Name: "esxi/vsan-vmnic"
+Description: "Defines which vmnic interface to configure for VSAN."
+Documentation: |
+  Defines the VMNIC to use for VSAN configuration on the vSphere ESXi host.
+
+  Defaults to ``vmnic1`` if not otherwise defined.
+
+Schema:
+  type: "string"
+  default: "vmnic1"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

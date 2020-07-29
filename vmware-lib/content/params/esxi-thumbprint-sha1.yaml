@@ -1,0 +1,13 @@
+---
+Name: "esxi/thumbprint-sha1"
+Description: "Defines the SHA1 thumbprint of ESXi."
+Documentation: |
+  Defines the ESXi SHA-1 thumbprint.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

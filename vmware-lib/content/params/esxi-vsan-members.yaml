@@ -1,0 +1,29 @@
+---
+Name: "esxi/vsan-members"
+Description: "Defines three vSphere VSAN configured nodes for cluster builds."
+Documentation: |
+  An array of strings that are the Digital Rebar machine names that
+  should be built in to the VSAN clsuter.
+
+  YAML Example of defining the machines to build in to the cluster:
+
+    ::
+
+      esxi/vsan-members:
+        - "machine01"
+        - "machine02"
+        - "machine03"
+
+  .. note:: The defined Machines must have successfully completed the
+            VSAN configuration task (``esxi/vsan-configure-host``).
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

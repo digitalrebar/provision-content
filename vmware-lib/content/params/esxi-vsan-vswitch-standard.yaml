@@ -1,0 +1,16 @@
+---
+Name: "esxi/vsan-vswitch-standard"
+Description: "Defines which Standard vSwtich to configure for VSAN."
+Documentation: |
+  Defines the Standard vSwitch to use for VSAN configuration on the vSphere
+  ESXi host.
+
+  Defaults to ``vSwitch1`` if not otherwise defined.
+
+Schema:
+  type: "string"
+  default: "vSwitch0"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

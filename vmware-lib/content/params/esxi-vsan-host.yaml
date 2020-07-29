@@ -1,0 +1,14 @@
+---
+Name: "esxi/vsan-host"
+Description: "Defines that this Machine should be configured as a VSAN host."
+Documentation: |
+  A boolean value that defines if the vSphere ESXi host should have
+  VSAN configuration built on it.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

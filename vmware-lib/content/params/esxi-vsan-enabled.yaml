@@ -1,0 +1,20 @@
+---
+Name: "esxi/vsan-enabled"
+Description: "Enables VSAN option during cluster create."
+Documentation: |
+  If set to ``true``, then set up and enable VSAN traffic on
+  ``esxi/vsan-vmk`` if defined.  If not defined, fall back to the
+  vMware Kernel interface defined on ``esxi/network-firstboot-vmk``.
+
+  The ``esxi/vsan-options`` can be set to control disk enrollment
+  (eg set to ``-vsan-autoclaim``).
+
+  By default, the ESXi machines are NOT set up to enable VSAN.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "yellow"
+  icon: "terminal"
+  title: "RackN Content"
