@@ -50,7 +50,7 @@ Templates:
       if [[ ! $order ]]; then
           efibootmgr -o "$current"
       else
-          efibootmgr -B -b "${current}"
+          efibootmgr -o "${current},${order}"
       fi
       efibootmgr -D || :
       efibootmgr -v || :
