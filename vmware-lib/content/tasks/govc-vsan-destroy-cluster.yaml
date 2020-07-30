@@ -110,6 +110,23 @@ Templates:
           govc host.esxcli vsan cluster leave
           govc host.esxcli vsan cluster get | grep -q "Enabled:.* true" && _state="enabled" || _state="unconfigured"
           [[ "$_state" == "unconfigured"  ]] && echo ">>> Successfully destroyed." || xiterr 1 "unable to destroy on '$MEMBER'"
+
+          echo ">>>"
+          echo ">>> Beginning disk wipe procedure..."
+          echo ">>> RUNNING: govc host.esxcli --json vsan storage list"
+          DGS=$(govc host.esxcli --json vsan storage list | jq -r '.Values | "\(.[].VSANDiskGroupUUID | .[0]):\(.[].Device | .[0])"' /tmp/v | sort -u)
+          echo ">>> Identified VSAN Disk Group UUIDs and Devices are:"
+          echo "$DGS"
+
+          for DG in $DGS
+          do
+            U=$(echo $DG | cut -d":" -f1)
+            D=$(echo $DG | cut -d":" -f2)
+            echo ">>> Nuke disk ('$D') for VSAN Disk Group UUID ('$U')"
+            echo ">>> RUNNING: govc host.esxcli vsan storage remove -u $U"
+            govc host.esxcli vsan storage remove -u $U
+          done
+
         else
           echo ">>>"
           echo ">>> '$MEMBER' is not configured with VSAN cluster, not attempting to destroy."
