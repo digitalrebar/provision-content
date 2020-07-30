@@ -5,7 +5,7 @@ Documentation: |
   The URL location of the OVA Resource to deploy via the ``govc/commands``.
 
   The OVA will be downloaded inside the Context container and used by the ``govc``
-  command to deploy the resource.  This could be a _VMware vCenter Server Appliance_
+  command to deploy the resource.  This could be a *VMware vCenter Server Appliance*
   (VCSA), NSX-T OVA, or any other deployable OVA format appliance device.
 
   This Parameter can utilize Digital Rebar Golang Templating constructs, which will

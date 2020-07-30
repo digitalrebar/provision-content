@@ -34,7 +34,7 @@ GoVC Context
 
 The GoVC context implements a RackN Context Container with the Agent (runner, drpcli
 binary) and the ``govc`` compiled binary inside of it.  By use of setting Param values,
- ``govc`` commands can be executed against vSphere resources.
+``govc`` commands can be executed against vSphere resources.
 
 
 GoVC and VCSA Deployment

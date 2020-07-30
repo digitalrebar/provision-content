@@ -16,7 +16,7 @@ Documentation: |
   directive.
 
   .. note:: The ``redhat/rhsm-organization`` and ``redhat/rhsm-activation`` values are
-  **BOTH** required Params if the install time activation is requested.
+            **BOTH** required Params if the install time activation is requested.
 
 Meta:
   icon: "file"
