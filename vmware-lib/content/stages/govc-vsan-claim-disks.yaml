@@ -6,7 +6,7 @@ Documentation: |
   by VSAN.
 
   Disk claiming filtering rules can be selected by setting the Param value
-  ``esxi/vsan-disk-selection-rule" to a supported value.  The default value is
+  ``esxi/vsan-disk-selection-rule`` to a supported value.  The default value is
   to use the *simple* selection rule.  See the Param for further documentation.
 
 Meta:

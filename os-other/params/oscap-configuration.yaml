@@ -18,7 +18,7 @@ Documentation: |
   OpenSCAP profile that is installed.  This is an array (list) of packages; one
   per element in the list.
 
-  **profile section*
+  **profile section**
 
   The profile section utilized ``key = value`` pairs which are directly mapped
   in to the Kickstart/Preseed to be used by the OpenSCAP tool to define the
