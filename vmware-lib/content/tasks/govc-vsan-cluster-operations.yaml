@@ -200,7 +200,7 @@ Templates:
       hdr() { (( $HDR )) && printf "$H\n" "$NODE"; }
       cmd() { printf ">>> ($NODE): govc $*\n\n"; govc $*; }
       about() { cmd about; }
-      cluster_build() { (( $IS_FIRST )) && cluster_new || cluster_join;  }
+      cluster_build() { (( $IS_FIRST )) && cluster_new || cluster_join &;  }
       cluster_list() { net_list; cluster_get; }
       host_has_vsan() { govc host.esxcli vsan cluster get > /dev/null 2>&1 && return 0 || return 1; }
       cluster_destroy() { cluster_leave; vmk_disable; }

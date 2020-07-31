@@ -101,7 +101,8 @@ Templates:
               # main cluster operations
               claim-disks)
                 hdr
-                claim_disks $SELECTION_RULE
+                echo ">>> Starting background job 'claim_disks' for node '$NODE' ... "
+                claim_disks $SELECTION_RULE &
               ;;
               *)
                 echo "Unknown operation '$OP'."

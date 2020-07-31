@@ -184,6 +184,10 @@ Templates:
 
       } # end set_vmk_on_host()
 
+      log() {
+        echo "$*" >> $ADD_LOG
+      }
+
       # uses variable MEMBER to operate against
       cluster_add() {
 
@@ -192,14 +196,14 @@ Templates:
         _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
         [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
 
-        run_govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password "$_pass" $THUMB >> $ADD_LOG
-        echo ">>> 'cluster.add' operation for '$MEMBER' completed"
 
-        echo ""
-        echo ">>>>>>>>>>>>>>>>>>>>>>> START cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
+        log ""
+        log ">>>>>>>>>>>>>>>>>>>>>>> START cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<"
+        log "CMD: govc cluster.add -cluster '$CLUSTER' -hostname '$HNAME' -username '$USERNAME' -password '$_pass' $THUMB"
+        govc cluster.add -cluster "$CLUSTER" -hostname "$HNAME" -username "$USERNAME" -password "$_pass" $THUMB >> $ADD_LOG
+        log ">>>>>>>>>>>>>>>>>>>>>>>> END cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
+        log ""
         cat $ADD_LOG
-        echo ">>>>>>>>>>>>>>>>>>>>>>>> END cluster.add log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
-        echo ""
         rm -f $ADD_LOG
       } # end cluster_add()
 
@@ -258,8 +262,8 @@ Templates:
           if [[ -n "$ADDR" ]]
           then
             echo "Starting cluster setup for '$MEMBER'."
-            #cluster_add &
-            cluster_add
+            cluster_add &
+            #cluster_add
           else
             xiterr 1 "Unable to get '$MEMBER' IP Address."
           fi
