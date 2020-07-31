@@ -19,7 +19,7 @@ Templates:
   - Name: "esxi-vsan-destroy-cluster.sh"
     Contents: |
       #!/usr/bin/env bash
-      # VSAN destroy 
+      # VSAN destroy
       # RackN Copyright 2020
 
       ### setup.tmpl
