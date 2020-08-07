@@ -38,6 +38,9 @@ case $OS_FAMILY in
       ln -s $config_file /boot/config-$(uname -r)
     fi
 
+    # Required for Kubernetes 1.18+
+    yum install -y conntrack-tools
+
     if ! which socat ; then
       install socat
     fi
