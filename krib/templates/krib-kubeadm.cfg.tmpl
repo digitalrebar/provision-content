@@ -68,7 +68,6 @@ etcd:
       - https://{{ $elem.Address }}:{{ $port }}
   {{ end -}}
 {{ end -}}
-useHyperKubeImage: true
 kubernetesVersion: {{ .Param "krib/cluster-kubernetes-version" }}
 networking:
   dnsDomain: "{{ .Param "krib/cluster-service-dns-domain" }}"
