@@ -84,6 +84,30 @@ if [[ ! -e $INSTALL_DIR/jq ]] ; then
 fi
 unset INSTALL_DIR
 
+# UNIVERSAL ESCAPE PATTERN
+# normally ignored, this allows operators to set a workflow "pause"
+{{ if .ParamExists "workflow/escape" }}
+{{ if ne -1 (int (.Param "workflow/escape")) }}
+echo "Detected workflow/escape (value is {{.Param "workflow/escape"}})"
+i={{int (.Param "workflow/escape")}}
+while [[ "$i" != "null" ]]; do
+  if [[ $i == 0 ]]; then
+    echo "ALERT! workflow/escape Reached 0 - Removing and Breaking Workflow"
+    drpcli machines remove $RS_UUID param "workflow/escape" > /dev/null
+    exit 1
+  else
+    i=$((i-1))
+    echo "WARNING! workflow/escape Countdown at ${i}"
+    drpcli machines set $RS_UUID param "workflow/escape" to $i > /dev/null
+  fi
+  sleep 1
+  i=$(drpcli machines get $RS_UUID param "workflow/escape") > /dev/null
+done
+{{ else }}
+echo "No workflow/escape set - continue"
+{{ end }}
+{{ end }}
+
 # Helper is rendered by the agent, and includes additional helpful functions; for
 # source, see repo https://github.com/digitalrebar/provision and file agent/cmdHelper.go
 if [[ -r ./helper ]]; then

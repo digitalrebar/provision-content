@@ -5,6 +5,11 @@ Documentation: |
 
   This workflow is recommended for joining cloud machines instead of `discover-base`.
 
+  NOTE: You must set `DefaulBootEnv` to `discover` in order to use join-up
+  to discover machines.  Alternatively, you can create placeholder
+  machines with `.BootEnv: discover` and use `join-up.sh` to connect to the placeholder
+  using the UUID. See the `ansible-joinup` task for an example.
+
   These added stages help for existing machines that may already
   have basic configuration (like firewalld) and a stable operating
   system (runner-service allows reboots).

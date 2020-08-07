@@ -1,0 +1,35 @@
+---
+Name: "workflow/escape"
+Description: "Seconds to pause, then break workflows in process (embedded in setup.tmpl)"
+Documentation: |
+  Allows operators to interrupt workflows from a global, profile or machine
+  basis by overriding this one param.  Requires that the workflow task(s) use
+  the setup.tmpl.
+
+  By default, value of -1 is ignored an workflow is not interrupted.
+
+  If value is 0 then task will `exit 1` out of the task and stop the workflow.
+
+  If value is >0 then the task will sleep 1 second and the value will decremented
+  and stored on the machine running the task.  
+
+  Values >0 allow operators to specify a pause before the workflow is halted.
+  If the workflow/escape param is removed from the machine before it reaches 0
+  then the task can continue without interruption.   This allows for operators
+  to choose between fast fail (workflow/escape = 0) or delayed fail ater X Seconds
+  (workflow/escape > 0).
+
+  If the machine's param value is removed before the value reaches 0 then the
+  workflow will continue without interruption.
+
+  NOTE: if you set the workflow/escape value on a machine to -1 then it
+  will disable the ability to override at a higher level.
+Schema:
+  type: integer
+  default: -1
+  minimum: -1
+Meta:
+  type: "value"
+  icon: "hand paper"
+  color: "purple"
+  title: "Digital Rebar Community Content"
