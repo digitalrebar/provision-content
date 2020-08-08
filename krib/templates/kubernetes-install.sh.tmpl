@@ -99,12 +99,12 @@ fi
 chmod +x {kubeadm,kubelet,kubectl}
 
 echo "Download kubelet systemd service unit file for version: ${RELEASE}"
-download -L "https://raw.githubusercontent.com/kubernetes/release/${RELEASE}/cmd/kubepkg/templates/latest/deb/kubelet/lib/systemd/system/kubelet.service" -o /etc/systemd/system/kubelet.service
+download -L "https://raw.githubusercontent.com/kubernetes/release/master/cmd/kubepkg/templates/latest/deb/kubelet/lib/systemd/system/kubelet.service" -o /etc/systemd/system/kubelet.service
 sed -i "s:/usr/bin:$INSTALL_DIR:g" /etc/systemd/system/kubelet.service
 
 mkdir -p /etc/systemd/system/kubelet.service.d
 echo "Download kubelet systemd service extension unit file for version: ${RELEASE}"
-download -L "https://raw.githubusercontent.com/kubernetes/release/${RELEASE}/cmd/kubepkg/templates/latest/deb/kubeadm/10-kubeadm.conf" -o /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+download -L "https://raw.githubusercontent.com/kubernetes/release/master/cmd/kubepkg/templates/latest/deb/kubeadm/10-kubeadm.conf" -o /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 sed -i "s:/usr/bin:$INSTALL_DIR:g" /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 systemctl enable kubelet && systemctl start kubelet
