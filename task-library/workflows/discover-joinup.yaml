@@ -5,6 +5,13 @@ Documentation: |
 
   This workflow is recommended for joining cloud machines instead of `discover-base`.
 
+  NOTE: You must set `defaultBootEnv` to `sledgehammer` in order to use join-up
+  to discover machines.
+
+  Some operators may chooose to first create placeholder machines and then link
+  with `join-up.sh` to the placeholder machine model using the UUID. See the
+  `ansible-joinup` task for an example.
+
   These added stages help for existing machines that may already
   have basic configuration (like firewalld) and a stable operating
   system (runner-service allows reboots).
