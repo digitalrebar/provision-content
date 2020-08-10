@@ -13,6 +13,16 @@ rules:
 - apiGroups:
   - certificates.k8s.io
   resources:
+  - signers
+  # legacy-unknown: support before kubernetes-1.18.0
+  resourceNames:
+  - "kubernetes.io/legacy-unknown"
+  - "kubernetes.io/kubelet-serving"
+  verbs:
+  - approve
+- apiGroups:
+  - certificates.k8s.io
+  resources:
   - certificatesigningrequests
   verbs:
   - delete
