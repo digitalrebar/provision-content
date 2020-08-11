@@ -5,17 +5,17 @@
     "complete_directory": "complete",
     "winrm_username": "vagrant",
     "winrm_password": "vagrant",
-    "iso_url": "https://software-download.microsoft.com/download/pr/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso",
-    "iso_checksum": "549bca46c055157291be6c22a3aaaed8330e78ef4382c99ee82c896426a1cee1",
+    "iso_url": "https://software-download.microsoft.com/download/pr/Windows_Server_2016_Datacenter_EVAL_en-us_14393_refresh.ISO",
+    "iso_checksum": "1ce702a578a3cb1ac3d14873980838590f06d5b7101c5daaccbac9d73f1fb50f",
     "iso_checksum_type": "sha256"
   },
   "builders": [
     {
-      "name": "windows-2019-amd64-libvirt",
+      "name": "windows-2016-amd64-libvirt",
       "type": "qemu",
       "accelerator": "kvm",
       "cpus": 2,
-      "memory": 4096,
+      "memory": 6144,
       "qemuargs": [
         ["-cpu", "host"],
         ["-soundhw", "hda"],
@@ -25,11 +25,11 @@
         ["-device", "virtio-serial-pci"],
         ["-chardev", "socket,path=/tmp/{{.Name}}-qga.sock,server,nowait,id=qga0"],
         ["-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0"],
-	      ["-display", "vnc=password=off"]
+	["-display", "vnc=127.0.0.1:99"]
       ],
       "headless": false,
       "format": "qcow2",
-      "output_directory": "{{user `output_directory`}}/{{build_name}}",
+      "output_directory": "{{user `output_directory`}}",
       "disk_size": "{{user `disk_size`}}",
       "disk_interface": "virtio",
       "iso_url": "{{user `iso_url`}}",
@@ -42,31 +42,31 @@
       "shutdown_command": "shutdown /s /t 0 /f /d p:4:1 /c \"Packer Shutdown\"",
       "http_directory": ".",
       "floppy_files": [
-        "windows-2019/autounattend.xml",
+        "windows-2016/autounattend.xml",
         "scripts/winrm.ps1",
-        "drivers/vioserial/2k19/amd64/*.cat",
-        "drivers/vioserial/2k19/amd64/*.inf",
-        "drivers/vioserial/2k19/amd64/*.sys",
-        "drivers/viostor/2k19/amd64/*.cat",
-        "drivers/viostor/2k19/amd64/*.inf",
-        "drivers/viostor/2k19/amd64/*.sys",
-        "drivers/NetKVM/2k19/amd64/*.cat",
-        "drivers/NetKVM/2k19/amd64/*.inf",
-        "drivers/NetKVM/2k19/amd64/*.sys",
-        "drivers/qxldod/2k19/amd64/*.cat",
-        "drivers/qxldod/2k19/amd64/*.inf",
-        "drivers/qxldod/2k19/amd64/*.sys"
+        "drivers/vioserial/2k16/amd64/*.cat",
+        "drivers/vioserial/2k16/amd64/*.inf",
+        "drivers/vioserial/2k16/amd64/*.sys",
+        "drivers/viostor/2k16/amd64/*.cat",
+        "drivers/viostor/2k16/amd64/*.inf",
+        "drivers/viostor/2k16/amd64/*.sys",
+        "drivers/NetKVM/2k16/amd64/*.cat",
+        "drivers/NetKVM/2k16/amd64/*.inf",
+        "drivers/NetKVM/2k16/amd64/*.sys",
+        "drivers/qxldod/2k16/amd64/*.cat",
+        "drivers/qxldod/2k16/amd64/*.inf",
+        "drivers/qxldod/2k16/amd64/*.sys"
       ]
     },
     {
-      "name": "windows-2019-amd64-virtualbox",
+      "name": "windows-2016-amd64-virtualbox",
       "type": "virtualbox-iso",
-      "guest_os_type": "Windows2019_64",
+      "guest_os_type": "Windows2016_64",
       "guest_additions_mode": "attach",
       "guest_additions_interface": "sata",
       "headless": true,
       "cpus": 2,
-      "memory": 4096,
+      "memory": 6144,
       "vboxmanage": [
         ["storagectl", "{{.Name}}", "--name", "IDE Controller", "--remove"],
         ["modifyvm", "{{.Name}}", "--vrde", "off"],
@@ -83,6 +83,7 @@
       ],
       "disk_size": "{{user `disk_size`}}",
       "hard_drive_interface": "sata",
+      "output_directory": "{{user `output_directory`}}",
       "iso_interface": "sata",
       "iso_url": "{{user `iso_url`}}",
       "iso_checksum": "{{user `iso_checksum`}}",
@@ -93,7 +94,7 @@
       "winrm_timeout": "4h",
       "shutdown_command": "shutdown /s /t 0 /f /d p:4:1 /c \"Packer Shutdown\"",
       "floppy_files": [
-        "windows-2019/autounattend.xml",
+        "windows-2016/autounattend.xml",
         "scripts/winrm.ps1"
       ]
     }
@@ -105,7 +106,11 @@
     },
     {
       "type": "powershell",
-      "inline": "Uninstall-WindowsFeature Windows-Defender"
+      "inline": "Uninstall-WindowsFeature Windows-Defender-Features"
+    },
+    {
+      "type": "powershell",
+      "inline": "Uninstall-WindowsFeature FS-SMB1"
     },
     {
       "type": "powershell",
@@ -116,7 +121,17 @@
     },
     {
       "type": "powershell",
+      "script": "scripts/libvirt-fix-cpu-driver.ps1"
+    },
+    {
+      "type": "powershell",
       "script": "scripts/provision.ps1"
+    },
+    {
+      "type": "windows-update",
+      "filters": [
+          "include:$_.Title -like '*Servicing Stack Update for Windows*'"
+      ]
     },
     {
       "type": "windows-update"
@@ -141,6 +156,9 @@
       "script": "scripts/install-choco-packages.ps1"
     },
     {
+      "type": "windows-restart"
+    },
+    {
       "type": "powershell",
       "script": "scripts/provision-cloudbase-init.ps1"
     },
@@ -158,11 +176,6 @@
     }
   ],
   "post-processors": [
-    {
-      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
-      "type": "shell-local",
-      "inline": "scripts/post-processor-check.sh {{user `complete_directory`}} {{build_name}}"
-    },
     {
       "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
       "type": "shell-local",
