@@ -25,7 +25,7 @@
         ["-device", "virtio-serial-pci"],
         ["-chardev", "socket,path=/tmp/{{.Name}}-qga.sock,server,nowait,id=qga0"],
         ["-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0"],
-	["-display", "vnc=password=off"]
+	["-display", "vnc=127.0.0.1:99"]
       ],
       "headless": true,
       "format": "qcow2",
@@ -148,10 +148,15 @@
     }
   ],
   "post-processors": [
+   {
+      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
+      "type": "shell-local",
+      "inline": "scripts/post-processor-convert.sh {{user `complete_directory`}} {{build_name}}"
+    },
     {
-      "type": "vagrant",
-      "output": "{{.BuildName}}.box",
-      "vagrantfile_template": "templates/Vagrantfile.template"
+      "execute_command": ["/usr/bin/env bash", "-c", "{{.Vars}} {{.Script}}"],
+      "type": "shell-local",
+      "inline": "scripts/rackn-drp-upload.sh {{user `complete_directory`}} {{build_name}}"
     }
   ]
 }
