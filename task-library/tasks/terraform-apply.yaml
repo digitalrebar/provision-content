@@ -125,6 +125,14 @@ Templates:
       echo "^^^^^ end of {{$plan}} loop ^^^^^ "
       {{ end }}
 
+      ## this is a sad hack required by Terraform deprecation
+      tfver=$(terraform -v)
+      tf13reg="Terraform v0\.1[3-9]\.0"
+      if [[ $tfver =~ $tf13reg ]]; then
+        echo "=== FORCE v0.13 UPGRADE ===="
+        terraform 0.13upgrade -yes -no-color .
+      fi
+
       echo "=== INIT $(terraform version) ===="
 
       terraform init -no-color
