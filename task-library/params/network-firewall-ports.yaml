@@ -1,0 +1,15 @@
+---
+Name: "network/firewall-ports"
+Description: "Enable Ports for Firewall"
+Documentation: |
+  Map of ports to open for Firewalld including the ``/tcp`` or ``/udp`` filter.
+
+Schema:
+  type: "array"
+  default:
+    - 22/tcp
+    - 443/tcp
+Meta:
+  color: "black"
+  icon: "fire"
+  title: "RackN Content Copyright 2019"

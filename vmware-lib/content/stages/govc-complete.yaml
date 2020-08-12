@@ -1,0 +1,13 @@
+---
+Name: "govc-complete"
+Description: "Marks the govc/commands related workflow as complete."
+Documentation: |
+  This Stage just marks the workflow running the ``govc/commands``
+  as complete.
+
+Meta:
+  type: "complete"
+  icon: "terminal"
+  icon: "check circle outline"
+  color: "green"
+  title: "RackN Content"

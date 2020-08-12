@@ -1,0 +1,329 @@
+Log for Job: 565bd414-e6ac-4822-a08e-382822a3d4d4
+Starting task :govc-cluster-create:govc-cluster-create on zz-govc-2
+Job 565bd414-e6ac-4822-a08e-382822a3d4d4 is running with elevated permissions ["machines * *", "profiles * *"]
+
+Starting command ./govc-cluster-create-govc-cluster-create.sh
+
+
+Command running
++ [[ -n C-UDPPYKAaOUIPSXJrTor1h__QXT0rQzb-Ii2R17eI7X-9aCnjhzPfJYmkEUHifFgnFYWm5-YPcfZdP-IXiPZhD5892qUQRn_JmzDS-McnVsvlz-cUZXcRTM2QyOQgB2w3agssvRbnK2QM7bEK_GZGEQ5OibgST0t1OnIKHAnUO89Zmp3VKROiCJxG2FJDMJ69X7YWV0O3ErL9Pc1y2THJh0-6ocXweVypZDKzV4ZwEKD6cSqExOsfCzO4W6oN2DORXZGQI6P2Uh8mBFonXNTGcMOl9q8XH6uzwqS6-lWs4sAKnZLkd-FEog00UIrVdyNyTvHdI_9wP6uWU1MRxLPoA1HxeZPfVspWcSErBfbtv18-K4M1HkS8M2v3ZqJdDVj3bfpXDNgbp_WkzAU09WhfPZS8bhdOgSFX--7lgio4dfIVbinXQL8uSPZbUZOAl-6ZVcHmwNDrLGObKK77PBB4i1lmPD72qTGCIWNxrCtoOxwk462fw4MUfAVTHGHK49T0hGS3Lmnzv8c4m5R5vcWyYslQmPiwwzKOZTLALWjGsd2pTNOC28IJczcBSPibebDqoGETWjozDO9mEO93hj8Iv5_4R7WJGJaad5r-4Uk9QB-wMHc2FwpX4Ce8T99DdhrKW1nCjKWfarY0SaAhKfEfPq-TUUCF8S73A1svdRDOj6Z_RmGcmuTAlmt9a-yuLZAZ2pxeFBRUveOFHNuGy4K7xXp6neO1qkRcB0ILA0dnsBNEPOhdWuUfrA_LW5myxRMZ0eIKSMYTDZdyi7wsjPsAX6WIfsMmIvHviqzMLVuDPEgVi9PWPQxYeLlYE2-mdbFI0eC1AkkFets4XCfnZmYQTAVCfaht2W92axqmIqQilmEc08KXPQVv5bIBI-l0mRFgooOeRuoL8tgArSXACt6SsOqAZv6ZvBwJDgiLVNHVIp-kcn7TPT24COKBUl4p81Idw9bBF0qxF7hIWws_QBRzIKy2j9iUiWPueT7m6ZYrAdgimeMlEiCwgsA5sgEkd02bmql8EDUkq6bAUHJcMjqLEMRLpO-jdmQjem8f_QBH-BeDgVGq1PNg_yhy2EdYRGg-WbQ1AgpQmSQQnNsBKZgqmrvbEXv8AuUyw3VvxmJHjnTHZYNh7ZzByBVtEd379TbQQBG2Fj2GkdILVXWy96P-RROL-jqMlHRQXCKlhrZXBoEiAi9yFR_0BkQ7M0trJPaWPXwE7e9Vps3t_aCqdf1JCxBTidXA4ALz0Wn8kCpbQ6Qr3mQ9iOM5p19qTxwSjgs44oWSd1W8pLaejv4BpQ8zDJcLSYctL0J1fu3h7R4l-RPJOWggnratdkCVphYJXu2qjmwpCVnvKa5a3aw_WuNHPxxDddqylMwXtCWKAO_kDgJ3wlZuD5vgJ4cY-MnP9Kc_BMqk4-pPP2PmGkDLdqnicoF68OSVpSv_22SWhkZEPxgLafQzBpItE-PIlMLdKNSAgtWJWyGStRONPmkhvnbREzWBXOvbX-DSskMLKa0Kd2T6NB63-yDjq7XDGUuOcQBTdSKy1iQEkYwuLRQM18m-Y06ZUlq8zztXrHYv_uWXviQ3mWZZO4YsHxCpZ83h1qyU8Ceil15UacrvlnqRZVGPHbDYvYNAlgiqCjx_N_-RiqE7Y4FGC4N3m7DRW3xGgnarHr5Pm12Rt8T26b80C74g4ef5ELE7sXi-zGrn-DvFcjcTdKmX3oPlcAXrrf1ZVWk0Z2LTIwvvX9TGSsOXy3PpV955gzFMfAl1n4mq97Mv1fR3dBzD0094tgdUno7mlTeJf24PuJH-K5FFXZIzridPapiD2QVlPmB4XfN-dsvp2ieSouT7BoEXOMtMYnnN2Q3TzHHtMPRc5WpsTothbWqsQ-AcXtY9WsmdodgxTJ5ayMilli8D6W-PkmP6i68Lwp0pj10j9Zdz92qEY5WgoI3vuzj53YIMEJ_TSufQwvd5pqDVA0qXrWMuI3O1AigoMU9uVFQGxE6GCeJlKxoWze22eoiIvlgRvk9uqfkT0KF-YUX27j-yQ2DVmSQE9pcHFIpKWrWNW7tqgR25WrwM2riqL4PJPx2aXXcxwG6kg0Zj_X776G04ikvBKEkfLw5RVrhsuaqVZslZQ1ompXboXyT1UJL3pYUfebOULb9yrs8HLIx0FaNUwcE07tOuSL51gPRy5jM13ZoNHzFPWY1Ym0sVzNfYZ-w-Hv9Ye0l8ktr_Ql7-Q2Fa_CN85qcmyI4atWTyCnxCvkxFV_YVpLs51cId1tFsi8BwXzJdWraZ9BMa0tlSctcwqBiyci10EgapfsUROqo_3wQmcWDWw-4LI7KwtRW6gFRM6bodop1zNZXIIpbX1db6y3Qz7YPnnbhIdZpNegiVNc7CHp2c30VMG8oO2Lyaxy50jKTYj6ntROOoUahpQ6asRMSkurfCrmaAWoa91gxMjBZiuceQqcTewdl7cn-AAmr084GxbxjL5_wECk6niwN-hujZG7TpnvUkUWMAO2HHNK9KsWckwboY0wyzxeaWYDLfSKO08kUgXm1qQMf0EblTpNAu_a97qE_tm_eTpsvzsfq8_liJDXDh--1usuAEpgkThuD50gdNcfyeVPJemp6scv_I4rD3Vm3SV_i7ktbrzR5QV74VYLunAVQ65PBdTL_opVR4WDs6pAY2bMZt1Cvz8fSgP4rUNlpGEux-TND3SWP1fDbElkbtTRAobe6uYGhsYTZ5V2N15AFqVk5UC4yqtV_VA6W3OcJxyl2fln2PQ-L4OCuU8fIuc7TBVk7DtAW583ttg94nr8jfmKWnf5SfIXQKdjQ3eP1hGDm1Iy-9IP7ogioZi8lXob98fmxhQL9DjFP98aeFDGCT3aDOhSzVUfiZz_E1Hz9aKzsiu9BA5BwDNAV8hyy07mUT70VqLOhliVEUuKqx0QFQNfFYzbDETntgFbLwvvyTyYWccqUCZVpziCljccoX65vf1bX71UQHp9v7Mk9sUOU0b3khBIDawCbA_wf1WkyOKnUYVW40S8iCMW-gl7SLp1PdxKde7xE_BTTP5WRbEkrd8zKfCoGTvnK-lRJakl3GOiyw== ]]
++ [[ -n https://10.173.165.3:8092 ]]
++ [[ -n cdeab46a-04bd-4039-8b94-6f542c264496 ]]
++ fixup_path /usr/local/bin /usr/sbin /sbin /opt/bin
++ local _add_path
+++ echo /usr/local/bin /usr/sbin /sbin /opt/bin
+++ sed 's/[:,]/ /g'
++ for _add_path in $(echo $* | sed 's/[:,]/ /g')
++ mkdir -p /usr/local/bin
++ grep -q :/usr/local/bin
++ for _add_path in $(echo $* | sed 's/[:,]/ /g')
++ mkdir -p /usr/sbin
++ grep -q :/usr/sbin
++ for _add_path in $(echo $* | sed 's/[:,]/ /g')
++ mkdir -p /sbin
++ grep -q :/sbin
++ for _add_path in $(echo $* | sed 's/[:,]/ /g')
++ mkdir -p /opt/bin
++ grep -q :/opt/bin
++ export PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/opt/bin
++ PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:/opt/bin
+++ uname -m
++ arch=x86_64
++ case $arch in
++ arch=amd64
+++ grep '^ID=' /etc/os-release
+++ tr -d '"'
+++ cut -d = -f 2
++ osfamily=alpine
++ INSTALL_DIR=/usr/local/bin
++ grep -q coreos /etc/os-release
++ grep -q alpine /etc/os-release
++ INSTALL_DIR=/usr/bin
++ mkdir -p /usr/bin
++ which drpcli
+/usr/bin/drpcli
++++ which drpcli
+++ dirname /usr/bin/drpcli
++ INSTALL_DIR=/usr/bin
++ [[ ! -e /usr/bin/drpjq ]]
++ [[ ! -e /usr/bin/jq ]]
++ unset INSTALL_DIR
++ [[ -r ./helper ]]
++ . ./helper
+++ export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
+++ DEBIAN_FRONTEND=noninteractive
+++ DEBCONF_NONINTERACTIVE_SEEN=true
+++ export LC_ALL=C LANGUAGE=C LANG=C
+++ LC_ALL=C
+++ LANGUAGE=C
+++ LANG=C
+++ export 'PS4=${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+++ PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+../helper@14(): set -o pipefail -o errexit
+../helper@15(): shopt -s nullglob extglob globstar
+../helper@31(): fix_path
+../helper@19(fix_path): local -A pathparts
+../helper@20(fix_path): local part
+../helper@21(fix_path): local IFS=:
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@22(fix_path): for part in $PATH
+../helper@23(fix_path): pathparts["$part"]=true
+../helper@25(fix_path): wanted_pathparts=("/usr/local/bin" "/usr/local/sbin" "/bin" "/sbin" "/usr/bin" "/usr/sbin")
+../helper@25(fix_path): local wanted_pathparts
+../helper@26(fix_path): for part in "${wanted_pathparts[@]}"
+../helper@27(fix_path): [[ -n true ]]
+../helper@27(fix_path): continue
+../helper@26(fix_path): for part in "${wanted_pathparts[@]}"
+../helper@27(fix_path): [[ -n true ]]
+../helper@27(fix_path): continue
+../helper@26(fix_path): for part in "${wanted_pathparts[@]}"
+../helper@27(fix_path): [[ -n true ]]
+../helper@27(fix_path): continue
+../helper@26(fix_path): for part in "${wanted_pathparts[@]}"
+../helper@27(fix_path): [[ -n true ]]
+../helper@27(fix_path): continue
+../helper@26(fix_path): for part in "${wanted_pathparts[@]}"
+../helper@27(fix_path): [[ -n true ]]
+../helper@27(fix_path): continue
+../helper@26(fix_path): for part in "${wanted_pathparts[@]}"
+../helper@27(fix_path): [[ -n true ]]
+../helper@27(fix_path): continue
+../helper@32(): unset fix_path
+../helper@35(): export OS_TYPE= OS_VER= OS_NAME=
+../helper@35(): OS_TYPE=
+../helper@35(): OS_VER=
+../helper@35(): OS_NAME=
+../helper@36(): [[ -f /etc/os-release ]]
+../helper@37(): . /etc/os-release
+///etc/os-release@1(): NAME='Alpine Linux'
+///etc/os-release@2(): ID=alpine
+///etc/os-release@3(): VERSION_ID=3.12.0
+///etc/os-release@4(): PRETTY_NAME='Alpine Linux v3.12'
+///etc/os-release@5(): HOME_URL=https://alpinelinux.org/
+///etc/os-release@6(): BUG_REPORT_URL=https://bugs.alpinelinux.org/
+../helper@38(): OS_TYPE=alpine
+../helper@39(): OS_VER=3.12.0
+../helper@59(): OS_NAME=alpine-3.12.0
+../helper@61(): case $OS_TYPE in
+../helper@64(): OS_FAMILY=alpine
+../helper@98(): INITSTYLE=sysv
+../helper@99(): which systemctl
+../helper@101(): which initctl
+./govc-cluster-create-govc-cluster-create.sh@103(): __sane_exit
+./helper@152(__sane_exit): touch /tmp/runner-286224961/govc-cluster-create-022335385/.sane-exit-codes
+./govc-cluster-create-govc-cluster-create.sh@113(): echo ''
+
+./govc-cluster-create-govc-cluster-create.sh@114(): echo '==== SETUP govc Environment ===='
+==== SETUP govc Environment ====
+./govc-cluster-create-govc-cluster-create.sh@115(): echo ''
+
+./govc-cluster-create-govc-cluster-create.sh@117(): MSG='Showing GOVC environment variables built from Params ... '
+./govc-cluster-create-govc-cluster-create.sh@120(): export GOVC_USERNAME=administrator@tec.vmware.com
+./govc-cluster-create-govc-cluster-create.sh@120(): GOVC_USERNAME=administrator@tec.vmware.com
+./govc-cluster-create-govc-cluster-create.sh@121(): export 'GOVC_PASSWORD=Dvmw204!'
+./govc-cluster-create-govc-cluster-create.sh@121(): GOVC_PASSWORD='Dvmw204!'
+./govc-cluster-create-govc-cluster-create.sh@122(): export GOVC_URL=vc-rackn.tec.vmware.com
+./govc-cluster-create-govc-cluster-create.sh@122(): GOVC_URL=vc-rackn.tec.vmware.com
+./govc-cluster-create-govc-cluster-create.sh@126(): export GOVC_INSECURE=1
+./govc-cluster-create-govc-cluster-create.sh@126(): GOVC_INSECURE=1
+./govc-cluster-create-govc-cluster-create.sh@131(): [[ -z vc-rackn.tec.vmware.com ]]
+./govc-cluster-create-govc-cluster-create.sh@132(): [[ -z administrator@tec.vmware.com ]]
+./govc-cluster-create-govc-cluster-create.sh@133(): [[ -z Dvmw204! ]]
+./govc-cluster-create-govc-cluster-create.sh@134(): [[ -n '' ]]
+./govc-cluster-create-govc-cluster-create.sh@136(): [[ true == \t\r\u\e ]]
+./govc-cluster-create-govc-cluster-create.sh@138(): echo 'WARNING: GOVC_PASSWORD is visible since '\''rs-debug-enable'\'' is set to '\''true'\''.'
+WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'.
+./govc-cluster-create-govc-cluster-create.sh@139(): echo ''
+
+./govc-cluster-create-govc-cluster-create.sh@140(): echo 'Showing GOVC environment variables built from Params ... '
+Showing GOVC environment variables built from Params ... 
+./govc-cluster-create-govc-cluster-create.sh@141(): env
+./govc-cluster-create-govc-cluster-create.sh@141(): grep -v grep
+./govc-cluster-create-govc-cluster-create.sh@141(): grep GOVC_
+GOVC_VER=v0.23.0
+GOVC_PASSWORD=Dvmw204!
+GOVC_INSECURE=1
+GOVC_USERNAME=administrator@tec.vmware.com
+GOVC_URL=vc-rackn.tec.vmware.com
+GOVC_SHA256=6de2afb3276b950ded9b6bd59ec6b0c57e43a4acdbb0450783d7c9ea85dd7ca4
+../govc-cluster-create-govc-cluster-create.sh@152(): which jq
+./govc-cluster-create-govc-cluster-create.sh@152(): JQ=/usr/bin/jq
+./govc-cluster-create-govc-cluster-create.sh@153(): [[ -z /usr/bin/jq ]]
+./govc-cluster-create-govc-cluster-create.sh@153(): true
+./govc-cluster-create-govc-cluster-create.sh@154(): [[ -z /usr/bin/jq ]]
+./govc-cluster-create-govc-cluster-create.sh@154(): true
+./govc-cluster-create-govc-cluster-create.sh@155(): [[ -z /usr/bin/jq ]]
+./govc-cluster-create-govc-cluster-create.sh@155(): true
+./govc-cluster-create-govc-cluster-create.sh@156(): [[ -z /usr/bin/jq ]]
+./govc-cluster-create-govc-cluster-create.sh@172(): USERNAME=root
+./govc-cluster-create-govc-cluster-create.sh@173(): DC=dc.tec
+./govc-cluster-create-govc-cluster-create.sh@174(): CLUSTER=cl.tec
+./govc-cluster-create-govc-cluster-create.sh@175(): OPTIONS='-vsan-enabled -vsan-autoclaim'
+./govc-cluster-create-govc-cluster-create.sh@176(): VSAN_ENABLED=true
+./govc-cluster-create-govc-cluster-create.sh@177(): FOLDER=
+./govc-cluster-create-govc-cluster-create.sh@178(): [[ -z cl.tec ]]
+../govc-cluster-create-govc-cluster-create.sh@179(): drpcli machines list esxi/cluster-name Eq cl.tec Meta.BaseContext Ne govc
+../govc-cluster-create-govc-cluster-create.sh@179(): jq -r '.[].Name'
+../govc-cluster-create-govc-cluster-create.sh@179(): tr '\n' ' '
+./govc-cluster-create-govc-cluster-create.sh@179(): MEMBERS='sc2-hs2-b1726 sc2-hs2-b1723 sc2-hs2-b1728 sc2-hs2-b1731 sc2-hs2-b1727 sc2-hs2-b1724 sc2-hs2-b1725 sc2-hs2-b1730 sc2-hs2-b1722 '
+./govc-cluster-create-govc-cluster-create.sh@180(): CLUSTER_PROFILE=haas-cluster-data
+./govc-cluster-create-govc-cluster-create.sh@182(): PARAM_SCUUID=esxi/vsan-data/sub-cluster-uuid
+./govc-cluster-create-govc-cluster-create.sh@184(): export GOVC_PERSIST_SESSION=false
+./govc-cluster-create-govc-cluster-create.sh@184(): GOVC_PERSIST_SESSION=false
+./govc-cluster-create-govc-cluster-create.sh@186(): echo 'Starting create operation with the following information:'
+Starting create operation with the following information:
+./govc-cluster-create-govc-cluster-create.sh@187(): echo ---------------------------------------------------------
+---------------------------------------------------------
+./govc-cluster-create-govc-cluster-create.sh@188(): echo ''
+
+./govc-cluster-create-govc-cluster-create.sh@189(): echo '     Datacenter:  '\''dc.tec'\'''
+     Datacenter:  'dc.tec'
+./govc-cluster-create-govc-cluster-create.sh@190(): echo '         Folder:  '\'''\'''
+         Folder:  ''
+./govc-cluster-create-govc-cluster-create.sh@191(): echo '        Cluster:  '\''cl.tec'\'''
+        Cluster:  'cl.tec'
+./govc-cluster-create-govc-cluster-create.sh@192(): echo 'Cluster Options:  '\''-vsan-enabled -vsan-autoclaim'\'''
+Cluster Options:  '-vsan-enabled -vsan-autoclaim'
+./govc-cluster-create-govc-cluster-create.sh@193(): echo '        Members:  '\''sc2-hs2-b1726 sc2-hs2-b1723 sc2-hs2-b1728 sc2-hs2-b1731 sc2-hs2-b1727 sc2-hs2-b1724 sc2-hs2-b1725 sc2-hs2-b1730 sc2-hs2-b1722 '\'''
+        Members:  'sc2-hs2-b1726 sc2-hs2-b1723 sc2-hs2-b1728 sc2-hs2-b1731 sc2-hs2-b1727 sc2-hs2-b1724 sc2-hs2-b1725 sc2-hs2-b1730 sc2-hs2-b1722 '
+./govc-cluster-create-govc-cluster-create.sh@194(): echo ''
+
+./govc-cluster-create-govc-cluster-create.sh@196(): [[ -n dc.tec ]]
+./govc-cluster-create-govc-cluster-create.sh@198(): govc datacenter.info dc.tec
+./govc-cluster-create-govc-cluster-create.sh@200(): echo 'Datacenter '\''dc.tec'\'' exists already.'
+Datacenter 'dc.tec' exists already.
+./govc-cluster-create-govc-cluster-create.sh@208(): export GOVC_DATACENTER=dc.tec
+./govc-cluster-create-govc-cluster-create.sh@208(): GOVC_DATACENTER=dc.tec
+./govc-cluster-create-govc-cluster-create.sh@214(): [[ -n '' ]]
+./govc-cluster-create-govc-cluster-create.sh@294(): [[ -n cl.tec ]]
+./govc-cluster-create-govc-cluster-create.sh@298(): govc cluster.rule.info -cluster cl.tec
+./govc-cluster-create-govc-cluster-create.sh@300(): echo 'Cluster '\''cl.tec'\'' exists already.'
+Cluster 'cl.tec' exists already.
+./govc-cluster-create-govc-cluster-create.sh@306(): [[ true == \t\r\u\e ]]
+./govc-cluster-create-govc-cluster-create.sh@308(): echo '-vsan-enabled -vsan-autoclaim'
+./govc-cluster-create-govc-cluster-create.sh@308(): grep -q '.*-vsan-enabled.*'
+./govc-cluster-create-govc-cluster-create.sh@316(): [[ -n -vsan-enabled -vsan-autoclaim ]]
+./govc-cluster-create-govc-cluster-create.sh@318(): govc cluster.rule.info -cluster cl.tec
+./govc-cluster-create-govc-cluster-create.sh@320(): run_govc cluster.change -vsan-enabled -vsan-autoclaim cl.tec
+./govc-cluster-create-govc-cluster-create.sh@167(run_govc): local '_args=cluster.change -vsan-enabled -vsan-autoclaim cl.tec'
+./govc-cluster-create-govc-cluster-create.sh@168(run_govc): echo 'CMD: govc cluster.change -vsan-enabled -vsan-autoclaim cl.tec'
+CMD: govc cluster.change -vsan-enabled -vsan-autoclaim cl.tec
+./govc-cluster-create-govc-cluster-create.sh@169(run_govc): govc cluster.change -vsan-enabled -vsan-autoclaim cl.tec
+./govc-cluster-create-govc-cluster-create.sh@329(): [[ -z sc2-hs2-b1726 sc2-hs2-b1723 sc2-hs2-b1728 sc2-hs2-b1731 sc2-hs2-b1727 sc2-hs2-b1724 sc2-hs2-b1725 sc2-hs2-b1730 sc2-hs2-b1722  ]]
+./govc-cluster-create-govc-cluster-create.sh@332(): rm -f
+./govc-cluster-create-govc-cluster-create.sh@333(): for MEMBER in $MEMBERS
+../govc-cluster-create-govc-cluster-create.sh@335(): drpcli machines get Name:sc2-hs2-b1726 param esxi/thumbprint-sha1
+../govc-cluster-create-govc-cluster-create.sh@335(): jq -r .
+./govc-cluster-create-govc-cluster-create.sh@335(): THUMB=24:39:98:05:BB:73:C5:61:57:04:DF:40:6D:C6:0F:40:EE:11:60:50
+../govc-cluster-create-govc-cluster-create.sh@337(): drpcli machines show Name:sc2-hs2-b1726 --slim=Params,Meta
+../govc-cluster-create-govc-cluster-create.sh@337(): jq -r .Address
+./govc-cluster-create-govc-cluster-create.sh@337(): ADDR=10.174.1.198
+./govc-cluster-create-govc-cluster-create.sh@338(): [[ -n 24:39:98:05:BB:73:C5:61:57:04:DF:40:6D:C6:0F:40:EE:11:60:50 ]]
+./govc-cluster-create-govc-cluster-create.sh@338(): THUMB='-thumbprint 24:39:98:05:BB:73:C5:61:57:04:DF:40:6D:C6:0F:40:EE:11:60:50'
+./govc-cluster-create-govc-cluster-create.sh@339(): ADD_LOG=/tmp/cluster-add.sc2-hs2-b1726.10.174.1.198.30964.log
+./govc-cluster-create-govc-cluster-create.sh@340(): echo 'Initializing member '\''sc2-hs2-b1726'\'' log '\''/tmp/cluster-add.sc2-hs2-b1726.10.174.1.198.30964.log'\'' ... '
+./govc-cluster-create-govc-cluster-create.sh@340(): tee /tmp/cluster-add.sc2-hs2-b1726.10.174.1.198.30964.log
+Initializing member 'sc2-hs2-b1726' log '/tmp/cluster-add.sc2-hs2-b1726.10.174.1.198.30964.log' ... 
+../govc-cluster-create-govc-cluster-create.sh@343(): get_member_name
+../govc-cluster-create-govc-cluster-create.sh@220(get_member_name): echo 10.174.1.198
+./govc-cluster-create-govc-cluster-create.sh@343(): HNAME=10.174.1.198
+./govc-cluster-create-govc-cluster-create.sh@344(): [[ -n 10.174.1.198 ]]
+./govc-cluster-create-govc-cluster-create.sh@346(): echo 'Starting cluster setup for '\''sc2-hs2-b1726'\''.'
+Starting cluster setup for 'sc2-hs2-b1726'.
+./govc-cluster-create-govc-cluster-create.sh@348(): cluster_add
+./govc-cluster-create-govc-cluster-create.sh@272(cluster_add): [[ true == \t\r\u\e ]]
+./govc-cluster-create-govc-cluster-create.sh@272(cluster_add): set_vmk_on_host
+../govc-cluster-create-govc-cluster-create.sh@225(set_vmk_on_host): get_member_name
+../govc-cluster-create-govc-cluster-create.sh@220(get_member_name): echo 10.174.1.198
+./govc-cluster-create-govc-cluster-create.sh@225(set_vmk_on_host): local GOVC_URL=10.174.1.198
+./govc-cluster-create-govc-cluster-create.sh@226(set_vmk_on_host): local GOVC_USERNAME=root
+./govc-cluster-create-govc-cluster-create.sh@227(set_vmk_on_host): local GOVC_DATACENTER=
+./govc-cluster-create-govc-cluster-create.sh@228(set_vmk_on_host): local GOVC_INSECURE=1
+./govc-cluster-create-govc-cluster-create.sh@229(set_vmk_on_host): local GOVC_DATASTORE=
+./govc-cluster-create-govc-cluster-create.sh@230(set_vmk_on_host): local GOVC_RESOURCE_POOL=
+../govc-cluster-create-govc-cluster-create.sh@232(set_vmk_on_host): jq -r .
+../govc-cluster-create-govc-cluster-create.sh@232(set_vmk_on_host): drpcli machines get Name:sc2-hs2-b1726 param esxi/insecure-password
+./govc-cluster-create-govc-cluster-create.sh@232(set_vmk_on_host): _pass=null
+./govc-cluster-create-govc-cluster-create.sh@233(set_vmk_on_host): [[ -n null ]]
+./govc-cluster-create-govc-cluster-create.sh@233(set_vmk_on_host): [[ null != \n\u\l\l ]]
+./govc-cluster-create-govc-cluster-create.sh@233(set_vmk_on_host): GOVC_PASSWORD=RocketSkates
+./govc-cluster-create-govc-cluster-create.sh@234(set_vmk_on_host): export GOVC_PASSWORD
+./govc-cluster-create-govc-cluster-create.sh@236(set_vmk_on_host): _msg='Running '\''govc'\'' with the following credentials ... '
+./govc-cluster-create-govc-cluster-create.sh@238(set_vmk_on_host): [[ true == \t\r\u\e ]]
+./govc-cluster-create-govc-cluster-create.sh@240(set_vmk_on_host): echo 'WARNING: GOVC_PASSWORD is visible since '\''rs-debug-enable'\'' is set to '\''true'\''.'
+WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'.
+./govc-cluster-create-govc-cluster-create.sh@241(set_vmk_on_host): echo ''
+
+./govc-cluster-create-govc-cluster-create.sh@242(set_vmk_on_host): echo 'Running '\''govc'\'' with the following credentials ... '
+Running 'govc' with the following credentials ... 
+./govc-cluster-create-govc-cluster-create.sh@243(set_vmk_on_host): env
+./govc-cluster-create-govc-cluster-create.sh@243(set_vmk_on_host): grep -v grep
+./govc-cluster-create-govc-cluster-create.sh@243(set_vmk_on_host): grep GOVC_
+GOVC_URL=10.174.1.198
+GOVC_USERNAME=root
+GOVC_DATACENTER=
+GOVC_INSECURE=1
+GOVC_VER=v0.23.0
+GOVC_PASSWORD=RocketSkates
+GOVC_PERSIST_SESSION=false
+GOVC_SHA256=6de2afb3276b950ded9b6bd59ec6b0c57e43a4acdbb0450783d7c9ea85dd7ca4
+./govc-cluster-create-govc-cluster-create.sh@251(set_vmk_on_host): echo DEBUG
+DEBUG
+./govc-cluster-create-govc-cluster-create.sh@252(set_vmk_on_host): echo DEBUG
+DEBUG
+./govc-cluster-create-govc-cluster-create.sh@253(set_vmk_on_host): govc about
+Name:         VMware ESXi
+Vendor:       VMware, Inc.
+Version:      7.0.0
+Build:        15843807
+OS type:      vmnix-x86
+API type:     HostAgent
+API version:  7.0.0.0
+Product ID:   embeddedEsx
+UUID:         
+./govc-cluster-create-govc-cluster-create.sh@254(set_vmk_on_host): govc host.info
+Name:              sc2-hs2-b1726.tec.vmware.com
+  Path:            /ha-datacenter/host/sc2-hs2-b1726.tec.vmware.com/sc2-hs2-b1726.tec.vmware.com
+  Manufacturer:    Dell Inc.
+  Logical CPUs:    48 CPUs @ 2694MHz
+  Processor type:  Intel(R) Xeon(R) Platinum 8168 CPU @ 2.70GHz
+  CPU usage:       128 MHz (0.1%)
+  Memory:          391805MB
+  Memory usage:    18177 MB (4.6%)
+  Boot time:       2020-07-23 13:53:13.418462 +0000 UTC
+  State:           connected
+./govc-cluster-create-govc-cluster-create.sh@255(set_vmk_on_host): echo DEBUG
+DEBUG
+./govc-cluster-create-govc-cluster-create.sh@256(set_vmk_on_host): echo DEBUG
+DEBUG
+./govc-cluster-create-govc-cluster-create.sh@258(set_vmk_on_host): govc host.esxcli vsan network list
+./govc-cluster-create-govc-cluster-create.sh@260(set_vmk_on_host): echo '>>> VMK  appears to have VSAN type already'
+>>> VMK  appears to have VSAN type already
+./govc-cluster-create-govc-cluster-create.sh@274(cluster_add): echo '>>> Running cluster.add for '\''sc2-hs2-b1726'\'' with IP address '\''10.174.1.198'\'''
+>>> Running cluster.add for 'sc2-hs2-b1726' with IP address '10.174.1.198'
+./govc-cluster-create-govc-cluster-create.sh@275(cluster_add): echo '>>> '\''cluster.add'\'' running in the background, no live streaming of job log data.'
+>>> 'cluster.add' running in the background, no live streaming of job log data.
+./govc-cluster-create-govc-cluster-create.sh@276(cluster_add): echo DEBUG
+DEBUG
+./govc-cluster-create-govc-cluster-create.sh@277(cluster_add): echo DEBUG
+DEBUG
+./govc-cluster-create-govc-cluster-create.sh@278(cluster_add): govc about
+govc: ServerFaultCode: Cannot complete login due to an incorrect user name or password.
+Command exited with status 1
+Action govc-cluster-create.sh finished
+Task govc-cluster-create failed
+Marked machine zz-govc-2 as not runnable
+Updated job for :govc-cluster-create:govc-cluster-create to failed
+Task signalled that it failed
+

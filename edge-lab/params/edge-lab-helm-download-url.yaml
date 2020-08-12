@@ -9,5 +9,6 @@ Schema:
 Meta:
   color: "blue"
   icon: "download"
+  clipboard: "yes"
   title: "Community Content"
   render: "semver"

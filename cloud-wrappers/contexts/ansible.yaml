@@ -1,0 +1,16 @@
+---
+Name: "ansible"
+Description: "Run Ansible Playbook in Docker Context"
+Documentation: |
+  Docker Context that runs Ansible Playbooks
+  Used by the `Ansible-Apply` task.
+  
+  Note: RackN License Required!
+Engine: "docker-context"
+Image: "digitalrebar-context-ansible"
+Meta:
+  type: "action"
+  icon: "send"
+  color: "blue"
+  title: "RackN Content"
+  Dockerpull: "digitalrebar/context-ansible"

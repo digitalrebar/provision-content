@@ -1,0 +1,87 @@
+---
+Name: sledgehammer-create-image
+Description: Create a Sledgehammer tarball and profile from the staged bits.
+Documentation: |
+  Now that all the bits are staged, create a tarball that contains
+  everything properly built and signed.  When finished, upload the ISO
+  and the profile with bootenv overrides to dr-provision
+ExtraClaims:
+  - scope: "contents"
+    action: "get"
+    specific: "*"
+  - scope: "isos"
+    action: "*"
+    specific: "*"
+  - scope: "profiles"
+    action: "create"
+    specific: "*"
+Templates:
+  - Name: make-sledgehammer
+    Contents: |
+      #!/bin/bash
+      echo "Generating unique signature for Sledgehammer"
+      cd /IMAGE
+      signature="$(sha1sum <root.squashfs |awk '{print $1}')"
+      # make stage1.img
+      cd initrd
+      sed -i -e "s/::SIGNATURE::/$signature/" init
+      sed -i -e "s/::BUILD_DATE::/$(date)/" init
+      sed -i -e "s/::SBV::/$(RS_TOKEN= drpcli contents show sledgehammer-builder | jq .meta.Version -r)/" init
+      find |sort |cpio -o -R 0:0 --format=newc |gzip -9 >../stage1.img
+      cd ..
+      # Tar it all up
+      tarname=sledgehammer-$signature.{{.Machine.Arch}}.tar
+      echo "Creating Sledgehammer $signature archive"
+      sha1sum vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi >sha1sums
+      mkdir $signature
+      mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
+      tar cf $tarname $signature
+      # Push back to dr-provision
+      echo "Uploading Sledgehammer to dr-provision"
+      drpcli isos upload $tarname as $tarname
+      echo "$tarname uploaded to isos"
+      case {{.Machine.Arch}} in
+          amd64) shim="shimx64.efi";;
+          arm64) shim="grubaa64.efi";;
+      esac
+      echo "Creating profile for sledgehammer-$signature"
+      drpcli profiles create - <<EOF
+      ---
+      Name: sledgehammer-$signature
+      Description: 'Bootenv override for sledgehammer {{.Machine.Arch}}'
+      Params:
+        bootenv-customize:
+          discovery:
+            Loaders:
+              '{{.Machine.Arch}}-uefi': $signature/$shim
+            OS:
+              Name: sledgehammer
+              SupportedArchitectures:
+                '{{.Machine.Arch}}':
+                  IsoFile: $tarname
+                  Kernel: $signature/vmlinuz0
+                  Initrds:
+                    - $signature/stage1.img
+            Templates:
+              - Name: grub-secure-discovery
+                Path: sledgehammer/$signature/grub.cfg
+                ID: allarch-grub.tmpl
+          sledgehammer:
+            Loaders:
+              '{{.Machine.Arch}}-uefi': $signature/$shim
+            OS:
+              Name: sledgehammer
+              SupportedArchitectures:
+                '{{.Machine.Arch}}':
+                  IsoFile: $tarname
+                  Kernel: $signature/vmlinuz0
+                  Initrds:
+                    - $signature/stage1.img
+            Templates:
+              - Name: grub-secure
+                Path: 'sledgehammer/$signature/grub.cfg-{{`{{.Machine.HexAddress}}`}}'
+                ID: default-grub.tmpl
+              - Name: grub-secure-mac
+                Path: 'sledgehammer/$signature/grub.cfg-{{`{{.Machine.MacAddr "pxelinux"}}`}}'
+                ID: default-grub.tmpl
+      EOF

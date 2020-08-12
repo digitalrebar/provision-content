@@ -1,0 +1,24 @@
+---
+Name: "helm-openfaas"
+Description: "Helm Charts to Install OpenFaaS"
+Documentation: |
+  Overrides Array of Helm charts to install OpenFaaS
+Params:
+  "edge-lab/helm-charts":
+    - name: "openfaas"
+      chart: "openfaas/openfaas"
+      namespace: "openfaas"
+      repos:
+        openfaas: "https://openfaas.github.io/faas-netes/"
+      prekubectl:
+        - "apply -f https://raw.githubusercontent.com/openfaas/faas-netes/master/namespaces.yml"
+      postkubectl: 
+        "openfaas/password": "-n openfaas get secret basic-auth -o jsonpath=\"{.data.basic-auth-password}\" | base64 --decode"
+      set:
+        - "functionNamespace=openfaas-fn"
+        - "generateBasicAuth=true"
+      sleep: 10
+Meta:
+  color: "blue"
+  icon: "map outline"
+  title: "Community Content"

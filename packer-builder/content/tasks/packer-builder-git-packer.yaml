@@ -1,0 +1,38 @@
+---
+Description: "Get the packer builder json and build scripts from git repo."
+Name: "packer-builder-git-packer"
+Documentation: |
+  Performs a git checkout of the ``packer-builder/packer/`` directory in the
+  ``digitalrebar/provision-content`` repo.
+
+  The git repo directory will be checked out in the ``packer-builder/packer/``
+  directory on the Machine this is run from.
+
+Templates:
+  - Name: "packer-builder-git-packer"
+    Contents: |
+      #!/usr/bin/env bash
+      # Get the packer build json and build scripts
+
+
+      WORK={{ .Param "packer-builder/work-dir" }}
+
+      mkdir -p $WORK
+      cd $WORK
+      echo "Available space in the filesystem for '$WORK' work directory:"
+      df -hl .
+
+      # git pull the repo location/directory for the packer-builder/packer/ content
+      git init
+      git remote add origin https://github.com/digitalrebar/provision-content.git
+      git fetch origin
+      git checkout origin/{{ .Param "packer-builder/git-branch" }} -- packer-builder/packer
+
+      echo "Repo directory 'packer-builder/packer' checked out."
+      ls packer-builder/packer/
+
+Meta:
+  icon: "cart arrow down"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"

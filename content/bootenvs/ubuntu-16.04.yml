@@ -11,11 +11,12 @@ Meta:
   color: "orange"
   title: "Digital Rebar Community Content"
 OS:
+  type: "os"
   Name: "ubuntu-16.04"
   Family: "ubuntu"
   IsoFile: "ubuntu-16.04.6-server-amd64.iso"
   IsoSha256: "16afb1375372c57471ea5e29803a89a5a6bd1f6aabea2e5e34ac1ab7eb9786ac"
-  IsoUrl: "http://mirror.math.princeton.edu/pub/ubuntu-iso/16.04/ubuntu-16.04.6-server-amd64.iso"
+  IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/16.04/ubuntu-16.04.4-server-arm64.iso"
   Version: "16.04"
 Initrds:
   - "install/netboot/ubuntu-installer/amd64/initrd.gz"
@@ -73,10 +74,10 @@ Templates:
     Name: "net-post-install.sh"
     Path: "{{.Machine.Path}}/post-install.sh"
   - Name: grub-secure-mac
-    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
     ID: default-grub.tmpl
   - Name: grub-secure
-    Path: '{{.Env.PathForArch "tftp" "" "amd64"}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
     ID: default-grub.tmpl
   - ID: "default-grub.tmpl"
     Name: "grub"

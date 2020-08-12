@@ -2,6 +2,8 @@
 
 {{template "setup.tmpl" .}}
 
+{{ template "set-proxy-servers.sh.tmpl" .}}
+
 cr={{.Param "krib/container-runtime"}}
 case $cr in
   docker) tasks="docker-install";;

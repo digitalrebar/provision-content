@@ -1,0 +1,11 @@
+---
+Name: exit-context
+Description: Switch back to the default context
+Documentation: |
+  It can be handy to have a stage-based marker for switching back
+  to the default context.  This stage provides that.
+Tasks:
+  - 'context:'
+Meta:
+  type: "reset"
+  icon: "shuffle"

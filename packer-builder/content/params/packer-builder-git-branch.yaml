@@ -1,0 +1,16 @@
+---
+Name: "packer-builder/git-branch"
+Description: "Select the hypervisor to setup."
+Documentation: |
+  Specify the git branch to checkout for the Packer contents - useful for debugging
+  when building / testing content not fully checked out in the git repo.
+
+  Default value is ``v4`` for the branch.
+
+Schema:
+  type: "string"
+  default: "v4"
+Meta:
+  color: "green"
+  icon: "code"
+  title: "RackN Content"

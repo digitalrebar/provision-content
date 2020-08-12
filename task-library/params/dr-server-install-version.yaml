@@ -1,0 +1,13 @@
+---
+Name: "dr-server/install-version"
+Description: "Version to of DRP install if no ZIP file provided"
+Documentation: |
+  When not using a ZIP file, use this version of DRP
+Schema:
+  type: string
+  default: tip
+Meta:
+  type: "value"
+  color: "blue"
+  icon: "hashtag"
+  title: "RackN Copyright 2020"

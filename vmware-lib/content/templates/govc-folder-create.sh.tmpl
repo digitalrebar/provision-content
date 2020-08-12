@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# make folder directory structures
+
+####### NOTE - can not create a base folder (eg '/dc01') that matches
+#######        the Datacenter name (eg 'dc01').  This error condition
+#######        is NOT HANDLED in this code.
+
+DC='{{ .Param "esxi/cluster-name" }}'
+
+make_folder() {
+  local _folder="$1"
+  local _bad_msg="received bad folder ('$_folder'), not attempting to make"
+  if [[ -n "$_folder" ]]
+  then
+    # a couple of quick safety checks
+    [[ "$_folder" == "/" ]] && { echo "$_bad_msg"; return 0; }
+    [[ "$_folder" == "." ]] && { echo "$_bad_msg"; return 0; }
+    if govc folder.info "$_folder" -dc="$DC" > /dev/null 2>&1
+    then
+      echo "Folder '$_folder' exists already."
+    else
+      run_govc folder.create "$_folder" -dc="$DC"
+    fi
+  else
+    echo "NOTICE: No folder specified to create in make_folder()"
+  fi
+}
+
+if [[ -n "$FOLDER" && "$FOLDER" =~ /.* ]]
+then
+  # separate path parts in to array
+  while read <<< $(dirname $FOLDER)
+  do
+    [[ "$FOLDER" == "/" ]] && break
+    DIRS+=($FOLDER)
+    FOLDER=$(dirname $FOLDER)
+  done
+
+  # reverse array of DIRS (if extdebug; BASH_ARGV is set in reverse order)
+  rev() { DIRS=("${BASH_ARGV[@]}"); }
+  shopt -s extdebug
+  rev "${DIRS[@]}"
+  shopt -u extdebug
+  for DIR in ${DIRS[*]}
+  do
+    if [[ "/$DC" == "$DIR" ]]
+    then
+      echo ">>> Datacenter named '$DC', requested folder '$DIR', can't create folder with"
+      echo ">>> same name as Datacenter.  Skipping and trying any potential remaining parts."
+    else
+      echo "Attempting to make '$DIR' Folder..."
+      make_folder "$DIR"
+    fi
+  done
+fi

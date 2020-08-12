@@ -1,0 +1,16 @@
+---
+Name: "terraform/plan-action"
+Description: "Verb (apply/destroy/plan) used with Terraform"
+Documentation: |
+  Verb used with Terraform activity to apply or destroy plans.
+  If additional command params are required, append them to this param.
+
+  Defaults to apply.
+Schema:
+  type: "string"
+  default: "apply"
+Meta:
+  color: "blue"
+  icon: "map outline"
+  title: "RackN Content"
+  copyright: "RackN 2020"

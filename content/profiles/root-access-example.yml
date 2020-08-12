@@ -8,5 +8,6 @@ Params:
   # Values: "without-password|yes|no|forced-commands-only"
   access-ssh-root-mode: without-password
 Meta:
+  type: "credential"
   color: "blue"
   icon: "key"

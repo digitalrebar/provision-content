@@ -1,0 +1,70 @@
+# Language and Locale
+d-i debian-installer/language string en
+d-i debian-installer/locale string en_US.UTF-8
+d-i localechooser/preferred-locale string en_US.UTF-8
+d-i localechooser/supported-locales en_US.UTF-8
+
+# Hostname / domain
+d-i netcfg/get_hostname string ubuntu
+d-i netcfg/get_domain string local
+
+# Keyboard
+d-i console-setup/ask_detect boolean false
+d-i keyboard-configuration/layout select USA
+d-i keyboard-configuration/variant select USA
+d-i keyboard-configuration/modelcode string pc105
+
+# Timezone / Time
+d-i time/zone string UTC
+d-i clock-setup/utc-auto boolean true
+d-i clock-setup/utc boolean true
+d-i clock-setup/ntp-server string XXX.XXX.XXX.XXX
+
+# Server
+tasksel tasksel/first multiselect standard, ubuntu-server
+
+# No proxy
+d-i mirror/http/proxy string 
+
+# Avoid last message install complete
+d-i finish-install/reboot_in_progress note
+
+# Packages Policy
+d-i pkgsel/install-language-support boolean false
+d-i pkgsel/update-policy select none
+d-i pkgsel/upgrade select none
+
+#SYG
+d-i base-installer/kernel/override-image string linux-generic-hwe-18.04
+#SYG
+d-i pkgsel/include string openssh-server cloud-init curl efibootmgr jq
+
+# Partitioning
+d-i partman-auto/disk string /dev/vda
+d-i partman-auto/method string regular
+d-i partman-basicfilesystems/no_swap boolean false
+d-i partman-auto/expert_recipe string myroot :: 1000 50 -1 ext4 \
+     $primary{ } $bootable{ } method{ format } \
+     format{ } use_filesystem{ } filesystem{ ext4 } \
+     mountpoint{ / } \
+    .
+d-i partman-auto/choose_recipe select myroot
+d-i partman/confirm_nooverwrite boolean true
+d-i partman/confirm boolean true
+d-i partman/confirm_write_new_label boolean true
+d-i partman/choose_partition select finish
+
+# Default User Setup
+d-i passwd/make-user boolean true
+d-i passwd/user-uid string 1000
+d-i passwd/user-fullname string Rocket Skates
+d-i passwd/username string rocketskates
+d-i passwd/user-password password RocketSkates
+d-i passwd/user-password-again password RocketSkates
+#d-i passwd/user-password-crypted password $6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1
+d-i user-setup/allow-password-weak boolean true
+d-i user-setup/encrypt-home boolean false
+
+d-i preseed/late_command string \
+    echo 'rocketskates ALL=(ALL) NOPASSWD: ALL' > /target/etc/sudoers.d/user_rocketskates ; \
+    in-target chmod 440 /etc/sudoers.d/user_rocketskates ;

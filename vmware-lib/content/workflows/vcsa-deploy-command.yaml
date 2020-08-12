@@ -9,7 +9,6 @@ Documentation: |
 
 Stages:
   - "vcsa-deploy-command"
-  - "complete-nobootenv"
 Meta:
   color: "orange"
   icon: "terminal"

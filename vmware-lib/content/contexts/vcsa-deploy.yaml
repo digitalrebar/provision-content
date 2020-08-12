@@ -3,10 +3,15 @@ Name: "vcsa-deploy"
 Description: "vcsa-deploy context using image digitalrebar-vcsa-deploy"
 Documentation: |
   Context that executes the command specified in ``vcsa-deploy/command`` Param,
-  in container context ``digitalrebar-vcsa-deploy``.
+  in container context ``digitalrebar/vcsa-deploy``.
+
+  You can pull the container image from docker hub for both Docker and
+  Podman environments, eg:
+
+    * ``docker pull digitalrebar/vcsa-deploy``
 
 Engine: "docker-context"
-Image: "digitalrebar-vcsa-deploy"
+Image: "vcsa-deploy:latest"
 Meta:
   color: orange
   icon: terminal

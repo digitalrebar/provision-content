@@ -1,0 +1,21 @@
+---
+Name: "dev/wait-icons"
+Description: "List of Icons to use during wait-time for workflow test"
+Schema:
+  type: array
+  default:
+    - "bath"
+    - "bed"
+    - "fighter jet"
+    - "gamepad"
+    - "glass martini"
+    - "lemon"
+    - "magnet"
+    - "paw"
+    - "rocket"
+    - "shower"
+    - "umbrella"
+Meta:
+  color: "blue"
+  icon: "stopwatch"
+  title: "RackN Content 2020"

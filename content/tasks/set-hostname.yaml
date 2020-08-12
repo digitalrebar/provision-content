@@ -5,7 +5,10 @@ Templates:
   - ID: "set-hostname.sh.tmpl"
     Name: "Set the hostname on the machine"
     Path: ""
+    Meta:
+      OS: "linux"
 Meta:
+  type: "id"
   icon: "key"
   color: "blue"
   title: "Digital Rebar Community Content"

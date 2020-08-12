@@ -38,6 +38,7 @@ Templates:
       drpcli machines update $RS_UUID '{ "OS": "centos-7" }' 2>/dev/null >/dev/null
       exit 0
 Meta:
+  type: "sledgehammer"
   icon: "search"
   color: "blue"
   title: "Digital Rebar Community Content"

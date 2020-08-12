@@ -1,0 +1,196 @@
+---
+Description: "Setup Containers for Docker-Context"
+Name: "bootstrap-contexts"
+Documentation: |
+  Multi-Step Docker-Context Boostrap.
+
+  This task is idempotent.
+
+  IMPORANT NOTES: 
+  * Stage installs Podman and the Docker-Context Plugin even if you do not have Docker-Contexts defined
+  * Contexts are a licensed feature (the stage will abort if no license is exists)
+
+  1. Installs Podman on DRP Host
+  1. Installs the Docker-Context from Catalog
+  1. Creates the runner context if missing
+  1. Attempts to build & upload images for all Docker-Contexts
+  1. Initializes Podman for all Contexts
+
+  Podman build files are discovered in the following precidence order:
+  1. using Container Buildfile from files/contexts/docker-build/[contextname]
+  1. using URL from Meta.Imagepull
+  1. using Container  Buildfile downloaded Context Meta.Dockerfile
+  1. using Docker Image from Context Meta.Dockerpull
+  Once downloaded and built, they are uploaded to the correct files location
+ExtraClaims:
+  - scope: "files"
+    action: "*"
+    specific: "*"
+  - scope: "contexts"
+    action: "*"
+    specific: "*"
+  - scope: "plugins"
+    action: "*"
+    specific: "docker-context"
+  - scope: "plugin_providers"
+    action: "*"
+    specific: "*"
+  - scope: "contents"
+    action: "get"
+    specific: "rackn-license"
+Templates:
+  - Contents: |-
+      {
+        "Name": "runner",
+        "Description": "Run DRPCLI in Docker Context",
+        "Documentation": "Very minimal container to run the DRPCLI as a starting or idle point for Machines. This provides a very low overhead system to start or complete workflows so that tasks can continue to execute even if the target machine is not available (or never exists).",
+        "Engine": "docker-context",
+        "Image": "digitalrebar-context-runner",
+        "Meta": {
+          "icon": "cube",
+          "color": "green",
+          "copyright": "RackN 2020",
+          "Dockerpull": "digitalrebar/context-runner"
+        }
+      }
+    Name: "runner-context"
+    Path: "runner.json"
+  - Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      if drpcli contents exists rackn-license ; then
+        echo "license installed, no action"
+      else
+        echo "SKIPPING due to missing RackN license"
+        exit 0
+      fi
+
+      if [[ "$(drpcli contexts list Engine=docker-context | jq length)" == "0" ]]; then
+        echo "No Docker Contexts"
+      fi
+
+      if ! which podman ; then
+        FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+        echo "Installing Podman"
+        case $FAMILY in
+          redhat|centos) yum install -y dnf; dnf install -y podman ;;
+          debian|ubuntu) . /etc/os-release
+            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+            curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
+            sudo apt-get update -qq; sudo apt-get -qq -y install podman ;;
+          *) >&2 echo "Unsupported package manager family '$FAMILY'."
+             exit 1 ;;
+        esac
+      fi
+
+      echo "Podman installed successfully"
+
+      echo "Install Docker-Context"
+      pv="stable"
+      if drpcli plugin_providers exists docker-context; then
+        pv="$(drpcli plugin_providers show docker-context | jq .Version -r)"
+        echo "Plugin Exists at version $pv"
+      else
+        echo "Plugin (re)install to version $pv"
+        drpcli catalog item install docker-context --version=$pv
+      fi
+
+      echo "Create Runner Context if missing (requires license)"
+      if drpcli contexts exists runner ; then
+        echo "  runner context exists, no action"
+      else
+        echo "  runner context missing, creating"
+        drpcli contexts create runner.json
+      fi
+
+      echo "Check which files are uploaded (error = none)"
+      drpcli files list contexts/docker-context || true
+
+      echo "Building the container images if not already built."
+      cp $(which drpcli) drpcli
+      raw=$(drpcli contexts list Engine=docker-context)
+      contexts=$(jq -r ".[].Name" <<< "${raw}")
+      i=0
+      for context in $contexts; do
+        image=$(jq -r ".[$i].Image" <<< "${raw}")
+        echo "=== Uploading Container for $context named [$image] using [$context-dockerfile] ==="
+        container_sum=$(drpcli files exists "contexts/docker-context/$image" || true)
+        imagepull=$(jq -r ".[$i].Meta.Imagepull" <<< "${raw}")
+        if [[ "$container_sum" == "" ]]; then
+          if [[ -f /root/$context.tar ]]; then
+            echo "  Skipping Build (found Container Tar /root/$context.tar)"
+            echo "  Uploading Container from /root/$context.tar"
+            drpcli files upload /root/$context.tar as "contexts/docker-context/$image"
+          elif [[ -f /root/$context.tar.gz ]]; then
+            echo "  Skipping Build (found Container Tar /root/$context.tar.gz)"
+            echo "  Uploading Container from /root/$context.tar.gz"
+            drpcli files upload /root/$context.tar.gz as "contexts/docker-context/$image"
+          elif [[ "$imagepull" != "null" ]]; then
+            echo "  Uploading Container from $imagepull"
+            drpcli files upload $imagepull as "contexts/docker-context/$image"
+          else
+            echo "  Building Container --tag=$image --file=$context-dockerfile"
+            echo "Installing Buildah"
+            dockerbuild=$(drpcli files exists "contexts/docker-build/$context" || true)
+            dockerpull=$(jq -r ".[$i].Meta.Dockerpull" <<< "${raw}")
+            dockerfile=$(jq -r ".[$i].Meta.Dockerfile" <<< "${raw}")
+            if [[ "$dockerbuild" != "" ]]; then
+              echo "    pulling dockerfile from contexts/docker-build/$context"
+              drpcli files download contexts/docker-build/$context > $context-dockerfile
+              podman build --tag=$image --file="$context-dockerfile" .
+            elif [[ "$dockerfile" != "null" ]]; then
+              echo "    pulling docker build from $dockerfile"
+              curl -fsSL $dockerfile -o $context-dockerfile
+              podman build --tag=$image --file="$context-dockerfile" .
+            elif [[ "$dockerpull" != "null" ]]; then
+              echo "    pulling container image from $dockerpull"
+              podman pull $dockerpull
+              echo "    tagging $dockerpull as $image"
+              podman tag $dockerpull $image
+            else
+              echo "!! Stopping context-bootstrap - missing container image for $context"
+              exit 1
+            fi
+            podman save $image > /root/$context.tar
+            gzip /root/$context.tar
+            echo "  Uploading Container from /root/$context.tar.gz"
+            drpcli files upload /root/$context.tar.gz as "contexts/docker-context/$image"
+            echo "  cleanup by removing files"
+            [[ -f /root/$context.tar ]] && rm /root/$context.tar
+            [[ -f /root/$context.tar.gz ]] && rm /root/$context.tar.gz
+          fi
+        else
+          echo "  Found $container_sum in files/contexts/docker-context, skipping upload"
+        fi
+        i=$(($i + 1))
+      done
+
+      echo "Populate the contexts"
+      i=0
+      for context in $contexts; do
+        image=$(jq -r ".[$i].Image" <<< "${raw}")
+        echo "Installing Container for $context named from $image"
+        if drpcli plugins runaction docker-context imageExists context/image-name ${image} ; then
+          echo "${image} installed, no upload needed"
+        else
+          echo "${image} missing, download"
+          drpcli plugins runaction docker-context imageUpload \
+            context/image-name ${image} \
+            context/image-path files/contexts/docker-context/${image}
+        fi
+        i=$(($i + 1))
+      done
+
+      echo "done"
+      exit 0
+    Name: "docker-context"
+Meta:
+  icon: "boxes"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

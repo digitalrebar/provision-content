@@ -14,6 +14,7 @@ Templates:
       echo "Running drpcli command to lock machine"
       drpcli machines update {{.Machine.UUID}} '{ "Locked": true }'
 Meta:
+  type: "lock"
   icon: "key"
   color: "blue"
   title: "Digital Rebar Community Content"

@@ -1,0 +1,28 @@
+---
+Name: "oscap/enabled"
+Description: "Set the OpenSCAP kickstart/preseed rendering on or off"
+Documentation: |
+  This param enables or disables rendering OpenSCAP configuration elements
+  in to the Kickstart or Preseed files during OS installation.
+
+  By default, this is disabled (``false``).
+
+  In addition to setting this to ``true``, the operator must define which
+  OpenSCAP profile, packages, and configuration should be supported.  This
+  is done by setting the ``oscap/configuration`` map on the Machine.  Examples
+  can be found in the ``oscap/configuration`` Param documentation.
+
+  Additional details about the OpenSCAP system an possible values can be
+  found in Redhat's RHEL guides and the OpenSCAP websites:
+
+    * `OpenSCAP Portal <http://www.open-scap.org/security-policies/choosing-policy/>`_
+    * `OpenSCAP Anaconda Addon <https://www.open-scap.org/tools/oscap-anaconda-addon/>`_
+    * `RHEL Kickstart OpenSCAP Documentation <https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-commands-and-options-reference_installing-rhel-as-an-experienced-user#addon-org_fedora_oscap_kickstart-commands-for-addons-supplied-with-the-rhel-installation-program>`_
+
+Meta:
+  icon: "file-alt"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "boolean"
+  default: false

@@ -1,0 +1,15 @@
+---
+Name: "esxi/vsan-cluster-id"
+Description: "VSAN Cluster ID, set by the esxi/vsan-leader"
+Documentation: |
+  Defines the VSAN cluster ID, added to the esxi/vsan-leader.  Once
+  added, then the followers use it to join the cluster.
+
+  DO NOT set this value, it is set by the ``esxi-vsan-build-cluster`` task.
+
+Schema:
+  type: "string"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

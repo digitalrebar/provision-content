@@ -1,0 +1,23 @@
+---
+Name: "provisioner-network-config"
+Description: "Defines the installer network configuration values."
+Documentation: |
+  Used in the RHEL and possibly other BootEnvs to configure the systems network
+  during installation.  The default mode is to use DHCP.  If this Param has a
+  value set, then all valid option arguments must be specified.
+
+  RHEL 8 example to specify a ``static`` network configuration would set this Param
+  to the volues as follows:
+
+    ::
+
+      # RHEL 8 specific configuration for static network config during kickstart install
+      network --bootproto=static --ip=10.0.2.15 --netmask=255.255.255.0 --gateway=10.0.2.254 --nameserver=192.168.2.1,192.168.3.1
+
+Schema:
+  type: "string"
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "Digital Rebar Community Content"

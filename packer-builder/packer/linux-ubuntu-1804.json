@@ -1,0 +1,177 @@
+{
+  "variables": {
+    "hostname": "ubuntu",
+    "name": "ubuntu1804-base",
+    "domain": "local",
+    "output_directory": "output",
+    "complete_directory": "complete",
+    "ssh_username": "rocketskates",
+    "ssh_password": "RocketSkates",
+    "disk_size": "10240",
+    "iso_url": "https://s3-us-west-2.amazonaws.com/get.rebar.digital/images/linux/ubuntu-18.04.4-server-amd64.iso",
+    "iso_checksum": "d5bc5c59c24191bb45dd85fc6a420b34",
+    "iso_checksum_type": "md5",
+    "boot_command_prefix": "<enter><wait><f6><esc><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs><bs>"
+  },
+
+  "builders": [
+    {
+      "name": "{{user `name`}}-qemu",
+      "vm_name": "{{user `name`}}",
+      "output_directory": "{{user `output_directory`}}/{{build_name}}",
+      "type": "qemu",
+      "accelerator": "kvm",
+      "cpus": 2,
+      "memory": 2048,
+      "qemuargs": [
+        ["-cpu", "host"],
+        ["-soundhw", "hda"],
+        ["-usbdevice", "tablet"],
+        ["-device", "virtio-net,netdev=user.0"],
+        ["-vga", "qxl"],
+        ["-device", "virtio-serial-pci"],
+        ["-chardev", "socket,path=/tmp/{{.Name}}-qga.sock,server,nowait,id=qga0"],
+        ["-device", "virtserialport,chardev=qga0,name=org.qemu.guest_agent.0"]
+	["-display", "vnc=password=off"]
+      ],
+      "headless": true,
+      "format": "qcow2",
+      "disk_size": "{{user `disk_size`}}",
+      "disk_interface": "virtio",
+      "net_device": "virtio-net",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+
+      "http_directory": "docroot",
+      "http_port_min": 10082,
+      "http_port_max": 10089,
+
+      "ssh_host_port_min": 2222,
+      "ssh_host_port_max": 2229,
+
+      "ssh_port": 22,
+      "ssh_wait_timeout": "1200s",
+
+      "boot_wait": "10s",
+
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now; exit 0",
+
+      "boot_command": [
+          "{{user `boot_command_prefix`}}",
+          "/install/vmlinuz noapic ",
+          "initrd=/install/initrd.gz ",
+          "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/kickseed ",
+          "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+          "hostname={{user `hostname`}} ",
+          "grub-installer/bootdev=/dev/vda<wait> ",
+          "fb=false debconf/frontend=noninteractive ",
+          "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+          "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+          "passwd/user-fullname={{user `ssh_username`}} ",
+          "passwd/user-password={{user `ssh_password`}} ",
+          "passwd/user-password-again={{user `ssh_password`}} ",
+          "passwd/username={{user `ssh_username`}} ",
+          "-- <enter>"
+      ]
+    },
+    {
+      "name": "{{user `name`}}-virtualbox",
+      "type": "virtualbox-iso",
+      "guest_os_type": "Ubuntu_64",
+      "guest_additions_mode": "attach",
+      "guest_additions_interface": "sata",
+      "headless": true,
+      "cpus": 2,
+      "memory": 2048,
+      "vboxmanage": [
+        ["storagectl", "{{.Name}}", "--name", "IDE Controller", "--remove"],
+        ["modifyvm", "{{.Name}}", "--vrde", "off"],
+        ["modifyvm", "{{.Name}}", "--graphicscontroller", "vboxsvga"],
+        ["modifyvm", "{{.Name}}", "--vram", "128"],
+        ["modifyvm", "{{.Name}}", "--accelerate3d", "on"],
+        ["modifyvm", "{{.Name}}", "--usb", "on"],
+        ["modifyvm", "{{.Name}}", "--mouse", "usbtablet"],
+        ["modifyvm", "{{.Name}}", "--audio", "none"],
+        ["modifyvm", "{{.Name}}", "--nictype1", "82540EM"],
+        ["modifyvm", "{{.Name}}", "--nictype2", "82540EM"],
+        ["modifyvm", "{{.Name}}", "--nictype3", "82540EM"],
+        ["modifyvm", "{{.Name}}", "--nictype4", "82540EM"]
+      ],
+      "output_directory": "{{user `output_directory`}}/{{build_name}}",
+      "disk_size": "{{user `disk_size`}}",
+      "hard_drive_interface": "sata",
+      "iso_interface": "sata",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+
+      "http_directory": "docroot",
+      "http_port_min": 10001,
+      "http_port_max": 10099,
+
+      "ssh_host_port_min": 2200,
+      "ssh_host_port_max": 2299,
+
+      "ssh_port": 22,
+      "ssh_wait_timeout": "1200s",
+
+      "boot_wait": "30s",
+
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now; exit 0",
+
+      "boot_command": [
+          "{{user `boot_command_prefix`}}",
+          "/install/vmlinuz noapic ",
+          "initrd=/install/initrd.gz ",
+          "preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/kickseed",
+          "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+          "hostname={{user `hostname`}} ",
+          "grub-installer/bootdev=/dev/vda<wait> ",
+          "fb=false debconf/frontend=noninteractive ",
+          "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+          "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+          "passwd/user-fullname={{user `ssh_username`}} ",
+          "passwd/user-password={{user `ssh_password`}} ",
+          "passwd/user-password-again={{user `ssh_password`}} ",
+          "passwd/username={{user `ssh_username`}} ",
+          "-- <enter>"
+      ]
+    }
+  ],
+
+  "provisioners": [
+    {
+      "execute_command": "{{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "script": "scripts/rackn-setup.sh",
+      "type": "shell"
+    },
+    {
+      "execute_command": "{{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "script": "scripts/rackn-cleanup.sh",
+      "type": "shell"
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline_shebang": "/bin/bash -e",
+      "inline": [
+          "echo 'Starting post-processor inline tarball extraction...'",
+          "ls -lh {{user `output_directory`}}",
+          "mv {{user `output_directory`}}/{{build_name}} {{user `output_directory`}}/{{build_name}}.qcow2",
+          "virt-tar-out -a {{user `output_directory`}}/{{build_name}}.qcow2 / {{user `output_directory`}}/{{build_name}}.tar",
+          "gzip -9 {{user `output_directory`}}/{{build_name}}.tar",
+          "mv {{user `output_directory`}}/{{build_name}}.tar.gz {{user `output_directory`}}/{{build_name}}.tgz",
+          "rm -f {{user `output_directory`}}/{{build_name}}.qcow2",
+          "echo 'Directory listing:'",
+          "ls -lh {{user `output_directory`}}"
+      ]
+    }
+  ]
+}

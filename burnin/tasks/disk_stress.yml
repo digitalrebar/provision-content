@@ -6,6 +6,7 @@ RequiredParams:
 - "burnin-disk-destructive"
 - "burnin-skip"
 Meta:
+  type: "build"
   color: "blue"
   icon: "fire"
   title: "RackN Content"

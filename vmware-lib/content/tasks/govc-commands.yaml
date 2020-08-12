@@ -1,0 +1,122 @@
+---
+Name: "govc-commands"
+Description: "A task to run govc commands against remote vSphere vCenter or ESXi instances"
+Documentation: |
+  This task executes a series of ``govc`` calls in a container context.  The govc
+  command is defined via the Param ``govc/commands``, which is required for this
+  task.  The ``govc/commands`` Param is an array of govc command to execute in
+  the container.
+
+  The operator must also specify the remote vSphere ESXi or vCenter resource to
+  connect to, to execute ``govc`` commands against.  This is accomplished
+  by setting the ``govc/url`` Param, and the individual ``govc/username``,
+  ``govc/password``, and optionally ``govc/port`` (if using a non-standard Port).
+
+  See the documentation for each of those Params for more details.
+
+  Many of the GoVC commands require a JSON configuration that defines more the
+  values for customizing.  In these cases, use the ``govc/template-json`` param
+  to define the Template to render inside of the GoVC container context.
+
+  If an OVA file is found inside the container at ``/ova/import.ova``, and if the
+  base argument of _import.ova_ is found in the _govc_ command, then the path
+  and OVA name will be appended to the command sequence.
+
+  Documentation and usage examples for ``govc`` can be found on the GoVMOMI
+  website at:
+
+    * https://github.com/vmware/govmomi/blob/master/govc/USAGE.md
+
+  .. warning:: Only a single OVA deploy action (``import.ova``) can be specified in
+               the command sequnce.
+
+RequiredParams:
+  - "govc/commands"
+  - "govc/url"
+  - "govc/username"
+  - "govc/password"
+OptionalParams:
+  - "govc/insecure"
+  - "govc/port"
+  - "govc/ova-location"
+  - "govc/ova-type"
+  - "govc/ova-version"
+  - "govc/template-json"
+Templates:
+  - Name: "govc-command.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
+      # RackN Copyright 2020
+
+      # govc documentation and usage examples:
+      #
+      #   https://github.com/vmware/govmomi/blob/master/govc/USAGE.md
+
+      set -e
+
+      {{ template "setup.tmpl" .}}
+
+      [[ -r /ova/template.json ]] && rm -f /ova/template.json
+
+      TMPL=""
+
+      {{ if .ParamExists "govc/template-json" -}}
+      {{ $dot := . -}}
+      {{ $govctmpl := .Param "govc/template-json" -}}
+      mkdir -p /ova
+      cat <<EOTMPL > /ova/template.json
+      {{ $dot.CallTemplate $govctmpl $dot }}
+      EOTMPL
+
+      TMPL="-options=/ova/template.json"
+
+      echo "===== BEGIN TEMPLATE DEBUG ===="
+      echo ""
+      echo "Using JSON Template for OVA: {{ $govctmpl }}"
+      echo ""
+      cat /ova/template.json
+      echo ""
+      echo "===== END TEMPLATE DEBUG ===="
+      {{ end -}}
+
+      {{ template "govc-setup.sh.tmpl" . }}
+
+      COUNT=0
+      {{ range $key, $cmd := ( .Param "govc/commands" ) -}}
+      $(echo "{{ $cmd }}" | grep -q "import.ova") && (( COUNT++ )) || true
+      [[ $COUNT -ge 2 ]] && exit 1 || true
+      {{ end -}}
+
+      {{ range $cmd := ( .Param "govc/commands" ) -}}
+      CMD='{{ $cmd }}'
+
+      if echo $CMD | grep -q "import.ova"
+      then
+        if [[ -r "/ova/import.ova" ]]
+        then
+          CMD="$CMD $TMPL /ova/import.ova"
+        else
+          xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
+        fi
+      fi
+
+      # sigh ... are we going to need to throttle calls with sleep timers and other fun stuff ? 
+      echo ""
+      echo "==== RUN GOVC COMMAND ===="
+      echo ""
+
+      echo ">>> GOVC: $CMD"
+      govc $CMD
+
+      echo ""
+      echo "==== DONE ===="
+      echo ""
+      {{ end -}}
+
+      exit 0
+Meta:
+  icon: "terminal"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

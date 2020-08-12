@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# setup the enviornment to execute a 'govc' command
+
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+
+echo ""
+echo "==== SETUP govc Environment ===="
+echo ""
+
+MSG="Showing GOVC environment variables built from Params ... "
+
+# REQUIRED
+export GOVC_USERNAME='{{ .Param "govc/username" }}'
+export GOVC_PASSWORD='{{ .Param "govc/password" }}'
+export GOVC_URL='{{ .ParamExpand "govc/url" }}'
+
+# OPTIONAL
+{{ if ( .Param "govc/port" ) }}export GOVC_URL="${GOVC_URL}:{{ .Param "govc/port" | toString }}"{{ end }}
+{{ if eq (.Param "govc/insecure") true -}}export GOVC_INSECURE=1{{ end }}
+{{ if ( .Param "govc/datastore" )       }}export GOVC_DATASTORE='{{ .Param "govc/datastore" }}'{{ end }}
+{{ if ( .Param "govc/network" )         }}export GOVC_NETWORK='{{ .Param "govc/network" }}'{{ end }}
+{{ if ( .Param "govc/resource-pool" )   }}export GOVC_RESOURCE_POOL='{{ .Param "govc/resource-pool" }}'{{ end }}
+
+[[ -z "$GOVC_URL" ]] && ERR=":: required setting GOVC_URL is empty (param: 'govc/url')"
+[[ -z "$GOVC_USERNAME" ]] && ERR="$ERR :: required setting GOVC_PASSWORD is empty (param: 'govc/password')"
+[[ -z "$GOVC_PASSWORD" ]] && ERR="$ERR :: required setting GOVC_USERNAME is empty (param: 'govc/username')"
+[[ -n "$ERR" ]] && xiterr 1 "$ERR"
+
+if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+then
+  echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+  echo ""
+  echo "$MSG"
+  env | grep -v grep | grep "GOVC_"
+else
+  echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+  echo ""
+  echo "$MSG"
+  env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+fi
+

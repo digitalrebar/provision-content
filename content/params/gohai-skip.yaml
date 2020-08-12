@@ -8,6 +8,7 @@ Schema:
   type: "boolean"
   default: false
 Meta:
+  type: "setup"
   icon: "search minus"
   color: "blue"
   title: "Digital Rebar Community Content"

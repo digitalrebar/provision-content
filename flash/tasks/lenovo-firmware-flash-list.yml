@@ -19,7 +19,9 @@ Templates:
           local _dest=$2
 
           echo "Downloading $_src"
-          curl -k -o $_dest $_src
+          set +e
+          curl -L -f -k -o $_dest $_src
+          set -e
           if [[ $? != 0 ]] ; then
               xiterr 1 "Failed to download $_dest from $_src"
           fi
@@ -79,9 +81,17 @@ Templates:
           while read line; do
             case $line in
               *STATUS*)
+                echo "STATUS line is $line"
                 [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
-                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=true;;
+                echo "REBOOT line is $line"
+                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'reboot required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=no
+                [[ $failed = no && $line = *'No reboot required'* ]] && this_one_reboot=no
+                [[ $failed = no && $line = *'no reboot required'* ]] && this_one_reboot=no;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
@@ -107,17 +117,22 @@ Templates:
         fi
 
         if [[ $this_one_reboot = yes ]] ; then
+            echo "Package {{$elem.File}} needs a reboot"
             if [[ "{{$elem.File}}" =~ xcc ]] ; then
                 echo "Rebooting xcc"
-                /opt/OneCli/OneCli misc rebootbmc
+                ipmitool mc reset cold
+                # Wait for the reset to take effect.
+                sleep 20
+                set +e
                 while true ; do
-                    ./attach-usb-lan.sh
-                    /opt/OneCli/OneCli inventory getdevices && break
+                    ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
                     echo "Not up yet"
                     sleep 5
                 done
+                set -e
                 echo "BMC is back up"
             else
+                echo "Want to reboot system"
                 want_reboot=yes
             fi
         fi

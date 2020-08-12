@@ -12,22 +12,23 @@ Documentation: |
   Many maintenance and hardware related workflows require to be run from the
   Sledgehammer BootEnv.
 Meta:
+  type: "sledgehammer"
   feature-flags: "change-stage-v2"
   icon: "microchip"
   color: "green"
   title: "Digital Rebar Community Content"
 Loaders:
-  amd64-uefi: e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/shimx64.efi
+  amd64-uefi: e1a0019788acff426f7cc2eb5e5373d771716eaa/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
-      Kernel: "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/vmlinuz0"
+      IsoFile: "sledgehammer-e1a0019788acff426f7cc2eb5e5373d771716eaa.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/sledgehammer-e1a0019788acff426f7cc2eb5e5373d771716eaa.amd64.tar"
+      Kernel: "e1a0019788acff426f7cc2eb5e5373d771716eaa/vmlinuz0"
       Initrds:
-        - "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/stage1.img"
+        - "e1a0019788acff426f7cc2eb5e5373d771716eaa/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -65,11 +66,11 @@ OS:
         {{.Param "kernel-console"}}
     rpi4:
       Loader: "grubarm64.efi"
-      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9b5276ac5826520829aa73c149fe672fe2363656/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      Kernel: "rpi/kernel8.img"
+      IsoFile: "sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/e50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      Kernel: "rpi-5.4.34/kernel8.img"
       Initrds:
-        - "rpi/stage1.img"
+        - "rpi-5.4.34/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -89,29 +90,32 @@ OptionalParams:
   - "kernel-options"
 Templates:
   - Name: start4.elf
-    Link: '{{.Env.PathForArch "tftp" "rpi/start4.elf" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/start4.elf" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/start4.elf'
   - Name: fixup4.dat
-    Link: '{{.Env.PathForArch "tftp" "rpi/fixup4.dat" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/fixup4.dat" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/fixup4.dat'
   - Name: bcm2711-rpi-4-b.dtb
-    Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/bcm2711-rpi-4-b.dtb" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/bcm2711-rpi-4-b.dtb'
   - Name: kernel8.img
-    Link: '{{.Env.PathForArch "tftp" "rpi/kernel8.img" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/kernel8.img" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/kernel8.img'
   - Name: stage1.img
-    Link: '{{.Env.PathForArch "tftp" "rpi/stage1.img" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/stage1.img" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/stage1.img'
+  - Name: root.squashfs
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/root.squashfs" "rpi4"}}'
+    Path: '{{.Machine.MacAddr "rpi4"}}/root.squashfs'
   - Name: "rpi-cmdline.txt"
     Path: '{{.Machine.MacAddr "rpi4"}}/cmdline.txt'
     Contents: |
-      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF=discovery provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}}
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait initrd=stage1.img rw cgroup_memory=1 cgroup_enable=memory BOOTIF=discovery provisioner.web={{.ProvisionerURL}}
   - Name: rpi4b-config.txt
     Path: '{{.Machine.MacAddr "rpi4"}}/config.txt'
     Contents: |
       # uncomment if you get no picture on HDMI for a default "safe" mode
-      #hdmi_safe=1
+      hdmi_safe=1
 
       # uncomment this if your display has a black border of unused pixels visible
       # and your display can output without overscan
@@ -192,10 +196,13 @@ Templates:
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - ID: "default-grub.tmpl"
     Name: "grub-secure"
-    Path: "sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.HexAddress}}"
+    Path: "sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/grub.cfg-{{.Machine.HexAddress}}"
   - ID: "default-grub.tmpl"
     Name: "grub-secure-mac"
-    Path: 'sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: 'sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+  - ID: drp-agent-cfg.yaml.tmpl
+    Name: agent-cfg
+    Path: "{{.Machine.Path}}/agent-cfg.yml"
   - Name: "control.sh"
     Path: "{{.Machine.Path}}/control.sh"
     Contents: |
@@ -220,10 +227,20 @@ Templates:
       shopt -s extglob
       export PS4="${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): "
       cp /usr/share/zoneinfo/GMT /etc/localtime
+      # Set up for the agent
+      mkdir -p /var/lib/drp-agent/
+      curl -fgLo /var/lib/drp-agent/agent-cfg.yml "{{.Machine.Url}}/agent-cfg.yml"
+      cat >/etc/sysconfig/drp-agent <<EOF
+      IP=$IP
+      EOF
+      drpcli agent install
 
       # This will contain a token appropriate for the path being
       # used below.  Reset the token to the longer machine token.
       export RS_TOKEN="{{.GenerateInfiniteToken}}"
+
+      drpcli machines set "$RS_UUID" param gohai-inventory to '{}' &>/dev/null
+      drpcli gohai | drpcli machines set "$RS_UUID" param gohai-inventory to - &>/dev/null
 
       # If we do not have hardware addresses set on the machine, set them now.
       get_macs() {
@@ -244,9 +261,6 @@ Templates:
       if [[ "$(jq '.HardwareAddrs | length' <<< "$json")" = 0 ]]; then
           drpcli machines update "$RS_UUID" "{\"HardwareAddrs\": $(get_macs)}" &>/dev/null
       fi
-      if [[ $IP && "$(jq -r '.Address' <<< "$json")" != $IP ]]; then
-          drpcli machines update "$RS_UUID" "{\"Address\":\"$IP\"}" &>/dev/null
-      fi
       unset get_macs json
 
       if [[ -d /sys/firmware/efi ]]; then
@@ -256,7 +270,8 @@ Templates:
       fi
 
       {{template "reset-workflow.tmpl" .}}
-      {{template "runner.tmpl" .}}
+      drpcli agent start
+      echo "Follow along with job logs using journalctl -u drp-agent"
 
       # The last line in this script must always be exit 0!!
       exit 0

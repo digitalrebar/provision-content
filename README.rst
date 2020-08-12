@@ -1,7 +1,7 @@
-.. Copyright (c) 2018 RackN Inc.
+.. Copyright (c) 2020 RackN Inc.
 .. Licensed under the Apache License, Version 2.0 (the "License");
 .. DigitalRebar Provision documentation under Digital Rebar master license
-.. 
+..
 
 Digital Rebar Provision Content
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,6 +31,7 @@ Examples of different content packs found here are as follows:
 directory              used for
 =====================  ============================================================
 content/               main "drp-community-content" pack
+task-library/          A library of tasks and helper functions
 krib/                  Kubernetes Rebar Integrated Bootstrap content pack
 rose/                  Rebar OpenStack Environment - single node master and cluster
 sledgehammer-builder/  contains the Sledgehammer Builder content

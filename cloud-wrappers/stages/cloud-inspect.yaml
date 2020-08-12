@@ -1,0 +1,12 @@
+---
+Name: "cloud-inspect"
+Description: "Stage to dynamically determine if machine is in AWS and record metadata"
+Documentation: |
+  Collect information about AWS cloud
+Tasks:
+  - "cloud-inspect"
+Meta:
+  type: "fetch"
+  icon: "cloud"
+  color: "blue"
+  title: "RackN Content"

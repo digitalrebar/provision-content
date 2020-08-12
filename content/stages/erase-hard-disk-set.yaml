@@ -6,6 +6,7 @@ BootEnv: "sledgehammer"
 Tasks:
   - "erase-hard-disk-set"
 Meta:
+  type: "cleanup"
   icon: "disk outline"
   color: "yellow"
   title: "Digital Rebar Community Content"

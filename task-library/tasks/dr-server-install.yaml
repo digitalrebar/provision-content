@@ -13,11 +13,16 @@ Documentation: |
 
     1. make user/password settable
 
-  Requires ``install.sh`` and ``dr-provision.zip`` to be in DRP ``files/bootstrap``.
+  Will use ``dr-server/install-version`` to download installation, but allows
+  override of ``install.sh`` and ``dr-provision.zip`` for custom development
+  if placed in DRP ``files/bootstrap``.
 
-  Does nothing if DRP already installed.
+  Will automatomatically transfer the DRP license to the machine being created.
 
-  If Manager installed, will register this DRP as an endpoint.
+  If DRP already installed, will restart DRP and update license
+
+  If Manager installed, will register this DRP as an endpoint.  A valid license is
+  REQUIRED for the manager installation!
 
   *HA Configuration Notes* (enable by setting ``ha-id``).
 
@@ -28,9 +33,12 @@ Documentation: |
 
   All ``ha-*`` params are required for HA configuration.
 
-  **Developer Feature**
+  For operators,
+  * this feature makes it easy to create new edge sites using DRP Manager.
+  * this feature makes it easy to create HA clusters
 
-  This featre enables rapid testing of new dr-server binaries.
+  For developers,
+  * this feature enables rapid testing of new dr-server binaries.
 
   When the adhoc param ``dr-server/replace-drp`` is defined, the task will updated
   the installed *dr-provision* binary with one from the download location provided.
@@ -42,6 +50,11 @@ ExtraClaims:
   - scope: "contents"
     action: "get"
     specific: "rackn-license"
+  - scope: "endpoints"
+    action: "*"
+    specific: "*"
+RequiredParams:
+  - "dr-server/install-version"
 OptionalParams:
   - "dr-server/ha-id"
   - "dr-server/ha-address"
@@ -73,36 +86,52 @@ Templates:
       echo "getting license file"
       drpcli contents show rackn-license > rackn-license.json
 
+      echo "verify that endpoint {{$drpid}} is in license"
+      if [[ "$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["{{$drpid}}"])')" == "true" ]]; then
+        echo "endpoint found!"
+      else
+        echo "endpoint missing, attempt to add to license"
+        # TODO: this should move to a RackN URL at some point
+        curl -X GET "https://1p0q9a8qob.execute-api.us-west-2.amazonaws.com/v40/license" \
+          -H "rackn-contactid: ${CONTACTID}" \
+          -H "rackn-ownerid: ${OWNERID}" \
+          -H "rackn-endpointid: ${MGR_LBL}" \
+          -H "rackn-key: ${KEY}" \
+          -H "rackn-version: ${VERSION}" \
+          -o rackn-license.json
+      fi
+
       if [[ "$(systemctl is-active dr-provision)" != "active" ]] ; then
 
+        echo "Download Install.sh"
         if drpcli files exists "bootstrap/install.sh"; then
-
-          echo "Download Components"
           drpcli files download "bootstrap/install.sh" > install.sh
-          {{ if .ParamExists "dr-server/zip-url" }}
-          echo "Downloading zip from {{ .Param "dr-server/zip-url" }}"
-          download -L --remote-name-all "{{ .Param "dr-server/zip-url" }}" -o dr-provision.zip
-          {{ else }}
-          echo "Downloading zip from catalog as per install.sh"
-          {{ end }}
-          chmod +x install.sh
-
-          echo "Run Install.sh with DRP ID {{ $drpid }}" 
-          ./install.sh install {{ if .ParamExists "dr-server/zip-url" -}}--zip-file=dr-provision.zip{{ end -}} \
-            --drp-id={{ $drpid }} \
-            --systemd \
-            --no-content
-          systemctl stop dr-provision
-
-          {{ if .ParamExists "dr-server/zip-url" }}
-          echo "Cleanup ZIP"
-          rm dr-provision.zip
-          {{ end }}
-
         else
-          echo "Could not find required install.sh file in /bootstrap"
+          download -L --remote-name-all http://get.rebar.digital/{{ .Param "dr-server/install-version"}} -o install.sh
           exit 1
         fi
+        chmod +x install.sh
+
+        {{ if .ParamExists "dr-server/zip-url" }}
+        echo "Downloading zip from {{ .Param "dr-server/zip-url" }}"
+        download -L --remote-name-all "{{ .Param "dr-server/zip-url" }}" -o dr-provision.zip
+        {{ else }}
+        echo "Downloading zip from catalog as per install.sh --version {{ .Param "dr-server/install-version"}}"
+        {{ end }}
+
+        echo "Run Install.sh with DRP ID {{ $drpid }}"
+        ./install.sh install \
+          {{ if .ParamExists "dr-server/zip-url" -}}--zip-file=dr-provision.zip{{else}}--version={{ .Param "dr-server/install-version"}}{{ end -}} \
+          --drp-id={{ $drpid }} \
+          --systemd \
+          --no-content
+        systemctl stop dr-provision
+
+        {{ if .ParamExists "dr-server/zip-url" }}
+        echo "Cleanup ZIP"
+        rm dr-provision.zip
+        {{ end }}
+
       else
         echo "DRP already installed, restarting in case config was changed"
         systemctl stop dr-provision
@@ -128,6 +157,21 @@ Templates:
 
       RS_USER="rocketskates"
       RS_PASS="r0cketsk8ts"
+
+      manager="$(drpcli info get | jq -r .manager)"
+      if [[ "$manager" == "true" ]] ; then
+        if drpcli endpoints exists {{ $drpid }} ; then
+          echo "Endpoint already registered in Manager"
+        else
+          echo "Manager, register new endpoint"
+          drpcli endpoints create '{"Id":"{{ $drpid }}", "Params":{"manager/url": "https://{{ .Machine.Address }}:8092"} }'
+          drpcli endpoints set "{{ $drpid }}" param "manager/username" to "$RS_USER"
+          drpcli endpoints set "{{ $drpid }}" param "manager/password" to "$RS_PASS"
+        fi
+      else
+        echo "Not a manager, no action"
+      fi
+
       unset RS_ENDPOINT
       unset RS_TOKEN
       unset RS_LOCAL_PROXY
@@ -143,13 +187,17 @@ Templates:
       {{ end }}
 
       {{ if or (not (.Param "dr-server/ha-passive")) (not (.ParamExists "dr-server/ha-id")) }}
+      echo "DRP is active - upload license"
       if [[ -f rackn-license.json ]] ; then
         echo "upload rackn-license"
-        drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 contents upload rackn-license.json
+        drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 contents upload rackn-license.json
         rm rackn-license.json
+      else
+        echo "ERROR: could not find license file"
+        exit 1
       fi
       echo "Test API"
-      drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8091 info status | jq .API
+      drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 info status | jq .API
       {{ else }}
       echo "DRP is passive - API is not active"
       {{ end }}

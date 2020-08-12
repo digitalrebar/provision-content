@@ -47,7 +47,7 @@ This will create a new Machine Object for the Proxmox node.  You will need
 to run the following Stages to install the AGent permanently, and optionally
 install SSH access keys:
 
-  * runner-service (requires "task-library" content pack)
+  * drp-agent
   * access-keys
 
 

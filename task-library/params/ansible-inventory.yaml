@@ -1,0 +1,14 @@
+---
+Name: "ansible-inventory"
+Description: "System inventory as reported by Ansible Setup module"
+Documentation: |
+  Holds the value from the ansible-inventory task.
+
+Schema:
+  type: "object"
+
+Meta:
+  icon: "search"
+  color: "blue"
+  title: "Digital Rebar Task Library"
+  readonly: "yes"

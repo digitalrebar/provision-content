@@ -3,10 +3,15 @@ Name: "govc"
 Description: "govc context using container image digitalrebar-govc"
 Documentation: |
   Executes the command referenced in the ``govc/command`` Param, in the
-  container context ``digitalrebar-govc``.
+  container context ``digitalrebar/govc``.
+
+  You can pull the container image from docker hub for both Docker and
+  Podman environments, eg:
+
+    * ``docker pull digitalrebar/govc``
 
 Engine: "docker-context"
-Image: "digitalrebar-govc"
+Image: "govc:latest"
 Meta:
   color: blue
   icon: terminal

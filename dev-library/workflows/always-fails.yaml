@@ -1,0 +1,12 @@
+---
+Name: "always-fails"
+Description: "For dev testing, workflow always fails"
+Documentation: |
+  Used to generate non-destructive actions in a workflow for testing.
+Stages:
+  - always-fails
+Meta:
+  type: "error"
+  color: red
+  icon: "warning sign"
+  title: RackN Content

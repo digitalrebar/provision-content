@@ -1,0 +1,90 @@
+---
+Name: "centos-7.8.2003-install"
+Description: "CentOS-7.8.2003 install bootenv"
+Documentation: |
+  This BootEnv installs the CentOS 7 Minimal operating system.  Both x86_64
+  and aarch64 architectures are supported.
+Meta:
+  type: "os"
+  feature-flags: "change-stage-v2"
+  icon: "linux"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Loaders:
+  amd64-uefi: EFI/BOOT/BOOTX64.EFI
+  arm64-uefi: EFI/BOOT/grubaa64.efi
+OS:
+  Family: "redhat"
+  Version: "7"
+  Name: "centos-7.7.1908"
+  SupportedArchitectures:
+    x86_64:
+      IsoFile: "CentOS-7-x86_64-Minimal-2003.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-x86_64-Minimal-2003.iso"
+      Sha256: "659691c28a0e672558b003d223f83938f254b39875ee7559d1a4a14c79173193"
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+    aarch64:
+      Loader: "grubarm64.efi"
+      IsoFile: "CentOS-7-aarch64-Minimal-2003.iso"
+      Sha256: "36f48ca26a284442f6abba221cc1279fca103289ade411ee298d38cbf66967bc"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-aarch64-Minimal-2003.iso"
+      Kernel: "images/pxeboot/vmlinuz"
+      Initrds:
+        - "images/pxeboot/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        --
+        {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+RequiredParams:
+OptionalParams:
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "kernel-console"
+  - "kernel-options"
+  - "proxy-servers"
+  - "select-kickseed"
+Templates:
+  - Name: "kexec"
+    ID: "kexec.tmpl"
+    Path: "{{.Machine.Path}}/kexec"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux-mac"
+    Path: 'pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}'
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe-mac"
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: "default-grub.tmpl"
+    Name: "grub"
+    Path: "grub/{{.Machine.Address}}.cfg"
+  - ID: "default-grub.tmpl"
+    Name: "grub-mac"
+    Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+  - Name: grub-secure-mac
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    ID: default-grub.tmpl
+  - Name: grub-secure
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    ID: default-grub.tmpl
+  - ID: "select-kickseed.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"

@@ -1,0 +1,152 @@
+This library contains items that help run Digital Rebar manage machines on public clouds.  It uses Terraform tasks to create/delete machines and Ansible tasks join the machine to install the Digital Rebar runner.  Once the runners starts, it will collect
+cloud specific data if a Metadata API is available.
+
+*TL;DR: `cloud-provision` will create and attach a machine to a cloud backed instance.  `cloud-decommission` will destroy the backing machine but lean the Digital Rebar entry.*
+
+Design
+------
+
+Since most cloud operations are highly standardized at tha machine level, the reference code in this wrapper is intented to be a generic workflow that can be used on a wide range of clouds.
+
+The design uses the idea that Digital Rebar can manage a machine instance ...
+
+The approach:
+
+  1. Uses Terraform to provide the "give me a machine"
+  1. Uses Ansible to SSH into a machine and start the DRP runner
+  1. Controls the machine with the DRP runner in a standard way
+  1. Uses Terraform to provide the "destroy a machine" controls
+
+The default Terraform plans include only create the most basic machines with SSH access.  We anticipate that advanced operators will create or extend these tasks for based on their specific requirements.
+
+Since the approach relies on SSH, the workflows include generating a per machine RSA key pair for each machine.
+
+Prerequistes
+------------
+
+Inbound Access 
+~~~~~~~~~~~~~~
+
+The Digital Rebar Server must be at a location that is accessible to the machines being provisioned.  This is required because the machines must be able to download the `join-up` script from the server.
+
+Outbound Access
+~~~~~~~~~~~~~~~
+
+The Digital Rebar Server must be able to SSH into the newly created machines so that it can run the `join-up` script.  Once the script is run, the runner will be able to pull instructions from the DRP and the SSH port could be closed.
+
+
+Catalog Items
+~~~~~~~~~~~~~
+
+The Cloud Wrapper requires Contexts because it uses Runner, Terraform and Ansible Contexts in Docker Containers.  This feature also requires that you have enabled a RackN licensed feature.
+
+
+Setting Up Cloud Wrapper
+------------------------
+
+You must set the `cloud/provider` to the correct cloud.  Beyond that, each cloud will have cloud specific values needed to set security, location, and instance type.  In general, safe defaults have been provided where possible.
+
+You must set Security credentials for each cloud!  In many cases, you must also provide the name of the SSH user.
+
+Required Values
+~~~~~~~~~~~~~~~
+
+The Cloud Wrapper components require at least two parameters without a default be set:
+
+1. `cloud/provider` determine which cloud is to be used. 
+1. `cloud/token` enables the API
+
+AWS
++++
+
+* aws/access-secret
+* aws/access-key-id
+* rsa/key-user - typically ec2-user
+
+Additional values, e.g. region, image and instance type, have safe defaults but should be reviewed.
+
+Google
+++++++
+
+* google/credential - this is a copy of contents from the JSON file Google provides
+* rsa/key-user - varies by user, make sure you have the correct default
+
+Additional values, e.g. region, image and instance type, have safe defaults but should be reviewed.
+
+Linode
+++++++
+
+* linode/token
+
+Additional values, e.g. region, image and instance type, have safe defaults but should be reviewed.
+
+Optional Values
+~~~~~~~~~~~~~~~
+
+When possble, the machine on the cloud provider is given the name of the machine in Digital Rebar.
+
+The reference terraform plan will create tags on the cloud provider based on the assigned profiles.  It also creates one called "digitalrebar."  This can be handy to find or manage the machines on the cloud provider.
+
+
+Creating / Destroying VMs
+-------------------------
+
+The Cloud Wrapper uses the `terraform-apply` tasks to create or destroy machines using
+a reference Terraform template defined in `terraform/plan-automation`.  It then hands off to the `ansible-join-up` task to install
+the DRP agent.
+
+These methods are provided as a reference.  In practice, operators will likely
+want to use more customized Terraform plans.
+
+The `cloud-inspect` task will use the Metadata API to collect additional information and set the `cloud/*` params where possible.  These values will be removed by the `cloud-cleanup` task on decommission.
+
+Create
+~~~~~~
+
+To create a cloud backed machine:
+
+  1. Starting from a Digital Rebar machine with an active runner.
+  1. Run the 'cloud-provision' workflow.
+
+If you have created a `linode` profile with the correct tokens, then this example will create and provision a machine in Linode:
+
+  ::
+
+    drpcli machines create '{"Name":"foo",
+    	"Profiles":["linode"],
+    	"Workflow":"cloud-provision",
+    	"Meta":{"BaseContext":"runner"}
+    }'
+
+
+If the machine is already created, then just the workflow change is required.  For example, decommissioned machines are left in a ready to reprovision state.
+
+Note that the machine will have several `cloud/*` and `terraform/*` parameters defined after the process completes.  These are important to operation and can be used by downstream workflows.
+
+
+Destroy
+~~~~~~~
+
+From a cloud backed machine:
+
+  1. Starting from a Digital Rebar machine with an active runner.
+  1. Run the 'cloud-decommission' workflow
+
+Note that the machine will have removed the `cloud/*` parameters.  If these are missing, the machine can be assumed to no longer have a backing cloud instance.
+
+
+Extending the Model
+-------------------
+
+This approach uses `terraform/plan-automation` to determine which Terraform plan to run for provisioning.  The included `cloud-provision-reference.tf.tmpl` template has basic safe provisioning operations for all clouds defined in the `cloud/provider` parameter.
+
+By default, the `cloud-verify` task will add this value to the provisioned machine if it has not been defined by the operator.  The `terraform-apply` task will remove the parameter (if defined at the machine level) on destroy.
+
+Operators who wish to override this behavior need to define `terraform/plan-automation` at the profile or global level.  This will prevent the system from adding the reference template.
+
+The behavior is provided to eliminate the need to clone or copy the `cloud-provision` workflow unless very different operations are required.
+
+Future Work
+-----------
+
+At some point, the cloud-provision could include an automatic "flexiflow" operation to start another workflow.

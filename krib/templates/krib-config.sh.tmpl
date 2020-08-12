@@ -5,6 +5,10 @@ set -e
 # Get access and who we are.
 {{ template "setup.tmpl" .}}
 
+{{ template "download-tools.tmpl" .}}
+
+{{ template "krib-runtime-proxy.tmpl" .}}
+
 {{ if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{ .Param "krib/cluster-profile" }}
 PROFILE_TOKEN={{ .GenerateProfileToken (.Param "krib/cluster-profile") 7200 }}
@@ -100,7 +104,7 @@ if [[ $MASTER_INDEX != notme ]] ; then
     echo "# externally defined template specified by 'krib/kubeadm-cfg'" > /tmp/kubeadm.cfg
     echo "# source: '$KC'" >> /tmp/kubeadm.cfg
     T=$(mktemp /tmp/kube.cfg.XXXXXXXXX)
-    curl -gfsSL -o $T $KC
+    download -gfsSL -o $T $KC
     cat $T >> /tmp/kubeadm.cfg && rm -f $T
     {{ end -}}
 
@@ -149,7 +153,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
           echo -e "[keyfile]\nunmanaged-devices=interface-name:cali*;interface-name:tunl*" > /etc/NetworkManager/conf.d/calico.conf
         fi
 
-        curl -gfsSL {{ .Param "provider/calico-config" }} > /tmp/calico.yaml
+        download -gfsSL {{ .Param "provider/calico-config" }} > /tmp/calico.yaml
         # This next line assures that in the event of multiple NICs in the node, the NIC able to reach 1.1.1.1 will be chosen
         # This can optionally be changed to a regex or even an explicit NIC name
         sed -i "/autodetect\"/a\            - name: IP_AUTODETECTION_METHOD\n              value: \"can-reach=1.1.1.1\"" /tmp/calico.yaml
@@ -182,7 +186,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
         ;;
       flannel)
         echo "Starting flannel networking..."
-        curl -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
+        download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
         ;;
       weave)
         echo "Starting weave networking..."

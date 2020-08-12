@@ -1,14 +1,20 @@
 ---
 Name: "sledgehammer-install"
 Description: "Install bootenv for building Sledgehammer images"
+Documentation: |
+  This BootEnv is used as the basis for building Sledgehammer, our in-memory discovery
+  and inventory management environment.  This bootenv is reponsible for performing
+  a basic CentOS install on a sacrificial machine.  The tasks that run after the install
+  has finished are responsible for stripping out everything we do not need for Sledgehammer
+  to boot as an in-memory OS image and packaging everything up for distribution.
+Loaders:
+  amd64-uefi: EFI/BOOT/BOOTX64.EFI
+  arm64-uefi: EFI/BOOT/grubaa64.efi
 OS:
   Family: "redhat"
-  Name: "centos-7"
+  Name: "centos-8"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-7-x86_64-Minimal-1810.iso"
-      IsoUrl: "http://mirror.math.princeton.edu/pub/centos/7/isos/x86_64/CentOS-7-x86_64-Minimal-1810.iso"
-      Sha256: "38d5d51d9d100fd73df031ffd6bd8b1297ce24660dc8c13a3b8b4534a4bd291c"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -21,9 +27,6 @@ OS:
         {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: CentOS-7-aarch64-Minimal-1810.iso
-      Sha256: "864596b2fb971c8d8c0f3618981cca4725f6c2347f6eb2f130e0aefa3413c0ef"
-      IsoUrl: http://mirror.centos.org/altarch/7/isos/aarch64/CentOS-7-aarch64-Minimal-1810.iso
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -53,6 +56,12 @@ Templates:
   - ID: "default-grub.tmpl"
     Name: "grub-mac"
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
+  - Name: grub-secure-mac
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    ID: default-grub.tmpl
+  - Name: grub-secure
+    Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
+    ID: default-grub.tmpl
   - Name: "sledgehammer.ks"
     Path: "{{.Machine.Path}}/sledgehammer.ks"
     Contents: |
@@ -78,10 +87,8 @@ Templates:
       %packages
       OpenIPMI
       OpenIPMI-tools
-      aic94xx-firmware
       audit
       authconfig
-      banner
       basesystem
       bash
       bsdtar
@@ -91,6 +98,7 @@ Templates:
       curl
       dhclient
       dmidecode
+      dnf
       dosfstools
       e2fsprogs
       efibootmgr
@@ -132,15 +140,17 @@ Templates:
       nfs-utils
       ntfs-3g
       ntfsprogs
-      ntp
       openssh-clients
       openssh-server
       openssl-libs
       parted
       passwd
       pciutils
+      perl-interpreter
       policycoreutils
       procps-ng
+      python2
+      python36
       rootfiles
       rpm
       rsyslog
@@ -148,11 +158,8 @@ Templates:
       setup
       shadow-utils
       squashfs-tools
-      stress
-      stress-ng
       sudo
       systemd
-      systemd-resolved
       systemd-networkd
       tar
       unzip
@@ -165,11 +172,14 @@ Templates:
       xz
       yum
       zlib
+      {{ range (.Param "sledgehammer/extra-packages") }}
+      {{ . }}
+      {{ end }}
       %end
 
       %pre
       {{ range $intf := .Param "sledgehammer/extra-ifs" }}
-      dhclient --no-pid {{ $intf }}
+      nmcli con add type ethernet con-name {{ $intf }} ifname {{ $intf }}
       {{end}}
       %end
 

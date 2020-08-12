@@ -1,0 +1,16 @@
+---
+Name: "terraform"
+Description: "Run Terraform Plan in Docker Context"
+Documentation: |
+  Docker Context that runs Terraform Plans
+  Used by the `Terraform-Apply` task.
+  
+  Note: RackN License Required!
+Engine: "docker-context"
+Image: "digitalrebar-context-terraform"
+Meta:
+  type: "action"
+  icon: "map"
+  color: "blue"
+  title: "RackN Content"
+  Dockerpull: "digitalrebar/context-terraform"

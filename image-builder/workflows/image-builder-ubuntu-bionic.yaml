@@ -20,6 +20,6 @@ Stages:
   - image-builder-start
   - ubuntu-18.04-install
   - ssh-access
-  - runner-service
+  - drp-agent
   - image-builder-linux
   - finish-install

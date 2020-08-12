@@ -1,0 +1,18 @@
+---
+Name: "cloud-decommission"
+Description: "Destroy Cloud Instance with Terraform Context"
+Params:
+  terraform/plan-action: "destroy"
+  context/name: "runner"
+Tasks:
+  - "context:terraform"
+  - "cloud-validate"
+  - "terraform-apply"
+  - "context:runner"
+  - "cloud-cleanup"
+  - "context-set"
+Meta:
+  type: "remove"
+  icon: "cloud download"
+  color: "brown"
+  title: "RackN Content"

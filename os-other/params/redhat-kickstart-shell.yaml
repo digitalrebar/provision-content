@@ -1,0 +1,23 @@
+---
+Name: "redhat/kickstart-shell"
+Description: "Activates the kickstart SSH shell if specified (default: True)"
+Documentation: |
+  During the Kickstart installation process, it is now possible in RHEL and
+  CentOS to activate an SSH login and shell for debugging or troubleshooting
+  while the system is installing.
+
+  This param by default will activate the SSH Shell and use the defaults of
+  ``rocketskates`` for username, and password of ``RocketSkates`` for that user.
+  These values can be overridden with the use of the ``provisioner-default-user``
+  and ``provisioner-default-password-hash`` Params.
+
+  Additionally, if an SSH Public key half is provided in ``provisioner-access-key``,
+  then that SSH Public key half will be added to the ``authorized_keys``.
+
+Meta:
+  icon: "file"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "boolean"
+  default: true

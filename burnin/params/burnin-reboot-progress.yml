@@ -5,6 +5,7 @@ Schema:
   type: "number"
   default: 0
 Meta:
+  type: "output"
   color: "blue"
   icon: "fire"
   title: "RackN Content"

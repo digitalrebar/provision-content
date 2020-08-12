@@ -1,0 +1,21 @@
+---
+Name: "set-machine-name-from-hostname"
+Description: "A stage to set Machine.Name from the Param 'hostname'."
+Documentation: |
+  This Stage sets the Machine Object ``.Machine.Name`` value to the current
+  Machine objects Parameter named ``hostname``.  This is often used in
+  discovery stages, where the Classify functions may set a Machines Param
+  ``hostname`` to a value based on the classify actions.
+
+  This Stage should be run **after** any Classify action Stages which perform
+  ``add_parameter hostname BOB`` actions - or similar Stages that set the
+  Machine objects ``hostname`` Param.
+
+Tasks:
+  - "set-machine-name-from-hostname"
+  - "set-hostname"
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

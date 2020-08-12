@@ -37,21 +37,36 @@ Setup K3s Cluster
 
 Before starting, install `kubectl` has been installed on client system
 
+.. note:: You _must_ have attached storage in each node for the k3s cluster to operate!  This could be an SDcard or USB drive.  If the partitions are not xfs, the code will wipe the drive!
+
 To build your cluster:
 
 #. select the nodes for installation and apply the `k3s-install` workflow
 #. wait for workflow to complete on leader
-#. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > admin.conf`
+#. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > kube.conf`
 
 To access on the DRP server or cluster:
 
-#. test with `kubectl --kubeconfig=admin.conf get nodes`
+#. test with `kubectl --kubeconfig=kube.conf get nodes`
 
 To access from another system, use an SSH tunnel:
 
 #. setup an ssh tunnel: `ssh root@[host wifi ip] -L 6443:[leader node ip]:6443`
 #. modify your `admin.conf` file to use `127.0.0.1` instead of the leader node ip
-#. test with `kubectl --kubeconfig=admin.conf get nodes`
+#. test with `kubectl --kubeconfig=kube.conf get nodes`
+
+Access Kubernetes Dashboard
+---------------------------
+
+The Kubernetes Dashboard v2 is automatically installed by the k3s-install` workflow.
+Admin and service accounts are created for access.
+
+To access the Dashboard:
+
+#. use `kubectl --kubeconfig=kube.conf proxy` to create a network
+path to your cluster.
+#. get the Dashboard authentication token `drpcli profiles get cluster01 param edge-lab/dashboard-token --decode`
+#. open the Dashboard using the proxy: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
 
 Install OpenFaaS via Helm
 -------------------------
@@ -59,16 +74,16 @@ Install OpenFaaS via Helm
 The k3s install above will automatically include Helm v3 and run
 charts defined in the `edge-lab/helm-charts` param array.
 
-OpenFaaS is provided as an example in the `openfaas-base` profile.
+OpenFaaS is provided as an example in the `helm-openfaas` profile.
 To include OpenFaaS in the k3s install, simply assign the
-`openfaas-base` profile on cluster leader (you can assign it to all
-cluster machines and it will be ignore on the non-leaders).
+`helm-openfaas` profile on cluster leader based on your architecture
+(you can assign it to all cluster machines and it will be ignore on the non-leaders).
 
 Since the helm stages are idempotent, either include the profile
 before running the `k3s-install` workflow or re-run the workflow.
 
 The OpenFaaS helm chart install will write its password to the
-cluster profile using `openfaas/password`.
+cluster profile using `openfaas/password`.  To retrieve the password use `drpcli profiles get cluster01 param openfaas/password --decode`.
 
 
 Machine Reset

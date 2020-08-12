@@ -1,6 +1,7 @@
 ---
 Description: "Stage to assign the machine icon and color"
 Meta:
+  type: "value"
   color: "yellow"
   icon: "info"
 Name: "machine-meta"

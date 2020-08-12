@@ -8,5 +8,6 @@ Schema:
   default: "https://github.com/rancher/k3s/releases"
 Meta:
   color: "blue"
+  clipboard: "yes"
   icon: "download"
   title: "Community Content Copyright RackN 2019"

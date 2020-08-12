@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# set the Machines hostname in the Operating System (linux, esxi)
+
+# set to 'sh' type for ESXi compatibility
+
 #
 # This template populates the HOSTNAME of the system in various places.
 # It also exports the HOSTNAME variable for use by other templates.
@@ -13,12 +17,24 @@
 # Defaults:
 #
 HOSTNAME="{{.Machine.Name}}"
+CURRENT=$(hostname)
 
-if [ -f /etc/sysconfig/network ] ; then
-    sed -i -e "s/HOSTNAME=.*/HOSTNAME=${HOSTNAME}/" /etc/sysconfig/network
+if [[ "$HOSTNAME" == "$CURRENT" ]]
+then
+    echo ">>> Hostname already matches requested name, no changes made"
+    exit 0
+else
+    echo ">>> Attempting to set OS hostname to $HOSTNAME"
+    if [ -f /etc/sysconfig/network ] ; then
+        sed -i -e "s/HOSTNAME=.*/HOSTNAME=${HOSTNAME}/" /etc/sysconfig/network
+    fi
+    echo "${HOSTNAME#*.}" >/etc/domainname
+    echo "$HOSTNAME" >/etc/hostname
+    hostname "$HOSTNAME"
+    echo ">>> 'hostname' now reports:"
+    hostname
+    export HOSTNAME
 fi
-echo "${HOSTNAME#*.}" >/etc/domainname
-echo "$HOSTNAME" >/etc/hostname
-hostname "$HOSTNAME"
-export HOSTNAME
+
+exit 0
 

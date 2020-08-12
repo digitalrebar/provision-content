@@ -2,6 +2,7 @@
 Name: always-fails
 Description: "DEV USE forces jobs to failed state"
 Meta:
+  type: "error"
   title: "RackN Content"
   color: red
   icon: "warning sign"

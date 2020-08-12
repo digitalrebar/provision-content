@@ -43,8 +43,7 @@ function fixup_path() {
   for _add_path in $(echo $* | sed 's/[:,]/ /g')
   do
     mkdir -p $_add_path
-    # inject colons to avoid partial match failures
-    grep -q ":$_add_path" <<< ":$PATH:" || export PATH="$PATH:$_add_path"
+    echo ":$PATH:" | grep -q ":$_add_path" || export PATH="$PATH:$_add_path"
   done
 }
 
@@ -58,6 +57,8 @@ case $arch in
         xiterr 1 "Unknown arch $(uname -m)";;
 esac
 
+osfamily=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+
 INSTALL_DIR=/usr/local/bin
 if grep -q coreos /etc/os-release ; then
   INSTALL_DIR=/opt/bin
@@ -68,7 +69,7 @@ mkdir -p $INSTALL_DIR
 
 if ! which drpcli ; then
     echo "Installing drpcli in $INSTALL_DIR"
-    curl -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
+    curl --noproxy '*' -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
     chmod 755 "$INSTALL_DIR/drpcli"
 else
     INSTALL_DIR="$(dirname $(which drpcli))"

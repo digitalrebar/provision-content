@@ -1,0 +1,18 @@
+---
+Name: "packer-setup-and-build"
+Description: "Run Packer Builder build."
+Documentation: |
+  This workflow prepares a CentOS or Ubuntu target system with tooling
+  for Packer and installs a Hypervisor to perform image builds.  An image
+  build will be started based on the ``packer-builder/build-image`` Param
+  value.
+
+Stages:
+  - "packer-builder-prep"
+  - "packer-builder-git-packer"
+  - "packer-builder-build-image"
+  - "packer-builder-upload-to-drp"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

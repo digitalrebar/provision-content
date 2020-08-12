@@ -1,0 +1,27 @@
+---
+Name: "terraform/plan-automation"
+Description: "Automation managed plan templates to run in Terraform Apply task"
+Documentation: |
+  Like terraform/plan-templates, but to be added by other tasks instead of operators.
+
+  This is an array of strings where each string is a template that renders
+  an Terraform Plan.  They are built in sequence and then run from a single
+  `terraform apply`
+
+  Developer Notes: When used on a Machine this Param is expected to be temporary
+  and will be automatically deleted during `destroy` action phase.  This allows
+  automation to set a default plan if none is present, but operators can override
+  the plan by setting at the profile or global level.
+
+  Outputs from a plan will can be automatically saved on the Machine.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  type: "configuration"
+  icon: "map"
+  color: "brown"
+  title: "Digital Rebar Community Connect"
+  copyright: "RackN 2020"

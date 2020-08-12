@@ -19,6 +19,7 @@ Schema:
   default: false
 
 Meta:
+  type: "debug"
   icon: "bug"
   color: "red"
   title: "Digital Rebar Community Content"

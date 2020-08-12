@@ -1,0 +1,80 @@
+---
+Name: "oscap/configuration"
+Description: "OpenSCAP packages, profile, and settings during OS Install"
+Documentation: |
+  OpenSCAP is a framework for providing security auditing of an Operating System.
+  This Param contains sections to be used to control the OpenSCAP profile installation
+  options.
+
+  Use of this Param requires that the ``oscap/enabled`` Param is set to ``true``.
+
+  There are two primary configuration sections of this Param object; the
+  *packages*, and the *profile*.
+
+  **packages section**
+
+  The Packages section defines an array of additional packages that should be
+  installed during the kickstart/preseed process in support of the selected
+  OpenSCAP profile that is installed.  This is an array (list) of packages; one
+  per element in the list.
+
+  **profile section**
+
+  The profile section utilized ``key = value`` pairs which are directly mapped
+  in to the Kickstart/Preseed to be used by the OpenSCAP tool to define the
+  configuration.  This is an array (list) of strings, that should each contain
+  a ``key = value`` configuration setting.
+
+  **example**
+
+  Example configurations that complies with the *PCI-DSS* OpenSCAP profile configuration
+  are below.
+
+  YAML Format example:
+    ::
+
+      packages:
+        - aide
+        - libreswan
+        - opensc
+        - openscap
+        - openscap-scanner
+        - pcsc-lite
+        - scap-security-guide
+      profile:
+        - "content-type = scap-security-guide"
+        - "profile = xccdf_org.ssgproject.content_profile_pci-dss"
+
+  JSON Format example:
+    ::
+
+      {
+        "packages": [
+          "aide",
+          "libreswan",
+          "opensc",
+          "openscap",
+          "openscap-scanner",
+          "pcsc-lite",
+          "scap-security-guide"
+        ],
+        "profile": [
+          "content-type = scap-security-guide",
+          "profile = xccdf_org.ssgproject.content_profile_pci-dss"
+        ]
+      }
+
+Meta:
+  icon: "file-alt"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+
+Schema:
+  type: "object"
+  items:
+    packages:
+      additionalProperties: "string"
+      type: "array"
+    profile:
+      additionalProperties: "string"
+      type: "array"

@@ -1,0 +1,187 @@
+---
+Name: sledgehammer-place-start-up
+Description: Place the start-up.sh script for Sledgehammer.
+Documentation: |
+  This task places a few static assets that are needed for the
+  Sledgehammer start-up process.  It handles the following assets:
+
+  * sledgehammer-start-up.sh
+
+    This script is run as a systemd service once Sledgehammer has
+    started.  It is responsible for making sure the image was booted
+    with the necessary kernel parameters and then downloading and
+    executing the machine-independent startup script from
+    dr-provision.
+
+  * sledgehammer-motd
+
+    This sets the default login banner.
+
+  * sledgehammer-ssh-config
+
+    This sets the default sshd configuration.  We default to allowing
+    root logins only via key based authentication and allowing sftp.
+
+  * sledgehammer-service
+
+    This is the systemd unit file that is responsible for starting
+    sledgehammer-start-up.sh when Sledgehammer boots.  It waits until
+    the network has been configured and is online before starting.
+Templates:
+  - Name: sledgehammer-start-up.sh
+    Path: /sbin/sledgehammer-start-up.sh
+    Contents: |
+      #!/bin/bash
+      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+      export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+      set -x
+      set -e
+      shopt -s extglob
+      get_param() {
+          [[ $(cat /proc/cmdline) =~ $1 ]] && echo "${BASH_REMATCH[1]}"
+      }
+      # Some useful boot parameter matches
+      ip_re='([0-9a-f.:]+/[0-9]+)'
+      bootif_re='BOOTIF=([^ ]+)'
+      provisioner_re='provisioner\.web=([^ ]+)'
+      domain_re='DOMAINNAME=(.+)$'
+      hostname_re='^HOSTNAME=(.+)$'
+      host_re='rs\.uuid=([^ ]+)'
+      dns_servers_re='^DNS=(.+)$'
+      uuid_re='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+      netname_re='"network":"([^ ]+)"'
+      PROVISIONER_WEB="$(get_param "$provisioner_re")"
+      # Test to see if we got everything we must have.
+      # Die horribly otherwise.
+      if ! [[ $PROVISIONER_WEB ]]; then
+          echo "Do not know where to find the Provisioner."
+          echo "This cannot happen"
+          exit 1
+      fi
+      if [[ $(cat /proc/cmdline) =~ $bootif_re ]]; then
+          if [[ "${BASH_REMATCH[1]}" == "discovery" ]] ; then
+              MAC=$(cat /sys/class/net/eth0/address)
+          else
+              MAC="${BASH_REMATCH[1]//-/:}"
+              MAC="${MAC#*:}"
+          fi
+      elif [[ -d /sys/firmware/efi ]]; then
+          declare -A boot_entries
+          bootent_re='^Boot([0-9]{4})'
+          efimac_re='MAC\(([0-9a-f]+)'
+          while read line; do
+              k="${line%% *}"
+              v="${line#* }"
+              if [[ $k = BootCurrent:* ]]; then
+                  current_bootent="${line##BootCurrent: }"
+              elif [[ $k =~ $bootent_re ]]; then
+                  boot_entries["${BASH_REMATCH[1]}"]="$v"
+              fi
+          done < <(efibootmgr -v)
+          if [[ ${boot_entries["$current_bootent"]} =~ $efimac_re ]]; then
+              MAC=''
+              for o in 0 2 4 6 8 10; do
+                  MAC+="${BASH_REMATCH[1]:$o:2}:"
+              done
+              MAC=${MAC%:}
+          fi
+      fi
+      for nic in /sys/class/net/*; do
+          [[ -f $nic/address && -f $nic/type && \
+              $(cat "$nic/type") = 1 && \
+              $(cat "$nic/address") = $MAC ]] || continue
+          BOOTDEV="${nic##*/}"
+          break
+      done
+      if [[ ! $BOOTDEV ]]; then
+          echo "We don't know what the MAC address of our boot NIC was!"
+          exit 1
+      fi
+      runningLink="$(networkctl |awk "/$BOOTDEV/ {print \$1}"|head -1)"
+      leaseFile="/var/run/systemd/netif/leases/$runningLink"
+      dhcp_param() {
+          awk -F= "/^$1/ {print \$2}" < "$leaseFile"
+      }
+      HOSTNAME=""
+      if [[ -e $leaseFile ]] ; then
+          HOSTNAME="$(dhcp_param HOSTNAME)"
+          DOMAIN="$(dhcp_param DOMAINNAME)"
+          DNS_SERVERS="$(dhcp_param DNS)"
+      fi
+      [[ $DOMAIN ]] || DOMAIN="unspecified.domain.local"
+      [[ $DNS_SERVERS ]] || DNS_SERVERS="8.8.8.8"
+      # Make our hsotname include the domain.
+      [[ $HOSTNAME && ${HOSTNAME%%.*} = $HOSTNAME ]] && HOSTNAME="${HOSTNAME}.${DOMAIN}"
+      # If we do not have a hostname, try to look it up in the hosts file
+      if [[ ! $HOSTNAME ]]; then
+          lookup_1="$(getent hosts $dhcp_ip | awk '{print $2}')"
+          lookup_2="$(getent hosts $dhcp_ip | awk '{print $2}')"
+          if [[ $lookup_1 && $lookup_1 == $lookup_2 && $lookup_1 != localhost* ]]; then
+              HOSTNAME="$lookup_1"
+          fi
+      fi
+      while ! [[ -x /tmp/start-up.sh ]]; do
+          curl -sgfL -o /tmp/start-up.sh "$PROVISIONER_WEB/machines/start-up.sh" || :
+          if grep -q '/tmp/control.sh' /tmp/start-up.sh && \
+              head -1 /tmp/start-up.sh | grep -q '^#!/bin/bash'; then
+              chmod 755 /tmp/start-up.sh
+              break
+          fi
+          sleep 1
+      done
+      export BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME
+      . /tmp/start-up.sh
+  - Name: sledgehammer-motd
+    Path: /etc/motd
+    Contents: |
+
+          Digital Rebar       &&&
+          Sledgehammer      &&&&&&&
+                          &&&&&&&&&&&&&@
+                        &&&&&&&&&&&&&&&&&@
+                        &&&&&&&&&&&&&&&&&
+                          &&&&&&&&&&&&&&&&&
+                            &&&&&&&&&&&&&&&&&
+                          &&& &&&&&&&&&&&&&&&
+                        &&&&&&& &&&&&&&&&&&
+                      &&&&&&&&&   &&&&&&&
+                    &&&&&&&&&       &&&
+                  &&&&&&&&&
+                &&&&&&&&&
+              &&&&&&&&&
+            &&&&&&&&&
+          &&&&&&&&&
+          &&&&&&&             (c) RackN, Inc.
+
+  - Name: sledgehammer-ssh-config
+    Path: /etc/ssh/sshd_config
+    Contents: |
+      # Default sshd config for Sledgehammer in Rebar 2
+      Protocol 2
+      SyslogFacility AUTHPRIV
+      PermitRootLogin without-password
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+      GSSAPIAuthentication no
+      GSSAPICleanupCredentials yes
+      UseDNS no
+      UsePAM yes
+      AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+      AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+      AcceptEnv LC_IDENTIFICATION LC_ALL
+      Subsystem sftp /usr/libexec/openssh/sftp-server
+  - Name: sledgehammer-service
+    Path: /etc/systemd/system/sledgehammer.service
+    Contents: |
+      [Unit]
+      Description=Sledgehammer startup script
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=true
+      ExecStart=/sbin/sledgehammer-start-up.sh
+
+      [Install]
+      WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+---
+Name: "kvm-simple-kvm-setup"
+Description: "Install KVM hypervisor."
+Documentation: |
+  This Stage installs the KVM Hypervisor.
+
+Tasks:
+  - "kvm-simple-kvm-setup"
+Meta:
+  icon: "clone outline"
+  color: "blue"
+  title: "RackN Content"

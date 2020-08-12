@@ -1,0 +1,9 @@
+---
+Name: "packer-builder-git-packer"
+Description: "Get the Packer Builder json configs and scripts."
+Tasks:
+  - "packer-builder-git-packer"
+Meta:
+  icon: "clone outline"
+  color: "blue"
+  title: "RackN Content"

@@ -12,10 +12,14 @@ addons:
     packages:
     - sshpass
 script:
+- curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+- unzip awscli-bundle.zip
+- "./awscli-bundle/install -b ~/bin/aws"
 - mkdir -p ~/.ssh
 - cp tools/ssh-config ~/.ssh/config
 - chmod 600 ~/.ssh/config
 - "./tools/package.sh"
+- "./tools/build_rel_notes.sh"
 - "./tools/publish.sh"
 after_script:
 - tools/notify.sh digitalrebar/provision-content

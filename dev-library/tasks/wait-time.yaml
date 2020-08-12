@@ -3,35 +3,51 @@ Name: wait-time
 Description: "Wait in Workflow"
 Documentation: |
   Handy for dev/test, this task will sleep for
-  a programmable amount of time
-Meta:
-  title: "RackN Content"
-  color: black
-  feature-flags: sane-exit-codes
-  icon: hourglass half
+  a programmable amount of time.
+
+  It will also excercise the API by changing the machine icons
+  b ased on the wait-icons list.
+RequiredParams:
+  - dev/wait-icons
+  - dev/wait-time
 Templates:
 - Contents: |-
     #!/usr/bin/env bash
-    # clear the workflow for a machine (makes it easy to rerun workflow)
 
     set -e
 
     {{template "setup.tmpl" .}}
 
-    do_sleep() { local _n=$SLEEP; while (( _n>=1 )); do printf "%s " "$_n"; sleep 1; (( _n-- )); done; echo "0"; }
+    if icon=$(drpcli machines meta get $RS_UUID icon) ; then
+      echo "icon is $icon"
+    else
+      icon='server'
+    fi
+    if color=$(drpcli machines meta get $RS_UUID color) ; then
+      echo "icon color is $color"
+    else
+      icon='black'
+    fi
 
-    export RS_UUID="{{.Machine.UUID}}"
+    {{ $wait := (.Param "dev/wait-time") }}
+    {{ range $index, $icon := (.Param "dev/wait-icons") -}}
+      echo "wait cycle {{$index}}"
+      drpcli machines meta set $RS_UUID key icon to "{{$icon}}"
+      drpcli machines meta set $RS_UUID key color to "brown"
+      sleep {{ $wait }}
+    {{ else -}}
+      echo "no icons defined, no wait"
+      exit 0
+    {{ end -}}
 
-    {{if .ParamExists "dev/wait-time" -}}
-    SLEEP={{.Param "dev/wait-time"}}
-    {{else -}}
-    SLEEP="5"
-    {{end -}}
-
-    echo "Wait Start - $SLEEP seconds"
-
-    do_sleep
+    drpcli machines meta set $RS_UUID key icon to "$icon"
+    drpcli machines meta set $RS_UUID key color to "$color"
 
     echo "Wait Finished"
     exit 0
   Name: wait-time
+Meta:
+  title: "RackN Content"
+  color: black
+  feature-flags: sane-exit-codes
+  icon: hourglass half

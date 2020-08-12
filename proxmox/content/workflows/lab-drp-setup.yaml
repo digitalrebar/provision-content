@@ -9,4 +9,4 @@ Meta:
 Stages:
   - lab-drp-network
   - ssh-access
-  - runner-service
+  - drp-agent

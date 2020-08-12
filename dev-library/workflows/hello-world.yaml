@@ -1,0 +1,21 @@
+---
+Name: "hello-world"
+Description: "Simple 'hello world' style workflow to test Agent/Runner"
+Documentation: |
+  This workflow runs a simple "hello world" script on the target Machine.
+  This can be useful as a quick end-to-end check of the DRP Agent and
+  workflow system.
+
+  The following Operating Systems are supported from this single workflow:
+
+    * MacOS X
+    * Linux
+    * Windows
+    * VMware vSphere ESXi
+
+Stages:
+  - hello-world
+Meta:
+  color: blue
+  icon: bullhorn
+  title: RackN Content

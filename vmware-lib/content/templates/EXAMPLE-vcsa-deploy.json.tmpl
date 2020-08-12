@@ -1,0 +1,46 @@
+{
+    "WARNING": "THIS IS AN EXAMPLE - you must modify values to fit your local environment appropriately.",
+    "__version": "2.13.0",
+    "new_vcsa": {
+        "esxi": {
+            "hostname": "10.10.10.100",
+            "username": "root",
+            "password": "RocketSkates1!",
+            "deployment_network": "VM Network",
+            "datastore": "datastore1",
+            "ssl_certificate_verification": { "verification_mode": "NONE" }
+        },
+        "appliance": {
+            "name": "vc01",
+            "image": "https://10.10.10.10:8092/files/images/vcsa.ova",
+            "deployment_option": "tiny",
+            "thin_disk_mode": true,
+            "ovftool_path": "/usr/bin/ovftool"
+        },
+        "network": {
+            "system_name": "vc01.bearmetal.dev",
+            "ip_family": "ipv4",
+            "mode": "static",
+            "ip": "10.10.10.100",
+            "prefix": "24",
+            "dns_servers": [ "1.1.1.1", "1.0.0.1" ],
+            "gateway": "10.10.10.1"
+        },
+        "os": {
+            "password": "RocketSkates1!",
+            "ntp_servers": [ "time-a.nist.gov", "time-b.nist.gov", "time-c.nist.gov" ],
+            "ssh_enable": true
+        },
+        "sso": {
+            "first_instance": true,
+            "domain_name": "bearmetal.dev",
+            "password": "RocketSkates1!"
+        }
+    },
+    "ceip": {
+        "settings": {
+            "ceip_enabled": false
+        }
+    }
+}
+

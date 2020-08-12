@@ -52,3 +52,6 @@ Schema:
   default:
     bootif:
       dhcp4: true
+Meta:
+  type: "value"
+  icon: "chip"

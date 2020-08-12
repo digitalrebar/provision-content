@@ -1,0 +1,41 @@
+---
+Name: sledgehammer/unwanted-packages
+Description: Packages that should be removed before creating Sledgehammer
+Documentation: |
+  On a freshly installed Centos syhstem, there are generally several
+  packages that are installed by default but that are not required for
+  Sledgehammer ot do its job.  This param contains a list of such packages.
+Schema:
+  type: array
+  items:
+    type: string
+  default:
+    # cronie is a cron replacement.
+    # We should not be running periodic tasks in Sledgehammer.
+    # If you really need to, use a systemd timer unit instead.
+    - cronie
+    # Sledgehammer will only have sshd as a network-aware listening service,
+    # and is supposed to be ephemeral.  Setting up and managing firewall
+    # rules is extra overhead that we don't need.
+    - firewalld
+    # Geolocation code and databases mostly used for finding the
+    # closest mirrors.  We are explicit about mirrors used, so
+    # no need for this either.
+    - "'geolite2*'"
+    # Wireless nic firmware.  We explicitly don't support operating
+    # over wireless nics, as they all require extra configuration beyond
+    # DHCP.
+    - "'i*-firmware'"
+    # Sledgehammer uses systemd-network instead of NetworkManager.
+    - NetworkManager
+    # Nothing we do by default needs a Javascript interpreter.
+    - mozjs60
+    # We don't need fancy boot splash screen progress bars, or even
+    # graphical consoles for that matter.
+    - plymouth
+    # We explicitly only want to use the minimal selinux enforcement
+    # policy instead of the more comprehensive targeted one.
+    - selinux-policy-targeted
+    # We don't care about LDAP authentication or single sign on.
+    # If you need to log in to Sledgehammer, use SSH.
+    - "'sssd*'"

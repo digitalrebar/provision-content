@@ -1,0 +1,38 @@
+---
+Name: "govc/commands"
+Description: "Command to for 'govc' to run."
+Documentation: |
+  An array of strings for ``govc`` to run.  Each array string will be
+  run in order defined in when the Param is populated.
+
+  Only a single ``import.ova`` command can be specified in any single
+  set of commands to run.
+
+  Defaults to ``govc about`` command.
+
+  As an example, you can print the ``govc`` environment which affects the
+  runtime operation of the ``govc`` command, using ``govc env``.  To use
+  this command, set the Param to the value ``env``.
+ 
+  .. note::  Do not specify ``govc`` ifself.
+
+  YAML Example of setting multiple commands to run in a single Task run:
+
+    ::
+
+      govc/commands:
+        - "about"
+        - "env"
+        - "datastore.ls"
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default:
+    - "about"
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

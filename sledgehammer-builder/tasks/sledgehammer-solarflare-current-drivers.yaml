@@ -1,0 +1,37 @@
+---
+Name: sledgehammer-solarflare-current-drivers
+Description: Install updated Solarflare drivers in Sledgehammer
+Documentation: |
+  This task installs up-to-date Solarflare drivers from the source
+  package defined in the sledgehammer/solarflare-driver-package param.
+
+  This task is not included in Sledgehammer by default -- to include it,
+  add it to sledgehammer/customize-tasks and rebuild Sledgehammer.
+
+  Please note that a Sledgeahmmer image built using this task will not
+  be compatible with UEFI Secure Boot, as the resulting kernel modules
+  will not be signed by the CentOS signing authority.
+Templates:
+  - Name: install-solarflare-drivers
+    Contents: |
+      #!/bin/bash
+      mkdir -p /tmp/solarflare-install
+      cd /tmp/solarflare-install
+      pkg='{{.Param  "sledgehammer/solarflare-driver-package"}}'
+      curl -fgL "$pkg" -o solarflare.zip
+      unzip solarflare.zip
+      kv="$(rpm -q kernel)"
+      kv="${kv#kernel-}"
+      [[ -e preinstalled ]] || rpm -qa >preinstalled
+      dnf -y install kernel-rpm-macros \
+          kernel-devel \
+          make \
+          rpm-build \
+          lsof \
+          gcc \
+          elfutils-libelf-devel
+      mkdir -p RPMS/x86_64 SRPMS SOURCES SPECS BUILD
+      rpmbuild --rebuild --define "_topdir $PWD" --define "kernel $kv" sfc*.src.rpm
+      rpm -qa >postinstalled
+      sort preinstalled postinstalled |uniq -u |xargs rpm -e
+      dnf -y localinstall RPMS/*/*.rpm

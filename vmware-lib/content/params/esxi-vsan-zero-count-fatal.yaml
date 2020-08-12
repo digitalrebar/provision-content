@@ -1,0 +1,19 @@
+---
+Name: "esxi/vsan-zero-count-fatal"
+Description: "Control fatal exit if the VSAN disk claim process finds zero disks"
+Documentation: |
+  If set to ``true`` if a node has no available disks to offer
+  (minimum 1 cache and 1 capacity), then exit with fatal error.
+
+  If set to ``false`` (the default), then if no disks on a given node
+  is not considered a fatal condition.
+
+  By default, zero count is not considered fatal.
+
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "yellow"
+  icon: "terminal"
+  title: "RackN Content"

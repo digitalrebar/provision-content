@@ -1,0 +1,19 @@
+---
+Name: "terraform/plan-templates"
+Description: "Defines a list of plan templates to run in Terraform Apply task"
+Documentation: |
+  This is an array of strings where each string is a template that renders
+  an Terraform Plan.  They are built in sequence and then run from a single
+  `terraform apply`
+
+  Outputs from a plan will can be automatically saved on the Machine.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+Meta:
+  icon: "map outline"
+  color: "blue"
+  title: "Digital Rebar Community Connect"
+  copyright: "RackN 2020"

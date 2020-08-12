@@ -1,0 +1,102 @@
+---
+Name: "govc-datastore-create"
+Description: "A task to create a datastore on a remote ESXi instance."
+Documentation: |
+  Creates a datastore on a remote ESXi instance.
+
+RequiredParams:
+  - "govc/datastore-create-disk"
+  - "govc/datastore-create-name"
+  - "govc/url"
+  - "govc/username"
+  - "govc/password"
+OptionalParams:
+  - "govc/insecure"
+  - "govc/port"
+Templates:
+  - Name: "govc-create-datastore.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # Execute a GoVC command against a remote vSphere ESXi or vCenter resource.
+      # RackN Copyright 2020
+
+      set -e
+
+      {{ if eq (.Param "govc/datastore-skip-create" ) true }}
+      echo "Skipping datastore creation as 'govc/datastore-skip-create' is 'true'."
+      exit 0
+      {{ end }}
+
+      {{ template "setup.tmpl" .}}
+
+      {{ template "govc-setup.sh.tmpl" . }}
+
+      # yes jq parsing might be better w/ '--json' output, but no - it isn't
+      HOST=$(govc host.info | grep "^Name:" | awk ' { print $NF } ')
+
+      get_first_available() {
+        RESULTS=$(govc host.esxcli --json storage vmfs extent list | jq -r '.Values | .[].DeviceName | .[]')
+        if [[ -n "$RESULTS" ]]
+        then
+          for FILTER in $RESULTS
+          do
+            FILT="$FILT select(.Device | .[] != \"$FILTER\") |"
+          done
+        else
+          FILT=""
+        fi
+
+        AVAIL=$(govc host.esxcli --json storage core path list | jq -r ".Values | .[] | $FILT .Device | .[] ")
+
+        if [[ -n "$AVAIL" ]]
+        then
+          DISK=$(echo "$AVAIL" | head -1)
+        else
+          echo "*****************************************************"
+          xiterr 1 "No available disks to create datastore on."
+        fi
+      }
+
+      SELECT='{{ .Param "govc/datastore-create-disk" }}'
+      DS_NAME='{{ .Param "govc/datastore-create-name" }}'
+      if echo "$SELECT" | egrep -q "^disk="
+      then
+        DISK="$(echo $SELECT | sed 's/^disk=//g')"
+        if govc host.esxcli --json storage core path list | jq -r ".Values | .[] | select(.Device .[] = \"$DISK\" | .[] "
+        then
+          echo "Found device '$DEVICE' to create datastore on."
+        else
+          echo "FATAL Unable to find requested device '$DEVICE'"
+          echo "Device dump for debugging purposes..."
+          govc host.esxcli storage core path list
+          exit 1
+        fi
+        
+      else
+        case $SELECT in
+          first_available) get_first_available ;;
+          *)
+            xiterr 1 "Unsupported Disk Selection request '$SELECT'. Supported is 'first_available' or 'disk=<DISK>'."
+          ;;
+        esac
+      fi
+
+
+      echo ""
+      echo "==== RUN 'govc $CMD' ===="
+      echo ""
+      
+      set -x
+      govc datastore.create -type vmfs -name "$DS_NAME" -disk=$DISK $HOST
+      set +x
+
+      echo ""
+      echo "==== DONE ===="
+      echo ""
+
+      exit 0
+Meta:
+  icon: "terminal"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

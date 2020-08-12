@@ -6,7 +6,7 @@ Documentation: |
   this to an established MetalLB release version
 Schema:
   type: "string"
-  default: "master"
+  default: "main"
 Meta:
   color: "blue"
   icon: "ship"
