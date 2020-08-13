@@ -87,7 +87,9 @@ Templates:
       drpcli contents show rackn-license > rackn-license.json
 
       echo "verify that endpoint {{$drpid}} is in license"
-      if [[ "$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["{{$drpid}}"])')" == "true" ]]; then
+      epl=$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["{{$drpid}}"])')
+      anymatch=$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["MatchAny"])')
+      if [[ "$epl" == "true" || "$anymatch" == "true" ]] ; then
         echo "endpoint found!"
       else
         echo "endpoint missing, attempt to add to license"
