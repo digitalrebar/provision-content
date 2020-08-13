@@ -4,7 +4,8 @@ Description: "CentOS 8 install stages.  References the latest CentOS 8 release"
 BootEnv: "centos-8-install"
 Tasks:
   - "set-hostname"
-  - "centos-drp-only-repos"
+# Do we really need this?
+#  - "centos-drp-only-repos"
   - "ssh-access"
   - "configure-network"
 Meta:
