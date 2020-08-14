@@ -264,6 +264,7 @@ Templates:
     rm -rf /var/lib/kubelet/*
     rm -rf /etc/cni/
     rm -rf /docker/etcd/*
+    rm -rf /etc/kubernetes
     
     rm -rf /var/lib/docker/*
     rm -rf /var/lib/rook/*
