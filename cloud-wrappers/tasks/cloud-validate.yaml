@@ -82,6 +82,15 @@ Templates:
             drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the linode/token!"}'
             exit 1
           {{ end }}
+          {{ range $i, $p := .Machine.Profiles }}
+          s="{{$p}}"
+          if [[ ${#s} -gt 2  ]]; then
+            echo "  verified \"$s\" tag length (must be >2 characters, was ${#s})"
+          else
+            echo "FAIL! \"$s\" profile IS NOT >2 characters. Min 3 is required by Linode"
+            exit 1
+          fi
+          {{ end }}
 
         {{ end }}
 

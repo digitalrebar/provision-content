@@ -55,7 +55,7 @@ Templates:
           - name: check if drpcli is running (makes join idempotent)
             service_facts:
 
-          - name: "drpcli is installed - no further actions"
+          - name: "drpcli is installed? - skip if drpcli is installed"
             debug:
               msg: "DRPCLI status is {{`{{ services['drpcli.service'].status }}`}}"
             when: "'drpcli.service' in services"
@@ -78,6 +78,34 @@ Templates:
           - name: run join-up script
             become: true
             shell: "nohup ./join-up.sh >/dev/null 2>&1 &"
+            when: "'drpcli.service' not in services"
+
+          - name: wait for joinup
+            pause:
+              seconds: 10
+            when: "'drpcli.service' not in services"
+
+          - name: check for drpcli pids (makes sure we started)
+            shell: pidof drpcli
+            register: drpcli_pids
+            ignore_errors: true
+
+          - name: Printing the process IDs obtained
+            debug:
+              msg: "PIDS of DRPCLI: {{`{{drpcli_pids.stdout}}`}}"
+
+          - name: rerun join-up script if no pids - skip is normal
+            become: true
+            shell: "nohup ./join-up.sh >/dev/null 2>&1 &"
+            when: drpcli_pids.stdout == ""
+
+          - name: wait for joinup second time
+            pause:
+              seconds: 10
+            when: drpcli_pids.stdout == ""
+
+          - name: last chance for pids of drpcli [fail if none]
+            shell: pidof drpcli
             when: "'drpcli.service' not in services"
       EOF
 
