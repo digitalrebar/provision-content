@@ -7,7 +7,7 @@ Documentation: |
   Param will have no effect on the cluster.
 Schema:
   type: "string"
-  default: "https://docs.projectcalico.org/v3.9/manifests/calico.yaml"
+  default: "https://docs.projectcalico.org/v3.15/manifests/calico.yaml"
 Meta:
   color: "blue"
   icon: "ship"
