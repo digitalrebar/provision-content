@@ -155,7 +155,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
 
         download -gfsSL {{ .Param "provider/calico-config" }} > /tmp/calico_raw.yaml
         # Strip out any weird control characters
-        cat /tmp/calico_raw -v > /tmp/calico.yaml
+        cat /tmp/calico_raw.yaml -v > /tmp/calico.yaml
         # This next line assures that in the event of multiple NICs in the node, the NIC able to reach 1.1.1.1 will be chosen
         # This can optionally be changed to a regex or even an explicit NIC name
         sed -i "/autodetect\"/a\            - name: IP_AUTODETECTION_METHOD\n              value: \"can-reach=1.1.1.1\"" /tmp/calico.yaml
