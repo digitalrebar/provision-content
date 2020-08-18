@@ -197,7 +197,7 @@ Templates:
           drpcli machines remove $RS_UUID terraform/tfstate || true
         else
           echo "Saving terraform.tfstate file to machine"
-          drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
+          drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate >/dev/null
         fi
       else
         echo "no terraform.state file exists - cannot save"
