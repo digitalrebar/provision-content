@@ -1,6 +1,6 @@
 ---
 Description: "A task to create an NFS share from the DRP server"
-Name: "edge-lab-bootstrap-nfs"
+Name: "edge-lab-setup-nfs"
 Documentation: |
   Install NFS server and creates a share
   Primary usecase is to support shared storage for a k3s cluster
@@ -12,7 +12,7 @@ ExtraClaims:
     action: "*"
     specific: "global"
 Templates:
-  - Name: "build_key_add_it"
+  - Name: "setup-nfs"
     Path: ""
     Contents: |
       #!/usr/bin/env bash
