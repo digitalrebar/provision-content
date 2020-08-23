@@ -35,6 +35,7 @@ OS:
         hw-detect/load_firmware=true
         rw
         quiet
+        {{.Param "debian-buster-netcfg"}}
         {{.Param "kernel-options"}}
         {{.Param "kernel-console"}}
 RequiredParams:
