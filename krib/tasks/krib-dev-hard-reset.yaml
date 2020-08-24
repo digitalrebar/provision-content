@@ -225,10 +225,10 @@ Templates:
     if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
       if [[ ! "$I_AM_MASTER" == true ]] ; then
         # I'm a worker, so wipe disk in preparation for next ceph installation
-        yum install -y gdisk
-        sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
+        # yum install -y gdisk
+        # sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
         # Now remove devicemapper details
-        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+        # for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
       fi
     fi
     {{ end -}}
