@@ -1,0 +1,13 @@
+---
+Name: "cluster/leader"
+Description: "Flag indiciating that machine is a cluster leader"
+Documentation: |
+  Added during cluster-setup to flag a cluster machines as leaders.
+Schema:
+  type: boolean
+  default: false
+Meta:
+  type: "config"
+  color: "blue"
+  icon: "address card"
+  title: "RackN Content"

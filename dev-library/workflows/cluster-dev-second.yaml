@@ -1,0 +1,11 @@
+---
+Name: "cluster-dev-second"
+Description: "For dev testing, runs the wait-time task for cluster workflows"
+Documentation: |
+  Used to generate non-destructive actions in a clusters for testing.
+Stages:
+  - wait-time
+Meta:
+  color: brown
+  icon: cogs
+  title: RackN Content

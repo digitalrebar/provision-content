@@ -1,0 +1,11 @@
+---
+Name: "cluster-dev-first"
+Description: "For dev testing, runs the cluster manager workflow"
+Documentation: |
+  Used to generate non-destructive actions in a clusters for testing.
+Stages:
+  - wait-time
+Meta:
+  color: purple
+  icon: cogs
+  title: RackN Content

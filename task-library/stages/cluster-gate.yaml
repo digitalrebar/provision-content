@@ -1,0 +1,15 @@
+---
+Name: "cluster-gate"
+Description: "Cluster Manager: Controller for Gates"
+Documentation: |
+  Cluster pattern coordinates cluster gate for the Cluster Manager.
+
+  Review the cluster-gate task for more complete documentation .
+
+Tasks:
+  - "cluster-gate"
+Meta:
+  type: "waiting"
+  icon: "step forward"
+  color: "blue"
+  title: "RackN Content"

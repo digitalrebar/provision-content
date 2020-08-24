@@ -30,35 +30,36 @@ Templates:
     # Get access and who we are.
     {{template "setup.tmpl" .}}
 
-    drpcli machines meta set $RS_UUID key color to yellow
+    drpcli machines meta set $RS_UUID key color to yellow >/dev/null
 
     {{template "cluster-shared.tmpl" .}}
 
-    if [[ {{ .Param "cluster/leader-count" }} > 1 ]]; then
-      echo "This script only supports SINGLE LEADER clusters"
-      exit 1
-    fi
     echo "Verifying Cluster $CLUSTER_PROFILE has Param[cluster/leaders] (elect me if missing)"
-    if [[ $(jq length <<< "${CLUSTER_LEADERS}") < {{ .Param "cluster/leader-count" }} ]]; then
-      echo "Attempting to add Myself As Leader"
-      LEADER_NEW='{
-        "Address":"{{ .Machine.Address }}",
-        "Name":"{{ .Machine.Name }}",
-        "Uuid":"{{ .Machine.Uuid }}",
-      }'
-      if drpcli profiles add $CLUSTER_PROFILE param cluster/leaders to "[${LEADER_NEW}]"; then
-        echo "Won Race - I am now the leader"
-        CLUSTER_I_AM_LEADER=true
-        CLUSTER_LEADER_INDEX=0
-        drpcli machines meta set $RS_UUID key icon to anchor
-      else
-        echo "No Action: Lost Race - another machine became the leader"
-        drpcli machines meta set $RS_UUID key icon to ship
-      fi
-      CLUSTER_LEADERS=$(drpcli profiles get $CLUSTER_PROFILE param cluster/leaders)
+    if [[ $CLUSTER_I_AM_LEADER ]] ; then
+      echo "I am a cluster leader! (skipping leader election"
     else
-      echo "No Action: Leader is $(jq '.[0].Name' <<< "${CLUSTER_LEADERS}")"
-      drpcli machines meta set $RS_UUID key icon to ship
+      if [[ $(jq length <<< "${CLUSTER_LEADERS}") -lt {{ .Param "cluster/leader-count" }} ]]; then
+        echo "Attempting to add Myself As Leader"
+        LEADER_NEW='{
+          "Address":"{{ default "127.0.0.1" .Machine.Address }}",
+          "Name":"{{ .Machine.Name }}",
+          "Uuid":"{{ .Machine.Uuid }}",
+        }'
+        if drpcli profiles add $CLUSTER_PROFILE param cluster/leaders to "[${LEADER_NEW}]"; then
+          echo "Won Race - I am now the leader"
+          CLUSTER_I_AM_LEADER=true
+          CLUSTER_LEADER_INDEX=0
+          drpcli machines set $RS_UUID param cluster/leader to true >/dev/null
+          drpcli machines meta set $RS_UUID key icon to "chess knight" >/dev/null
+        else
+          echo "No Action: Lost Race - another machine became the leader"
+          drpcli machines meta set $RS_UUID key icon to "chess pawn"  >/dev/null
+        fi
+        CLUSTER_LEADERS=$(drpcli profiles get $CLUSTER_PROFILE param cluster/leaders)
+      else
+        echo "No Action: Leader is $(jq '.[0].Name' <<< "${CLUSTER_LEADERS}")"
+        drpcli machines meta set $RS_UUID key icon to "chess pawn" >/dev/null
+      fi
     fi
 
     echo "Complete: Setup Cluster"

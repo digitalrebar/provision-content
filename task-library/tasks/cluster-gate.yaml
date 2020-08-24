@@ -1,0 +1,147 @@
+Name: "cluster-gate"
+Description: "Cluster: Manages Machines through Gates"
+Documentation: |
+  Digital Rebar v4.5 Cluster pattern coordinates cluster operations around a series of gate tasks
+  managed by a dedicated workflow run by the cluster manager machine.  This allows the activity of
+  many machines to be synchronized AND for extra-machine and intra-machine processes to be performed
+  by the manager at the appropriate time.
+
+  To operate, build a cluster workflow that performs the cluster level operations (if any).  This
+  workflow should include the `cluster-gate` stage at locations where machine synchronization is required.
+  The stage should be included once for each gate defined.
+
+  The cluster-gate is a simple state machine defined in the cluster-gates parameter (see cluster/gates for
+  more details).  The cluster-gates provide an ordered list of gates.  Each gate goes from a workflow to another workflow.
+  The cluster manager workflow will wait until all machines in the cluster have reached defined from workflow before
+  starting some or all of the cluster machines on the to workflow.
+
+  Between gates, the cluster manager can perform additional stages.  The cluster-gate stages will allow
+  all machines in the cluster to resyncronize.
+
+  In the v4.5 pattern, the cluster can be defined as any API filterable string (see cluster/filter Param).
+  By default, the filter is uses the legacy cluster profile pattern.
+
+  To use this pattern, operators must:
+  * define a cluster manager workflow including a cluster-gate stage for each gate
+  * define all the workflows used between the machine gates (no workflow, "", is a valid workflow)
+  * designate a machine as the cluster manager
+  * define the cluster/gates parameter for the manager
+
+  Generally, the cluster manager is not an actual machine, but a stand-alone machine context.
+Meta:
+  type: "check"
+  icon: "step forward"
+  color: "blue"
+  title: "RackN Content"
+RequiredParams:
+  - cluster/filter
+  - cluster/gates
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # cluster-gate-collect
+
+    set -e
+    {{template "setup.tmpl" .}}
+    {{template "cluster-shared.tmpl" .}}
+    {{$filter := .Param "cluster/filter"}}
+    {{$atgate := .Param "cluster/at-gate"}}
+
+    echo "Checking for running machines in cluster"
+    echo "=== CLUSTER COLLECT (At Gate {{$atgate}}): {{$filter}} ==="
+    while [[ "$(drpcli machines wait $RS_UUID Runnable true 1)" == "complete" ]]; do
+      #TODO - switch to drpcli machines count after v4.5 releases!!
+      CLUSTER_MACHINES="$(drpcli machines list WorkflowComplete=false Uuid="Ne($RS_UUID)" {{$filter}})"
+      count=$(jq -r length <<< "$CLUSTER_MACHINES")
+      if [[ $count -gt 0 ]]; then
+        echo "  we still have $count running machines: $(jq -rc "map(.Name)" <<< "$CLUSTER_MACHINES")"
+        sleep $count
+      else
+        echo "=== CLUSTER RELEASE (At Gate {{$atgate}}) ==="
+        ATGATE=-1
+        LASTGATE=-1
+        RELEASE=0
+        ATLEASE=1
+        {{range $index, $gate := .Param "cluster/gates" }}
+          LASTGATE={{$index}}
+          echo "  Checking {{$index}}:{{$gate.Name}} from \"{{$gate.FromWorkflow}}\""
+          if [[ $ATGATE -lt 0 ]]; then
+            CLUSTER_MACHINES="$(drpcli machines list Workflow="{{$gate.FromWorkflow}}" WorkflowComplete=true Uuid="Ne($RS_UUID)" {{$filter}})"
+            WAITING=$(jq -r length <<< "$CLUSTER_MACHINES")
+            if [[ $WAITING -gt 0 ]]; then
+              echo "    Found $WAITING machines at {{$index}}:{{$gate.Name}} - releasing {{$gate.AtATime}}"
+              ATGATE={{$index}}
+              RELEASE={{$gate.AtATime}}
+              ATLEAST={{$gate.AtLeast}}
+              TOWORKFLOW="{{$gate.ToWorkflow}}"
+              {{ if $gate.Icon -}}
+              drpcli machines meta set $RS_UUID key icon to "{{$gate.Icon}}" > /dev/null
+              {{- end }}
+            else
+              echo "    No machines at {{$index}}:{{$gate.Name}} - checking next gate"
+            fi
+          else
+            echo "  ...skipping {{$index}}:{{$gate.Name}} already using Gate $ATGATE"
+          fi
+        {{else}}
+          echo "ERROR: No cluster/gates defined!"
+          exit 1
+        {{end}}
+
+
+        echo "=== RELEASE $RELEASE MACHINES FROM $ATGATE (At Gate {{$atgate}}) ===="
+        if [[ $ATGATE -lt 0 ]]; then
+          echo "NO ACTION: no machines at any gates.  We are done!"
+          drpcli machines remove $RS_UUID param cluster/at-gate > /dev/null
+          exit 0
+        else
+          echo "How many machines are at the gate?"
+          TOTAL_MACHINES="$(drpcli machines list Uuid="Ne($RS_UUID)" {{$filter}})"
+          TOTAL=$(jq -r length <<< "$TOTAL_MACHINES")
+          if [[ $TOTAL -lt $ATLEAST ]]; then
+            echo "KEEP WAITING: not enough machines at gate. Have $TOTAL but require $ATLEAST"
+            LEFTOVER=$TOTAL
+            sleep 10
+          else
+            LEFTOVER=$(jq -r length <<< "$CLUSTER_MACHINES")
+            if [[ $RELEASE -gt 0 ]]; then
+              echo "Releasing $RELEASE of $LEFTOVER machines (of $TOTAL) from $ATGATE"
+              RELEASE_UUIDS=$(jq -r ".[0:$RELEASE] | .[].Uuid" <<< "$CLUSTER_MACHINES")
+              LEFTOVER=$((LEFTOVER-RELEASE))
+            else
+              echo "Releasing all $TOTAL machines from $ATGATE"
+              RELEASE_UUIDS=$(jq -r ".[].Uuid" <<< "$CLUSTER_MACHINES")
+              LEFTOVER=0
+            fi
+            i=0
+            for uuid in $RELEASE_UUIDS; do
+              name=$(drpcli machines workflow $uuid "$TOWORKFLOW" | jq -r .Name)
+              echo "  Started Workflow $TOWORKFLOW on Machine $i: $name ($uuid)"
+              i=$((i+1))
+            done
+          fi
+        fi
+        if [[ $ATGATE -eq {{$atgate}} && $LEFTOVER -lt 1 ]]; then
+          if [[ $ATGATE -eq $LASTGATE ]]; then
+            echo "COMPLETE! All machines released from LAST gate ($ATGATE)"
+            drpcli machines remove $RS_UUID param cluster/at-gate > /dev/null
+          else
+            echo "ADVANCE! All machines released from gate $ATGATE of $LASTGATE"
+            drpcli machines set $RS_UUID param cluster/at-gate to {{add $atgate 1}} > /dev/null
+          fi
+          exit 0
+        else
+          echo "$LEFTOVER machines remain.  Take another pass on gate $ATGATE of $LASTGATE"
+        fi
+
+        echo "=== CLUSTER RECOLLECT (At Gate {{$atgate}}): {{$filter}} ==="
+      fi
+    done
+
+    echo "should never reach this point"
+    exit 1
+  Name: cluster-gate

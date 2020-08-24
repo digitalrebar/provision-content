@@ -1,6 +1,6 @@
 ---
 Name: "cluster/escape"
-Description: "Exit code out of cluster stages (rescue!)"
+Description: "DEPRECATED Exit code out of cluster stages (rescue!)"
 Schema:
   type: integer
   default: 1

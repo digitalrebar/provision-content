@@ -1,0 +1,16 @@
+---
+Name: "cluster-gate-start"
+Description: "Cluster Manager: setup/clear for Cluster-Gates"
+Documentation: |
+  Clears the cluster/at-gate param to make sure Cluster workflows
+  do not start in the middle.
+
+  Optional
+
+Tasks:
+  - "cluster-gate-start"
+Meta:
+  type: "setup"
+  icon: "play"
+  color: "blue"
+  title: "RackN Content"

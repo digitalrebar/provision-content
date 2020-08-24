@@ -1,7 +1,10 @@
 ---
 Name: "cluster-add"
-Description: "A task that adds nodes to a cluster profile"
+Description: "DEPRECATED A task that adds nodes to a cluster profile"
 Documentation: |
+  =========================
+  DEPRECATED 
+  =========================
   Injects the Machine Uuid into the cluster/machines param.
   This is the first step in a the cluster workflow.
   Typical cluster workflow is ``add -> step -> remove -> sync``

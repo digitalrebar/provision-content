@@ -2,7 +2,7 @@
 Name: "cluster-setup"
 Description: "Setup cluster leader and members"
 Documentation: |
-  Initialize Cluster using Digital Rebar Patterns
+  Initialize Cluster using Digital Rebar Cluster Patterns
 
   1. will verify machine is in a shared profile
   2. will create shared profile if missing

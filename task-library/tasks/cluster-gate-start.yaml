@@ -1,0 +1,33 @@
+Name: "cluster-gate-start"
+Description: "Cluster: Prepared Cluster Workflow"
+Documentation: |
+  Clears the cluster/at-gate param to make sure Cluster workflows
+  do not start in the middle.
+
+  Optional
+Meta:
+  type: "setup"
+  icon: "play"
+  color: "blue"
+  title: "RackN Content"
+RequiredParams:
+  - cluster/filter
+  - cluster/gates
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+Templates:
+- Contents: |-
+    #!/bin/bash
+    # cluster-gate-collect
+
+    set -e
+    {{template "setup.tmpl" .}}
+    {{template "cluster-shared.tmpl" .}}
+
+    echo "Prepare - reset at-gate"
+    drpcli machines remove $RS_UUID param cluster/at-gate || true > /dev/null
+
+    exit 0
+  Name: cluster-gate-start

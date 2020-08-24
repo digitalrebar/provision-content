@@ -1,6 +1,8 @@
 ---
 Name: "cluster/machines"
-Description: "Machines in this cluster"
+Description: "DEPRECATED Machines in this cluster"
+Documentation: |
+  Use the cluster/filter to collect machines in the cluster
 Schema:
   type: "array"
   items:

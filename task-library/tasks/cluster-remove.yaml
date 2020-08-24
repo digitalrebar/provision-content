@@ -1,7 +1,10 @@
 ---
 Name: "cluster-remove"
-Description: "A task that removes nodes from cluster profile"
+Description: "DEPRECATED A task that removes nodes from cluster profile"
 Documentation: |
+  =========================
+  DEPRECATED 
+  =========================
   Removes the Machine Uuid into the cluster profile.
 
   Typical cluster workflow is ``add -> step -> remove -> sync``

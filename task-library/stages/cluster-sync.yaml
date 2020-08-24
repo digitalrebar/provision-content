@@ -1,6 +1,10 @@
 ---
 Name: "cluster-sync"
-Description: "Wait for Queue Empty"
+Description: "DEPRECATED Wait for Queue Empty"
+Documentation: |
+  =========================
+  DEPRECATED 
+  =========================
 Tasks:
   - "cluster-sync"
 Meta:

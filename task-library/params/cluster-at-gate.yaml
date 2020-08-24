@@ -1,0 +1,17 @@
+---
+Name: "cluster/at-gate"
+Description: "Cluster Manager: Used to tracks the current gate (system managed)"
+Documentation: |
+  At Gate is a system managed index that is set by the cluster-gate task during
+  management operations.
+
+  When removed or missing, the cluster gate is the first gate.
+Schema:
+  type: "number"
+  default: 0
+Meta:
+  type: "config"
+  color: "blue"
+  icon: "pause"
+  title: "RackN Content"
+  copyright: "RackN 2020"

@@ -1,6 +1,8 @@
 ---
 Name: "cluster/profile"
 Description: "Name of the profile for this cluster"
+Documentation: |
+  Required field for cluster operations, defines the group of machines
 Schema:
   type: "string"
   default: "cluster01"

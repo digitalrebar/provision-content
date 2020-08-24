@@ -1,6 +1,8 @@
 ---
 Name: "cluster/leaders"
-Description: "Machines that have been elected leader"
+Description: "DEPRECATED Machines that have been elected leader"
+Documentation: |
+  DEPRECATED in favor of using cluster/leader param
 Schema:
   type: "array"
   items:

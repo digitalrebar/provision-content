@@ -1,0 +1,17 @@
+---
+Name: "cluster-dev-manager"
+Description: "For dev testing, runs the cluster manager workflow"
+Documentation: |
+  Used to generate non-destructive actions in a clusters for testing.
+Stages:
+  - cluster-gate-start
+  - hello-world
+  - cluster-gate
+  - wait-time
+  - cluster-gate
+  - cluster-gate
+  - workflow-reset
+Meta:
+  color: green
+  icon: cogs
+  title: RackN Content

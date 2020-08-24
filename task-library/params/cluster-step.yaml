@@ -1,10 +1,12 @@
 ---
 Name: "cluster/step"
-Description: "Number of machines to use per step in this cluster"
+Description: "DEPRECATED Number of machines to release from a gate"
+Documentation: |
+  Use the cluster/gates instead.  Each gate can has it's own release (AtATime) value.
 Schema:
   type: integer
   default: 1
-  minimum: 1
+  minimum: -1
 Meta:
   color: "blue"
   icon: "clone"

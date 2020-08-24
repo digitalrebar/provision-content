@@ -1,0 +1,97 @@
+---
+Name: "cluster/gates"
+Description: "Cluster: Gates used to synchronize workflows"
+Documentation: |
+  Gates are points in a workflow that are used to coordinate activity between other systems.
+
+  Each gate is effectively a state machine with entery and exit consitions.  This param is used
+  to define that state machine.  They are processed in the order provided, so if there is no
+  Machine.Workflow matching the `FromWorkflow` then the next gate is considered.
+
+  Gate components:
+
+  * Name: cosmetic detail useful for logging (optional, default="Unnamed Gate")
+  * FromWorkflow: workflow used to trigger this gate (required).
+  * ToWorkflow: workflow that will be started when the gate criteria are met (required)
+  * AtATime: maximum number of machines to release from the gate at a time (<1 = all, default = -1)
+  * AtLeast: minimum number of machines required to release the gate (default = 1).
+  * Icon: if provided, will set the icon for the Cluster for operator status hints
+
+  Note: Gates cannot use the same FromWorkflow!
+
+  Warning: Setting AtLeast>1 may cause the workflow to loop forever!
+
+  Example (designed to work with the dev-library cluster-manager workflow):
+
+    ::
+
+      [
+        { 
+          "Name": "First",
+          "FromWorkflow": "",
+          "ToWorkflow": "cluster-dev-first",
+          "AtATime": 1,
+          "AtLeast": 1,
+          "Icon": "cog"
+        }, {
+          "Name": "Second",
+          "FromWorkflow": "cluster-dev-first",
+          "ToWorkflow": "cluster-dev-second",
+          "AtLeast": 1,
+          "AtATime": 1
+        }, {
+          "Name": "Last",
+          "FromWorkflow": "cluster-dev-second",
+          "ToWorkflow": "",
+          "AtLeast": 1,
+          "AtATime": -1,
+          "Icon": "check"
+        }
+      ]
+
+Schema:
+  type: array
+  items:
+    properties:
+      Name:
+        type: string
+        default: "Unnamed Gate"
+      FromWorkflow:
+        type: string
+        default: ""
+      ToWorkflow:
+        type: string
+        default: ""
+      AtATime:
+        type: integer
+        default: -1 
+      AtLeast:
+        type: integer
+        default: 1
+      Icon:
+        type: string
+        default: "step forward"
+  default:
+    - Name: First
+      FromWorkflow: ""
+      ToWorkflow: cluster-dev-first
+      AtATime: 1
+      AtLeast: 1
+      Icon: "star outline"
+    - Name: Second
+      FromWorkflow: cluster-dev-first
+      ToWorkflow: cluster-dev-second
+      AtATime: 1
+      AtLeast: 1
+      Icon: "star half"
+    - Name: Last
+      FromWorkflow: cluster-dev-second
+      ToWorkflow: ""
+      AtATime: -1
+      AtLeast: 1
+      Icon: "star"
+Meta:
+  type: "config"
+  color: "blue"
+  icon: "step forward"
+  title: "RackN Content"

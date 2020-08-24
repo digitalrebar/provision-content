@@ -1,6 +1,6 @@
 FROM alpine:latest
 RUN apk --no-cache add bash curl openssh-keygen
-RUN curl -o drpcli440 https://s3-us-west-2.amazonaws.com/rebar-catalog/drpcli/v4.4.0/amd64/linux/drpcli && \
+RUN curl -o drpcli440 https://s3-us-west-2.amazonaws.com/rebar-catalog/drpcli/v4.5.0-alpha00.76%2Bgd90e2bd0bccafba048b8ae1d2540c2b001181cce/amd64/linux/drpcli && \
 	chmod 755 drpcli440 && \
 	./drpcli440 catalog item download drpcli to /usr/bin/drpcli && \
 	chmod 755 /usr/bin/drpcli && \

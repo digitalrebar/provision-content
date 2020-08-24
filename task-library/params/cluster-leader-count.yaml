@@ -1,6 +1,8 @@
 ---
 Name: "cluster/leader-count"
 Description: "Number of leaders to elect while building cluster"
+Documentation: |
+  Instructs cluster-setup to flag desired number of cluster machines as leaders.
 Schema:
   type: integer
   default: 1

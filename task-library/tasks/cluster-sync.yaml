@@ -1,7 +1,10 @@
 ---
 Name: "cluster-sync"
-Description: "Waits till all machines complete (use after cluster-remove)"
+Description: "DEPRECATED Waits till all machines complete (use after cluster-remove)"
 Documentation: |
+  =========================
+  DEPRECATED 
+  =========================
   Waits until no machines remain.  Use with ``cluster-remove``.
 
   Typical cluster workflow is ``add -> step -> remove -> sync``
