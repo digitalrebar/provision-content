@@ -29,6 +29,7 @@ Templates:
       ISO="$(basename $ISO_URL)"
       SCOUNT={{ .Param "proxmox/lab-student-count" }}
       TCOUNT={{ .Param "proxmox/lab-student-vms" }}
+      STORAGE={{ .Param "proxmox/storage-name" }}
       # DRP
       D_BOOT={{ .Param "proxmox/lab-drp-boot-order" }}
       D_CORES={{ .Param "proxmox/lab-drp-cores" }}
@@ -42,6 +43,7 @@ Templates:
       M_MEMORY={{ .Param "proxmox/lab-machines-memory" }}
       M_DISK={{ .Param "proxmox/lab-machines-disk" }}
       M_XTRA={{ .Param "proxmox/lab-pvesh-extra-config-machines" }}
+
 
       ### TODO: Make these params
       # NIC one of: e1000 e1000-82540em e1000-82544gc e1000-82545em i82551 i82557b i82559er ne2k_isa ne2k_pci pcnet rtl8139 virtio vmxnet3
@@ -72,7 +74,7 @@ Templates:
 
       destroy_if_exists() {
         local _vmid=$1
-        if pvesh get /nodes/${PVENODE}/qemu/${_vmid}/status/current
+        if pvesh get /nodes/${PVENODE}/qemu/${_vmid}/status/current > /dev/null 2>&1
         then
           echo "Virtual Machine with ID '$_vmid' exists and being destroyed now..."
           pvesh create /nodes/${PVENODE}/qemu/${_vmid}/status/stop
@@ -88,30 +90,36 @@ Templates:
         FNUM=$(/usr/bin/printf "%02i" $(echo $SNUM | sed 's/^0*//g'))
         FNODE=$(/usr/bin/printf "%02i" $(echo ${PVENODE:(-2)} | sed 's/^0*//g'))
         BRIDGE=${BASE}${SNUM}
+        STUD="s$FNUM"
+
         # Create student management node
-        destroy_if_exists $VMID
         LOG=$(mktemp /tmp/pvesh-create-$VMID-XXXXXXXXX.log)
         echo "CREATE drp with ID $VMID at $(date)" > $LOG
+        destroy_if_exists $VMID
         set -x
-        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $D_BOOT --cpu host --cores $D_CORES --memory $D_MEMORY --net0 ${D_NIC_TYPE},bridge=${D_BRIDGE},firewall=0,macaddr=00:00:00:${FNODE}:${FNUM}:00 --net1 ${D_NIC_TYPE},bridge=${BRIDGE} --ostype l26 --scsihw $D_SCSI_TYPE --scsi0 local-lvm:$D_DISK $D_XTRA > $LOG 2>&1 &
+        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --name $STUD-drp-$VMID --boot $D_BOOT --cpu host --cores $D_CORES --memory $D_MEMORY --net0 ${D_NIC_TYPE},bridge=${D_BRIDGE},firewall=0,macaddr=00:00:00:${FNODE}:${FNUM}:00 --net1 ${D_NIC_TYPE},bridge=${BRIDGE} --ostype l26 --scsihw $D_SCSI_TYPE --scsi0 $STORAGE:$D_DISK $D_XTRA > $LOG 2>&1
         set +x
-        #pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $D_BOOT --cpu host --cores $D_CORES --memory $D_MEMORY --net0 ${NIC_TYPE},bridge=${D_BRIDGE},firewall=0 --net1 ${NIC_TYPE},bridge=${BRIDGE} --ostype l26 --scsihw $SCSI_TYPE --scsi0 local-lvm:$D_DISK --ide2 local:iso/${ISO},media=cdrom $D_XTRA > $LOG 2>&1 &
         START="$START $VMID"
 
-        for TNUM in $(seq $TCOUNT)
-        do
-          # Create student target nodes
-          FNUM=$(/usr/bin/printf "%02i" $(echo $TNUM | sed 's/^0*//g'))
-          VMID=${SNUM}${FNUM}
-          BRIDGE=${BASE}${SNUM}
-          destroy_if_exists $VMID
-          LOG=$(mktemp /tmp/pvesh-create-$VMID-XXXXXXXXX.log)
-          LOGS="$LOGS $LOG"
-          echo "CREATE machine with ID $VMID at $(date)" > $LOG
-          set -x
-          pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --boot $M_BOOT --cpu host --cores $M_CORES --memory $M_MEMORY --net0 ${M_NIC_TYPE},bridge=${BRIDGE},firewall=0,macaddr=00:00:00:00:00:$FNUM --ostype l26 --sata0 local-lvm:$M_DISK $M_XTRA > $LOG 2>&1 &
-          set +x
-        done
+        if [[ "$TCOUNT" -eq 0 ]]
+        then
+          echo "Target machine count set to ZERO, not creating any."
+        else
+          for TNUM in $(seq $TCOUNT)
+          do
+            # Create student target nodes
+            FNUM=$(/usr/bin/printf "%02i" $(echo $TNUM | sed 's/^0*//g'))
+            VMID=${SNUM}${FNUM}
+            BRIDGE=${BASE}${SNUM}
+            destroy_if_exists $VMID
+            LOG=$(mktemp /tmp/pvesh-create-$VMID-XXXXXXXXX.log)
+            LOGS="$LOGS $LOG"
+            echo "CREATE machine with ID $VMID at $(date)" > $LOG
+            set -x
+            pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --name $STUD-mach-$VMID --boot $M_BOOT --cpu host --cores $M_CORES --memory $M_MEMORY --net0 ${M_NIC_TYPE},bridge=${BRIDGE},firewall=0,macaddr=00:00:00:00:00:$FNUM --ostype l26 --sata0 $STORAGE:$M_DISK $M_XTRA > $LOG 2>&1 &
+            set +x
+          done
+        fi
 
       done
 

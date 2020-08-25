@@ -26,6 +26,14 @@ Templates:
 
       EXT={{ .Param "lab-drp-external-network" }}
       INT={{ .Param "lab-drp-internal-network" }}
+      CIDR={{ .Param "lab-drp-internal-subnet" }}
+      NET=$(echo $CIDR | cut -d "/" -f1)
+      PREFIX=$(echo $CIDR | cut -d "/" -f2)
+      BASE=$(echo $NET | cut -d"." -f1-3)
+      LAST=$(echo $NET | cut -d"." -f4)
+      (( OCT = LAST + 1 ))
+      IPADDR="${BASE}.${OCT}"
+
       PKGS="vim curl wget"
 
       echo "Setting up ip forwaarding ... "
@@ -44,8 +52,8 @@ Templates:
       DEVICE=$INT
       BOOTPROTO=none
       ONBOOT=yes
-      PREFIX=24
-      IPADDR=192.168.1.1
+      PREFIX=$PREFIX
+      IPADDR=$IPADDR
       " > /etc/sysconfig/network-scripts/ifcfg-$INT
       ifdown $INT || true
       ifup $INT
