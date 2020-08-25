@@ -1,0 +1,46 @@
+---
+Name: network-add-nat-bridge
+Description: Add a NAT bridge to connect VMs.
+Documentation: |
+  This task creates a NAT bridge that will be attached to the
+  ``proxmox/lab-drp-external-bridge`` defined bridge.
+
+  The NAT bridge will Masquerade for ``proxmox/lab-nat-subnet``.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+Templates:
+  - Name: "network-add-nat-bridge.sh.tmpl"
+    Contents: |-
+      #!/usr/bin/env bash
+      # Create NAT type bridge and set NAT Masquerading on it
+
+      {{ template "setup.tmpl" . }}
+
+      SOURCE='{{ .Param "proxmox/lab-drp-external-bridge" }}'
+      BRIDGE='{{ .Param "proxmox/lab-nat-bridge" }}'
+      SUBNET='{{ .Param "proxmox/lab-nat-subnet" }}'
+
+      mkdir -p /etc/network/interfaces.d
+      cat <<EOBR > /etc/network/interfaces.d/$BRIDGE
+      auto $BRIDGE
+      iface $BRIDGE inet static
+        address  $SUBNET
+        bridge_ports none
+        bridge_stp off
+        bridge_fd 0
+
+        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
+        post-up   iptables -t nat -A POSTROUTING -s "$SUBNET" -o $SOURCE -j MASQUERADE
+        post-down iptables -t nat -D POSTROUTING -s "$SUBNET" -o $SOURCE -j MASQUERADE
+
+      EOBR
+
+      systemctl restart networking.service
+
+

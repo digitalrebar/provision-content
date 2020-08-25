@@ -1,0 +1,22 @@
+---
+Name: "proxmox/flexiflow-buster-install"
+Description: "Defines tasks to inject to 'flexiflow-buster-install' workflow."
+Documentation: |
+  This Param contains an Array of Strings that will define which tasks to dynamically
+  add to the ``flexiflow-buster-install`` workflow before it exits.
+
+  This is generally used to specify the network setup stages in the base Hypervisor,
+  before creating any target DRP or Machine VMs.  For example, the following tasks
+  set network configuration up:
+
+    * ``network-convert-interface-to-bridge``
+    * ``network-add-nat-bridge``
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+Meta:
+  color: "orange"
+  icon: "magic"
+  title: "RackN Content"

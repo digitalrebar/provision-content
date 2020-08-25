@@ -1,0 +1,9 @@
+---
+Name: "network-add-nat-bridge"
+Description: "Add NAT bridge to connect VMs to"
+Tasks:
+  - "network-add-nat-bridge"
+Meta:
+  icon: "download"
+  color: "green"
+  title: "Digital Rebar Community Content"

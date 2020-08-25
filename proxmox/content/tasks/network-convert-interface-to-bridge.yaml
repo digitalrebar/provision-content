@@ -1,0 +1,65 @@
+---
+Name: network-convert-interface-to-bridge
+Description: Converts the Boot interface to Bridge enslaved device.
+Documentation: |
+  This task converts the systems Boot Interface to an bridge
+  enslaved connection.  Generally this task is used to set up
+  basic bridging for a hypervisor.
+
+Meta:
+  color: blue
+  feature-flags: sane-exit-codes
+  icon: shopping cart
+  title: RackN Content
+OptionalParams: []
+Prerequisites: []
+Templates:
+  - Name: "network-convert-interface-to-bridge.sh.tmpl"
+    Contents: |-
+      #!/usr/bin/env bash
+      # Convert interface to bridge enslaved connection
+
+      {{ template "setup.tmpl" . }}
+
+      MAC=$(drpcli machines get $RS_UUID param last-boot-macaddr | jq -r '.' | sed -e 's/^01-//' -e 's/-/:/g')
+      PRE="Interface with MAC ('$MAC')"
+      BRIDGE='{{ .Param "proxmox/lab-drp-external-bridge" }}'
+
+      # we must have zero from this, which indicates we are not enslaved already'
+      ENS=$(ip -j address show | jq -r ".[] | select(.address==\"$MAC\") | select(.master==\"$BRIDGE\") | .ifname" | wc -l)
+      [[ "$ENS" != 0 ]] && xiterr 1 "$PRE is already enslaved. Failing." || echo ">>> $PRE is not yet enslaved."
+
+      # we must have one from this
+      INT=$(ip -j address show | jq -r ".[] | select(.address==\"$MAC\") | .ifname")
+      NUM=$(echo "$INT" | wc -l)
+      [[ "$NUM" != 1 ]] && xiterr 1 "$PRE configured more than once." || echo ">>> $PRE only found once"
+
+      echo "Selecting interface '$INT' to enslave on Bridge '$BRIDGE'"
+
+      mkdir -p /etc/network/interfaces.d
+
+      ########
+      ######## WARNING
+      ########
+      ######## This currently only works for DHCP based configurations.  Static or
+      ######## other more complex configs will require enhancements to this script.
+      ########
+
+      echo "Commenting out interface '$INT' definitions in /etc/network/interfaces"
+      echo "NOTE: this is bad - if interface has a more complex or Static IP config, this will fail"
+      sed -i.bak "s/^\(.*${INT}.*$\)/#\1/g" /etc/network/interfaces
+
+      echo "Building bridge interface configuration for '$BRIDGE'"
+      cat <<EOBR > /etc/network/interfaces.d/$BRIDGE
+      auto $BRIDGE
+      iface $BRIDGE inet dhcp
+        bridge_ports $INT
+        # disable Spanning Tree Protocol, no delay before active, no fwding delay
+        bridge_stp off
+        bridge_waitport 0
+        bridge_fd 0
+
+      EOBR
+
+      systemctl restart networking.service
+
