@@ -18,9 +18,9 @@ RUN apk add --no-cache bash bind-tools
 #RUN rm -f govc_linux_amd64.gz
 
 ADD https://s3-us-west-2.amazonaws.com/get.rebar.digital/artifacts/govc/govc-multi-disk-try2 ./
-mv govc-multi-disk-try2 /usr/bin/
-chmod 755 /usr/bin/govc-multi-disk-try2
-ln -s /usr/bin/govc-multi-disk-try2 /usr/bin/govc
+RUN mv govc-multi-disk-try2 /usr/bin/
+RUN chmod 755 /usr/bin/govc-multi-disk-try2
+RUN ln -s /usr/bin/govc-multi-disk-try2 /usr/bin/govc
 
 ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/amd64/linux/drpcli /usr/bin/
 RUN chmod 755 /usr/bin/drpcli
