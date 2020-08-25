@@ -6,6 +6,8 @@ Documentation: |
   provided, and enroll all Machines with the same cluster designation defined
   by the Param ``esxi/cluster-name``.
 
+  **THIS IS DEPRECATED - VSAN tooling is in a separate task.**
+
 ExtraClaims:
   - scope: "machines"
     action: "*"
@@ -69,6 +71,7 @@ Templates:
       DC='{{ .Param "esxi/datacenter-name" }}'
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       OPTIONS='{{ .Param "esxi/cluster-options" }}'
+      VSAN_ENABLED='{{ .Param "esxi/vsan-enabled" }}'
       FOLDER='{{ .ParamExpand "esxi/cluster-folder" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
       MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
@@ -80,6 +83,7 @@ Templates:
       {{ else -}}
       xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not been assigned."
       {{ end }}
+      PARAM_SCUUID="esxi/vsan-data/sub-cluster-uuid"
 
       export GOVC_PERSIST_SESSION=false
 
@@ -121,10 +125,72 @@ Templates:
         # echo $MEMBER.$DNAME
       }
 
+      get_vmk_device() {
+        _vmk=$(drpcli machines get Name:$MEMBER param esxi/vsan-vmk | jq -r '.' || true)
+        if [[ -n "$_vmk" && "$_vmk" != "null" ]]
+        then
+          echo "Found VMK device '$_vmk' from 'esxi/vsan-vmk' param..."
+        else
+          echo "'esxi/vsan-vmk' has no assigned value, checking 'esxi/network-firstboot-vmk'..."
+          _vmk=$(drpcli machines get Name:$MEMBER param esxi/network-firstboot-vmk| jq -r '.' || true)
+          [[ -z "$_vmk" || "$_vmk" == "null" ]] && echo "No value assigned by 'esxi/network-firstboot-vmk' ... " || true
+        fi
+
+        [[ -z "$_vmk" || "$_vmk" == "null" ]] && { _vmk="vmk0"; echo "Falling back to default 'vmk0'."; } || true
+
+        echo "Using VMK device '$VMK' for VSAN traffic ... "
+        VMK="$_vmk"
+      }
+
+      set_vmk_on_host() {
+        local _has_vsan _vmk _pass
+        local GOVC_URL=$(get_member_name $NODE)
+        local GOVC_USERNAME=root
+        local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        local GOVC_INSECURE=1
+        local GOVC_DATASTORE=""
+        local GOVC_RESOURCE_POOL=""
+        local GOVC_PASSWORD
+
+        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
+        [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
+        GOVC_PASSWORD="$_pass"
+
+        _msg="Running 'govc' with the following credentials against '$HNAME' ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+
+        get_vmk_device
+
+        _has_vsan=$(govc host.esxcli vsan network list 2> /dev/null)
+        if [[ -n "$_has_vsan" ]]
+        then
+          echo ">>> VMK $VMK appears to have VSAN type already"
+        else
+          echo ">>> adding VMK $VMK with VSAN type"
+          _args="host.esxcli vsan network ip add -i $VMK"
+          echo "CMD: govc $_args"
+          govc $_args
+        fi
+
+      } # end set_vmk_on_host()
+
       # uses variable MEMBER to operate against
       cluster_add() {
 
         [[ -n "$THUMB" ]] && THUMB="-thumbprint $THUMB" || THUMB="-noverify"
+        [[ "$VSAN_ENABLED" == "true" ]] && set_vmk_on_host || true
         _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
         [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
 
@@ -152,6 +218,16 @@ Templates:
         echo ">>> 'cluster.add' running in the background, no live streaming of job log data."
           # [[ -n "$FOLDER" ]] && FOLD="-folder=\"$FOLDER\""
           run_govc cluster.create $FOLD "$CLUSTER"
+        fi
+
+        if [[ "$VSAN_ENABLED" == "true" ]]
+        then
+          if ! echo "$OPTIONS" | grep -q ".*-vsan-enabled.*"
+          then
+            echo "Appending '-vsan-enabled' option to cluster options."
+            echo "If '-vsan-autoclaim' is desired, you must set it on 'esxi/cluster-options' and rebuild."
+            OPTIONS="-vsan-enabled $OPTIONS"
+          fi
         fi
 
         if [[ -n "$OPTIONS" ]]
