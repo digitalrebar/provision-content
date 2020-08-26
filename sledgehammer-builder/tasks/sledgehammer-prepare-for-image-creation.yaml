@@ -61,3 +61,7 @@ Templates:
       {{ range (.Param "sledgehammer/enable-services") }}
       systemctl enable {{ . }}
       {{ end }}
+  - Name: set-default-python
+    Contents: |
+      #!/bin/bash
+      alternatives --set python {{ .Param "sledgehammer/default-python" }}
