@@ -1,5 +1,5 @@
 ---
-Name: "lab-drp-network"
+Name: "proxmox-lab-drp-network"
 Description: "Setup up DRP external network."
 Documentation: |
   Sets up the DRP for external IP Forwarding and masquerading (nat),
@@ -10,7 +10,7 @@ Documentation: |
   embedded cloud-init.
 
 Tasks:
-  - "lab-drp-network"
+  - "proxmox-lab-drp-network"
 Meta:
   icon: "download"
   color: "yellow"
