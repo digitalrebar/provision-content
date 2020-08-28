@@ -4,6 +4,7 @@ Description: "Debian 9 install BootEnv"
 Documentation: |
   This BootEnv installs Debian 9 via the "mini" ISO file.
 Meta:
+  type: "os"
   feature-flags: "change-stage-v2"
   icon: "linux"
   color: "black"
@@ -11,10 +12,7 @@ Meta:
 OS:
   Name: "debian-9"
   Family: "debian"
-  IsoFile: "debian-9-amd64-mini.iso"
-  IsoSha256: "e93011cf474c91d89bc382efec825549a136c86f59794261834e1c6f17ed53d0"
-  IsoUrl: "http://mirrors.kernel.org/debian/dists/stretch/main/installer-amd64/current/images/netboot/mini.iso"
-  Version: "9.6"
+  Version: "9"
 Initrds:
   - "initrd.gz"
 Kernel: "linux"

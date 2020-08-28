@@ -5,6 +5,8 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+{{ template "download-tools.tmpl" .}}
+
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
@@ -18,13 +20,10 @@ MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 
 if [[ $MASTER_INDEX == 0 ]] ; then
   export KUBECONFIG=/etc/kubernetes/admin.conf
-  if ! which wget ; then
-    install wget
-  fi
 
   # Get manifests, and duplicate service manifest for optional additional external ingress
-  wget -O /tmp/nginx-ingress-mandatory.yaml {{ .Param "krib/ingress-nginx-mandatory" }}
-  wget -O /tmp/nginx-ingress-service.yaml {{ .Param "krib/ingress-nginx-config" }}
+  download -o /tmp/nginx-ingress-mandatory.yaml {{ .Param "krib/ingress-nginx-mandatory" }}
+  download -o /tmp/nginx-ingress-service.yaml {{ .Param "krib/ingress-nginx-config" }}
 
   # Replace references to "master" with the user-specified tag (if user has left the default at "master" this will have no effect)
   sed -i 's/nginx-ingress-controller:.*/nginx-ingress-controller:{{ .Param "krib/nginx-ingress-version" }}/' /tmp/nginx-ingress-mandatory.yaml
@@ -127,7 +126,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # now cert-manager
 {{if .ParamExists "certmanager/email"}}
   echo "Start cert-manager install"
-  wget -O /tmp/certmanager-manifests.yaml {{ .Param "certmanager/manifests" }}
+  download -o /tmp/certmanager-manifests.yaml {{ .Param "certmanager/manifests" }}
 
   echo "Preparing namespace and disabling validation.."
   kubectl create namespace cert-manager || echo "Failed to create namespace, it probably already exists. Proceeding..."
@@ -151,7 +150,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   # Replace default container image with the one specified in "krib/nginx-ingress-container-image-controller"
   sed -i 's|quay.io/jetstack/cert-manager-webhook|{{ .Param "krib/cert-manager-container-image-webhook" }}|' \
     /tmp/certmanager-manifests.yaml
-  {{ end -}}  
+  {{ end -}}
   ######
   ###### End optional substitution
 
@@ -167,7 +166,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   kubectl apply -f /tmp/certmanager-provider-secret.yaml
 {{end}}
 
-  # It can take some time before this succeeds, because it requires un-tainted workers available to 
+  # It can take some time before this succeeds, because it requires un-tainted workers available to
   # run workloads, and the download of container images for certmanager's validating webhook
   # For this reason, we use with_backoff, and we retry every minute for 10 min
   ATTEMPTS=10 TIMEOUT=10 with_backoff kubectl apply -f /tmp/certmanager-clusterissuer.yaml

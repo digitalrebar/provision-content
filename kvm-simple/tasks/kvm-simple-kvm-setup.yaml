@@ -1,0 +1,14 @@
+---
+Description: "Install the KVM hypervisor for CentOS or Ubuntu."
+Name: "kvm-simple-kvm-setup"
+Documentation: |
+  Installs the KVM hypervisor on either CentOS or Ubuntu systems.
+
+Templates:
+  - Name: "kvm-simple-kvm-setup"
+    ID: "kvm-simple-kvm-setup.sh.tmpl"
+Meta:
+  icon: "caret square down outline"
+  color: "blue"
+  title: "RackN"
+  feature-flags: "sane-exit-codes"

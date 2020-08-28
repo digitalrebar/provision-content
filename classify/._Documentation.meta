@@ -1,21 +1,104 @@
-Classifier System
------------------
-
 The Classifier System allows an operator to flexibly define groups of
-"test/action" sequences to perform on a Machine.  These can be used
-to do any number of tasks.
+*test*/*action* sequences to perform on a Machine.  These can be used
+to do any number of tasks.  Typically the classifier allows an operator
+to add additional information to a Machine object that will alter the
+behavior of subsequent Workflow stages/tasks.
 
-By default the classifier ships with a limited set of tests and actions
+By default the classifier provides a limited set of *tests* and *actions*
 that can be performed.  However, the operator can specify additional
-groups of test/actions pairs by use of the ``classify/custom-functions``
-Param.  See the Param documentation on how to use it.
+groups of *test*/*actions* pairs by use of the ``classify/custom-functions``
+Param.  See the Param ``classify/custom-functions`` documentation on how to
+use it.
 
 By default, the classifier is designed to exit on the first test match
 that succeeds with a "pass" status.  The operator can override this
 behavior by setting the optional ``continue`` value set to ``true``
 in the ``classify/classification-data`` structure.
 
-If you are extending the Classifier to add custom groups of test/actions
+If you are extending the Classifier to add custom groups of *test*/*action*
 sequences, please review the ``function ... {}`` BASH functions in the
-``classify.sh.tmpl`` template.
+``classify.sh.tmpl`` **template** for examples.
+
+
+Getting Started with the Classifier
+-----------------------------------
+
+The Classifier rulesets of *test*/*action* sequences are configured by setting the Param
+``classify/classification-data`` on a Machine.  The usual rules and orders of precedence
+are followed on this Param (Param on Machine; Profile on Machine; Global Profile; etc...).
+
+The classification data structure is a list of YAML or JSON objects, with two required and one
+optional set of values.  The structure is as follows (example in YAML):
+
+  ::
+
+    - test: "<TEST_TYPE>"
+      actions:
+        - "<ACTION>"
+        - "<ACTION>"
+      continue: true
+
+The ``test`` and ``actions`` are required elements.  ``continue`` is optional based on the
+operators need.
+
+Here are some example usage scenarious to help you get started.
+
+Simple MAC Address Match and Classify
+=====================================
+
+In this scenario, you will use the MAC Address as a simple *test* matcher
+to apply *actions*.  Demonstrated in this example are adding two Params, and two profiles
+to the machine.
+
+The Params in this example sets hostname, and ``universal/application`` value to specify the
+*role* that this machine will perform.  Subsequent content/plugins can react accordingly to
+this.  The profiles might be responsible for carrying configuration data for subsequent
+content/plugins to operate on.  For example, setting BIOS ``bios-target-configuraion``,
+determining what Firmware/Flash versions to use, Operating System configuration profile
+data (eg VMware ESXi configuration, etc.).
+
+Last, this classify test/action sequence will continue on in the list to any subsequent
+test/action sequences after a match is found (``continue: true``).
+
+  ::
+
+      classify/classification-data:
+        - test: "has_mac 24:6e:96:6a:40:34"
+          actions:
+            - "set_parameter hostname r3r6-u03"
+            - "set_parameter universal/application vcf381"
+            - "add_profile demo-r3r6-machine-r3r6-u03"
+            - "add_profile demo-r3r6-application-vcf381"
+          continue: true
+
+
+Change Workflow
+===============
+
+In this scenario, the Classify system will be used to change the Machines Workflow.  We
+will match on the Inventory field ``inventory/Manufacturer`` with a match of ``QEMU``
+(which is typically how a KVM hypervisor will present a KVM backed Virtual Machine). The
+Machine will be changed to the ``centos-install`` workflow to install CentOS operating
+system.
+
+.. note:: When the Machine's workflow is changed, any remaining Stages/Tasks from the **current**
+          workflow will be immediately replaced by the new Workflow.
+
+This example assumes that the operator has already set the ``classify/custom-functions`` to include
+the ``has_inventory_value.sh.tmpl`` template included already.
+
+  ::
+
+    classify/classification-data:
+      - test: "has_inventory_value Manufacturer QEMU"
+        actions:
+          - "change_workflow centos-install"
+
+Since there is no ``continue: true`` setting, the classifier will exit after this rule, and
+will not process any further rules listed after this one.
+
+.. note:: The ``Flexiflow`` content pack is designed to provide controlled ways to inject new
+          **tasks** and switch **workflows**.  You may wish to utilize the constructs in that
+          content pack over the ``change_workflow`` action in the Classifier.
+
 

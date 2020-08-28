@@ -3,7 +3,9 @@ Name: "kernel-options"
 Description: "Defines extra options to pass to the kernel on PXE boot"
 Documentation: |
   This string defines any extra options that the operator may need to
-  pass to the Kernel during the PXE boot process.
+  pass to the Kernel during the PXE boot process. The string you enter
+  will be directly passed, so if your distro requires comma, or space
+  seperation of options define them accordingly.
 
   e.g. "acpi=off"
 
@@ -17,6 +19,7 @@ Schema:
   type: "string"
   default: ""
 Meta:
+  type: "config"
   icon: "desktop"
   color: "blue"
   title: "Digital Rebar Community Content"

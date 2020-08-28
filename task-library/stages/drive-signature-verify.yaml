@@ -3,6 +3,7 @@ Name: "drive-signature-verify"
 Description: "Validate signatures for all drives"
 Documentation: |
   Verifies signatures for drives.
+
 Tasks:
   - "drive-signature-verify"
 Meta:

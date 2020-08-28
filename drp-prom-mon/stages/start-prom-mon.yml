@@ -1,6 +1,7 @@
 Name: start-prom-mon
 Description: Start the prom-mon process on this Machine.
-
+Documentation: |
+  Start the prom-mon process on this Machine.
 BootEnv: ""
 OptionalParams: []
 RequiredParams: []

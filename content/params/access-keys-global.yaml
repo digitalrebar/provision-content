@@ -1,0 +1,29 @@
+---
+Name: "access-keys-global"
+Description: "A map of global ssh public keys to install for the root user"
+Documentation: |
+  Supplements local access-keys by adding global keys (generall from the global profile)
+  Generally, `access-keys` are to be set for narrow use cases such as per machine.
+
+  This map is used to put additional ssh public keys in place for the root user.
+
+  The key of the map is a arbritary name and the value is the ssh
+  public key for that name.
+
+  Parameter YAML format:
+
+    ::
+
+      access-keys:
+        greg:  ssh-rsa key
+        greg2:  ssh-rsa key
+
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+Meta:
+  type: "credential"
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -5,7 +5,7 @@ Documentation: |
   If using physical disks for Ceph OSDs, this value will be used as an explicit
   target for OSD installation. It will also be WIPED during dev-reset, so use with
   care. The value of the param should be only the block device, don't prefix with /dev/
-  Example value might be "sda", indicating that /dev/sda is to be used for rook ceph, and 
+  Example value might be "sda", indicating that /dev/sda is to be used for rook ceph, and
   WIPED DURING RESET.
 
   AGAIN, IF YOU SET THIS VALUE, /dev/<this value> WILL BE WIPED DURING cluster dev-reset!!

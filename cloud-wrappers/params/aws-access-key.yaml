@@ -1,0 +1,17 @@
+---
+Name: "aws/access-key-id"
+Description: "ID for Access Key (not the secret)"
+Documentation: |
+  The ID needed to use the AWS secrete
+
+  Known types: aws
+Secure: true
+Schema:
+  type: "string"
+Meta:
+  type: "id"
+  icon: "hashtag"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  password: "showable"
+  clipboard: "cut"

@@ -8,4 +8,5 @@ Meta:
   color: "blue"
   icon: "object group outline"
   title: "RackN Content"
+  route: "profiles"
   copyright: "RackN 2019"

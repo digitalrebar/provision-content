@@ -1,0 +1,36 @@
+---
+Name: "packer-builder/hypervisor"
+Description: "Select the hypervisor to setup."
+Documentation: |
+  Defines the supported hypervisor to deploy for the Packer images to be built
+  by.
+
+  The default value is ``kvm``.
+
+  The currently tested and automated hyperviser deployment is KVM on either
+  CentOS or Ubuntu platforms.  Other close linux distro variantes may also
+  work, but have not been tested.
+
+  The Packer JSON builds support KVM (libvirt), VirtualBox, and vSphere.  Building
+  images can be done utilizing this content pack for other hypervisor versions
+  if the operator sets up the hypervisor by hand first.
+
+  The list of Packer JSON supported hypervisor build environments is below.  Note
+  that this list has not been extensively tested, and debugging of various
+  hypervisor configuraions may be required if you use anything except ``kvm`` type.
+
+    * ``kvm``
+    * ``virtualbox``
+    * ``vsphere``
+
+Schema:
+  type: "string"
+  enum:
+    - kvm
+    - virtualbox
+    - vsphere
+  default: "kvm"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

@@ -11,6 +11,7 @@ Schema:
     type: "string"
 
 Meta:
+  type: "config"
   icon: "database"
   color: "blue"
   title: "Digital Rebar Community Content"

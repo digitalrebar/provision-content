@@ -1,0 +1,3 @@
+        ["-chardev", "spicevmc,id=spicechannel0,name=vdagent"],
+        ["-device", "virtserialport,chardev=spicechannel0,name=com.redhat.spice.0"],
+        ["-spice", "unix,addr=/tmp/{{.Name}}-spice.socket,disable-ticketing"],

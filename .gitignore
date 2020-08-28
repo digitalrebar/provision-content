@@ -15,5 +15,13 @@ drp
 /.idea/
 bin
 krib/krib.yaml
+content/contents.yaml
+content/content.yaml
 edge-lab/edge-lab.yaml
 edge-lab/admin.conf
+edge-lab/kube.config
+task-library/task-library.yaml
+bundle.yaml
+bundle.json
+rel_notes
+rebar-catalog

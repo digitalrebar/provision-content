@@ -1,0 +1,14 @@
+---
+Name: "packer-upload-only"
+Description: "Only upload the Packer Builder built image to DRP Files space."
+Documentation: |
+  This workflow only uploads the image that was built, and has been
+  recorded in the ``packer-builder/upload-image`` param, to the DRP Files
+  space.
+
+Stages:
+  - "packer-builder-upload-to-drp"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

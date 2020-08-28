@@ -3,7 +3,7 @@ Description: Install a container runtime from Internet Repos
 Documentation: |
   This stage allows for the installation of multiple container runtimes. The single task (krib-runtime-install)
   which it executes, will launch further tasks based on the value of krib/container-runtime. Currently docker
-  and containerd are supported, although the design is extensible. 
+  and containerd are supported, although the design is extensible.
 Meta:
   color: yellow
   icon: docker

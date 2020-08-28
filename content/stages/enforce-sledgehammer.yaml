@@ -4,6 +4,7 @@ Description: "Ensure that the system is in sledgehammer"
 Tasks:
   - "enforce-sledgehammer"
 Meta:
+  type: "sledgehammer"
   icon: "spinner"
   color: "purple"
   title: "Digital Rebar Community Content"

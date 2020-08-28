@@ -58,6 +58,8 @@ Documentation: |
 
   The default for ths parameter is
 
+    ::
+
       network:
         version: 2
 
@@ -65,6 +67,8 @@ Documentation: |
   example which bonds the onboard interfaces, bridges that bond with
   all the interfaces on expansion cards, and then creates a VLAN
   interface on top of that is as follows:
+
+    ::
 
       network:
         version: 2
@@ -108,3 +112,6 @@ Schema:
   default:
     network:
       version: 2
+Meta:
+  type: "config"
+  icon: "chip"

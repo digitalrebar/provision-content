@@ -2,7 +2,8 @@
 Name: "inventory/DIMMSizes"
 Description: "Flat Inventory for DIMM Sizes"
 Documentation: |
-  From inventory/data, used for indexable data
+  From ``inventory/data``, used for indexable data.
+
 Schema:
   type: "array"
   items:

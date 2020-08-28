@@ -1,0 +1,14 @@
+FROM python:3.8-slim
+
+MAINTAINER "The RackN Team <support@rackn.com>"
+
+ENV DRPCLI_VER="v4.3.3"
+
+#RUN apk add --no-cache bash wget libarchive-tools coreutils
+RUN apt -y update
+RUN apt -y install bash jq wget curl bind9utils
+RUN pip install --no-cache-dir pyvmomi
+
+ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/amd64/linux/drpcli /usr/bin/
+RUN chmod 755 /usr/bin/drpcli
+ENTRYPOINT /usr/bin/drpcli machines processjobs

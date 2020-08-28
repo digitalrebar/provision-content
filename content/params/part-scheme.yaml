@@ -7,7 +7,9 @@ Documentation: |
 
   The string will be expanded into this template name:
 
-    part-seed-<string>.tmpl
+    ::
+
+      part-seed-<string>.tmpl
 
   e.g. softraid
 
@@ -15,6 +17,7 @@ Schema:
   type: "string"
 
 Meta:
+  type: "config"
   icon: "disk outline"
   color: "blue"
   title: "Digital Rebar Community Content"

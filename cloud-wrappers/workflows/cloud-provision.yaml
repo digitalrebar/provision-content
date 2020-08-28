@@ -1,0 +1,20 @@
+Name: "cloud-provision"
+Description: "Create Cloud Instance Using Terraform"
+Documentation: |
+  Requires that operator has created a Contexts for "runner", "terraform" and "ansible"
+  that can run DRP Agent and Terraform then Connect via Ansible
+
+  Leaves the machines in machine Context
+Stages:
+  - "cloud-provision"
+  - "context-clear"
+  - "discover-nobootenv"
+  - "cloud-inspect"
+  - "network-firewall"
+  - "runner-service"
+  - "complete-nobootenv"
+Meta:
+  type: "setup"
+  color: "brown"
+  icon: "cloud upload"
+  title: "RackN Content"

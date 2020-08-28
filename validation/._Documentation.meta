@@ -1,5 +1,3 @@
-Validation System
------------------
 
 The Validation System allows an operator to flexibly define a set of
 tasks to do validation operations.  Validation allows an operator to
@@ -20,7 +18,7 @@ pack to enhance it for other users.
 
 
 Prebuilt Stages
-~~~~~~~~~~~~~~~
+---------------
 
 The validation system provides three prebuilt base sets of validation
 stages to run the validation engine in:
@@ -45,7 +43,7 @@ will dynamically be added based on the control Paramters.
 
 
 Defining Validation Tasks
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 Control over which specific validation tasks are executed at any given
 validation stage is defined by the Param ``validation/list-parameter``.
@@ -72,7 +70,7 @@ the listed sequence by the validation process at that *Stage* in the
 
 
 Task Exit Conditions
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 Validation actions can exit one of several ways:
 
@@ -87,7 +85,7 @@ futures return conditions (not yet implemented):
 
 
 Remediating and Continuing Failed Tasks
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------
 
 The failure exit conditions allow the developer of the validation task
 to determine if the failure is a "soft" failure which can be remediated, and
@@ -107,7 +105,7 @@ that additional issues can be found and aggregated.
 
 
 Example Usage
-~~~~~~~~~~~~~
+-------------
 
 Here is a brief outline of example usage of the validation system utilizing
 the RackN defined stages.  In this example, we will define tasks to run in
@@ -123,36 +121,36 @@ components of the Digital Rebar content and plugins capabity.
 
 .. note::  Note the addition of the 'validation-post-discovery' and
   'validation-post-hardware' Stages, these define the point in the workflow
-   where the validation process will run.
+  where the validation process will run.
 
-	::
+  ::
 
-		Meta:
-  		color: grey
-  		icon: money
-		Name: my-complete-discovery
-		Description: My complete discovery workflow
-		Stages:
-			- discover
-			- setup-repos
-			- ipmi-inventory
-			- raid-inventory
-			- network-lldp
-			- inventory
-			- rack-discover
-			- classify
-			- validation-post-discover
-			- ipmi-configure
-			- flash
-			- raid-enable-encryption
-			- raid-configure
-			- bios-configure
-			- ilo-config
-			- burnin
-			- burnin-reboot
-			- validation-post-hardware
-			- notify-hardware-complete
-			- sledgehammer-wait
+    Meta:
+      color: grey
+      icon: money
+    Name: my-complete-discovery
+    Description: My complete discovery workflow
+    Stages:
+      - discover
+      - setup-repos
+      - ipmi-inventory
+      - raid-inventory
+      - network-lldp
+      - inventory
+      - rack-discover
+      - classify
+      - validation-post-discover
+      - ipmi-configure
+      - flash
+      - raid-enable-encryption
+      - raid-configure
+      - bios-configure
+      - ilo-config
+      - burnin
+      - burnin-reboot
+      - validation-post-hardware
+      - notify-hardware-complete
+      - sledgehammer-wait
 
 
 Stages
@@ -186,23 +184,23 @@ machine as it executes the ``classify`` stage.
 The profile defines the tasks to run.  The profile YAML configuration would
 look like the following:
 
-	::
+  ::
 
-		---
-		Meta:
-  		color: grey
-  		icon: money
-		Name: validations
-		Params:
-  		validation/post-discover:
-    		- "validation-machine-name-dns-to-ip"
-    		- "in-subnet-check-render"
-    		- "in-subnet-check-validate"
-    		- "ipmi-network-validation"
-    		- "validate-nic-counts"
-    		- "validate-jumbo-frames"
-  		validation/post-hardware:
-    		- "validate-ipmi-hostname-ip"
+    ---
+    Meta:
+      color: grey
+      icon: money
+    Name: validations
+    Params:
+      validation/post-discover:
+        - "validation-machine-name-dns-to-ip"
+        - "in-subnet-check-render"
+        - "in-subnet-check-validate"
+        - "ipmi-network-validation"
+        - "validate-nic-counts"
+        - "validate-jumbo-frames"
+      validation/post-hardware:
+        - "validate-ipmi-hostname-ip"
 
 The type definition for the Params ``validation/post-discover`` are defined
 in the Validation content pack, and the appropriate stage contains the
@@ -275,7 +273,7 @@ validation system.
 
 
 Developing New Validation Capabilities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 This section provides information on how to build custom validation capabilities
 utilizing the existing Validation system.
@@ -287,11 +285,11 @@ Namespace Definitions
 Validation system stages, control params, and other content parts will utilize
 the prefix namespace of ``validation/``.  Individual Tasks, Params, etc. that
 implement functional use of the Validation system components will utilize the
-prefix namespace of ``validate/`.
+prefix namespace of ``validate/``.
 
 For example, the Start Stage for the Validation system is ``validation-start``,
 while the NIC Count and UP link state checking uses a Task namespaced as
-  ``validate-nic-counts`.
+``validate-nic-counts``.
 
 Standard Stage/Task and Param semantics still apply (eg ``validate/nic-required-up``
 is the Param namespace name).
@@ -315,20 +313,20 @@ standard template, and included in any appropriate custom tasks.
 Current functions that can be incorporated in to your Validation custom tasks
 are as follows:
 
-	* ``validation_add_error()`` = Adds a validation error to the ``validation/errors` Param
-	* ``validation_add_error_ignore()`` = Adds a validation error to the ``validation/errors-ignore`` Param
-	* ``validation_clear_errors_ignore()`` = Removes the ``validation/errors-ignore`` Param from the Machine
-	* ``validation_msg_prefix()`` = builds a prefix of Stage/Task/CurrentJob for output messages
-	* ``validation_success()`` = marks a validation task successful and exits 0
-	* ``validation_fail_at_stage_end()``= marks a validation task failed, but exits 0, and ultimately exits the Stage with exit code 1
-	* ``validation_fail_immediately()``= marks validation task failed and exits 1 immediately
-	* ``validation_fail_and_ignore()`` = marks validation as failed, but ignores the failure without exiting the workflow
-	* ``#validation_fail_and_remediate()`` = Not implemented yet
-	* ``validate_machine_name_dns_by_ip()`` = verifies the machine has a DNS record based on the Machines IP address
-	* ``validate_ipv4_ip_syntax()`` = simple helper to verify string is in IPv4 dotted quad notation
-	* ``validate_check_same_subnet()`` = verifies that given 2 ip address and a subnet mask, both addresses are in the same subnet network
-	* ``validate_ping_dest_from_src()`` = verifies that Machine can ping an IP address given a source interface to use
-	* ``validate_nic_counts()`` = verifies the number of NICs and number of NICs that can be brought to an "UP" state
+  * ``validation_add_error()`` = Adds a validation error to the ``validation/errors`` Param
+  * ``validation_add_error_ignore()`` = Adds a validation error to the ``validation/errors-ignore`` Param
+  * ``validation_clear_errors_ignore()`` = Removes the ``validation/errors-ignore`` Param from the Machine
+  * ``validation_msg_prefix()`` = builds a prefix of Stage/Task/CurrentJob for output messages
+  * ``validation_success()`` = marks a validation task successful and exits 0
+  * ``validation_fail_at_stage_end()`` = marks a validation task failed, but exits 0, and ultimately exits the Stage with exit code 1
+  * ``validation_fail_immediately()`` = marks validation task failed and exits 1 immediately
+  * ``validation_fail_and_ignore()`` = marks validation as failed, but ignores the failure without exiting the workflow
+  * ``#validation_fail_and_remediate()`` = Not implemented yet
+  * ``validate_machine_name_dns_by_ip()`` = verifies the machine has a DNS record based on the Machines IP address
+  * ``validate_ipv4_ip_syntax()`` = simple helper to verify string is in IPv4 dotted quad notation
+  * ``validate_check_same_subnet()`` = verifies that given 2 ip address and a subnet mask, both addresses are in the same subnet network
+  * ``validate_ping_dest_from_src()`` = verifies that Machine can ping an IP address given a source interface to use
+  * ``validate_nic_counts()`` = verifies the number of NICs and number of NICs that can be brought to an "UP" state
 
 
 Adding New Stages
@@ -348,20 +346,20 @@ Example Stage in YAML:
   ::
 
     ---
-		Name: "my-validation"
-		Description: "Perform tasks defined by the 'my-validation' Param."
-		Documentation: |
-			The Param 'my-validation' is an array that will contain
-			the list of validation tasks to run.
-		Params:
-  		"validation/list-parameter": "my-validation"
-		Tasks:
-  		- "validation-start"
-  		- "validation-stop"
-		Meta:
-  		color: "orange"
-  		icon: "search"
-  		title: "RackN Content"
+    Name: "my-validation"
+    Description: "Perform tasks defined by the 'my-validation' Param."
+    Documentation: |
+      The Param 'my-validation' is an array that will contain
+      the list of validation tasks to run.
+    Params:
+      "validation/list-parameter": "my-validation"
+    Tasks:
+      - "validation-start"
+      - "validation-stop"
+    Meta:
+      color: "orange"
+      icon: "search"
+      title: "RackN Content"
 
 Note that as the ``Documentation`` field says; the ``validation/list-parameter``
 for this Stage is defined as ``my-validation``.  This Parameter must be defined
@@ -389,31 +387,31 @@ to insure you handle exit codes correctly for the system.
 
 Here is an example Task that implements a hypothetical validation function.
 
-	::
+  ::
 
-		---
-		Name: "validation-test-fail"
-		Description: "Example failing validation task"
-		Meta:
-  		color: "blue"
-  		icon: "bug"
-  		title: "RackN Content"
-  		feature-flags: "sane-exit-codes"
-		Templates:
-		- Name: "validation_fail.sh"
-  		Contents: |
-    		#!/usr/bin/env bash
-    		{{ template "setup.tmpl" . }}
-    		{{ template "validation-lib.tmpl" . }}
+    ---
+    Name: "validation-test-fail"
+    Description: "Example failing validation task"
+    Meta:
+      color: "blue"
+      icon: "bug"
+      title: "RackN Content"
+      feature-flags: "sane-exit-codes"
+    Templates:
+    - Name: "validation_fail.sh"
+      Contents: |
+        #!/usr/bin/env bash
+        {{ template "setup.tmpl" . }}
+        {{ template "validation-lib.tmpl" . }}
 
-				{{ if eq (.Param "margarita-time" ) true }}
-    			echo "This is a failure.  Calling add_validation_error"
-    			add_validation_error "Margarita time! We'll finish provisioning later."
-    			exit 0
-				{{ else -}}
-					echo "Sadly, it's not margarita time.  Provision on!"
-					exit 0
-				{{ end -}}
+        {{ if eq (.Param "margarita-time" ) true }}
+          echo "This is a failure.  Calling add_validation_error"
+          add_validation_error "Margarita time! We'll finish provisioning later."
+          exit 0
+        {{ else -}}
+          echo "Sadly, it's not margarita time.  Provision on!"
+          exit 0
+        {{ end -}}
 
 In this example, some other component or process would be responsible for
 setting the check Param ``margarita-time`` to either ``true`` or ``false``.
@@ -427,7 +425,7 @@ The library also contains a helper routine to add errors to the
  ``add_validation_error`` which should be called with a single string which
  contains the text of the error message.  This function can safely called
  multiple times, and each subsequent error message will be appended to the
- ``validation/errors` array.
+ ``validation/errors`` array.
 
 
 Separating Validate Tasks from the Validation System

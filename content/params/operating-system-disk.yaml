@@ -13,6 +13,7 @@ Schema:
   default: "sda"
 
 Meta:
+  type: "setup"
   icon: "disk outline"
   color: "blue"
   title: "Digital Rebar Community Content"

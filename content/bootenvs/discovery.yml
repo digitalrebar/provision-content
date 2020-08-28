@@ -6,28 +6,31 @@ Documentation: |
 
   To join EXISTING machines or CLOUD machines into DRP, you can use run `join-up.sh`.
   Add the following line to the machines initialization script:
+
     ::
 
       #!/bin/bash
       curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
+
 Meta:
+  type: "discovery"
   feature-flags: "change-stage-v2"
   icon: "binoculars"
   color: "blue"
   title: "Digital Rebar Community Content"
 OnlyUnknown: true
 Loaders:
-  amd64-uefi: e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/shimx64.efi
+  amd64-uefi: e1a0019788acff426f7cc2eb5e5373d771716eaa/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/sledgehammer-e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da.amd64.tar"
-      Kernel: "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/vmlinuz0"
+      IsoFile: "sledgehammer-e1a0019788acff426f7cc2eb5e5373d771716eaa.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/sledgehammer-e1a0019788acff426f7cc2eb5e5373d771716eaa.amd64.tar"
+      Kernel: "e1a0019788acff426f7cc2eb5e5373d771716eaa/vmlinuz0"
       Initrds:
-        - "e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/stage1.img"
+        - "e1a0019788acff426f7cc2eb5e5373d771716eaa/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -62,12 +65,12 @@ OS:
         --
         {{.Param "kernel-console"}}
     rpi4:
-      Loader: "grubarm64.efi"
-      IsoFile: "sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9b5276ac5826520829aa73c149fe672fe2363656/sledgehammer-9b5276ac5826520829aa73c149fe672fe2363656.rpi4.tar"
-      Kernel: "rpi/kernel8.img"
+      Loader: grubarm64.efi
+      IsoFile: sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar
+      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/e50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      Kernel: rpi-5.4.34/kernel8.img
       Initrds:
-        - "rpi/stage1.img"
+        - rpi-5.4.34/stage1.img
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -78,6 +81,7 @@ OS:
         rd_NO_MD
         rd_NO_DM
         provisioner.web={{.ProvisionerURL}}
+        rs.uuid={{.Machine.UUID}}
         {{.Param "kernel-options"}}
         --
         {{.Param "kernel-console"}}
@@ -86,23 +90,26 @@ OptionalParams:
   - "kernel-options"
 Templates:
   - Name: start4.elf
-    Link: '{{.Env.PathForArch "tftp" "rpi/start4.elf" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/start4.elf" "rpi4"}}'
     Path: start4.elf
   - Name: fixup4.dat
-    Link: '{{.Env.PathForArch "tftp" "rpi/fixup4.dat" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/fixup4.dat" "rpi4"}}'
     Path: fixup4.dat
   - Name: bcm2711-rpi-4-b.dtb
-    Link: '{{.Env.PathForArch "tftp" "rpi/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/bcm2711-rpi-4-b.dtb" "rpi4"}}'
     Path: bcm2711-rpi-4-b.dtb
+  - Name: root.squashfs
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/root.squashfs" "rpi4"}}'
+    Path: 'sledgehammer/rpi4/rpi/root.squashfs'
   - Name: rpi4b-cmdline.txt
     Path: cmdline.txt
     Contents: |
-      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait BOOTIF=discovery provisioner.web={{.ProvisionerURL}}
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait cgroup_memory=1 cgroup_enable=memory initrd=stage1.img rw BOOTIF=discovery provisioner.web={{.ProvisionerURL}}
   - Name: rpi4b-config.txt
     Path: config.txt
     Contents: |
       # uncomment if you get no picture on HDMI for a default "safe" mode
-      #hdmi_safe=1
+      hdmi_safe=1
 
       # uncomment this if your display has a black border of unused pixels visible
       # and your display can output without overscan
@@ -210,15 +217,6 @@ Templates:
   - Name: "grub"
     Path: "grub/grub.cfg"
     Contents: |
-      set _kernel=linux
-      set _module=initrd
-      $_kernel
-      if test $? != 18; then
-          set _kernel=linuxefi
-          set _module=initrdefi
-      fi
-      function kernel { $_kernel "$@"; }
-      function module { $_module "$@"; }
       if test -s (tftp)/grub/${net_default_mac}.cfg; then
         echo "Booting via MAC"
         source (tftp)/grub/${net_default_mac}.cfg
@@ -226,34 +224,18 @@ Templates:
         echo "Booting via IP"
         source (tftp)/grub/${net_default_ip}.cfg
       else
-        echo "Booting discovery for ${grub_cpu}"
-        source (tftp)/grub/${grub_cpu}.cfg
+        echo "Booting discovery"
+        source (tftp)/grub/discovery.cfg
       fi
-      boot
-  - Name: "grub-secure"
-    Path: "sledgehammer/e21d2b7f079dfcbd2952dbc79d09a793cd8fe7da/grub.cfg"
-    ID: grub-secure.tmpl
-  - Name: "grub-i386"
-    Path: "grub/i386.cfg"
-    Contents: |
-      kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
-      {{range $initrd := .Env.InitrdsFor "amd64"}}
-      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
-      {{end}}
-  - Name: "grub-x86_64"
-    Path: "grub/x86_64.cfg"
-    Contents: |
-      kernel linux (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "amd64") "amd64"}} {{.BootParamsFor "amd64"}} BOOTIF=01-${net_default_mac}
-      {{range $initrd := .Env.InitrdsFor "amd64"}}
-      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "amd64"}}
-      {{end}}
-  - Name: "grub-arm64"
-    Path: "grub/arm64.cfg"
-    Contents: |
-      kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "arm64") "arm64"}} {{.BootParamsFor "arm64"}} BOOTIF=01-${net_default_mac}
-      {{range $initrd := .Env.InitrdsFor "arm64"}}
-      module (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
-      {{end}}
+  - Name: "grub-secure-discovery"
+    Path: "sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/grub.cfg"
+    ID: allarch-grub.tmpl
+  - Name: "grub-discovery"
+    Path: "grub/discovery.cfg"
+    ID: allarch-grub.tmpl
+  - Name: "common-bootstrap.sh"
+    Path: "machines/common-bootstrap.sh"
+    ID: discovery-common-bootstrap.sh.tmpl
   - Name: "join-up.sh"
     Path: "machines/join-up.sh"
     Contents: |
@@ -281,289 +263,91 @@ Templates:
       # CUMULUS-AUTOPROVISIONING
 
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-
-      # to be generic, we do NOT assume access to cloud provider APIs to determine things
-      get_macs() {
-          local maclist=""
-          local nic=""
-          for nic in /sys/class/net/*; do
-              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
-              maclist="$maclist,\"$(cat "$nic/address")\""
-          done
-          printf '[%s]' "${maclist#,}"
-      }
-
-      PROVISIONER_WEB="{{.ProvisionerURL}}"
-      ARCH="$(uname -m)"
-      case $ARCH in
-          amd64|x86_64) ARCH=amd64;;
-          arm64|aarch64) ARCH=arm64;;
-          *)
-              echo "Unknown arch $ARCH"
-              exit 1;;
-      esac
-      # Perform minimal required bootstrapping for discovery
-      export RS_TOKEN="{{.GenerateToken}}"
-      export RS_ENDPOINT="{{.ApiURL}}"
-      mkdir -p /usr/local/bin
-      grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
-      for tool in drpcli jq; do
-          which "$tool" &>/dev/null && continue
-          echo "Installing $tool in /usr/local/bin"
-          case $tool in
-              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
-              jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
-          esac
-          chmod 755 "/usr/local/bin/$tool"
-      done
-      unset tool
-
       set -x
+      curl -o /tmp/discovery-common-bootstrap.sh \
+          '{{.ProvisionerURL}}/machines/common-bootstrap.sh'
 
-      # Check just in case we pxe booted.
-      host_re='rs\.uuid=([^ ]+)'
-      if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
-        RS_UUID="${BASH_REMATCH[1]}"
-      fi
+      . /tmp/discovery-common-bootstrap.sh
 
-      # Check Hostname to find us
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        RS_UUID=$(drpcli machines list Name=$HOSTNAME | jq -r .[0].Uuid)
-        if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-          RS_UUID=$(drpcli machines show Name:$HOSTNAME | jq -r .Uuid)
-        fi
-      fi
-
-      # If no uuid, check to see if we have one stored from before
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        # See if we have already been created based on dropping uuid file
-        if [[ -f /etc/rs-uuid ]]; then
-            luuid="$(tail -n 1 /etc/rs-uuid)"
-            RS_UUID=$(drpcli machines list Uuid=$luuid | jq -r .[0].Uuid)
-            if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-              RS_UUID=$(drpcli machines show $luuid | jq -r .Uuid)
-            fi
-        fi
-      fi
-
-      # If we still don't have RS_UUID - check the IP address.
-      IP=""
-      BOOTDEV="eth0"
-      bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
-      bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
-      if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
-          IP="${BASH_REMATCH[1]}"
-      else
-          if [[ $(ip -6 -o addr show dev $BOOTDEV) =~ $bootdev_ip6_re ]]; then
-              IP="${BASH_REMATCH[1]}"
-          fi
-      fi
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        RS_UUID=$(drpcli machines list Address=$IP | jq -r .[0].Uuid)
-      fi
-
-      # If we still don't have a UUID, then create a machine
-      if [[ $RS_UUID == null || $RS_UUID == "" ]]; then
-        echo "Machine UUID file not found.  Adding $HOSTNAME..."
-
-        # Create a new node for us,
-        while ! JSON="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                             \"Address\": \"$IP\",
-                                             \"Arch\": \"$ARCH\",
-                                             \"Meta\": {\"icon\":\"cloud\"},
-                                             \"HardwareAddrs\": $(get_macs)}")"; do
-            echo "We could not create a node for ourself, trying again."
-            sleep 5
-        done
-        RS_UUID="$(jq -r '.Uuid' <<< "$JSON")"
-        echo "${RS_UUID}" > /etc/rs-uuid
-        echo "Machine $HOSTNAME added with UUID $RS_UUID"
-      else
-        echo "Machine $HOSTNAME found in DRPCLI! Using $RS_UUID"
-        echo "${RS_UUID}" > /etc/rs-uuid
-      fi
-
-      {{template "profile.tmpl" .}}
-
-      echo "$PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-      if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
-          grep -q '^exit 0$' /tmp/control.sh && \
-          head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
-          echo "Could not load our control.sh!"
-          exit 1
-      fi
-      chmod 755 /tmp/control.sh
-
-      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
-
-      echo "transfer from start-up to control script"
-
-      [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
-
-      echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-      exit 1
+      find_by_whoami ||
+          find_by_saved_uuid ||
+          find_by_hwaddrs ||
+          find_by_kernel_cmdline ||
+          find_by_hostname ||
+          create_machine ||
+          cannot_find_or_create
+      switch_to_control
   - Name: "start-up.sh"
     Path: "machines/start-up.sh"
     Contents: |
       #!/bin/bash
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-      set +x
 
-      get_macs() {
-          local maclist=""
-          local nic=""
-          for nic in /sys/class/net/*; do
-              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
-              maclist="$maclist,\"$(cat "$nic/address")\""
-          done
-          printf '[%s]' "${maclist#,}"
+      curl -o /tmp/discovery-common-bootstrap.sh \
+          '{{.ProvisionerURL}}/machines/common-bootstrap.sh'
+
+      . /tmp/discovery-common-bootstrap.sh
+      # Sigh, stuff is broken in sledgehammer-start-up.sh
+      runningLink="$(networkctl |awk "/$BOOTDEV/ {print \$1}"|head -1)"
+      leaseFile="/var/run/systemd/netif/leases/$runningLink"
+      dhcp_param() {
+          awk -F= "/^$1/ {print \$2}" < "$leaseFile"
       }
-
-      if [[ ! -f /etc/systemd/network/20-bootif.network ]]; then
-          get_param() {
-              [[ $(cat /proc/cmdline) =~ $1 ]] && echo "${BASH_REMATCH[1]}"
-          }
-
-          dhcp_param() {
-              [[ $(cat /var/lib/dhclient/dhclient.leases) =~ $1 ]] && echo "${BASH_REMATCH[1]}"
-          }
-
-
-      # Since we are not using normal networking, make sure that
-      # dhclient will stick around forever even if we exit
-          cat >"/etc/systemd/system/dhclient-$BOOTDEV.service" << EOF
-      [Unit]
-      Description=dhclient for $BOOTDEV.service
-      After=network-online.target
-      Wants=network-online.target
-
-      [Service]
-      Type=simple
-      ExecStart=/sbin/dhclient --no-pid -d $BOOTDEV
-
-      [Install]
-      WantedBy=multi-user.target
-      EOF
-
-          systemctl daemon-reload
-          dhclient -x
-          systemctl start "dhclient-$BOOTDEV"
-          sleep 5
-
-          # Stuff from sledgehammer file that makes this command debuggable
-          # Some useful boot parameter matches
-          ip_re='([0-9a-f.:]+/[0-9]+)'
-          host_re='rs\.uuid=([^ ]+)'
-          hostname_re='option host-name "([^"]+)'
-          fixed_ip='fixed-address ([0-9a-f.:]+)'
-          uuid_re='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
-          netname_re='"network":"([^ ]+)"'
-
-          # Assume nothing about the hostname.
-          unset HOSTNAME
-
-          # Check for DHCP set host name.  Expand it to a FQDN if needed.
-          if dhcp_hostname="$(dhcp_param "$hostname_re")"; then
-              echo "Hostname set by DHCP to $dhcp_hostname"
-              if [[ ${dhcp_hostname%%.*} == $dhcp_hostname ]]; then
-                  HOSTNAME="${dhcp_hostname}.${DOMAIN}"
-              else
-                  HOSTNAME="$dhcp_hostname"
-              fi
-          else
-              dhcp_ip="$(dhcp_param "$fixed_ip")"
-              if [[ $dhcp_ip != "" ]]  ; then
-                  lookup_1=$(getent hosts $dhcp_ip | awk '{print $2}')
-                  lookup_2=$(getent hosts $dhcp_ip | awk '{print $2}')
-                  if [[ $lookup_1 && $lookup_1 == $lookup_2 && $lookup_1 != localhost* ]]; then
-                      HOSTNAME=$lookup_1
-                  fi
-              fi
-          fi
+      if [[ -e $leaseFile ]] ; then
+          HOSTNAME="$(dhcp_param HOSTNAME)"
+          DOMAIN="$(dhcp_param DOMAINNAME)"
+          DNS_SERVERS="$(dhcp_param DNS)"
+          IP="$(dhcp_param ADDRESS)"
       fi
-      ARCH="$(uname -m)"
-      case $ARCH in
-          amd64|x86_64) ARCH=amd64;;
-          arm64|aarch64) ARCH=arm64;;
-          *)
-              echo "Unknown arch $ARCH"
-              exit 1;;
-      esac
-      # Perform minimal required bootstrapping for discovery
-      export RS_TOKEN="{{.GenerateToken}}"
-      export RS_ENDPOINT="{{.ApiURL}}"
-      mkdir -p /usr/local/bin
-      grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
-      for tool in drpcli jq; do
-          which "$tool" &>/dev/null && continue
-          echo "Installing $tool in /usr/local/bin"
-          case $tool in
-              drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
-              jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
-          esac
-          chmod 755 "/usr/local/bin/$tool"
-      done
-      unset tool
-
-      IP=""
-      bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
-      bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
-      if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
-          IP="${BASH_REMATCH[1]}"
-      else
-          if [[ $(ip -6 -o addr show dev $BOOTDEV | grep "scope global" | head -1) =~ $bootdev_ip6_re ]]; then
+      [[ $DOMAIN ]] || DOMAIN="unspecified.domain.local"
+      [[ $DNS_SERVERS ]] || DNS_SERVERS="8.8.8.8"
+      if [[ ! $IP ]]; then
+          bootdev_ip4_re='inet ([0-9.]+)/([0-9]+)'
+          bootdev_ip6_re='inet6 ([0-9a-fA-F:.]+)/([0-9]+) scope global'
+          if [[ $(ip -4 -o addr show dev $BOOTDEV) =~ $bootdev_ip4_re ]]; then
               IP="${BASH_REMATCH[1]}"
+          else
+              if [[ $(ip -6 -o addr show dev $BOOTDEV | grep "scope global" | head -1) =~ $bootdev_ip6_re ]]; then
+                  IP="${BASH_REMATCH[1]}"
+              fi
           fi
       fi
+      if [[ ! $HOSTNAME ]]; then
+          # Try DNS reverse lookup
+          candidate="$(getent hosts $IP |awk "/$IP/ {print \$2}" |head -1)"
+          if [[ $candidate && $candidate != localhost* ]]; then
+              # Found a sane one
+              HOSTNAME="$candidate"
+          else
+              # Go with the default.
+              default_host=true
+              HOSTNAME="d${MAC//:/-}"
+          fi
+      fi
+      # If we have a hostname that is not in FQDN form, append $DOMAIN to it.
+      [[ $HOSTNAME = ${HOSTNAME%%.*} ]] && HOSTNAME="${HOSTNAME}.${DOMAIN}"
+
       # See if we have already been created.
-      if [[ $(cat /proc/cmdline) =~ $host_re ]]; then
-          RS_UUID="${BASH_REMATCH[1]}"
-          json="$(drpcli machines show "$RS_UUID")"
-          # If we did not get a hostname from DHCP, get it from DigitalRebar Provision.
-          if [[ ! $HOSTNAME ]]; then
-              HOSTNAME="$(jq -r '.Name' <<< "$json")"
-          fi
-      else
-          # If we did not get a hostname from DHCP, generate one for ourselves.
-          [[ $HOSTNAME ]] || HOSTNAME="d${MAC//:/-}.${DOMAIN}"
+      find_by_whoami ||
+          find_by_hwaddrs ||
+          find_by_kernel_cmdline ||
+          create_machine 5 ||
+          cannot_find_or_create
 
-          # Create a new node for us,
-          while ! json="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
-                                               \"Address\": \"$IP\",
-                                               \"Arch\": \"$ARCH\",
-                                               \"HardwareAddrs\": $(get_macs)}")"; do
-              echo "We could not create a node for ourself, trying again."
-              sleep 5
-          done
-          RS_UUID="$(jq -r '.Uuid' <<< "$json")"
-
+      json="$(drpcli machines show $RS_UUID --slim Params,Meta)"
+      # If we did not get a hostname from DHCP, get it from DigitalRebar Provision.
+      if [[ $default_host ]]; then
+          HOSTNAME="$(jq -r '.Name' <<< "$json")"
       fi
-      echo "${RS_UUID}" > /etc/rs-uuid
-      # Set our hostname for everything else.
       if [ -f /etc/sysconfig/network ] ; then
           sed -i -e "s/HOSTNAME=.*/HOSTNAME=${HOSTNAME}/" /etc/sysconfig/network
       fi
       echo "${HOSTNAME#*.}" >/etc/domainname
       hostname "$HOSTNAME"
 
-      {{template "profile.tmpl" .}}
-
       # Force reliance on DNS
       echo '127.0.0.1 localhost' >/etc/hosts
-
-      if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
-          grep -q '^exit 0$' /tmp/control.sh && \
-          head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
-          echo "Could not load our control.sh!"
-          exit 1
-      fi
-      chmod 755 /tmp/control.sh
-
-      export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
-
-      echo "transfer from start-up to control script"
-
-      [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
-
-      echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-      exit 1
+      switch_to_control
+      # This last line is required to let Sledgehammer know it has loaded a valid start-up.sh
+      # Do not alter or remove it.
+      # /tmp/control.sh

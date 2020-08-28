@@ -1,0 +1,16 @@
+---
+Name: "esxi/vsan-vmknic-ip"
+Description: "Defines the vmknic interface IP address for VSAN."
+Documentation: |
+  Defines the vmknic IP address for VSAN configuration on the vSphere ESXi host.
+
+  If this setting  and the ``esxi/vsan-vmknic-netmask`` are both empty, then the
+  configured already by prior Stage/Task runs.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

@@ -1,6 +1,6 @@
 ---
 Name: "vcsa-deploy-command"
-Description: "Run vcsa-deploy command in govomi context container"
+Description: "Run vcsa-deploy command in govmomi context container"
 Tasks:
   - "context:vcsa-deploy"
   - "vcsa-deploy-command"

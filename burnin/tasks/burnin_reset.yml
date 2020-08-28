@@ -4,6 +4,7 @@ Description: "Burn-In Reset"
 RequiredParams:
 - "burnin-skip"
 Meta:
+  type: "reset"
   color: "blue"
   icon: "fire"
   title: "RackN Content"

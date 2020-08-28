@@ -8,4 +8,4 @@ Meta:
   title: RackN Content
 Stages:
   - ssh-access
-  - runner-service
+  - drp-agent

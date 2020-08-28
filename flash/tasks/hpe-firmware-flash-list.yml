@@ -15,7 +15,10 @@ Templates:
           local _src=$1
           local _dest=$2
 
-          curl -k -o $_dest $_src
+          echo "Downloading $_src"
+          set +e
+          curl -L -f -k -o $_dest $_src
+          set -e
           if [[ $? != 0 ]] ; then
               xiterr 1 "Failed to download $_dest from $_src"
           fi
@@ -52,6 +55,7 @@ Templates:
         {{ end }}
 
         # Check to see if RPM is already installed.
+        set +e
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
         if ! rpm -q ${RPMNAME} 2>/dev/null >/dev/null ; then
           rpm -ivh $FILENAME
@@ -61,6 +65,13 @@ Templates:
         if [[ "$SETUP" = "" ]] ; then
           SETUP=$(rpm -ql $RPMNAME | grep '/hpsetup$')
         fi
+        if [[ "$SETUP" = "" ]] ; then
+          echo "Failed to find a setup script!"
+          echo "Files in $RPMNAME"
+          rpm -ql $RPMNAME
+          exit 1
+        fi
+        set -e
         # One day make this an argument
         TPMARG=""
         if [[ "$RPMNAME" =~ ^firmware-system ]] ; then

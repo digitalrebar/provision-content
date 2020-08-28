@@ -8,6 +8,7 @@ Documentation: |
   boot order to have whatever device we booted from be the first.
 Name: always-pxe-in-uefi-first
 Meta:
+  type: "setup"
   title: Digital Rebar Community Content
   icon: "disk outline"
   color: "blue"
@@ -52,4 +53,4 @@ Templates:
           efibootmgr -o "${current},${order}"
       fi
       efibootmgr -D || :
-      efivootmgr -v || :
+      efibootmgr -v || :

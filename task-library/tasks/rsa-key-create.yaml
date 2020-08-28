@@ -2,15 +2,16 @@
 Name: "rsa-key-create"
 Description: "Create RSA Key Pair"
 Documentation: |
-  Uses ssh-keygen to create an RSA public/private key pair.
+  Uses ``ssh-keygen`` to create an RSA public/private key pair.
 
-  Stores keys in `rsa/key-public` and `rsa/key-private` on
+  Stores keys in ``rsa/key-public`` and ``rsa/key-private`` on
   the machine.
 
   The public key (which contains newlines) is stored in format
-  where newlines are converted to |.
+  where newlines are converted to ``|``.
 
-  Noop if the `rsa/key-private` exists
+  Noop if the ``rsa/key-private`` exists.
+
 OptionalParams:
   - rsa/key-private
 Templates:

@@ -1,0 +1,51 @@
+---
+Name: "packer-builder/var-file"
+Description: "Specify a custom 'variables' file for the Packer build."
+Documentation: |
+  If a value is set for this Param, the Packer build will use this file
+  as the variables override.  If this is not set, then the default
+  of ``variables.json`` in the packer directory will be used.
+
+  .. warning:: To utilize a custom variables set of values, the operator must first
+               render or make available the JSON variables file on the system that
+               the content will run on.
+
+  Example value for this Param:  ``/tmp/variables.json``
+
+  The file specified *must* be in valid JSON format.  You may specify
+  only the specifc build variables that you wish to override, otherwise,
+  the embedded Variable references in each target build will take
+  precedence.
+
+  An example of valid JSON format for setting variables is below (this
+  is an example of the files content that should be rendered for use on
+  the system):
+
+    ::
+
+      {
+        "disk_size": "20480",
+        "output_directory": "output",
+        "complete_directory": "complete",
+        "winrm_username": "vagrant",
+        "winrm_password": "vagrant",
+        "ssh_username": "rocketskates",
+        "ssh_password": "RocketSkates"
+      }
+
+  .. note:: The above example may not be the most up to date set of variables that
+            are available to override in the JSON files.  Please see the file named
+            ``variables.json`` in the ``packer`` directory for more recent options.
+
+  Most notably - the ``output_directory`` and ``complete_directory`` should be
+  located on a filesystem with sufficient space for the builds.  Windows builds can
+  take *MASSIVE GOBS* of disk space - basically plan for a minimum of 4x the ``disk_size``
+  variable setting to be completely safe.
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "file alternate outline"
+  title: "RackN Content"

@@ -1,0 +1,12 @@
+---
+Name: "edge-lab/nfs-share"
+Description: "Path to shared NFS location for Edge Lab"
+Documentation: |
+  Path for shared NFS storage for cluster
+  Typically created during bootstrap on DRP host
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "file alternate"
+  title: "Community Content"

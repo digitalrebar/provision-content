@@ -1,0 +1,32 @@
+---
+Name: "govc-datastore-create"
+Description: "Run VMware govc datastore create stage"
+Documentation: |
+  This workflow creates a datastore on a remote vSphere API node.
+  The datastore creation is controlled primarily by two Params:
+
+     * ``govc/datastore-create-name`` - sets the name of the DataStore
+     * ``govc/datastore-create-disk`` - defines what disk to make the DataStore on
+
+  Either a _rule_ or a specific Device can be specified by the ``govc/datastore-create-disk``
+  Param.  Supported _rules_ and disk device definition settings examples:
+
+    * ``first_available``
+    * ``disk=t10.ATA_____Micron_M500DC_MTFDDAK120MBB_____________________14260DAD9402``
+  
+  The default is to use the _rule_ ``first_available``.
+
+  The ``first_available`` rule attempts to filter out used disk devices, then
+  chooses the first of any remaining disks that are unused.
+
+  .. note:: IF using the *govc* command, you can find the disk information with the command
+            ``govc host.esxcli storage core path list`` (after setting up the appropriate
+            ``GOVC_`` environment variables, of course.).
+
+Stages:
+  - "govc-datastore-create"
+  - "govc-complete"
+Meta:
+  color: "purple"
+  icon: "terminal"
+  title: "RackN Content"

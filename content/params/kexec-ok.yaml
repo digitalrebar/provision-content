@@ -5,11 +5,16 @@ Documentation: |
   Allows the machine agent to call kexec to switch boot environments
   as long as the machine is currently running Linux, and the new
   environment has a template named 'kexec' that contains the
-  kernel, initrds, and command line to use.
+  kernel, initrds, and command line to use. This can be used to speed
+  up deployments of systems that support kexec.
+
+  .. note:: Not all Linux kernels/distros ship with kexec support enabled. Check your distro for compatibility.
+
 Schema:
   type: boolean
   default: false
 Meta:
+  type: "enable"
   icon: "bolt"
   color: "yellow"
   title: "Digital Rebar Community Content"

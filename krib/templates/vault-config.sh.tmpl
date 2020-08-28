@@ -32,7 +32,7 @@ setup_seal() {
   if [[ ! `grep awskms /etc/vault/vault.hcl` ]]; then
   {{ if and (.ParamExists "vault/awskms-region") (.ParamExists "vault/awskms-access-key") (.ParamExists "vault/awskms-secret-key") (.ParamExists "vault/awskms-kms-key-id") }}
     cat <<EOF >> /etc/vault/vault.hcl
-    
+
 seal "awskms" {
     region     = "{{ .Param "vault/awskms-region" }}"
     access_key = "{{ .Param "vault/awskms-access-key" }}"
@@ -57,8 +57,8 @@ systemctl restart vault
 
 # Wait around until consul has elected a leader
 until consul operator raft list-peers | grep -q leader;
-do 
-  SLEEP=$[ ( $RANDOM % 5 ) ]; 
+do
+  SLEEP=$[ ( $RANDOM % 5 ) ];
 done
 
 # Only initialize vault on the consul leader, to avoid races
@@ -69,7 +69,7 @@ if [[ $? -eq 0 ]] ; then
   # Before attempting to init vault, sleep 5s to give it time to wake up
   sleep 5s
 
-  export VAULT_CACERT=/etc/vault/pki/server-ca.pem 
+  export VAULT_CACERT=/etc/vault/pki/server-ca.pem
   vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
   # Get our recovery key and token, then delete the local record
@@ -90,7 +90,7 @@ if [[ $? -eq 0 ]] ; then
   echo "Setting vault/kms-plugin-token"
   vault token create -policy transit-only -format json > /tmp/token.json
   VAULT_KMS_TOKEN=`cat /tmp/token.json | jq -r '[.auth.client_token][0]'`
-  
+
   drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/kms-plugin-token" to "$VAULT_KMS_TOKEN"
 
   # Destroy the evidence

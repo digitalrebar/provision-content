@@ -2,10 +2,14 @@
 Name: "cluster-remove"
 Description: "A task that removes nodes from cluster profile"
 Documentation: |
-  Removes the Machine Uuid into the cluster profile
-  Typical cluster workflow is add->step->remove->sync
+  Removes the Machine Uuid into the cluster profile.
+
+  Typical cluster workflow is ``add -> step -> remove -> sync``
+
   Where step or sync are optional.
-  See cluster-add task for more details
+
+  See ``cluster-add`` task for more details.
+
 Meta:
   icon: "object ungroup"
   color: "blue"

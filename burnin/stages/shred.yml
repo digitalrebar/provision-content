@@ -5,6 +5,7 @@ BootEnv: "sledgehammer"
 Tasks:
   - "shred"
 Meta:
+  type: "destroy"
   color: "yellow"
   icon: "fire"
   title: "RackN Content"

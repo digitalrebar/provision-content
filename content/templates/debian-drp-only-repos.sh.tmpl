@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export LC_ALL=C LANGUAGE=C LANG=C
+export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
+cat >/etc/apt/sources.list <<"EOFLOCALREPO"
+{{range .MachineRepos }}
+{{ .Lines }}
+{{end}}
+EOFLOCALREPO
+
+apt-get -y --force-yes update

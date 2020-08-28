@@ -1,0 +1,18 @@
+---
+Name: "edge-lab/dashboard-token"
+Description: "Dashboard Login Token"
+Documentation: |
+  Param is set (output) by the Dashboard install process
+
+  To start the dashboard, use `kubectl proxy` then open
+  `http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login <http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login>`_
+
+  Note: this is stored as a secure object so the decode is required
+Secure: true
+Schema:
+  type: string
+Meta:
+  color: "blue"
+  clipboard: "yes"
+  icon: "file archive"
+  title: "Community Content Copyright RackN 2020"

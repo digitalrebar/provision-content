@@ -40,7 +40,7 @@ resource "drp_workflow" "discover-rose-cluster" {
   Description = "Terraform Added"
   Stages = [
     "discover", "packet-discover",
-    "ubuntu-18.04-install", "runner-service", "finish-install",
+    "ubuntu-18.04-install", "drp-agent", "finish-install",
     "ssh-access", "packet-ssh-keys", "rose-config", "complete"
   ]
   Meta {

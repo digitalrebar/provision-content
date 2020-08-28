@@ -2,8 +2,10 @@
 Description: "A task to run the LLDP system to collect data"
 Documentation: |
   Assumes Sledgehammer has LLDP daemon installed so that we can collect data.
+
   Also requires the system to have LLDP enabled on neighbors including switches
   to send the correct broadcast packets.
+
 Name: "network-lldp"
 Templates:
   - ID: "network-lldp-start.sh.tmpl"

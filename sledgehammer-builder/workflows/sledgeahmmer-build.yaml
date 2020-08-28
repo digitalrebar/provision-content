@@ -1,0 +1,26 @@
+---
+Name: sledgehammer-build
+Description: Build a new Sledghahmmer image
+Documentation: |
+  Sledghammer is the OS image Digital Rebar uses for discovery, inventory, and
+  hardwre configuration.  Sledgehammer is based on the current centos-8 boot
+  environment, and requires that bootenv to be present and functional to operate.
+
+  You can customize the Sledgehammer build process by adding updated versions of the
+  follwing Params to the machine you will run this workflow on:
+
+  - sledgehammer/extra-packages
+  - sledgehammer/unwanted-packages
+  - sledgehammer/unwanted-kernel-modules
+  - sledgehammer/disable-services
+  - sledgehammer/enable-services
+  - sledgehammer/customize-tasks
+
+  Please refer to the documentation for each of those parameters for information
+  on what they are and what they allow you to change.
+
+  Once this workflow has finished building a new image, it will upload it
+  to dr-provision along with a profile that will allow you to start using the new image
+  immediately, and then power off the machine that was used to build the image.
+Stages:
+  - sledgehammer-build

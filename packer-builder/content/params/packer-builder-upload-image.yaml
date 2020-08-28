@@ -1,0 +1,17 @@
+---
+Name: "packer-builder/upload-image"
+Description: "This param tracks the packer builder image that was completed, and ready for upload to DRP"
+Documentation: |
+  The packer builder system will add this param to the Machine when it completes
+  the image build process.  The image will be uploaded to DRP in the Files space
+  under:
+
+    * ``<DRP_ENDPOINT>:8091/files/images/builder/``
+
+Schema:
+  type: "string"
+  default: ""
+Meta:
+  color: "green"
+  icon: "file alternate outline"
+  title: "RackN Content"

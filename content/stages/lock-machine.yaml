@@ -1,6 +1,7 @@
 ---
 Description: "Stage to lock the machine"
 Meta:
+  type: "lock"
   color: "yellow"
   icon: "key"
 Name: "lock-machine"

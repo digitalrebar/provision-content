@@ -1,0 +1,12 @@
+---
+Name: "docker/apply-http-proxy"
+Description: "Apply HTTP/HTTPS proxy from to the Docker daemon"
+Documentation: |
+  "Apply HTTP/HTTPS proxy from to the Docker daemon"
+Schema:
+  type: "boolean"
+  default: false
+Meta:
+  color: "blue"
+  icon: "boxes"
+  title: "Community Content"

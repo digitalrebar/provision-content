@@ -1,7 +1,8 @@
 ---
 Name: "cfg-drp-ubuntu1604"
 Description: "A task to configure DRP content bootenv Ubuntu 16.04"
-Documentation: ""
+Documentation: |
+  A task to configure DRP content bootenv Ubuntu 16.04
 
 Meta:
   color: "orange"

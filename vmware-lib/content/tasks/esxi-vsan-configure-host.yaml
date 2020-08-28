@@ -1,0 +1,83 @@
+---
+Description: "Configure a vSphere ESXi host for VSAN use in a cluster."
+Name: "esxi-vsan-configure-host"
+Documentation: |
+  Configure VSAN on a vSphere ESXi host.  This should be done prior to deployment
+  of vCenter for optimal results.
+
+  The ``esxi/vsan-vmk`` Param should be used to define the VMware Kerenel device
+  to use for VSAN operations.  If this param is not set, then the value set in
+  ``esxi/network-firstboot-vmk`` will be used.  The default value will fall through
+  to ``vmk0`` if neither of these Params have been set by an operator.
+
+  This script is intended to run on an ESXi host.
+
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams: []
+OptionalParams:
+  - "esxi/vsan-vmk"
+  - "esxi/network-firstboot-vmk"
+Templates:
+  - Name: "esxi-vsan-configure-host.sh"
+    Contents: |
+      #!/usr/bin/env sh
+      # Configure VSAN on an ESXi host via ESXi workflow
+
+      function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+
+      VSW='{{ .Param "esxi/vsan-vswitch-standard" }}'
+      VMN='{{ .Param "esxi/vsan-vmnic" }}'
+      PGR='{{ .Param "esxi/vsan-portgroup" }}'
+      {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
+      IP='{{ .Param "esxi/vsan-vmknic-ip" }}'
+      NM='{{ .Param "esxi/vsan-vmknic-netmask" }}'
+
+      # TODO: select Standard/Distributed vSwitch, check if exists, build if not
+
+      #esxcli network vswitch standard add -v $VSW
+      #esxcli network vswitch standard uplink add -v $VSW -u $VMN
+      #esxcfg-vswitch -A $PGR $VSW
+
+      #if [[ -z "$IP" && -z "$NM" ]]
+      #then
+      #  echo "esxi/vmknic-ip and netmask are both emptying, assuming existing configuration is correct"
+      #else
+      #  [[ -z "$IP" ]] && xiterr 1 "No value defined for 'esxi/vsan-vmknic-ip'"
+      #  [[ -z "$NM" ]] && xiterr 1 "No value defined for 'esxi/vsan-vmknic-netmask'"
+      #  esxcfg-vmknic -a -i $IP -n $NM -p $PGR
+      #fi
+
+      esxcli vsan network ip add -i $VMK
+
+      exit 0
+      # skipping all validation steps / path for now - this needs trued up
+      ENABLED=$(esxcli --formatter=keyvalue vsan cluster get | grep "^VsanClusterGet.Enabled" | cut -d "=" -f2)
+
+      if [[ "$ENABLED" == "true" ]]
+      then
+        echo "VSAN services are enabled on cluster"
+      else
+        echo "Dumping VSAN information:"
+        esxcli vsan cluster get || true
+        xiterr 1 "VSAN is not enabled (set 'esxi/vsan-enabled' to 'true') for this ESXi node ('{{ .Machine.Name }}')"
+      fi
+
+      for DEV in $(esxcli --formatter=keyvalue vsan network list | grep VmkNicName | cut -d"=" -f2)
+      do
+        VMKS="$VMKS $DEV"
+      done
+
+      if echo $VMKS | grep -q $VMK
+      then
+        echo "VSAN is configured on '$VMK' already."
+      else
+        esxcli vsan network ip add -i $VMK
+        # changing existing interface to support VSAN
+        # esxcli vsan network ip set -i $VMK -T=vsan
+      fi
+
+

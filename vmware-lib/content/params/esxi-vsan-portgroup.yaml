@@ -1,0 +1,15 @@
+---
+Name: "esxi/vsan-portgroup"
+Description: "Defines the Portgroup name to configure for VSAN."
+Documentation: |
+  Defines the Portgroup name  to use for VSAN configuration on the vSphere ESXi host.
+
+  Defaults to ``VSAN`` if not otherwise defined.
+
+Schema:
+  type: "string"
+  default: "VSAN"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

@@ -1,0 +1,29 @@
+---
+Name: "access-keys-shared"
+Description: "A map of shared ssh public keys to install for the root user"
+Documentation: |
+  Supplements local access-keys by adding group or shared keys (generally from a shared profile)
+  Generally, `access-keys` are to be set for narrow use cases such as per machine.
+
+  This map is used to put ssh public keys in place for the root user.
+
+  The key of the map is a arbritary name and the value is the ssh
+  public key for that name.
+
+  Parameter YAML format:
+
+    ::
+
+      access-keys:
+        greg:  ssh-rsa key
+        greg2:  ssh-rsa key
+
+Schema:
+  type: "object"
+  additionalProperties:
+    type: "string"
+Meta:
+  type: "credential"
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"

@@ -12,9 +12,13 @@ Documentation: |
 
   This is used in the VMware ESXi provisioning kickstarts.
 
+  To set the hostname of most Linux hosts update the value of
+  `.Machine.Name`.
+
 Schema:
   type: "string"
 Meta:
+  type: "id"
   icon: "tag"
   color: "blue"
   title: "Digital Rebar Community Content"

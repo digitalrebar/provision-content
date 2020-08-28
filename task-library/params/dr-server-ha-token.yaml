@@ -1,0 +1,13 @@
+---
+Name: "dr-server/ha-token"
+Description: "Token used for shared authentication of HA DRP clusters"
+Secure: true
+Documentation: |
+  Create the ``dr-server/ha-token`` using ``drpcli users token rocketskates ttl 3y | jq -r '.Token'``
+
+Schema:
+  type: string
+Meta:
+  color: "blue"
+  icon: "key"
+  title: "RackN Copyright 2020"

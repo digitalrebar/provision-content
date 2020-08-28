@@ -6,9 +6,9 @@ Documentation: |
   This can be very helpful to troubleshoot timing issues
   in provisioning.  It should NOT be used in production!
 Schema:
-  type: "integer"
-  minimum: 1
-  default: 5
+  type: "number"
+  default: 1.0
+  minimum: 0.1
 Meta:
   color: "yellow"
   icon: "hourglass half"

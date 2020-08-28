@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+#
+# Common routines for either registering a machine into dr-provision,
+# or discovering that we already have a machine registration for
+# whatever machine we are running on.
+
+macs=()
+for nic in /sys/class/net/*; do
+    [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
+    macs+=($(cat "$nic/address"))
+done
+hwaddrs="$(printf '"%s",' "${macs[@]}")"
+hwaddrs="[${hwaddrs%,}]"
+maclist="$(printf '%s,' "${macs[@]}")"
+maclist="${maclist%,}"
+export PROVISIONER_WEB="{{.ProvisionerURL}}"
+export ARCH="$(uname -m)"
+case $ARCH in
+    amd64|x86_64) ARCH=amd64;;
+    arm64|aarch64) ARCH=arm64;;
+    *)
+        echo "Unknown arch $ARCH"
+        exit 1;;
+esac
+# Perform minimal required bootstrapping for discovery
+export RS_TOKEN="{{.GenerateToken}}"
+export RS_ENDPOINT="{{.ApiURL}}"
+mkdir -p /usr/local/bin
+grep -q '/usr/local/bin' <<< "$PATH" || export PATH="$PATH:/usr/local/bin"
+for tool in drpcli jq; do
+    which "$tool" &>/dev/null && continue
+    echo "Installing $tool in /usr/local/bin"
+    case $tool in
+        drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
+        jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
+    esac
+    chmod 755 "/usr/local/bin/$tool"
+done
+unset tool
+
+# If we did not get a hostname from DHCP, generate one for ourselves.
+[[ $HOSTNAME ]] || export HOSTNAME="d${MAC//:/-}.${DOMAIN}"
+
+
+switch_to_control() {
+    echo "${RS_UUID}" > /etc/rs-uuid
+    {{template "profile.tmpl" .}}
+
+    echo "$PROVISIONER_WEB/machines/$RS_UUID/control.sh"
+    if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
+            grep -q '^exit 0$' /tmp/control.sh && \
+            head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
+        echo "Could not load our control.sh!"
+        echo "Either the machine is not in the proper bootenv, or"
+        echo "the bootenv is broken and fell through to Sledgehammer"
+        exit 1
+    fi
+    chmod 755 /tmp/control.sh
+    export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
+    echo "transfer from start-up to control script"
+    [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
+    echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
+    exit 1
+}
+
+# Create a new node for us.
+#
+# $1 = Number of tries.  If left unspecified, will try forever
+create_machine() {
+    local tries=${1:-0} i=1
+    while true; do
+        JSON="$(drpcli machines create "{\"Name\": \"$HOSTNAME\",
+                                         \"Arch\": \"$ARCH\",
+                                         \"HardwareAddrs\": $hwaddrs}")" && break
+        if ((tries == 0 || i <= tries)); then
+            echo "We could not create a node for ourself, trying again (try $i)"
+            ((i++))
+            sleep 5
+            continue
+        fi
+        echo "Tried $i times to create a node, giving up"
+        return 1
+    done
+    export RS_UUID="$(jq -r '.Uuid' <<< "$JSON")"
+}
+
+find_by_whoami() {
+    if ! resp="$(drpcli machines whoami)"; then
+        echo "Find by whoami not available"
+        return 1
+    fi
+    score="$(jq '.Result.Score' <<< "$resp")"
+    if [[ $score  && $score != null ]]; then
+        # The returned Result has a Score, so this machine already
+        # exists.
+        export RS_UUID="$(jq -r '.Result.Uuid' <<< "$resp")"
+        export RS_TOKEN="$(jq -r '.Result.Token' <<< "$resp")"
+        echo "Whoami says we are $RS_UUID"
+    else
+        echo "Whoami did not find machine"
+        return 1
+    fi
+}
+
+find_by_kernel_cmdline() {
+    local host_re='rs\.uuid=([^ ]+)'
+    if ! [[ $(cat /proc/cmdline) =~ $host_re ]]; then
+        echo "No kernel cmdline supplied RS_UUID"
+        return 1
+    fi
+    export RS_UUID="${BASH_REMATCH[1]}"
+    echo "Kernel cmdline supplied $RS_UUID"
+}
+
+find_by_hostname() {
+    export RS_UUID=$(drpcli machines show Name:$HOSTNAME | jq -r .Uuid)
+    if [[ !$RS_UUID || $RS_UUID = null ]]; then
+        echo "Unable to map $HOSTNAME back to a UUID"
+        unset RS_UUID
+        return 1
+    fi
+    echo "$HOSTNAME lookup found $RS_UUID"
+}
+
+find_by_saved_uuid() {
+    if ![[ -f /etc/rs-uuid ]]; then
+        echo "No saved UUID"
+        return 1
+    fi
+    luuid="$(tail -n 1 /etc/rs-uuid)"
+    export RS_UUID=$(drpcli machines show $luuid | jq -r .Uuid)
+    if [[ -z $RS_UUID || $RS_UUID = null ]]; then
+        echo "Saved UUID does not map back to a machine"
+        unset RS_UUID
+        return 1
+    fi
+    echo "Using saved UUID $RS_UUID"
+}
+
+find_by_hwaddrs() {
+    local machines
+    if grep -q '"HardwareAddr"' < <(drpcli machines indexes); then
+        # The fast way
+        machines="$(drpcli machines list "HardwareAddr=$maclist" --slim 'Params,Meta')"
+        case $(jq 'length' <<< "$machines") in
+            0)  # A new machine needs to be created
+                echo "No machine matching mac list $maclist"
+                return 1;;
+            1)  # it'sa me, Machinio
+                export RS_UUID="$(jq -r '.[0].Uuid' <<< "$machines")"
+                echo "Found $RS_UUID via mac address lookup"
+                return 0;;
+            *)  # This will not end well no matter what we do.
+                echo "More than one machine present with our macaddresses ($maclist)"
+                echo "No way to create a non-conflicting machine for this system."
+                echo "Conflicting machines:"
+                jq -r '.[] |.Uuid' <<< "$machines"
+                exit 1;;
+            esac
+    fi
+    # The slow way
+    machines="$(drpcli machines list --slim 'Params,Meta')"
+    local -A toCheck
+    for tc in $(IFS=',' printf '%s ' "$maclist"); do
+        toCheck["$tc"]="$tc"
+    done
+    while read -rs machine; do
+        for hwaddr in $(jq -r '.HardwareAddrs | .[]' <<< "$machine"); do
+            [[ ${toCheck["$hwaddr"]} ]] || continue
+            if [[ $RS_UUID ]]; then
+                echo "More than one machine with HardwareAddr $hwaddr"
+                echo "Cannot safely create machine in an automated fashion"
+                exit 1
+            fi
+            export RS_UUID="$(jq -r '.Uuid' <<< "$machine")"
+            break
+        done
+    done
+    if ! [[ $RS_UUID ]]; then
+        echo "No machine found for $maclist"
+        return 1
+    fi
+    echo "Found $RS_UUID via mac address matching"
+}
+
+cannot_find_or_create() {
+    echo "Unable to find or create a machine record"
+    exit 1
+}

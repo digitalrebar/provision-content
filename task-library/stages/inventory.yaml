@@ -2,11 +2,14 @@
 Name: "inventory"
 Description: "Collect Inventory Keys"
 Documentation: |
-  Collects selected fields from Gohai into a simpler, flat list.
-  The process uses JQ filters, defined in inventory/fields, to
-  build inventory/data on each machine.
-  Also, applies the inventory/check map to the data and will fail
+  Collects selected fields from Gohai into a simpler flat list.
+
+  The process uses JQ filters, defined in ``inventory/fields``, to
+  build ``inventory/data`` on each machine.
+
+  Also, applies the ``inventory/check`` map to the data and will fail
   if the checks do not pass.
+
 Tasks:
   - "inventory-check"
 Meta:

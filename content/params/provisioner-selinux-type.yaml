@@ -1,0 +1,19 @@
+---
+Name: "provisioner-selinux-type"
+Description: "Defines the SELinux type to set on a system."
+Documentation: |
+  Defines the SELinux mode to set on a system during installation.
+
+  Also see ``provisioner-selinux``
+
+Meta:
+  icon: "user"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+Schema:
+  type: "string"
+  enum:
+    - "targeted"
+    - "mls"
+  default: "targeted"
+

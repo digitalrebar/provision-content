@@ -1,0 +1,21 @@
+---
+Name: "govc-deploy-ova"
+Description: "Deploy an OVA to a vSphere instance via 'govc' context."
+Documentation: |
+  This Stage runs _govc_ command with the ``import.ova`` option, to
+  deploy an OVA appliance device to a vSphere target.
+
+  The OVA should be specified by the ``govc/ova-location`` Param, and
+  the associated JSON template for the deployment must be specified
+  by the ``govc/ova-template`` Param.
+
+Params:
+  govc/commands:
+    - "import.ova -options=/ova/template.json"
+Tasks:
+  - "context:govc"
+  - "govc-commands"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

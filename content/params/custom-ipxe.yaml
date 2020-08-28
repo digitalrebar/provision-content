@@ -10,6 +10,7 @@ Schema:
   type: "string"
   default: "shell"
 Meta:
+  type: "config"
   icon: "tag"
   color: "blue"
   title: "Digital Rebar Community Content"

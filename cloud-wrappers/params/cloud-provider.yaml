@@ -1,0 +1,20 @@
+---
+Name: "cloud/provider"
+Description: "Cloud Provider"
+Documentation: |
+  The cloud provider detected by join-up script in discovery
+
+  Implemented types: aws, google, linode
+
+  Expand this list as new types are added!
+Schema:
+  type: "string"
+  enum: 
+    - "aws"
+    - "google"
+    - "linode"
+Meta:
+  type: "value"
+  icon: "cloud"
+  color: "blue"
+  title: "Digital Rebar Community Content"

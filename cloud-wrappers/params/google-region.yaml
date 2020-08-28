@@ -1,0 +1,13 @@
+---
+Name: "google/region"
+Description: "Google Cloud Region"
+Documentation: |
+  Provisioning to Region for Google Cloud
+Schema:
+  type: "string"
+  default: "us-central1"
+Meta:
+  type: "value"
+  color: "green"
+  icon: "map outline"
+  title: "RackN Content"

@@ -1,7 +1,8 @@
 ---
 Name: "drp-prom-mon/drp-prefs-unknownBootenv"
 Description: "Set the Global Preferences for unknown Boot Environment."
-Documentation: ""
+Documentation: |
+  Set the Global Preferences for unknown Boot Environment.
 
 Schema:
   type: "string"

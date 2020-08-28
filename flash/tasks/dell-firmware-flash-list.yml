@@ -15,7 +15,10 @@ Templates:
           local _src=$1
           local _dest=$2
 
-          curl -k -o $_dest $_src
+          echo "Downloading $_src"
+          set -e
+          curl -L -f -k -o $_dest $_src
+          set +e
           if [[ $? != 0 ]] ; then
               xiterr 1 "Failed to download $_dest from $_src"
           fi
@@ -71,7 +74,7 @@ Templates:
              failed=yes;;
           5)
              echo "Unquailifed update for $FILENAME"
-             failed=yes;;
+             echo "Either missing or not applicable - skipping";;
           6)
              echo "Reboot started!! for $FILENAME"
              want_reboot=yes;;

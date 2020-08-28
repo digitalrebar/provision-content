@@ -1,5 +1,8 @@
-Description: The color for machines icon
+Description: The color for machine's icon
+Documentation: |
+  The color of the machine's icon
 Meta:
+  type: "value"
   color: blue
   icon: info
   title: RackN Content

@@ -5,6 +5,7 @@ Description: |
   process.  This includes LVM metadata, partition tables, software RAID signatures,
   and the first and last megabyte of any partitions and disks.
 Meta:
+  type: "erase"
   feature-flags: "sane-exit-codes"
   icon: "erase"
   color: "blue"
@@ -47,6 +48,7 @@ Templates:
           [[ $name = fd* ]] && continue
           echo "Forcibly removing any RAID metadata on /dev/$name. Failures are OK if readonly"
           mdadm --misc --zero-superblock --force /dev/$name || :
+          wipefs -a -f /dev/$name || :
           if (( blocks >= 4096)); then
               echo "Zeroing the first and last 2 megs of /dev/$name. Failures are OK if readonly"
               dd "if=/dev/zero" "of=/dev/$name" "bs=512" "count=4096" || :

@@ -1,11 +1,12 @@
 ---
 Description: "A task to change the stage based upon parameters and possibly reboot not intended to be a workflow stage"
 Documentation: |
-  This task uses the stage-chooser/next-stage and stage-chooser/reboot parameters
+  This task uses the ``stage-chooser/next-stage`` and ``stage-chooser/reboot`` parameters
   to change the stage of the current machine and possibly reboot.
 
   This is not intended for use in a stage chain or workflow.  But a transient stage,
   that can be used on a machine that is idle with a runner executing.
+
 Name: "stage-chooser"
 Templates:
   - ID: "stage-chooser.sh.tmpl"

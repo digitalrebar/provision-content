@@ -8,6 +8,7 @@ Tasks:
   - "ssh-access"
   - "configure-network"
 Meta:
+  type: "os"
   icon: "download"
   color: "yellow"
   title: "Digital Rebar Community Content"

@@ -5,6 +5,7 @@ Tasks:
   - "burnin_reset"
   - "burnin_reboot_reset"
 Meta:
+  type: "reset"
   color: "yellow"
   icon: "fire"
   title: "RackN Content"

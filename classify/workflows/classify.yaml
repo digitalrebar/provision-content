@@ -1,6 +1,11 @@
 ---
 Name: "classify"
 Description: "Run the sample Classification Workflow"
+Documentation: |
+  Workflow that runs the ``classify`` Stage, which allows an operator to
+  match ``test`` and ``action`` sequences on the given machine that the
+  workflow is run on.
+
 Meta:
   color: "green"
   icon: "balance scale"

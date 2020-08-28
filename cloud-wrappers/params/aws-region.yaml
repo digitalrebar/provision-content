@@ -1,0 +1,13 @@
+---
+Name: "aws/region"
+Description: "AWS Region"
+Documentation: |
+  Provisioning to Region for AWS
+Schema:
+  type: "string"
+  default: "us-west-2"
+Meta:
+  type: "value"
+  color: "green"
+  icon: "map outline"
+  title: "RackN Content"

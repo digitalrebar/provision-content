@@ -4,6 +4,7 @@ Description: Reorder the UEFI bootorder during OS install to make the current bo
 Tasks:
   - always-pxe-in-uefi-first
 Meta:
+  type: "config"
   title: Digital Rebar Community Content
   icon: "disk outline"
   color: "blue"

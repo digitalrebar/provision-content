@@ -3,38 +3,41 @@ Name: "cluster-add"
 Description: "A task that adds nodes to a cluster profile"
 Documentation: |
   Injects the Machine Uuid into the cluster/machines param.
-  This is the first step in a the cluster workflow
-  Typical cluster workflow is add->step->remove->sync
-  Where step or sync are optional.
+  This is the first step in a the cluster workflow.
+  Typical cluster workflow is ``add -> step -> remove -> sync``
+  where step or sync are optional.
 
-  The cluster-* stages provide basic queue management for machines
-  with a shared profile.  That profile must have a cluster/profile
+  The ``cluster-*`` stages provide basic queue management for machines
+  with a shared profile.  That profile must have a ``cluster/profile``
   field that names the profile.  Once the queue is running, machines
   are tracked in the cluster/machines parameter.
 
-  cluster-add enqueues the machine
-  cluster-step services the queue (takes the next cluster/step in line)
-  cluster-remove dequeues the machine (should be done AFTER servicing)
-  cluster-sync forces all machines to wait until the queue is empty
+    * ``cluster-add`` enqueues the machine
+    * ``cluster-step`` services the queue (takes the next cluster/step in line)
+    * ``cluster-remove`` dequeues the machine (should be done AFTER servicing)
+    * ``cluster-sync`` forces all machines to wait until the queue is empty
 
   If you are doing a rolling upgrade, use the following sequence:
-  cluster-add -> cluster-step -> [do work] -> cluster-remove
+
+    * ``cluster-add -> cluster-step -> [do work] -> cluster-remove``
 
   If you are coalescing work over multiple machines, use the following sequence:
-  cluster-add -> [do work] -> cluster-remove -> cluster-sync
 
-  The cluster-add process will automatically elect cluster/leader-count leaders
-  during the enqueue step.  These cluster/leaders will be be maintained
+    * ``cluster-add -> [do work] -> cluster-remove -> cluster-sync``
+
+  The cluster-add process will automatically elect ``cluster/leader-count`` leaders
+  during the enqueue step.  These ``cluster/leaders`` will be be maintained
   after the run is over and require manual editing to remove.  It is possible
   to pre-create the leasder list.
 
   It is possible to do multiple add/remove steps in a single workflow
 
   If your cluster is NOT behaving, you can rescue or escape from the cluster stages
-  by setting cluster/escape on the profile.  This will interrupt a cluster in process.
-  Using escape=0 will allow the cluster stages to exit normally and noop while
-  using escape=1 will exit with an error and the stages will stop progressing.
-  Escape=1 is safter since downstream actions are blocked.
+  by setting ``cluster/escape`` on the profile.  This will interrupt a cluster in process.
+  Using ``escape=0`` will allow the cluster stages to exit normally and noop while
+  using ``escape=1`` will exit with an error and the stages will stop progressing.
+  ``Escape=1`` is safter since downstream actions are blocked.
+
 Meta:
   icon: "object group"
   color: "blue"

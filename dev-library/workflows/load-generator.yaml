@@ -1,0 +1,12 @@
+---
+Name: "load-generator"
+Description: "For dev testing, runs the wait-time task and resets the workflow"
+Documentation: |
+  Used to generate non-destructive actions in a workflow for testing.
+Stages:
+  - wait-time
+  - workflow-reset
+Meta:
+  color: blue
+  icon: cogs
+  title: RackN Content

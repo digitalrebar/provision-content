@@ -21,14 +21,26 @@
 # access-ssh-root-mode - defaults to "without-password" if unspecified
 #
 
-{{if .ParamExists "access-keys"}}
+{{if or (.ParamExists "access-keys") (or (.ParamExists "access-keys-global") (.ParamExists "access-shared")) }}
 KEYS=/root/.ssh/authorized_keys
 TMP_KEYS=$(mktemp /tmp/authorized_keys.tmp.XXXXXXX)
 echo "Putting ssh access keys for root in place"
 mkdir -p /root/.ssh
 cat >>$KEYS <<EOFSSHACCESS
+{{if .ParamExists "access-keys" -}}
 {{range $key := .Param "access-keys" -}}
 {{$key}}
+{{end -}}
+{{end -}}
+{{if .ParamExists "access-keys-shared" -}}
+{{range $key := .Param "access-keys-shared" -}}
+{{$key}}
+{{end -}}
+{{end -}}
+{{if .ParamExists "access-keys-global" -}}
+{{range $key := .Param "access-keys-global" -}}
+{{$key}}
+{{end -}}
 {{end -}}
 EOFSSHACCESS
 # if the we are called multiple times we get duplicate keys, lets fix that
@@ -39,7 +51,17 @@ chmod 600 $KEYS
 {{end}}
 
 echo "Updating SSHD default values"
+# This is Ubuntu-ish - so keep it - though it doesn't really work properly without the below as well.
 sed --in-place -r -e '/^#?PermitRootLogin/ s/^#//' -e '/^#?PermitRootLogin/ s/prohibit-password/{{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
+# Now always set it.
+sed --in-place -r -e '/PermitRootLogin/ s/PermitRootLogin .*/PermitRootLogin {{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
+
+{{if .ParamExists "access-ssh-root-mode" }}
+{{ if eq (.Param "access-ssh-root-mode") "yes" }}
+sed --in-place -r -e '/^#?PasswordAuthentication/ s/^#//' /etc/ssh/sshd_config
+sed --in-place -r -e '/PasswordAuthentication/ s/PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+{{ end }}
+{{ end }}
 
 # Restart sshd but os badness.
 . /etc/os-release

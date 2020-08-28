@@ -1,6 +1,8 @@
 ---
 Name: "prom-mon-single-node"
 Description: "Single node with DRP/Node Exporter/Prometheus/Grafana setup"
+Documentation: |
+  Single node with DRP/Node Exporter/Prometheus/Grafana setup
 Meta:
   color: "orange"
   icon: "dashboard"

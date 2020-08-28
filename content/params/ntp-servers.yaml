@@ -3,7 +3,7 @@ Name: "ntp-servers"
 Description: "Defines the set of NTP servers to apply to the system."
 Documentation: |
   This is an array of strings where each string an IP address or Name of
-  an NTP server.
+  an NTP server. Used by the Debian & Ubuntu installers only at this time.
 
 Schema:
   type: "array"
@@ -11,6 +11,7 @@ Schema:
     type: "string"
 
 Meta:
+  type: "id"
   icon: "time"
   color: "blue"
   title: "Digital Rebar Community Content"

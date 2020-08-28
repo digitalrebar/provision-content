@@ -4,7 +4,7 @@ Name: "krib-external-dns"
 Templates:
   - ID: "krib-external-dns.yaml.tmpl"
     Name: "ExternalDNS manifests"
-    Path: "/tmp/krib-external-dns.yaml"    
+    Path: "/tmp/krib-external-dns.yaml"
   - ID: "krib-external-dns.sh.tmpl"
     Name: "ExternalDNS script execution"
     Path: ""

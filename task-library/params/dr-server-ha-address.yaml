@@ -1,0 +1,12 @@
+---
+Name: "dr-server/ha-address"
+Description: "Shared Address of the HA cluster"
+Documentation: |
+  Must be IP and netmask in CIDR format
+
+Schema:
+  type: string
+Meta:
+  color: "blue"
+  icon: "address card"
+  title: "RackN Copyright 2020"

@@ -10,11 +10,14 @@ Documentation: |
   variable to the value if this parameter when the agent start up.  On
   Windows, it does so by setting the TMP environment variable
   instead.  If this parameter is left unset, then the machine agent
-  will use whatever the default values for the system are.
+  will use whatever the default values for the system are. This setting
+  does not impact the ESXi agent (drpy)
+
 Schema:
   type: string
   default: ''
 Meta:
+  type: "config"
   icon: "folder"
   color: "blue"
   title: "Digital Rebar Community Content"

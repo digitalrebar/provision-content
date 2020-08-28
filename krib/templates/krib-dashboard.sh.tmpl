@@ -5,6 +5,10 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+{{ template "download-tools.tmpl" .}}
+
+{{ template "krib-runtime-proxy.tmpl" .}}
+
 {{if .ParamExists "krib/cluster-profile" -}}
 CLUSTER_PROFILE={{.Param "krib/cluster-profile"}}
 PROFILE_TOKEN={{.GenerateProfileToken (.Param "krib/cluster-profile") 7200}}
@@ -34,7 +38,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     install wget
   fi
 
-  wget -O /tmp/kubernetes-dashboard.yaml {{ .Param "krib/dashboard-config" }}
+  download -o /tmp/kubernetes-dashboard.yaml {{ .Param "krib/dashboard-config" }}
 
   OPWD=$(pwd)
   cd /tmp

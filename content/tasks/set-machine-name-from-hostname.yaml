@@ -1,0 +1,24 @@
+---
+Name: "set-machine-name-from-hostname"
+Description: "A task to set Machine.Name from the Param 'hostname'."
+Documentation: |
+  This Task sets the Machine Object ``.Macine.Name`` value to the current
+  Machine objects Parameter named ``hostname``.  This is often used in
+  discovery stages, where the Classify functions may set a Machines Param
+  ``hostname`` to a value based on the classify actions.
+
+  This Task should be run **after** any Classify action Stages which perform
+  ``add_parameter hostname BOB`` actions - or similar Tasks that set the
+  Machine objects ``hostname`` Param.
+
+Templates:
+  - ID: "set-machine-name-from-hostname.sh.tmpl"
+    Name: "set-machine-name-from-hostname"
+    Path: ""
+    Meta:
+      OS: "linux"
+Meta:
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"

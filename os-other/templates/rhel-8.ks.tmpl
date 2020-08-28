@@ -1,0 +1,130 @@
+# DigitalRebar Provision RHEL-8 (and related distros) kickstart
+
+# RHEL documentation on kickstart directives
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_installation/kickstart-commands-and-options-reference_installing-rhel-as-an-experienced-user
+
+# RHSM create an activation key from: https://access.redhat.com/management/activation_keys/new
+{{if .ParamExists "redhat/rhsm-organization"}}rhsm --organization={{.Param "redhat/rhsm-organization"}} --activation-key={{.Param "redhat/rhsm-activation-key"}} {{.Param "redhat/rhsm-additional"}}{{else}}# no RHSM org/key specified - skipping{{end -}}
+
+{{if eq ( .Param "redhat/kickstart-shell") true}}
+{{if .ParamExists "provisioner-access-key"}}
+sshpw --username={{if .ParamExists "provisioner-default-user"}}{{.Param "provisioner-default-user"}}{{else}}rocketskates{{end}} --sshkey {{.Param "provisioner-access-key"}}
+{{else -}}
+sshpw --username={{if .ParamExists "provisioner-default-user"}}{{.Param "provisioner-default-user"}}{{else}}rocketskates{{end}} --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$TNfj2zjqvI5ICeDM$jMOazmEcMphCFQYd47sCmjtdIkXjI3eegqE17sydyRo7bjCVntZ9dE815KUYnnUCZnvjOdvYbSkK80lnnNgSM1{{end}}
+{{end -}}
+{{else -}}
+# no SSH Shell username/key configured
+{{end -}}
+
+#######################
+####################### Needs .InstallRepos handling for RHEL
+#######################
+# Assumes full DVD ISO is exploded on DRP Endpoint
+url --url={{.Env.PathFor "tftp" ""}}/BasseOs
+url --url={{.Env.PathFor "tftp" ""}}/AppStream
+
+eula --agreed
+timezone Etc/UTC --isUtc
+lang en_US.UTF-8
+keyboard --vckeymap=us --xlayouts='us'
+
+# to generate a hashed password from cleartext, use python3, like:
+# python3 -c 'import crypt,getpass;pw=getpass.getpass();print(crypt.crypt(pw) if (pw==getpass.getpass("Confirm: ")) else exit())'
+rootpw --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1{{end}}
+firewall --disabled
+#firewall --enabled --port=8091,8092
+auth --passalgo=sha512 --useshadow
+selinux --{{.Param "provisioner-selinux"}}
+
+# Partition clearing information
+bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
+zerombr
+ignoredisk --only-use={{.Param "operating-system-disk"}}
+#clearpart --none --initlabel
+clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
+
+autopart --type=lvm
+#part /boot --fstype ext4 --size=512 --ondisk={{.Param "operating-system-disk"}}
+#part /boot/efi --fstype vfat --size=512 --ondisk={{.Param "operating-system-disk"}}
+#part swap --recommended
+#part pv.6 --size=1 --grow --ondisk={{.Param "operating-system-disk"}}
+#volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
+#logvol / --fstype xfs --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
+
+# Run the Setup Agent on first boot
+firstboot --enable
+text
+skipx
+reboot {{if .Param "kexec-ok" }}--kexec{{end}}
+
+# Network information
+network --hostname={{ if .ParamExists "hostname" }}{{ .Param "hostname" }}{{ else }}{{ .Machine.ShortName }}{{ end }}
+{{ if .ParamExists "provisioner-network-config" }} network {{ .ParamExpand "provisioner-network-config" }}{{ else }}network --bootproto=dhcp{{ end -}}
+
+# System services
+#services --enabled="chronyd"
+# System timezone
+#timezone America/Los_Angeles --isUtc
+
+%packages
+{{ $packages := index (.Param "kickstart-base-packages") .Env.OS.Name -}}
+{{ if not $packages -}}
+{{ $packages = index (.Param "kickstart-base-packages") .Env.OS.FamilyName -}}
+{{ end -}}
+{{ if not $packages -}}
+{{ $packages = index (.Param "kickstart-base-packages") "unknown" -}}
+{{ end -}}
+{{ range $index, $element := $packages -}}
+{{$element}}
+{{ end -}}
+{{if .ParamExists "extra-packages" -}}
+{{ range $index, $element := (.Param "extra-packages") -}}
+{{$element}}
+{{end -}}
+{{end -}}
+kexec-tools
+{{ if eq ( .Param "oscap/enabled") true -}}
+# extra packages to be installed for SCAP
+{{ range $index, $pkgs := (.Param "oscap/configuration") -}}
+{{ if eq $index "packages" -}}
+{{ range $pkg := $pkgs -}}
+{{ $pkg }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+%end
+
+{{ if eq ( .Param "oscap/enabled") true -}}
+# SCAP profile configuration
+%addon org_fedora_oscap
+{{ range $index, $profiles := (.Param "oscap/configuration") -}}
+{{ if eq $index "profile" -}}
+{{ range $profile := $profiles -}}
+    {{ $profile }}
+{{ end -}}
+{{ end -}}
+{{ end -}}
+%end
+{{ end -}}
+
+%addon com_redhat_kdump --enable --reserve-mb='auto'
+%end
+
+%anaconda
+{{ range $index, $pwpolicy := (.Param "redhat/pwpolicy") -}}
+{{ $pwpolicy }}
+{{ end -}}
+%end
+
+%post
+
+exec > /root/post-install.log 2>&1
+set -x
+export PS4='${BASH_SOURCE}@${LINENO}(${FUNCNAME[0]}): '
+
+{{template "reset-workflow.tmpl" .}}
+{{template "runner.tmpl" .}}
+
+sync
+%end

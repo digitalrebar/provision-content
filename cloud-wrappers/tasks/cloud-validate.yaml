@@ -1,0 +1,110 @@
+---
+Name:  "cloud-validate"
+Description: "A task make sure minimum values are set for cloud wrappers."
+Documentation: |
+  Used as a validate that the right params have been set for cloud
+  scenarios and provide operator friendly feedback in the Machine.Description
+
+  Developer Notes:
+  * Please add synchronize with the `cloud/provider` enum!
+  * Sets the `terraform/plan-automation` value on the machine if missing
+
+RequiredParams:
+  - cloud/provider
+OptionalParams:
+  - linode/token
+  - aws/access-key
+  - aws/secret-key
+  - google/credential
+  - google/project-id
+  - terraform/plan-automation
+Templates:
+  - Name: "cloud-validate"
+    Contents: |
+      #!/bin/bash
+      # RackN Copyright 2020
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+
+      {{ if (empty (.Param "terraform/plan-automation")) }}
+        echo "No automation plan: Adding default terraform/plan-automation"
+        drpcli machines set $RS_UUID param terraform/plan-automation to '["cloud-provision-reference.tf.tmpl"]'
+      {{ else }}
+        echo "NOTE: terraform/plan-automation found! Using {{ .ParamExists "terraform/plan-automation" }}"
+      {{ end }}
+
+      {{ if .ParamExists "cloud/provider" }}
+
+        echo "We have cloud provider {{ .Param "cloud/provider"}}!  Do we have the right credentials?"
+
+        {{ if eq "aws" (.Param "cloud/provider") }}
+          {{ if .ParamExists "aws/secret-key" }}
+            echo "  required secret-key is set"
+          {{ else }}
+            echo "  ERROR: you must set the aws/secret-key for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key!"}'
+            exit 1
+          {{ end }}
+          {{ if .ParamExists "aws/access-key-id" }}
+            echo "  required access-key is set"
+          {{ else }}
+            echo "  ERROR: you must set the aws/access-key-id for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key-id!"}'
+            exit 1
+          {{ end }}
+        {{ end }}
+
+        {{ if eq "google" (.Param "cloud/provider") }}
+          {{ if .ParamExists "google/credential" }}
+            echo "  required google/credentialis set"
+          {{ else }}
+            echo "  ERROR: you must set the google/credential for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/credential!"}'
+            exit 1
+          {{ end }}
+          {{ if .ParamExists "google/project-id" }}
+            echo "  required google/project-id is set"
+          {{ else }}
+            echo "  ERROR: you must set the google/project-id for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/project-id!"}'
+            exit 1
+          {{ end }}
+        {{ end }}
+
+        {{ if eq "linode" (.Param "cloud/provider") }}
+          echo "linode/token check..."
+          {{ if .ParamExists "linode/token" }}
+            echo "  required token is set"
+          {{ else }}
+            echo "  ERROR: you must set the linode/token for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the linode/token!"}'
+            exit 1
+          {{ end }}
+          {{ range $i, $p := .Machine.Profiles }}
+          s="{{$p}}"
+          if [[ ${#s} -gt 2  ]]; then
+            echo "  verified \"$s\" tag length (must be >2 characters, was ${#s})"
+          else
+            echo "FAIL! \"$s\" profile IS NOT >2 characters. Min 3 is required by Linode"
+            exit 1
+          fi
+          {{ end }}
+
+        {{ end }}
+
+      {{ else }}
+        echo "You must define which cloud is being used!"
+        drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the cloud/provider!"}'
+        exit 1
+      {{ end }}
+
+      echo "passed validation"
+      exit 0
+Meta:
+  type: "discover"
+  icon: "cloud"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

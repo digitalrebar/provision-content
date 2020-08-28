@@ -2,7 +2,10 @@
 Name: "sledgehammer/extra-ifs"
 Description: "Extra interfaces to configure during sledgehammer builds"
 Documentation: |
-  Extra interfaces to configure during sledgehammer builds.
+  Extra interfaces to configure during sledgehammer builds.  This is only
+  required if you are building a Sledgehammer instance on a VM with nonstandard
+  networking, and it does not have anything to do with how Sledgehammer behaves
+  at runtime.
 
 Schema:
   type: "array"

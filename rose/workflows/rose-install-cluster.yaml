@@ -8,7 +8,7 @@ Name: "rose-install-cluster"
 ReadOnly: false
 Stages:
   - "ubuntu-18.04-install"
-  - "runner-service"
+  - "drp-agent"
   - "finish-install"
   - "ssh-access"
   - "packet-ssh-keys"

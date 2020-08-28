@@ -1,0 +1,16 @@
+---
+Name: edge-lab-install-dashboard
+Description: "Edge Lab install Dashboard"
+Documentation: |
+  Installs and runs Kubernetes Dashboard after a cluster has been constructed.
+  This stage is idempotent and can be run multiple times.
+
+  Note: will skip if the dashboard version does not start with v
+RunnerWait: true
+Tasks:
+  - "edge-lab-install-dashboard"
+Meta:
+  icon: "tv"
+  color: "blue"
+  title: "Community Content"
+  copyright: "RackN 2020"

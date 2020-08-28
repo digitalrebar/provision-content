@@ -32,7 +32,7 @@ reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 %packages
 {{ $packages := index (.Param "kickstart-base-packages") .Env.OS.Name -}}
 {{ if not $packages -}}
-{{ $packages = index (.Param "kickstart-base-packages") .Env.OS.Family -}}
+{{ $packages = index (.Param "kickstart-base-packages") .Env.OS.FamilyName -}}
 {{ end -}}
 {{ if not $packages -}}
 {{ $packages = index (.Param "kickstart-base-packages") "unknown" -}}

@@ -1,0 +1,14 @@
+---
+Name: "linode/token"
+Description: "Security Token for Linode API operations"
+Documentation: |
+  The token required by cloud provider to act aginst the API
+Secure: true
+Schema:
+  type: "string"
+Meta:
+  type: "token"
+  icon: "key"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  password: "showable"

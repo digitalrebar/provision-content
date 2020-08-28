@@ -15,6 +15,7 @@ Schema:
   default: "https://d1i21q4vxgce8j.cloudfront.net/rackn-catalog.json"
 
 Meta:
+  type: "url"
   icon: "database"
   color: "blue"
   title: "Digital Rebar Community Content"

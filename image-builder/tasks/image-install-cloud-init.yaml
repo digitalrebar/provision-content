@@ -1,6 +1,10 @@
 Name: image-install-cloud-init
 Description: Install cloud-init service on system to be imaged.
-Documentation: ""
+Documentation: |
+  Simple task to add ``cloud-init`` pacakge to an Image Builder image
+  which can be used by the ``image-deploy`` plugin to customize the installed
+  Machine.
+
 ReadOnly: true
 Meta:
   color: purple

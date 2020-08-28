@@ -1,0 +1,16 @@
+---
+Name: "govc-wait-for-ova"
+Description: "Wait for API access to the newly deployed OVA instance."
+Documentation: |
+  This Stage blocks and waits until the deployed OVA service API is fully
+  avaialble after deployment.  The stage uses the *govc about* which
+  requires API access to get the *about* details from the remote
+  API service.
+
+Tasks:
+  - "context:govc"
+  - "govc-wait-for-ova"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

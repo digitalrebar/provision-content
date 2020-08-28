@@ -5,6 +5,7 @@ Schema:
   type: "boolean"
   default: false
 Meta:
-  color: "blue"
+  type: "erase"
+  color: "yellow"
   icon: "fire"
   title: "RackN Content"

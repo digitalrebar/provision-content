@@ -1,6 +1,8 @@
 ---
 Name: "install-drp"
 Description: "Stage that install DRP endpoint."
+Documentation: |
+  Stage that install DRP endpoint.
 Meta:
   color: "orange"
   icon: "dashboard"

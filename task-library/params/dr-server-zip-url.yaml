@@ -1,0 +1,13 @@
+---
+Name: "dr-server/zip-url"
+Description: "Location of the ZIP for installation (uses built in if missing)"
+Documentation: |
+  This is an optional performance improvement.
+  If missing, will use catalog lookup in install script.
+
+Schema:
+  type: string
+Meta:
+  color: "blue"
+  icon: "linkify"
+  title: "RackN Copyright 2020"

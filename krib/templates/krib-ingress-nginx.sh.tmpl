@@ -5,6 +5,9 @@ set -e
 # Get access and who we are.
 {{template "setup.tmpl" .}}
 
+# helm install needs proxy
+{{ template "krib-runtime-proxy.tmpl" .}}
+
 echo "Run helm install on the master (skip for minions)..."
 
 {{if .ParamExists "krib/cluster-profile" -}}

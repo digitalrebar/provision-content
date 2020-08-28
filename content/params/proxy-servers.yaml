@@ -12,6 +12,7 @@ Schema:
     type: "string"
 
 Meta:
+  type: "url"
   icon: "browser"
   color: "blue"
   title: "Digital Rebar Community Content"

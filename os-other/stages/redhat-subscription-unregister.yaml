@@ -8,7 +8,9 @@ Documentation: |
   for reuse elsewhere.  If you do not run this process, then you must release
   the subscription from the Redhat portal at:
 
-    https://access.redhat.com/management/systems
+    ::
+
+      https://access.redhat.com/management/systems
 
   If the ``redhat/subscription-skip-activation`` Param is set to ``true``, then
   unregister process will also skip.

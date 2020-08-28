@@ -5,6 +5,8 @@ Documentation: |
   Boolean value that tells the UX to not contact the SaaS because
   it is not reachable.  This should only be set in the global profile.
 
+  See: :ref:`rs_airgap`. For setup instructions.
+
   This defaults to false.
 
 Schema:
@@ -12,6 +14,7 @@ Schema:
   default: false
 
 Meta:
+  type: "enable"
   icon: "database"
   color: "blue"
   title: "Digital Rebar Community Content"
