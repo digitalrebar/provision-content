@@ -25,18 +25,18 @@ Prerequistes
 ------------
 
 Inbound Access 
-~~~~~~~~~~~~~~
+==============
 
 The Digital Rebar Server must be at a location that is accessible to the machines being provisioned.  This is required because the machines must be able to download the `join-up` script from the server.
 
 Outbound Access
-~~~~~~~~~~~~~~~
+===============
 
 The Digital Rebar Server must be able to SSH into the newly created machines so that it can run the `join-up` script.  Once the script is run, the runner will be able to pull instructions from the DRP and the SSH port could be closed.
 
 
 Catalog Items
-~~~~~~~~~~~~~
+=============
 
 The Cloud Wrapper requires Contexts because it uses Runner, Terraform and Ansible Contexts in Docker Containers.  This feature also requires that you have enabled a RackN licensed feature.
 
@@ -49,7 +49,7 @@ You must set the `cloud/provider` to the correct cloud.  Beyond that, each cloud
 You must set Security credentials for each cloud!  In many cases, you must also provide the name of the SSH user.
 
 Required Values
-~~~~~~~~~~~~~~~
+===============
 
 The Cloud Wrapper components require at least two parameters without a default be set:
 
@@ -81,7 +81,7 @@ Linode
 Additional values, e.g. region, image and instance type, have safe defaults but should be reviewed.
 
 Optional Values
-~~~~~~~~~~~~~~~
+===============
 
 When possble, the machine on the cloud provider is given the name of the machine in Digital Rebar.
 
@@ -101,7 +101,7 @@ want to use more customized Terraform plans.
 The `cloud-inspect` task will use the Metadata API to collect additional information and set the `cloud/*` params where possible.  These values will be removed by the `cloud-cleanup` task on decommission.
 
 Create
-~~~~~~
+======
 
 To create a cloud backed machine:
 
@@ -125,7 +125,7 @@ Note that the machine will have several `cloud/*` and `terraform/*` parameters d
 
 
 Destroy
-~~~~~~~
+=======
 
 From a cloud backed machine:
 
