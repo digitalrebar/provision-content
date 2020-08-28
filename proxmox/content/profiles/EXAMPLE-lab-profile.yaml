@@ -24,7 +24,7 @@ Params:
   proxmox/flexiflow-buster-install:
     - "network-convert-interface-to-bridge"
     - "network-add-nat-bridge"
-  lab-drp-install-packages: "vim curl wget jq ifupdown2"
+  proxmox/lab-drp-install-packages: "vim curl wget jq ifupdown2"
   proxmox/iso: "http://get.rebar.digital/images/proxmox/proxmox-ve_6.1-1.iso"
   proxmox/lab-base-tag: "student"
   proxmox/lab-student-count: 4

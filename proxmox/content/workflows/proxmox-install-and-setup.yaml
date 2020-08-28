@@ -1,6 +1,6 @@
 ---
-Name: proxmox-buster-install
-Description: "Install Debian Buster and Proxmox on top of it."
+Name: proxmox-install-and-setup
+Description: "Install Debian Buster, Proxmox, and setup the Lab environment ."
 Documentation: |
   Installs Debian 10 (Buster) via standard RackN *BootEnv* install,
   using preseed/package based (Debian Installer, d-i) method.
@@ -37,10 +37,11 @@ Documentation: |
   enslaved by the bridge, but also bring up a NAT Masquerade bridge
   to attach machines to.
 
-  **ToDo**:
-  Future implementations should provide customized injection of the
-  preseed selections answers, and allow specifying the version of
-  Proxmox VE to install.
+  After the base install is completed, the the Lab setup will be performed.
+  This includes (optionally) installing DRP on the Hypervisor, setting
+  up the Lab target machine hypervisor bridges and network, creating
+  Lab accouints, and finally - creating the Virtual Machines within
+  Proxmox.
 
 Meta:
   color: orange
@@ -55,4 +56,11 @@ Stages:
   - proxmox-admin-account
   - proxmox-create-storage
   - flexiflow-buster-install
+  - kvm-enable-nested
+  - proxmox-lab-network
+  - proxmox-lab-accounts
+  - proxmox-lab-createnodes
+  - proxmox-drp-install
+  - proxmox-drp-provision-drp
   - complete
+

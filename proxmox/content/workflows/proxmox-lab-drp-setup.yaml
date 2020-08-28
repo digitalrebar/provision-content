@@ -1,5 +1,5 @@
 ---
-Name: lab-drp-setup
+Name: proxmox-lab-drp-setup
 Description: "Configure the DRP system"
 Documentation: ""
 Meta:
@@ -7,6 +7,5 @@ Meta:
   icon: shuffle
   title: RackN Content
 Stages:
-  - lab-drp-network
   - ssh-access
   - runner-service

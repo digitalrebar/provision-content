@@ -1,5 +1,5 @@
 ---
-Name: lab-drp-install-packages
+Name: proxmox/lab-drp-install-packages
 Description: Specify a list of extra packages to install on the DRP endpoint.
 Documentation: |
   A space separated list of packages to install on the remote DRP endpoint.

@@ -7,6 +7,16 @@ Documentation: |
 
   The NAT bridge will Masquerade for ``proxmox/lab-nat-subnet``.
 
+  The template defined in the Param ``network-add-nat-bridge-template`` will be
+  expanded in place in this script then rendered to the Hypervisor.  This allows
+  for in the field custom configurations that may not have been encompassed in
+  the default Template configuration of this content pack.
+
+  .. warning::  This method appears to not correctly NAT Masquerade traffic correctly.
+                Verify the DRP Endpoints have external network connectivity with this
+                method before relying on it.  The post-up/down settings may need to be
+                adjusted.
+
 Meta:
   color: blue
   feature-flags: sane-exit-codes
@@ -22,25 +32,36 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
-      SOURCE='{{ .Param "proxmox/lab-drp-external-bridge" }}'
+      OUTPUT='{{ .Param "proxmox/lab-drp-external-bridge" }}'
       BRIDGE='{{ .Param "proxmox/lab-nat-bridge" }}'
-      SUBNET='{{ .Param "proxmox/lab-nat-subnet" }}'
+      CIDR='{{ .Param "proxmox/lab-nat-subnet" }}'
+      TMPL="{{ .Param "network-add-nat-bridge-template" }}'
+      {{$tmpl := (printf "%s" (.Param "network-add-nat-bridge-template")) -}}
+
+      NET=$(echo $CIDR | cut -d "/" -f1)
+      PREFIX=$(echo $CIDR | cut -d "/" -f2)
+      BASE=$(echo $NET | cut -d"." -f1-3)
+      LAST=$(echo $NET | cut -d"." -f4)
+      (( OCT = LAST + 1 ))
+      IPADDR="${BASE}.${OCT}"
+      ADDRESS="${IPADDR}/${PREFIX}"
 
       mkdir -p /etc/network/interfaces.d
-      cat <<EOBR > /etc/network/interfaces.d/$BRIDGE
-      auto $BRIDGE
-      iface $BRIDGE inet static
-        address  $SUBNET
-        bridge_ports none
-        bridge_stp off
-        bridge_fd 0
+      echo "Setting up NAT bridge with the following characteristics:"
+      echo "---------------------------------------------------------"
+      echo "NAT bridge:                       $BRIDGE"
+      echo "Network Subnet CIDR:              $CIDR"
+      echo "Assigning IP Address to bridge:   $ADDRESS"
+      echo "Using Template for interface cfg: $TMPL"
 
-        post-up echo 1 > /proc/sys/net/ipv4/ip_forward
-        post-up   iptables -t nat -A POSTROUTING -s "$SUBNET" -o $SOURCE -j MASQUERADE
-        post-down iptables -t nat -D POSTROUTING -s "$SUBNET" -o $SOURCE -j MASQUERADE
+      cat <<EOBR > /etc/network/interfaces.d/$BRIDGE
+      {{.CallTemplate $tmpl .}}
 
       EOBR
 
-      systemctl restart networking.service
+      brctl show $BRIDGE > /dev/null 2>&1 && echo "Bridge '$BRIDGE' exists already" || brctl addbr $BRIDGE
+      ifdown $BRIDGE || true
+      ifup $BRIDGE
+      #systemctl restart networking.service
 
 

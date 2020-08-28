@@ -1,5 +1,5 @@
 ---
-Name: lab-drp-network
+Name: proxmox-lab-drp-network
 Description: Set up the DRP ip forwarding, masquerading, internal network, etc.
 Documentation: |
   Set up DRP endpoint as an ip forwarding/masquerading gateway for the
@@ -8,6 +8,8 @@ Documentation: |
   IP Forwarding services for.
 
   This is done using the cloud-inite per_once process.
+
+  .. warning:: This task requires/assumes CentOS as the base OS for the DRP Endpoints.
 
 Meta:
   color: blue
@@ -24,9 +26,9 @@ Templates:
       {{ template "setup.tmpl" .}}
       set -e
 
-      EXT={{ .Param "lab-drp-external-network" }}
-      INT={{ .Param "lab-drp-internal-network" }}
-      CIDR={{ .Param "lab-drp-internal-subnet" }}
+      EXT={{ .Param "proxmox/lab-drp-external-interface" }}
+      INT={{ .Param "proxmox/lab-drp-internal-interface" }}
+      CIDR={{ .Param "proxmox/lab-drp-internal-subnet" }}
       NET=$(echo $CIDR | cut -d "/" -f1)
       PREFIX=$(echo $CIDR | cut -d "/" -f2)
       BASE=$(echo $NET | cut -d"." -f1-3)

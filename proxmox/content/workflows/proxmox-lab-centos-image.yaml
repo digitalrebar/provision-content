@@ -1,5 +1,5 @@
 ---
-Name: lab-centos-image
+Name: proxmox-lab-centos-image
 Description: "Deploy lab/training DRP endpoint."
 Documentation: ""
 Meta:
