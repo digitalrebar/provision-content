@@ -1,0 +1,60 @@
+---
+Name: proxmox-buster-installer
+Description: Installs Proxmod on top of Debian 10 (Buster)
+Documentation: |
+  This task sets up and installs latest stable Proxmox VE on
+  top of an already installed Debian 10 (Buster) system.  This
+  can be run betweent the ``finsish-install`` and ``complete``
+  stage of the RackN provided `debian-base`` workflow.
+
+  This is also used in the ``proxmox-buster-installer`` Workflow
+  which installs Debian 10 (Buster) first.
+
+Meta:
+  color: orange
+  feature-flags: sane-exit-codes
+  icon: expand arrows alternate
+  title: RackN Content
+RequiredParams: []
+OptionalParams: []
+Prerequisites: []
+Templates:
+  - Name: proxmox-buster-install.sh.tmpl
+    Contents: |
+      #!/usr/bin/env bash
+
+      # Install Debian 10 (Buster) and latest Proxmox VE
+
+      {{ template "setup.tmpl" . }}
+
+      echo ">>> set the machines IP address/name in /etc/hosts"
+
+      echo "{{.Machine.Address}}  {{.Machine.ShortName}} {{.Machine.Name}}" | tee -a /etc/hosts
+
+      echo ">>> comment out the 127.0.1.1 line"
+      sed -i.bak 's/^\(127.0.1.1.*$\)/#\1/g' /etc/hosts
+
+      echo ">>> verify via command hostname it's set correctly"
+      hostname --ip-address
+
+      echo ">>> add proxmox no-subscription repos"
+      echo "deb http://download.proxmox.com/debian/pve buster pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
+
+      ENT="/etc/apt/sources.list.d/pve-enterprise.list"
+      [[ -r "$ENT" ]] && { echo "Removing injected enterprise repo."; rm -f "$ENT"; } || echo "Good. No enterprise repo repo list found."
+
+      echo ">>> get the GPG key for the repo"
+      wget http://download.proxmox.com/debian/proxmox-ve-release-6.x.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-6.x.gpg
+
+      echo ">>> bump everything up to current versions"
+      apt -y update && apt -y full-upgrade
+
+      echo ">>> preseed the samba and postfix package questions"
+      debconf-set-selections /root/proxmox-debconf-set-selections
+
+      echo ">>> install proxmox"
+      apt -y install proxmox-ve postfix open-iscsi vim wget curl jq ifupdown2
+
+      echo ">>> remove the OS prober package"
+      apt -y remove os-prober
+
