@@ -123,6 +123,7 @@ Templates:
       kernel-tools
       kexec-tools
       less
+      libssh2
       libsysfs
       linux-firmware
       lldpd
@@ -137,6 +138,7 @@ Templates:
       {{end}}
       mktemp
       ncurses
+      ncurses-compat-libs
       nfs-utils
       ntfs-3g
       ntfsprogs
