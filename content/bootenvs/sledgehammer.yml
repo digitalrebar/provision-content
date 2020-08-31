@@ -66,11 +66,11 @@ OS:
         {{.Param "kernel-console"}}
     rpi4:
       Loader: "grubarm64.efi"
-      IsoFile: "sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
-      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/e50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
-      Kernel: "rpi-5.4.34/kernel8.img"
+      IsoFile: "sledgehammer-d50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/d50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-d50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      Kernel: "rpi-5.4.35/kernel8.img"
       Initrds:
-        - "rpi-5.4.34/stage1.img"
+        - "rpi-5.4.35/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -90,22 +90,22 @@ OptionalParams:
   - "kernel-options"
 Templates:
   - Name: start4.elf
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/start4.elf" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/start4.elf" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/start4.elf'
   - Name: fixup4.dat
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/fixup4.dat" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/fixup4.dat" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/fixup4.dat'
   - Name: bcm2711-rpi-4-b.dtb
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/bcm2711-rpi-4-b.dtb" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/bcm2711-rpi-4-b.dtb'
   - Name: kernel8.img
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/kernel8.img" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/kernel8.img" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/kernel8.img'
   - Name: stage1.img
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/stage1.img" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/stage1.img" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/stage1.img'
   - Name: root.squashfs
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/root.squashfs" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/root.squashfs" "rpi4"}}'
     Path: '{{.Machine.MacAddr "rpi4"}}/root.squashfs'
   - Name: "rpi-cmdline.txt"
     Path: '{{.Machine.MacAddr "rpi4"}}/cmdline.txt'
