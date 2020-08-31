@@ -279,24 +279,6 @@ Templates:
     pkill containerd || pkill dockerd
     for i in `pidof /usr/local/bin/containerd-shim-runc-v1`; do kill -9 $i; done
 
-
-    {{ if .ParamExists "rook/ceph-target-disk"}}
-    {{if .ParamExists "krib/selective-mastership" -}}
-    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
-    {{end -}}
-    {{if .ParamExists "krib/i-am-master" -}}
-    I_AM_MASTER={{.Param "krib/i-am-master" }}
-    {{end -}}
-    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
-      if [[ ! "$I_AM_MASTER" == true ]] ; then
-        # I'm a worker, so wipe disk in preparation for next ceph installation
-        # yum install -y gdisk
-        # sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
-        # Now remove devicemapper details
-        # for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
-      fi
-    fi
-    {{ end -}}
   Name: KRIB wipe machine for cluster reinstall
 - Contents: |-
     #!/bin/bash
@@ -318,7 +300,7 @@ Templates:
           echo {{ .Param "operating-system-disk" }} | grep $disk
           if [[ $? -ne 0 ]]; then
             echo "DESTRUCTIVELY zapping /dev/$disk"
-            sgdisk --zap-all /dev/$disk
+            # sgdisk --zap-all /dev/$disk
           else
             echo "/dev/$disk matches {{ .Param "operating-system-disk" }}, so NOT zapping"
           fi
