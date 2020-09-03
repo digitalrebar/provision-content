@@ -9,7 +9,7 @@ Meta:
   icon: database
   title: Digital Rebar Community Content
 Schema:
-  default: "vim curl wget jq"
+  default: "vim curl wget jq lldpd"
   type: string
 Secure: false
 
