@@ -45,7 +45,9 @@ Meta:
   icon: expand arrows alternate
   title: RackN Content
 Stages:
+  - proxmox-generate-ssh-key
   - proxmox-buster-installer
   - proxmox-admin-account
   - proxmox-create-storage
   - flexiflow-buster-install
+  - complete

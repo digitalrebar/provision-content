@@ -27,8 +27,9 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      # PROXMOX is extremely intolerant of hostname changes ... basically, you can't
+      # and you must have the hostname in /etc/hosts ...
       echo ">>> set the machines IP address/name in /etc/hosts"
-
       echo "{{.Machine.Address}}  {{.Machine.ShortName}} {{.Machine.Name}}" | tee -a /etc/hosts
 
       echo ">>> comment out the 127.0.1.1 line"

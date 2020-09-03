@@ -18,8 +18,12 @@ Templates:
       #!/usr/bin/env bash
       # Proxmox Lab setup virtual machines
 
+      # BEGIN setup.tmpl
+      {{ template "setup.tmpl" . }}
+
+      # BEGIN proxmox-drp-provision-drp.tmpl
       {{ if eq ( .Param "proxmox/install-drp-on-hypervisor") true -}}
-      echo "Performing DRP OS provisionging form installed DRP on Hypervisor..."
+      echo "Performing DRP OS provisioning form installed DRP on Hypervisor..."
       {{ else -}}
       echo "The 'proxmox/install-drp-on-hypervisor' Param is set to 'false'."
       echo "NOT PROVISIONING DRP VMs from the installed hypervisor DRP instance, exiting from the DRP install."
@@ -38,6 +42,10 @@ Templates:
 
       # if our system was deployed via DRP, there are Agent remnants that will
       # interfere with the DRP install / startup checks from succeeding...
+      SRC_RSE="$RS_ENDPOINT"
+      SRC_RSU="$RS_USERNAME"
+      SRC_RSP="$RS_PASSWORD"
+      SRC_RST="$RS_TOKEN"
       RS_ENDPOINT="https://127.0.0.1:8092"
       RS_USERNAME="rocketskates"
       RS_PASSWORD="r0cketsk8ts"
@@ -45,8 +53,8 @@ Templates:
       unset RS_LOCAL_PROXY
       unset RS_TOKEN
 
-      TIMEOUT="300"
-      WAIT="5"
+      TIMEOUT={{.Param "proxmox/drp-wait-timeout"}}
+      LOOP="5"
       echo ""
       echo "============================================================"
       echo "Waiting for '$DRPS' DRP Endpoints to be discovered..."
@@ -55,32 +63,36 @@ Templates:
 
       # builtin shell variable that tracks run time of script, reset to zero for timer
       SECONDS=0
-      sleep $WAIT
+      sleep $LOOP
       while (( N < DRPS ))
       do
-        (( REM = TIMEOUT - SECONDS ))
+        (( LEFT = TIMEOUT - SECONDS ))
 
         if [[ $SECONDS -gt $TIMEOUT ]]
         then
           xiterr 1 "Timeout wait for DRP Endpoints to be discovered reached... failing... "
         else
-          echo "Waiting $WAIT seconds (remaining timeout: '$REM')... "
+          echo "Waiting $LOOP seconds (remaining timeout: '$LEFT')... "
         fi
 
         ###
         #  Needs work - targets wrong Machine for the Param get ???
         ###
-        #KILL_SWITCH=$(drpcli machines get {{.Machine.UUID}} param proxmox/drp-timeout-kill-switch)
-        #if [[ "$KILL_SWITCH" == "true" ]]
-        #then
-        #  echo "KILL SWITCH invoked - 'proxmox/drp-timeout-kill' was set to TRUE."
-        #  echo "Exiting with error"
-        #  drpcli machines remove {{.Machine.UUID}} param proxmox/drp-timeout-kill-switch
-        #  xiterr 1 "KILL SWITCH invoked."
-        #fi
+        [[ -n "$SRC_RST" ]] && CREDS="-E $SRC_RSE -T $SRC_RST" \
+           || CREDS="-E $SRC_RSE -U $SRC_RSU -P $SRC_RSP"
+        KILL_SWITCH=$(drpcli $CREDS machines get {{.Machine.UUID}} param proxmox/drp-timeout-kill-switch)
+        if [[ "$KILL_SWITCH" == "true" ]]
+        then
+          echo "KILL SWITCH invoked - 'proxmox/drp-timeout-kill' was set to TRUE."
+          echo "Exiting with error"
+          drpcli machines remove {{.Machine.UUID}} param proxmox/drp-timeout-kill-switch
+          xiterr 1 "KILL SWITCH invoked."
+        fi
 
-        sleep $WAIT
+        sleep $LOOP
         N=$(drpcli machines list | jq -r '.[].Name' | wc -l)
+
+        echo ">>> '$N' machines discovered..."
       done
 
       echo ""

@@ -69,7 +69,7 @@ Templates:
 
       # since we're changing multipl NICs we need a full restart ... hopefully
       # you defined things correctly for the new setup !!
-      #brctl show $BRIDGE > /dev/null 2>&1 && echo "Bridge '$BRIDGE' exists already" || brctl addbr $BRIDGE
+      brctl show $BRIDGE > /dev/null 2>&1 && echo "Bridge '$BRIDGE' exists already" || brctl addbr $BRIDGE
       #ifdown $BRIDGE || true
       #ifup $BRIDGE
       systemctl restart networking.service

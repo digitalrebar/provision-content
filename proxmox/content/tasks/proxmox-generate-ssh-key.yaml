@@ -29,18 +29,18 @@ Templates:
       #!/usr/bin/env bash
       # Proxmox Lab setup virtual machines
 
-      function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
+      {{ template "setup.tmpl" . }}
 
       set -e
       set -x
+
+      PROF='{{.Param "proxmox/data-profile"}}'
+      [[ "$PROF" == "" || "$PROF" == "null" ]] && xiterr 1 "Required 'proxmox/data-profile' value is not set." || true
 
       PRIV=$(mktemp -u ssh-lab-key-XXXXXX)
       RAND=$(echo "$PRIV" | awk -F"-" ' { print $NF } ')
       PUB=${PRIV}.pub
       ssh-keygen -t ed25519 -C "generated-lab-key-$RAND" -N "" -P "" -f $PRIV
-
-      PROF='{{.Param "proxmox/data-profile"}}'
-      [[ "$PROF" == "" || "$PROF" == "null" ]] && xiterr 1 "Required 'proxmox/data-profile' value is not set." || true
 
       # make sure our profile exists, if not, create it
       drpcli profiles exists "$PROF" || drpcli profiles create '{"Name": "'$PROF'"}'
