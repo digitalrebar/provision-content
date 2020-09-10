@@ -1,0 +1,17 @@
+---
+Name: "esxi/dvs-memberships"
+Description: "Array list of Distributed Virtual Switches to register ESXi to. "
+Documentation: |
+  An array of strings listing Distributed Virtual Switch names,
+  for an ESXi node to become a member of.
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: []
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"

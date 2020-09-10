@@ -1,0 +1,45 @@
+###
+#  GoVC Library functions and tools
+###
+
+###
+#  Requires ARGv1 contain a DRP Machine Name to operate
+#  on.
+#
+#  Uses the value of the Param `esxi/member-reference` to
+#  build up an ESXi node reference member name for vSphere /
+#  vCenter operations.
+#
+#  Simply prints out the Reference based vSphere / vCenter value
+#  on standard output (stdout).
+###
+get_member_name() {
+  local _machine="$1"
+  local _ref _addr _member _domain
+  [[ -z "$_machine" ]] && xiterr 1 "No machine name to operate on specified." || true
+
+  _ref='{{ .Param "esxi/member-reference" }}'
+  case $_ref in
+    name)
+        _member="$_machine"
+      ;;
+    address)
+        _member=$(drpcli machines show Name:${_machine} | jq '.Address')
+      ;;
+    fqdn-dhcp)
+        _address=$(drpcli machines show Name:${_machine} | jq '.Address')
+        _domain=$(drpcli leases show $_address | jq -r '.Options | .[] | select(.Code==15) | .Value')
+        [[ "$_domain" == "null" || -z "$_domain" ]] && xiterr 1 "DHCP option 15 (domain name) missing, or no Lease for '$_address' exists." || true
+        _member="${_machine}.${_domain}"
+      ;;
+    fqdn-dns-domain)
+        _domain='{{.Param "dns-domain"}}'
+        [[ "$_domain" == "null" || -z "$_domain" ]] && xiterr "DNS Domain Param ('dns-domain') not specified." || true
+        _member=${_machine}.${_d}
+      ;;
+    *)
+        xiterr 1 "Unknown ESXi machine member name reference specified ('$_ref')"
+      ;;
+  esac
+  echo ${_member}
+}

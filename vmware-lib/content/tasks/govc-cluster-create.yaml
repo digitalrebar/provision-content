@@ -44,6 +44,9 @@ Templates:
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
 
+      ### govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" .}}
+
       ### govc-cluster-create.sh
       JQ=$(which jq)
       [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
@@ -114,14 +117,6 @@ Templates:
       #  folder name handling. (See CLUSTER, create in FOLD construct also)
       ###
       [[ -n "$FOLDER" ]] && printf '>>>\n>>> FOLDER CREATE process disabled, needs help\n>>>\n'
-
-      # try to set based on Machien Name, FQDN, or fallback to IP Address
-      # TODO:  This needs enhanced in conjunction with the govc context container
-      #        to support DNS record checks in the future.
-      get_member_name() {
-        echo $ADDR
-        # echo $MEMBER.$DNAME
-      }
 
       get_vmk_device() {
         _vmk=$(drpcli machines get Name:$MEMBER param esxi/vsan-vmk | jq -r '.' || true)
@@ -254,8 +249,8 @@ Templates:
           ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
 
-          HNAME=$(get_member_name)
-          if [[ -n "$ADDR" ]]
+          HNAME=$(get_member_name $MEMBER)
+          if [[ -n "$HNAME" ]]
           then
             echo "Starting cluster setup for '$MEMBER'."
             #cluster_add &

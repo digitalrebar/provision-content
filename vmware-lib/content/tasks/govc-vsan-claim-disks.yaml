@@ -33,10 +33,13 @@ Templates:
       #!/usr/bin/env bash
       # Build the VSAN cluster from the hosts.
 
-      ### setup.tmpl
+      ### begin setup.tmpl
       {{ template "setup.tmpl" . }}
 
-      ### esxi-vsan-cluster-operations.sh
+      ### begin govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" . }}
+
+      ### begin esxi-vsan-cluster-operations.sh
       ON='{{ .Param "esxi/vsan-enabled" }}'
       [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
 
@@ -86,7 +89,7 @@ Templates:
 
         for NODE in $NODES
         do
-          ADDR=$(get_member_name)
+          ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
           DISK_JSON=/tmp/claim-disks-$$.$NODE.$ADDR.log
           DISKS=/tmp/disks-$$.$NODE.$ADDR.log
           HDR=1
@@ -181,14 +184,6 @@ Templates:
       param_get() {
         local _param=$(drpcli profiles get "$_name" param "$_param" | jq -r '.')
         [[ -n "$_param" && "$_param" != "null" ]] && echo "$_param"
-      }
-
-      # TODO:  Try to set based on Machien Name, FQDN, or fallback to IP Address.
-      #        This needs enhanced in conjunction with the govc context container
-      #        to support DNS record checks in the future.
-      get_member_name() {
-        ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
-        echo $ADDR
       }
 
       set_govc_env() {

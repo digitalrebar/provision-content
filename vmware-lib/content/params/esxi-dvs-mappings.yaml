@@ -1,0 +1,91 @@
+---
+Name: "esxi/dvs-mappings"
+Description: "Defines the Distributed Virtual Switch (DVS) mappings."
+Documentation: |
+  This data structure defines how the DVS switches should be mapped in
+  a VMware ESXi cluster.
+
+  dvs.create dc DC mtu MTU DVS_NAME
+  dvs_path="/$dc_name/network/DSwitch"
+  govc dvs.create -product-version 6.0.0 -folder "$(dirname "$dvs_path")" "$(basename "$dvs_path")"
+
+  public_network="/$dc_name/network/PublicNetwork"
+  internal_network="/$dc_name/network/InternalNetwork"
+  govc dvs.portgroup.add -dvs "$dvs_path" -type earlyBinding -nports 16 "$(basename "$public_network")"
+  govc dvs.portgroup.add -dvs "$dvs_path" -type ephemeral "$(basename "$internal_network")"
+
+  govc dvs.add -dvs "$dvs_path" -pnic vmnic1 $HOST1 $HOST2 ... $HOSTn
+
+  Example in YAML:
+
+    ::
+
+      esxi/dvs-mappings:
+        dvs01:
+          mtu: 9000
+          version: 7.0.0
+          discovery: lldp
+          vmnic: vmnic0
+          portgroups:
+            pg_internal:
+              type: ephemeral
+              ports: 16
+            pg_external:
+              type: ephemeral
+              ports: 8
+        dvs02:
+          mtu: ...
+          version: ...
+          ...
+
+Meta:
+  color: "green"
+  icon: "sitemap"
+  title: "RackN Content"
+Schema:
+  default: {}
+  type: "object"
+  additionalProperties:
+    type: "object"
+    required:
+      - "mtu"
+      - "version"
+      - "discovery"
+      - "vmnic"
+    properties:
+      mtu:
+        type: "number"
+        minimum: 1000
+        maximum: 9999
+      version:
+        type: "string"
+        enum:
+          - "6.5.0"
+          - "6.6.0"
+          - "7.0.0"
+      discovery:
+        type: "string"
+        enum:
+          - "cdp"
+          - "lldp"
+      vmnic:
+        type: "string"
+      portgroups:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          required:
+            - "type"
+            - "ports"
+          properties:
+            type:
+              type: "string"
+              enum:
+                - "ephemeral"
+                - "earlyBinding"
+                - "lateBinding"
+            ports:
+              type: "number"
+              minimum: 1
+              maximum: 60000
+
