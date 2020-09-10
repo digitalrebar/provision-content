@@ -1,0 +1,52 @@
+---
+Description: "Reset a node for reinstallation (doesn't effect change cluster)"
+Name: "krib-reset-node"
+Documentation: |
+  Resets a node for reinstallation
+ExtraClaims:
+  - scope: "plugins"
+    action: "*"
+    specific: "*"
+RequiredParams:
+  - krib/cluster-profile
+  - etcd/cluster-profile
+OptionalParams:
+  - krib/cluster-is-production
+Templates:
+- Contents: |-
+    #!/bin/bash
+
+    {{ if .ParamExists "rook/ceph-target-disk"}}
+    {{if .ParamExists "krib/selective-mastership" -}}
+    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+    {{end -}}
+    {{if .ParamExists "krib/i-am-master" -}}
+    I_AM_MASTER={{.Param "krib/i-am-master" }}
+    {{end -}}
+    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+      if [[ ! "$I_AM_MASTER" == true ]] ; then
+        # I'm a worker, so wipe disk in preparation for next ceph installation
+        yum install -y gdisk
+        for disk in `ls /dev/ | grep {{ .Param "rook/ceph-target-disk" }}`
+        do
+          # Don't wipe OS filesystems
+          echo {{ .Param "operating-system-disk" }} | grep $disk
+          if [[ $? -ne 0 ]]; then
+            echo "DESTRUCTIVELY zapping /dev/$disk"
+            # sgdisk --zap-all /dev/$disk
+          else
+            echo "/dev/$disk matches {{ .Param "operating-system-disk" }}, so NOT zapping"
+          fi
+
+        done
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+      fi
+    fi
+    {{ end -}}
+  Name: KRIB wipe disks used for rook-ceph (if configured)
+Meta:
+  icon: "ship"
+  color: "orange"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
