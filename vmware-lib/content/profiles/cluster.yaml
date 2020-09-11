@@ -33,3 +33,34 @@ Params:
       version: "6.5.0"
       discovery: "cdp"
       vmnic: "vmnic2"
+  cluster-gates:
+    - Name: "Deploy vCenter"
+      AtATime: 1
+      AtLeast: 1
+      FromWorkflow: "esxi-install"
+      ToWorkflow: "govc-deploy-ova"
+      Icon: certificate
+    - Name: "Deploy VSAN"
+      AtATime: 1
+      AtLeast: 1
+      FromWorkflow: "govc-deploy-ova"
+      ToWorkflow: "vsan-build-and-deploy"
+      Icon: database
+    - Name: "Cluster Create"
+      AtATime: 1
+      AtLeast: 1
+      FromWorkflow: "vsan-build-and-deploy"
+      ToWorkflow: "govc-cluster-create"
+      Icon: cogs
+    - Name: "DVS Create"
+      AtATime: 1
+      AtLeast: 1
+      FromWorkflow: "govc-cluster-create"
+      ToWorkflow: "govc-dvs-create"
+      Icon: sitemap
+    - Name: "Completed"
+      AtATime: 1
+      AtLeast: 1
+      FromWorkflow: "govc-dvs-create"
+      ToWorkflow: "govc-cluster-complete"
+      Icon: star
