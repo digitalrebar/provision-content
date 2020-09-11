@@ -2,10 +2,19 @@ Description: A task to invoke a specific set of ansible playbooks pulled from gi
 Documentation: |
   A task to invoke a specific set of ansible playbooks pulled from git.
 
+  Sequence of operations (loops over all entries:
+  1. collect args if provided
+  1. git clone repo to name
+  1. git checkout commit if provided
+  1. cd to name & path
+  1. run ansible-playbook playbook and args if provided
+  1. remove the directories
+
   .. note:: Requires Param ``ansible/playbooks`` - List of playbook git repos
             to run on the local machine.
 
 Meta:
+  type: "config"
   color: black
   feature-flags: sane-exit-codes
   icon: play
@@ -62,6 +71,8 @@ Templates:
         cd -
 
         rm -rf $NAME $L
+    {{else}}
+        echo "NOTE: No ansible/playbooks defined."
     {{end}}
 
     exit 0
