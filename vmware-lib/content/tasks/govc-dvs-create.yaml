@@ -65,7 +65,7 @@ Templates:
 
         if [[ -z "$(run_govc quiet ls "$DVS_PATH")" ]]
         then
-          run_govc dvs.create dc $DC mtu $DVS_MTU $DVS_NAME
+          run_govc dvs.create -dc $DC mtu $DVS_MTU $DVS_NAME
           run_govc dvs.create -product-version $DVS_VER -folder "$(dirname "$DVS_PATH")" "$(basename "$DVS_PATH")"
         else
           xiterr 1 "can not create DVS '$DVS_NAME' it exists already"
