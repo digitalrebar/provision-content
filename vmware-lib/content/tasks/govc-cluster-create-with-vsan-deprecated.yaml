@@ -6,6 +6,8 @@ Documentation: |
   provided, and enroll all Machines with the same cluster designation defined
   by the Param ``esxi/cluster-name``.
 
+  **THIS IS DEPRECATED - VSAN tooling is in a separate task.**
+
 ExtraClaims:
   - scope: "machines"
     action: "*"
@@ -43,9 +45,6 @@ Templates:
 
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
-
-      ### govc-lib.sh.tmpl
-      {{ template "govc-lib.sh.tmpl" .}}
 
       ### govc-cluster-create.sh
       JQ=$(which jq)
@@ -118,67 +117,6 @@ Templates:
       ###
       [[ -n "$FOLDER" ]] && printf '>>>\n>>> FOLDER CREATE process disabled, needs help\n>>>\n'
 
-      get_vmk_device() {
-        _vmk=$(drpcli machines get Name:$MEMBER param esxi/vsan-vmk | jq -r '.' || true)
-        if [[ -n "$_vmk" && "$_vmk" != "null" ]]
-        then
-          echo "Found VMK device '$_vmk' from 'esxi/vsan-vmk' param..."
-        else
-          echo "'esxi/vsan-vmk' has no assigned value, checking 'esxi/network-firstboot-vmk'..."
-          _vmk=$(drpcli machines get Name:$MEMBER param esxi/network-firstboot-vmk| jq -r '.' || true)
-          [[ -z "$_vmk" || "$_vmk" == "null" ]] && echo "No value assigned by 'esxi/network-firstboot-vmk' ... " || true
-        fi
-
-        [[ -z "$_vmk" || "$_vmk" == "null" ]] && { _vmk="vmk0"; echo "Falling back to default 'vmk0'."; } || true
-
-        echo "Using VMK device '$VMK' for VSAN traffic ... "
-        VMK="$_vmk"
-      }
-
-      set_vmk_on_host() {
-        local _has_vsan _vmk _pass
-        local GOVC_URL=$(get_member_name $NODE)
-        local GOVC_USERNAME=root
-        local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
-        local GOVC_INSECURE=1
-        local GOVC_DATASTORE=""
-        local GOVC_RESOURCE_POOL=""
-        local GOVC_PASSWORD
-
-        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
-        [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
-        GOVC_PASSWORD="$_pass"
-
-        _msg="Running 'govc' with the following credentials against '$HNAME' ... "
-
-        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
-        then
-          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
-          echo ""
-          echo "$_msg"
-          env | grep -v grep | grep "GOVC_"
-        else
-          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
-          echo ""
-          echo "$_msg"
-          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
-        fi
-
-        get_vmk_device
-
-        _has_vsan=$(govc host.esxcli vsan network list 2> /dev/null)
-        if [[ -n "$_has_vsan" ]]
-        then
-          echo ">>> VMK $VMK appears to have VSAN type already"
-        else
-          echo ">>> adding VMK $VMK with VSAN type"
-          _args="host.esxcli vsan network ip add -i $VMK"
-          echo "CMD: govc $_args"
-          govc $_args
-        fi
-
-      } # end set_vmk_on_host()
-
       # try to set based on Machien Name, FQDN, or fallback to IP Address
       # TODO:  This needs enhanced in conjunction with the govc context container
       #        to support DNS record checks in the future.
@@ -197,7 +135,9 @@ Templates:
           _vmk=$(drpcli machines get Name:$MEMBER param esxi/network-firstboot-vmk| jq -r '.' || true)
           [[ -z "$_vmk" || "$_vmk" == "null" ]] && echo "No value assigned by 'esxi/network-firstboot-vmk' ... " || true
         fi
+
         [[ -z "$_vmk" || "$_vmk" == "null" ]] && { _vmk="vmk0"; echo "Falling back to default 'vmk0'."; } || true
+
         echo "Using VMK device '$VMK' for VSAN traffic ... "
         VMK="$_vmk"
       }
@@ -211,10 +151,13 @@ Templates:
         local GOVC_DATASTORE=""
         local GOVC_RESOURCE_POOL=""
         local GOVC_PASSWORD
+
         _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
         [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
         GOVC_PASSWORD="$_pass"
+
         _msg="Running 'govc' with the following credentials against '$HNAME' ... "
+
         if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
         then
           echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
@@ -227,7 +170,9 @@ Templates:
           echo "$_msg"
           env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
         fi
+
         get_vmk_device
+
         _has_vsan=$(govc host.esxcli vsan network list 2> /dev/null)
         if [[ -n "$_has_vsan" ]]
         then
@@ -238,6 +183,7 @@ Templates:
           echo "CMD: govc $_args"
           govc $_args
         fi
+
       } # end set_vmk_on_host()
 
       # uses variable MEMBER to operate against
@@ -310,8 +256,8 @@ Templates:
           ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
 
-          HNAME=$(get_member_name $MEMBER)
-          if [[ -n "$HNAME" ]]
+          HNAME=$(get_member_name)
+          if [[ -n "$ADDR" ]]
           then
             echo "Starting cluster setup for '$MEMBER'."
             #cluster_add &
