@@ -1,0 +1,70 @@
+---
+Name: "ansible/playbooks"
+Description: "List of git hosted localhost playbooks"
+Documentation: |
+  Used by Task 'ansible-playbooks-local' task.
+
+  Runs the provided playbooks in order from the json array.  The array contains structured
+  objects with further details about the ansible-playbook action.
+
+  Each playbook MUST be stored in a git location accessible from the machine running the task.
+
+  The following properties are included in each array entry:
+
+  * playbook (required): name of the playbooks passed into ansible-playbook cli
+  * name (required): determines the target of the git clone
+  * repo (required): path related to machine where the playbook can be clone from
+  * path (optional): if playbooks are nested into a single repo, move into that playbook
+  * commit (optional): commit used to checkout a specific commit tag from the git history
+  * data (optionalm boolean): if true, use items provided in args
+  * args (optional): additional arguments to be passed into the ansible-playbook cli
+  * verbosity (optional, boolean): if true, captures additional output from ansiblie.
+
+  For example
+
+    ::
+
+      [
+        { 
+          "playbook": "become",
+          "name": "become",
+          "repo": "https://github.com/ansible/test-playbooks",
+          "path": "",
+          "commit": "",
+          "data": false,
+          "args": "",
+          "verbosity": true
+        }
+      ]
+
+Schema:
+  type: "array"
+  default: []
+  items:
+    properties:
+      name:
+        type: string
+      playbook:
+        type: string
+      repo:
+        type: string
+      path:
+        type: string
+        default: ""
+      commit:
+        type: string
+        default: ""
+      data:
+        type: boolean
+        default: false
+      args:
+        type: string
+      verbosity:
+        type: boolean
+        default: false
+Meta:
+  type: "config"
+  icon: "cog"
+  color: "black"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2020"
