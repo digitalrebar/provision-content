@@ -82,17 +82,20 @@ Templates:
       }
 
       portgroup_create() {
+        local _vlan _ports
         [[ -z "$DC" ]] && xiterr 1 'DC name empty' || true
         [[ -z "$DVS_PATH" ]] && xiterr 1 'DVS path empty' || true
         [[ -z "$PG_NAME" ]] && xiterr 1 'Portgroup name empty' || true
         [[ -z "$PG_TYPE" ]] && xiterr 1 'Portgroup type empty' || true
-        [[ -z "$PG_PORTS" ]] && xiterr 1 'Portgroup number of ports empty' || true
+
+        [[ "$PG_PORTS" == "0" || -z "$PG_PORTS" ]] && _ports="" || _ports="-nports $PG_PORTS"
+        [[ "$PG_VLAN" == "0" || -z "$PG_VLAN" ]] && _vlan="" || _vlan="-vlan $PG_VLAN"
 
         local net_path="/$DC/network/$PG_NAME"
 
         if [[ -z "$(run_govc quiet ls "$net_path")" ]]
         then
-          run_govc dvs.portgroup.add -dvs "$DVS_PATH" -type $PG_TYPE -nports $PG_PORTS "$PG_NAME"
+          run_govc dvs.portgroup.add -dvs "$DVS_PATH" -type $PG_TYPE $_ports $_vlan "$PG_NAME"
         else
           xiterr 1 "can not create Portgroup '$PG_NAME' it exists already"
         fi
@@ -138,12 +141,14 @@ Templates:
       PG_NAME='{{$pg}}'
       PG_TYPE='{{$pgcfg.type}}'
       PG_PORTS='{{$pgcfg.ports}}'
+      PG_VLAN='{{$pgcfg.vlan}}'
 
       echo "Creating PortGroup '$PG' with the following configuration:"
       echo "============================================================================="
       echo "    portgroup: '$PG_NAME'"
       echo "         type: '{{$pgcfg.type}}'"
       echo "        ports: '{{$pgcfg.ports}}'"
+      echo "         vlan: '{{$pgcfg.vlan}}'"
 
       portgroup_create
       {{ end -}}
