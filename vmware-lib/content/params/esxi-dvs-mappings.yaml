@@ -19,7 +19,8 @@ Documentation: |
   For Portgroups on a DVS, the following values are supported:
 
     * ``type`` = one of ``ephemeral``, ``earlyBinding``, or ``lateBinding``
-    * ``ports`` = from 1 to 60,000
+    * ``ports`` = 0 for elastic, or from 1 to 60,000
+    * ``vlans`` = empty or 0 for *none*, or VLAN tag ID from 1 to 4096
 
   Example in YAML:
 
@@ -35,9 +36,11 @@ Documentation: |
             pg_internal:
               type: ephemeral
               ports: 16
+              vlan: 10
             pg_external:
               type: ephemeral
               ports: 8
+              vlan: 0
         dvs02:
           mtu: 1534
           version: 7.0.0
@@ -56,10 +59,12 @@ Documentation: |
         "portgroups": {
           "pg_external": {
             "type": "ephemeral",
+            "vlan": 10
             "ports": 8
           },
           "pg_internal": {
             "type": "ephemeral",
+            "vlan": 0,
             "ports": 16
           }
         }
@@ -134,4 +139,9 @@ Schema:
               type: "number"
               minimum: 1
               maximum: 60000
+            vlan:
+              type: "number"
+              minimum: 1
+              maximum: 4094
+
 

@@ -117,7 +117,11 @@ Templates:
       DVS_DSC='{{$dvscfg.discovery}}'
       DVS_VMN='{{$dvscfg.vmnic}}'
       # now get our member nodes for this DVS
-      NAMES=$(drpcli machines list esxi/dvs-memberships In "[\"$DVS_NAME\"]" Meta.BaseContext Ne govc | $_JQ -r '.[].Name' | tr '\n' ' ')
+      NAMES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" esxi/dvs-memberships In "[\"$DVS_NAME\"]" Meta.BaseContext Ne govc | $_JQ -r '.[].Name' | tr '\n' ' ')
+
+      echo "Found the following DRP Machine names to operate on:"
+      echo "$FOUND"
+
       # convert DRP machine name to ESXi host name
       for NAME in $NAMES
       do
