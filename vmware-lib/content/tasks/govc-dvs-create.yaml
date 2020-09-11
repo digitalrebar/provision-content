@@ -99,10 +99,12 @@ Templates:
       }
 
       DC_PATH="/${DC}"
-      if [[ -z "$(run_govc quiet ls "/$DC_PATH")" ]]
+      if [[ -z "$(run_govc quiet ls "$DC_PATH")" ]]
       then
         xiterr 1 "Datacenter ('$DC') not created yet."
       fi
+
+      echo "Starting DVS configuration based on 'esxi/dvs-mappings' Param."
 
       {{ range $dvs, $dvscfg := (.Param "esxi/dvs-mappings") -}}
       DVS_NAME="{{ $dvs }}"
@@ -148,3 +150,4 @@ Templates:
       {{ end -}}
       {{ end -}}
 
+      echo "End of DVS Creation from 'esxi/dvs-mappings' Param"
