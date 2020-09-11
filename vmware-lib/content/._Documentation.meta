@@ -116,11 +116,7 @@ Workflow from the Context Machine, or ignore the status stage error.
 
 
 Prepare the VCSA JSON Deployment Template
-<<<<<<< Updated upstream
 +++++++++++++++++++++++++++++++++++++++++
-=======
-=========================================
->>>>>>> Stashed changes
 
 The Param ``govc/template-json`` defines the name of a Template that you must provide with
 the configuration details for the deployed VCSA instance.  This template can be a standard

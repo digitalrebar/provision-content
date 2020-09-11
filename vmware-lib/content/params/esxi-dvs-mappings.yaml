@@ -2,19 +2,24 @@
 Name: "esxi/dvs-mappings"
 Description: "Defines the Distributed Virtual Switch (DVS) mappings."
 Documentation: |
-  This data structure defines how the DVS switches should be mapped in
+  This data structure defines how the DVS switches should be created in
   a VMware ESXi cluster.
 
-  dvs.create dc DC mtu MTU DVS_NAME
-  dvs_path="/$dc_name/network/DSwitch"
-  govc dvs.create -product-version 6.0.0 -folder "$(dirname "$dvs_path")" "$(basename "$dvs_path")"
+  This Param data structure defines the configurations of the Distributed
+  Virtual Switches and Portgroups.  In addition, you must add the Param
+  ``esxi/dvs-memberships`` to each *vSphere ESXi* node with the DVS switches
+  to add to that node.
 
-  public_network="/$dc_name/network/PublicNetwork"
-  internal_network="/$dc_name/network/InternalNetwork"
-  govc dvs.portgroup.add -dvs "$dvs_path" -type earlyBinding -nports 16 "$(basename "$public_network")"
-  govc dvs.portgroup.add -dvs "$dvs_path" -type ephemeral "$(basename "$internal_network")"
+  Supported DVS configuration values are as follows:
 
-  govc dvs.add -dvs "$dvs_path" -pnic vmnic1 $HOST1 $HOST2 ... $HOSTn
+    * ``mtu`` = From 1000 to 9999
+    * ``version`` = one of ``6.5.0``, ``6.6.0``, ``7.0.0``
+    * ``discovery`` = one of ``cdp`` or ``lldp``
+
+  For Portgroups on a DVS, the following values are supported:
+
+    * ``type`` = one of ``ephemeral``, ``earlyBinding``, or ``lateBinding``
+    * ``ports`` = from 1 to 60,000
 
   Example in YAML:
 
@@ -25,7 +30,7 @@ Documentation: |
           mtu: 9000
           version: 7.0.0
           discovery: lldp
-          vmnic: vmnic0
+          vmnic: vmnic1
           portgroups:
             pg_internal:
               type: ephemeral
@@ -34,9 +39,50 @@ Documentation: |
               type: ephemeral
               ports: 8
         dvs02:
-          mtu: ...
-          version: ...
-          ...
+          mtu: 1534
+          version: 7.0.0
+          discovery: cdp
+          vmnic: vmnic2
+
+  Example in JSON:
+
+    ::
+
+      "dvs01": {
+        "mtu": 9000,
+        "version": "7.0.0",
+        "discovery": "lldp",
+        "vmnic": "vmnic1",
+        "portgroups": {
+          "pg_external": {
+            "type": "ephemeral",
+            "ports": 8
+          },
+          "pg_internal": {
+            "type": "ephemeral",
+            "ports": 16
+          }
+        }
+      },
+      "dvs02": {
+        "mtu": 1534,
+        "version": "7.0.0",
+        "discovery": "cdp",
+        "vmnic": "vmnic2"
+      }
+
+  In the above example, the ``dvs01`` DVS will have jumbo frames, switch
+  version set to 7.0.0, discovery packets will use the LLDP protocol, and
+  it will map to the ``vmnic1`` device.  In addition, it will define two
+  Portgroups, named ``pg_internal`` and ``pg_external``; both of type
+  ephemeral with different numbers of ports defined.
+
+  The ``dvs02`` switch will use standard size packets, the CDP discovery
+  protocol, the ``vmnic2`` device, and will not map any Portgroups.
+
+  .. note:: You must also add the named DVS Switches (eg ``dvs01`` and ``dvs02``
+            in the above example), to the vSphere ESXi nodes that will use these
+            switches; via the ``esxi/dvs-memberships`` Param.
 
 Meta:
   color: "green"
