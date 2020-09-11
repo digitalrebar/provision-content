@@ -35,44 +35,60 @@ Templates:
     {{template "setup.tmpl" .}}
     [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
-    echo "Running Git-based ansible playbooks"
+    if ! which ansible 2>/dev/null >/dev/null ; then
+        echo "Installing ansible..."
+        install ansible
+    else
+        echo "Ansible installed, no action required"
+    fi
+
+    echo "Running local ansible/playbooks"
     {{range $index, $playbook := .Param "ansible/playbooks"}}
-        NAME={{$playbook.name}}
-        REPO={{$playbook.repo}}
-        DIR={{$playbook.path}}
-        PB={{$playbook.playbook}}
-        L=$(mktemp "./$F.$$.XXXXXXXX.log")
+
+        echo "======== Item {{$index}} of ansible/playbooks ========="
+        NAME="{{if $playbook.name}}{{$playbook.name}}{{else}}playbook{{$index}}{{end}}"
+        DIR="/{{if $playbook.path}}{{$playbook.path}}{{else}}{{end}}"
+        PB="{{if $playbook.playbook}}{{$playbook.playbook}}{{else}}playbook{{$index}}.yaml{{end}}"
+
+        {{if $playbook.template }}
+          echo "  Creating playbook ${NAME}/${PB} from DRP template: {{$playbook.template}}"
+          mkdir ${NAME}
+          tee ${NAME}/${PB} >/dev/null << EOF
+    {{$.CallTemplate $playbook.template $}}
+    EOF
+        {{else}}
+          {{ if not $playbook.repo}}
+            echo "ERROR: template or repo must be defined!"
+            exit 1
+          {{else}}
+            echo "  Cloning the git repo: {{$playbook.repo}}"
+            git clone "{{$playbook.repo}}" "$NAME"
+            {{if not $playbook.commit }}
+              echo "  No commit requsted, using default commit"
+            {{else}}
+              echo "  Checking out {{$playbook.commit}}"
+              git checkout {{$playbook.commit}}
+            {{end}}
+          {{end}}
+        {{end}}
 
         {{if not $playbook.data }}
+            echo "  No special args requsted"
             ARGS=""
         {{else}}
+            echo "  Using args: {{$playbook.args}}"
             ARGS="{{$playbook.args}}"
         {{end}}
 
-        echo "Getting the git repo: $REPO"
-        git clone "$REPO" "$NAME"
-
-        {{if not $playbook.commit }}
-        echo "No commit"
-        {{else}}
-        git checkout {{$playbook.commit}}
-        {{end}}
-
-        echo "Running the playbook, $PB, from $DIR"
-        echo "Setting log file to:  '$L'"
-        cd "$NAME/$DIR"
-        {{if not $playbook.verbosity }}
-        echo "ansible-playbook $ARGS \"$PB\" | tee -a \"$L\""
-        ansible-playbook $ARGS "$PB" 2>&1 | tee -a "$L"
-        {{else}}
-        echo "ansible-playbook $ARGS {{$playbook.verbosity}} \"$PB\" | tee -a \"$L\""
-        ansible-playbook $ARGS {{$playbook.verbosity}} "$PB" 2>&1 | tee -a "$L"
-        {{end}}
+        cd "${NAME}${DIR}"
+        echo "  Running the playbook $PB in $(pwd)"
+        ansible-playbook -i localhost, $ARGS {{if not $playbook.verbosity}}no_log: True{{end}} "$PB"
         cd -
 
-        rm -rf $NAME $L
     {{else}}
         echo "NOTE: No ansible/playbooks defined."
     {{end}}
+    echo "======== End of Loop ========="
 
+    echo "done"
     exit 0
