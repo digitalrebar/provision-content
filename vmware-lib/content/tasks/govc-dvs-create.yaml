@@ -3,16 +3,21 @@ Description: "A task to create Distributed Virtual Switches"
 Name: "govc-dvs-create"
 Documentation: |
   This task will create Distributed Virtual Switches in a vCenter service.
-  It uses the ``esxi/dvs-mappings`` Param to define which DVSs and portgroups
-  to create.
+  It uses the ``esxi/dvs-mappings`` Param to define which DVSs and (optionally)
+  portgroups to create, along with the configuration values for the DVS and
+  Portgroups.
 
-ExtraClaims:
-  - scope: "machines"
-    action: "*"
-    specific: "*"
-  - scope: "profiles"
-    action: "*"
-    specific: "*"
+  Please review the Param documentation for ``esxi/dvs-mappings`` for structure
+  and usage examples.
+
+  In addition to ``esxi/dvs-mappings`` configuration values for each of the DVS
+  and Portgroups, you must also add the ``esxi/dvs-memberships`` Param, which is
+  an array of strings.  Each string should be the name of a Distributed Virtual
+  Switch to create on the vSphere ESXi node.
+
+  Typically the ``esxi/dvs-memberships`` Param will be added to a machine via
+  classification rules.
+
 Meta:
   icon: "terminal"
   color: "purple"
@@ -22,19 +27,17 @@ RequiredParams:
   - "esxi/dvs-mappings"
   - "esxi/datacenter-name"
   - "esxi/cluster-name"
+  - "govc/username"
+  - "govc/password"
+  - "govc/url"
+OptionalParams:
+  - "govc/debug"
 Templates:
   - Name: "govc-dvs-create.sh"
     Contents: |
       #!/usr/bin/env bash
       # DVS create and enrollment task.
       # RackN Copyright 2020
-
-      ###
-      #  NOTICE:  This template relies on the 'esxi/cluster-name' being set
-      #           to a cluster name to operate on.  Additionally, each Machine
-      #           that belongs in the specified cluster MUST ALSO have the
-      #           Param set with the name of the cluster.
-      ###
 
       ### start setup.tmpl
       {{ template "setup.tmpl" . }}
@@ -46,26 +49,6 @@ Templates:
       {{ template "govc-lib.sh.tmpl" . }}
 
       ### start govc-dvs-create.sh
-      JQ=$(which jq)
-      [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
-      [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
-      [[ -z "$JQ" ]] && JQ=$(which gojq)     || true
-      if [[ -z "$JQ" ]]; then
-        D="$(which drpcli)"
-        if [[ -n "$D" ]]; then
-          ln -s $D /usr/local/bin/drpjq
-          JQ="/usr/local/bin/drpjq"
-        else
-          xiterr 1 "Unable to find 'jq' or alternative to use."
-        fi
-      fi
-
-      run_govc() {
-        local _args="$*"
-        echo "CMD: govc $_args"
-        govc $_args
-      }
-
       USERNAME="root"
       DC='{{ .Param "esxi/datacenter-name" }}'
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
@@ -80,10 +63,10 @@ Templates:
         [[ -z "$DVS_MTU" ]] && xiterr 1 'DVS MTU empty' || true
         [[ -z "$DVS_VER" ]] && xiterr 1 'DVS Version empty' || true
 
-        if [[ -z "$(govc ls "$DVS_PATH")" ]]
+        if [[ -z "$(run_govc quiet ls "$DVS_PATH")" ]]
         then
-          govc dvs.create dc $DC mtu $DVS_MTU $DVS_NAME
-          govc dvs.create -product-version $DVS_VER -folder "$(dirname "$DVS_PATH")" "$(basename "$DVS_PATH")"
+          run_govc dvs.create dc $DC mtu $DVS_MTU $DVS_NAME
+          run_govc dvs.create -product-version $DVS_VER -folder "$(dirname "$DVS_PATH")" "$(basename "$DVS_PATH")"
         else
           xiterr 1 "can not create DVS '$DVS_NAME' it exists already"
         fi
@@ -95,7 +78,7 @@ Templates:
         [[ -z "$DVS_VMN" ]] && xiterr 1 'DVS VMNIC device empty' || true
         [[ -z "$MEMBERS" ]] && xiterr 1 'Members to apply DVS to is empty' || true
 
-        govc dvs.add -dvs "$DVS_PATH" -pnic $DVS_VMN $MEMBERS
+        run_govc dvs.add -dvs "$DVS_PATH" -pnic $DVS_VMN $MEMBERS
       }
 
       portgroup_create() {
@@ -107,13 +90,19 @@ Templates:
 
         local net_path="/$DC/network/$PG_NAME"
 
-        if [[ -z "$(govc ls "$net_path")" ]]
+        if [[ -z "$(run_govc quiet ls "$net_path")" ]]
         then
-          govc dvs.portgroup.add -dvs "$DVS_PATH" -type $PG_TYPE -nports $PG_PORTS $PG_NAME
+          run_govc dvs.portgroup.add -dvs "$DVS_PATH" -type $PG_TYPE -nports $PG_PORTS "$PG_NAME"
         else
           xiterr 1 "can not create Portgroup '$PG_NAME' it exists already"
         fi
       }
+
+      DC_PATH="/${DC}"
+      if [[ -z "$(run_govc quiet ls "/$DC_PATH")" ]]
+      then
+        xiterr 1 "Datacenter ('$DC') not created yet."
+      fi
 
       {{ range $dvs, $dvscfg := (.Param "esxi/dvs-mappings") -}}
       DVS_NAME="{{ $dvs }}"
@@ -123,7 +112,7 @@ Templates:
       DVS_DSC='{{$dvscfg.discovery}}'
       DVS_VMN='{{$dvscfg.vmnic}}'
       # now get our member nodes for this DVS
-      NAMES=$(drpcli machines list esxi/dvs-memberships In "[\"$DVS_NAME\"]" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      NAMES=$(drpcli machines list esxi/dvs-memberships In "[\"$DVS_NAME\"]" Meta.BaseContext Ne govc | $_JQ -r '.[].Name' | tr '\n' ' ')
       # convert DRP machine name to ESXi host name
       for NAME in $NAMES
       do
