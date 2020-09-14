@@ -283,6 +283,7 @@ Templates:
 - Contents: |-
     #!/bin/bash
 
+    set -x
     {{ if .ParamExists "rook/ceph-target-disk"}}
     {{if .ParamExists "krib/selective-mastership" -}}
     SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
