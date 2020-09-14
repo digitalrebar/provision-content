@@ -295,10 +295,16 @@ Templates:
       if [[ ! "$I_AM_MASTER" == true ]] ; then
         # I'm a worker, so wipe disk in preparation for next ceph installation
         yum install -y gdisk
-        if [[ -f "/dev/{{ .Param "rook/ceph-target-disk" }}" ]]
-        then
-          sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
-        fi
+        for disk in `ls /dev/ | grep {{ .Param "rook/ceph-target-disk" }}`
+        do
+          # Don't wipe OS filesystems
+          echo {{ .Param "operating-system-disk" }} | grep $disk
+          if [[ $? -ne 0 ]]; then
+            echo "DESTRUCTIVELY zapping /dev/$disk"
+            sgdisk --zap-all /dev/$disk
+          else
+            echo "/dev/$disk matches {{ .Param "operating-system-disk" }}, so NOT zapping"
+          fi
 
         done
         # Now remove devicemapper details
