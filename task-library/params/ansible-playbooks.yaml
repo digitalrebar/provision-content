@@ -7,18 +7,22 @@ Documentation: |
   Runs the provided playbooks in order from the json array.  The array contains structured
   objects with further details about the ansible-playbook action.
 
-  Each playbook MUST be stored in a git location accessible from the machine running the task.
+  Each playbook MUST be stored in either
+  1. a git location accessible from the machine running the task.
+  1. a DRP template accessible to the running DRP
 
   The following properties are included in each array entry:
 
   * playbook (required): name of the playbooks passed into ansible-playbook cli
   * name (required): determines the target of the git clone
-  * repo (required): path related to machine where the playbook can be clone from
+  * either (required, mutually exclusive):
+    * repo: path related to machine where the playbook can be git cloned from
+    * template: name of a DRP template containing a localhost ansible playbook
   * path (optional): if playbooks are nested into a single repo, move into that playbook
   * commit (optional): commit used to checkout a specific commit tag from the git history
   * data (optionalm boolean): if true, use items provided in args
   * args (optional): additional arguments to be passed into the ansible-playbook cli
-  * verbosity (optional, boolean): if true, captures additional output from ansiblie.
+  * verbosity (optional, boolean): if false, suppresses output from ansiblie using no_log.
 
   For example
 
@@ -34,12 +38,27 @@ Documentation: |
           "data": false,
           "args": "",
           "verbosity": true
+        },
+        {
+          "playbook": "test",
+          "name": "test",
+          "template": "ansible-playbooks-test-playbook.yaml.tmpl",
+          "path": "",
+          "commit": "",
+          "data": false,
+          "args": "",
+          "verbosity": true
         }
       ]
 
 Schema:
   type: "array"
-  default: []
+  default:
+  - playbook: test
+    name: test
+    template: "ansible-playbooks-test-playbook.yaml.tmpl"
+    data: false
+    verbosity: true
   items:
     properties:
       name:
