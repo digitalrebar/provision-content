@@ -35,7 +35,7 @@ get_member_name() {
     fqdn-dns-domain)
         _domain='{{.Param "dns-domain"}}'
         [[ "$_domain" == "null" || -z "$_domain" ]] && xiterr "DNS Domain Param ('dns-domain') not specified." || true
-        _member=${_machine}.${_d}
+        _member=${_machine}.${_domain}
       ;;
     *)
         xiterr 1 "Unknown ESXi machine member name reference specified ('$_ref')"
