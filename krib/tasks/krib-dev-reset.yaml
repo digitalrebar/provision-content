@@ -298,6 +298,7 @@ Templates:
         for disk in `ls /dev/ | grep {{ .Param "rook/ceph-target-disk" }}`
         do
           echo "DESTRUCTIVELY zapping /dev/$disk"
+          echo "running sgdisk --zap-all /dev/$disk..."
           sgdisk --zap-all /dev/$disk
         done
         # Now remove devicemapper details
