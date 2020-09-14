@@ -33,6 +33,7 @@ Templates:
           echo {{ .Param "operating-system-disk" }} | grep $disk
           if [[ $? -ne 0 ]]; then
             echo "DESTRUCTIVELY zapping /dev/$disk"
+            echo "running sgdisk --zap-all /dev/$disk..."
             sgdisk --zap-all /dev/$disk
           else
             echo "/dev/$disk matches {{ .Param "operating-system-disk" }}, so NOT zapping"
