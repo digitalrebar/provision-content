@@ -24,10 +24,10 @@ get_member_name() {
         _member="$_machine"
       ;;
     address)
-        _member=$(drpcli machines show Name:${_machine} | jq '.Address')
+        _member=$(drpcli machines show Name:${_machine} | jq -r '.Address')
       ;;
     fqdn-dhcp)
-        _address=$(drpcli machines show Name:${_machine} | jq '.Address')
+        _address=$(drpcli machines show Name:${_machine} | jq -r '.Address')
         _domain=$(drpcli leases show $_address | jq -r '.Options | .[] | select(.Code==15) | .Value')
         [[ "$_domain" == "null" || -z "$_domain" ]] && xiterr 1 "DHCP option 15 (domain name) missing, or no Lease for '$_address' exists." || true
         _member="${_machine}.${_domain}"

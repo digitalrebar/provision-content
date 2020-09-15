@@ -124,6 +124,9 @@ Templates:
       MEMBERS=""
       # now get our member nodes for this DVS
 
+      echo ""
+      echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BEGIN DVS '$DVS_NAME' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+      echo ""
       echo "Finding ESXi node members to operate on in cluster '$CLUSTER' with '$DVS_NAME' DVS."
       # DRP v4.5.0 release version will support the below Filter syntax for Params
       #NAMES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" esxi/dvs-membershipos In "$DVS_NAME" Context Ne govc | jq -r ".[].Name" | tr '\n' ' ')
