@@ -119,6 +119,9 @@ Templates:
       DVS_MTU='{{$dvscfg.mtu}}'
       DVS_DSC='{{$dvscfg.discovery}}'
       DVS_VMN='{{$dvscfg.vmnic}}'
+      FOUND=""
+      NAMES=""
+      MEMBERS=""
       # now get our member nodes for this DVS
 
       echo "Finding ESXi node members to operate on in cluster '$CLUSTER' with '$DVS_NAME' DVS."
@@ -146,7 +149,6 @@ Templates:
       echo "        vmnic:  '$DVS_VMN'"
 
       dvs_create
-      [[ -n "$MEMBERS" ]] && dvs_add || echo "No ESXi members added, none tagged have '$DVS_NAME' via 'esxi/dvs-memberships' Param."
 
       {{ if $dvscfg.portgroups -}}
       {{ range $pg, $pgcfg := $dvscfg.portgroups -}}
@@ -167,6 +169,10 @@ Templates:
       echo "No Portgroups created as no configuration found for DVS '$DVS_NAME' on 'esxi/dvs-mappings' Param."
       {{ end -}}
       {{ end -}}
+
+      echo "Adding members to DVS, if appropriate."
+      [[ -n "$MEMBERS" ]] && dvs_add || echo "No ESXi members added, none tagged have '$DVS_NAME' via 'esxi/dvs-memberships' Param."
+
       {{ end -}}
 
       echo "End of DVS Creation from 'esxi/dvs-mappings' Param"
