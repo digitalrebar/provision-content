@@ -101,7 +101,6 @@ Schema:
     required:
       - "mtu"
       - "version"
-      - "discovery"
       - "vmnic"
     properties:
       mtu:

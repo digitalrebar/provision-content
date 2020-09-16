@@ -62,14 +62,16 @@ Templates:
       export GOVC_DATACENTER="$DC"
 
       dvs_create() {
+        local _dsc
         [[ -z "$DC" ]] && xiterr 1 'DC name empty' || true
         [[ -z "$DVS_PATH" ]] && xiterr 1 'DVS Path empty' || true
         [[ -z "$DVS_MTU" ]] && xiterr 1 'DVS MTU empty' || true
         [[ -z "$DVS_VER" ]] && xiterr 1 'DVS Version empty' || true
+        [[ -z "$DVS_DSC" ]] && _dsc="-discovery-protocol=cdp" || _dsc="-discovery-protocol=$DVS_DSC"
 
         if [[ -z "$(run_govc quiet ls "$DVS_PATH")" ]]
         then
-          run_govc dvs.create -dc "$DC" -product-version $DVS_VER -mtu $DVS_MTU -folder "$(dirname "$DVS_PATH")" "$(basename "$DVS_PATH")"
+          run_govc dvs.create -dc "$DC" -product-version $DVS_VER $_dsc -mtu $DVS_MTU -folder "$(dirname "$DVS_PATH")" "$(basename "$DVS_PATH")"
         else
           xiterr 1 "can not create DVS '$DVS_NAME' it exists already"
         fi
