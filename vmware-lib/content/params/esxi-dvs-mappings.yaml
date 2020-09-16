@@ -125,9 +125,6 @@ Schema:
         type: "object"
         additionalProperties:
           type: "object"
-          required:
-            - "type"
-            - "ports"
           properties:
             type:
               type: "string"
