@@ -16,7 +16,7 @@ Documentation: |
     * ``fqdn-dns-domain`` = the DRP Machine registered Name plus the value of the Param ``dns-domain``
 
 Schema:
-  default: "address"
+  default: "name"
   type: "string"
   enum:
     - address
