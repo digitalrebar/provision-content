@@ -85,12 +85,12 @@ Templates:
       }
 
       portgroup_create() {
-        local _vlan _ports
+        local _vlan _ports _pgtype
         [[ -z "$DC" ]] && xiterr 1 'Required DC name empty' || true
         [[ -z "$DVS_PATH" ]] && xiterr 1 'DVS path empty' || true
         [[ -z "$PG_NAME" ]] && xiterr 1 'Required Portgroup name empty' || true
-        [[ -z "$PG_TYPE" ]] && xiterr 1 'Required Portgroup type empty' || true
 
+        [[ -n "$PG_TYPE" ]] && _pgtype="-type $PG_TYPE" || _pgtype=""
         [[ "$PG_PORTS" == "0" || "$PG_PORTS" == "<no value>" || "$PG_PORTS" == "null" || -z "$PG_PORTS" ]] && _ports="" || _ports="-nports $PG_PORTS"
         [[ "$PG_VLAN" == "0" || "$PG_VLAN" == "<no value>" || "$PG_VLAN" == "null" || -z "$PG_VLAN" ]] && _vlan="" || _vlan="-vlan $PG_VLAN"
 
@@ -98,7 +98,7 @@ Templates:
 
         if [[ -z "$(run_govc quiet ls "$net_path")" ]]
         then
-          run_govc dvs.portgroup.add -dvs "$DVS_PATH" -type $PG_TYPE $_ports $_vlan "$PG_NAME"
+          run_govc dvs.portgroup.add -dvs "$DVS_PATH" $_pg_type $_ports $_vlan "$PG_NAME"
         else
           xiterr 1 "can not create Portgroup '$PG_NAME' it exists already"
         fi
