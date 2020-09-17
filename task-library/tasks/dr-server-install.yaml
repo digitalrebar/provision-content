@@ -29,8 +29,6 @@ Documentation: |
   It is anticipated at all HA machines share a profile since these settings are the
   same (except ``ha-passive``) for all HA cluster machines.
 
-  Create the ``ha-token`` using ``drpcli users token rocketskates ttl 3y | jq -r '.Token'``
-
   All ``ha-*`` params are required for HA configuration.
 
   For operators,
@@ -58,14 +56,10 @@ RequiredParams:
 OptionalParams:
   - "dr-server/ha-id"
   - "dr-server/ha-address"
-  - "dr-server/ha-token"
   - "dr-server/ha-passive"
   - "dr-server/zip-url"
   - "dr-server/replace-drp"
 Templates:
-  - ID: "dr-server-ha.conf.tmpl"
-    Name: "dr-server-ha.conf."
-    Path: "/etc/systemd/system/dr-provision.service.d/20-ha.conf"
   - Name: "drp-install"
     Contents: |-
       #!/bin/bash
@@ -76,12 +70,11 @@ Templates:
       {{ template "download-tools.tmpl" .}}
 
       {{ $drpid := (regexFind "[a-zA-Z0-9-]+" .Machine.Name) }}
-
-      if [[ -f /etc/systemd/system/dr-provision.service.d/20-ha.conf ]]; then
-        echo "HA configuration file exists"
-      else
-        echo "No HA configuration detected"
-      fi
+      {{ $ha_ip := "" }}
+      {{ if .ParamExists "dr-server/ha-address" }}
+        {{ $a := split "/" (.Param "dr-server/ha-address") }}
+        {{ $ha_ip = $a._0 }}
+      {{ end }}
 
       echo "getting license file"
       drpcli contents show rackn-license > rackn-license.json
@@ -103,47 +96,72 @@ Templates:
           -o rackn-license.json
       fi
 
-      if [[ "$(systemctl is-active dr-provision)" != "active" ]] ; then
-
-        echo "Download Install.sh"
-        if drpcli files exists "bootstrap/install.sh"; then
-          drpcli files download "bootstrap/install.sh" > install.sh
-        else
-          download -L --remote-name-all http://get.rebar.digital/{{ .Param "dr-server/install-version"}} -o install.sh
-          exit 1
-        fi
-        chmod +x install.sh
-
-        {{ if .ParamExists "dr-server/zip-url" }}
-        echo "Downloading zip from {{ .Param "dr-server/zip-url" }}"
-        download -L --remote-name-all "{{ .Param "dr-server/zip-url" }}" -o dr-provision.zip
-        {{ else }}
-        echo "Downloading zip from catalog as per install.sh --version {{ .Param "dr-server/install-version"}}"
-        {{ end }}
-
-        echo "Run Install.sh with DRP ID {{ $drpid }}"
-        ./install.sh install \
-          {{ if .ParamExists "dr-server/zip-url" -}}--zip-file=dr-provision.zip{{else}}--version={{ .Param "dr-server/install-version"}}{{ end -}} \
-          --drp-id={{ $drpid }} \
-          --systemd \
-          --no-content
-        systemctl stop dr-provision
-
-        {{ if .ParamExists "dr-server/zip-url" }}
-        echo "Cleanup ZIP"
-        rm dr-provision.zip
-        {{ end }}
-
-      else
+      FORCE=""
+      if [[ "$(systemctl is-active dr-provision)" == "active" ]] ; then
         echo "DRP already installed, restarting in case config was changed"
         systemctl stop dr-provision
+        FORCE="--force"
       fi
+
+      echo "Download Install.sh"
+      rm -f install.sh
+      if drpcli files exists "bootstrap/install.sh"; then
+        drpcli files download "bootstrap/install.sh" > install.sh
+      else
+        download -L --remote-name-all http://get.rebar.digital/{{ .Param "dr-server/install-version"}} -o install.sh
+        exit 1
+      fi
+      chmod +x install.sh
+
+      {{ if .ParamExists "dr-server/zip-url" }}
+      echo "Downloading zip from {{ .Param "dr-server/zip-url" }}"
+      download -L --remote-name-all "{{ .Param "dr-server/zip-url" }}" -o dr-provision.zip
+      {{ else }}
+      echo "Downloading zip from catalog as per install.sh --version {{ .Param "dr-server/install-version"}}"
+      {{ end }}
+
+      echo "Fix up HA options - still more work to do"
+      {{ if and (.Param "dr-server/ha-passive") (.ParamExists "dr-server/ha-address") }}
+      HA_TOKEN="$(drpcli -U $RS_USER -P $RS_PASS -E {{ $ha_ip }} users token rocketskates ttl 3y |jq -r '.Token')"
+      {{ else }}
+      HA_TOKEN="ACTIVE_OR_SINGLE_NOT_NEEDED"
+      {{ end }}
+
+      HA_ARGS=""
+      {{ if .ParamExists "dr-server/ha-address" }}
+      HA_ARGS="--ha-enabled --ha-token=$HA_TOKEN --ha-address={{.Param "dr-server/ha-address"}}"
+      {{ if .ParamExists "dr-server/ha-interface" }}
+      HA_ARGS+=" --ha-interface={{.Param "dr-server/ha-interface"}}"
+      {{ else }}
+      echo "dr-server/ha-interface MUST be specified for HA operations"
+      exit 1
+      {{ end }}
+      {{ if .Param "dr-server/ha-passive" }}
+      HA_ARGS+=" --ha-passive"
+      {{ end }}
+      {{ end }}
+
+      echo "Run Install.sh with DRP ID {{ $drpid }}"
+      ./install.sh \
+        {{ if .ParamExists "dr-server/zip-url" -}}--zip-file=dr-provision.zip{{else}}--version={{ .Param "dr-server/install-version"}}{{ end -}} \
+        --drp-id={{ $drpid }} \
+      {{ if .ParamExists "dr-server/ha-id" }}    --ha-id={{.Param "dr-server/ha-id"}}{{ end }} \
+        $HA_ARGS \
+        $FORCE \
+        --systemd \
+        --no-content \
+        install
+      systemctl stop dr-provision
+
+      {{ if .ParamExists "dr-server/zip-url" }}
+      echo "Cleanup ZIP"
+      rm dr-provision.zip
+      {{ end }}
 
       {{ if .ParamExists "dr-server/replace-drp" }}
       # development only feature, ad hoc param replaces the binary from a known location
       echo "WARNING: Replacing dr-provision binary from {{ .Param "dr-server/replace-drp" }}"
       BIN=$(which dr-provision)
-      systemctl stop dr-provision
       download -L --remote-name-all "{{ .Param "dr-server/replace-drp" }}" -o $BIN
       chmod +x $BIN
       {{ if .ParamExists "dr-server/ha-address" }}
@@ -160,49 +178,58 @@ Templates:
       RS_USER="rocketskates"
       RS_PASS="r0cketsk8ts"
 
+      # Do the things to ourselves
+      (
+        unset RS_ENDPOINT
+        unset RS_TOKEN
+        unset RS_LOCAL_PROXY
+
+        echo "Wait for API to be up"
+        drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 info status | jq .API
+
+      {{ if or (not (.Param "dr-server/ha-passive")) (not (.ParamExists "dr-server/ha-id")) }}
+        echo "DRP is active - upload license"
+        if [[ -f rackn-license.json ]] ; then
+          echo "upload rackn-license"
+          drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 contents upload rackn-license.json
+          drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 contents show rackn-license > /tmp/l1.json
+          cp rackn-license.json /tmp/l2.json
+          rm -f rackn-license.json
+        else
+          echo "ERROR: could not find license file"
+          exit 1
+        fi
+        echo "Test API"
+        drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 info status | jq .API
+      {{ else }}
+        echo "DRP is passive - License is not needed."
+      {{ end }}
+      )
+
       manager="$(drpcli info get | jq -r .manager)"
       if [[ "$manager" == "true" ]] ; then
-        if drpcli endpoints exists {{ $drpid }} ; then
+        # if no ha-address (not HA mode) or we are active we need to register
+      {{ if or (not (.Param "dr-server/ha-passive")) (not (.ParamExists "dr-server/ha-address")) }}
+        {{ $ha_id := $drpid }}
+        {{ $ha_address := .Machine.Address}}
+        {{ if .ParamExists "dr-server/ha-address" }}
+          {{ $ha_address = $ha_ip }}
+          {{ $ha_id = .Param "dr-server/ha-id" }}
+        {{ end }}
+        if drpcli endpoints exists {{ $ha_id }} ; then
           echo "Endpoint already registered in Manager"
         else
           echo "Manager, register new endpoint"
-          drpcli endpoints create '{"Id":"{{ $drpid }}", "Params":{"manager/url": "https://{{ .Machine.Address }}:8092"} }'
-          drpcli endpoints set "{{ $drpid }}" param "manager/username" to "$RS_USER"
-          drpcli endpoints set "{{ $drpid }}" param "manager/password" to "$RS_PASS"
+          drpcli endpoints create '{"Id":"{{ $ha_id }}", "Params":{"manager/url": "https://{{ $ha_address }}:8092"} }'
+          drpcli endpoints set "{{ $ha_id }}" param "manager/username" to "$RS_USER"
+          drpcli endpoints set "{{ $ha_id }}" param "manager/password" to "$RS_PASS"
         fi
+      {{ else }}
+        echo "Don't register passive nodes"
+      {{ end }}
       else
         echo "Not a manager, no action"
       fi
-
-      unset RS_ENDPOINT
-      unset RS_TOKEN
-      unset RS_LOCAL_PROXY
-
-      {{ if and (not (.Param "dr-server/ha-passive")) (.ParamExists "dr-server/ha-address") }}
-      {{ if not (.ParamExists "dr-server/ha-token") }}
-      echo "HA Token: $(drpcli -U $RS_USER -P $RS_PASS -E {{ .Param "dr-server/ha-address" }} users token rocketskates ttl 3y |jq -r '.Token')"
-      {{ else }}
-      echo "HA Token already exists - no not regenerate"
-      {{ end }}
-      {{ else }}
-      echo "Not generating HA Token.  Machine must be NOT ha-passive and have ha-address"
-      {{ end }}
-
-      {{ if or (not (.Param "dr-server/ha-passive")) (not (.ParamExists "dr-server/ha-id")) }}
-      echo "DRP is active - upload license"
-      if [[ -f rackn-license.json ]] ; then
-        echo "upload rackn-license"
-        drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 contents upload rackn-license.json
-        rm rackn-license.json
-      else
-        echo "ERROR: could not find license file"
-        exit 1
-      fi
-      echo "Test API"
-      drpcli -U $RS_USER -P $RS_PASS -E https://127.0.0.1:8092 info status | jq .API
-      {{ else }}
-      echo "DRP is passive - API is not active"
-      {{ end }}
 
       echo "Done"
       exit 0
