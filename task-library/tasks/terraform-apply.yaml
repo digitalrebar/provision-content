@@ -176,7 +176,7 @@ Templates:
 
         {{ else }}
             echo "******** DESTROY POST ACTIONS ***********"
-            {{ if .ParamExists "terraform-var/machine_ip" }}          
+            {{ if .ParamExists "terraform-var/machine_ip" }}
               echo "Clear IP and terraform-var/machine_ip when performing destroy with IP"
               drpcli machines update $RS_UUID "{\"Address\":\"\"}" | jq .Address
               drpcli machines remove $RS_UUID param terraform-var/machine_ip
@@ -196,7 +196,7 @@ Templates:
       if [[ -e terraform.tfstate ]] ; then
         if [[ "$(cat terraform.tfstate | jq -r '.resources | length')" == "0" ]] ; then
           echo "Removing empty terraform.tfstate file"
-          drpcli machines remove $RS_UUID terraform/tfstate || true
+          drpcli machines remove $RS_UUID param terraform/tfstate || true
         else
           echo "Saving terraform.tfstate file to machine"
           drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate >/dev/null

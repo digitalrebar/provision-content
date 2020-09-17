@@ -5,6 +5,8 @@ Secure: true
 Documentation: |
   Create the ``dr-server/ha-token`` using ``drpcli users token rocketskates ttl 3y | jq -r '.Token'``
 
+  DEPRECATED: This should not be used.  The system will automatically acquire this.
+
 Schema:
   type: string
 Meta:
