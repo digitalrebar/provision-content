@@ -35,17 +35,11 @@ Templates:
       sha1sum vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi >sha1sums
       mkdir $signature
       mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
-      tar cf $tarname $signature
-      # Push back to dr-provision
-      echo "Uploading Sledgehammer to dr-provision"
-      drpcli isos upload $tarname as $tarname
-      echo "$tarname uploaded to isos"
       case {{.Machine.Arch}} in
           amd64) shim="shimx64.efi";;
           arm64) shim="grubaa64.efi";;
       esac
-      echo "Creating profile for sledgehammer-$signature"
-      drpcli profiles create - <<EOF
+      cat >"$signature/sledgehammer-$signature.yaml" <<EOF
       ---
       Name: sledgehammer-$signature
       Description: 'Bootenv override for sledgehammer {{.Machine.Arch}}'
@@ -85,3 +79,10 @@ Templates:
                 Path: 'sledgehammer/$signature/grub.cfg-{{`{{.Machine.MacAddr "pxelinux"}}`}}'
                 ID: default-grub.tmpl
       EOF
+      tar cf $tarname $signature
+      # Push back to dr-provision
+      echo "Uploading Sledgehammer to dr-provision"
+      drpcli isos upload $tarname as $tarname
+      echo "$tarname uploaded to isos"
+      echo "Creating profile for sledgehammer-$signature"
+      drpcli profiles create - < "$signature/sledgehammer-$signature.yaml"
