@@ -21,6 +21,16 @@ Documentation: |
     * ``type`` = one of ``ephemeral``, ``earlyBinding``, or ``lateBinding``
     * ``ports`` = 0 for elastic, or from 1 to 60,000
     * ``vlans`` = empty or 0 for *none*, or VLAN tag ID from 1 to 4096
+    * ``migrate.portgroup`` = *standard switch portgroup name* to migrate during DVS creation (eg 'Management Network')
+    * ``migrate.vswitch`` = *standard vswitch name* to migrate during DVS creation (eg 'vSwitch0')
+
+  Portgroup values ``type``, ``ports``, and ``vlans`` can optionally be left
+  empty.  If they are, they will default to the Portgroup version based default
+  values.
+
+  The ``migrate`` options will allow migrating the specified Standard Virtual Switch
+  portgroup specified, to the DVS Portgroup.  If they are not specified, no portgroup
+  migrations will be made.
 
   Example in YAML:
 
@@ -34,6 +44,9 @@ Documentation: |
           vmnic: vmnic1
           portgroups:
             pg_internal:
+              migrage:
+                portgroup: "Management Network"
+                vswitch: "vSwitch0"
               type: ephemeral
               ports: 16
               vlan: 10
@@ -63,6 +76,10 @@ Documentation: |
             "ports": 8
           },
           "pg_internal": {
+            "migrage": {
+              "portgroup": "Management Network",
+              "vswitch": "vSwitch0"
+            }
             "type": "ephemeral",
             "vlan": 0,
             "ports": 16
@@ -125,6 +142,15 @@ Schema:
         additionalProperties:
           type: "object"
           properties:
+            migrate:
+              type: "object"
+                additionalProperties:
+                type: "object"
+                properties:
+                  vswitch:
+                    type: "string"
+                  portgroup:
+                    type: "string"
             type:
               type: "string"
               enum:
