@@ -44,33 +44,49 @@ Templates:
       M_DISK={{ .Param "proxmox/lab-machines-disk" }}
       M_XTRA={{ .Param "proxmox/lab-pvesh-extra-config-machines" }}
 
+      ###
+      #  TODO:  Proxmox can use/store text config files to local disk, which defines the machines
+      #         configuration details.  It may be easier to provide a templatized option for
+      #         Operators to inject multiple VM IDs and their Configs via that approach versus the
+      #         shell loop construct.  The shell loop is fine for all VMs that are "the same".
+      #            See:  https://pve.proxmox.com/wiki/Qemu/KVM_Virtual_Machines
+      #
+      #         Example location:  /etc/pve/qemu-server/<VMID>.conf
+      #         Example config:
+      #           cores: 1
+      #           sockets: 1
+      #           memory: 512
+      #           name: webmail
+      #           ostype: l26
+      #           bootdisk: virtio0
+      #           net0: e1000=EE:D2:28:5F:B6:3E,bridge=vmbr0
+      #           virtio0: local:vm-100-disk-1,size=32G
+      #
+      #         A more complex Param data structure could be used to generate these more flexibly.
+      ###
 
-      ### TODO: Make these params
-      # NIC one of: e1000 e1000-82540em e1000-82544gc e1000-82545em i82551 i82557b i82559er ne2k_isa ne2k_pci pcnet rtl8139 virtio vmxnet3
-      # SCSI one of: lsi lsi53c810 megasas pvscsi virtio-scsi-pci virtio-scsi-single
+
       # DRP
-      D_NIC_TYPE="e1000"
-      D_SCSI_TYPE="megasas"
+      D_OS_TYPE='{{.Param "proxmox/vm-drp-os-type"}}'
+      D_NIC_TYPE='{{.Param "proxmox/vm-drp-nic"}}'
+      D_STOR_TYPE='{{.Param "proxmox/vm-drp-storage"}}'
+
       # Machine - uses "sata" disk type, not SCSI
-      M_NIC_TYPE="e1000"
+      M_OS_TYPE='{{.Param "proxmox/vm-machine-os-type"}}'
+      M_NIC_TYPE='{{.Param "proxmox/vm-machine-nic"}}'
+      M_STOR_TYPE='{{ .Param "proxmox/vm-machine-storage" }}'
 
-      ############# skip for now
-      # Download CentOS-8 ISO if it's not already downloaded in the home directory
-      #if [[ -f /root/$ISO ]]
-      #then
-      #  echo "Cached ISO file exists, skipping download ('$ISO')..."
-      #else
-      #  echo "Cached ISO file DOES NOT exist, getting it now ('$ISO')..."
-      #  wget -p $ISO_URL -O /root/$ISO
-      #fi
+      case $D_STOR_TYPE in
+        ide)  D_STOR="--ide0"                        ;;
+        sata) D_STOR="--sata0"                       ;;
+        *)    D_STOR="--scsihw $D_STOR_TYPE --scsi0" ;;
+      esac
 
-      # Upload the CentOS-8 ISO to the proxmox ISO storage local repo unless it's already there
-      #if $(pvesh get /nodes/${PVENODE}/storage/local/content --output-format json | jq -r '.[] | .volid' | grep "$ISO" > /dev/null)
-      #then
-      #  echo "ISO found, skipping create ('$ISO').."
-      #else
-      #  pvesh create /nodes/${PVENODE}/storage/local/upload --filename $ISO --content iso --tmpfilename /root/$ISO
-      #fi
+      case $M_STOR_TYPE in
+        ide)  M_STOR="--ide0"                        ;;
+        sata) M_STOR="--sata0"                       ;;
+        *)    M_STOR="--scsihw $M_STOR_TYPE --scsi0" ;;
+      esac
 
       destroy_if_exists() {
         local _vmid=$1
@@ -84,20 +100,32 @@ Templates:
         fi
       }
 
+      if [[ $HOSTNAME =~ .*[0-9][0-9] ]]
+      then
+        echo "Hostname ends with 2 digits, using for Node number..."
+        FNODE=$(/usr/bin/printf "%02d" $(echo ${PVENODE:(-2)}))
+      else
+        echo "Hostname does not contain 2 digits at the end, generating a random number..."
+        # RANDOM twice because it could return 1 number
+        RAND=${RANDOM}${RANDOM}
+        FNODE=$(/usr/bin/printf "%02d" ${RAND:(-2)})
+      fi
+
+      echo "Host index number set to: '$FNODE'"
+
       for SNUM in $(seq $SCOUNT)
       do
         VMID=${SNUM}00
         FNUM=$(/usr/bin/printf "%02i" $(echo $SNUM | sed 's/^0*//g'))
-        FNODE=$(/usr/bin/printf "%02i" $(echo ${PVENODE:(-2)} | sed 's/^0*//g'))
         BRIDGE=${BASE}${SNUM}
-        STUD="s$FNUM"
+        NAME_PRE="${TAG}$FNUM"
 
         # Create student management node
         LOG=$(mktemp /tmp/pvesh-create-$VMID-XXXXXXXXX.log)
         echo "CREATE drp with ID $VMID at $(date)" > $LOG
         destroy_if_exists $VMID
         set -x
-        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --name $STUD-drp-$VMID --boot $D_BOOT --cpu host --cores $D_CORES --memory $D_MEMORY --net0 ${D_NIC_TYPE},bridge=${D_BRIDGE},firewall=0,macaddr=00:00:00:${FNODE}:${FNUM}:00 --net1 ${D_NIC_TYPE},bridge=${BRIDGE} --ostype l26 --scsihw $D_SCSI_TYPE --scsi0 $STORAGE:$D_DISK $D_XTRA > $LOG 2>&1
+        pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --name $NAME_PRE-drp-$VMID --boot $D_BOOT --cpu host --cores $D_CORES --memory $D_MEMORY --net0 ${D_NIC_TYPE},bridge=${D_BRIDGE},firewall=0,macaddr=00:00:00:${FNODE}:${FNUM}:00 --net1 ${D_NIC_TYPE},bridge=${BRIDGE} --ostype $D_OS_TYPE $D_STOR $STORAGE:$D_DISK $D_XTRA > $LOG 2>&1
         set +x
         START="$START $VMID"
 
@@ -116,7 +144,7 @@ Templates:
             LOGS="$LOGS $LOG"
             echo "CREATE machine with ID $VMID at $(date)" > $LOG
             set -x
-            pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --name $STUD-mach-$VMID --boot $M_BOOT --cpu host --cores $M_CORES --memory $M_MEMORY --net0 ${M_NIC_TYPE},bridge=${BRIDGE},firewall=0,macaddr=00:00:00:00:00:$FNUM --ostype l26 --sata0 $STORAGE:$M_DISK $M_XTRA > $LOG 2>&1 &
+            pvesh create /nodes/${PVENODE}/qemu --vmid ${VMID} --name $NAME_PRE-mach-$VMID --boot $M_BOOT --cpu host --cores $M_CORES --memory $M_MEMORY --net0 ${M_NIC_TYPE},bridge=${BRIDGE},firewall=0,macaddr=00:00:00:00:00:$FNUM --ostype $M_OS_TYPE $M_STOR $STORAGE:$M_DISK $M_XTRA > $LOG 2>&1 &
             set +x
           done
         fi
@@ -127,7 +155,9 @@ Templates:
       for VMID in $START
       do
         echo "Starting virtual machine '$VMID'..."
-        pvesh create /nodes/${PVENODE}/qemu/${VMID}/status/start
+        pvesh create /nodes/${PVENODE}/qemu/${VMID}/status/start &
+        echo "Setting virtual machine '$VMID' to start on boot..."
+        qm set $VMID -onboot 1
       done
 
       echo "CREATE LOGS..."

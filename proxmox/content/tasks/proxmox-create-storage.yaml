@@ -63,12 +63,14 @@ Templates:
 
       # initialize it with one partition
       sgdisk -N 1 $DEVICE
+      # find our partition - NVMe drives tack on 'p1', while others just '1'
+      PART=$(lsblk -npl "${DEVICE}" -o name,type | grep part | awk '{print $1}' | head -n1)
 
       # Create a Physical Volume (PV) without confirmation and 250K metadatasize
-      pvcreate --metadatasize 250k -y -ff ${DEVICE}1
+      pvcreate --metadatasize 250k -y -ff ${PART}
 
       # Create a volume group named “vmdata” on /dev/sdc1
-      vgcreate $VG ${DEVICE}1
+      vgcreate $VG ${PART}
 
       # create a thin-pool Logical Volume (LV) named "vmdata" on VG "vmdata"
       lvcreate -l 95%FREE -n $NAME $VG

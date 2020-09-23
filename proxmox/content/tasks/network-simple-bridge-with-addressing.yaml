@@ -59,6 +59,12 @@ Templates:
       IPADDR="${BASE}.${OCT}"
       ADDRESS="${IPADDR}/${PREFIX}"
 
+      echo ""
+      echo "Commenting out interface '$INTERFACE' definitions in /etc/network/interfaces"
+      echo "NOTE: this is bad - if interface has a more complex or Static IP config, this may fail"
+      sed -i.bak "s/^\(.*${INTERFACE}.*$\)/#\1/g" /etc/network/interfaces
+      echo ""
+
       mkdir -p /etc/network/interfaces.d
       echo "Setting up Simple bridge with the following characteristics:"
       echo "------------------------------------------------------------"
@@ -72,6 +78,7 @@ Templates:
       EOBR
 
       brctl show $BRIDGE > /dev/null 2>&1 && echo "Bridge '$BRIDGE' exists already" || brctl addbr $BRIDGE
-      ifdown $BRIDGE || true
-      ifup $BRIDGE
+      #ifdown $BRIDGE || true
+      #ifup $BRIDGE
+      systemctl restart networking.service
 
