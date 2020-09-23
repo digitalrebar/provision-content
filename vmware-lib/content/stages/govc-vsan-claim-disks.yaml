@@ -14,4 +14,5 @@ Meta:
   color: "green"
   title: "RackN Content"
 Tasks:
+  - "context:govc"
   - "govc-vsan-claim-disks"
