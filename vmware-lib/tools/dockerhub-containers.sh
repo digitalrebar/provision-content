@@ -6,7 +6,7 @@
 ###
 
 #CONTEXTS="govc vcsa-deploy context-runner"
-CONTEXTS="govc vcsa-deploy"
+CONTEXTS="govc govc-pwsh pwsh pyvmomi vcsa-deploy"
 
 for CONTEXT in $CONTEXTS
 do
