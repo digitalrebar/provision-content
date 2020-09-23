@@ -48,6 +48,12 @@ reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 {{end -}}
 %end
 
+%pre
+{{ range $intf := .Param "kickstart/extra-ifs" }}
+nmcli con add type ethernet con-name {{ $intf }} ifname {{ $intf }}
+{{end}}
+%end
+
 %post
 
 exec > /root/post-install.log 2>&1
