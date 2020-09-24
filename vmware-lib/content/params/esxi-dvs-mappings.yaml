@@ -144,7 +144,7 @@ Schema:
           properties:
             migrate:
               type: "object"
-                additionalProperties:
+              additionalProperties:
                 type: "object"
                 properties:
                   vswitch:
