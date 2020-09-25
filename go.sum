@@ -1,3 +1,4 @@
+github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/goutils v1.1.0 h1:zukEsf/1JZwCMgHiK3GZftabmxiCw4apj3a28RPBiVg=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
@@ -21,8 +22,8 @@ github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e h1:vUmf0yez
 github.com/digitalocean/go-smbios v0.0.0-20180907143718-390a4f403a8e/go.mod h1:YTIHhz/QFSYnu/EhlF2SpU2Uk+32abacUYA5ZPljz1A=
 github.com/digitalrebar/logger v0.3.0 h1:7/XP3BQiWfl1Lqmm7tvkvdwjPilDUUPC/iWbeWO9G6g=
 github.com/digitalrebar/logger v0.3.0/go.mod h1:zH2t4FBhzVxZJTg+eaPzNCRL50nlcRLxWurfTsl5jWE=
-github.com/digitalrebar/provision/v4 v4.5.0-beta01 h1:8iOrRdghe01SrOdckCm5MBah/s8Nijp1LNb45+Zl6ic=
-github.com/digitalrebar/provision/v4 v4.5.0-beta01/go.mod h1:6RVCvHA0zLLX+H0ykzoo4maLhSQ1LYHkR/wZcfO46Us=
+github.com/digitalrebar/provision/v4 v4.5.0 h1:o9lx4DR0OEkAbz2TfLu+EqPYrqlTu8erHkNDgEHCTPg=
+github.com/digitalrebar/provision/v4 v4.5.0/go.mod h1:6RVCvHA0zLLX+H0ykzoo4maLhSQ1LYHkR/wZcfO46Us=
 github.com/digitalrebar/tftp v2.1.0+incompatible h1:CzBcnsUaMtdLSOf3dSycinnfpajAAro7l8oo/ILyzOI=
 github.com/digitalrebar/tftp v2.1.0+incompatible/go.mod h1:k1tcsyQwHE72oTU5sfXPJdOCHFiZUt3M2BdYdHsfw6c=
 github.com/digitalrebar/tftp/v3 v3.0.0 h1:Ft2i3s2gCZ795rISs9vlcy3YSqfd6mtodxGoUcPSrhs=
@@ -118,6 +119,7 @@ github.com/spf13/cobra v0.0.4-0.20180722215644-7c4570c3ebeb h1:l8xMeTl9t6JKC/dA1
 github.com/spf13/cobra v0.0.4-0.20180722215644-7c4570c3ebeb/go.mod h1:1l0Ry5zgKvJasoi3XT1TypsSe7PqH0Sj9dhYf7v3XqQ=
 github.com/spf13/pflag v1.0.3 h1:zPAT6CGy6wXeQ7NtTnaTerfKOsV6V6F8agHXFiazDkg=
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
+github.com/stevenroose/remarshal v0.0.0-20160825110430-37e7cbf22025 h1:7wJkExq7a8hs4thauj7otgYQD+zzmxWickV8uxpkJYY=
 github.com/stevenroose/remarshal v0.0.0-20160825110430-37e7cbf22025/go.mod h1:hy8+qmjgBi7BCVwCLsE3nwNHNjEjAMVfdTKvykMrbcA=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
