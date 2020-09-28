@@ -3,6 +3,7 @@
 - hosts: all
   connection: local
   gather_facts: false
+  debugger: {{ if .Param "rs-debug-enable" }}on_failed{{ else }}never{{ end }}
   user: "{{ .Param "rsa/key-user" }}"
 
   vars:
