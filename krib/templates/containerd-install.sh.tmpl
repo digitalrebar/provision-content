@@ -19,7 +19,7 @@ fi
 # Allow for a local repository for installation files
 {{if .ParamExists "krib/package-repository" -}}
   echo "local repo download containerd v{{.Param "containerd/version"}} binaries in {{.Param "krib/package-repository"}}"
-  curl -L {{.Param "krib/package-repository"}}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /
+  curl -L {{.Param "krib/package-repository"}}/cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz | tar xvz -C /usr/local/
 {{else}}
   BINARIES="cri-containerd-{{.Param "containerd/version"}}.linux-amd64.tar.gz"
   if [[ ! -f $BINARIES ]] ; then
@@ -39,6 +39,14 @@ fi
   fi
 {{end -}}
 # Configure containerd
+
+# Also retrieve the source, which is where the containerd.service file is now found
+echo "local repo download containerd v{{.Param "containerd/version"}} source in {{.Param "krib/package-repository"}}"
+curl -L {{.Param "krib/package-repository"}}/containerd-v{{.Param "containerd/version"}}.tar.gz
+tar xfvp containerd-v{{.Param "containerd/version"}}.tar.gz
+cp containerd-v{{.Param "containerd/version"}}/containerd.service /etc/systemd/system/
+systemctl daemon-reload
+rm -rf containerd-v{{.Param "containerd/version"}}
 
 {{if .ParamExists "containerd/config" -}}
 echo "Creating /etc/containerd/config.toml file from Param containerd/config"
