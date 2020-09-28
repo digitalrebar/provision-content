@@ -42,7 +42,7 @@ fi
 
 # Also retrieve the source, which is where the containerd.service file is now found
 echo "local repo download containerd v{{.Param "containerd/version"}} source in {{.Param "krib/package-repository"}}"
-curl -L {{.Param "krib/package-repository"}}/containerd-v{{.Param "containerd/version"}}.tar.gz
+curl -L {{.Param "krib/package-repository"}}/containerd-v{{.Param "containerd/version"}}.tar.gz -o containerd-v{{.Param "containerd/version"}}.tar.gz
 tar xfvp containerd-v{{.Param "containerd/version"}}.tar.gz
 cp containerd-v{{.Param "containerd/version"}}/containerd.service /etc/systemd/system/
 systemctl daemon-reload
