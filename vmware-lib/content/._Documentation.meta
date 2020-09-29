@@ -5,7 +5,7 @@ environments.
 
 
 GoVC General Information
-========================
+------------------------
 
 GoVC is a Golang binary that implements the VMOMI library of capabilities.  The
 primary benefit is it's a single statically compiled binary (stand alone) that has
@@ -28,7 +28,7 @@ context container, please see:
 
 
 GoVC Context
-++++++++++++
+============
 
 The GoVC context implements a RackN Context Container with the Agent (runner, drpcli
 binary) and the ``govc`` compiled binary inside of it.  By use of setting Param values,
@@ -36,7 +36,7 @@ binary) and the ``govc`` compiled binary inside of it.  By use of setting Param 
 
 
 GoVC and VCSA Deployment
-++++++++++++++++++++++++
+========================
 
 VCSA (vCenter Server Appliance) can be deployed via the GoVC tool.  The operator must
 perform the following preparotry tasks to enable the Context environment to operate
@@ -102,7 +102,7 @@ Scripts referenced in this document should be available from:
   * https://github.com/digitalrebar/provision-content/tree/v4/vmware-lib
 
 vCenter Complete Note
-+++++++++++++++++++++
+=====================
 
 If install vCenter 7.x - the ``govc`` connect URL method seems to have changed.
 AS of 2020/07/01 - the Stage ``govc-wait-for-vcenter`` will not complete successfully.
@@ -114,7 +114,7 @@ Workflow from the Context Machine, or ignore the status stage error.
 
 
 Prepare the VCSA JSON Deployment Template
-+++++++++++++++++++++++++++++++++++++++++
+=========================================
 
 The Param ``govc/template-json`` defines the name of a Template that you must provide with
 the configuration details for the deployed VCSA instance.  This template can be a standard
@@ -131,7 +131,7 @@ to execute the deployment to.  Set these Params as defined in the below section.
 
 
 Define the Deployment Target
-++++++++++++++++++++++++++++
+============================
 
 You must define the vSphere deployment target (eg ESXi node) to deploy the VCSA OVA to.
 This is done by specifying the URL directly as a single Param, or the individual Param
@@ -177,7 +177,7 @@ then add the Profile to the Context Machine that will deploy the vCenter VCSA OV
 
 
 Example GOVC Usage
-==================
+------------------
 
 A (begining of) a collection of useful resources for understanding how to
 use ``govc`` to manage vSphere resources.
