@@ -32,7 +32,7 @@ Documentation: |
   or similar constructs must be used to provide outbound network connectivity to the DRP
   Endpoints.
 
-  .. warning:: The ``network-add-nat-bridge` current NAT Masquerading mechanisms do not
+  .. warning:: The ``network-add-nat-bridge`` current NAT Masquerading mechanisms do not
                appear to correctly work reliably.  This method requires additional testing
                and development.
 
