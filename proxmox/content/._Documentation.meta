@@ -10,10 +10,10 @@ and rebuild it to make it network installable.
 
 
 Installation of Proxmox
-=======================
+-----------------------
 
 Installation is performed with the ``proxmox-buster-install`` Workflow.  This workflow
-requires the ``drp-community-content` to install Debian 10 (Buster) on the target
+requires the ``drp-community-content`` to install Debian 10 (Buster) on the target
 systems.  Configuration of Proxmox is performed via RackN Workflow stages.  Please
 start by reviewing the provided workflow before attempting to rework the workflows
 for your use case.
