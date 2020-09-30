@@ -13,55 +13,121 @@ Documentation: |
   Requires the ``esxi/dvs-mappings`` Param contains a ``migrate`` stanza that is
   properly filled out.
 
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+  - scope: "profiles"
+    action: "*"
+    specific: "*"
 Meta:
   icon: "terminal"
   color: "purple"
   title: "Digital Rebar Community Content"
   feature-flags: "sane-exit-codes"
 RequiredParams:
-  - "esxi/cluster-members"
   - "esxi/cluster-name"
   - "esxi/dvs-mappings"
 OptionalParams: []
 Templates:
-  - Name: "esxi-cluster-hosts-get"
-    ID: "esxi-cluster-hosts-get.sh.tmpl"
-  - Name: "ansible-vmware-migrate-vmk.yaml"
-    Path: "ansible-vmware-migrate-vmk.yaml"
+  - Name: "ansible-vmware-migrate-vmk.sh.tmpl"
     Contents: |
+      #!/usr/bin/env bash
+      # Generate the Ansible playbook for migrating VMK
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" . }}
+
+      ### govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" .}}
+
+      PLAYBOOK="/tmp/ansible-vmware-migrate-vmk-playbook.yaml"
+      MEMBERS=""
+      DVS_NAME=""
+      VC_HOST={{ .ParamExpand "govc/url" }}
+      VC_USER={{ .Param "govc/username" }}
+      VC_PASS={{ .Param "govc/password" }}
+      VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+
+      get_hosts_with_dvs() {
+        MEMBERS=""
+        local _name _names _member
+        echo "Getting hosts for cluster '$CLUSTER' and DVS '$DVS_NAME'"
+
+        _names=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r ".[]  | select(.Params.\"esxi/dvs-memberships\" | index(\"$DVS_NAME\")) | .Name" | tr '\n' ' ')
+
+        echo "Convert found DRP Names to ESXi node names."
+        echo "      DRP Names:  $_names"
+
+        for _name in $_names
+        do
+          _member=""
+          _member="$(get_member_name $_name)"
+          if [[ -n "$_member" ]]
+          then
+            echo "Found ESXi member name of '$_member'"
+            MEMBERS="$MEMBERS $_member"
+          else
+            xiterr 1 "Could not convert Machine name '$_name' to ESXi cluster member name."
+          fi
+        done
+        [[ -z "$MEMBERS" ]] && xiterr 1 "No members with 'esxi/cluster-name' found to operate on."
+
+        echo "Found ESXi cluster members: $MEMBERS"
+      } # end get_hosts_with_dvs()
+
       {{ $hosts := cat (.Param "esxi/cluster-name") "  cluster-members" | replace "   " "/" -}}
         {{ range $dvs, $dvscfg := (.Param "esxi/dvs-mappings") -}}
+      echo "Ranging over DVS '{{ $dvs }}'"
           {{ if $dvscfg.portgroups -}}
+      echo "Ranging over DVS Portgroups '{{ $dvscfg.portgroups }}'"
             {{ range $pg, $pgcfg := $dvscfg.portgroups -}}
-            {{ if $dvscfg.portgroups.migrate }}
-              {{ range $host := ( .Param $hosts ) -}}
-      - name: Migrate VMK {{ $dvscfg.migrate.vmk }} on $host
+      echo "Ranging over Portgroup '{{ $pg }}'"
+            {{ if $pgcfg.migrate }}
+      echo "FOUND migration tasks to perform..."
+
+      DVS_NAME="{{ $dvs }}"
+      get_hosts_with_dvs
+
+      for MEM in $MEMBERS
+      do
+      echo "WRITING mgration playbook for member '$MEM'"
+      cat <<EOF >> $PLAYBOOK
+      - name: Migrate VMK {{ $pgcfg.migrate.vmk }} on HOST $MEM
         delegate_to: localhost
         community.vmware.vmware_migrate_vmk:
-          hostname: {{ .ParamExpand "govc/url" }}
-          username: {{ .Param "govc/username" }}
-          password: {{ .Param "govc/password" }}
-          esxi_hostname: {{ $host }}
+          hostname: $VC_HOST
+          username: $VC_USER
+          password: $VC_PASS
+          esxi_hostname: $MEM
           device: {{$pgcfg.migrate.vmk}}
           current_switch_name: {{$pgcfg.migrate.vswitch}}
           current_portgroup_name: {{$pgcfg.migrate.portgroup}}
           migrate_switch_name: {{ $dvs }}
           migrate_portgroup_name: {{ $pg }}
-          validate_certs: {{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
-              {{ end -}}
+          validate_certs: $VAL
+      EOF
+      done
             {{ end -}}
           {{ end -}}
         {{ end -}}
       {{ end -}}
-  - Name: "run-ansible-vmware-migrate-vmk"
-    Contents: |
-      #!/usr/bin/env bash
-      # run ansible playbook for vmware-migrate-vmk
 
-      export ANSIBLE_FORCE_COLOR=0
-      echo "CMD: ansible-playbook ansible-vmware-migrate-vmk.yaml"
-      echo "generated playbook:"
-      echo "=================================== BEGIN ==================================="
-      cat ansible-vmware-migrate-vmk.yaml
-      echo "==================================== END ===================================="
+      if [[ -r "$PLAYBOOK" ]]
+      then
+        export ANSIBLE_FORCE_COLOR=0
+
+        echo ""
+        echo "generated playbook:"
+        echo "=================================== BEGIN ==================================="
+        cat $PLAYBOOK
+        echo "==================================== END ===================================="
+        echo ""
+
+        ansible $PLAYBOOK
+      else
+        echo "WARNING: No playbook file was generated to execute. ('$PLAYBOOK')"
+      fi
 

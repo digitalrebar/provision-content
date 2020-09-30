@@ -144,17 +144,6 @@ Schema:
         additionalProperties:
           type: "object"
           properties:
-            migrate:
-              type: "object"
-              additionalProperties:
-                type: "object"
-                properties:
-                  vswitch:
-                    type: "string"
-                  portgroup:
-                    type: "string"
-                  vmk:
-                    type: "string"
             type:
               type: "string"
               enum:
@@ -169,5 +158,14 @@ Schema:
               type: "number"
               minimum: 0
               maximum: 4094
-
-
+            migrate:
+              type: "object"
+              additionalProperties:
+                type: "string"
+                properties:
+                  vswitch:
+                    type: "string"
+                  portgroup:
+                    type: "string"
+                  vmk:
+                    type: "string"

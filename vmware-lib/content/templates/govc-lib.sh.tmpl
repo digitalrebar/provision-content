@@ -33,8 +33,8 @@ get_member_name() {
         _member="${_machine}.${_domain}"
       ;;
     fqdn-dns-domain)
-        _domain='{{.Param "dns-domain"}}'
-        [[ "$_domain" == "null" || -z "$_domain" ]] && xiterr "DNS Domain Param ('dns-domain') not specified." || true
+        _domain='{{if ( .ParamExists "dns-domain" ) }}{{.Param "dns-domain"}}{{ end }}'
+        [[ "$_domain" == "null" || -z "$_domain" ]] && xiterr "Required DNS Domain Param ('dns-domain') not specified." || true
         _member=${_machine}.${_domain}
       ;;
     *)

@@ -1,6 +1,6 @@
 ---
 Description: "Collects all ESXi Host members for a cluster and records it in esxi/cluster-profile"
-Name: "esxi-cluster-host-get"
+Name: "esxi-cluster-hosts-get"
 Documentation: |
   This task collects all ESXi members that are in a given Datacenter and Cluster,
   and records it on the Profile specified in the ``esxi/cluster-profile`` Param.
