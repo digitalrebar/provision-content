@@ -25,9 +25,17 @@ Params:
         pg_internal:
           type: "ephemeral"
           ports: 512
+          migrate:
+            vmk: "vmk0"
+            portgroup: "Management Network"
+            vswitch: "vSwitch0"
         pg_external:
           type: "lateBinding"
           ports: 60000
+      migrate:
+        vmk: "vmk0"
+        portgroup: "Management Network"
+        vswitch: "vSwitch0"
     dvs02:
       mtu: 9000
       version: "6.5.0"

@@ -44,7 +44,7 @@ Documentation: |
           vmnic: vmnic1
           portgroups:
             pg_internal:
-              migrage:
+              migrate:
                 portgroup: "Management Network"
                 vswitch: "vSwitch0"
                 vmk: vmk0
@@ -77,7 +77,7 @@ Documentation: |
             "ports": 8
           },
           "pg_internal": {
-            "migrage": {
+            "migrate": {
               "portgroup": "Management Network",
               "vmk": "vmk0",
               "vswitch": "vSwitch0"

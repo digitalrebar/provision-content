@@ -1,0 +1,10 @@
+---
+Name: vmware-tools
+Description: 'vmware-tools context using image vmware-tools:latest'
+Documentation: ''
+Meta:
+  color: blue
+  icon: cube
+  title: RackN Content
+Image: 'vmware-tools:latest'
+Engine: docker-context

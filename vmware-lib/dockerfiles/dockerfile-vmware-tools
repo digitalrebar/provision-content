@@ -3,20 +3,22 @@ MAINTAINER eng@rackn.com
 
 RUN echo "===> Adding Python runtime..."                                       && \
     apk --no-cache --update add openssh-client python3 openssl ca-certificates && \
-    apk --no-cache --update add --virtual build-dependencies                      \
-        python3-dev libffi-dev openssl-dev build-base                          && \
+    apk --no-cache --update add --virtual build-dependencies py3-pip py3-wheel    \
+        python3-dev libffi-dev openssl-dev build-base
+
+RUN echo "===> Upgrading PIP and CFFI packages..." && \
     pip3 install --upgrade pip cffi
 
 RUN echo "===> Installing Ansible..."     && \
-    pip3 install ansible==2.9.1           && \
-    echo "===> Removing package list..."  && \
-    apk del build-dependencies            && \
-    rm -rf /var/cache/apk/*
+    pip3 install ansible==2.9.1
 
 RUN echo "===> Installing PyVMOMI..."     && \
     pip3 install --no-cache-dir pyvmomi
 
-RUN echo "===> Installing Libraries..."   && \
+RUN echo "===> Installing yq..."          && \
+    pip3 install --no-cache-dir --upgrade yq
+
+RUN echo "===> Installing tools..."       && \
     apk --no-cache --update add \
         bash \
         py-dnspython \
@@ -28,13 +30,15 @@ RUN echo "===> Installing Libraries..."   && \
         curl \
         wget \
         openssh-client \
-        openssh-keygen                    && \
-    rm -rf /var/cache/apk/*
+        openssh-keygen
 
-RUN pip3 install --no-cache-dir --upgrade yq
 
-RUN echo "===> Installing Ansible Galaxy Communitis VMWARE  && \
+RUN echo "===> Instal Ansible Galaxy Communitis VMWARE..." && \
     ansible-galaxy collection install community.vmware
+
+RUN echo "===> Cleaning up..."            && \
+    apk del build-dependencies            && \
+    rm -rf /var/cache/apk/*
 
 RUN curl -o drpcli440 https://s3-us-west-2.amazonaws.com/rebar-catalog/drpcli/v4.4.0/amd64/linux/drpcli && \
     chmod 755 drpcli440                                                                                 && \
