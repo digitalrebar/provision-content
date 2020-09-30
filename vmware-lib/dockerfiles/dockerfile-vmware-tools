@@ -21,6 +21,11 @@ RUN echo "===> Installing yq..."          && \
 RUN echo "===> Installing tools..."       && \
     apk --no-cache --update add \
         bash \
+        vim \
+        binutils \
+        coreutils \
+        sed \
+        gawk \
         py-dnspython \
         py-boto \
         py-netaddr \
@@ -32,9 +37,14 @@ RUN echo "===> Installing tools..."       && \
         openssh-client \
         openssh-keygen
 
-
 RUN echo "===> Instal Ansible Galaxy Communitis VMWARE..." && \
     ansible-galaxy collection install community.vmware
+
+### REALLY weird - had to install twice, to get python and pyvmomi
+###        environment setup correctly for ansible to "see" it
+RUN echo "===> Installing PyVMOMI..."     && \
+    apk add py3-pip                       && \
+    pip3 install --no-cache-dir pyvmomi
 
 RUN echo "===> Cleaning up..."            && \
     apk del build-dependencies            && \

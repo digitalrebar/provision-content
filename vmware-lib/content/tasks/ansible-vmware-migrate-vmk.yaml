@@ -91,24 +91,32 @@ Templates:
       DVS_NAME="{{ $dvs }}"
       get_hosts_with_dvs
 
+      echo "Writing header for playbook YAML..."
+      cat <<EOHDR > $PLAYBOOK
+      ---
+      - hosts: localhost
+        gather_facts: false
+        tasks:
+      EOHDR
+
       for MEM in $MEMBERS
       do
-      echo "WRITING mgration playbook for member '$MEM'"
-      cat <<EOF >> $PLAYBOOK
-      - name: Migrate VMK {{ $pgcfg.migrate.vmk }} on HOST $MEM
-        delegate_to: localhost
-        community.vmware.vmware_migrate_vmk:
-          hostname: $VC_HOST
-          username: $VC_USER
-          password: $VC_PASS
-          esxi_hostname: $MEM
-          device: {{$pgcfg.migrate.vmk}}
-          current_switch_name: {{$pgcfg.migrate.vswitch}}
-          current_portgroup_name: {{$pgcfg.migrate.portgroup}}
-          migrate_switch_name: {{ $dvs }}
-          migrate_portgroup_name: {{ $pg }}
-          validate_certs: $VAL
-      EOF
+      echo "WRITING migration playbook task for member '$MEM'"
+      cat <<EOPB >> $PLAYBOOK
+        - name: Migrate VMK {{ $pgcfg.migrate.vmk }} on HOST $MEM
+          delegate_to: localhost
+          community.vmware.vmware_migrate_vmk:
+            hostname: $VC_HOST
+            username: $VC_USER
+            password: $VC_PASS
+            esxi_hostname: $MEM
+            device: {{$pgcfg.migrate.vmk}}
+            current_switch_name: {{$pgcfg.migrate.vswitch}}
+            current_portgroup_name: {{$pgcfg.migrate.portgroup}}
+            migrate_switch_name: {{ $dvs }}
+            migrate_portgroup_name: {{ $pg }}
+            validate_certs: $VAL
+      EOPB
       done
             {{ end -}}
           {{ end -}}
@@ -126,7 +134,7 @@ Templates:
         echo "==================================== END ===================================="
         echo ""
 
-        ansible $PLAYBOOK
+        ansible-playbook $PLAYBOOK
       else
         echo "WARNING: No playbook file was generated to execute. ('$PLAYBOOK')"
       fi
