@@ -106,55 +106,6 @@ Templates:
         fi
       }
 
-      migrate_standard_to_distributed() {
-
-        echo "MIGRATE capabilities not functional ... not attempting to migrate ... me so sorry ... "
-        exit 0
-
-        local _machine _esxi_node
-
-      ### # Management #
-      ### Write-Host "Migrating" $mgmt_portgroup "to" $vds_name
-      ### $dvportgroup = Get-VDPortgroup -name $mgmt_portgroup -VDSwitch $vds
-      ### $vmk = Get-VMHostNetworkAdapter -Name vmk0 -VMHost $vmhost
-      ### Set-VMHostNetworkAdapter -PortGroup $dvportgroup -VirtualNic $vmk -confirm:$false | Out-Null
-      ### # Migrate remainder pNIC to VDS (vmnic2/vmnic3)
-      ### Write-Host "Adding vmnic2/vmnic3 to" $vds_name
-      ### $vmhostNetworkAdapter = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic2
-      ### $vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter -Confirm:$false
-      ### $vmhostNetworkAdapter = Get-VMHost $vmhost | Get-VMHostNetworkAdapter -Physical -Name vmnic3
-      ### $vds | Add-VDSwitchPhysicalNetworkAdapter -VMHostNetworkAdapter $vmhostNetworkAdapter -Confirm:$false
-
-      ### # Remove old vSwitch portgroups
-      ### $vswitch = Get-VirtualSwitch -VMHost $vmhost -Name vSwitch0
-
-      ### Write-Host "Removing vSwitch portgroup" $mgmt_portgroup
-      ### $mgmt_pg = Get-VirtualPortGroup -Name $mgmt_portgroup -VirtualSwitch $vswitch
-      ### Remove-VirtualPortGroup -VirtualPortGroup $mgmt_pg -confirm:$false
-
-
-
-      ### for _machine in $NAMES
-      ### do
-      ### _esxi_node=$(get_member_name $_machine)
-      ### # Management #
-      ### echo "Migrating host configuration: $_machinere the"
-      ### echo "Migrating Standard vSwitch PG '$MIG_PG' to DVS '$DVS_NAME' and PG '$PG_NAME'."
-      ### VMK={{ .Param "esxi/network-firstboot-vmk" }}
-      ### #Set-VMHostNetworkAdapter -PortGroup $dvportgroup -VirtualNic $vmk -confirm:$false | Out-Null
-      ### Set-VMHostNetworkAdapter -PortGroup $PG_NAME -VirtualNic $VMK -confirm:$false | Out-Null
-
-
-      ### # Remove old vSwitch portgroups
-      ### $vswitch = Get-VirtualSwitch -VMHost $vmhost -Name vSwitch0
-
-      ### Write-Host "Removing vSwitch portgroup" $MIG_PG
-      ### $mgmt_pg = Get-VirtualPortGroup -Name $MIG_PG -VirtualSwitch $vswitch
-      ### Remove-VirtualPortGroup -VirtualPortGroup $mgmt_pg -confirm:$false
-      ### done
-
-      }
-
       DC_PATH="/${DC}"
       if [[ -z "$(run_govc quiet ls "$DC_PATH")" ]]
       then
@@ -210,8 +161,9 @@ Templates:
       PG_TYPE='{{$pgcfg.type}}'
       PG_PORTS='{{$pgcfg.ports}}'
       PG_VLAN='{{$pgcfg.vlan}}'
-      MIG_PG='{{$pgcfg.migrate.portgroup}}'
-      MIG_VSW='{{$pgcfg.migrate.vswitch}}'
+      # portgroup migrate is handled in ansible-vmware-migrate-vmk task
+      #MIG_PG='{{$pgcfg.migrate.portgroup}}'
+      #MIG_VSW='{{$pgcfg.migrate.vswitch}}'
 
       echo "Creating PortGroup '$PG_NAME' with the following configuration:"
       echo "============================================================================="
@@ -219,11 +171,12 @@ Templates:
       echo "           type: '$PG_TYPE'"
       echo "          ports: '$PG_PORTS'"
       echo "           vlan: '$PG_VLAN'"
-      echo "     migrate pg: '$MIG_PG'"
-      echo "migrate vswitch: '$MIG_VSW'"
+      echo "     migrate pg: '$MIG_PG' (*)"
+      echo "migrate vswitch: '$MIG_VSW' (*)"
+      echo ""
+      echo "(*) migrate tasks are handled by ansible-vmware-migrate-vmk"
 
       portgroup_create
-      [[ "$MIG_PG" == "<no value>" || "$MIG_PG" == "null" || -z "$MIG_PG" ]] && echo "No portgroup migration requested." || migrate_standard_to_distributed
 
       # zero values out for next run
       PG_NAME="" PG_TYPE="" PG_PORTS="" PG_VLAN="" MIG_PG=""

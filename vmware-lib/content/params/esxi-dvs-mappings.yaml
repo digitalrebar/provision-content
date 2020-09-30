@@ -47,6 +47,7 @@ Documentation: |
               migrage:
                 portgroup: "Management Network"
                 vswitch: "vSwitch0"
+                vmk: vmk0
               type: ephemeral
               ports: 16
               vlan: 10
@@ -78,6 +79,7 @@ Documentation: |
           "pg_internal": {
             "migrage": {
               "portgroup": "Management Network",
+              "vmk": "vmk0",
               "vswitch": "vSwitch0"
             }
             "type": "ephemeral",
@@ -150,6 +152,8 @@ Schema:
                   vswitch:
                     type: "string"
                   portgroup:
+                    type: "string"
+                  vmk:
                     type: "string"
             type:
               type: "string"

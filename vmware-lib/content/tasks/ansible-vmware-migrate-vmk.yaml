@@ -1,0 +1,67 @@
+---
+Name: "ansible-vmware-migrate-vmk"
+Description: "Migrate virtual NIC (vmk) from Standard vSwitch to Distributed vSwitch"
+Documentation: |
+  Migrates an existing virtual NIC (VMK) in ESXi hosts from a Standard vSwitch
+  to a Distributed vSwitch.
+
+  Utilizes the Ansible Galaxy collection ``communities.vmware``.
+
+  Acts on ESXi nodes identified by the ``esxi/cluster-name`` Param set on the
+  machines.
+
+  Requires the ``esxi/dvs-mappings`` Param contains a ``migrate`` stanza that is
+  properly filled out.
+
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - "esxi/cluster-members"
+  - "esxi/cluster-name"
+  - "esxi/dvs-mappings"
+OptionalParams: []
+Templates:
+  - Name: "esxi-cluster-hosts-get"
+    ID: "esxi-cluster-hosts-get.sh.tmpl"
+  - Name: "ansible-vmware-migrate-vmk.yaml"
+    Path: "ansible-vmware-migrate-vmk.yaml"
+    Contents: |
+      {{ $hosts := cat (.Param "esxi/cluster-name") "  cluster-members" | replace "   " "/" -}}
+        {{ range $dvs, $dvscfg := (.Param "esxi/dvs-mappings") -}}
+          {{ if $dvscfg.portgroups -}}
+            {{ range $pg, $pgcfg := $dvscfg.portgroups -}}
+            {{ if $dvscfg.portgroups.migrate }}
+              {{ range $host := ( .Param $hosts ) -}}
+      - name: Migrate VMK {{ $dvscfg.migrate.vmk }} on $host
+        delegate_to: localhost
+        community.vmware.vmware_migrate_vmk:
+          hostname: {{ .ParamExpand "govc/url" }}
+          username: {{ .Param "govc/username" }}
+          password: {{ .Param "govc/password" }}
+          esxi_hostname: {{ $host }}
+          device: {{$pgcfg.migrate.vmk}}
+          current_switch_name: {{$pgcfg.migrate.vswitch}}
+          current_portgroup_name: {{$pgcfg.migrate.portgroup}}
+          migrate_switch_name: {{ $dvs }}
+          migrate_portgroup_name: {{ $pg }}
+          validate_certs: {{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
+              {{ end -}}
+            {{ end -}}
+          {{ end -}}
+        {{ end -}}
+      {{ end -}}
+  - Name: "run-ansible-vmware-migrate-vmk"
+    Contents: |
+      #!/usr/bin/env bash
+      # run ansible playbook for vmware-migrate-vmk
+
+      export ANSIBLE_FORCE_COLOR=0
+      echo "CMD: ansible-playbook ansible-vmware-migrate-vmk.yaml"
+      echo "generated playbook:"
+      echo "=================================== BEGIN ==================================="
+      cat ansible-vmware-migrate-vmk.yaml
+      echo "==================================== END ===================================="
+
