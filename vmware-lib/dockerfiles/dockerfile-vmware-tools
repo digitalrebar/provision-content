@@ -1,54 +1,47 @@
-FROM alpine:latest
-MAINTAINER eng@rackn.com
+FROM bitnami/minideb:buster
+MAINTAINER "The RackN Team <support@rackn.com>"
 
-RUN echo "===> Adding Python runtime..."                                       && \
-    apk --no-cache --update add openssh-client python3 openssl ca-certificates && \
-    apk --no-cache --update add --virtual build-dependencies py3-pip py3-wheel    \
-        python3-dev libffi-dev openssl-dev build-base
+# Alpine musl libc does NOT work with OVFTool - so the switch to minideb:buster
 
-RUN echo "===> Upgrading PIP and CFFI packages..." && \
-    pip3 install --upgrade pip cffi
+#    add-apt-repository ppa:ansible/ubuntu                     && \
 
-RUN echo "===> Installing Ansible..."     && \
-    pip3 install ansible==2.9.1
+RUN install_packages gnupg
 
-RUN echo "===> Installing PyVMOMI..."     && \
-    pip3 install --no-cache-dir pyvmomi
+RUN echo "===> Setting up environment..."                     && \
+    install_packages apt-utils software-properties-common        \
+    python3-software-properties                               && \
+    echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu bionic main" > /etc/apt/sources.list.d/ansible.list  && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367  && \
+    apt -y update                                             && \
+    install_packages ansible                                  && \
+    install_packages                                             \
+        bash vim git curl wget dnsutils html2text                \
+        openssh-client python3 openssl ca-certificates           \
+        python3-pip python3-wheel libffi-dev libssl-dev          \
+        python3-dnspython python3-boto python3-netaddr           \
+        python3-setuptools gnupg                              && \
+    python3 -m pip install --upgrade pip cffi                 && \
+    python3 -m pip install --no-cache-dir pyvmomi             && \
+    python3 -m pip install --no-cache-dir --upgrade yq
 
-RUN echo "===> Installing yq..."          && \
-    pip3 install --no-cache-dir --upgrade yq
-
-RUN echo "===> Installing tools..."       && \
-    apk --no-cache --update add \
-        bash \
-        vim \
-        binutils \
-        coreutils \
-        sed \
-        gawk \
-        py-dnspython \
-        py-boto \
-        py-netaddr \
-        bind-tools \
-        html2text \
-        git \
-        curl \
-        wget \
-        openssh-client \
-        openssh-keygen
-
-RUN echo "===> Instal Ansible Galaxy Communitis VMWARE..." && \
-    ansible-galaxy collection install community.vmware
+RUN echo "===> Install Ansible Galaxy Communities VMware..."  && \
+    curl -fsSL -o community.vmware.tar.gz https://s3-us-west-2.amazonaws.com/get.rebar.digital/artifacts/vmtools/community-vmware-1.2.1-dev8.tar.gz  && \
+    ansible-galaxy collection install ./community.vmware.tar.gz && \
+    rm -f community.vmware.tar.gz
 
 ### REALLY weird - had to install twice, to get python and pyvmomi
 ###        environment setup correctly for ansible to "see" it
-RUN echo "===> Installing PyVMOMI..."     && \
-    apk add py3-pip                       && \
-    pip3 install --no-cache-dir pyvmomi
+RUN echo "===> Installing PyVMOMI..."                       && \
+    install_packages python3-pip                            && \
+    python3 -m pip install --no-cache-dir pyvmomi
 
-RUN echo "===> Cleaning up..."            && \
-    apk del build-dependencies            && \
-    rm -rf /var/cache/apk/*
+RUN echo "===> Fixing python 2/3 problems for ansible..."   && \
+    echo "localhost ansible_python_interpreter=/usr/bin/python3" >> /etc/ansible/hosts
+
+RUN curl -fsSL -o ovftool.bundle https://s3-us-west-2.amazonaws.com/get.rebar.digital/artifacts/vmtools/VMware-ovftool-4.4.0-15722219-lin.x86_64.bundle  && \
+    chmod +x ovftool.bundle && \
+    ./ovftool.bundle --eulas-agreed --required --console && \
+    rm -f ovftool.bundle
 
 RUN curl -o drpcli440 https://s3-us-west-2.amazonaws.com/rebar-catalog/drpcli/v4.4.0/amd64/linux/drpcli && \
     chmod 755 drpcli440                                                                                 && \
