@@ -31,8 +31,9 @@ Templates:
       server.host: "0.0.0.0"
   - Name: "start-kibana.sh"
     Contents: |
-      service enable kibana
-      service restart kibana
+      #!/bin/bash
+      service kibana enable
+      service kibana restart
 
 Meta:
   icon: "bug"

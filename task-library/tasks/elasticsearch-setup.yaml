@@ -27,8 +27,9 @@ Templates:
       exit 0
   - Name: "start-elasticsearch.sh"
     Contents: |
-      service enable elasticsearch
-      service restart elasticsearch
+      #!/bin/bash
+      service elasticsearch enable
+      service elasticsearch restart
 
 Meta:
   icon: "bug"
