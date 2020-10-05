@@ -12,10 +12,12 @@ Templates:
 
       if [[ "$OS_FAMILY" == "rhel" ]] ; then
         curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.9.2-x86_64.rpm
+        rpm -e elasticsearch || :
         rpm --install elasticsearch-7.9.2-x86_64.rpm
         rm -f elasticsearch-7.9.2-x86_64.rpm
       elif [[ "$OS_FAMILY" == "debian" ]] ; then
         curl -L -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.9.2-amd64.deb
+        dpkg -r elasticsearch || :
         dpkg -i elasticsearch-7.9.2-amd64.deb
         rm -f elasticsearch-7.9.2-amd64.deb
       else
