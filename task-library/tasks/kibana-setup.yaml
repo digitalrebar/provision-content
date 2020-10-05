@@ -1,0 +1,39 @@
+---
+Name: "kibana-setup"
+Description: "A task to install and setup kibana"
+Documentation: |
+  A task to install and setup kibana.  This is a very simple single instance.
+Templates:
+  - Name: "install-kibana.sh"
+    Contents: |
+      #!/bin/bash
+
+      {{ template "setup.tmpl" . }}
+
+      if [[ "$OS_FAMILY" == "rhel" ]] ; then
+        curl -L -O https://artifacts.elastic.co/downloads/kibana/kibana-7.9.2-x86_64.rpm
+        rpm --install kibana-7.9.2-x86_64.rpm
+        rm -f kibana-7.9.2-x86_64.rpm
+      elif [[ "$OS_FAMILY" == "debian" ]] ; then
+        curl -L -O https://artifacts.elastic.co/downloads/kibana/kibana-7.9.2-amd64.deb
+        dpkg -i kibana-7.9.2-amd64.deb
+        rm -f kibana-7.9.2-amd64.deb
+      else
+        echo "Unknown install method for $OS_FAMILY"
+        exit 1
+      fi
+      exit 0
+  - Name: "The kabana config file"
+    Path: "/etc/kibana/kibana.yml"
+    Contents: |
+      server.host: "0.0.0.0"
+  - Name: "start-kibana.sh"
+    Contents: |
+      service enable kibana
+      service restart kibana
+
+Meta:
+  icon: "bug"
+  color: "green"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"
