@@ -1,0 +1,11 @@
+Description: Profile to bootstrap elasticsearch
+Documentation: Profile to bootstrap elasticsearch
+Meta:
+  color: blue
+  icon: world
+  title: Digital Rebar Provision
+Name: elasticsearch-bootstrap
+Params:
+  universal/bootstrap-post-flexiflow:
+    - elasticsearch-setup
+
