@@ -12,10 +12,12 @@ Templates:
 
       if [[ "$OS_FAMILY" == "rhel" ]] ; then
         curl -L -O https://artifacts.elastic.co/downloads/kibana/kibana-7.9.2-x86_64.rpm
+        rpm -e kibana || :
         rpm --install kibana-7.9.2-x86_64.rpm
         rm -f kibana-7.9.2-x86_64.rpm
       elif [[ "$OS_FAMILY" == "debian" ]] ; then
         curl -L -O https://artifacts.elastic.co/downloads/kibana/kibana-7.9.2-amd64.deb
+        dpkg -r kibana || :
         dpkg -i kibana-7.9.2-amd64.deb
         rm -f kibana-7.9.2-amd64.deb
       else
