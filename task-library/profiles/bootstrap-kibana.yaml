@@ -4,7 +4,7 @@ Meta:
   color: blue
   icon: world
   title: Digital Rebar Provision
-Name: kibana-bootstrap
+Name: bootstrap-kibana
 Params:
   universal/bootstrap-post-flexiflow:
     - kibana-setup
