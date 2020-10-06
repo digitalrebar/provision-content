@@ -1,6 +1,8 @@
 Name: "bootstrap-advanced"
 Description: "Bootstrap Advanced Install"
 Documentation: |
+  DEPRECATED: Use universal-bootstrap with bootstrap-contexts profile
+
   Bootstrap Digital Rebar server for advanced operation
   Includes the bootstrap-base!
 
