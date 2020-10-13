@@ -252,12 +252,12 @@ Templates:
     # remanants of the old cluster. This script brutally removes any cluster-specific content,
     # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
 
-    # Stop any running pods
-    for POD in `crictl pods -q`
-    do
-      crictl stopp $POD
-      crictl rmp $POD
-    done
+    # # Stop any running pods
+    # for POD in `crictl pods -q`
+    # do
+    #   crictl stopp $POD
+    #   crictl rmp $POD
+    # done
 
     timeout 10 kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
