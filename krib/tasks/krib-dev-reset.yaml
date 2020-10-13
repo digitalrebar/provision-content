@@ -260,13 +260,21 @@ Templates:
     systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
     systemctl stop kubelet || echo "failed to stop kubelet. let's proceed anyway..."
 
+    # Stop any running pods
+    for POD in `crictl pods -q`
+    do
+      crictl stopp $POD
+      crictl rmp $POD
+    done
+
     # Wipe out any persistent content
     rm -rf /var/lib/cni/
     rm -rf /var/lib/kubelet/*
     rm -rf /etc/cni/
     rm -rf /docker/etcd/*
     rm -rf /etc/kubernetes
-    
+    rm -rf /opt/containerd/*
+
     rm -rf /var/lib/docker/*
     rm -rf /var/lib/rook/*
     rm -rf /var/lib/consul/client
