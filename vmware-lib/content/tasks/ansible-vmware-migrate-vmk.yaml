@@ -136,6 +136,7 @@ Templates:
             password: $VC_PASS
             vm_name: $VM_MIGRATE
             dvportgroup_name: {{$pgcfg.migrate.portgroup}}
+            validate_certs: $VAL
       EOVM
       fi
             {{ end -}}
