@@ -129,6 +129,12 @@ Templates:
       then
         echo "No Virtual Machine migration has been requested."
       else
+
+        if [[ "$VM_PORTGROUP" == "<no value>" || "$VM_PORTGROUP" == "null" || -z "$VM_PORTGROUP" ]]
+        then
+          xiterr 1 "No vm_migrate_portgroup specified for vm_migrate action"
+        fi
+
       cat <<EOVM >> $PLAYBOOK
         - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
           delegate_to: localhost
