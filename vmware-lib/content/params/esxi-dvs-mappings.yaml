@@ -48,6 +48,7 @@ Documentation: |
                 portgroup: "Management Network"
                 vswitch: "vSwitch0"
                 vmk: vmk0
+                vm_migrate: VM_NAME
               type: ephemeral
               ports: 16
               vlan: 10
@@ -80,7 +81,8 @@ Documentation: |
             "migrate": {
               "portgroup": "Management Network",
               "vmk": "vmk0",
-              "vswitch": "vSwitch0"
+              "vswitch": "vSwitch0",
+              "vm_migrate": "VM_NAME"
             }
             "type": "ephemeral",
             "vlan": 0,
@@ -168,4 +170,6 @@ Schema:
                   portgroup:
                     type: "string"
                   vmk:
+                    type: "string"
+                  vm_migrate:
                     type: "string"

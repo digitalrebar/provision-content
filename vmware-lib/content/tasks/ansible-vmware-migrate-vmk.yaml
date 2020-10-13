@@ -47,6 +47,7 @@ Templates:
       VC_HOST={{ .ParamExpand "govc/url" }}
       VC_USER={{ .Param "govc/username" }}
       VC_PASS={{ .Param "govc/password" }}
+      VM_MIGRATE=""
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
@@ -91,6 +92,8 @@ Templates:
       DVS_NAME="{{ $dvs }}"
       get_hosts_with_dvs
 
+      VM_MIGRATE={{$pgcfg.migrate.vm_migrate}}
+
       echo "Writing header for playbook YAML..."
       cat <<EOHDR > $PLAYBOOK
       ---
@@ -118,6 +121,23 @@ Templates:
             validate_certs: $VAL
       EOPB
       done
+
+      # if a VM to migrate to the DVS is specified in migrate, add to the playbook
+      if [[ "$VM_MIGRATE" == "<no value>" || "$VM_MIGRATE" == "null" || -z "$VM_MIGRATE" ]]
+      then
+        echo "No Virtual Machine migration has been requested."
+      else
+      cat <<EOVM >> $PLAYBOOK
+        - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
+          delegate_to: localhost
+          community.vmware.vmware_vm_vss_dvs_migrate:
+            hostname: $VC_HOST
+            username: $VC_USER
+            password: $VC_PASS
+            vm_name: $VM_MIGRATE
+            dvportgroup_name: {{$pgcfg.migrate.portgroup}}
+      EOVM
+      fi
             {{ end -}}
           {{ end -}}
         {{ end -}}
