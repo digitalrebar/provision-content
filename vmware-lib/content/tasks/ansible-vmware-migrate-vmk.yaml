@@ -134,7 +134,7 @@ Templates:
         echo "==================================== END ===================================="
         echo ""
 
-        ansible-playbook $PLAYBOOK
+        ansible-playbook $PLAYBOOK --connection=local
       else
         echo "WARNING: No playbook file was generated to execute. ('$PLAYBOOK')"
       fi
