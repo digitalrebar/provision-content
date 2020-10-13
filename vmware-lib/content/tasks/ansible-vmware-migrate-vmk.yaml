@@ -48,6 +48,7 @@ Templates:
       VC_USER={{ .Param "govc/username" }}
       VC_PASS={{ .Param "govc/password" }}
       VM_MIGRATE=""
+      VM_MIGRATE_PORTGROUP=""
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
@@ -93,6 +94,7 @@ Templates:
       get_hosts_with_dvs
 
       VM_MIGRATE={{$pgcfg.migrate.vm_migrate}}
+      VM_PORTGROUP={{$pgcfg.migrate.vm_migrate_portgroup}}
 
       echo "Writing header for playbook YAML..."
       cat <<EOHDR > $PLAYBOOK
@@ -135,7 +137,7 @@ Templates:
             username: $VC_USER
             password: $VC_PASS
             vm_name: $VM_MIGRATE
-            dvportgroup_name: {{$pgcfg.migrate.portgroup}}
+            dvportgroup_name: $VM_PORTGROUP
             validate_certs: $VAL
       EOVM
       fi
