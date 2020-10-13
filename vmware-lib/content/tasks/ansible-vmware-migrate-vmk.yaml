@@ -48,7 +48,6 @@ Templates:
       VC_USER={{ .Param "govc/username" }}
       VC_PASS={{ .Param "govc/password" }}
       VM_MIGRATE=""
-      VM_MIGRATE_PORTGROUP=""
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
@@ -94,7 +93,6 @@ Templates:
       get_hosts_with_dvs
 
       VM_MIGRATE="{{$pgcfg.migrate.vm_migrate}}"
-      VM_PORTGROUP="{{$pgcfg.migrate.vm_migrate_portgroup}}"
 
       echo "Writing header for playbook YAML..."
       cat <<EOHDR > $PLAYBOOK
@@ -129,12 +127,6 @@ Templates:
       then
         echo "No Virtual Machine migration has been requested."
       else
-
-        if [[ "$VM_PORTGROUP" == "<no value>" || "$VM_PORTGROUP" == "null" || -z "$VM_PORTGROUP" ]]
-        then
-          xiterr 1 "No vm_migrate_portgroup specified for vm_migrate action"
-        fi
-
       cat <<EOVM >> $PLAYBOOK
         - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
           delegate_to: localhost
@@ -143,7 +135,7 @@ Templates:
             username: $VC_USER
             password: $VC_PASS
             vm_name: $VM_MIGRATE
-            dvportgroup_name: $VM_PORTGROUP
+            dvportgroup_name: {{ $pg }}
             validate_certs: $VAL
       EOVM
       fi
