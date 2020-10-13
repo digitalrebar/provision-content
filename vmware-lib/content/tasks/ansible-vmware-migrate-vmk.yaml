@@ -93,8 +93,8 @@ Templates:
       DVS_NAME="{{ $dvs }}"
       get_hosts_with_dvs
 
-      VM_MIGRATE={{$pgcfg.migrate.vm_migrate}}
-      VM_PORTGROUP={{$pgcfg.migrate.vm_migrate_portgroup}}
+      VM_MIGRATE="{{$pgcfg.migrate.vm_migrate}}"
+      VM_PORTGROUP="{{$pgcfg.migrate.vm_migrate_portgroup}}"
 
       echo "Writing header for playbook YAML..."
       cat <<EOHDR > $PLAYBOOK
