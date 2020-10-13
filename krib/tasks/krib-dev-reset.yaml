@@ -252,6 +252,13 @@ Templates:
     # remanants of the old cluster. This script brutally removes any cluster-specific content,
     # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
 
+    # Stop any running pods
+    for POD in `crictl pods -q`
+    do
+      crictl stopp $POD
+      crictl rmp $POD
+    done
+
     timeout 10 kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
     systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
@@ -260,12 +267,6 @@ Templates:
     systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
     systemctl stop kubelet || echo "failed to stop kubelet. let's proceed anyway..."
 
-    # Stop any running pods
-    for POD in `crictl pods -q`
-    do
-      crictl stopp $POD
-      crictl rmp $POD
-    done
 
     # Wipe out any persistent content
     rm -rf /var/lib/cni/
@@ -309,7 +310,7 @@ Templates:
       fi
     fi
     {{ end -}}
-  Name: KRIB wipe disks used for rook-ceph (if configured)
+  Name: KRIB wipe disks used for rook-ceph (if exists)
 Meta:
   icon: "ship"
   color: "orange"
