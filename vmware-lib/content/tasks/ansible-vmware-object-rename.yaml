@@ -42,16 +42,23 @@ Templates:
       VC_PASS={{ .Param "govc/password" }}
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
 
+      {{ if .ParamExists "esxi/object-rename-override" -}}
+      OVER="{{ .ParamExpand "esxi/object-rename-override" }}"
+      OVER_MSG="Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$NEW_NAME')."
+      {{ end -}}
+
       {{ range $obj := (.Param "esxi/object-rename") -}}
       NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE=""
 
       echo "Starting rename operation for '{{ $obj }}'"
 
-      NEW_NAME="{{ $obj.new_name }}"
-      {{ if .ParamExists "esxi/object-rename-override" -}}
-      NEW_NAME="{{ .ParamExpand "esxi/object-rename-override" }}"
-      echo "Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$NEW_NAME')."
-      {{ end -}}
+      if [[ -z "$OVER" ]]
+      then
+        NEW_NAME="{{ $obj.new_name }}"
+      else
+        echo "$OVER_MSG"
+        NEW_NAME="$OVER"
+      fi
 
       OBJECT="{{ if $obj.object.name }}object_name: {{ $obj.object_name }}{{ else }}object_moid: {{ $obj.object_moid }}{{ end }}"
       OBJ_NAME="$(echo $OBJECT | awk ' { print $NF }')"
