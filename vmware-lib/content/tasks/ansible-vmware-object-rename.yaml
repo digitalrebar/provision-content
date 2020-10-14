@@ -48,6 +48,11 @@ Templates:
       echo "Starting rename operation for '{{ $object }}'"
 
       NEW_NAME="{{ $obj.new_name }}"
+      {{ if .Param "esxi/object-rename-override" -}}
+      NEW_NAME="{{ .ParamExpand "esxi/object-rename-override" }}"
+      echo "Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$NEW_NAME')."
+      {{ end -}}
+
       OBJECT="{{ if $obj.object.name }}object_name: {{ $obj.object_name }}{{ else }}object_moid: {{ $obj.object_moid }}{{ end }}"
       OBJ_NAME="$(echo $OBJECT | awk ' { print $NF }')"
       OBJ_TYPE="{{ $obj.object_type }}"
@@ -70,7 +75,7 @@ Templates:
             hostname: $VC_HOST
             username: $VC_USER
             password: $VC_PASS
-            new_name: $New_NAME
+            new_name: $NEW_NAME
             $OBJECT
             object_type: $OBJ_TYPE
             validate_certs: $VAL
