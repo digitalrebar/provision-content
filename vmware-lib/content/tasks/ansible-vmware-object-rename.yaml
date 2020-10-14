@@ -44,7 +44,7 @@ Templates:
 
       {{ if .ParamExists "esxi/object-rename-override" -}}
       OVER="{{ .ParamExpand "esxi/object-rename-override" }}"
-      OVER_MSG="Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$NEW_NAME')."
+      OVER_MSG="Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$OVER')."
       {{ end -}}
 
       {{ range $obj := (.Param "esxi/object-rename") -}}
@@ -72,8 +72,6 @@ Templates:
         tasks:
       EOHDR
 
-      for MEM in $MEMBERS
-      do
       echo "WRITING migration playbook task for member '$MEM'"
       cat <<EOPB >> $PLAYBOOK
         - name: Rename object $OBJ_NAME to $NEW_NAME
@@ -87,7 +85,6 @@ Templates:
             object_type: $OBJ_TYPE
             validate_certs: $VAL
       EOPB
-      done
       {{ end -}}
 
       if [[ -r "$PLAYBOOK" ]]
