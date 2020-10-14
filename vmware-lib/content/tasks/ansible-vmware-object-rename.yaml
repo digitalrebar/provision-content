@@ -48,7 +48,7 @@ Templates:
       echo "Starting rename operation for '{{ $obj }}'"
 
       NEW_NAME="{{ $obj.new_name }}"
-      {{ if .Param "esxi/object-rename-override" -}}
+      {{ if .ParamExists "esxi/object-rename-override" -}}
       NEW_NAME="{{ .ParamExpand "esxi/object-rename-override" }}"
       echo "Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$NEW_NAME')."
       {{ end -}}
