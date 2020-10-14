@@ -67,6 +67,10 @@ Documentation: |
   be renamed to ``vsan-cluster01-datastore``.  Subsequently, the Virtual
   Machine named *Fedora_VM* will be renamed to ``fedora-vm01``.
 
+  .. note:: If a Golang Templating construct is desired for the *new_name*
+            value, set the ``esxi/object-rename-override`` for the *new_name*
+            value.  In that case, this objects setting will be ignored.
+
 Meta:
   color: "green"
   icon: "sitemap"
@@ -77,7 +81,6 @@ Schema:
   additionalProperties:
     type: "object"
     required:
-      - "new_name"
       - "object_type"
     properties:
       new_name:
