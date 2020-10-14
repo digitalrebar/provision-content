@@ -1,13 +1,14 @@
-FROM bitnami/minideb:buster
-MAINTAINER "The RackN Team <support@rackn.com>"
-
 ###
 #  Below powershell install based on the Microsoft published Dockerfile spec:
 #  https://github.com/PowerShell/PowerShell-Docker/blob/master/release/lts/debian10/docker/Dockerfile
 ###
+ARG fromTag=buster
+ARG imageRepo=bitnami/minideb
+FROM ${imageRepo}:${fromTag} AS installer-env
+MAINTAINER "The RackN Team <support@rackn.com>"
 
 # Define Args for the needed to add the package
-ARG PS_VERSION=6.2.3
+ARG PS_VERSION=6.2.7
 ARG PS_PACKAGE=powershell-${PS_VERSION}-linux-x64.tar.gz
 ARG PS_PACKAGE_URL=https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/${PS_PACKAGE}
 ARG PS_INSTALL_VERSION=7-lts
