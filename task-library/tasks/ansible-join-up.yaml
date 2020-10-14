@@ -44,6 +44,7 @@ Templates:
         remote_user: "{{ .Param "rsa/key-user" }}"
         connection: "ssh"
         gather_facts: false
+        debugger: {{ if .Param "rs-debug-enable" }}on_failed{{ else }}never{{ end }}
         become: true
 
         tasks:
@@ -109,8 +110,16 @@ Templates:
             when: "'drpcli.service' not in services"
       EOF
 
+      {{ if .Param "rs-debug-enable" }}
+      echo "========= DEBUG output playbook ========="
+      cat join-up.yaml
+      echo "========= DEBUG output playbook ========="
+      {{ end }}
+
       echo "Prevent the task list from restarting!"
-      drpcli machines set $RS_UUID param start-over to false
+      drpcli machines set $RS_UUID param start-over to false > /dev/null
+
+      echo "REMINDER: SSH user, {{ .Param "rsa/key-user" }}, must be available on target o/s!"
 
       echo "Run Join-Up Playbook using $(ansible-playbook --version)"
       ansible-playbook \

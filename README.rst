@@ -39,3 +39,5 @@ sledgehammer-builder/  contains the Sledgehammer Builder content
 
 The extraneous directories and files (images, tools, .gitignore, etc.) are
 not part of the content packs.
+
+.. Release v4.6.0 Start
