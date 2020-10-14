@@ -25,7 +25,7 @@ RequiredParams:
   - "esxi/dvs-mappings"
 OptionalParams: []
 Templates:
-  - Name: "ansible-vmware-migrate-vmk.sh.tmpl"
+  - Name: "ansible-vmware-object-rename.sh.tmpl"
     Contents: |
       #!/usr/bin/env bash
       # Generate the Ansible playbook for migrating VMK
@@ -45,7 +45,7 @@ Templates:
       {{ range $obj := (.Param "esxi/object-rename") -}}
       NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE=""
 
-      echo "Starting rename operation for '{{ $object }}'"
+      echo "Starting rename operation for '{{ $obj }}'"
 
       NEW_NAME="{{ $obj.new_name }}"
       {{ if .Param "esxi/object-rename-override" -}}
