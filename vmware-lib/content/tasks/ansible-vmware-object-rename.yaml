@@ -60,7 +60,7 @@ Templates:
         NEW_NAME="$OVER"
       fi
 
-      OBJECT="{{ if $obj.object.name }}object_name: {{ $obj.object_name }}{{ else }}object_moid: {{ $obj.object_moid }}{{ end }}"
+      OBJECT="{{ if $obj.object_name }}object_name: {{ $obj.object_name }}{{ else }}object_moid: {{ $obj.object_moid }}{{ end }}"
       OBJ_NAME="$(echo $OBJECT | awk ' { print $NF }')"
       OBJ_TYPE="{{ $obj.object_type }}"
 
