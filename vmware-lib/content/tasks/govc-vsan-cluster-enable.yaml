@@ -1,4 +1,4 @@
-----
+---
 Name: tec-cluster-enable-vsan
 Description: A task wait for appliance OVA API to become available
 Documentation: >-
