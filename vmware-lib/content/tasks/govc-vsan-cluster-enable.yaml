@@ -1,5 +1,5 @@
 ---
-Name: tec-cluster-enable-vsan
+Name: govc-vsan-cluster-enable
 Description: A task wait for appliance OVA API to become available
 Documentation: >-
   This task will enable VSAN on the cluster after create and claim operations.
