@@ -9,5 +9,5 @@ Meta:
   color: "green"
   title: "RackN Content"
 Tasks:
-  - "context:govc"
+  - "context:vmware-lib"
   - "govc-dvs-create"
