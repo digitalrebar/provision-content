@@ -49,7 +49,7 @@ xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not bee
 
 echo "Cluster profile to write to is '$CLUSTER_PROFILE'"
 
-NAMES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Ne govc | jq -r ".[]  | select(.Params.\"esxi/dvs-memberships\" | index(\"$DVS_NAME\")) | .Name" | tr '\n' ' ')
+NAMES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r ".[]  | select(.Params.\"esxi/dvs-memberships\" | index(\"$DVS_NAME\")) | .Name" | tr '\n' ' ')
 
 echo "Convert found DRP Names to ESXi node names."
 echo "      DRP Names:  $NAMES"

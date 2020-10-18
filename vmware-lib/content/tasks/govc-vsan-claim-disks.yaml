@@ -62,7 +62,7 @@ Templates:
       {{ if .ParamExists "esxi/vsan-nodes-override" }}
       NODES="{{ .Param "esxi/vsan-nodes-override" }}"
       {{ else -}}
-      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Eq "" | jq -r '.[].Name' | tr '\n' ' ')
       {{ end }}
 
       SELECTION_RULE='{{ .Param "esxi/vsan-disk-selection-rule" }}'
