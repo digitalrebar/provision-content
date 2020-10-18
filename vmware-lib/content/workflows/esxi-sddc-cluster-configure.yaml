@@ -22,7 +22,6 @@ Meta:
   icon: terminal
   title: RackN Content
 Stages:
-  - context:vmware-lib
   - govc-cluster-create
   - govc-vsan-cluster-build
   - govc-vsan-claim-disks
