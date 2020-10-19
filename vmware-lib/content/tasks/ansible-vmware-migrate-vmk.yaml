@@ -128,14 +128,13 @@ Templates:
               {{ range $mig := $pgcfg.migrate.vms_to_migrate -}}
       VM_MIGRATE="{{$mig}}"
 
-      # if a VM to migrate to the DVS is specified in migrate, add to the playbook
       if [[ "$VM_MIGRATE == "<no value>" || "$VM_MIGRATE" == "null" || "$VM_MIGRATE == "" ]]
       then
         echo "No Virtual Machine migration has been requested."
       else
         echo "Building migration playbook for '$VM_MIGRATE' VM"
         cat <<EOVM >> $PLAYBOOK
-        - name: Migrate VM {{$migcfg.vm_name}} to DVS {{$pgcfg.migrate.vswitch}}
+        - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
           delegate_to: localhost
           community.vmware.vmware_vm_vss_dvs_migrate:
             hostname: $VC_HOST
