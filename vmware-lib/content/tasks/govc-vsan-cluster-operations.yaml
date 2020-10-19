@@ -75,7 +75,7 @@ Templates:
       {{ if .ParamExists "esxi/vsan-nodes-override" }}
       NODES="{{ .Param "esxi/vsan-nodes-override" }}"
       {{ else -}}
-      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Eq "" | jq -r '.[].Name' | tr '\n' ' ')
+      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r '.[].Name' | tr '\n' ' ')
       {{ end }}
 
       # additional global vars used throughout functions
