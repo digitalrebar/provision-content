@@ -4,7 +4,7 @@ Description: "CentOS 7 install stages.  References the latest CentOS 7 release"
 BootEnv: "centos-7-install"
 Tasks:
   - "set-hostname"
-  - "centos-drp-only-repos"
+  # - "centos-drp-only-repos"
   - "ssh-access"
   - "configure-network"
 Meta:
