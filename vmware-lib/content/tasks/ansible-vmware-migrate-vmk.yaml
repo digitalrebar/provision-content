@@ -98,6 +98,9 @@ Templates:
       get_hosts_with_dvs
 
       VM_MIGRATE="{{$pgcfg.migrate.vm_migrate}}"
+      VM_VCENTER="{{$pgcfg.migrate.vm_vcenter}}"
+      VM_VC_USER="{{$pgcfg.migrate.vm_vc_user}}"
+      VM_VC_PASS="{{$pgcfg.migrate.vm_vc_pass}}"
 
       echo "Writing header for playbook YAML..."
       cat <<EOHDR > $PLAYBOOK
@@ -132,6 +135,10 @@ Templates:
       then
         echo "No Virtual Machine migration has been requested."
       else
+
+      [[ "$VM_VCENTER" != "<no value>" || "$VM_VCENTER" != "null" || "$VM_VCENTER" != "" ]] && VC_HOST="$VM_VCENTER"
+      [[ "$VM_VC_USER" != "<no value>" || "$VM_VC_USER" != "null" || "$VM_VC_USER" != "" ]] && VC_USER="$VM_VC_USER"
+      [[ "$VM_VC_PASS" != "<no value>" || "$VM_VC_PASS" != "null" || "$VM_VC_PASS" != "" ]] && VC_PASS="$VM_VC_PASS"
       cat <<EOVM >> $PLAYBOOK
         - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
           delegate_to: localhost

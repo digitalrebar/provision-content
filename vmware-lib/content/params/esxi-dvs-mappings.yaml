@@ -21,8 +21,18 @@ Documentation: |
     * ``type`` = one of ``ephemeral``, ``earlyBinding``, or ``lateBinding``
     * ``ports`` = 0 for elastic, or from 1 to 60,000
     * ``vlans`` = empty or 0 for *none*, or VLAN tag ID from 1 to 4096
-    * ``migrate.portgroup`` = *standard switch portgroup name* to migrate during DVS creation (eg 'Management Network')
-    * ``migrate.vswitch`` = *standard vswitch name* to migrate during DVS creation (eg 'vSwitch0')
+    * ``migrate.portgroup`` = *standard switch portgroup name* to migrate during DVS creation (eg ``Management Network``)
+    * ``migrate.vswitch`` = *standard vswitch name* to migrate during DVS creation (eg ``vSwitch0``)
+    * ``migrate.vmk`` = VMK interface to migrate (eg ``vmk0``)
+    * ``migrate.vm_migrate`` = Name of the VM to migrate in required (eg ``vcenter02``)
+    * ``migrate.vm_vcenter`` = The owning node for the vm_migrate Virtual Machine (eg ``vcenter01``)
+    * ``migrate.vm_vc_user`` = The owning node username for authentication (eg ``administrator@example.com``)
+    * ``migrate.vm_vc_pass`` = The owning node password for authentication
+
+  If ``vm_migrate`` is specified, the ``vm_vcenter`` will use the same name
+  by default, otherwise it will use the value provided in ``vm_vcenter``.  Additionally,
+  if the ``vm_vc_user`` and/or ``vm_vc_pass`` values are specified, these will be
+  used to override the existing set of credentials.
 
   Portgroup values ``type``, ``ports``, and ``vlans`` can optionally be left
   empty.  If they are, they will default to the Portgroup version based default
@@ -48,7 +58,10 @@ Documentation: |
                 portgroup: "Management Network"
                 vswitch: "vSwitch0"
                 vmk: "vmk0"
-                vm_migrate: "vcenter01"
+                vm_migrate: "vm01"
+                vm_vcenter: "vcenter01"
+                vm_vc_user: "administrator@example.com"
+                vm_vc_pass: "VMware123!"
               type: ephemeral
               ports: 16
               vlan: 10
@@ -82,7 +95,10 @@ Documentation: |
               "portgroup": "Management Network",
               "vmk": "vmk0",
               "vswitch": "vSwitch0",
-              "vm_migrate": "vcenter01"
+              "vm_migrate": "vm01",
+              "vm_vcenter": "vcenter01",
+              "vm_vc_user": "administrator@example.com",
+              "vm_vc_pass": "VMware123!"
             }
             "type": "ephemeral",
             "vlan": 0,
@@ -172,4 +188,10 @@ Schema:
                   vmk:
                     type: "string"
                   vm_migrate:
+                    type: "string"
+                  vm_vcenter:
+                    type: "string"
+                  vm_vc_user:
+                    type: "string"
+                  vm_vc_pass:
                     type: "string"
