@@ -34,4 +34,4 @@ Stages:
   - govc-stage-ova
   - govc-deploy-ova
   - govc-wait-for-ova
-  - govc-complete
+  - complete

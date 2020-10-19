@@ -27,3 +27,4 @@ Stages:
   - govc-vsan-claim-disks
   - govc-vsan-cluster-enable
   - govc-dvs-create
+  - complete
