@@ -130,10 +130,13 @@ Templates:
       echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BEGIN DVS '$DVS_NAME' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
       echo ""
       echo "Finding ESXi node members to operate on in cluster '$CLUSTER' with '$DVS_NAME' DVS."
-      # DRP v4.5.0 release version will support the below Filter syntax for Params
-      #NAMES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" esxi/dvs-membershipos In "$DVS_NAME" Context Ne govc | jq -r ".[].Name" | tr '\n' ' ')
-      # until then, selecting in JQ is our only path
-      NAMES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Ne govc | jq -r ".[]  | select(.Params.\"esxi/dvs-memberships\" | index(\"$DVS_NAME\")) | .Name" | tr '\n' ' ')
+
+      for _name in $(drpcli machines list esxi/cluster-name Eq $CLUSTER Context Eq '' --slim Params,Meta | jq -r '.[].Name')
+      do
+        _in=""
+        _in=$(drpcli machines get Name:$_name param esxi/dvs-memberships --aggregate | jq -r '. as $dvs | "'$DVS_NAME'" | IN($dvs[])')
+        [[ "$_in" == "true" ]] && NAMES+="$_name " || true
+      done
 
       echo "Now convert found DRP Names to ESXi node names."
       echo "      DRP Names:  $NAMES"
