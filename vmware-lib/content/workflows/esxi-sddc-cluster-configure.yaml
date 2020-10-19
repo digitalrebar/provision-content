@@ -26,5 +26,7 @@ Stages:
   - govc-vsan-cluster-build
   - govc-vsan-claim-disks
   - govc-vsan-cluster-enable
+  - ansible-vmware-object-rename
   - govc-dvs-create
+  - ansible-vmware-migrate-vmk
   - complete
