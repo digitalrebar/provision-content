@@ -57,10 +57,10 @@ Templates:
         local _name _names _member _in
         echo "Getting hosts for cluster '$CLUSTER' and DVS '$DVS_NAME'"
 
-        for _name in $(drpcli machines list esxi/cluster-name Eq tec.mgt.cl Context Eq '' | jq -r '.[].Name')
+        for _name in $(drpcli machines list esxi/cluster-name Eq $CLUSTER Context Eq '' --slim Params,Meta | jq -r '.[].Name')
         do
           _in=""
-          _in=$(drpcli machines params Name:$_name --aggregate | jq -r '."esxi/dvs-memberships" as $dvs | "'$DVS_NAME'" | IN($dvs[])')
+          _in=$(drpcli machines get Name:$_name param esxi/dvs-memberships --aggregate | jq -r '. as $dvs | "'$DVS_NAME'" | IN($dvs[])')
           [[ "$_in" == "true" ]] && _names+="$_name " || true
         done
 
