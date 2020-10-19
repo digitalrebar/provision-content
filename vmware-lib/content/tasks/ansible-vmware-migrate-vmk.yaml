@@ -98,6 +98,7 @@ Templates:
       get_hosts_with_dvs
 
       VM_MIGRATE="{{$pgcfg.migrate.vm_migrate}}"
+      VM_PORTGROUP="{{$pgcfg.migrate.vm_portgroup}}"
       VM_VCENTER="{{$pgcfg.migrate.vm_vcenter}}"
       VM_VC_USER="{{$pgcfg.migrate.vm_vc_user}}"
       VM_VC_PASS="{{$pgcfg.migrate.vm_vc_pass}}"
@@ -136,10 +137,11 @@ Templates:
         echo "No Virtual Machine migration has been requested."
       else
 
-      [[ "$VM_VCENTER" != "<no value>" ]] && VC_HOST="$VM_VCENTER" || true
-      [[ "$VM_VC_USER" != "<no value>" ]] && VC_USER="$VM_VC_USER" || true
-      [[ "$VM_VC_PASS" != "<no value>" ]] && VC_PASS="$VM_VC_PASS" || true
-      cat <<EOVM >> $PLAYBOOK
+        [[ "$VM_VCENTER" != "<no value>" ]] && VC_HOST="$VM_VCENTER" || true
+        [[ "$VM_PORTGROUP" != "<no value>" ]] && ="$VM_PORTGROUP" || true
+        [[ "$VM_VC_USER" != "<no value>" ]] && VC_USER="$VM_VC_USER" || true
+        [[ "$VM_VC_PASS" != "<no value>" ]] && VC_PASS="$VM_VC_PASS" || true
+        cat <<EOVM >> $PLAYBOOK
         - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
           delegate_to: localhost
           community.vmware.vmware_vm_vss_dvs_migrate:
@@ -147,6 +149,7 @@ Templates:
             username: $VC_USER
             password: $VC_PASS
             vm_name: $VM_MIGRATE
+            current_portgroup_name: $VM_PORTGROUP
             dvportgroup_name: {{ $pg }}
             validate_certs: $VAL
       EOVM
