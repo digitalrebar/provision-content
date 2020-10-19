@@ -136,9 +136,9 @@ Templates:
         echo "No Virtual Machine migration has been requested."
       else
 
-      [[ "$VM_VCENTER" != "<no value>" || "$VM_VCENTER" != "null" || "$VM_VCENTER" != "" ]] && VC_HOST="$VM_VCENTER"
-      [[ "$VM_VC_USER" != "<no value>" || "$VM_VC_USER" != "null" || "$VM_VC_USER" != "" ]] && VC_USER="$VM_VC_USER"
-      [[ "$VM_VC_PASS" != "<no value>" || "$VM_VC_PASS" != "null" || "$VM_VC_PASS" != "" ]] && VC_PASS="$VM_VC_PASS"
+      [[ "$VM_VCENTER" != "<no value>" ]] && VC_HOST="$VM_VCENTER" || true
+      [[ "$VM_VC_USER" != "<no value>" ]] && VC_USER="$VM_VC_USER" || true
+      [[ "$VM_VC_PASS" != "<no value>" ]] && VC_PASS="$VM_VC_PASS" || true
       cat <<EOVM >> $PLAYBOOK
         - name: Migrate VM $VM_MIGRATE to DVS {{$pgcfg.migrate.vswitch}}
           delegate_to: localhost
