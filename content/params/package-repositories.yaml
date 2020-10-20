@@ -170,7 +170,8 @@ Schema:
         - centos-7.7.1908
         - centos-7.8.2003
       arch: any
-      url: http://mirrors.kernel.org/fedora-epel/7/$basearch
+#      url: http://mirrors.kernel.org/fedora-epel/7/$basearch
+      url: https://download.fedoraproject.org/pub/epel/7/$basearch
       distribution: "7"
     - tag: centos-8
       os:
