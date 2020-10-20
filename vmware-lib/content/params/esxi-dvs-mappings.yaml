@@ -168,14 +168,12 @@ Schema:
               maximum: 4094
             migrate:
               type: "object"
-              additionalProperties:
-                type: "string"
-                properties:
-                  vswitch:
+              properties:
+                vswitch:
+                  type: "string"
+                vmk:
+                  type: "string"
+                vms_to_migrate:
+                  type: "array"
+                  items:
                     type: "string"
-                  vmk:
-                    type: "string"
-                  vms_to_migrate:
-                    type: "array"
-                    additionalProperties:
-                      type: "string"
