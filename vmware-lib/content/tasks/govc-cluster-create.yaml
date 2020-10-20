@@ -68,7 +68,7 @@ Templates:
       OPTIONS='{{ .Param "esxi/cluster-options" }}'
       FOLDER='{{ .ParamExpand "esxi/cluster-folder" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
-      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r '.[].Name' | tr '\n' ' ')
       {{ if .ParamExists "esxi/cluster-profile" -}}
       {{ if eq ( .Param "esxi/cluster-profile" ) "" -}}
       xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') exists but has an empty value."

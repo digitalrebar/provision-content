@@ -11,9 +11,11 @@ Meta:
 Profiles: []
 Params:
   govc/url: "foobar"
+  esxi/member-reference: "name"
   esxi/datacenter-name: "dc01"
   esxi/cluster-folder: "/dc01"
   esxi/cluster-name: "cluster01"
+  esxi/cluster-profile: "cluster-profile"
   esxi/cluster-options: "-vsan-enabled -vsan-autoclaim"
   esxi/dvs-mappings:
     dvs01:
@@ -25,6 +27,10 @@ Params:
         pg_internal:
           type: "ephemeral"
           ports: 512
+          migrate:
+            vmk: "vmk0"
+            portgroup: "Management Network"
+            vswitch: "vSwitch0"
         pg_external:
           type: "lateBinding"
           ports: 60000

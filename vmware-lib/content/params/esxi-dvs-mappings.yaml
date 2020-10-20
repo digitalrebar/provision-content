@@ -21,8 +21,10 @@ Documentation: |
     * ``type`` = one of ``ephemeral``, ``earlyBinding``, or ``lateBinding``
     * ``ports`` = 0 for elastic, or from 1 to 60,000
     * ``vlans`` = empty or 0 for *none*, or VLAN tag ID from 1 to 4096
-    * ``migrate.portgroup`` = *standard switch portgroup name* to migrate during DVS creation (eg 'Management Network')
-    * ``migrate.vswitch`` = *standard vswitch name* to migrate during DVS creation (eg 'vSwitch0')
+    * ``migrate.portgroup`` = *standard switch portgroup name* to migrate during DVS creation (eg ``Management Network``)
+    * ``migrate.vswitch`` = *standard vswitch name* to migrate during DVS creation (eg ``vSwitch0``)
+    * ``migrate.vmk`` = VMK interface to migrate (eg ``vmk0``)
+    * ``migrate.vms_to_migrate`` = An array of VM names to migrate from the Standard to Distributed vSwitch
 
   Portgroup values ``type``, ``ports``, and ``vlans`` can optionally be left
   empty.  If they are, they will default to the Portgroup version based default
@@ -44,9 +46,13 @@ Documentation: |
           vmnic: vmnic1
           portgroups:
             pg_internal:
-              migrage:
+              migrate:
                 portgroup: "Management Network"
                 vswitch: "vSwitch0"
+                vmk: "vmk0"
+                vms_to_migrate:
+                  - "vm01"
+                  - "vm02"
               type: ephemeral
               ports: 16
               vlan: 10
@@ -76,9 +82,13 @@ Documentation: |
             "ports": 8
           },
           "pg_internal": {
-            "migrage": {
+            "migrate": {
               "portgroup": "Management Network",
-              "vswitch": "vSwitch0"
+              "vmk": "vmk0",
+              "vswitch": "vSwitch0",
+              "vms_to_migrate": [
+                "vm01", "vm02"
+              ]
             }
             "type": "ephemeral",
             "vlan": 0,
@@ -142,15 +152,6 @@ Schema:
         additionalProperties:
           type: "object"
           properties:
-            migrate:
-              type: "object"
-              additionalProperties:
-                type: "object"
-                properties:
-                  vswitch:
-                    type: "string"
-                  portgroup:
-                    type: "string"
             type:
               type: "string"
               enum:
@@ -165,5 +166,14 @@ Schema:
               type: "number"
               minimum: 0
               maximum: 4094
-
-
+            migrate:
+              type: "object"
+              properties:
+                vswitch:
+                  type: "string"
+                vmk:
+                  type: "string"
+                vms_to_migrate:
+                  type: "array"
+                  items:
+                    type: "string"

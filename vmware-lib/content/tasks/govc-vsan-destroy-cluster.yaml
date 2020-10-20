@@ -50,7 +50,7 @@ Templates:
 
       export GOVC_PERSIST_SESSION=false
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
-      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r '.[].Name' | tr '\n' ' ')
 
       echo ""
       echo "      Cluster to operate on: '$CLUSTER'"
