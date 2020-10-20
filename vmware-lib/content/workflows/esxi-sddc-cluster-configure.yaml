@@ -29,4 +29,4 @@ Stages:
   - ansible-vmware-object-rename
   - govc-dvs-create
   - ansible-vmware-migrate-vmk
-  - complete
+  - complete-nobootenv
