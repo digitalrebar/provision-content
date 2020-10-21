@@ -51,7 +51,7 @@ Templates:
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
-      ADDITIONAL_OPTIONS="{{ .Param "ansible/additional-options" }}"
+      ADDITIONAL_OPTIONS="$ANSIBLE_VERBOSE {{ .Param "ansible/additional-options" }}"
 
       get_hosts_with_dvs() {
         MEMBERS=""
