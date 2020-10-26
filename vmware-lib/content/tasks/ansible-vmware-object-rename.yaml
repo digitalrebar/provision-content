@@ -41,6 +41,7 @@ Templates:
       VC_USER={{ .Param "govc/username" }}
       VC_PASS={{ .Param "govc/password" }}
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
+      ADDITIONAL_OPTIONS="$ANSIBLE_VERBOSE {{ .Param "ansible/additional-options" }}"
 
       {{ if .ParamExists "esxi/object-rename-override" -}}
       OVER="{{ .ParamExpand "esxi/object-rename-override" }}"
@@ -98,7 +99,7 @@ Templates:
         echo "==================================== END ===================================="
         echo ""
 
-        ansible-playbook $PLAYBOOK --connection=local -e 'ansible_python_interpreter=/usr/bin/python3'
+        ansible-playbook $ADDITIONAL_OPTIONS $PLAYBOOK
       else
         echo "WARNING: No playbook file was generated to execute. ('$PLAYBOOK')"
       fi

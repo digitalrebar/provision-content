@@ -51,6 +51,7 @@ Templates:
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+      ADDITIONAL_OPTIONS="$ANSIBLE_VERBOSE {{ .Param "ansible/additional-options" }}"
 
       get_hosts_with_dvs() {
         MEMBERS=""
@@ -158,7 +159,7 @@ Templates:
         echo "==================================== END ===================================="
         echo ""
 
-        ansible-playbook $PLAYBOOK --connection=local
+        ansible-playbook $ADDITIONAL_OPTIONS $PLAYBOOK
       else
         echo "WARNING: No playbook file was generated to execute. ('$PLAYBOOK')"
       fi
