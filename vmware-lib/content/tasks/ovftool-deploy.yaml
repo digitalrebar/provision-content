@@ -27,7 +27,7 @@ Templates:
 
       # start template govc-setup.sh.tmpl
       # we need values in this to auth against vcenter for deployment
-      #\{\{ template "govc-setup.sh.tmpl" . \}\}
+      {{ template "govc-setup.sh.tmpl" . }}
 
       # start template ovftool-deploy.sh
       {{ if .ParamExists "ova/param-json" -}}
