@@ -84,24 +84,23 @@ Templates:
 
       COUNT=0
       {{ range $key, $cmd := ( .Param "govc/commands" ) -}}
-      $(echo "{{ $cmd }}" | grep -q "import.ova") && (( COUNT++ )) || true
-      [[ $COUNT -ge 2 ]] && exit 1 || true
+      $(echo "{{ $cmd }}" | egrep -q "import.ova|import.spec") && (( COUNT++ )) || true
+      [[ $COUNT -ge 2 ]] && xiterr 1 "multiple 'import.ova' or 'import.spec' values (only 1 allowed)" || true
       {{ end -}}
 
       {{ range $cmd := ( .Param "govc/commands" ) -}}
       CMD='{{ $cmd }}'
 
-      if echo $CMD | grep -q "import.ova"
+      if echo $CMD | egrep -q "import.ova|import.spec"
       then
         if [[ -r "/ova/import.ova" ]]
         then
           CMD="$CMD $TMPL /ova/import.ova"
         else
-          xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
+          xiterr 1 "'import.ova' specified, but /ova/import.ova image not found (run task 'govc-stage-ova' first)"
         fi
       fi
 
-      # sigh ... are we going to need to throttle calls with sleep timers and other fun stuff ? 
       echo ""
       echo "==== RUN GOVC COMMAND ===="
       echo ""
