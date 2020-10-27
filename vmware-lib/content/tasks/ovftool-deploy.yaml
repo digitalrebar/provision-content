@@ -1,0 +1,91 @@
+---
+Name: "ovftool-deploy"
+Description: "A task to deploy OVAs using 'ovftool'."
+Documentation: |
+  This task deploys an OVA appliance utilizing the ``ovftool`` which is found
+  in the ``vmware-tools`` context container.
+
+  This requires the JSON configuration to be described in the ``ova/param-json``
+  Param to build up the ``ovftool`` command line options.  ``govc import.spec``
+  (also in the ``vmware-tools`` context container) can be used to generate the
+  JSON template for a given OVA file.
+
+RequiredParams:
+  - ova/param-json
+OptionalParams: []
+Templates:
+  - Name: "ovftool-deploy.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # Deploy an OVA appliance using 'ovftool'
+      # RackN Copyright 2020
+
+      set -e
+
+      # start template setup.tmpl
+      {{ template "setup.tmpl" .}}
+
+      # start template govc-setup.sh.tmpl
+      # we need values in this to auth against vcenter for deployment
+      #\{\{ template "govc-setup.sh.tmpl" . \}\}
+
+      # start template ovftool-deploy.sh
+      {{ if .ParamExists "ova/param-json" -}}
+      echo "JSON configuration data found in Param 'ova/param-json'"
+      {{ else -}}
+      xiterr 1 "No required JSON configuration data found in Param 'ova/param-json'"
+      {{ end -}}
+
+      OVFCMD=$(mktemp /tmp/ovftool.XXXXXX.sh)
+      > $OVFCMD
+      chmod +x $OVFCMD
+
+      #\{\{ $ovajson := ( .ComposeParam "ova/param-json" ) | toJson -\}\}
+      {{ $ovajson := ( .ComposeParam "ova/param-json" ) -}}
+      {{ $propmap := get (.Param "ova/param-json") "PropertyMapping" }}
+      {{ $netmap := get (.Param "ova/param-json") "NetworkMapping" }}
+
+      cat << EOOVF > $OVFCMD
+      ovftool \\
+        --name='{{ $ovajson.Name }}' \\
+        --acceptAllEulas \\
+        --allowAllExtraConfig \\
+        --allowExtraConfig \\
+        {{ if eq (.Param "govc/insecure") true -}}--noSSLVerify \\{{ else -}}{{ end }}
+      {{ range $idx, $element := $propmap -}}
+        {{ $propkey := get $element "Key" }}{{ $propval := get $element "Value" -}}
+        --prop:"{{ $propkey }}"="{{ $propval }}" \\
+      {{ end -}}
+      {{ range $idx, $element := $netmap -}}
+      {{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" -}}
+        --net:"{{ $netkey }}"="{{ $netval }}" \\
+      {{ end -}}
+      {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else -}}\\{{ end }}
+        {{ .ParamExpand "govc/ova-location" }} \\
+        'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ .ParamExpand "esxi/datacenter-name" }}/host/{{ .ParamExpand "esxi/cluster-name" }}'
+      EOOVF
+
+      echo ""
+      echo "==== Show OVFTool COMMAND ===="
+      echo ""
+
+      cat $OVFCMD
+      echo ""
+      echo "==== End Show OVFTool ===="
+      echo ""
+
+      echo ""
+      echo "==== RUN OVFTool COMMAND ===="
+      echo ""
+
+      eval $OVFCMD
+
+      echo ""
+      echo "==== DONE ===="
+      echo ""
+
+Meta:
+  icon: "terminal"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
