@@ -24,7 +24,7 @@ Templates:
 
       {{ template "setup.tmpl" .}}
 
-      {{ if eq .Param "govc/skip-ova-stage" true -}}
+      {{ if eq ( .Param "govc/skip-ova-stage" ) true -}}
       echo "Skipping OvA staging process since 'govc/skip-ova-stage' is 'false' (the default value)."
       {{ else -}}
       echo "Starting OVA staging process.  To disable, set 'govc/skip-ova-stage' to 'true'."
