@@ -59,7 +59,7 @@ Templates:
       {{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }}  --net:"{{ $netkey }}"="{{ $netval }}" \\ {{ end -}}
       {{ if ( .Param "govc/datastore" ) }}  --datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else -}}\\{{ end }}
         {{ .ParamExpand "govc/ova-location" }} \\
-        'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ if .Param “esxi/datacenter-name” }}{{ .ParamExpand “esxi/datacenter-name” }}/host/{{ .ParamExpand “esxi/cluster-name” }}{{ else }}ha-datacenter/host/{{ end }}'
+        'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ if .Param "esxi/datacenter-name" }}{{ .ParamExpand "esxi/datacenter-name" }}/host/{{ .ParamExpand "esxi/cluster-name" }}{{ else }}ha-datacenter/host/{{ end }}'
       EOOVF
 
       echo ""
