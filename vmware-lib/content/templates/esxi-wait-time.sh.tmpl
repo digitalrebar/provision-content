@@ -4,10 +4,11 @@
 set -e
 WAIT='{{ .Param "esxi/wait-time" }}'
 
+echo ""
 echo ">>> Starting esxi-wait-time task..."
 echo ">>> Wait time set to:  $WAIT"
 
-while (( WAIT > 0 ))
+while [[ $WAIT > 0 ]]
 do
   printf "$WAIT "
   sleep 1
