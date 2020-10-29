@@ -46,6 +46,13 @@ Templates:
       {{ $propmap := get (.Param "ova/param-json") "PropertyMapping" }}
       {{ $netmap := get (.Param "ova/param-json") "NetworkMapping" }}
 
+      # build up the "path" for the vi: command syntax
+      {{ if .Param "esxi/datacenter-name" -}}
+        {{ $path := ( .ParamExpand "esxi/datacenter-name" }} ) "/host/" ( {{ .ParamExpand "esxi/cluster-name" ) -}}
+      {{ else -}}
+        {{ $path := "ha-datacenter/host/" -}}
+      {{ end }}
+
       cat << EOOVF > $OVFCMD
       ovftool \\
         --name='{{ $ovajson.Name }}' \\
@@ -63,7 +70,7 @@ Templates:
       {{ end -}}
       {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else -}}\\{{ end }}
         {{ .ParamExpand "govc/ova-location" }} \\
-        'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ .ParamExpand "esxi/datacenter-name" }}/host/{{ .ParamExpand "esxi/cluster-name" }}'
+        'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ $path }}'
       EOOVF
 
       echo ""
