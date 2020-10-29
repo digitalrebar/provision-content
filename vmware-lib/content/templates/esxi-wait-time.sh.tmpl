@@ -8,12 +8,7 @@ echo ""
 echo ">>> Starting esxi-wait-time task..."
 echo ">>> Wait time set to:  $WAIT"
 
-while [[ $WAIT > 0 ]]
-do
-  printf "$WAIT "
-  sleep 1
-  WAIT=$(expr $WAIT + 1)
-done
+sleep $WAIT
 
 echo ""
 echo ">>> Wait timer expired, continuing..."
