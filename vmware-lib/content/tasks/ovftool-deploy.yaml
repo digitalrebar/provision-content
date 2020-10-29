@@ -52,11 +52,7 @@ Templates:
         --acceptAllEulas \\
         --allowAllExtraConfig \\
         --allowExtraConfig \\
-        {{ if eq (.Param "govc/insecure") true -}}--noSSLVerify \\{{ else -}}{{ end }}
-      {{ range $idx, $element := $propmap }}{{ $propkey := get $element "Key" }}{{ $propval := get $element "Value" }}  --prop:"{{ $propkey }}"="{{ $propval }}" \\ {{ end }}
-      {{ range $idx, $element := $netmap }}{{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }}  --net:"{{ $netkey }}"="{{ $netval }}" \\ {{ end }}
-      {{ if ( .Param "govc/datastore" ) }}  --datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else -}}\\{{ end }}
-        {{ .ParamExpand "govc/ova-location" }} \\
+        {{ if eq (.Param "govc/insecure") true }} --noSSLVerify {{ else -}}{{ end }}{{ range $idx, $element := $propmap }}{{ $propkey := get $element "Key" }}{{ $propval := get $element "Value" }} --prop:"{{ $propkey }}"="{{ $propval }}" {{ end }}{{ range $idx, $element := $netmap }}{{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }} --net:"{{ $netkey }}"="{{ $netval }}"{{ end }}{{ if ( .Param "govc/datastore" ) }} --datastore="{{ .ParamExpand "govc/datastore" }}"{{ else -}} {{ end }} {{ .ParamExpand "govc/ova-location" }} \\
         'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ .ParamExpand "esxi/datacenter-name" }}/host/{{ .ParamExpand "esxi/cluster-name" }}'
       EOOVF
 
