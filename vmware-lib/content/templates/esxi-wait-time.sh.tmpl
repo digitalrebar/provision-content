@@ -12,7 +12,7 @@ while [[ $WAIT > 0 ]]
 do
   printf "$WAIT "
   sleep 1
-  N=$(expr $N + 1)
+  WAIT=$(expr $WAIT + 1)
 done
 
 echo ""
