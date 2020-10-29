@@ -20,6 +20,7 @@ Templates:
       # Deploy an OVA appliance using 'ovftool'
       # RackN Copyright 2020
 
+      set +H
       set -e
 
       # start template setup.tmpl
