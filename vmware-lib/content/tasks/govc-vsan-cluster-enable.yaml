@@ -36,7 +36,7 @@ OptionalParams:
   - esxi/vsan-enabled
 Prerequisites: []
 Templates:
-  - Name: tec-cluster-enable-vsan.sh
+  - Name: esxi-vsan-cluster-enable.sh
     Path: ''
     Link: ''
     ID: ''
@@ -57,6 +57,13 @@ Templates:
 
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
+
+      ### begin govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" . }}
+
+      ### begin esxi-vsan-cluster-enable.sh
+      ON='{{ .Param "esxi/vsan-enabled" }}'
+      [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
 
       ### tec-cluster-create.sh
       JQ=$(which jq)

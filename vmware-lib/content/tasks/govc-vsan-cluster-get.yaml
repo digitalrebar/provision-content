@@ -31,6 +31,9 @@ Templates:
       ### govc-lib.sh.tmpl
       {{ template "govc-lib.sh.tmpl" .}}
 
+      ### begin esxi-vsan-cluster-get.sh
+      ON='{{ .Param "esxi/vsan-enabled" }}'
+      [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
       set -e
 
       JQ=$(which jq)

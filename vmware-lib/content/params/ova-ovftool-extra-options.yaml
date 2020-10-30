@@ -1,0 +1,36 @@
+---
+Name: "ova/ovftool-extra-options"
+Description: "Extra 'ovftool' options to inject with ovftool OVA deployment"
+Documentation: |
+  This Param allows the operator to inject any specific additional
+  options to the ``ovftool`` command when doing an OVA deployment.
+
+  This Param should:
+
+    * use properly formatted ``ovftool`` options
+    * not repeat any existing options built up by the Task
+    * do not include **ANY** newlines in the options
+    * options should be separated by a single white space
+
+  Example value for this Param:
+
+    * ``--skipManifestCheck --defaultStorageProfile=my-storage-profile --prop:Foo=Bar``
+
+  By default, this Param sets the commonly used values:
+
+    * ``--acceptAllEulas --allowAllExtraConfig --allowExtraConfig``
+
+  .. warning:: If the operator uses this Param, and would like to retain these
+                values, you must also add them in addition to your extra options.
+
+  As an alternative for command line option parsing, see the Param
+  ``ova/ovaftool-deploy-more-mapping-template`` - which is a MUCH more
+  advanced use case alternative.
+
+Schema:
+  type: "string"
+  default: "--acceptAllEulas --allowAllExtraConfig --allowExtraConfig"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"
