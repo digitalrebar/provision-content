@@ -11,4 +11,3 @@ Meta:
   color: "green"
   icon: "terminal"
   title: "RackN Content"
-  route: "templates"
