@@ -41,6 +41,11 @@ Documentation: |
             like to make this as complete as possible in product; so in-the-field
             template maintenance is not necessary.
 
+Meta:
+  icon: "terminal"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
 RequiredParams:
   - ova/param-json
 OptionalParams:
@@ -78,26 +83,38 @@ Templates:
       {{ $propmap := get (.Param "ova/param-json") "PropertyMapping" -}}
       {{ $netmap := get (.Param "ova/param-json") "NetworkMapping" -}}
 
-      # thank you for inconsistent ovftool argument flags from govc
-      # generated template json values ... thank you very much
-      {{ .ParamExists "ova/ovaftool-deploy-more-mapping-template" }}
+      # thank you for inconsistent ovftool argument flags from govc generated
+      # template json values -vs- ovftool usage ... thank you very much
+      {{ if ( .ParamExists "ova/ovaftool-deploy-more-mapping-template" ) }}
       {{ .CallTemplate (.Param "ova/ovaftool-deploy-more-mapping-template" ) .}}
       {{ end }}
-      {{ if $ovajson.Annotation }}MORE+="--annotation=\"{{ $ovajson.Annotation }}\" "{{ end }}
+
       {{ if $ovajson.DiskProvisioning }}MORE+="--diskMode=\"{{ $ovajson.DiskProvisioning }}\" "{{ end }}
       {{ if $ovajson.IPAllocationPolicy }}MORE+="--ipAllocationPolicy=\"{{ $ovajson.IPAllocationPolicy }}\" "{{ end }}
       {{ if $ovajson.IPProtocol }}MORE+="--ipProtocol=\"{{ $ovajson.IPProtocol }}\" "{{ end }}
       {{ if $ovajson.Deployment }}MORE+="--deploymentOption=\"{{ $ovajson.Deployment }}\" "{{ end }}
-      {{ if eq ( lower $ovajson.MarkAsTemplate ) "true" }}MORE+="--importAsTemplate "{{ end }}
-      {{ if eq ( lower $ovajson.PowerOn ) "true" }}MORE+="--powerOn "{{ end }}
-      {{ if eq ( lower $ovajson.WaitForIP ) "true" }}MORE+="--X:waitForIp "{{ end }}
+      {{ if eq $ovajson.MarkAsTemplate true }}MORE+="--importAsTemplate "{{ end }}
+      {{ if eq $ovajson.PowerOn true }}MORE+="--powerOn "{{ end }}
+      {{ if eq $ovajson.WaitForIP true }}MORE+="--X:waitForIp "{{ end }}
 
       cat << EOOVF > $OVFCMD
       ovftool {{ .Param "ova/ovftool-extra-options" }} \\
         --name='{{ $ovajson.Name }}' \\
         $MORE \\
-        {{ if eq (.Param "govc/insecure") true }} --noSSLVerify {{ else -}}{{ end }}{{ range $idx, $element := $propmap }}{{ $propkey := get $element "Key" }}{{ $propval := get $element "Value" }} --prop:"{{ $propkey }}"="{{ $propval }}" {{ end }}{{ range $idx, $element := $netmap }}{{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }} --net:"{{ $netkey }}"="{{ $netval }}"{{ end }}{{ if ( .Param "govc/datastore" ) }} --datastore="{{ .ParamExpand "govc/datastore" }}"{{ else -}} {{ end }} {{ .ParamExpand "govc/ova-location" }} \\
-        'vi://{{ .Param "govc/username" }}:{{ .Param "govc/password" }}@{{ .ParamExpand "govc/url" }}{{ if ( .Param "govc/port" ) }}:{{ .Param "govc/port" | toString }}{{ end }}/{{ .ParamExpand "esxi/datacenter-name" }}/host/{{ .ParamExpand "esxi/cluster-name" }}'
+        {{ if eq (.Param "govc/insecure") true }}--noSSLVerify \\{{ else -}}{{ end -}}
+        {{- range $idx, $element := $propmap }}
+        {{ $propkey := get $element "Key" }}{{ $propval := get $element "Value" }}--prop:"{{ $propkey }}"="{{ $propval }}" \\
+        {{- end }}
+        {{- range $idx, $element := $netmap }}
+        {{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }}--net:"{{ $netkey }}"="{{ $netval }}" \\
+        {{- end }}
+        {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else }}{{ end }}
+        {{ .ParamExpand "govc/ova-location" }} \\
+        'vi://
+              {{- .Param "govc/username" -}}:{{- .Param "govc/password" -}}
+              @{{- .ParamExpand "govc/url" -}}
+              {{- if ( .Param "govc/port" ) -}}:{{- .Param "govc/port" | toString -}}{{- end -}}
+              /{{- .ParamExpand "esxi/datacenter-name" -}}/host/{{- .ParamExpand "esxi/cluster-name" -}}'
       EOOVF
 
       echo ""
@@ -119,8 +136,3 @@ Templates:
       echo "==== DONE ===="
       echo ""
 
-Meta:
-  icon: "terminal"
-  color: "blue"
-  title: "Digital Rebar Community Content"
-  feature-flags: "sane-exit-codes"

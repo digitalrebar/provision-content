@@ -29,6 +29,7 @@ Documentation: |
 
 Schema:
   type: "string"
+  default: "--acceptAllEulas --allowAllExtraConfig --allowExtraConfig"
 Meta:
   color: "green"
   icon: "terminal"

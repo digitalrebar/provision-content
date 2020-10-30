@@ -33,7 +33,6 @@ Documentation: |
   deployment - so no "stage-ova" task is required.
 
 Stages:
-  - contex:vmware-tools
   - ovftool-deploy
 Meta:
   color: "purple"
