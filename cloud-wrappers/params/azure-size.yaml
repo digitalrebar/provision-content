@@ -1,0 +1,15 @@
+---
+Name: "azure/size"
+Description: "Azure Instance Size"
+Documentation: |
+  Size
+Schema:
+  type: "string"
+  default: "Standard_F2"
+Meta:
+  type: "value"
+  color: "blue"
+  icon: "server"
+  title: "RackN Content"
+  cloud: "azure"
+  clipboard: "cut"

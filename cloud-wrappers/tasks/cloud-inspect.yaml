@@ -75,6 +75,19 @@ Templates:
 
       {{ end }}
 
+      {{ if eq "azure" (.Param "cloud/provider") }}
+      echo "============================= LINODE INSPECT ============================="
+
+        {{ if .ParamExists "terraform-var/instance_id" }}
+        drpcli machines set $RS_UUID param cloud/instance-id to "\"{{ int (.Param "terraform-var/instance_id") }}\""
+        {{ end }}
+
+        {{ if .ParamExists "terraform-var/machine_ip" }}
+        drpcli machines set $RS_UUID param cloud/public-ipv4  to "{{ .Param "terraform-var/machine_ip" }}"
+        {{ end }}
+
+      {{ end }}
+
       {{ else }}
         echo "You must define which cloud is being used!"
         drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the cloud/provider!"}'
