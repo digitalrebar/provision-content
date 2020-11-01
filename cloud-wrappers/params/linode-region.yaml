@@ -11,3 +11,4 @@ Meta:
   color: "green"
   icon: "map outline"
   title: "RackN Content"
+  cloud: "linode"
