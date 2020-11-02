@@ -1,0 +1,14 @@
+---
+Name: "azure/tenant"
+Description: "Azure Tenant"
+Documentation: |
+  API Tenant
+Schema:
+  type: "string"
+Meta:
+  type: "value"
+  color: "blue"
+  icon: "group"
+  title: "RackN Content"
+  cloud: "azure"
+  clipboard: "cut"

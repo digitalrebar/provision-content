@@ -44,14 +44,14 @@ Templates:
             echo "  required secret-key is set"
           {{ else }}
             echo "  ERROR: you must set the aws/secret-key for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key!"}'
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key!"}' > /dev/null
             exit 1
           {{ end }}
           {{ if .ParamExists "aws/access-key-id" }}
             echo "  required access-key is set"
           {{ else }}
             echo "  ERROR: you must set the aws/access-key-id for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key-id!"}'
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key-id!"}' > /dev/null
             exit 1
           {{ end }}
         {{ end }}
@@ -61,14 +61,14 @@ Templates:
             echo "  required google/credentialis set"
           {{ else }}
             echo "  ERROR: you must set the google/credential for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/credential!"}'
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/credential!"}' > /dev/null
             exit 1
           {{ end }}
           {{ if .ParamExists "google/project-id" }}
             echo "  required google/project-id is set"
           {{ else }}
             echo "  ERROR: you must set the google/project-id for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/project-id!"}'
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/project-id!"}' > /dev/null
             exit 1
           {{ end }}
         {{ end }}
@@ -79,7 +79,7 @@ Templates:
             echo "  required token is set"
           {{ else }}
             echo "  ERROR: you must set the linode/token for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the linode/token!"}'
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the linode/token!"}' > /dev/null
             exit 1
           {{ end }}
           {{ range $i, $p := .Machine.Profiles }}
@@ -92,6 +92,37 @@ Templates:
           fi
           {{ end }}
 
+        {{ end }}
+
+        {{ if eq "azure" (.Param "cloud/provider") }}
+          {{ if .ParamExists "azure/subscription_id" }}
+            echo "  required subscription_id is set"
+          {{ else }}
+            echo "  ERROR: you must set the azure/subscription_id for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/subscription_id!"}' > /dev/null
+            exit 1
+          {{ end }}
+          {{ if .ParamExists "azure/appId" }}
+            echo "  required appId is set"
+          {{ else }}
+            echo "  ERROR: you must set the azure/appId for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/appId!"}' > /dev/null
+            exit 1
+          {{ end }}
+          {{ if .ParamExists "azure/password" }}
+            echo "  required password is set"
+          {{ else }}
+            echo "  ERROR: you must set the azure/password for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/password!"}' > /dev/null
+            exit 1
+          {{ end }}
+          {{ if .ParamExists "azure/tenant" }}
+            echo "  required tenant is set"
+          {{ else }}
+            echo "  ERROR: you must set the azure/tenant for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/tenant!"}' > /dev/null
+            exit 1
+          {{ end }}
         {{ end }}
 
       {{ else }}

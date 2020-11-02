@@ -4,7 +4,7 @@ Description: "Cloud Provider"
 Documentation: |
   The cloud provider detected by join-up script in discovery
 
-  Implemented types: aws, google, linode
+  Implemented types: aws, google, linode, azure
 
   Expand this list as new types are added!
 Schema:
@@ -13,6 +13,7 @@ Schema:
     - "aws"
     - "google"
     - "linode"
+    - "azure"
 Meta:
   type: "value"
   icon: "cloud"
