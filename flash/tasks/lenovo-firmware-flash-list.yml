@@ -149,6 +149,8 @@ Templates:
           exit 1
       fi
 
+      {{ template "flash-list-installed.sh.tmpl" . }}
+
       echo "Nothing else to do and complete"
       drpcli machines set "$RS_UUID" param skip-flash to true
       exit 0
