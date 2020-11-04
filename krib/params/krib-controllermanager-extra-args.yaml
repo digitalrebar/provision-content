@@ -1,0 +1,12 @@
+---
+Name: "krib/controllermanager-extra-args"
+Description: "Kubeadm controllerManagerExtraArgs"
+Documentation: |
+  Array of controllerManagerExtraArgs that you want added to the kubeadm configuration.
+Schema:
+  type: "object"
+  default: {}
+Meta:
+  color: "blue"
+  icon: "ship"
+  title: "Community Content"

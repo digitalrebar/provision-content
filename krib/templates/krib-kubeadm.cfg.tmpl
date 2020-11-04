@@ -45,6 +45,13 @@ apiServer:
     {{ $key }}: {{ $value }}
     {{ end }}
     {{ end }}
+controllerManager:
+  extraArgs:
+    {{ if .ParamExists "krib/controllermanager-extra-args" -}}
+    {{ range $key, $value  := .Param "krib/controllermanager-extra-args" -}}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+    {{ end }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
 {{ $ha := ne (int 1) (int (.Param "krib/cluster-master-count")) -}}
