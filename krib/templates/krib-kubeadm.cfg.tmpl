@@ -45,9 +45,6 @@ apiServer:
     {{ $key }}: {{ $value }}
     {{ end }}
     {{ end }}
-controllerManager:
-  extraArgs:
-    bind-address: 0.0.0.0
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
 {{ $ha := ne (int 1) (int (.Param "krib/cluster-master-count")) -}}
