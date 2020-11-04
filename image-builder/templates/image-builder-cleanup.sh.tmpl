@@ -54,12 +54,18 @@ esac
 find /var/log -type f -exec cp /dev/null '{}' \;
 
 # clean up drpcli local cache settings
+echo "Emptying the old 'etc/drpcli' agent configuration file..."
 > /etc/drpcli
 
+echo "Removing all files in new agent config directory '/var/lib/drp-agent/'..."
+rm -f /var/lib/drp-agent/*
+
 # zero out /etc/resolv.conf
+echo "Emptying '/etc/resolv.conf' file..."
 > /etc/resolv.conf
 
 # clean bash history
+echo "Removing BASH shell history..."
 > /root/.bash_history
 
 exit 0
