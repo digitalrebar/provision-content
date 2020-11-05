@@ -126,9 +126,7 @@ Templates:
         -i {{ .Machine.Address }}, \
         --private-key=rsa-{{ .Machine.Name }} \
         join-up.yaml
-
-      drpcli machines meta set $RS_UUID key color to "green"
-      
+     
       echo "Done"
     Name: "Run Playbooks"
 Meta:
