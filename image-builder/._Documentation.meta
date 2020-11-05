@@ -37,6 +37,63 @@ of ``cloud-init`` for image deployment customizations, etc.).
 tasks attached to the Stages to meet your use case requirements.**
 
 
+Customizing Your Image
+======================
+
+The current image builder utilizes the OS installers (eg Anaconda for RedHat/CentOS,
+Debian Installer for Debian/Ubuntu, etc...).  During the installation, the Digital
+Rebar agent (runner) is started in the Post section of these installers.  Workflow
+Stages/Tasks can be run to customize the OS image.
+
+The ``image-builder`` workflows each contain two Flexiflow Stages that will allow the
+operator to dynamically inject Tasks in to the workflow.  These tasks have access
+to the final installed filesystem via the *chroot* environment.  Tasks can install,
+customize, or alter the final image for your needs.
+
+The Tasks can be added prior to the ``image-builder-linux`` Stage which performs
+package/repo management functions, system update, etc. and after the ``image-builder-linux``
+Stage, but before the ``image-builder-capture`` Stage.  The first flexiflow injection
+lets the operator add customizations to the base OS, prior to administrative and
+cleanup tasks, while the second, allows for post-cleanup tasks for any additional
+final cleanup, or Image personalization customizations desired.
+
+To utilize the Flexiflow stages, your target machine you are building your images on
+must have the Parameter(s) ``image-builder/pre-builder-flexiflow`` and/or the
+``image-builder/poost-builder-flexiflow`` on it.   Each is an array
+list of strings that should reference Task name(s) to add, in order.
+
+These tasks will be injected dynamically in to the Workflow to allow customization,
+at the *Pre* or *Post* stage - depending on which Param values you set.
+
+An example of adding repositories that are not part of the base installer definitions,
+installing packages, and then subsequently removing the repository definitioin might
+look something like the following:
+
+  ::
+
+    image-builder/pre-builder-flexiflow:
+      - my-repository-add
+      - my-install-my-packages
+      - my-repository-remove
+    image-builder/post-builder-flexiflow:
+      - my-add-etc-issue
+
+In our theoretical example above, we have 3 tasks that will be injected in the
+*Pre* stage.  The first should add a new repository to the installed system (for
+example EPEL).  The second would install some packages that are contained in the
+example repository.  The third then removes the example repository from the
+sysmem - so the final installed system is in a clean state without those repos.
+
+After the ``image-builder-linux`` Stage/Tasks run, then the *Post* tasks will
+be injected.  In this case ``my-add-etc-issue``.  In this hypothetical task,
+the operator could add a signature to the end of ``/etc/issue`` to identify
+the image build uniquely to your organization.
+
+.. note:: The above tasks are examples, and do not actually exist, the operator
+          would have to create them as a part of a content pack or individual
+          objects added on to the DRP Endpoint.
+
+
 Tutorial Videos
 ===============
 

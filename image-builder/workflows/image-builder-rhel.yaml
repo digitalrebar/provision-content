@@ -22,5 +22,9 @@ Stages:
   - redhat-subscription-register
   - ssh-access
   - drp-agent
+  - image-builder-pre-builder-flexiflow
   - image-builder-linux
-  - finish-install
+  - image-builder-post-builder-flexiflow
+  - image-builder-capture
+  - complete-nobootenv
+
