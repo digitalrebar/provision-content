@@ -77,13 +77,26 @@ Templates:
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
         echo "Installing Podman"
         case $FAMILY in
-          redhat|centos) yum install -y dnf; dnf install -y podman ;;
+          redhat|centos)
+            if which yum > /dev/null 2>&1
+            then
+              yum -y install podman
+            elif which dnf > /dev/null 2>&1
+            then
+              dnf -y install podman
+            else
+              echo "No 'yum' or 'dnf' found on $FAMILY OS.  Unable to install 'podman'."
+              exit 1
+            fi
+            ;;
           debian|ubuntu) . /etc/os-release
             echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
             curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
-            sudo apt-get update -qq; sudo apt-get -qq -y install podman ;;
+            sudo apt-get update -qq; sudo apt-get -qq -y install podman
+            ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
-             exit 1 ;;
+             exit 1
+            ;;
         esac
       fi
 
