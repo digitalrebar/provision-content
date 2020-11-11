@@ -43,29 +43,20 @@ Templates:
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       ADDITIONAL_OPTIONS="$ANSIBLE_VERBOSE {{ .Param "ansible/additional-options" }}"
 
+      # this is bad - needs to accommodate multiple object types being
+      # renamed, the override only does one override thing - should be a
+      # Map of with object_name as the key and value is the override value
       {{ if .ParamExists "esxi/object-rename-override" -}}
       OVER="{{ .ParamExpand "esxi/object-rename-override" }}"
       OVER_MSG="Overriding 'new_name' since 'esxi/object-rename-override' is set (to '$OVER')."
       {{ end -}}
 
-      {{ range $obj := (.Param "esxi/object-rename") -}}
-      NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE=""
-
-      echo "Starting rename operation for '{{ $obj }}'"
-
-      if [[ -z "$OVER" ]]
-      then
-        NEW_NAME="{{ $obj.new_name }}"
-      else
-        echo "$OVER_MSG"
-        NEW_NAME="$OVER"
-      fi
-
-      OBJECT="{{ if $obj.object_name }}object_name: {{ $obj.object_name }}{{ else }}object_moid: {{ $obj.object_moid }}{{ end }}"
-      OBJ_NAME="$(echo $OBJECT | awk ' { print $NF }')"
-      OBJ_TYPE="{{ $obj.object_type }}"
+      # write out a playbook for each object found in the Param, based on
+      # Global variables that are set in the golang 'range' statement
+      write_playbook() {
 
       echo "Writing header for playbook YAML..."
+
       cat <<EOHDR > $PLAYBOOK
       ---
       - hosts: localhost
@@ -86,9 +77,56 @@ Templates:
             object_type: $OBJ_TYPE
             validate_certs: $VAL
       EOPB
+
+      } # end write_playbook()
+
+      {{ range $obj := (.Param "esxi/object-rename") -}}
+      NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE="" DO_PLAYBOOK=""
+
+      echo "Starting rename operation for '{{ $obj }}'"
+
+      if [[ -z "$OVER" ]]
+      then
+        NEW_NAME="{{ $obj.new_name }}"
+      else
+        echo "$OVER_MSG"
+        NEW_NAME="$OVER"
+      fi
+
+      OBJECT="{{ if $obj.object_name }}object_name: {{ $obj.object_name }}{{ else }}object_moid: {{ $obj.object_moid }}{{ end }}"
+      OBJ_NAME="$(echo $OBJECT | awk ' { print $NF }')"
+      OBJ_TYPE="{{ $obj.object_type }}"
+
+      ###
+      #  in some cases, we may have an esxi/object-rename structure, with an
+      #  object to rename for a feature that is disabled - for example; VSAN
+      #
+      #  below # we try to catch those use cases and skip building a playbook
+      #  for each test condition, set DO_PLAYBOOK to 'true' to generate the
+      #  playbook, otherwise it will be skipped.  For helpful message output,
+      #  also set the SKIP_TESTS+="foo test" with which test was skipped
+      ###
+
+      # Test 1: Check if VSAN is disabled
+      SKIP_TESTS+="VSAN enabled"
+      DO_VSAN='{{ .Param "esxi/vsan-enabled" }}'
+      [[ "$DO_VSAN" == "false" ]] && echo "VSAN is disabled by 'esxi/vsan-enabled'"
+      DO_PLAYBOOK="$DO_VSAN"
+
+      [[ "$DO_PLAYBOOK" == "true" ]] write_playbook
+
       {{ end -}}
 
-      if [[ -r "$PLAYBOOK" ]]
+      if [[ -n "$SKIP_TESTS" ]]
+      then
+        echo ""
+        echo "One of the test conditions to generate playbook were invoked."
+        echo "Tests:  $SKIP_TESTS"
+        echo ""
+      fi
+
+      # run ansible if we have a PLAYBOOK generated with size greater than zero
+      if [[ -s "$PLAYBOOK" ]]
       then
         export ANSIBLE_FORCE_COLOR=0
 
@@ -101,6 +139,6 @@ Templates:
 
         ansible-playbook $ADDITIONAL_OPTIONS $PLAYBOOK
       else
-        echo "WARNING: No playbook file was generated to execute. ('$PLAYBOOK')"
+        echo "NOTICE: No playbook file was generated to execute. ('$PLAYBOOK')"
       fi
 
