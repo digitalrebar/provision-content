@@ -80,6 +80,10 @@ Templates:
 
       } # end write_playbook()
 
+      # used in test1 below to validate if VSAN enabled
+      # outside of the range statement because of golang templating scope
+      DO_VSAN='{{ .Param "esxi/vsan-enabled" }}'
+
       {{ range $obj := (.Param "esxi/object-rename") -}}
       NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE=""
       DO_PLAYBOOK="true"
@@ -109,8 +113,8 @@ Templates:
       ###
 
       # Test 1: Check if VSAN is disabled
+      # DO_VSAN set above before the 'range' statement in the golang template
       SKIP_TESTS+="VSAN enabled"
-      DO_VSAN='{{ .Param "esxi/vsan-enabled" }}'
       [[ "$DO_VSAN" == "false" ]] && echo "VSAN is disabled by 'esxi/vsan-enabled'"
       DO_PLAYBOOK="$DO_VSAN"
 
