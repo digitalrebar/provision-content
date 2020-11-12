@@ -81,7 +81,8 @@ Templates:
       } # end write_playbook()
 
       {{ range $obj := (.Param "esxi/object-rename") -}}
-      NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE="" DO_PLAYBOOK=""
+      NEW_NAME="" OBJECT="" OBJ_NAME="" OBJ_TYPE=""
+      DO_PLAYBOOK="true"
 
       echo "Starting rename operation for '{{ $obj }}'"
 
@@ -113,7 +114,7 @@ Templates:
       [[ "$DO_VSAN" == "false" ]] && echo "VSAN is disabled by 'esxi/vsan-enabled'"
       DO_PLAYBOOK="$DO_VSAN"
 
-      [[ "$DO_PLAYBOOK" == "true" ]] write_playbook
+      [[ "$DO_PLAYBOOK" == "true" ]] && write_playbook
 
       {{ end -}}
 
