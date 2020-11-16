@@ -59,6 +59,13 @@ esac
 
 osfamily=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
 
+osclass="linux"
+case $osfamily in
+    mac*|dar*) osclass="darwin";;
+    win*) osclass="windows";;
+    *) true;;
+esac
+
 INSTALL_DIR=/usr/local/bin
 if grep -q coreos /etc/os-release ; then
   INSTALL_DIR=/opt/bin
@@ -69,7 +76,7 @@ mkdir -p $INSTALL_DIR
 
 if ! which drpcli ; then
     echo "Installing drpcli in $INSTALL_DIR"
-    curl --noproxy '*' -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
+    curl --noproxy '*' -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.$osclass"
     chmod 755 "$INSTALL_DIR/drpcli"
 else
     INSTALL_DIR="$(dirname $(which drpcli))"
