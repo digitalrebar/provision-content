@@ -18,6 +18,9 @@ OptionalParams:
   - inventory/data
   - inventory/integrity
 Templates:
+- Path: tpm-info.sh
+  Name: tpm-info.sh
+  ID: tpm-info.sh.tmpl
 - Contents: |-
     #!/bin/bash
     # JQ parse gohai data into simpler inventory/data map
@@ -25,6 +28,10 @@ Templates:
     set -e
 
     {{template "setup.tmpl" .}}
+
+    if [[ -e tpm-info.sh ]] ; then
+        chmod +x ./tpm-info.sh
+    fi
 
     INVENTORY="{}"
 
