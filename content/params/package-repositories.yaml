@@ -113,11 +113,11 @@ Schema:
       arch: aarch64
       url: http://mirror.centos.org/altarch/7/os/aarch64/
       installSource: true
-    - tag: centos-7.8.2003
+    - tag: centos-7.9.2009
       os:
-        - centos-7.8.2003
+        - centos-7.9.2009
       arch: x86_64
-      url: http://mirrors.edge.kernel.org/centos/7.6.1810/os/x86_64/
+      url: http://mirrors.edge.kernel.org/centos/7.9.2009/os/x86_64/
       installSource: true
     - tag: centos-7-everything
       os:
@@ -128,6 +128,7 @@ Schema:
         - centos-7.6.1810
         - centos-7.7.1908
         - centos-7.8.2003
+        - centos-7.9.2009
       arch: x86_64
       url: "http://mirrors.edge.kernel.org/centos"
       distribution: "7"
@@ -150,6 +151,7 @@ Schema:
         - centos-7.6.1810
         - centos-7.7.1908
         - centos-7.8.2003
+        - centos-7.9.2009
       arch: aarch64
       url: "http://mirror.centos.org/altarch"
       distribution: "7"
@@ -169,6 +171,7 @@ Schema:
         - centos-7.6.1810
         - centos-7.7.1908
         - centos-7.8.2003
+        - centos-7.9.2009
       arch: any
       url: http://mirrors.kernel.org/fedora-epel/7/$basearch
       distribution: "7"
