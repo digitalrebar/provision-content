@@ -59,6 +59,11 @@ Schema:
         RaidDisks: "map(.Disks | length)"
         RaidDiskSizes: "map(.Disks | map(.Size))"
         RaidDiskStatuses: "map(.Disks | map(.Status))"
+    tpm:
+      Command: "./tpm-info.sh"
+      JQargs: ""
+      Fields:
+        TpmPublicKey: ".TpmPublicKey"
 Meta:
   color: "green"
   icon: "handshake outline"
