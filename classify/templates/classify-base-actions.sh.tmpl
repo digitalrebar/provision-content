@@ -1,0 +1,61 @@
+
+###
+#   Sets a given parameter to a given value on a Machine object.
+###
+function cl_set_parameter() {
+  local _parameter="$1"
+  local _value="$2"
+
+  echo "Set $_parameter on the machine"
+  drpcli machines set $RS_UUID param "$_parameter" to "$_value" >/dev/null
+}
+
+function set_paramater() {
+  cl_set_parameter "$1" "$2"
+}
+
+###
+#  Adds a given ARGv1 profile to the Machine object
+###
+function cl_add_profile() {
+  local _profile="$1"
+
+  if drpcli profiles exists "$_profile"
+  then
+  if drpcli machines show $RS_UUID | jq -r '.Profiles' | grep -q "\"$_profile\""
+  then
+    echo "Profile ('$_profile') already exists on Machine - no action taken."
+  else
+    echo "Profile ('$_profile') added to machine."
+    drpcli machines addprofile $RS_UUID "$_profile" >/dev/null
+  fi
+  else
+    echo "Requested profile ('$_profile') does not exist."
+    exit 1
+  fi
+}
+
+function add_profiles() {
+  cl_add_profile "$1"
+}
+
+###
+#  Changes the Machine workflow to ARGv1 specified workflow
+###
+function cl_change_workflow() {
+  local _wf="$1"
+
+  if drpcli workflows exists "$_wf"
+  then
+    echo "Workflow ('$_wf') set on machine."
+    drpcli machines update $RS_UUID "{ \"Workflow\": \"$_wf\" }" >/dev/null
+  else
+    echo "Requested workflow ('$_wf') does not exist."
+    exit 1
+  fi
+}
+
+function change_workflow() {
+  cl_change_workflow "$1"
+}
+
