@@ -1,0 +1,15 @@
+---
+Name: sledgehammer-full-drivers
+Description: Defines parameters needed to build sledgehammer with extra drivers
+Documentation: |
+  This profile is used to define all the known extra drivers to build with.
+
+  * Exablaze
+  * Solarflare
+  * Mellanox
+
+Params:
+  sledgehammer/customize-tasks:
+# NOT READY    - sledgehammer-exablaze-current-drivers
+    - sledgehammer-solarflare-current-drivers
+    - sledgehammer-mellanox-current-drivers

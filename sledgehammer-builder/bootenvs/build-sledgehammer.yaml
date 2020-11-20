@@ -164,6 +164,7 @@ Templates:
       systemd
       systemd-networkd
       tar
+      tpm2-tools
       unzip
       util-linux
       vim-enhanced
@@ -171,6 +172,7 @@ Templates:
       which
       xfsdump
       xfsprogs
+      xorriso
       xz
       yum
       zlib

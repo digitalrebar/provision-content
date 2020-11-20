@@ -16,12 +16,12 @@ Loaders:
 OS:
   Family: "redhat"
   Version: "8"
-  Name: "centos-8"
+  Name: "centos-8.1.1911"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-8.2.2004-x86_64-minimal.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.2.2004-x86_64-minimal.iso"
-      Sha256: "47ab14778c823acae2ee6d365d76a9aed3f95bb8d0add23a06536b58bb5293c0"
+      IsoFile: "CentOS-8.1.1911-x86_64-dvd1.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.1.1911-x86_64-dvd1.iso"
+      Sha256: "3ee3f4ea1538e026fff763e2b284a6f20b259d91d1ad5688f5783a67d279423b"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -35,9 +35,9 @@ OS:
         {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: "CentOS-8.2.2004-aarch64-minimal.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.2.2004-aarch64-minimal.iso"
-      Sha256: "621d08902bfd7ca8437cd536b86631c87ddc3e36a530abc77011d230401eb158"
+      IsoFile: "CentOS-8.1.1911-aarch64-dvd1.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.1.1911-aarch64-dvd1.iso"
+      Sha256: "357f34e86a28c86aaf1661462ef41ec4cf5f58c120f46e66e1985a9f71c246e3"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"

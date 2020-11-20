@@ -164,11 +164,13 @@ Templates:
       systemd-resolved
       systemd-networkd
       tar
+      tpm2-tools
       unzip
       util-linux
       vim-enhanced
       wget
       which
+      xorriso
       xfsdump
       xfsprogs
       xz

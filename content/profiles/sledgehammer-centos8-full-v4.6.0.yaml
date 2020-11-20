@@ -1,0 +1,39 @@
+Description: Bootenv override for sledgehammer centos8 full drivers v4.6.0 amd64
+Documentation: ""
+Name: sledgehammer-centos8-full-v4.6.0
+Params:
+  bootenv-customize:
+    discovery:
+      Loaders:
+        amd64-uefi: bca06a945f0f725993e463dbb5867447943c807e/shimx64.efi
+      OS:
+        Name: sledgehammer
+        SupportedArchitectures:
+          amd64:
+            Initrds:
+            - bca06a945f0f725993e463dbb5867447943c807e/stage1.img
+            IsoFile: sledgehammer-bca06a945f0f725993e463dbb5867447943c807e.amd64.tar
+            Kernel: bca06a945f0f725993e463dbb5867447943c807e/vmlinuz0
+      Templates:
+      - ID: allarch-grub.tmpl
+        Name: grub-secure-discovery
+        Path: sledgehammer/bca06a945f0f725993e463dbb5867447943c807e/grub.cfg
+    sledgehammer:
+      Loaders:
+        amd64-uefi: bca06a945f0f725993e463dbb5867447943c807e/shimx64.efi
+      OS:
+        Name: sledgehammer
+        SupportedArchitectures:
+          amd64:
+            Initrds:
+            - bca06a945f0f725993e463dbb5867447943c807e/stage1.img
+            IsoFile: sledgehammer-bca06a945f0f725993e463dbb5867447943c807e.amd64.tar
+            Kernel: bca06a945f0f725993e463dbb5867447943c807e/vmlinuz0
+      Templates:
+      - ID: default-grub.tmpl
+        Name: grub-secure
+        Path: sledgehammer/bca06a945f0f725993e463dbb5867447943c807e/grub.cfg-{{.Machine.HexAddress}}
+      - ID: default-grub.tmpl
+        Name: grub-secure-mac
+        Path: sledgehammer/bca06a945f0f725993e463dbb5867447943c807e/grub.cfg-{{.Machine.MacAddr
+          "pxelinux"}}

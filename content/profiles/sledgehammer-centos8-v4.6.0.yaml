@@ -1,0 +1,39 @@
+---
+Description: 'Bootenv override for sledgehammer v4.6.0 amd64 (CentOS 8)'
+Name: sledgehammer-centos8-v4.6.0
+Params:
+  bootenv-customize:
+    discovery:
+      Loaders:
+        amd64-uefi: e1ca7eddd660032ec98a4201860471ad04f8d105/shimx64.efi
+      OS:
+        Name: sledgehammer
+        SupportedArchitectures:
+          amd64:
+            Initrds:
+            - e1ca7eddd660032ec98a4201860471ad04f8d105/stage1.img
+            IsoFile: sledgehammer-e1ca7eddd660032ec98a4201860471ad04f8d105.amd64.tar
+            Kernel: e1ca7eddd660032ec98a4201860471ad04f8d105/vmlinuz0
+      Templates:
+      - ID: allarch-grub.tmpl
+        Name: grub-secure-discovery
+        Path: sledgehammer/e1ca7eddd660032ec98a4201860471ad04f8d105/grub.cfg
+    sledgehammer:
+      Loaders:
+        amd64-uefi: e1ca7eddd660032ec98a4201860471ad04f8d105/shimx64.efi
+      OS:
+        Name: sledgehammer
+        SupportedArchitectures:
+          amd64:
+            Initrds:
+            - e1ca7eddd660032ec98a4201860471ad04f8d105/stage1.img
+            IsoFile: sledgehammer-e1ca7eddd660032ec98a4201860471ad04f8d105.amd64.tar
+            Kernel: e1ca7eddd660032ec98a4201860471ad04f8d105/vmlinuz0
+      Templates:
+      - ID: default-grub.tmpl
+        Name: grub-secure
+        Path: sledgehammer/e1ca7eddd660032ec98a4201860471ad04f8d105/grub.cfg-{{.Machine.HexAddress}}
+      - ID: default-grub.tmpl
+        Name: grub-secure-mac
+        Path: sledgehammer/e1ca7eddd660032ec98a4201860471ad04f8d105/grub.cfg-{{.Machine.MacAddr
+          "pxelinux"}}
