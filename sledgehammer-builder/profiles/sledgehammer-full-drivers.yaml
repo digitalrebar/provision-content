@@ -10,6 +10,6 @@ Documentation: |
 
 Params:
   sledgehammer/customize-tasks:
-# NOT READY    - sledgehammer-exablaze-current-drivers
+    - sledgehammer-exablaze-current-drivers
     - sledgehammer-solarflare-current-drivers
     - sledgehammer-mellanox-current-drivers
