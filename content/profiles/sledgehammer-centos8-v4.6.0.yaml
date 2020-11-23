@@ -13,6 +13,7 @@ Params:
             Initrds:
             - e1ca7eddd660032ec98a4201860471ad04f8d105/stage1.img
             IsoFile: sledgehammer-e1ca7eddd660032ec98a4201860471ad04f8d105.amd64.tar
+            IsoUrl: http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e1ca7eddd660032ec98a4201860471ad04f8d105/sledgehammer-e1ca7eddd660032ec98a4201860471ad04f8d105.amd64.tar
             Kernel: e1ca7eddd660032ec98a4201860471ad04f8d105/vmlinuz0
       Templates:
       - ID: allarch-grub.tmpl

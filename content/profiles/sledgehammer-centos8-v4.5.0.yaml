@@ -11,6 +11,7 @@ Params:
         SupportedArchitectures:
           'amd64':
             IsoFile: sledgehammer-0b8f38aeecc5a40f915758d9af47102fee6fb83e.amd64.tar
+            IsoUrl: http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/0b8f38aeecc5a40f915758d9af47102fee6fb83e/sledgehammer-0b8f38aeecc5a40f915758d9af47102fee6fb83e.amd64.tar
             Kernel: 0b8f38aeecc5a40f915758d9af47102fee6fb83e/vmlinuz0
             Initrds:
               - 0b8f38aeecc5a40f915758d9af47102fee6fb83e/stage1.img
