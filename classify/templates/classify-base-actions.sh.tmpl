@@ -59,3 +59,65 @@ function change_workflow() {
   cl_change_workflow "$1"
 }
 
+# extends classifier to process parameter into a profile
+function cl_process_param_to_profile() {
+  local _name=$1
+  local _pname=${_name/\//-}
+  local _fail=$2
+
+  # Find the application params and remove them.
+  drpcli machines show $RS_UUID --slim "Params,Meta" | \
+    jq "del(.Profiles[] | select(.|test(\"${_pname}-\")))" | \
+    drpcli machines update $RS_UUID - >/dev/null
+
+  UA=$(drpcli machines get $RS_UUID param $_name --aggregate | jq -r .)
+  UA=${UA// /_}
+  _profile="${_pname}-${UA}"
+  if drpcli profiles exists "$_profile"
+  then
+    if drpcli machines show $RS_UUID | jq -r '.Profiles' | grep -q "\"$_profile\""
+    then
+      echo "Profile ('$_profile') already exists on Machine - no action taken."
+    else
+      drpcli machines addprofile $RS_UUID "$_profile" >/dev/null
+    fi
+  else
+    echo "Requested profile ('$_profile') does not exist.  Not adding."
+    if [[ "$_fail" ]] ; then
+      exit 1
+    fi
+  fi
+}
+
+# extends classifier to process parameter into a profile
+function cl_process_params_to_profile() {
+  local _prefix="${1}"
+  local _fullname="$_prefix"
+  shift
+
+  while (( $# != 0 )) ; do
+    local _UA
+    _UA=$(drpcli machines get $RS_UUID param $1 --aggregate | jq -r .)
+    _UA=${_UA// /_}
+
+    _fullname+="-$_UA"
+    shift
+  done
+
+  if drpcli profiles exists "$_fullname"
+  then
+    # Find the application params and remove them.
+    drpcli machines show $RS_UUID --slim "Params,Meta" | \
+    jq "del(.Profiles[] | select(.|test(\"${_prefix}-\")))" | \
+      drpcli machines update $RS_UUID - >/dev/null
+
+    if drpcli machines show $RS_UUID | jq -r '.Profiles' | grep -q "\"$_fullname\""
+    then
+      echo "Profile ('$_fullname') already exists on Machine - no action taken."
+    else
+      drpcli machines addprofile $RS_UUID "$_fullname" >/dev/null
+    fi
+  else
+    echo "Requested profile ('$_fullname') does not exist.  Not adding."
+  fi
+}
