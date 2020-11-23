@@ -1,0 +1,40 @@
+---
+Description: Bootenv override for sledgehammer centos8 full drivers v4.6.0 amd64
+Name: sledgehammer-centos8-full-v4.6.0
+Params:
+  bootenv-customize:
+    discovery:
+      Loaders:
+        amd64-uefi: d638bb5c402d007be9a3228a108982ad54dce200/shimx64.efi
+      OS:
+        Name: sledgehammer
+        SupportedArchitectures:
+          amd64:
+            Initrds:
+            - d638bb5c402d007be9a3228a108982ad54dce200/stage1.img
+            IsoFile: sledgehammer-d638bb5c402d007be9a3228a108982ad54dce200.amd64.tar
+            IsoUrl: http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/sledgehammer-d638bb5c402d007be9a3228a108982ad54dce200.amd64.tar
+            Kernel: d638bb5c402d007be9a3228a108982ad54dce200/vmlinuz0
+      Templates:
+      - ID: allarch-grub.tmpl
+        Name: grub-secure-discovery
+        Path: sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/grub.cfg
+    sledgehammer:
+      Loaders:
+        amd64-uefi: d638bb5c402d007be9a3228a108982ad54dce200/shimx64.efi
+      OS:
+        Name: sledgehammer
+        SupportedArchitectures:
+          amd64:
+            Initrds:
+            - d638bb5c402d007be9a3228a108982ad54dce200/stage1.img
+            IsoFile: sledgehammer-d638bb5c402d007be9a3228a108982ad54dce200.amd64.tar
+            Kernel: d638bb5c402d007be9a3228a108982ad54dce200/vmlinuz0
+      Templates:
+      - ID: default-grub.tmpl
+        Name: grub-secure
+        Path: sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/grub.cfg-{{.Machine.HexAddress}}
+      - ID: default-grub.tmpl
+        Name: grub-secure-mac
+        Path: sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/grub.cfg-{{.Machine.MacAddr
+          "pxelinux"}}

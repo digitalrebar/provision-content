@@ -1,8 +1,8 @@
 ---
-Name: "centos-8-install"
-Description: "CentOS-8 installer that points to the latest CentOS 8 release."
+Name: "centos-8.2.2004-install"
+Description: "CentOS-8.2.2004 installer that points to the latest CentOS 8.2.2004 release."
 Documentation: |
-  This BootEnv installs the CentOS 8 Minimal operating system.  Both x86_64
+  This BootEnv installs the CentOS 8.2.2004 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
 Meta:
   type: "os"
@@ -16,7 +16,7 @@ Loaders:
 OS:
   Family: "redhat"
   Version: "8"
-  Name: "centos-8"
+  Name: "centos-8.2.2004"
   SupportedArchitectures:
     x86_64:
       IsoFile: "CentOS-8.2.2004-x86_64-minimal.iso"
