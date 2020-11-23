@@ -1,5 +1,5 @@
 ---
-Name: "centos-8-install"
+Name: "centos-8.1.1911-install"
 Description: "CentOS-8 installer that points to the latest CentOS 8 release."
 Documentation: |
   This BootEnv installs the CentOS 8 Minimal operating system.  Both x86_64
