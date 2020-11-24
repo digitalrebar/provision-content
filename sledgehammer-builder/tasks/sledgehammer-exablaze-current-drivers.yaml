@@ -79,3 +79,6 @@ Templates:
       # Put drivers back
       cp -r /tmp/exadrivers /
       rm -rf /tmp/exadrivers
+
+      # Install exanic utils
+      dnf -y install exanic-utils
