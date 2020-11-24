@@ -37,8 +37,23 @@ of ``cloud-init`` for image deployment customizations, etc.).
 tasks attached to the Stages to meet your use case requirements.**
 
 
-Customizing Your Image
-======================
+Customizing Your Image - Uploaded Image Name
+============================================
+
+The default image name that is generated may or may not suit your use case requirement.
+If the image name (and accompanying Manifest file) need to carry a custom formatted
+name when uploaded to the DRP Endpoint, you can do so by use of the following three
+Params:
+
+  * ``image-builder/upload-path``
+  * ``image-builder/upload-rootfs-name``
+  * ``image-builder/upload-manifest-name``
+
+Please review the documentation from each of those Params for more complete details.
+
+
+Customizing Your Image - Image Contents Changes
+===============================================
 
 The current image builder utilizes the OS installers (eg Anaconda for RedHat/CentOS,
 Debian Installer for Debian/Ubuntu, etc...).  During the installation, the Digital

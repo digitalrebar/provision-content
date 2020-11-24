@@ -21,8 +21,15 @@ export RS_BUILDER_DATE="`date`"
 
 DSTAMP=`date +%Y%m%d-%H%M%S`
 export RS_IMAGE_IDENT=`uuidgen | md5sum | awk ' { print $1 } ' | cut -c 1-10`
-export RS_UPLOAD_TARBALL="images/$TAG-rootfs-$DSTAMP-$RS_IMAGE_IDENT.tgz"
-export RS_UPLOAD_MANIFEST="images/$TAG-MANIFEST-$DSTAMP-$RS_IMAGE_IDENT.txt"
+
+UP_PATH="$(echo "{{ .Param "image-builder/upload-path" -}}" | sed 's|/$||g')"
+UP_NAME="$(echo "{{ .Param "image-builder/upload-rootfs-name" -}}" | sed 's|.tgz||g')"
+UP_MANI="$(echo "{{ .Param "image-builder/upload-manifest-name" -}}" | sed 's|.txt||g')"
+
+export RS_UPLOAD_TARBALL="${UP_PATH}/${UP_NAME}.tgz"
+export RS_UPLOAD_MANIFEST="${UP_PATH}/${UP_MANI}.txt"
+#export RS_UPLOAD_TARBALL="$UP_PATH/$TAG-rootfs-$DSTAMP-$RS_IMAGE_IDENT.tgz"
+#export RS_UPLOAD_MANIFEST="$UP_PATH/$TAG-MANIFEST-$DSTAMP-$RS_IMAGE_IDENT.txt"
 
 # branding
 for F in issue issue.net
