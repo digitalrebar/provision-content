@@ -4,6 +4,7 @@ RUN echo "===> Adding Python runtime..."  && \
     apk --no-cache --update add openssh-client python3 openssl ca-certificates    && \
     apk --no-cache --update add --virtual build-dependencies \
                 python3-dev libffi-dev openssl-dev build-base  && \
+    apk add py3-pip && \
     pip3 install --upgrade pip cffi
 RUN echo "===> Installing Ansible..."  && \
     pip3 install ansible==2.9.1         && \
