@@ -5,36 +5,36 @@ Params:
   bootenv-customize:
     discovery:
       Loaders:
-        amd64-uefi: d638bb5c402d007be9a3228a108982ad54dce200/shimx64.efi
+        amd64-uefi: 007c07b1714add1c88182b46af6c7b395821ac7e/shimx64.efi
       OS:
         Name: sledgehammer
         SupportedArchitectures:
           amd64:
             Initrds:
-            - d638bb5c402d007be9a3228a108982ad54dce200/stage1.img
-            IsoFile: sledgehammer-d638bb5c402d007be9a3228a108982ad54dce200.amd64.tar
-            IsoUrl: http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/sledgehammer-d638bb5c402d007be9a3228a108982ad54dce200.amd64.tar
-            Kernel: d638bb5c402d007be9a3228a108982ad54dce200/vmlinuz0
+            - 007c07b1714add1c88182b46af6c7b395821ac7e/stage1.img
+            IsoFile: sledgehammer-007c07b1714add1c88182b46af6c7b395821ac7e.amd64.tar
+            IsoUrl: http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/007c07b1714add1c88182b46af6c7b395821ac7e/sledgehammer-007c07b1714add1c88182b46af6c7b395821ac7e.amd64.tar
+            Kernel: 007c07b1714add1c88182b46af6c7b395821ac7e/vmlinuz0
       Templates:
       - ID: allarch-grub.tmpl
         Name: grub-secure-discovery
-        Path: sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/grub.cfg
+        Path: sledgehammer/007c07b1714add1c88182b46af6c7b395821ac7e/grub.cfg
     sledgehammer:
       Loaders:
-        amd64-uefi: d638bb5c402d007be9a3228a108982ad54dce200/shimx64.efi
+        amd64-uefi: 007c07b1714add1c88182b46af6c7b395821ac7e/shimx64.efi
       OS:
         Name: sledgehammer
         SupportedArchitectures:
           amd64:
             Initrds:
-            - d638bb5c402d007be9a3228a108982ad54dce200/stage1.img
-            IsoFile: sledgehammer-d638bb5c402d007be9a3228a108982ad54dce200.amd64.tar
-            Kernel: d638bb5c402d007be9a3228a108982ad54dce200/vmlinuz0
+            - 007c07b1714add1c88182b46af6c7b395821ac7e/stage1.img
+            IsoFile: sledgehammer-007c07b1714add1c88182b46af6c7b395821ac7e.amd64.tar
+            Kernel: 007c07b1714add1c88182b46af6c7b395821ac7e/vmlinuz0
       Templates:
       - ID: default-grub.tmpl
         Name: grub-secure
-        Path: sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/grub.cfg-{{.Machine.HexAddress}}
+        Path: sledgehammer/007c07b1714add1c88182b46af6c7b395821ac7e/grub.cfg-{{.Machine.HexAddress}}
       - ID: default-grub.tmpl
         Name: grub-secure-mac
-        Path: sledgehammer/d638bb5c402d007be9a3228a108982ad54dce200/grub.cfg-{{.Machine.MacAddr
+        Path: sledgehammer/007c07b1714add1c88182b46af6c7b395821ac7e/grub.cfg-{{.Machine.MacAddr
           "pxelinux"}}
