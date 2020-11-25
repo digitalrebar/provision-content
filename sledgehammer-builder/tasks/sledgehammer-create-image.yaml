@@ -35,6 +35,59 @@ Templates:
       sha1sum vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi >sha1sums
       mkdir $signature
       mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
+
+      echo "Making cd iso"
+      mkdir -p iso/boot/grub
+      mkdir -p iso/EFI/BOOT/fonts
+      cp $signature/vmlinuz0 iso
+      cp $signature/stage1.img iso
+      wget -O iso/EFI/BOOT/BOOTIA32.EFI {{.Env.PathFor "http" "EFI/BOOT/BOOTIA32.EFI" }}
+      wget -O iso/EFI/BOOT/BOOTX64.EFI {{.Env.PathFor "http" "EFI/BOOT/BOOTX64.EFI" }}
+      wget -O iso/EFI/BOOT/grubia32.efi {{.Env.PathFor "http" "EFI/BOOT/grubia32.efi" }}
+      wget -O iso/EFI/BOOT/TRANS.TBL {{.Env.PathFor "http" "EFI/BOOT/TRANS.TBL" }}
+      wget -O iso/EFI/BOOT/grubx64.efi {{.Env.PathFor "http" "EFI/BOOT/grubx64.efi" }}
+      wget -O iso/EFI/BOOT/mmia32.efi {{.Env.PathFor "http" "EFI/BOOT/mmia32.efi" }}
+      wget -O iso/EFI/BOOT/mmx64.efi {{.Env.PathFor "http" "EFI/BOOT/mmx64.efi" }}
+      wget -O iso/EFI/BOOT/fonts/unicode.pf2 {{.Env.PathFor "http" "EFI/BOOT/fonts/unicode.pf2" }}
+      wget -O iso/EFI/BOOT/fonts/TRANS.TBL {{.Env.PathFor "http" "EFI/BOOT/fonts/TRANS.TBL" }}
+      cat >iso/EFI/BOOT/BOOT.conf << 'EOFGRUB'
+      if [ ${grub_platform} == "efi" ]; then
+        set root=(cd0)
+        set linuxcmd=linuxefi
+        set initrdcmd=initrdefi
+      else
+        set root=(cd)
+        set linuxcmd=linux
+        set initrdcmd=initrd
+      fi
+      timeout=0
+      # There are 15 lines of 80 comments after for padding.
+      # REPLACE HERE
+      menuentry "Sledgehammer" {
+        $linuxcmd /vmlinuz0 BOOTIF=discovery provisioner.web=http://192.168.100.001:8091 provisioner.ip=192.168.100.25/24 provisioner.gw=192.168.100.1
+        $initrdcmd /stage1.img
+        boot
+      }
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      ################################################################################
+      EOFGRUB
+      cp iso/EFI/BOOT/BOOT.conf iso/EFI/BOOT/grub.cfg
+      cp iso/EFI/BOOT/BOOT.conf iso/boot/grub/grub.cfg
+      grub2-mkrescue -o $signature/cdboot.iso iso
+
       case {{.Machine.Arch}} in
           amd64) shim="shimx64.efi";;
           arm64) shim="grubaa64.efi";;
