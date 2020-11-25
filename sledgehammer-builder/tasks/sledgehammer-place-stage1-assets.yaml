@@ -80,6 +80,10 @@ Templates:
       postportdelay=$(grep -o 'provisioner.postportdelay=[^ ]*' /proc/cmdline)
       routedelay=$(grep -o 'provisioner.routedelay=[^ ]*' /proc/cmdline)
       wgetretrycount=$(grep -o 'provisioner.wgetretrycount=[^ ]*' /proc/cmdline)
+      myip=$(grep -o 'provisioner.ip=[^ ]*' /proc/cmdline)
+      mygw=$(grep -o 'provisioner.gw=[^ ]*' /proc/cmdline)
+      mydns=$(grep -o 'provisioner.dns=[^ ]*' /proc/cmdline)
+
       if [[ "$bootif" == "BOOTIF=discovery" ]] ; then
         bootif=$(cat /sys/class/net/eth0/address)
         bootif=${bootif//:/-}
@@ -97,6 +101,9 @@ Templates:
       routedelay=${routedelay#*=}
       wgetretrycount=${wgetretrycount#*=}
       wgetretrycount=${wgetretrycount:-65}
+      myip=${myip#*=}
+      mygw=${mygw#*=}
+      mydns=${mydns#*=}
 
       pxedev=""
       for dev in /sys/class/net/*; do
@@ -113,12 +120,19 @@ Templates:
       ip link set "$pxedev" up
       # if a post port delay is sent - wait
       test -z "$postportdelay" || sleep $postportdelay
-      if [[ "$ip6" == "" ]] ; then
-          udhcpc -b -R -a -i "$pxedev"
+
+      if [[ "$myip" != "" ]] ; then
+        ip ad add $myip dev $pxedev
+        ip route add default via $mygw
       else
+        if [[ "$ip6" == "" ]] ; then
+          udhcpc -b -R -a -i "$pxedev"
+        else
           test -z "$routedelay" || sleep $routedelay
           udhcpc6 -b -R -i "$pxedev"
+        fi
       fi
+
       echo "Fetching second-stage initramfs"
       ARCH={{.Machine.Arch}}
       squashfs="$nextone/sledgehammer/$ARCH/$SIGNATURE/root.squashfs"
@@ -165,18 +179,26 @@ Templates:
       echo '[Match]'
       printf 'MACAddress=%s\n\n' "$bootif"
       echo '[Network]'
-      if [[ "$ip6" == "" ]] ; then
+      if [[ "$myip" == "" ]] ; then
+        if [[ "$ip6" == "" ]] ; then
           echo 'DHCP=ipv4'
           echo
           echo '[DHCPv4]'
           echo 'ClientIdentifier=mac'
           echo 'SendDecline=false'
           echo 'SendRelease=false'
-      else
+        else
           echo 'DHCP=ipv6'
           echo
           echo '[DHCPv6]'
           echo 'ClientIdentifier=mac'
+        fi
+      else
+        echo "Address=${myip}"
+        echo "Gateway=${mygw}"
+        if [[ "$mydns" != "" ]] ; then
+          echo "DNS=$mydns"
+        fi
       fi
       } > /newinitramfs/etc/systemd/network/20-bootif.network
 
@@ -197,10 +219,15 @@ Templates:
       echo "" >/proc/sys/kernel/hotplug
       # pkill -9 here to keep udhcpc from releasing the IP
       # address when we will want it back in a second or two.
-      if [[ "$ip6" == "" ]] ; then
-          pkill -9 udhcpc
+      if [[ "$myip" == "" ]] ; then
+        if [[ "$ip6" == "" ]] ; then
+            pkill -9 udhcpc
+        else
+            pkill -9 udhcpc6
+        fi
       else
-          pkill -9 udhcpc6
+        ip route delete default
+        ip a del $myip
       fi
       ip link set "$pxedev" down
 

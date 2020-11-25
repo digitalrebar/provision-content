@@ -60,7 +60,13 @@ Templates:
       fi
       if [[ $(cat /proc/cmdline) =~ $bootif_re ]]; then
           if [[ "${BASH_REMATCH[1]}" == "discovery" ]] ; then
-              MAC=$(cat /sys/class/net/eth0/address)
+              MACSTR=$(grep -o 'MACAddress=[^ ]*' /etc/systemd/network/20-bootif.network)
+              macstr_re='MACAddress=([^ ]+)'
+              if [[ "$MACSTR" =~ $macstr_re ]]; then
+                MAC="${BASH_REMATCH[1]}"
+              else
+                MAC=$(cat /sys/class/net/eth0/address)
+              fi
           else
               MAC="${BASH_REMATCH[1]//-/:}"
               MAC="${MAC#*:}"
