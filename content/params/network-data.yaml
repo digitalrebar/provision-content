@@ -14,6 +14,7 @@ Documentation: |
   * gateway = IPv4 Gateway address
   * netmask = IPv4 Netmaks
   * address = IPv4 Address - In some cases, this will NOT be required.  DNS lookups...
+  * inteface = a comma separated list of interfaces to used e.g. eth0,enp0s3 - if needed.
 
   Leave the element out if not needed.
 
@@ -37,6 +38,7 @@ Documentation: |
         netmask: 255.255.255.0
         address: 10.3.3.15
         vlan: "2335"
+        interface: eth0,enp0s3
 
 
 Schema:
