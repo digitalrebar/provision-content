@@ -83,11 +83,22 @@ Templates:
       myip=$(grep -o 'provisioner.ip=[^ ]*' /proc/cmdline)
       mygw=$(grep -o 'provisioner.gw=[^ ]*' /proc/cmdline)
       mydns=$(grep -o 'provisioner.dns=[^ ]*' /proc/cmdline)
+      interfaces=$(grep -o 'provisioner.interface=[^ ]*' /proc/cmdline)
 
       if [[ "$bootif" == "BOOTIF=discovery" ]] ; then
-        bootif=$(cat /sys/class/net/eth0/address)
-        bootif=${bootif//:/-}
-        bootif="BOOTIF=01-$bootif"
+        interfaces=${interfaces#*=}
+        if [[ "$interfaces" == "" ]] ; then
+          interfaces="eth0"
+        fi
+        for i in ${interfaces//,/ } ; do
+           if [ ! -f /sys/class/net/$i/address ] ; then
+             continue
+           fi
+           bootif=$(cat /sys/class/net/$i/address)
+           bootif=${bootif//:/-}
+           bootif="BOOTIF=01-$bootif"
+           break
+        done
       fi
       test -z "$bootif" && fail "Missing required parameter BOOTIF"
       test -z "$nextone" && fail "Missing required parameter provisioner.web"

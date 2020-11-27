@@ -20,17 +20,17 @@ Meta:
   title: "Digital Rebar Community Content"
 OnlyUnknown: true
 Loaders:
-  amd64-uefi: 9a66eace28d76510a35e411cc79e764d2c6fb1a2/shimx64.efi
+  amd64-uefi: aaaf3f77a704e10a51a62ee494e129758c9c0389/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-9a66eace28d76510a35e411cc79e764d2c6fb1a2.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/9a66eace28d76510a35e411cc79e764d2c6fb1a2/sledgehammer-9a66eace28d76510a35e411cc79e764d2c6fb1a2.amd64.tar"
-      Kernel: "9a66eace28d76510a35e411cc79e764d2c6fb1a2/vmlinuz0"
+      IsoFile: "sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar"
+      Kernel: "aaaf3f77a704e10a51a62ee494e129758c9c0389/vmlinuz0"
       Initrds:
-        - "9a66eace28d76510a35e411cc79e764d2c6fb1a2/stage1.img"
+        - "aaaf3f77a704e10a51a62ee494e129758c9c0389/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -228,7 +228,7 @@ Templates:
         source (tftp)/grub/discovery.cfg
       fi
   - Name: "grub-secure-discovery"
-    Path: "sledgehammer/9a66eace28d76510a35e411cc79e764d2c6fb1a2/grub.cfg"
+    Path: "sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/grub.cfg"
     ID: allarch-grub.tmpl
   - Name: "grub-discovery"
     Path: "grub/discovery.cfg"
