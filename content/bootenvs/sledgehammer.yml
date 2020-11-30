@@ -41,7 +41,7 @@ OS:
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
         {{ if .ParamExists "network-data" }}
-        {{ $nd := .Param "network-data" }}
+        {{ $nd := .ComposeParam "network-data" }}
         {{ if hasKey $nd "prov" }}
         {{ $prov := get $nd "prov" }}
         {{ if and (hasKey $prov "address") (hasKey $prov "netmask") }}
@@ -80,7 +80,7 @@ OS:
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
         {{ if .ParamExists "network-data" }}
-        {{ $nd := .Param "network-data" }}
+        {{ $nd := .ComposeParam "network-data" }}
         {{ if hasKey $nd "prov" }}
         {{ $prov := get $nd "prov" }}
         {{ if and (hasKey $prov "address") (hasKey $prov "netmask") }}
@@ -119,7 +119,7 @@ OS:
         provisioner.web={{.ProvisionerURL}}
         rs.uuid={{.Machine.UUID}}
         {{ if .ParamExists "network-data" }}
-        {{ $nd := .Param "network-data" }}
+        {{ $nd := .ComposeParam "network-data" }}
         {{ if hasKey $nd "prov" }}
         {{ $prov := get $nd "prov" }}
         {{ if and (hasKey $prov "address") (hasKey $prov "netmask") }}
