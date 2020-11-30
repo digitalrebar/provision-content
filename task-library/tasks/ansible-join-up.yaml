@@ -119,6 +119,20 @@ Templates:
       echo "Prevent the task list from restarting!"
       drpcli machines set $RS_UUID param start-over to false > /dev/null
 
+      # this is going to look like a reboot, fake a powercycle
+      # MUST BE AFTER other machine updates or it will be over-written by next event
+      if drpcli events post '{
+        "Action": "powercycle",
+        "Key": "{{ .Machine.Uuid }}",
+        "Object": {{ .Machine | toJson }},
+        "Principal": "runner:{{ .Machine.Uuid }}",
+        "Type": "machines"
+      }' > /dev/null; then
+        echo "Sending Reboot Event (powercycle)"
+      else
+        echo "Warning: failed trying to post Reboot Event (powercycle)"
+      fi
+
       echo "REMINDER: SSH user, {{ .Param "rsa/key-user" }}, must be available on target o/s!"
 
       echo "Run Join-Up Playbook using $(ansible-playbook --version)"
