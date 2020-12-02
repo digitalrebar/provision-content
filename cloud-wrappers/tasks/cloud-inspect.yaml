@@ -94,6 +94,9 @@ Templates:
         exit 1
       {{ end }}
 
+      echo "set icon to cloud to show provisioned"
+      drpcli machines meta set $RS_UUID key icon to cloud > /dev/null
+
       echo "done"
       exit 0
 Meta:
