@@ -108,7 +108,7 @@ Templates:
         {{- range $idx, $element := $netmap }}
         {{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }}--net:"{{ $netkey }}"="{{ $netval }}" \\
         {{- end }}
-        {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else }}{{ end }}
+        {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}"{{ else }}{{ end }} \\
         {{ .ParamExpand "govc/ova-location" }} \\
         'vi://
               {{- .Param "govc/username" -}}:{{- .Param "govc/password" -}}
