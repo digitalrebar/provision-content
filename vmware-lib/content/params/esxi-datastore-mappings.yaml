@@ -1,0 +1,184 @@
+---
+Name: "esxi/datastore-mappings"
+Description: "Defines the a set of Datastore mappings to create."
+Documentation: |
+  This data structure defines a set of Datastores to create in a single
+  set of mappings.  Multiple datastore types can be created in one
+  task run.
+
+  This Param data structure defines the configurations of each of the described
+  datastores to be created.  In addition, you must add the Param
+  ``esxi/datastore-memberships`` to each *vSphere ESXi* node with the name of the
+  datastores to add to that node.
+
+  Required datastore configuration values are as follows:
+
+    * ``name`` = the name of the datastore to create
+    * ``type`` = either ``nfs``, ``nfs4``, ``cifs``, ``vmfs``, or ``local`
+
+  The following additional values can be specified, and are *type* dependent
+  (either *nfs*, *vmfs*, or *local* type):
+
+    * ``disk``                = Canonical name of disk (VMFS only)
+    * ``force``               = Ignore DuplicateName error if datastore is already mounted on a host (``false`` by default)
+    * ``host``                = Host system
+    * ``mode``                = Access mode for the mount point (readOnly|readWrite)
+    * ``path``                = Local directory path for the datastore (local only)
+    * ``remote-host``         = Remote hostname of the NAS datastore (NFS/CIFS)
+    * ``remote-path``         = Remote path of the NFS mount point (NFS/CIFS)
+    * ``username``            = Username to use when connecting (CIFS only)
+    * ``password``            = Password to use when connecting (CIFS only)
+    * ``version``             = VMFS major version
+
+  Digital Rebar Golang templating constructs can be used in the datastructures and will
+  be filled in when the template is evaluted.  This is useful for Datastores that are
+  created bound to specific Node information.  A further example; creating a local
+  datastore with the ESXi node name in the name construct.  When these are rolled up
+  under vCenter management, it allows datastore uniqueness.
+
+  Example in YAML:
+
+    ::
+
+      esxi/datastore-mappings:
+        nfs-datastore:
+          name: "nfs-{{.MachineName}}"
+          mtu: 9000
+          version: 7.0.0
+          discovery: lldp
+          vmnic: vmnic1
+          portgroups:
+            pg_internal:
+              migrate:
+                portgroup: "Management Network"
+                vswitch: "vSwitch0"
+                vmk: "vmk0"
+                vms_to_migrate:
+                  - "vm01"
+                  - "vm02"
+              type: ephemeral
+              ports: 16
+              vlan: 10
+            pg_external:
+              type: ephemeral
+              ports: 8
+              vlan: 0
+        dvs02:
+          mtu: 1534
+          version: 7.0.0
+          discovery: cdp
+          vmnic: vmnic2
+
+  Example in JSON:
+
+    ::
+
+      "dvs01": {
+        "mtu": 9000,
+        "version": "7.0.0",
+        "discovery": "lldp",
+        "vmnic": "vmnic1",
+        "portgroups": {
+          "pg_external": {
+            "type": "ephemeral",
+            "vlan": 10
+            "ports": 8
+          },
+          "pg_internal": {
+            "migrate": {
+              "portgroup": "Management Network",
+              "vmk": "vmk0",
+              "vswitch": "vSwitch0",
+              "vms_to_migrate": [
+                "vm01", "vm02"
+              ]
+            }
+            "type": "ephemeral",
+            "vlan": 0,
+            "ports": 16
+          }
+        }
+      },
+      "dvs02": {
+        "mtu": 1534,
+        "version": "7.0.0",
+        "discovery": "cdp",
+        "vmnic": "vmnic2"
+      }
+
+  "vms_to_migrate": [
+                "vm01", "vm02"
+              ]  In the above example, the ``dvs01`` DVS will have jumbo frames, switch
+  version set to 7.0.0, discovery packets will use the LLDP protocol, and
+  it will map to the ``vmnic1`` device.  In addition, it will define two
+  Portgroups, named ``pg_internal`` and ``pg_external``; both of type
+  ephemeral with different numbers of ports defined.
+
+  The ``dvs02`` switch will use standard size packets, the CDP discovery
+  protocol, the ``vmnic2`` device, and will not map any Portgroups.
+
+  .. note:: You must also add the named DVS Switches (eg ``dvs01`` and ``dvs02``
+            in the above example), to the vSphere ESXi nodes that will use these
+            switches; via the ``esxi/dvs-memberships`` Param.
+
+Meta:
+  color: "green"
+  icon: "sitemap"
+  title: "RackN Content"
+Schema:
+  default: {}
+  type: "object"
+  additionalProperties:
+    type: "object"
+    required:
+      - "mtu"
+      - "version"
+      - "vmnic"
+    properties:
+      mtu:
+        type: "number"
+        minimum: 1000
+        maximum: 9999
+      version:
+        type: "string"
+        enum:
+          - "6.5.0"
+          - "6.6.0"
+          - "7.0.0"
+      discovery:
+        type: "string"
+        enum:
+          - "cdp"
+          - "lldp"
+      vmnic:
+        type: "string"
+      portgroups:
+        type: "object"
+        additionalProperties:
+          type: "object"
+          properties:
+            type:
+              type: "string"
+              enum:
+                - "ephemeral"
+                - "earlyBinding"
+                - "lateBinding"
+            ports:
+              type: "number"
+              minimum: 0
+              maximum: 60000
+            vlan:
+              type: "number"
+              minimum: 0
+              maximum: 4094
+            migrate:
+              type: "object"
+              properties:
+                vswitch:
+                  type: "string"
+                vmk:
+                  type: "string"
+                vms_to_migrate:
+                  type: "array"
+                  items:
+                    type: "string"

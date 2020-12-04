@@ -79,6 +79,10 @@ Templates:
       > $OVFCMD
       chmod +x $OVFCMD
 
+      ABOUT=$(govc about -json)
+      [[ -z "$ABOUT" ]] && xiterr 1 "'govc about' returned empty results"
+      API_TYPE=$(jq -r '.About.ApiType' <<< $ABOUT)
+
       {{ $ovajson := ( .ComposeParam "ova/param-json" ) -}}
       {{ $propmap := get (.Param "ova/param-json") "PropertyMapping" -}}
       {{ $netmap := get (.Param "ova/param-json") "NetworkMapping" -}}
@@ -97,6 +101,25 @@ Templates:
       {{ if eq $ovajson.PowerOn true }}MORE+="--powerOn "{{ end }}
       {{ if eq $ovajson.WaitForIP true }}MORE+="--X:waitForIp "{{ end }}
 
+      if [[ "{{ .Param "govc/debug" }}" == "true" ]]
+      then
+        echo ">>> DEBUG output for 'govc about' command."
+        jq '.' <<< $ABOUT
+      fi
+
+      # build correct vi:// string syntax depending on us talking to vCenter or ESXi directly
+      case $API_TYPE in
+        VirtualCenter)
+          STRING='{{- .ParamExpand "esxi/datacenter-name" -}}/host/{{- .ParamExpand "esxi/cluster-name" -}}'
+          ;;
+        HostAgent)
+          STRING=''
+          ;;
+        *)
+          xiterr 1 "Unsupport API Type ('$API_TYPE') from vSphere resource. Expect 'VirtualCenter' or 'HostAgent'."
+          ;;
+      esac
+
       cat << EOOVF > $OVFCMD
       ovftool {{ .Param "ova/ovftool-extra-options" }} \\
         --name='{{ $ovajson.Name }}' \\
@@ -108,13 +131,13 @@ Templates:
         {{- range $idx, $element := $netmap }}
         {{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }}--net:"{{ $netkey }}"="{{ $netval }}" \\
         {{- end }}
-        {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}" \\{{ else }}{{ end }}
+        {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}" {{ else }}{{ end }} \\
         {{ .ParamExpand "govc/ova-location" }} \\
         'vi://
               {{- .Param "govc/username" -}}:{{- .Param "govc/password" -}}
               @{{- .ParamExpand "govc/url" -}}
               {{- if ( .Param "govc/port" ) -}}:{{- .Param "govc/port" | toString -}}{{- end -}}
-              /{{- .ParamExpand "esxi/datacenter-name" -}}/host/{{- .ParamExpand "esxi/cluster-name" -}}'
+              /${STRING}'
       EOOVF
 
       echo ""
