@@ -1,5 +1,5 @@
 ---
-Name: "ova/ovaftool-deploy-more-mapping-template"
+Name: "ova/ovftool-deploy-more-mapping-template"
 Description: "Template to inject Golang Template re-mapping for OVFTool arguments"
 Documentation: |
   The ``ovftool-deploy`` task remaps JSON generated template values to

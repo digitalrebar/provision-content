@@ -21,7 +21,7 @@ Documentation: |
   OVFTool command line flags.
 
     1.  Use the Param ``ova/ovftool-extra-options`` to add command line flag overrides - see the Param for more documentation.
-    2.  For more advanced/flexible use cases in the field, create a Shell script template defined by the Param ``ova/ovaftool-deploy-more-mapping-template``
+    2.  For more advanced/flexible use cases in the field, create a Shell script template defined by the Param ``ova/ovftool-deploy-more-mapping-template``
 
   The template override (option 2) is a much more advanced use case.  It utilizes
   Golang Templating to parse the JSON data structure options, and remap them
@@ -49,7 +49,7 @@ Meta:
 RequiredParams:
   - ova/param-json
 OptionalParams:
-  - ova/ovaftool-deploy-more-mapping-template
+  - ova/ovftool-deploy-more-mapping-template
   - ova/ovftool-extra-options
 Templates:
   - Name: "ovftool-deploy.sh"
@@ -79,19 +79,26 @@ Templates:
       > $OVFCMD
       chmod +x $OVFCMD
 
+      # used to properly build up the vi:// string syntax depending if we're vCenter or ESXi
       ABOUT=$(govc about -json)
       [[ -z "$ABOUT" ]] && xiterr 1 "'govc about' returned empty results"
       API_TYPE=$(jq -r '.About.ApiType' <<< $ABOUT)
+      [[ -z "$API_TYPE" ]] && xiterr 1 "No 'API Type' found in 'govc about' results"
 
       {{ $ovajson := ( .ComposeParam "ova/param-json" ) -}}
       {{ $propmap := get (.Param "ova/param-json") "PropertyMapping" -}}
       {{ $netmap := get (.Param "ova/param-json") "NetworkMapping" -}}
 
+      ###
+      #  remap JSON template constructs to OVFTool command line usage
+      # ###
+      #
       # thank you for inconsistent ovftool argument flags from govc generated
       # template json values -vs- ovftool usage ... thank you very much
-      {{ if ( .ParamExists "ova/ovaftool-deploy-more-mapping-template" ) }}
-      {{ .CallTemplate (.Param "ova/ovaftool-deploy-more-mapping-template" ) .}}
-      {{ end }}
+      # this allows for in-the-field injection of remappings if needed
+      {{ if ( .ParamExists "ova/ovftool-deploy-more-mapping-template" ) -}}
+      {{ .CallTemplate (.Param "ova/ovftool-deploy-more-mapping-template" ) .}}
+      {{ end -}}
 
       {{ if $ovajson.DiskProvisioning }}MORE+="--diskMode=\"{{ $ovajson.DiskProvisioning }}\" "{{ end }}
       {{ if $ovajson.IPAllocationPolicy }}MORE+="--ipAllocationPolicy=\"{{ $ovajson.IPAllocationPolicy }}\" "{{ end }}
