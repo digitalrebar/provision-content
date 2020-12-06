@@ -14,7 +14,7 @@ Schema:
       sha256sum: "7df333f1fc1207d600139fe8196688303d05fbbc6836577808cda8fe1e3ea63f"
     linux-arm64:
       url: "https://storage.googleapis.com/kubernetes-release/release/v1.19.4/bin/linux/arm64/kubectl"
-      sha256sum: "missing please add"
+      sha256sum: "334ca7ce181d8b83e100b1ad4347af93bee6f261d792e9f52d9769095e970919"
   required:
     - version
     - name

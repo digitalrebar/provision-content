@@ -16,7 +16,7 @@ Schema:
       explode: "linux-amd64/helm"
     linux-arm64:
       url: "https://get.helm.sh/helm-v3.4.1-linux-arm64.tar.gz"
-      sha256sum: "missing - update required"
+      sha256sum: "ebe5d535eaa2188927392a5f3ddb333606dd40bdfa5a4243e91b3e8372d2ccab"
       explode: "linux-arm64/helm"
   required:
     - version

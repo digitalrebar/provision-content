@@ -47,7 +47,12 @@ Templates:
 
       {{ if .Param "cluster/leader" }}
 
+
       echo "========== I am leader - run k3s server ========="
+      {{ if .ParamExists "kube-lib/kube-config" }}
+        echo "ERROR - you must clear 'kube-lib/kube-config' in $CLUSTER_PROFILE value before installing new k3s leader!"
+        exit 1
+      {{ end }}
       K3S_URL=https://{{ .Machine.Address }}:{{ .Param "kube-lib/api-port" }}
       EXECSTART="server --bind-address={{ .Machine.Address }} --node-label=leader --https-listen-port={{ .Param "kube-lib/api-port" }} --selinux"
       SYSTEMD_TYPE="notify"
