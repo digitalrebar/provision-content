@@ -4,6 +4,14 @@
 {{ end }}
 
 {{ if eq "azure" (.Param "cloud/provider") }}
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = ">= 2.39.0"
+    }
+  }
+}
 provider "azurerm" {
   subscription_id = "{{ .Param "azure/subscription_id" }}"
   client_id = "{{ .Param "azure/appId" }}"
@@ -127,6 +135,15 @@ output "instance_id" {
 
 {{ if eq "linode" (.Param "cloud/provider") }}
 # Configure the Linode provider
+terraform {
+  required_providers {
+    linode = {
+      source = "linode/linode"
+      version = ">= 1.13.4"
+    }
+  }
+}
+
 provider "linode" {
   token = "{{ .Param "linode/token" }}"
 }
@@ -156,6 +173,14 @@ output "instance_id" {
 {{ end }}
 
 {{ if eq "aws" (.Param "cloud/provider") }}
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = ">= 3.20.0"
+    }
+  }
+}
 provider "aws" {
   region = "{{ .Param "aws/region" }}"
   access_key = "{{ .Param "aws/access-key-id" }}"
@@ -230,6 +255,14 @@ output "machine_ip" {
 {{ end }}
 
 {{ if eq "google" (.Param "cloud/provider") }}
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = ">= 3.50.0"
+    }
+  }
+}
 provider "google" {
 	credentials  = <<EOF
         {{ .ParamAsJSON "google/credential" }}
