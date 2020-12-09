@@ -1,6 +1,6 @@
 ---
 Name: "esxi/datastore-mappings"
-Description: "Defines the a set of Datastore mappings to create."
+Description: "Defines a set of Datastore mappings to create."
 Documentation: |
   This data structure defines a set of Datastores to create in a single
   set of mappings.  Multiple datastore types can be created in one
@@ -11,13 +11,17 @@ Documentation: |
   ``esxi/datastore-memberships`` to each *vSphere ESXi* node with the name of the
   datastores to add to that node.
 
+  The datastore mappings are performed via the Context system, which means the
+  actions are implemented as an API call to the ESXi host directly or via the
+  vCenter instance that manages the node.
+
   Required datastore configuration values are as follows:
 
     * ``name`` = the name of the datastore to create
     * ``type`` = either ``nfs``, ``nfs4``, ``cifs``, ``vmfs``, or ``local`
 
   The following additional values can be specified, and are *type* dependent
-  (either *nfs*, *vmfs*, or *local* type):
+  (either *nfs*/*nfs4*, *vmfs*, or *local* type):
 
     * ``disk``                = Canonical name of disk (VMFS only)
     * ``force``               = Ignore DuplicateName error if datastore is already mounted on a host (``false`` by default)
@@ -36,90 +40,86 @@ Documentation: |
   datastore with the ESXi node name in the name construct.  When these are rolled up
   under vCenter management, it allows datastore uniqueness.
 
+  The general data structure follows the below pattern:
+
+    ::
+
+      datastore-reference:
+        name: name-of-datastore
+        type: supported-datastore-type
+        other-options: ...
+
+  The Datastore Reference is different than the actual datastore name to create, as
+  in many cases, the Datastore Name may be based on the specific ESXi node name or other
+  unique reference for that node.  This allows for golang templatization structures
+  to dynamically reference the Datastore *name* value, but use a generic Reference
+  for the configuration structure.
+
   Example in YAML:
 
     ::
 
       esxi/datastore-mappings:
-        nfs-datastore:
-          name: "nfs-{{.MachineName}}"
-          mtu: 9000
-          version: 7.0.0
-          discovery: lldp
-          vmnic: vmnic1
-          portgroups:
-            pg_internal:
-              migrate:
-                portgroup: "Management Network"
-                vswitch: "vSwitch0"
-                vmk: "vmk0"
-                vms_to_migrate:
-                  - "vm01"
-                  - "vm02"
-              type: ephemeral
-              ports: 16
-              vlan: 10
-            pg_external:
-              type: ephemeral
-              ports: 8
-              vlan: 0
-        dvs02:
-          mtu: 1534
-          version: 7.0.0
-          discovery: cdp
-          vmnic: vmnic2
+        nfs1-datastore:
+          name: "nfs-1-{{.MachineName}}"
+          type: "nfs"
+          mode: "readWrite"
+          remote-host: "nfs1.example.com"
+          remote-path: "/hosts/{{ .Machine.Name }}"
+        vmfs-datastore:
+          name: "vmfsDatastore"
+          type: "vmfs"
+          disk: "mpx.vmhba0:C0:T0:L0"
+        local1-datastore:
+          name: "localDatastore"
+          type: "local"
+          path: "/var/datastore"
 
   Example in JSON:
 
     ::
 
-      "dvs01": {
-        "mtu": 9000,
-        "version": "7.0.0",
-        "discovery": "lldp",
-        "vmnic": "vmnic1",
-        "portgroups": {
-          "pg_external": {
-            "type": "ephemeral",
-            "vlan": 10
-            "ports": 8
-          },
-          "pg_internal": {
-            "migrate": {
-              "portgroup": "Management Network",
-              "vmk": "vmk0",
-              "vswitch": "vSwitch0",
-              "vms_to_migrate": [
-                "vm01", "vm02"
-              ]
-            }
-            "type": "ephemeral",
-            "vlan": 0,
-            "ports": 16
-          }
+      {
+        "nfs1-datastore": {
+          "name": "nfs-1-{{.MachineName}}",
+          "type": "nfs",
+          "mode": "readWrite",
+          "remote-host": "nfs1.example.com",
+          "remote-path": "/hosts/{{ .Machine.Name }}"
+        },
+        "vmfs-datastore": {
+          "name": "vmfsDatastore"
+          "type": "vmfs"
+          "disk": "mpx.vmhba0:C0:T0:L0"
+        },
+        "local1-datastore": {
+          "name": "localDatastore"
+          "type": "local"
+          "path": "/var/datastore"
         }
-      },
-      "dvs02": {
-        "mtu": 1534,
-        "version": "7.0.0",
-        "discovery": "cdp",
-        "vmnic": "vmnic2"
       }
 
-  "vms_to_migrate": [
-                "vm01", "vm02"
-              ]  In the above example, the ``dvs01`` DVS will have jumbo frames, switch
-  version set to 7.0.0, discovery packets will use the LLDP protocol, and
-  it will map to the ``vmnic1`` device.  In addition, it will define two
-  Portgroups, named ``pg_internal`` and ``pg_external``; both of type
-  ephemeral with different numbers of ports defined.
+  In the above examples, three separate Datastores will be created on the systems
+  based on their membership mappings.  The membership mappings are managed by adding
+  the Param ``esxi/datastore-memberships`` with a list of the datastore references
+  to be added to that machine.
 
-  The ``dvs02`` switch will use standard size packets, the CDP discovery
-  protocol, the ``vmnic2`` device, and will not map any Portgroups.
+  For example, on the machine named ``esxi-01``, we add the param with the following
+  values:
 
-  .. note:: You must also add the named DVS Switches (eg ``dvs01`` and ``dvs02``
-            in the above example), to the vSphere ESXi nodes that will use these
-            switches; via the ``esxi/dvs-memberships`` Param.
+    ::
+
+      esxi/datastore-memberships:
+        - nfs1-datastore
+        - local1-datastore
+
+  In this scenario, the machine will be added with the NFS datastore named ``nfs-1-esxi-01``
+  which maps to the share *nfs1.example.com:/hosts/esxi-01*.  This happens because the
+  Params are expanded to the Machine name, mapping a custom NFS share under the common
+  reference name *nfs1-datastore*.
+
+  The second datastore (*local1-datastore*) is mapped on the machine as well.  However,
+  the VMFS datastore is not mapped on this machine.
 
 Meta:
   color: "green"
@@ -131,54 +131,39 @@ Schema:
   additionalProperties:
     type: "object"
     required:
-      - "mtu"
-      - "version"
-      - "vmnic"
+      - "name"
+      - "type"
     properties:
-      mtu:
-        type: "number"
-        minimum: 1000
-        maximum: 9999
+      name:
+        type: "string"
+      type:
+        type: "string"
+        enum:
+          - "nfs"
+          - "nfs4"
+          - "cifs"
+          - "vmfs"
+          - "local"
+      force:
+        type: "boolean"
+      disk:
+        type: "string"
+      host:
+        type: "string"
+      mode:
+        type: "string"
+        enum:
+          - "readOnly"
+          - "readWrite"
+      path:
+        type: "string"
+      remote-host:
+        type: "string"
+      remote-path:
+        type: "string"
+      username:
+        type: "string"
+      password:
+        type: "string"
       version:
         type: "string"
-        enum:
-          - "6.5.0"
-          - "6.6.0"
-          - "7.0.0"
-      discovery:
-        type: "string"
-        enum:
-          - "cdp"
-          - "lldp"
-      vmnic:
-        type: "string"
-      portgroups:
-        type: "object"
-        additionalProperties:
-          type: "object"
-          properties:
-            type:
-              type: "string"
-              enum:
-                - "ephemeral"
-                - "earlyBinding"
-                - "lateBinding"
-            ports:
-              type: "number"
-              minimum: 0
-              maximum: 60000
-            vlan:
-              type: "number"
-              minimum: 0
-              maximum: 4094
-            migrate:
-              type: "object"
-              properties:
-                vswitch:
-                  type: "string"
-                vmk:
-                  type: "string"
-                vms_to_migrate:
-                  type: "array"
-                  items:
-                    type: "string"

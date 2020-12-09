@@ -91,8 +91,8 @@ Templates:
 
       ###
       #  remap JSON template constructs to OVFTool command line usage
-      # ###
-      #
+      ###
+
       # thank you for inconsistent ovftool argument flags from govc generated
       # template json values -vs- ovftool usage ... thank you very much
       # this allows for in-the-field injection of remappings if needed
@@ -166,3 +166,12 @@ Templates:
       echo "==== DONE ===="
       echo ""
 
+      if [[ "{{ .Param "govc/debug" }}" == "true" ]]
+      then
+        echo ">>> DEBUG on - not cleaning up $OVFCMD file."
+      else
+        echo "Cleaning up temporary '$OVFCMD' file."
+        rm -f $OVFCMD
+      fi
+
+      echo ""

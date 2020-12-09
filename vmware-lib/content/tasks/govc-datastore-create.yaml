@@ -1,16 +1,18 @@
 ---
 Name: "govc-datastore-create"
-Description: "A task to create a datastore on a remote ESXi instance."
+Description: "A task to create a datastore(s) on a remote ESXi instance."
 Documentation: |
   Creates a datastore on a remote ESXi instance.
 
 RequiredParams:
-  - "govc/datastore-create-disk"
-  - "govc/datastore-create-name"
   - "govc/url"
   - "govc/username"
   - "govc/password"
 OptionalParams:
+  - "esxi/datastore-mappings"
+  - "esxi/datastore-memberships"
+  - "govc/datastore-create-disk"
+  - "govc/datastore-create-name"
   - "govc/insecure"
   - "govc/port"
 Templates:
@@ -27,10 +29,17 @@ Templates:
       exit 0
       {{ end }}
 
+      ### start setup.tmpl
       {{ template "setup.tmpl" .}}
 
+      ### start govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" . }}
 
+      ### start govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" . }}
+
+      ### start govc-create-datastore
+      #
       # yes jq parsing might be better w/ '--json' output, but no - it isn't
       HOST=$(govc host.info | grep "^Name:" | awk ' { print $NF } ')
 
@@ -71,7 +80,7 @@ Templates:
           govc host.esxcli storage core path list
           exit 1
         fi
-        
+
       else
         case $SELECT in
           first_available) get_first_available ;;
@@ -81,11 +90,10 @@ Templates:
         esac
       fi
 
-
       echo ""
       echo "==== RUN 'govc $CMD' ===="
       echo ""
-      
+
       set -x
       govc datastore.create -type vmfs -name "$DS_NAME" -disk=$DISK $HOST
       set +x
