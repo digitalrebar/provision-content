@@ -27,6 +27,7 @@ OptionalParams:
   - "esxi/insecure-password"
   - "esxi/vsan-nodes-override"
   - "esxi/vsan-data/sub-cluster-uuid"
+  - "esxi/vsan-tag-only"
 Templates:
   - Name: "esxi-vsan-cluster-operations.sh"
     Contents: |
@@ -65,6 +66,11 @@ Templates:
       NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r '.[].Name' | tr '\n' ' ')
       {{ end }}
 
+      [[ -z "$NODES" ]] && xiterr 1 "No nodes to operate on were found (check esxi/cluster-name filter, and esxi/vsan-nodes-overrides)."
+
+      # check if we should only tag but not claim disks
+      TAG_ONLY='{{ .Param "esxi/vsan-tag-only" }}'
+
       SELECTION_RULE='{{ .Param "esxi/vsan-disk-selection-rule" }}'
 
       # additional global vars used throughout functions
@@ -84,6 +90,12 @@ Templates:
         echo ">> NOTICE: 'esxi/vsan-zero-count-fatal' is 'false'"
         echo "           any single node failure to acquire disks is hunky dory"
         {{ end }}
+        if [[ "$TAG_ONLY" == "true" ]]
+          echo ">> NOTICE: 'esxi/vsan-tag-only' param is 'true', will not claim disks as requested."
+          echo "           Disks will only be tagged for VSAN use."
+        else
+          echo ">> NOTICE: Disks will be both tagged and claimed for VSAN use."
+        fi
         echo "----------------------------------------------------------------------------------------"
         echo ""
 
@@ -119,7 +131,6 @@ Templates:
 
           if [[ -n "$DISKS_CACHE" && -n "$DISKS_CAPACITY" ]]
           then
-            _my_args=$(build_args)
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
             echo ""
 
@@ -137,10 +148,15 @@ Templates:
               fi
             done
 
-            echo "CMD TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
-            govc host.esxcli vsan storage add $_my_args
-            echo ""
-            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            if [[ "$TAG_ONLY" == "true" ]]
+              echo "Skipping 'vsan storage add' disk claiming as requested."
+            else
+              _my_args=$(build_args)
+              echo "CMD TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
+              govc host.esxcli vsan storage add $_my_args
+              echo ""
+              echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+            fi
           fi
 
           echo ""
