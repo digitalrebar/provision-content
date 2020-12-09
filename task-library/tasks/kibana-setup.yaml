@@ -50,6 +50,7 @@ Templates:
     Path: "/etc/kibana/kibana.yml"
     Contents: |
       server.host: "0.0.0.0"
+      server.maxPayloadBytes: 10485760
   - Name: "start-kibana.sh"
     Contents: |
       #!/bin/bash
