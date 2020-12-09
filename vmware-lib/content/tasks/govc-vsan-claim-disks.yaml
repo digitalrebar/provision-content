@@ -91,6 +91,7 @@ Templates:
         echo "           any single node failure to acquire disks is hunky dory"
         {{ end }}
         if [[ "$TAG_ONLY" == "true" ]]
+        then
           echo ">> NOTICE: 'esxi/vsan-tag-only' param is 'true', will not claim disks as requested."
           echo "           Disks will only be tagged for VSAN use."
         else
@@ -149,6 +150,7 @@ Templates:
             done
 
             if [[ "$TAG_ONLY" == "true" ]]
+            then
               echo "Skipping 'vsan storage add' disk claiming as requested."
             else
               _my_args=$(build_args)
