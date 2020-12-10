@@ -42,6 +42,8 @@ Schema:
         NICs: ".Networking.Interfaces | map(select(.Sys.BusAddress != \\\"virtual\\\"))|length"
         NICInfo: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.Vendor+\\\" \\\"+.Model+\\\" \\\"+.Sys.BusAddress)"
         NICSpeed: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map((.Speed|tostring)+\\\" \\\"+(.Duplex|tostring))"
+        NICDescr: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.Vendor+\\\" \\\"+.Model+\\\" \\\"+.HardwareAddr+\\\" \\\"+.Name)"
+        NICMac: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.HardwareAddr)"
         CPUs: ".System.ProcessorCount"
         CPUType: ".System.Processors[0].Model"
         CPUSpeed: ".System.Processors[0].Speed"
