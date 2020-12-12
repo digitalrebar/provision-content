@@ -15,16 +15,35 @@ Documentation: |
   * netmask = IPv4 Netmaks
   * address = IPv4 Address - In some cases, this will NOT be required.  DNS lookups...
   * inteface = a comma separated list of interfaces to used e.g. eth0,enp0s3 - if needed.
+  * routes = a list of route objects
+  * dns-servers = a list of dns-servers (though generally this is specified with the dns-servers parameter)
 
   Leave the element out if not needed.
+
+  The `all` network can be used to define things that should apply to all networks.  This is meant for dns-servers
+  and routes currently.
 
   For example:
 
     ::
 
+      all: # Special non-network to hold global-level things of routes and dns-servers
+        routes:
+        - network: 20.20.20.0
+          gateway: 192.168.2.1
+          netmask: 255.255.255.0
+          interface: eth1
+        dns-servers:
+        - 8.8.8.8
+        - 8.8.4.4
       prov:
         name: prov
         dhcp: yes
+        routes:
+        - network: 10.10.10.0
+          gateway: 192.168.1.1
+          netmask: 255.255.255.0
+          interface: eth0
       prod:
         name: prod
         dhcp: no
@@ -38,13 +57,55 @@ Documentation: |
         netmask: 255.255.255.0
         address: 10.3.3.15
         vlan: "2335"
-        interface: eth0,enp0s3
-
+        interface: "eth0,enp0s3"
 
 Schema:
   type: "object"
   additional_properties:
     type: "object"
+    properties:
+      name:
+        type: string
+      dhcp:
+        type: string
+        enum:
+          - YES
+          - yes
+          - NO
+          - no
+          - true
+          - TRUE
+          - false
+          - FALSE
+      gateway:
+        type: string
+      netmask:
+        type: string
+      address:
+        type: string
+      vlan:
+        type: string
+      mtu:
+        type: string
+      interface:
+        type: string
+      dns-servers:
+        type: array
+        items:
+          type: string
+      routes:
+        type: object
+        properties:
+          network:
+            type: string
+          gateway:
+            type: string
+          netmask:
+            type: string
+          interface:
+            type: string
+        additional_properties:
+          type: "string"
     additional_properties:
       type: "string"
   default: {}
