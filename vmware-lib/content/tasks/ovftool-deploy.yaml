@@ -127,8 +127,19 @@ Templates:
           ;;
       esac
 
+      echo ""
+      echo ">>>                                                                            <<<"
+      echo ">>> NOTICE !!!  The '--acceptAllEulas' Option is set on.  This means you are   <<<"
+      echo ">>>             implicitly accepting the EULA associated with this OVA.  The   <<<"
+      echo ">>>             EULA should be iterated in the job log output, and it is your  <<<"
+      echo ">>>             responsibility to comply with the End-User License Agreement.  <<<"
+      echo ">>>                                                                            <<<"
+      echo ""
+
       cat << EOOVF > $OVFCMD
-      ovftool {{ .Param "ova/ovftool-extra-options" }} \\
+      ovftool \\
+        {{ .Param "ova/ovftool-options" }} \\
+        {{ .Param "ova/ovftool-extra-options" }} \\
         --name='{{ $ovajson.Name }}' \\
         $MORE \\
         {{ if eq (.Param "govc/insecure") true }}--noSSLVerify \\{{ else -}}{{ end -}}

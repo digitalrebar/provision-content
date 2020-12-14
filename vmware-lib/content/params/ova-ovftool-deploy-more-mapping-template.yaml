@@ -7,7 +7,7 @@ Documentation: |
   not remap required values for your deployment scenario, this Param can
   point to the Name of a Template.
 
-  The template must be a BASH script with Golante Template constructs that
+  The template must be a BASH script with Golang Template constructs that
   remap the JSON attributes to OVFTool values.  Please see the ``ovftool-deploy``
   Task for more details.  Relevant command line build up is performed by appending
   to the shell variable name ``MORE``.

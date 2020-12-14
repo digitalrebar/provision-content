@@ -8,28 +8,31 @@ Documentation: |
   This Param should:
 
     * use properly formatted ``ovftool`` options
-    * not repeat any existing options built up by the Task
+    * **MUST NOT** repeat any existing options built up by the Task
     * do not include **ANY** newlines in the options
     * options should be separated by a single white space
 
-  Example value for this Param:
+  By default, this Param does not specify a ``default`` value.
 
-    * ``--skipManifestCheck --defaultStorageProfile=my-storage-profile --prop:Foo=Bar``
-
-  By default, this Param sets the commonly used values:
-
-    * ``--acceptAllEulas --allowAllExtraConfig --allowExtraConfig``
-
-  .. warning:: If the operator uses this Param, and would like to retain these
-                values, you must also add them in addition to your extra options.
+  .. note:: Do not use ``ova/ovftool-options`` for additional options,
+            this Param is the correct one to insert additional flags.
 
   As an alternative for command line option parsing, see the Param
   ``ova/ovaftool-deploy-more-mapping-template`` - which is a MUCH more
   advanced use case alternative.
 
+  **Example:** enhancing the OVFtool standard output to provide more
+  verbose details if there are problems deploying an OVA, set this
+  extra options Param as follows:
+
+    * ``--X:logToConsole=True --X:logLevel="verbose"``
+
+  Rerun the deployment Stage/Task, and now the job-log should have much
+  more verbose logged output for troubleshooting.
+
 Schema:
   type: "string"
-  default: "--acceptAllEulas --allowAllExtraConfig --allowExtraConfig"
+  default: ""
 Meta:
   color: "green"
   icon: "terminal"

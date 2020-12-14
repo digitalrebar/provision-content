@@ -18,7 +18,10 @@ Documentation: |
   Required datastore configuration values are as follows:
 
     * ``name`` = the name of the datastore to create
-    * ``type`` = either ``nfs``, ``nfs4``, ``cifs``, ``vmfs``, or ``local`
+    * ``type`` = either ``get_first_available``, ``nfs``, ``nfs4``, ``cifs``, ``vmfs``, or ``local`
+
+  .. note:: The ``get_first_available`` simulates the orignal datastore create
+            pattern in the mappings data structure.  Provided only for legacy use.
 
   The following additional values can be specified, and are *type* dependent
   (either *nfs*/*nfs4*, *vmfs*, or *local* type):
@@ -139,6 +142,7 @@ Schema:
       type:
         type: "string"
         enum:
+          - "get_first_available"
           - "nfs"
           - "nfs4"
           - "cifs"
