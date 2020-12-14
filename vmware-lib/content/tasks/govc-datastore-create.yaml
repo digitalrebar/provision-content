@@ -16,7 +16,7 @@ OptionalParams:
   - "govc/insecure"
   - "govc/port"
 Templates:
-  - Name: "govc-create-datastore.sh"
+  - Name: "govc-datastore-create.sh"
     Contents: |
       #!/usr/bin/env bash
       # Create a Datastore on a remote vCenter or ESXi host with 'govc'
@@ -24,7 +24,7 @@ Templates:
 
       set -e
 
-      {{ if eq (.Param "govc/datastore-skip-create" ) true }}
+      {{ if .Param "govc/datastore-skip-create" }}
       echo "Skipping datastore creation as 'govc/datastore-skip-create' is 'true'."
       exit 0
       {{ end }}
@@ -145,7 +145,7 @@ Templates:
         ;;
         datastore_mappings)
 
-        {{ if .Param esxi/datastore-mappings -}}
+        {{ if .Param "esxi/datastore-mappings" -}}
           {{ range $dsref, $dsval := ( .Param "esxi/datastore-mappings" ) -}}
           REF="{{ $dsref }}"
           DS_NAME='{{$dsval.name}}'
@@ -155,8 +155,8 @@ Templates:
           DS_HOST='{{$dsval.host}}'
           DS_MODE='{{$dsval.mode}}'
           DS_PATH='{{$dsval.path}}'
-          DS_RHOST='{{$dsval.remote-host}}'
-          DS_RPATH='{{$dsval.remote-path}}'
+          DS_RHOST='{{ get $dsval "remote-host" }}'
+          DS_RPATH='{{ get $dsval "remote-path" }}'
           DS_USER='{{$dsval.username}}'
           DS_PASS='{{$dsval.password}}'
           DS_VER='{{$dsval.version}}'
