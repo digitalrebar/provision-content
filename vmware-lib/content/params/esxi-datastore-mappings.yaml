@@ -64,7 +64,7 @@ Documentation: |
 
       esxi/datastore-mappings:
         nfs1-datastore:
-          name: "nfs-1-{{.MachineName}}"
+          name: "nfs-1-{{.Machine.Name}}"
           type: "nfs"
           mode: "readWrite"
           remote-host: "nfs1.example.com"
@@ -84,7 +84,7 @@ Documentation: |
 
       {
         "nfs1-datastore": {
-          "name": "nfs-1-{{.MachineName}}",
+          "name": "nfs-1-{{.Machine.Name}}",
           "type": "nfs",
           "mode": "readWrite",
           "remote-host": "nfs1.example.com",
