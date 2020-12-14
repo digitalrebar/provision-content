@@ -94,18 +94,20 @@ Schema:
         items:
           type: string
       routes:
-        type: object
-        properties:
-          network:
-            type: string
-          gateway:
-            type: string
-          netmask:
-            type: string
-          interface:
-            type: string
-        additional_properties:
-          type: "string"
+        type: array
+        items:
+          type: object
+          properties:
+            network:
+              type: string
+            gateway:
+              type: string
+            netmask:
+              type: string
+            interface:
+              type: string
+          additional_properties:
+            type: "string"
     additional_properties:
       type: "string"
   default: {}
