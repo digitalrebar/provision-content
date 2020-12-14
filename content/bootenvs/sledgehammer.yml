@@ -164,7 +164,7 @@ Templates:
   - Name: "rpi-cmdline.txt"
     Path: '{{.Machine.MacAddr "rpi4"}}/cmdline.txt'
     Contents: |
-      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait initrd=stage1.img rw cgroup_memory=1 cgroup_enable=memory BOOTIF=discovery provisioner.web={{.ProvisionerURL}}
+      snd_bcm2835.enable_hdmi=1 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 fsck.repair=yes fsck.mode=auto elevator=deadline rootwait initrd=stage1.img rw cgroup_memory=1 cgroup_enable=memory BOOTIF=discovery provisioner.web={{.ProvisionerURL}} rs.uuid={{.Machine.UUID}}
   - Name: rpi4b-config.txt
     Path: '{{.Machine.MacAddr "rpi4"}}/config.txt'
     Contents: |
