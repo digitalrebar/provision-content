@@ -41,6 +41,7 @@ Templates:
       ### govc-lib.sh.tmpl
       {{ template "govc-lib.sh.tmpl" .}}
 
+      ### ansible-vmware-migrate-vmk.sh.tmpl
       PLAYBOOK="/tmp/ansible-vmware-migrate-vmk-playbook.yaml"
       MEMBERS=""
       DVS_NAME=""
@@ -51,6 +52,7 @@ Templates:
       VAL={{ if eq (.Param "govc/insecure") true -}}no{{ else }}yes{{ end }}
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
+      # ANSIBLE_VERBOSE is set in govc-lib.sh.tmpl based on rs-debug-enable Param setting
       ADDITIONAL_OPTIONS="$ANSIBLE_VERBOSE {{ .Param "ansible/additional-options" }}"
 
       get_hosts_with_dvs() {
@@ -58,7 +60,7 @@ Templates:
         local _name _names _member _in
         echo "Getting hosts for cluster '$CLUSTER' and DVS '$DVS_NAME'"
 
-        for _name in $(drpcli machines list esxi/cluster-name Eq $CLUSTER Context Eq '' --slim Params,Meta | jq -r '.[].Name')
+        for _name in $(get_cluster_members $CLUSTER)
         do
           _in=""
           _in=$(drpcli machines get Name:$_name param esxi/dvs-memberships --aggregate | jq -r '. as $dvs | "'$DVS_NAME'" | IN($dvs[])')
@@ -66,7 +68,7 @@ Templates:
         done
 
         echo "Convert found DRP Names to ESXi node names."
-        echo "      DRP Names:  $_names"
+        echo "DRP Names:  $_names"
 
         for _name in $_names
         do

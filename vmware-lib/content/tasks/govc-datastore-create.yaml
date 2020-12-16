@@ -24,10 +24,10 @@ Templates:
 
       set -e
 
-      {{ if .Param "govc/datastore-skip-create" }}
+      {{ if .Param "govc/datastore-skip-create" -}}
       echo "Skipping datastore creation as 'govc/datastore-skip-create' is 'true'."
       exit 0
-      {{ end }}
+      {{ end -}}
 
       ### start setup.tmpl
       {{ template "setup.tmpl" .}}
@@ -38,7 +38,16 @@ Templates:
       ### start govc-lib.sh.tmpl
       {{ template "govc-lib.sh.tmpl" . }}
 
-      ### start govc-create-datastore.sh
+      ### start govc-datastore-create.sh
+
+      # if GOVC_URL is empty, we check to see if we're running in a context
+      # off of a Machine, and set that here to the Machine name
+      HOST="$(get_member_name {{ .Machine.Name }})"
+      if [[ -z "$GOVC_URL" ]]
+      then
+        echo "GOVC_URL is not set, assuming self machine name"
+        export GOVC_URL=$HOST
+      fi
 
       # yes jq parsing might be better w/ '--json' output, but no - it isn't
       HOST=$(govc host.info | grep "^Name:" | awk ' { print $NF } ')
@@ -102,8 +111,6 @@ Templates:
         if [[ "$_val" == "" || "$_val" == "null" || "$_val" == "[]" || "$_val" == "{}" || "$_val" == "<no value>" ]]
         then
           xiterr 1 "Required configuration value '$_key' was set to unsupported value '$_val'."
-        else
-
         fi
       }
 
@@ -115,7 +122,7 @@ Templates:
           echo "The 'first_available' rule has run a second time.  This is not supported."
           echo "This means that the govc/datastore-create-disk param was set to 'first_available'"
           echo "and the esxi/datastore-mappings contained a 'first_available' stanza also."
-          echo "You must set the govc/datastore-create-disk to 'datastore_mappings`, or remove"
+          echo "You must set the govc/datastore-create-disk to 'datastore_mappings', or remove"
           echo "the stanza reference 'first_available' from the esxi/datastore-mappings object."
           echo ""
           echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FATAL !!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
@@ -146,22 +153,25 @@ Templates:
         datastore_mappings)
 
         {{ if .Param "esxi/datastore-mappings" -}}
-          {{ range $dsref, $dsval := ( .Param "esxi/datastore-mappings" ) -}}
-          REF="{{ $dsref }}"
-          DS_NAME='{{$dsval.name}}'
-          DS_TYPE='{{$dsval.type}}'
-          DS_FORCE='{{$dsval.force}}'
-          DS_DISK='{{$dsval.disk}}'
-          DS_HOST='{{$dsval.host}}'
-          DS_MODE='{{$dsval.mode}}'
-          DS_PATH='{{$dsval.path}}'
+          {{ range $dsref, $dsval := ( .ComposeParam "esxi/datastore-mappings" ) -}}
+          REF='{{ $dsref }}'
+          DS_NAME='{{ get $dsval "name" }}'
+          DS_TYPE='{{ get $dsval "type" }}'
+          DS_FORCE='{{ get $dsval "force" }}'
+          DS_DISK='{{ get $dsval "disk" }}'
+          DS_MODE='{{ get $dsval "mode" }}'
+          DS_PATH='{{ get $dsval "path" }}'
           DS_RHOST='{{ get $dsval "remote-host" }}'
           DS_RPATH='{{ get $dsval "remote-path" }}'
-          DS_USER='{{$dsval.username}}'
-          DS_PASS='{{$dsval.password}}'
-          DS_VER='{{$dsval.version}}'
+          DS_USER='{{ get $dsval "username" }}'
+          DS_PASS='{{ get $dsval "password" }}'
+          DS_VER='{{ get $dsval "version" }}'
+          {{ if ( get $dsval "host" ) -}}
+          DS_HOST='{{  get $dsval "host" }}'
+          {{ else -}}
+          DS_HOST="$HOST"
+          {{ end -}}
 
-          [[ "$DS_HOST" != "<no value>" ]] && H="$DS_HOST" || H="$(get_member_name {{ .Machine.Name }})"
           [[ "$DS_FORCE" == "true" ]] && F="-force true" || F=""
           [[ "$DS_MODE" == "readOnly" || "$DS_MODE" == "readWrite" ]] && M="-mode $DS_MODE" || M=""
 
@@ -172,10 +182,10 @@ Templates:
               echo "Datastore mapping type set to 'first_available'."
               get_first_available
             ;;
-            nfs|nfs4)
+            nfs*)
               verify_data "remote-host" "$DS_RHOST"
               verify_data "remote-path" "$DS_RPATH"
-              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -remote-host \"$DS_RHOST\" -remote-path \"$DS_RPATH\" $M $F $H"
+              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -remote-host \"$DS_RHOST\" -remote-path \"$DS_RPATH\" $M $F $DS_HOST"
             ;;
             cifs)
               verify_data "remote-host" "$DS_RHOST"
@@ -184,18 +194,18 @@ Templates:
               verify_data "password" "$DS_PASS"
               [[ "$DS_USER" != "<no value>" ]] && U="-username $DS_USER" || U=""
               [[ "$DS_PASS" != "<no value>" ]] && P="-password $DS_PASS" || P=""
-              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -remote-host \"$DS_RHOST\" -remote-path \"$DS_RPATH\" $U $P $M $F $H"
+              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -remote-host \"$DS_RHOST\" -remote-path \"$DS_RPATH\" $U $P $M $F $DS_HOST"
             ;;
             vmfs)
               [[ "$DS_VER" != "<no value>" ]] && V="-version $DS_VER" || V=""
-              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -disk \"$DS_DISK\" $M $V $F $H"
+              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -disk \"$DS_DISK\" $M $V $F $DS_HOST"
             ;;
             local)
               verify_data "path" "$DS_PATH"
-              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -path \"$DS_PATH\" $M $F $H"
+              ARGS="-type $DS_TYPE -name \"$DS_NAME\" -path \"$DS_PATH\" $M $F $DS_HOST"
             ;;
             *)
-              xiterr 1 'Datastore type '$DS_TYPE' not supported."
+              xiterr 1 "Datastore type '$DS_TYPE' not supported."
             ;;
           esac
 

@@ -131,7 +131,7 @@ Templates:
       echo ""
       echo "Finding ESXi node members to operate on in cluster '$CLUSTER' with '$DVS_NAME' DVS."
 
-      for _name in $(drpcli machines list esxi/cluster-name Eq $CLUSTER Context Eq '' --slim Params,Meta | jq -r '.[].Name')
+      for _name in $(get_cluster_members $CLUSTER)
       do
         _in=""
         _in=$(drpcli machines get Name:$_name param esxi/dvs-memberships --aggregate | jq -r '. as $dvs | "'$DVS_NAME'" | IN($dvs[])')

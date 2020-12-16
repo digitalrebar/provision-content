@@ -44,7 +44,7 @@ get_member_name() {
       ;;
   esac
   echo ${_member}
-}
+} # end get_member_name()
 
 ###
 #  Run the govc command with options.
@@ -79,10 +79,24 @@ run_govc() {
   (( $_output )) && echo "${_msg}CMD: govc $_args" || true
   [[ "$_dbg" == "false" ]] && eval govc $_args || true
   return $?
-}
+} # end run_govc()
+
+###
+#  Gets members of a cluster with the Param 'esxi/cluster-name' set to
+#  the value of ARGv1 input.  Returns a space separated list of Machine
+#  names
+###
+get_cluster_members() {
+  local _cluster="$1"
+  local _mem
+  _mem=$(drpcli machines list esxi/cluster-name Eq $_cluster Meta.BaseContext Eq '' --slim Params,Meta | jq -r '.[].Name' | tr '\n' ' ')
+  printf "%s\n" "$_mem"
+} # end get_cluster_members()
 
 ###
 #  Try really really hard to find a 'jq' binary to use.
+#  Sets the global Variable _JQ to the fully qualified path of 'jq'
+#  or the linked 'drpcli' to 'drpjq'.
 ###
 _JQ=""
 _JQ=$(which jq)

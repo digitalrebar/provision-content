@@ -41,7 +41,7 @@ Templates:
 
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
-      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Context Eq "" | jq -r '.[].Name' | tr '\n' ' ')
+      MEMBERS=$(get_cluster_members $CLUSTER)
 
       echo "Starting create operation with the following information:"
       echo "---------------------------------------------------------"
