@@ -36,10 +36,11 @@ Templates:
       {{ end }}
 
       {{ if .ParamExists "cloud/provider" }}
+        {{ $cloud := .Param "cloud/provider" }}
 
         echo "We have cloud provider {{ .Param "cloud/provider"}}!  Do we have the right credentials?"
 
-        {{ if eq "aws" (.Param "cloud/provider") }}
+        {{ if eq "aws" $cloud }}
           {{ if .ParamExists "aws/secret-key" }}
             echo "  required secret-key is set"
           {{ else }}
@@ -56,7 +57,7 @@ Templates:
           {{ end }}
         {{ end }}
 
-        {{ if eq "google" (.Param "cloud/provider") }}
+        {{ if eq "google" $cloud }}
           {{ if .ParamExists "google/credential" }}
             echo "  required google/credentialis set"
           {{ else }}
@@ -73,7 +74,7 @@ Templates:
           {{ end }}
         {{ end }}
 
-        {{ if eq "linode" (.Param "cloud/provider") }}
+        {{ if eq "linode" $cloud }}
           echo "linode/token check..."
           {{ if .ParamExists "linode/token" }}
             echo "  required token is set"
@@ -94,7 +95,7 @@ Templates:
 
         {{ end }}
 
-        {{ if eq "azure" (.Param "cloud/provider") }}
+        {{ if eq "azure" $cloud }}
           {{ if .ParamExists "azure/subscription_id" }}
             echo "  required subscription_id is set"
           {{ else }}
@@ -124,6 +125,15 @@ Templates:
             exit 1
           {{ end }}
         {{ end }}
+
+        cloudicon="cloud"
+        {{ if hasKey (.Param "cloud/provider-icons") $cloud }}
+          cloudicon={{ get (.Param "cloud/provider-icons") $cloud }}
+        {{ else }}
+          cloudicon={{ get (.Param "cloud/provider-icons") "default" }}
+        {{ end }}
+        echo "set icon to $cloudicon"
+        drpcli machines meta set $RS_UUID key icon to $cloudicon > /dev/null
 
       {{ else }}
         echo "You must define which cloud is being used!"

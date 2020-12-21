@@ -6,7 +6,7 @@ Documentation: |
 RequiresParams:
 
 Templates:
-  - Name: "discover-cloud-metadata"
+  - Name: "cloud-inspect"
     Contents: |
       #!/bin/bash
       # RackN Copyright 2020
@@ -15,11 +15,12 @@ Templates:
       {{template "setup.tmpl" .}}
 
       {{ if .ParamExists "cloud/provider" }}
+      {{ $cloud := (.Param "cloud/provider") }}
 
       # Ubuntu Path is different than Centos Path - fix it.
       export PATH=$PATH:/usr/bin:/usr/sbin:/bin:/sbin
 
-      {{ if eq "aws" (.Param "cloud/provider") }}
+      {{ if eq "aws" $cloud }}
       echo "============================= AWS INSPECT ============================="
       INSTANCEID=$(curl -sfL http://169.254.169.254/latest/meta-data/instance-id)
       echo "Looking for {{ .Param "cloud/provider"}} Instance ID, found \"$INSTANCEID\""
@@ -39,7 +40,7 @@ Templates:
       {{ end }}
 
 
-      {{ if eq "google" (.Param "cloud/provider") }}
+      {{ if eq "google" $cloud }}
       echo "============================= GOOGLE INSPECT ============================="
       INSTANCEID=$(curl -sfL -H "Metadata-Flavor: Google" http://metadata/computeMetadata/v1/instance/id)
       echo "Looking for {{ .Param "cloud/provider"}} Instance ID, found \"$INSTANCEID\""
@@ -62,7 +63,7 @@ Templates:
       fi
       {{ end }}
 
-      {{ if eq "linode" (.Param "cloud/provider") }}
+      {{ if eq "linode" $cloud }}
       echo "============================= LINODE INSPECT ============================="
 
         {{ if .ParamExists "terraform-var/instance_id" }}
@@ -75,7 +76,7 @@ Templates:
 
       {{ end }}
 
-      {{ if eq "azure" (.Param "cloud/provider") }}
+      {{ if eq "azure" $cloud }}
       echo "============================= LINODE INSPECT ============================="
 
         {{ if .ParamExists "terraform-var/instance_id" }}
