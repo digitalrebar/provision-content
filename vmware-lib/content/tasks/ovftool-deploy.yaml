@@ -21,7 +21,7 @@ Documentation: |
   OVFTool command line flags.
 
     1.  Use the Param ``ova/ovftool-extra-options`` to add command line flag overrides - see the Param for more documentation.
-    2.  For more advanced/flexible use cases in the field, create a Shell script template defined by the Param ``ova/ovaftool-deploy-more-mapping-template``
+    2.  For more advanced/flexible use cases in the field, create a Shell script template defined by the Param ``ova/ovftool-deploy-more-mapping-template``
 
   The template override (option 2) is a much more advanced use case.  It utilizes
   Golang Templating to parse the JSON data structure options, and remap them
@@ -49,7 +49,7 @@ Meta:
 RequiredParams:
   - ova/param-json
 OptionalParams:
-  - ova/ovaftool-deploy-more-mapping-template
+  - ova/ovftool-deploy-more-mapping-template
   - ova/ovftool-extra-options
 Templates:
   - Name: "ovftool-deploy.sh"
@@ -79,15 +79,26 @@ Templates:
       > $OVFCMD
       chmod +x $OVFCMD
 
+      # used to properly build up the vi:// string syntax depending if we're vCenter or ESXi
+      ABOUT=$(govc about -json)
+      [[ -z "$ABOUT" ]] && xiterr 1 "'govc about' returned empty results"
+      API_TYPE=$(jq -r '.About.ApiType' <<< $ABOUT)
+      [[ -z "$API_TYPE" ]] && xiterr 1 "No 'API Type' found in 'govc about' results"
+
       {{ $ovajson := ( .ComposeParam "ova/param-json" ) -}}
       {{ $propmap := get (.Param "ova/param-json") "PropertyMapping" -}}
       {{ $netmap := get (.Param "ova/param-json") "NetworkMapping" -}}
 
+      ###
+      #  remap JSON template constructs to OVFTool command line usage
+      ###
+
       # thank you for inconsistent ovftool argument flags from govc generated
       # template json values -vs- ovftool usage ... thank you very much
-      {{ if ( .ParamExists "ova/ovaftool-deploy-more-mapping-template" ) }}
-      {{ .CallTemplate (.Param "ova/ovaftool-deploy-more-mapping-template" ) .}}
-      {{ end }}
+      # this allows for in-the-field injection of remappings if needed
+      {{ if ( .ParamExists "ova/ovftool-deploy-more-mapping-template" ) -}}
+      {{ .CallTemplate (.Param "ova/ovftool-deploy-more-mapping-template" ) .}}
+      {{ end -}}
 
       {{ if $ovajson.DiskProvisioning }}MORE+="--diskMode=\"{{ $ovajson.DiskProvisioning }}\" "{{ end }}
       {{ if $ovajson.IPAllocationPolicy }}MORE+="--ipAllocationPolicy=\"{{ $ovajson.IPAllocationPolicy }}\" "{{ end }}
@@ -97,8 +108,38 @@ Templates:
       {{ if eq $ovajson.PowerOn true }}MORE+="--powerOn "{{ end }}
       {{ if eq $ovajson.WaitForIP true }}MORE+="--X:waitForIp "{{ end }}
 
+      if [[ "{{ .Param "govc/debug" }}" == "true" ]]
+      then
+        echo ">>> DEBUG output for 'govc about' command."
+        jq '.' <<< $ABOUT
+      fi
+
+      # build correct vi:// string syntax depending on us talking to vCenter or ESXi directly
+      case $API_TYPE in
+        VirtualCenter)
+          STRING='{{- .ParamExpand "esxi/datacenter-name" -}}/host/{{- .ParamExpand "esxi/cluster-name" -}}'
+          ;;
+        HostAgent)
+          STRING=''
+          ;;
+        *)
+          xiterr 1 "Unsupport API Type ('$API_TYPE') from vSphere resource. Expect 'VirtualCenter' or 'HostAgent'."
+          ;;
+      esac
+
+      echo ""
+      echo ">>>                                                                            <<<"
+      echo ">>> NOTICE !!!  The '--acceptAllEulas' Option is set on.  This means you are   <<<"
+      echo ">>>             implicitly accepting the EULA associated with this OVA.  The   <<<"
+      echo ">>>             EULA should be iterated in the job log output, and it is your  <<<"
+      echo ">>>             responsibility to comply with the End-User License Agreement.  <<<"
+      echo ">>>                                                                            <<<"
+      echo ""
+
       cat << EOOVF > $OVFCMD
-      ovftool {{ .Param "ova/ovftool-extra-options" }} \\
+      ovftool \\
+        {{ .Param "ova/ovftool-options" }} \\
+        {{ .Param "ova/ovftool-extra-options" }} \\
         --name='{{ $ovajson.Name }}' \\
         $MORE \\
         {{ if eq (.Param "govc/insecure") true }}--noSSLVerify \\{{ else -}}{{ end -}}
@@ -114,7 +155,7 @@ Templates:
               {{- .Param "govc/username" -}}:{{- .Param "govc/password" -}}
               @{{- .ParamExpand "govc/url" -}}
               {{- if ( .Param "govc/port" ) -}}:{{- .Param "govc/port" | toString -}}{{- end -}}
-              /{{- .ParamExpand "esxi/datacenter-name" -}}/host/{{- .ParamExpand "esxi/cluster-name" -}}'
+              /${STRING}'
       EOOVF
 
       echo ""
@@ -136,3 +177,12 @@ Templates:
       echo "==== DONE ===="
       echo ""
 
+      if [[ "{{ .Param "govc/debug" }}" == "true" ]]
+      then
+        echo ">>> DEBUG on - not cleaning up $OVFCMD file."
+      else
+        echo "Cleaning up temporary '$OVFCMD' file."
+        rm -f $OVFCMD
+      fi
+
+      echo ""

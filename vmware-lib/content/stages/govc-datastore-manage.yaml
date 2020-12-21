@@ -1,5 +1,5 @@
 ---
-Name: "govc-datastore-create"
+Name: "govc-datastore-manage"
 Description: "Run govc command to create a datastore on the remote vSphere ESXi node"
 Documentation: |
   This Stage runs a _govc_ command to create a datastore on the ESXi instance.
@@ -9,13 +9,18 @@ Documentation: |
   If not specified, the defaults for device are "first found device", and the name
   of the datastore will be set to "datastore1".
 
+  In addition, the more advanced "mapping" Param can be used to define multiple
+  Datastore creations of different types (NFS, CIFS, VMFS, Local, etc.).
+
 OptionalParams:
   - govc/datastore-create-disk
   - govc/datastore-create-name
   - govc/datastore-skip-create
+  - esxi/datastore-mappings
 Tasks:
   - "context:govc"
-  - "govc-datastore-create"
+  - "govc-datastore-manage"
+  - "context:"
 Meta:
   icon: "terminal"
   color: "black"

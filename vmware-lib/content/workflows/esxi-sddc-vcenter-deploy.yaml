@@ -30,7 +30,7 @@ Meta:
   icon: terminal
   title: RackN Content
 Stages:
-  - govc-datastore-create
+  - govc-datastore-manage
   - govc-stage-ova
   - govc-deploy-ova
   - govc-wait-for-ova
