@@ -30,6 +30,10 @@ Templates:
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
 
+      ### govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" .}}
+
+      ### govc-get-thumbprint.sh
       set -e
 
       get_thumb() {

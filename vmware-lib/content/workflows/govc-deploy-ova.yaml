@@ -37,7 +37,7 @@ Documentation: |
             the ``govc/ova-location`` URL.
 
 Stages:
-  - "govc-datastore-create"
+  - "govc-datastore-manage"
   - "govc-stage-ova"
   - "govc-deploy-ova"
   - "govc-wait-for-ova"

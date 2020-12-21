@@ -1,5 +1,5 @@
 ---
-Name: "govc-datastore-create"
+Name: "govc-datastore-manage"
 Description: "Run govc command to create a datastore on the remote vSphere ESXi node"
 Documentation: |
   This Stage runs a _govc_ command to create a datastore on the ESXi instance.
@@ -19,7 +19,7 @@ OptionalParams:
   - esxi/datastore-mappings
 Tasks:
   - "context:govc"
-  - "govc-datastore-create"
+  - "govc-datastore-manage"
 Meta:
   icon: "terminal"
   color: "black"

@@ -3,10 +3,10 @@ Name: "govc/datastore-create-disk"
 Description: "The disk to create a Datastore on, or 'first_available'"
 Documentation: |
   This param sets the disk to create the datastore defined in the param
-  ``govc/datastore-datastore-name``.  The param can be set to a rule that
+  ``govc/datastore-create-name``.  The param can be set to a rule that
   will search for a disk, or directly to a specific disk.
 
-  Supported _rules_ and direct disk definition settings:
+  Supported *rules* and direct disk definition settings:
 
     * ``datastore_mappings``
     * ``first_available``
