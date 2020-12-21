@@ -20,6 +20,7 @@ OptionalParams:
 Tasks:
   - "context:govc"
   - "govc-datastore-manage"
+  - "context:"
 Meta:
   icon: "terminal"
   color: "black"
