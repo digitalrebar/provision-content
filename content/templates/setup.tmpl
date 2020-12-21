@@ -22,7 +22,7 @@ set -e
 [[ $RS_TOKEN ]] || export RS_TOKEN="{{.GenerateInfiniteToken}}"
 [[ $RS_ENDPOINT ]] || export RS_ENDPOINT="{{.ApiURL}}"
 [[ $RS_UUID ]] || export RS_UUID="{{.Machine.UUID}}"
-
+[[ $HOME ]] || export HOME=$(pwd)
 ###
 #  if we want debugging of our scripts, set the Param to true
 #  also set shell variable for script reuse if desired for further
