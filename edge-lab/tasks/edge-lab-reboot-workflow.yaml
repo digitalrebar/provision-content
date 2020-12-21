@@ -26,6 +26,7 @@ Templates:
         "Type": "machines"
       }' > /dev/null; then
         echo "Sending Reboot Event (powercycle)"
+        sleep 1
       else
         echo "Warning: failed trying to post Reboot Event (powercycle)"
       fi
