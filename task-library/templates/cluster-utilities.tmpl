@@ -31,6 +31,17 @@ cluster_wait_for_variable() {
   echo $var
 }
 
+cluster_require_cluster_profile() {
+  local uuid=$1
+  local profile=$2
+  if [[ $(drpcli machines count Uuid=$uuid Profiles=$profile) -eq 0 ]]; then
+    echo "  Warning: Machine $uuid did not have cluster profile $profile, adding..."
+    drpcli machines addprofile $uuid $CLUSTER_PROFILE > /dev/null;
+  else
+    echo "  Verified: Machine $uuid has cluster profile $profile.  No action required"
+  fi
+}
+
 cluster_wait_for_workflow_complete() {
   local timer_count=0
   local timer_expire=1200

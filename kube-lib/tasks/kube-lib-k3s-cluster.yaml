@@ -38,6 +38,7 @@ Templates:
       UUIDS=$(jq -rc ".[].Uuid" <<< "$CLUSTER_LEADERS")
       for uuid in $UUIDS; do
         echo "  starting k3s leader install workflow on $uuid"
+        cluster_require_cluster_profile $uuid $CLUSTER_PROFILE
         drpcli machines meta set $uuid key icon to anchor > /dev/null
         drpcli machines workflow $uuid k3s-machine-install > /dev/null
       done
@@ -49,6 +50,7 @@ Templates:
       UUIDS=$(jq -rc ".[].Uuid" <<< "$CLUSTER_WORKERS")
       for uuid in $UUIDS; do
         echo "  starting k3s worker install workflow on $uuid"
+        cluster_require_cluster_profile $uuid $CLUSTER_PROFILE
         drpcli machines meta set $uuid key icon to ship > /dev/null
         drpcli machines workflow $uuid k3s-machine-install > /dev/null
       done

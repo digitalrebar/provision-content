@@ -14,7 +14,7 @@ Schema:
       sha256sum: "ad296fb03eb31334eb88ba4c54690145d3f343bde17a1331803093c544025b4a"
     linux-arm64:
       url: "https://github.com/rancher/k3s/releases/download/v1.19.3%2Bk3s3/k3s-arm64"
-      sha256sum: "f165370c347b4867d78793ac1960ce972d8dc283a7f6b9ddfb7ab8021bd31403"
+      sha256sum: "79345a9534678261e77a78af5db9cfe5c9c44bddffddd504fe3eb5bb921df313"
   required:
     - version
     - name
