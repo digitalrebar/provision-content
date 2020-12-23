@@ -66,7 +66,7 @@ Templates:
       echo "  Created Profile {{ .Machine.Name }}"
     fi
 
-    if [[ $(drpcli machines count Uuid=$RS_UUID Profile={{.Machine.Name}}) -lt 1 ]]; then
+    if [[ $(drpcli machines count Uuid=$RS_UUID Profile={{.Machine.Name}}) -eq 0 ]]; then
       drpcli machines addprofile $RS_UUID {{ .Machine.Name }} > /dev/null
       echo "  Added Profile {{ .Machine.Name }} to Machine {{ .Machine.Name }}"
     else

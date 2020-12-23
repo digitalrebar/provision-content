@@ -1,10 +1,6 @@
-Name: "edge-lab-bootstrap"
+Name: "bootstrap-edge-lab"
 Description: "Bootstrap Edge Lab server"
 Documentation: |
-  *****************************************
-  DEPRECATED in favor of bootstrap-edge-lab
-  *****************************************
-
   Bootstrap Edge Lab server.
 
   * Base Bootstrap
@@ -22,7 +18,6 @@ Stages:
   - "edge-lab-bootstrap"
   - "complete-nobootenv"
 Meta:
-  type: deprecated
-  color: "grey"
+  color: "green"
   icon: "sort amount up"
   copyright: "RackN 2019"

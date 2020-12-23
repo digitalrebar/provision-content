@@ -17,6 +17,9 @@ Documentation: |
   This design allows operators to specific multiple mount points
   or have a single point with multiple potential configurations.
 
+  * rebuilt will wide and rebuild the mount
+  * reset will rm -rf all files if UUID changes
+
   example:
 
     ::
@@ -28,6 +31,7 @@ Documentation: |
           mount: "/mnt/storage",
           type: "xfs",
           rebuild: true,
+          reset: true,
           comment: "example"
         }
         {
@@ -36,6 +40,7 @@ Documentation: |
           mount: "/mnt/storage",
           type: "xfs",
           rebuild: true,
+          reset: true,
           comment: "put something here"
         }
       ]
@@ -51,6 +56,7 @@ Schema:
       - type
       - rebuild
       - comment
+      - reset
     properties:
       disk:
         type: string
@@ -61,6 +67,8 @@ Schema:
       type:
         type: string
       rebuild:
+        type: boolean
+      reset:
         type: boolean
 Meta:
   type: "config"
