@@ -1,0 +1,17 @@
+---
+Name: "network-data-parser-debug"
+Description: "Turns on debug output in the 'network-data-parser.tmpl' template."
+Documentation: |
+  If set to boolean ``true``, will output simple Shell ``echo`` statements
+  with the parsed values from the ``network-data`` structure.  Technically,
+  the template should be complete shell/powershell/script agnostic, and use
+  of ``echo`` is Bash/SH/etc. specific statement syntax.
+
+Schema:
+  type: boolean
+  default: false
+Meta:
+  type: "enable"
+  icon: "bug"
+  color: "orange"
+  title: "Digital Rebar Community Content"

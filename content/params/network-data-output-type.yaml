@@ -1,0 +1,32 @@
+---
+Name: "network-data-output-type"
+Description: "Defines what variable output type for 'network-data-parser.tmpl' template."
+Documentation: |
+  The template ``network-data-parser.tmpl`` parses the ``network-data`` structure in a
+  consistent manner and set of rules.  To reuse the parsing rules, include the template
+  in to other templates.  Since golang templating can't pass variables from an
+  included template in to the scope of the operating template, we must rely on the
+  scripted language Varaible definitions.
+
+  Setting this Param to one of the supported types, will tell the ``network-data-parser.tmpl``
+  to generate the correct Variable references for the targeted scripting language.
+  Supported scripted languages are:
+
+    * ``shell`` = Shell (BASH, SH, ZSH, etc)
+    * ``powershell`` = PowerShell
+    * ``python`` = Python (2 and 3 compatible)
+
+  The default value if not otherwise specified is ``shell`` (BASH, SH, etc).
+
+Schema:
+  type: string
+  enum:
+    - shell
+    - powershell
+    - python
+  default: shell
+Meta:
+  type: "value"
+  icon: "file alternate outline"
+  color: "green"
+  title: "Digital Rebar Community Content"
