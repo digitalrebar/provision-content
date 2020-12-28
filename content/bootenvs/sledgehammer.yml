@@ -18,17 +18,17 @@ Meta:
   color: "green"
   title: "Digital Rebar Community Content"
 Loaders:
-  amd64-uefi: aaaf3f77a704e10a51a62ee494e129758c9c0389/shimx64.efi
+  amd64-uefi: 3efc63eb3f30d393109c5a633f8845ac21e06267/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar"
-      Kernel: "aaaf3f77a704e10a51a62ee494e129758c9c0389/vmlinuz0"
+      IsoFile: "sledgehammer-3efc63eb3f30d393109c5a633f8845ac21e06267.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/3efc63eb3f30d393109c5a633f8845ac21e06267/sledgehammer-3efc63eb3f30d393109c5a633f8845ac21e06267.amd64.tar"
+      Kernel: "3efc63eb3f30d393109c5a633f8845ac21e06267/vmlinuz0"
       Initrds:
-        - "aaaf3f77a704e10a51a62ee494e129758c9c0389/stage1.img"
+        - "3efc63eb3f30d393109c5a633f8845ac21e06267/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -51,7 +51,7 @@ OS:
         provisioner.gw={{ get $prov "gateway" }}
         {{ end }}
         {{ if hasKey $prov "interface" }}
-        provisioner.interface="{{ get $prov "interface" }}"
+        provisioner.interface={{ get $prov "interface" }}
         {{ end }}
         {{ end }}
         {{ end }}
@@ -90,7 +90,7 @@ OS:
         provisioner.gw={{ get $prov "gateway" }}
         {{ end }}
         {{ if hasKey $prov "interface" }}
-        provisioner.interface="{{ get $prov "interface" }}"
+        provisioner.interface={{ get $prov "interface" }}
         {{ end }}
         {{ end }}
         {{ end }}
@@ -129,7 +129,7 @@ OS:
         provisioner.gw={{ get $prov "gateway" }}
         {{ end }}
         {{ if hasKey $prov "interface" }}
-        provisioner.interface="{{ get $prov "interface" }}"
+        provisioner.interface={{ get $prov "interface" }}
         {{ end }}
         {{ end }}
         {{ end }}
@@ -250,10 +250,10 @@ Templates:
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - ID: "default-grub.tmpl"
     Name: "grub-secure"
-    Path: "sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/grub.cfg-{{.Machine.HexAddress}}"
+    Path: "sledgehammer/3efc63eb3f30d393109c5a633f8845ac21e06267/grub.cfg-{{.Machine.HexAddress}}"
   - ID: "default-grub.tmpl"
     Name: "grub-secure-mac"
-    Path: 'sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: 'sledgehammer/3efc63eb3f30d393109c5a633f8845ac21e06267/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
   - ID: drp-agent-cfg.yaml.tmpl
     Name: agent-cfg
     Path: "{{.Machine.Path}}/agent-cfg.yml"

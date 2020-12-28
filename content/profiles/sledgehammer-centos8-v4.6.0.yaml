@@ -5,36 +5,35 @@ Params:
   bootenv-customize:
     discovery:
       Loaders:
-        amd64-uefi: aaaf3f77a704e10a51a62ee494e129758c9c0389/shimx64.efi
+        amd64-uefi: 3efc63eb3f30d393109c5a633f8845ac21e06267/shimx64.efi
       OS:
         Name: sledgehammer
         SupportedArchitectures:
           amd64:
             Initrds:
-            - aaaf3f77a704e10a51a62ee494e129758c9c0389/stage1.img
-            IsoFile: sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar
-            IsoUrl: http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar
-            Kernel: aaaf3f77a704e10a51a62ee494e129758c9c0389/vmlinuz0
+            - 3efc63eb3f30d393109c5a633f8845ac21e06267/stage1.img
+            IsoFile: sledgehammer-3efc63eb3f30d393109c5a633f8845ac21e06267.amd64.tar
+            Kernel: 3efc63eb3f30d393109c5a633f8845ac21e06267/vmlinuz0
       Templates:
       - ID: allarch-grub.tmpl
         Name: grub-secure-discovery
-        Path: sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/grub.cfg
+        Path: sledgehammer/3efc63eb3f30d393109c5a633f8845ac21e06267/grub.cfg
     sledgehammer:
       Loaders:
-        amd64-uefi: aaaf3f77a704e10a51a62ee494e129758c9c0389/shimx64.efi
+        amd64-uefi: 3efc63eb3f30d393109c5a633f8845ac21e06267/shimx64.efi
       OS:
         Name: sledgehammer
         SupportedArchitectures:
           amd64:
             Initrds:
-            - aaaf3f77a704e10a51a62ee494e129758c9c0389/stage1.img
-            IsoFile: sledgehammer-aaaf3f77a704e10a51a62ee494e129758c9c0389.amd64.tar
-            Kernel: aaaf3f77a704e10a51a62ee494e129758c9c0389/vmlinuz0
+            - 3efc63eb3f30d393109c5a633f8845ac21e06267/stage1.img
+            IsoFile: sledgehammer-3efc63eb3f30d393109c5a633f8845ac21e06267.amd64.tar
+            Kernel: 3efc63eb3f30d393109c5a633f8845ac21e06267/vmlinuz0
       Templates:
       - ID: default-grub.tmpl
         Name: grub-secure
-        Path: sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/grub.cfg-{{.Machine.HexAddress}}
+        Path: sledgehammer/3efc63eb3f30d393109c5a633f8845ac21e06267/grub.cfg-{{.Machine.HexAddress}}
       - ID: default-grub.tmpl
         Name: grub-secure-mac
-        Path: sledgehammer/aaaf3f77a704e10a51a62ee494e129758c9c0389/grub.cfg-{{.Machine.MacAddr
+        Path: sledgehammer/3efc63eb3f30d393109c5a633f8845ac21e06267/grub.cfg-{{.Machine.MacAddr
           "pxelinux"}}
