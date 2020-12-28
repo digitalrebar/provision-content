@@ -23,6 +23,11 @@
       string type values.  The DNS and NTP servers data will be parsed
       and added as a space separate String from the found values.
 
+      The dns_servers and ntp_servers are not returned in any array type
+      as some OSes that we support (namely VMware ESXi) shell does not
+      support any array types; and much more primitive constructs need
+      to be used to support them.
+
       Routes entries ('routes') will NOT be parsed and handled by this
       template.  See the 'netowork-manage-routes' task in the DRP
       Community Content pack for handling route parsing rules.
@@ -134,6 +139,8 @@ _nd_{{ $key }}='{{ $val }}'
 ###
 #  >>> VMware ESXi does not support associative arrays, no array rendered for use
 #  >>> since 'Env.Os.Family' returned 'vmware'
+#
+#  >>> use the 'fetch_nd_var()' function to get values (eg 'fetch_nd_var address')
 ###
 {{ else -}}
 ###
@@ -143,8 +150,34 @@ _nd_{{ $key }}='{{ $val }}'
 declare -A _nd_data
 {{ range $key, $val := $NETDATA -}}
   _nd_data[{{ $key }}]='{{ $val }}'
-{{ end -}}
-{{ end -}}
+{{ end -}} {{- /* end range $NETDATA */ -}}
+{{ end -}} {{- /* end if eq .Env.OS.Family */ -}}
+###
+#  Given a network-data key name as ARGv1, fetch the value from the associtive
+#  array if it exists.  If not, then get the value from the individual variables;
+#  for OSes (ESXi, etc) that do not support array variable types.
+#
+#  example getting MTU value, assuming it's set to '9000':
+#    usage:  fetch_nd_var mtu
+#  returns:  9000
+#
+#  First searches _nd_data[mtu] if _nd_data exists.  Otherwise, returns the value
+#  from the variable _nd_mtu.
+#
+#  Returns an empty string if the key has not been assigned any value.
+###
+fetch_nd_var() {
+  local _key="$1"
+  local _val=""
+
+  if [[ -n "$_nd_data" ]]
+  then
+    echo "$_nd_data[$_key]"
+  else
+    eval _val="\$_nd_${_key}"
+    echo "$_val"
+  fi
+}
 {{ if $debug -}}
 ###
 #  enabled Shell debug output because 'network-data-parser-debug' is true
