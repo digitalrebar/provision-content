@@ -125,44 +125,22 @@
 {{ $_ := set $NETDATA "dns_servers" ( trim $dsrvr ) -}}
 {{ $_ := set $NETDATA "ntp_servers" ( trim $nsrvr ) -}}
 
-{{- /* GENERATE appropriate shell/python/powershell variable definitions */ -}}
+{{- /* GENERATE shell (basic/advanced)/python/powershell variable definitions */ -}}
 
 {{- if eq $output  "shell" }}
-{{- /* *********************************** SHELL ********************************** */ -}}
+{{- /* ******************************  SHELL BASIC  ****************************** */ -}}
 ###
-#  Shell (BASH, SH, ZSH, etc) variable definitions of network-data structure
-###
-{{ range $key, $val := $NETDATA -}}
-_nd_{{ $key }}='{{ $val }}'
-{{ end -}}
-{{ if or ( eq .Env.OS.Family "vmware" ) (eq ( .Param "os-identity/system" ) "vmware" ) -}}
-###
-#  >>> VMware ESXi does not support associative arrays, no array rendered for use
-#  >>> since 'Env.Os.Family' returned 'vmware'
-#
-#  >>> use the 'fetch_nd_var()' function to get values (eg 'fetch_nd_var address')
-###
-{{ else -}}
-###
-#  Shell (sh/bash/zsh/etc) associative array (VMware ESXi busybox shell does not
-#  support this format)
-###
-declare -A _nd_data
-{{ range $key, $val := $NETDATA -}}
-  _nd_data[{{ $key }}]='{{ $val }}'
-{{ end -}} {{- /* end range $NETDATA */ -}}
-{{ end -}} {{- /* end if eq .Env.OS.Family */ -}}
-###
-#  Given a network-data key name as ARGv1, fetch the value from the associtive
-#  array if it exists.  If not, then get the value from the individual variables;
-#  for OSes (ESXi, etc) that do not support array variable types.
+#  Given a network-data key name as ARGv1, fetch the value from the associative
+#  array if exists (eg. 'declare' function found in shell environment).  If not
+#  then get the value from the individual variables; for OSes (ESXi, etc) that
+#  do not support array variable types.
 #
 #  example getting MTU value, assuming it's set to '9000':
 #    usage:  fetch_nd_var mtu
 #  returns:  9000
 #
-#  First searches _nd_data[mtu] if _nd_data exists.  Otherwise, returns the value
-#  from the variable _nd_mtu.
+#  First searches _nd_data[mtu] if the _nd_data array exists.  Otherwise,
+#  returns the value from the variable _nd_mtu.
 #
 #  Returns an empty string if the key has not been assigned any value.
 ###
@@ -180,30 +158,64 @@ fetch_nd_var() {
     echo "$_val"
   fi
 }
+
+###
+#  shell basic (BASH, SH, ZSH, etc) variable definitions of network-data structure
+#  No rendered associative arrays for shells like BusyBox/Ash that do not support
+#  them (eg. VMware ESXi).
+###
+{{ range $key, $val := $NETDATA -}}
+_nd_{{ $key }}='{{ $val }}'
+{{ end -}}
+
 {{ if $debug -}}
 ###
-#  enabled Shell debug output because 'network-data-parser-debug' is true
+#  enabled Shell debug output because 'network-data-parser-debug' is 'true'
 ###
 echo ""
-echo "DEBUG: 'network-data' parsing resulted in the following assignments:"
+echo "DEBUG: shell basic - 'network-data' resulted in the following assignments:"
 echo ""
 {{ range $key, $val := $NETDATA -}}
 printf ">>> %18s :: %s\n" "{{ $key }}" "$_nd_{{ $key }}"
 {{ end -}}
-{{ if or ( eq .Env.OS.Family "vmware" ) (eq ( .Param "os-identity/system" ) "vmware" ) -}}
-###
-#  In ESXi environment - no associative arrays were built, so no dump of them
-###
-{{ else -}}
-###
-#  Dump the associative array values
-###
-echo ""
-echo "DEBUG: dump of the _nd_data associative array:"
-echo ""
-for KEY in "${!_nd_data[@]}"; do printf ">>> %18s = '%s'\n" "[$KEY]" "${_nd_data[$KEY]}" ; done
-{{ end -}} {{- /* end if .Env.OS.Family or os-identity/system */ -}}
 {{ end -}} {{- /* end if $debug */ -}}
+
+###
+#  if 'declare' is not available, the shell doesn't support Array types
+###
+if ! type declare > /dev/null 2>&1
+then
+  ###
+  #  This shell does not support 'declare', which indicates it also does
+  #  not support Array type variables.  No associative array or related
+  #  debugging statements will be generated.
+  ###
+  echo ">>>"
+  echo ">>> No array support detected, no associative arrays or debug generated."
+  echo ">>>"
+else
+  ###
+  #  shell advanced (sh/bash/zsh/etc) associative array (VMware ESXi busybox
+  #  shell does not support this format)
+  ###
+  declare -A _nd_data
+{{ range $key, $val := $NETDATA -}}
+  {{ "  " }}_nd_data[{{ $key }}]='{{ $val }}'
+{{ end -}}
+
+{{ if $debug }}
+  ###
+  #  shell-advanced: Dump the associative array values
+  ###
+  echo ""
+  echo "DEBUG: shell-advanced - dump of the _nd_data associative array:"
+  echo ""
+  for KEY in "${!_nd_data[@]}"
+  do
+    printf ">>> %22s = '%s'\n" "_nd_data[$KEY]" "${_nd_data[$KEY]}"
+  done
+{{ end -}} {{- /* end if $debug */ -}}
+fi # end ! type declare
 
 {{ else if eq $output "python" -}}
 {{- /* ********************************   PYTHON   ******************************** */ -}}
@@ -213,6 +225,7 @@ for KEY in "${!_nd_data[@]}"; do printf ">>> %18s = '%s'\n" "[$KEY]" "${_nd_data
 {{ range $key, $val := $NETDATA -}}
 _nd_{{ $key }} = '{{ $val }}'
 {{ end -}}
+
 ###
 #  Python dict format of network-data structure
 ###
@@ -222,11 +235,12 @@ _nd_data = {
 {{ end -}}
 }
 {{ if $debug -}}
+
 ###
 #  enabled Python debug output because 'network-data-parser-debug' is true
 ###
 print()
-print("DEBUG: 'network-data' parsing resulted in the following assignments:")
+print("DEBUG: python - 'network-data' resulted in the following assignments:")
 print()
 {{ range $key, $val := $NETDATA -}}
 print(">>> %18s :: %s" % ("{{ $key }}", _nd_{{ $key }}))
@@ -246,6 +260,7 @@ for key, value in _nd_data.items():
 {{ range $key, $val := $NETDATA -}}
 _nd_{{ $key }} = '{{ $val }}'
 {{ end -}}
+
 ###
 #  Powershell hash table for network data
 ###
@@ -255,25 +270,25 @@ $_nd_data = @{
 {{ end -}}
 }
 {{ if $debug -}}
+
 ###
 #  enabled Powershell debug output because 'network-data-parser-debug' is true
 ###
 Write-Output ""
-Write-Output "DEBUG: 'network-data' parsing resulted in the following assignments:"
+Write-Output "DEBUG: powershell - 'network-data' resulted in the following assignments:"
 Write-Output ""
 {{ range $key, $val := $NETDATA -}}
 Write-Output ">>> {{ $key }} :: $_nd_{{ $key }}"
 {{ end -}}
 Write-Output ""
-Write-Output "DEBUG: dump of the _nd_data Powershell hash:"
+Write-Output "DEBUG: powershell - dump of the _nd_data Powershell hash:"
 Write-Output ""
 $_nd_data | Format-Table
 {{ end -}}
 
 {{ else -}}
 ####
-####  FATAL: 'network-data-output-type' unsupported value '{{ .Param "network-data-output-type" }}'
-####
+####  FATAL: 'network-data-output-type' unsupported value '{{ $output }}'
 ####
 {{ end -}} {{- /* end if .Param network-data */ -}}
 
