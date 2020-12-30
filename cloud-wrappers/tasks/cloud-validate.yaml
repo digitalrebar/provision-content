@@ -95,6 +95,27 @@ Templates:
 
         {{ end }}
 
+        {{ if eq "digitalocean" $cloud }}
+          echo "digitalocean/token check..."
+          {{ if .ParamExists "digitalocean/token" }}
+            echo "  required token is set"
+          {{ else }}
+            echo "  ERROR: you must set the digitalocean/token for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the digitalocean/token!"}' > /dev/null
+            exit 1
+          {{ end }}
+          {{ range $i, $p := .Machine.Profiles }}
+          s="{{$p}}"
+          if [[ ${#s} -gt 2  ]]; then
+            echo "  verified \"$s\" tag length (must be >2 characters, was ${#s})"
+          else
+            echo "FAIL! \"$s\" profile IS NOT >2 characters. Min 3 is required by Linode"
+            exit 1
+          fi
+          {{ end }}
+
+        {{ end }}
+
         {{ if eq "azure" $cloud }}
           {{ if .ParamExists "azure/subscription_id" }}
             echo "  required subscription_id is set"
@@ -128,12 +149,12 @@ Templates:
 
         cloudicon="cloud"
         {{ if hasKey (.Param "cloud/provider-icons") $cloud }}
-          cloudicon={{ get (.Param "cloud/provider-icons") $cloud }}
+          cloudicon="{{ get (.Param "cloud/provider-icons") $cloud }}"
         {{ else }}
-          cloudicon={{ get (.Param "cloud/provider-icons") "default" }}
+          cloudicon="{{ get (.Param "cloud/provider-icons") "default" }}"
         {{ end }}
         echo "set icon to $cloudicon"
-        drpcli machines meta set $RS_UUID key icon to $cloudicon > /dev/null
+        drpcli machines meta set $RS_UUID key icon to "${cloudicon}" > /dev/null
 
       {{ else }}
         echo "You must define which cloud is being used!"
