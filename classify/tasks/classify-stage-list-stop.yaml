@@ -14,9 +14,20 @@ Meta:
   title: "RackN Content"
   feature-flags: "sane-exit-codes"
 Templates:
-- Name: "validation_stop.sh"
+- Name: "classification_stop.sh"
+  Meta:
+    OS: "linux,darwin"
   Contents: |
     #!/bin/bash
-    # Copyright RackN, 2020
-
+    exit 0
+- Name: "classify-stage-list-stop.ps1"
+  Meta:
+    OS: "windows"
+  Contents: |
+    exit 0
+- Name: "classify-stage-list-stop-esxi.sh"
+  Meta:
+    OS: "esxi"
+  Contents: |
+    #!/bin/sh
     exit 0
