@@ -351,3 +351,7 @@ Templates:
       # This last line is required to let Sledgehammer know it has loaded a valid start-up.sh
       # Do not alter or remove it.
       # /tmp/control.sh
+
+  - Name: "esxi-join-up.py"
+    Path: "machines/esxi-join-up.py"
+    ID: esxi-join-up.py.tmpl
