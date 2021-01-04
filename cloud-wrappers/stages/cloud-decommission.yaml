@@ -4,6 +4,7 @@ Description: "Destroy Cloud Instance with Terraform Context"
 Params:
   terraform/plan-action: "destroy"
   context/name: "runner"
+BootEnv: "sledgehammer"
 Tasks:
   - "context:terraform"
   - "cloud-validate"
