@@ -226,6 +226,14 @@ Schema:
       arch: any
       url: http://mirrors.kernel.org/fedora-epel/8/Modular/$basearch
       distribution: "8"
+    - tag: certs-8
+      os:
+        - centos-8
+        - centos-8.1.1911
+        - centos-8.2.2004
+      arch: any
+      url:	https://forensics.cert.org/centos/cert/8/$basearch
+      distribution: "8"
     - tag: ubuntu-16.04
       os:
         - ubuntu-16.04

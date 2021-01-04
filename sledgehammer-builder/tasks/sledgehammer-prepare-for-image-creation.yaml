@@ -44,6 +44,8 @@ Templates:
       rm -rf firmware
       mv firmware.new firmware
       cd /
+      echo "Remove package repo entries"
+      rm -rf /etc/yum.repos.d/00-*
       echo "Restoring Selinux file contexts"
       restorecon -r -F -i -p .
   - Name: fix-up-services
