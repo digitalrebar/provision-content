@@ -18,6 +18,8 @@ Meta:
   feature-flags: "sane-exit-codes"
 Templates:
 - Name: "classify-stage-list-start.sh"
+  Meta:
+    OS: "linux,darwin"
   Contents: |
     #!/bin/bash
     # Copyright RackN, 2020
@@ -58,4 +60,17 @@ Templates:
     Tasks: {{toJson $full}}
     EOF
 
+    exit 0
+- Name: "classify-stage-list-start.ps1"
+  Meta:
+    OS: "windows"
+  Contents: |
+    Write-Host "classify stage list start not supported on windows."
+    exit 0
+- Name: "classify-stage-list-start-esxi.sh"
+  Meta:
+    OS: "esxi"
+  Contents: |
+    #!/bin/sh
+    echo "classify stage list start not supported on esxi."
     exit 0

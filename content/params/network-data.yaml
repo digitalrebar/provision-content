@@ -69,14 +69,14 @@ Schema:
       dhcp:
         type: string
         enum:
-          - YES
-          - yes
-          - NO
-          - no
-          - true
-          - TRUE
-          - false
-          - FALSE
+          - "YES"
+          - "yes"
+          - "NO"
+          - "no"
+          - "true"
+          - "TRUE"
+          - "false"
+          - "FALSE"
       gateway:
         type: string
       netmask:
@@ -114,6 +114,6 @@ Schema:
 
 Meta:
   type: "value"
-  icon: "chip"
+  icon: "microchip"
   color: "blue"
   title: "Digital Rebar Community Content"

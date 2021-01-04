@@ -100,6 +100,7 @@ Templates:
       dmidecode
       dnf
       dosfstools
+      dpkg
       e2fsprogs
       efibootmgr
       file
@@ -125,6 +126,9 @@ Templates:
       less
       libssh2
       libsysfs
+      libtomcrypt
+      libtommath
+      libyaml
       linux-firmware
       lldpd
       lshw
@@ -152,7 +156,12 @@ Templates:
       policycoreutils
       procps-ng
       python2
+      python2-crypto
+      python2-pyyaml
       python36
+      python3-crypto
+      python3-oauthlib
+      python3-pyyaml
       rootfiles
       rpm
       rsyslog

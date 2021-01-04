@@ -11,7 +11,15 @@ Meta:
   icon: "search"
   title: "RackN"
 Templates:
-- Contents: ""
+- Meta:
+    OS: "linux,darwin"
   ID: "classify.sh.tmpl"
-  Name: "Classify Machine"
-  Path: ""
+  Name: "Classify linux-darwin Machine"
+- Meta:
+    OS: "windows"
+  ID: "classify.ps1.tmpl"
+  Name: "Classify windows Machine"
+- Meta:
+    OS: "esxi"
+  ID: "classify-esxi.sh.tmpl"
+  Name: "Classify esxi Machine"
