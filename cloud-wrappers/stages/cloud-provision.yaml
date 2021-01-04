@@ -3,6 +3,7 @@ Name: "cloud-provision"
 Description: "Provision Cloud Instance with Terraform Context"
 Params:
   terraform/plan-action: "apply"
+BootEnv: "sledgehammer"
 Tasks:
   - "context:runner"
   - "cloud-validate"
