@@ -6,12 +6,14 @@ Documentation: |
   the General Available (GA) kernel.  If you wish to install the HWE (Hardware
   Enablement) version, please use the Stage "ubuntu-20.04-hwe-install".
   Both amd64 and arm64 architectures are supported.
+  
   NOTE - Default Ubuntu ISOs will attempt to check internet repositories, this
   can cause problems during provisioning if your environment does not have
   outbound access.  Workaround this by defining Options 3 (Gateway) and 6 (DNS)
-  for your Subnet settings.
+  for your Subnet settings.  See https://provision.readthedocs.io/en/latest/doc/kb/kb-00033.html
 
   ``part-scheme`` can be used to inject a storage section.
+
 
   The template would be named "part-scheme-<Value of part-scheme>".
 
