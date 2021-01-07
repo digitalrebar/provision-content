@@ -58,6 +58,8 @@ Templates:
       # Deploy an OVA appliance using 'ovftool'
       # RackN Copyright 2020
 
+      # disable shell history expansion with '!' - because vmware operators all seem
+      # to love '!' in their passwords...
       set +H
       set -e
 
@@ -123,7 +125,7 @@ Templates:
           STRING=''
           ;;
         *)
-          xiterr 1 "Unsupport API Type ('$API_TYPE') from vSphere resource. Expect 'VirtualCenter' or 'HostAgent'."
+          xiterr 1 "Unsupported API Type ('$API_TYPE') from vSphere resource. Expected 'VirtualCenter' or 'HostAgent'."
           ;;
       esac
 
@@ -135,6 +137,14 @@ Templates:
       echo ">>>             responsibility to comply with the End-User License Agreement.  <<<"
       echo ">>>                                                                            <<<"
       echo ""
+
+      {{ if ( .Param "govc/datastore" ) }}DATASTORE"--datastore=\"{{ .ParamExpand "govc/datastore" }}\""{{ else }}
+      echo ""
+      echo ">>> NOTICE !!!  No 'govc/datastore' configuration was provided. Hopefully you <<<"
+      echo ">>>             do not need to specify one for this deployment.               <<<"
+      echo ""
+      DATASTORE=""
+      {{ end -}}
 
       cat << EOOVF > $OVFCMD
       ovftool \\
@@ -149,7 +159,7 @@ Templates:
         {{- range $idx, $element := $netmap }}
         {{ $netkey := get $element "Name" }}{{ $netval := get $element "Network" }}--net:"{{ $netkey }}"="{{ $netval }}" \\
         {{- end }}
-        {{ if ( .Param "govc/datastore" ) }}--datastore="{{ .ParamExpand "govc/datastore" }}"{{ else }}{{ end }} \\
+        $DATASTORE \\
         {{ .ParamExpand "govc/ova-location" }} \\
         'vi://
               {{- .Param "govc/username" -}}:{{- .Param "govc/password" -}}
@@ -172,6 +182,27 @@ Templates:
       echo ""
 
       eval $OVFCMD
+
+      if (( $? ))
+      then
+        echo ""
+        echo "ovftool failed - please parse job log output for more detailed output"
+        echo ""
+        echo "Output verbosity can be increased by setting the Param 'ova/ovftool-extra-options'"
+        echo "to '--X:logToConsole=True --X:logLevel=verbose' and re-running the ovftool deployment"
+        echo ""
+        echo "If '--prop' flag values are specified as Boolean True/False by ovftool and the VMs"
+        echo "OVA properties, you must set these values in quoted format, exactly as follows:"
+        echo ""
+        echo "       \"True\" or \"False\""
+        echo "  or   'True' or 'False'"
+        echo ""
+        echo "Case and quotes (single or double will work) matter - despite the OVFTool output"
+        echo "regarding syntax - these are string values not boolean."
+        echo ""
+      else
+        echo "OVFtool command completed successfully."
+      fi
 
       echo ""
       echo "==== DONE ===="
