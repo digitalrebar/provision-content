@@ -12,6 +12,33 @@ Documentation: |
       #!/bin/bash
       curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
 
+  To join EXISTING machines or CLOUD machines running ESXi into DRP, you can use `esxi-join-up.py`.
+  To run this you will first need to install 2 packages RackN provides in vib or component format that
+  have been signed by VMware. You will need the DRP-Firewall-Rule and the DRP-Agent packages. These
+  packages are available on your local DRP endpoint. Before those packages can be installed a partial
+  configuration file will need to be placed on the HostSystem. These steps will need to be done in order.
+  The following commands can be run from the HostSystem you plan to join to DRP.
+
+    ::
+
+      RKN_DIR=$(localcli --formatter json storage filesystem list|python -c "import sys,json;x=json.load(sys.stdin);y=[i for i in x if i['Type']=='VFFS' or 'vmfs' in i['Type'].lower()];print(y[0]['Mount Point'])")/rackn
+      mkdir -p $RKN_DIR
+      cd $RKN_DIR
+      wget -O DRP-Agent.vib [internal ip]:8091/files/plugin_providers/vmware/DRP-Agent-signed.vib
+      wget [internal ip]:8091/files/plugin_providers/vmware/DRP-Firewall-Rule.vib
+      wget [internal ip]:8091/files/plugin_providers/vmware/drpy.conf
+      localcli software vib install -v DRP-Firewall-Rule.vib -f
+      localcli software vib install -v DRP-Agent.vib  -f
+
+  Next you can download the join up script, and then run it:
+
+    ::
+
+      wget [internal ip]:8091/machines/esxi-join-up.py
+      python esxi-join-up.py
+
+  When this process completes you will get output letting you know the machine was added to inventory.
+
 Meta:
   type: "discovery"
   feature-flags: "change-stage-v2"

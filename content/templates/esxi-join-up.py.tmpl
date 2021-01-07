@@ -2,6 +2,7 @@ import argparse
 import configparser
 import json
 import logging
+import os
 import subprocess
 import sys
 
@@ -131,6 +132,26 @@ def get_drpy_conf(drpclient, machine_uuid) -> str:
     return temp_res
 
 
+def kill_drpy():
+    pid_file = "/opt/rackn/drpy/rackn-agent.sh.pid"
+    if os.path.isfile(pid_file):
+        with open(pid_file, 'r') as f:
+            pid = f.read()
+        pid = pid.rstrip()
+        stats = _run("kill -9 {}".format(pid))
+        if stats.returncode == 0:
+            os.unlink(pid_file)
+            return
+        if 'No such process' in stats.stderr:
+            os.unlink(pid_file)
+            return
+        logger.error("Unable to kill RackN Agent {}".format(stats.stderr))
+        raise SystemError
+    logger.error("No PID file found for RackN Agent.")
+    logger.error("System in unexpected state.")
+    raise SystemError
+
+
 def _run(cmd) -> subprocess.CompletedProcess:
     """
     Execute a subprocess.run on cmd and return
@@ -147,81 +168,6 @@ def _run(cmd) -> subprocess.CompletedProcess:
         universal_newlines=True
     )
     return ret
-
-
-def get_drpy_run(conf) -> str:
-    return '''#!/usr/bin/env python3
-# Start up the DRPY agent on an ESXi system.
-
-###
-#  Requires
-#     * Firewall VIB has been installed and activated for API port
-#       access to the DRP Endpoint.
-#     * DRPY VIB has been installed successfully on the system
-#
-#  Above should be met by the 'esxi-drpy-vib-render.py.tmpl' template
-###
-
-import sys, os, datetime, re
-
-agent = "/opt/rackn/drpy/agent"
-rackn_dir = "/opt/rackn/drpy"
-conf_file = rackn_dir + "/drpy.conf"
-
-if not os.path.isdir(rackn_dir):
-  os.mkdir(rackn_dir)
-
-### set up our config file from templates
-print('Setting drpy-agent-conf file to: ' + conf_file)
-conf_file_content = """{0}"""
-if not conf_file_content:
-  sys.exit('No DRPY conf file rendered from template "drpy-agent.conf.tmpl".')
-
-try:
-  with open(conf_file,"w") as f:
-    f.write(conf_file_content)
-except Exception as e:
-  print(str(e))
-
-print("Wrote configuration file '" + conf_file + "' for Agent.")
-
-if not conf_file:
-  sys.exit('No DRPY conf file found on system ("' + conf_file + '".')
-
-if not agent:
-  sys.exit('DRPY agent not found on system"' + agent + '.')
-
-start_agent = "python " + agent + " -f " + conf_file + " 2>&1"
-
-count = 0
-while not os.path.exists(agent):
-  print("Agent is not installed there....")
-  sleep(5)
-  count=count+1
-  if count > 30:
-    sys.exit('DRPY agent not found on system"' + agent + '.')
-
-print("Starting agent with config file named '" + conf_file + "'.")
-os.system(start_agent)
-
-print("Completed processing workflow jobs. Agent exited.")
-'''.format(conf)
-
-
-def put_drpy_run_first_boot(script):
-    with open('/etc/rc.local.d/local.sh', 'r') as f:
-        local_sh = f.readlines()
-    # by default the last line of this file is exit 0
-    local_sh = local_sh[:-1]
-    with open('/etc/rc.local.d/local.sh', 'w') as f:
-        f.writelines(local_sh)
-        f.write("mkdir -p /opt/rackn/drpy/bin\n")
-        f.write("cat > /opt/rackn/drpy/bin/esxi-drpy-run.py <<INSIDEEOF\n")
-        f.write(script)
-        f.write("INSIDEEOF\n")
-        f.write("chmod +x /opt/rackn/drpy/bin/esxi-drpy-run.py\n")
-        f.write("/bin/nohup /opt/rackn/drpy/bin/esxi-drpy-run.py &\n")
-        f.write("exit 0")
 
 
 if __name__ == "__main__":
@@ -241,6 +187,7 @@ if __name__ == "__main__":
         print("DRP-Agent and DRP-Firewall-Rule vib required before join-up can run.")
         raise SystemError
     # setup the client
+    kill_drpy()
     client = Client(endpoint=endpoint, token="{{.GenerateToken}}")
     macs = get_macs()
     send = {"MacAddrs": macs}
@@ -264,12 +211,13 @@ if __name__ == "__main__":
     agent_conf = get_drpy_conf(client, m.Uuid)
     agent_conf_par = configparser.ConfigParser()
     agent_conf_par.read_string(agent_conf)
-    with open("/opt/rackn/drpy/drpy.conf", 'w') as conf:
+    vmfs_cmd_str = "localcli --formatter json storage filesystem list"
+    vmfs_cmd = _run(vmfs_cmd_str)
+    x = json.loads(vmfs_cmd.stdout)
+    y = [i for i in x if i['Type'] == 'VFFS' or 'vmfs' in i['Type'].lower()]
+    c_file = "{}/rackn/drpy.conf".format(y[0]['Mount Point'])
+    with open(c_file, 'w') as conf:
         agent_conf_par.write(conf)
-    with open("/opt/rackn/drpy/drpy.conf", 'r') as conf:
-        conf_str = conf.read()
-    drpy_run = get_drpy_run(conf_str)
-    with open("/opt/rackn/drpy/bin/esxi-drpy-run.py", 'w') as edr:
-        edr.write(drpy_run)
-    put_drpy_run_first_boot(drpy_run)
+    start_agent = "/etc/init.d/rackn-agent.sh start"
+    os.system(start_agent)
     print("done")
