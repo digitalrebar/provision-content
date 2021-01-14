@@ -1,13 +1,13 @@
 ---
-Name: "centos-8-install"
-Description: "CentOS-8 installer that points to the latest CentOS 8 release."
+Name: "fedora-33-install"
+Description: "Fedora Server 33"
 Documentation: |
-  This BootEnv installs the CentOS 8 Minimal operating system.  Both x86_64
-  and aarch64 architectures are supported.
+  This BootEnv installs the Fedora 33 Minimal server operating system. x86_64
+  is supported.
 
-  ISOs can be downloaded from:
+  ISOs can be downloaded from the Fedora download website, at:
 
-    * http://isoredirect.centos.org/centos
+    * https://getfedora.org/en/server/download/
 
 Meta:
   type: "os"
@@ -15,34 +15,14 @@ Meta:
   icon: "linux"
   color: "blue"
   title: "Digital Rebar Community Content"
-Loaders:
-  amd64-uefi: EFI/BOOT/BOOTX64.EFI
-  arm64-uefi: EFI/BOOT/grubaa64.efi
 OS:
-  Family: "redhat"
-  Version: "8"
-  Name: "centos-8"
+  Family: "fedora"
+  Name: "fedora-33"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-8.3.2011-x86_64-dvd1.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.3.2011-x86_64-dvd1.iso"
-      Sha256: "aaf9d4b3071c16dbbda01dfe06085e5d0fdac76df323e3bbe87cce4318052247"
-      Kernel: "images/pxeboot/vmlinuz"
-      Initrds:
-        - "images/pxeboot/initrd.img"
-      BootParams: >-
-        ksdevice=bootif
-        ks={{.Machine.Url}}/compute.ks
-        method={{.Env.InstallUrl}}
-        inst.geoloc=0
-        {{.Param "kernel-options"}}
-        --
-        {{.Param "kernel-console"}}
-    aarch64:
-      Loader: "grubarm64.efi"
-      IsoFile: "CentOS-8.3.2011-aarch64-dvd1.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.3.2011-aarch64-dvd1.iso"
-      Sha256: "ecf586b30fa16b28a33b2fb4ffadd8801201608f9755c94da1212876d32fba92"
+      IsoFile: "Fedora-Server-dvd-x86_64-33-1.2.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/fedora/33/Fedora-Server-dvd-x86_64-33-1.2.iso"
+      Sha256: "4fe38b45a4c788927ddfdfb224c414f138226a75f27a287995d802cba3cb89d4"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"

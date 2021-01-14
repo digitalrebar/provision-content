@@ -1,8 +1,8 @@
 ---
-Name: "ubuntu-20.04-install"
-Description: "Ubuntu-20.04 install"
+Name: "ubuntu-20.04.1-install"
+Description: "Ubuntu-20.04.1 install"
 Documentation: |
-  Installs Ubuntu Focal Fossa (20.04) LTS version.  This BootEnv will install
+  Installs Ubuntu Focal Fossa (20.04.1) LTS version.  This BootEnv will install
   the General Available (GA) kernel.  If you wish to install the HWE (Hardware
   Enablement) version, please use the Stage "ubuntu-20.04-hwe-install".
   Both amd64 and arm64 architectures are supported.
@@ -37,7 +37,7 @@ Meta:
   icon: "linux"
   title: "Digital Rebar Community Content"
 OS:
-  Name: "ubuntu-20.04"
+  Name: "ubuntu-20.04.1"
   Family: "ubuntu"
   Codename: "Focal Fossa"
   Version: "20.04"
