@@ -1,8 +1,8 @@
 ---
-Name: "ubuntu-20.04-install"
-Description: "Ubuntu-20.04 install"
+Name: "ubuntu-20.04.0-install"
+Description: "Ubuntu-20.04.0 install"
 Documentation: |
-  Installs Ubuntu Focal Fossa (20.04) LTS version.  This BootEnv will install
+  Installs Ubuntu Focal Fossa (20.04.0) LTS version.  This BootEnv will install
   the General Available (GA) kernel.  If you wish to install the HWE (Hardware
   Enablement) version, please use the Stage "ubuntu-20.04-hwe-install".
   Both amd64 and arm64 architectures are supported.
@@ -37,15 +37,15 @@ Meta:
   icon: "linux"
   title: "Digital Rebar Community Content"
 OS:
-  Name: "ubuntu-20.04"
+  Name: "ubuntu-20.04.0"
   Family: "ubuntu"
   Codename: "Focal Fossa"
   Version: "20.04"
   SupportedArchitectures:
     amd64:
-      IsoFile: "ubuntu-20.04.1-live-server-amd64.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/20.04/ubuntu-20.04.1-live-server-amd64.iso"
-      IsoSha256: "443511f6bf12402c12503733059269a2e10dec602916c0a75263e5d990f6bb93"
+      IsoFile: "ubuntu-20.04-live-server-amd64.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/20.04/ubuntu-20.04-live-server-amd64.iso"
+      IsoSha256: "caf3fd69c77c439f162e2ba6040e9c320c4ff0d69aad1340a514319a9264df9f"
       Kernel: "casper/vmlinuz"
       Initrds:
         - "casper/initrd"
