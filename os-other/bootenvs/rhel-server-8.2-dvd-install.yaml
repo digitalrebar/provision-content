@@ -1,15 +1,28 @@
 ---
-Name: rhel-server-8-boot-install
-Description: Install BootEnv for RedHat 8 - boot (minimal) ISO
+Name: rhel-server-8.2-dvd-install
+Description: Install BootEnv for RedHat 8.2 - full DVD ISO
 Documentation: |
-  This BootEnv installs the RHEL Server 8 operating system from the boot (minimal) ISO.
+  This BootEnv installs the RHEL Server 8.2 operating system from the full dvd
+  ISO. By default, it will install as a trial with no registration. This is
+  specified by the redhat/subscription-username parameter with the default
+  username of "trial" and redhat/subscription-password blank. Adding a
+  password and/or changing the username will be verified by RedHat's servers
+  and the install will hang if it fails. You can also completely skip
+  registration even with the username and password parameters set by adding
+  the redhat/subscription-skip-activation parameter.
+
+  The ISO can be downloaded from the RedHat Access website with an authorized
+  login and account.  The website is typically found at:
+
+    * https://access.redhat.com/downloads/content/479/ver=/rhel---8/
+
 Meta:
   color: red
   feature-flags: change-stage-v2
   icon: linux
   title: Digital Rebar Community Content
 OS:
-  Name: rhel-server-8-boot
+  Name: rhel-server-8.2-dvd
   Codename: ""
   Family: redhat
   Version: "8"
@@ -25,15 +38,16 @@ OS:
         {{.Param "kernel-console"}}
       Initrds:
         - images/pxeboot/initrd.img
-      IsoFile: rhel-8.2-x86_64-boot.iso
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/redhat/rhel/8/rhel-8.2-x86_64-boot.iso"
+      IsoFile: "rhel-8.2-x86_64-dvd.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/redhat/rhel/8/rhel-8.2-x86_64-dvd.iso"
       Kernel: images/pxeboot/vmlinuz
       Loader: ""
-      Sha256: "d30989c6b3f3b81c262dfbf6e8f711e0d49a6828eb77833c34859e694c24e981"
+      Sha256: "7fdfed9c7cced4e526a362e64ed06bcdc6ce0394a98625a40e7d05db29bf7b86"
 Loaders:
   amd64-uefi: EFI/BOOT/BOOTX64.EFI
 OnlyUnknown: false
-RequiredParams: []
+RequiredParams:
+  - redhat/subscription-username
 OptionalParams:
   - kernel-console
   - kernel-options
@@ -51,9 +65,7 @@ OptionalParams:
   - redhat/subscription-gpg-keys
   - redhat/subscription-password
   - redhat/subscription-repos
-  - redhat/subscription-repos
   - redhat/subscription-skip-activation
-  - redhat/subscription-username
 Templates:
   - Name: kexec
     ID: kexec.tmpl
@@ -83,6 +95,6 @@ Templates:
     Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
     ID: default-grub.tmpl
   - Name: compute.ks
-    Path: '{{.Machine.Path}}/compute.ks'
     ID: select-kickseed.tmpl
+    Path: '{{.Machine.Path}}/compute.ks'
 
