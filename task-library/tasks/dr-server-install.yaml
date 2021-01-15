@@ -96,10 +96,12 @@ Templates:
       fi
 
       FORCE=""
+      ACTION="install"
       if [[ "$(systemctl is-active dr-provision)" == "active" ]] ; then
-        echo "DRP already installed, restarting in case config was changed"
+        echo "DRP already installed (will ugprade), restarting in case config was changed"
         systemctl stop dr-provision
         FORCE="--force"
+        ACTION="upgrade"
       fi
 
       echo "Download Install.sh"
@@ -157,7 +159,8 @@ Templates:
           --drp-password={{ .Param "dr-server/initial-password" }} \
           --drp-user={{ .Param "dr-server/initial-user" }} \
           --initial-contents="rackn-license.json" \
-          install
+          ${ACTION}
+
         systemctl stop dr-provision
 
         echo "--- Completed install.sh ---"
