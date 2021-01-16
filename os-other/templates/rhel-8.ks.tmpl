@@ -9,19 +9,20 @@
 {{if eq ( .Param "redhat/kickstart-shell") true}}
 {{if .ParamExists "provisioner-access-key"}}
 sshpw --username={{if .ParamExists "provisioner-default-user"}}{{.Param "provisioner-default-user"}}{{else}}rocketskates{{end}} --sshkey {{.Param "provisioner-access-key"}}
+
 {{else -}}
 sshpw --username={{if .ParamExists "provisioner-default-user"}}{{.Param "provisioner-default-user"}}{{else}}rocketskates{{end}} --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$TNfj2zjqvI5ICeDM$jMOazmEcMphCFQYd47sCmjtdIkXjI3eegqE17sydyRo7bjCVntZ9dE815KUYnnUCZnvjOdvYbSkK80lnnNgSM1{{end}}
+
 {{end -}}
 {{else -}}
 # no SSH Shell username/key configured
+
 {{end -}}
 
-#######################
-####################### Needs .InstallRepos handling for RHEL
-#######################
-# Assumes full DVD ISO is exploded on DRP Endpoint
-url --url={{.Env.PathFor "tftp" ""}}/BaseOS
-url --url={{.Env.PathFor "tftp" ""}}/AppStream
+# set up the install repos from package-repositories
+{{ range .InstallRepos -}}
+{{ .Install }}
+{{ end -}}
 
 eula --agreed
 timezone Etc/UTC --isUtc
