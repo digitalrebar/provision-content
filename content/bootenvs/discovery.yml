@@ -24,11 +24,16 @@ Documentation: |
       RKN_DIR=$(localcli --formatter json storage filesystem list|python -c "import sys,json;x=json.load(sys.stdin);y=[i for i in x if i['Type']=='VFFS' or 'vmfs' in i['Type'].lower()];print(y[0]['Mount Point'])")/rackn
       mkdir -p $RKN_DIR
       cd $RKN_DIR
-      wget -O DRP-Agent.vib [internal ip]:8091/files/plugin_providers/vmware/DRP-Agent-signed.vib
-      wget [internal ip]:8091/files/plugin_providers/vmware/DRP-Firewall-Rule.vib
+      # For 6.x
+      wget -O DRP-Agent.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/DRP-Agent-signed.zip
+      wget -O DRP-Firewall-Rule.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/RKN-DRPY-FW-RULE_1.0-0.0.0003-offline_bundle-16370411.zip
+      # For 7.x
+      wget -O DRP-Agent.vib [internal ip]:8091/files/plugin_providers/vmware/7.x/DRP-Agent-signed.zip
+      wget -O DRP-Firewall-Rule.zip [internal ip]:8091/files/plugin_providers/vmware/7.x/RKN-DRPY-FW-RULE_1.0-0.0.0003_16333171.zip
+
       wget [internal ip]:8091/files/plugin_providers/vmware/drpy.conf
-      localcli software vib install -v DRP-Firewall-Rule.vib -f
-      localcli software vib install -v DRP-Agent.vib  -f
+      localcli software vib install -d ./DRP-Firewall-Rule.zip
+      localcli software vib install -d ./DRP-Agent.zip
 
   Next you can download the join up script, and then run it:
 
