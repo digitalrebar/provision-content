@@ -80,11 +80,22 @@ Templates:
             ARGS="{{$playbook.args}}"
         {{end}}
 
-        cd "${NAME}${DIR}"
-        echo "  Running the playbook $PB in $(pwd)"
-        ansible-playbook -i localhost, $ARGS {{if not $playbook.verbosity}}no_log: True{{end}} "$PB"
-        cd -
 
+        cd "${NAME}${DIR}"
+
+        echo "Making DRP machine JSON available to playbook"
+        tee digitalrebar.json >/dev/null << EOF
+    { digitalrebar: $(drpcli machines show $RS_UUID)
+    }
+    EOF
+        
+        echo "  Running the playbook $PB in $(pwd)"
+        ansible-playbook -i localhost, \
+          $ARGS {{if not $playbook.verbosity}}no_log: True{{end}} \
+          --extra-vars @digitalrebar.json \
+          "$PB"
+
+        cd -
     {{else}}
         echo "NOTE: No ansible/playbooks defined."
     {{end}}

@@ -113,7 +113,7 @@ drp_cache() {
       drpcli files upload $name as $DRPFILE  > /dev/null
     fi
   fi
-  if [[ sha256sum == "*" ]]; then
+  if [[ $sha256sum == "*" ]]; then
     echo "Skipping sha256sum test (was set to *)"
   else
     echo "Performing sha256sum test of $CACHEFILE"

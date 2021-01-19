@@ -1,64 +1,146 @@
 ---
 Name: "dr-server-install"
-Description: "Install Digital Rebar Server"
+Description: "Install Digital Rebar Server via Ansible"
 Documentation: |
-  Installs DRP Server using the DRPCLI Runner.  Sets DRP-ID to Machine.Name
+  Installs DRP Server using the Ansibile Context.  Sets DRP-ID to Machine.Name
+
+  NOTE: All connections from FROM THE MANAGER, the provisioned site does NOT need
+  to connect to the manager.
+
+  LIMITATIONS:
+  * firewall features only available for Centos family
 
   The primary use cases for this task are
 
     1. Creating a remote site for Multi-Site-Manager
-    2. Building an HA cluster of DR Servers
+    1. Building Development installations for rapid testing
 
-  TODO:
+  Requires install.sh and zip artifacts to be ``bootstrap/*``
 
-    1. make user/password settable
+  Will transfer the DRP license to the machine being created.
 
-  Will use ``dr-server/install-version`` to download installation, but allows
-  override of ``install.sh`` and ``dr-provision.zip`` for custom development
-  if placed in DRP ``files/bootstrap``.
+  If DRP is already installed, will restart DRP and update license
 
-  Will automatomatically transfer the DRP license to the machine being created.
-
-  If DRP already installed, will restart DRP and update license
-
-  If Manager installed, will register this DRP as an endpoint.  A valid license is
-  REQUIRED for the manager installation!
-
-  *HA Configuration Notes* (enable by setting ``ha-id``).
-
-  It is anticipated at all HA machines share a profile since these settings are the
-  same (except ``ha-passive``) for all HA cluster machines.
-
-  All ``ha-*`` params are required for HA configuration.
-
-  For operators,
-  * this feature makes it easy to create new edge sites using DRP Manager.
-  * this feature makes it easy to create HA clusters
-
-  For developers,
-  * this feature enables rapid testing of new dr-server binaries.
-
-  When the adhoc param ``dr-server/replace-drp`` is defined, the task will updated
-  the installed *dr-provision* binary with one from the download location provided.
+  For operators,this feature makes it easy to create new edge sites using DRP Manager.
 
 ExtraClaims:
   - scope: "files"
-    action: "get"
+    action: "*"
     specific: "*"
   - scope: "contents"
     action: "get"
     specific: "rackn-license"
-RequiredParams:
-  - "dr-server/install-version"
-  - "dr-server/initial-user"
-  - "dr-server/initial-password"
 OptionalParams:
-  - "dr-server/ha-id"
-  - "dr-server/ha-address"
-  - "dr-server/ha-passive"
-  - "dr-server/zip-url"
-  - "dr-server/replace-drp"
+  - "dr-server/install-drpid"
+  - "dr-server/initial-password"
+  - "dr-server/initial-user"
 Templates:
+  - Name: "playbook.yaml"
+    Path: "playbook.yaml"
+    Contents: |-
+      ---
+      ### Run DRP Install/Upgrade via Ansible
+      - hosts: all
+        remote_user: "{{ .Param "rsa/key-user" }}"
+        connection: "ssh"
+        gather_facts: false
+        debugger: {{ if .Param "rs-debug-enable" }}on_failed{{ else }}never{{ end }}
+        become: true
+
+        tasks:
+
+          - name: Wait for the instances to boot by checking the ssh port
+            wait_for_connection:
+              timeout: 300
+
+          - name: "What is my DRP ID?"
+            debug:
+              var: drpid
+
+          - name: check if dr-provision is running (makes join idempotent)
+            service_facts:
+
+          - name: "dr-provision is installed? - upgrades if dr-provision is installed"
+            debug:
+              msg: "DRP status is {{`{{ services['dr-provision.service'].status }}`}}"
+            when: services["dr-provision.service"] is defined
+
+          {{range $index, $port := .Param "network/firewall-ports" }}
+          - name: "enable firewall ports... enable {{$port}} for DRP server"
+            {{ if contains "/" $port -}}
+            shell: "firewall-cmd --permanent --add-port={{$port}}"
+            {{ else -}}
+            shell: "firewall-cmd --permanent --add-port={{$port}}"
+            {{ end -}}
+            when: services["firewalld.service"] is defined
+          {{end}}
+
+          - name: "Bounce firewalld"
+            shell: "firewall-cmd --reload"
+            when: services["firewalld.service"] is defined
+
+          - name: "transfer install script"
+            copy:
+              src: "./install.sh"
+              dest: "./install.sh"
+              mode: 0755
+
+          - name: "transfer license"
+            copy:
+              src: "./rackn-license.json"
+              dest: "./rackn-license.json"
+              mode: 0555
+
+          - name: "transfer dr-provision.zip"
+            copy:
+              src: "./dr-provision.zip"
+              dest: "./dr-provision.zip"
+              mode: 0555
+
+          - name: "run install.sh script install mode"
+            become: true
+            shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --systemd --zip-file=dr-provision.zip --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
+            when: services["dr-provision.service"] is not defined
+            register: shell_result1
+
+          - name: "install output log"
+            debug: 
+              var: shell_result1.stdout_lines
+            when: services["dr-provision.service"] is not defined
+
+          - name: "upgrading... Stop dr-provision service cron"
+            service:
+              name: dr-provision
+              state: stopped
+            when: services["dr-provision.service"] is defined
+
+          - name: "run install.sh script upgrade mode"
+            become: true
+            shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --systemd --zip-file=dr-provision.zip --start-runner upgrade"
+            when: services["dr-provision.service"] is defined
+            register: shell_result2
+
+          - name: "upgrade output log"
+            debug: 
+              var: shell_result2.stdout_lines
+            when: services["dr-provision.service"] is defined
+
+          - name: wait for install to complete
+            pause:
+              seconds: 10
+
+          - name: check for dr-provision pids (makes sure we started)
+            shell: pidof dr-provision
+            register: drprovision_pids
+            ignore_errors: true
+
+          - name: "make sure license is uploaded"
+            shell: "drpcli contents upload rackn-license.json"
+            ignore_errors: true
+
+          - name: Printing the process IDs obtained
+            debug:
+              msg: "PIDS of dr-provision: {{`{{drprovision_pids.stdout}}`}}"
   - Name: "drp-install"
     Contents: |-
       #!/bin/bash
@@ -66,25 +148,25 @@ Templates:
 
       set -e
       {{ template "setup.tmpl" .}}
-      {{ template "download-tools.tmpl" .}}
 
-      {{ $drpid := (regexFind "[a-zA-Z0-9-]+" .Machine.Name) }}
-      {{ $ha_ip := "" }}
-      {{ if .ParamExists "dr-server/ha-address" }}
-        {{ $a := split "/" (.Param "dr-server/ha-address") }}
-        {{ $ha_ip = $a._0 }}
+      {{ if .ParamExists "dr-server/install-drpid" }}
+      DRPID={{ regexFind "[a-zA-Z0-9-]+" (.Param "dr-server/install-drpid") }}
+      {{ else }}
+      DRPID="{{ regexFind "[a-zA-Z0-9-]+" (list "site" .Machine.Name | join "-") }}"
       {{ end }}
 
-      echo "getting license file"
+      echo "==== DRP Server Install for ${DRPID} ===="
+
+      echo "getting license file (will be copied to target)"
       drpcli contents show rackn-license > rackn-license.json
 
-      echo "verify that endpoint {{$drpid}} is in license"
-      epl=$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["{{$drpid}}"])')
+      echo "  verify that endpoint $DRPID is in license"
+      epl=$(cat rackn-license.json | jq ".sections.profiles[\"rackn-license\"].Params[\"rackn/license-object\"].Endpoints | contains([\"$drpid\"])")
       anymatch=$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["MatchAny"])')
       if [[ "$epl" == "true" || "$anymatch" == "true" ]] ; then
-        echo "endpoint found!"
+        echo "  endpoint found!"
       else
-        echo "endpoint missing, attempt to add to license"
+        echo "  endpoint missing, attempt to add to license"
         # TODO: this should move to a RackN URL at some point
         curl -X GET "https://1p0q9a8qob.execute-api.us-west-2.amazonaws.com/v40/license" \
           -H "rackn-contactid: ${CONTACTID}" \
@@ -95,114 +177,36 @@ Templates:
           -o rackn-license.json
       fi
 
-      FORCE=""
-      ACTION="install"
-      if [[ "$(systemctl is-active dr-provision)" == "active" ]] ; then
-        echo "DRP already installed (will ugprade), restarting in case config was changed"
-        systemctl stop dr-provision
-        FORCE="--force"
-        ACTION="upgrade"
-      fi
-
-      echo "Download Install.sh"
-      rm -f install.sh
-      if drpcli files exists "bootstrap/install.sh"; then
-        drpcli files download "bootstrap/install.sh" > install.sh
+      if drpcli files exists bootstrap/install.sh >/dev/null ; then
+        echo "get local copies of install.sh & dr-provision.zip (will be copied to target)"
+        drpcli files download bootstrap/install.sh to install.sh >/dev/null
+        drpcli files download bootstrap/dr-provision.zip to dr-provision.zip >/dev/null
       else
-        download -L --remote-name-all http://get.rebar.digital/{{ .Param "dr-server/install-version"}} -o install.sh
+        echo "ERROR: install script REQUIRES bootstrap/install.sh and bootstrap/dr-provision.zip"
         exit 1
       fi
-      chmod +x install.sh
 
-      {{ if .ParamExists "dr-server/zip-url" }}
-      echo "Downloading zip from {{ .Param "dr-server/zip-url" }}"
-      download -L --remote-name-all "{{ .Param "dr-server/zip-url" }}" -o dr-provision.zip
-      {{ else }}
-      echo "Downloading zip from catalog as per install.sh --version {{ .Param "dr-server/install-version"}}"
-      {{ end }}
+      # we need a keypair for Ansible
+      echo "Retrieving SSH key from Machine Params rsa/key-*"
+      tee rsa-{{.Machine.Name}} >/dev/null << EOF
+      {{.Param "rsa/key-private" | replace "|" "\n" }}
+      EOF
+      chmod 600 rsa-{{.Machine.Name}}
 
-      echo "Fix up HA options - still more work to do"
-      {{ if and (.Param "dr-server/ha-passive") (.ParamExists "dr-server/ha-address") }}
-      HA_TOKEN="$(drpcli -U $RS_USER -P $RS_PASS -E {{ $ha_ip }} users token rocketskates ttl 3y |jq -r '.Token')"
-      {{ else }}
-      HA_TOKEN="ACTIVE_OR_SINGLE_NOT_NEEDED"
-      {{ end }}
+      export ANSIBLE_HOST_KEY_CHECKING=False
 
-      HA_ARGS=""
-      {{ if .ParamExists "dr-server/ha-address" }}
-      HA_ARGS="--ha-enabled --ha-token=$HA_TOKEN --ha-address={{.Param "dr-server/ha-address"}}"
-      {{ if .ParamExists "dr-server/ha-interface" }}
-      HA_ARGS+=" --ha-interface={{.Param "dr-server/ha-interface"}}"
-      {{ else }}
-      echo "dr-server/ha-interface MUST be specified for HA operations"
-      exit 1
-      {{ end }}
-      {{ if .Param "dr-server/ha-passive" }}
-      HA_ARGS+=" --ha-passive"
-      {{ end }}
-      {{ end }}
-
-      # Do the things to ourselves
-      (
-        unset RS_ENDPOINT
-        unset RS_TOKEN
-        unset RS_LOCAL_PROXY
-
-        echo "--- Run Install.sh with DRP ID {{ $drpid }} ---"
-        ./install.sh \
-          {{ if .ParamExists "dr-server/zip-url" -}}--zip-file=dr-provision.zip{{else}}--version={{ .Param "dr-server/install-version"}}{{ end -}} \
-          --drp-id={{ $drpid }} \
-        {{ if .ParamExists "dr-server/ha-id" }}    --ha-id={{.Param "dr-server/ha-id"}}{{ end }} \
-          $HA_ARGS \
-          $FORCE \
-          --systemd \
-          --drp-password={{ .Param "dr-server/initial-password" }} \
-          --drp-user={{ .Param "dr-server/initial-user" }} \
-          --initial-contents="rackn-license.json" \
-          ${ACTION}
-
-        systemctl stop dr-provision
-
-        echo "--- Completed install.sh ---"
-
-        {{ if .ParamExists "dr-server/zip-url" }}
-        echo "Cleanup ZIP"
-        rm dr-provision.zip
-        {{ end }}
-
-        {{ if .ParamExists "dr-server/replace-drp" }}
-        # development only feature, ad hoc param replaces the binary from a known location
-        echo "WARNING: Replacing dr-provision binary from {{ .Param "dr-server/replace-drp" }}"
-        BIN=$(which dr-provision)
-        download -L --remote-name-all "{{ .Param "dr-server/replace-drp" }}" -o $BIN
-        chmod +x $BIN
-        {{ if .ParamExists "dr-server/ha-address" }}
-        echo "just in case, clear the ha interface"
-        ip addr del {{ .Param "dr-server/ha-address" }} dev {{ .Param "dr-server/ha-interface" }} || true
-        {{ end }}
-        echo "$($BIN --version)"
-        {{ end }}
-
-        echo "start dr-provision"
-        systemctl daemon-reload
-        systemctl start dr-provision
-
-        echo "Checking for RackN License Installed..."
-        if drpcli -E https://127.0.0.1:8092 \
-          -P {{ .Param "dr-server/initial-password" }} \
-          -U {{ .Param "dr-server/initial-user" }} \
-          contents exists rackn-license ; then
-          echo "  YES - License found"
-        else
-          echo "  ERROR - No License"
-          exit 1
-        fi
-      )
+      echo "Run Playbook using $(ansible-playbook --version)"
+      ansible-playbook \
+        -i {{.Machine.Address}}, \
+        --private-key=rsa-{{.Machine.Name}} \
+        --extra-vars "drpid=$DRPID" \
+        playbook.yaml
 
       echo "Done"
       exit 0
 Meta:
+  type: "install"
   icon: "heart"
-  color: "green"
+  color: "blue"
   title: "RackN Content"
   feature-flags: "sane-exit-codes"

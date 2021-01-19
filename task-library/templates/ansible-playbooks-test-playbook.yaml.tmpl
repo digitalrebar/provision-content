@@ -18,3 +18,8 @@
       file:
         path: "{{`{{ test }}`}}"
         state: touch
+
+    - name: "Showing Available DRP Data"
+      debug:
+        var: digitalrebar
+      ignore_errors: true
