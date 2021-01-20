@@ -49,6 +49,10 @@ VAULT_IP={{ .Param "vault/ip" }}
 VAULT_IP={{ .Machine.Address }}
 {{ end -}}
 
+# we need a random backoff to avoid races
+SLEEP=$[ ( $RANDOM % 30 ) ]
+sleep $SLEEP
+
 {{if eq (.ParamExists "vault/servers") false -}}
 # add server management params if missing
 echo "Add initial variables to track members."
