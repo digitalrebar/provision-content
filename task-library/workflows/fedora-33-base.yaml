@@ -1,0 +1,20 @@
+Name: "fedora-33-base"
+Description: "Basic Fedora 33 Install Workflow + Runner"
+Documentation: |
+  This workflow includes the DRP Runner in Fedora 33 provisioning process for DRP.
+
+  After the install completes, the workflow installs the runner
+  in a waiting state so that DRP will automatically detect and start a
+  new workflow if the Machine.Workflow is updated.
+
+  .. note:: To enable, upload the Fedora ISO as per the fedora-33 BootEnv
+
+Stages:
+  - fedora-33-install
+  - drp-agent
+  - finish-install
+  - complete
+Meta:
+  color: green
+  icon: download
+  title: RackN Content
