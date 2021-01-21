@@ -14,3 +14,4 @@ Meta:
   color: "blue"
   title: "RackN Content"
   Dockerpull: "digitalrebar/context-terraform"
+  Imagepull: "http://get.rebar.digital/containers/20200210/terraform.tar"

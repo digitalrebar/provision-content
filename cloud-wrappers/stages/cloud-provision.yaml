@@ -5,7 +5,7 @@ Params:
   terraform/plan-action: "apply"
 BootEnv: "sledgehammer"
 Tasks:
-  - "context:runner"
+  - "context:drpcli-runner"
   - "cloud-validate"
   - "rsa-key-create"
   - "context:terraform"
