@@ -42,13 +42,13 @@ Templates:
   - Contents: |-
       {
         "Name": "runner",
-        "Description": "Run DRPCLI in Docker Context [created by bootstrap-contexts]",
+        "Description": "DEPRECATED! SWITCH TO drpcli-runner",
         "Documentation": "Very minimal container to run the DRPCLI as a starting or idle point for Machines. This provides a very low overhead system to start or complete workflows so that tasks can continue to execute even if the target machine is not available (or never exists).",
         "Engine": "docker-context",
         "Image": "digitalrebar-context-runner",
         "Meta": {
           "icon": "cube",
-          "color": "green",
+          "color": "red",
           "copyright": "RackN 2020",
           "Dockerpull": "digitalrebar/context-runner"
         }
@@ -184,6 +184,9 @@ Templates:
         fi
         i=$(($i + 1))
       done
+
+      echo "Restart Plugin (handles case where plugin exists before podman"
+      drpcli plugins runaction docker-context restartProvider
 
       echo "Populate the contexts"
       i=0
