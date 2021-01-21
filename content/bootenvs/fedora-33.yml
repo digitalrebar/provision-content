@@ -18,6 +18,7 @@ Meta:
 OS:
   Family: "fedora"
   Name: "fedora-33"
+  Version: "33"
   SupportedArchitectures:
     x86_64:
       IsoFile: "Fedora-Server-dvd-x86_64-33-1.2.iso"
