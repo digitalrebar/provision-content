@@ -3,13 +3,13 @@ Name: "cloud-decommission"
 Description: "Destroy Cloud Instance with Terraform Context"
 Params:
   terraform/plan-action: "destroy"
-  context/name: "runner"
+  context/name: "drpcli-runner"
 BootEnv: "sledgehammer"
 Tasks:
   - "context:terraform"
   - "cloud-validate"
   - "terraform-apply"
-  - "context:runner"
+  - "context:drpcli-runner"
   - "cloud-cleanup"
   - "context-set"
 Meta:

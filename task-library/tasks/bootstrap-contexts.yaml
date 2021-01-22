@@ -40,22 +40,6 @@ ExtraClaims:
     specific: "rackn-license"
 Templates:
   - Contents: |-
-      {
-        "Name": "runner",
-        "Description": "DEPRECATED! SWITCH TO drpcli-runner",
-        "Documentation": "Very minimal container to run the DRPCLI as a starting or idle point for Machines. This provides a very low overhead system to start or complete workflows so that tasks can continue to execute even if the target machine is not available (or never exists).",
-        "Engine": "docker-context",
-        "Image": "digitalrebar-context-runner",
-        "Meta": {
-          "icon": "cube",
-          "color": "red",
-          "copyright": "RackN 2020",
-          "Dockerpull": "digitalrebar/context-runner"
-        }
-      }
-    Name: "runner-context"
-    Path: "runner.json"
-  - Contents: |-
       #!/bin/bash
       # RackN Copyright 2020
 
@@ -106,7 +90,7 @@ Templates:
       echo "Podman installed successfully"
 
       echo "Install Docker-Context"
-      pv="stable"
+      pv="tip"
       if drpcli plugin_providers exists docker-context; then
         pv="$(drpcli plugin_providers show docker-context | jq .Version -r)"
         echo "Plugin Exists at version $pv"
@@ -115,12 +99,11 @@ Templates:
         drpcli catalog item install docker-context --version=$pv
       fi
 
-      echo "Create Runner Context if missing (requires license)"
-      if drpcli contexts exists runner ; then
-        echo "  runner context exists, no action"
+      if drpcli contexts exists drpcli-runner ; then
+        echo "Built-In Runner Detected"
       else
-        echo "  runner context missing, creating"
-        drpcli contexts create runner.json
+        echo "ERROR: this process requires the built-in runner context"
+        exit 1
       fi
 
       echo "Check which files are uploaded (error = none)"
