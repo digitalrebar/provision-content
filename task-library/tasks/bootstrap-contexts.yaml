@@ -164,6 +164,12 @@ Templates:
           fi
         else
           echo "  Found $container_sum in files/contexts/docker-context, skipping upload"
+          if podman images | grep -q localhost/$image ; then
+            echo   "  localhost/$image is installed, removing to ensure correct download"
+            podman rmi localhost/$image
+          else
+            echo   "  localhost/$image does NOT exist locally, no action"
+          fi
         fi
         i=$(($i + 1))
       done

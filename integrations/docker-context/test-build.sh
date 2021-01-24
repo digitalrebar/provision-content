@@ -13,9 +13,13 @@ for f in $files; do
 	docker rmi digitalrebar-$f || true
 	echo "Building $f"
 	docker build -f $f -t digitalrebar-$f .
+	t=$(echo $f | sed 's/-dockerfile//g')
+	docker save digitalrebar-$f > $t.tar
+	gzip -f $t.tar
+	echo "  created $t.tar.gz"
 done
 
 echo "Checking Docker Images"
 docker images digitalrebar-*
 
-echo "done"
+echo "done - reminder, you may want to upload images to s3"
