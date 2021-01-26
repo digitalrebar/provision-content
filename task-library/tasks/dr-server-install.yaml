@@ -99,7 +99,7 @@ Templates:
 
           - name: "run install.sh script install mode"
             become: true
-            shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --systemd --zip-file=dr-provision.zip --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
+            shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --no-content --systemd --bootstrap --zip-file=dr-provision.zip --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
             when: services["dr-provision.service"] is not defined
             register: shell_result1
 
@@ -108,34 +108,38 @@ Templates:
               var: shell_result1.stdout_lines
             when: services["dr-provision.service"] is not defined
 
-          - name: "upgrading... Stop dr-provision service cron"
-            service:
-              name: dr-provision
-              state: stopped
-            when: services["dr-provision.service"] is defined
+          - name: "change rocketskates password"
+            shell: "drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} users password rocketskates {{ .Param "dr-server/initial-password" }}"
+            ignore_errors: true
+            when: services["dr-provision.service"] is not defined
 
-          - name: "run install.sh script upgrade mode"
+          - name: "upgrading.... via drpcli system upgrade"
             become: true
-            shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --systemd --zip-file=dr-provision.zip --start-runner upgrade"
+            shell: "drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} system upgrade dr-provision.zip"
             when: services["dr-provision.service"] is defined
+            ignore_errors: true
             register: shell_result2
 
-          - name: "upgrade output log"
+          - name: "upgrading... output log"
             debug: 
               var: shell_result2.stdout_lines
             when: services["dr-provision.service"] is defined
 
-          - name: wait for install to complete
-            pause:
-              seconds: 10
+          - name: "make sure license is uploaded"
+            shell: "drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} contents upload rackn-license.json"
+            ignore_errors: true
+
+          - name: "retrieve version of dr-provision"
+            shell: "drpcli  -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} info get | jq .version"
+            register: drp_version
+
+          - name: "version of dr-provision"
+            debug:
+              var: drp_version.stdout_lines
 
           - name: check for dr-provision pids (makes sure we started)
             shell: pidof dr-provision
             register: drprovision_pids
-            ignore_errors: true
-
-          - name: "make sure license is uploaded"
-            shell: "drpcli contents upload rackn-license.json"
             ignore_errors: true
 
           - name: Printing the process IDs obtained

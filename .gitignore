@@ -25,3 +25,4 @@ bundle.yaml
 bundle.json
 rel_notes
 rebar-catalog
+integrations/docker-context/*.tar.gz
