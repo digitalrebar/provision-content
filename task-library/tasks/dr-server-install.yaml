@@ -130,12 +130,12 @@ Templates:
             ignore_errors: true
 
           - name: "retrieve version of dr-provision"
-            shell: "drpcli  -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} info get | jq .version"
+            shell: "drpcli  -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} info get"
             register: drp_version
 
           - name: "version of dr-provision"
             debug:
-              var: drp_version.stdout_lines
+              var: (drp_version.stdout | from_json).version
 
           - name: check for dr-provision pids (makes sure we started)
             shell: pidof dr-provision
