@@ -1,0 +1,12 @@
+---
+Name: "cloud/dmi-hypervisor"
+Description: "Cloud Hypervisor Type"
+Documentation: |
+  The DMI.Hypervisor value returned by Gohai
+Schema:
+  type: "string"
+Meta:
+  type: "id"
+  icon: "server"
+  color: "blue"
+  title: "Digital Rebar Community Content"

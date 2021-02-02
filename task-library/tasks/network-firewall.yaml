@@ -29,30 +29,33 @@ Templates:
     esac
 
     # just in case, try starting firewalld
-    systemctl start firewalld
+    if systemctl status firewalld | grep Loaded ; then
 
-    {{range $index, $port := .Param "network/firewall-ports" }}
-      {{ if contains "/" $port }}
-      PORT={{$port}}
-      {{ else }}
-      PORT={{$port}}/tcp
-      {{ end }}
-      echo "Rule {{$index}}: add-port $PORT"
+      {{range $index, $port := .Param "network/firewall-ports" }}
+        {{ if contains "/" $port }}
+        PORT={{$port}}
+        {{ else }}
+        PORT={{$port}}/tcp
+        {{ end }}
+        echo "Rule {{$index}}: add-port $PORT"
+        case $osfamily in
+          redhat|centos) firewall-cmd --permanent --add-port=$PORT ;;
+          debian|ubuntu) sudo ufw allow $PORT ;;
+        esac
+      {{else}}
+        echo "No network/firewall-ports defined"
+      {{end}}
+
+      echo "restart firewall"
       case $osfamily in
-        redhat|centos) firewall-cmd --permanent --add-port=$PORT ;;
-        debian|ubuntu) sudo ufw allow $PORT ;;
+        redhat|centos) firewall-cmd --reload ;;
+        debian|ubuntu) sudo ufw reload ;;
       esac
-    {{else}}
-      echo "No network/firewall-ports defined"
-    {{end}}
-
-    echo "restart firewall"
-    case $osfamily in
-      redhat|centos) firewall-cmd --reload ;;
-      debian|ubuntu) sudo ufw reload ;;
-    esac
     
-    {{ end }}
+      {{ end }}
+    else
+      echo "WARNING: no firewalld found, skipping network config"
+    fi
 
     echo "done"
 

@@ -20,6 +20,19 @@ Templates:
       # Ubuntu Path is different than Centos Path - fix it.
       export PATH=$PATH:/usr/bin:/usr/sbin:/bin:/sbin
 
+      {{ if .ParamExists "gohai-inventory" }}
+        {{ $gohai := .Param "gohai-inventory" }}
+        {{ $dmi := get $gohai "DMI"}}
+        {{ $hypervisor := get $dmi "Hypervisor"}}
+        {{ $bios := get $dmi "BIOS"}}
+        {{ $manu := get $bios "Vendor"}}
+        echo "Using Gohai Inventory to set cloud/dmi-hypervisor to {{coalesce $hypervisor $manu "unknown"}}"
+        drpcli machines set $RS_UUID param cloud/dmi-hypervisor to '{{coalesce $hypervisor $manu "unknown"}}' > /dev/null
+      {{ else }}
+        echo "No Gohai Inventory - setting cloud/dmi-hypervisor to missing"
+        drpcli machines set $RS_UUID param cloud/dmi-hypervisor to 'missing' > /dev/null
+      {{ end }}
+
       {{ if eq "aws" $cloud }}
       echo "============================= AWS INSPECT ============================="
       INSTANCEID=$(curl -sfL http://169.254.169.254/latest/meta-data/instance-id)
@@ -77,7 +90,7 @@ Templates:
       {{ end }}
 
       {{ if eq "azure" $cloud }}
-      echo "============================= LINODE INSPECT ============================="
+      echo "============================= AZURE INSPECT ============================="
 
         {{ if .ParamExists "terraform-var/instance_id" }}
         drpcli machines set $RS_UUID param cloud/instance-id to "\"{{ int (.Param "terraform-var/instance_id") }}\""
