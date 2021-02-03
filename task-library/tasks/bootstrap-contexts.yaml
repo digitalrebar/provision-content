@@ -59,7 +59,7 @@ Templates:
 
       if ! which podman ; then
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
-        echo "Installing Podman"
+        echo "Installing Podman for $FAMILY"
         case $FAMILY in
           redhat|centos)
             if which yum > /dev/null 2>&1
@@ -78,14 +78,25 @@ Templates:
             curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
             sudo apt-get update -qq; sudo apt-get -qq -y install podman
             ;;
+          alpine)
+            apk add podman
+            ;;
+          amzn)
+            sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_7/devel:kubic:libcontainers:stable.repo
+            sudo yum -y install yum-plugin-copr
+            sudo yum -y copr enable lsm5/container-selinux
+            sudo yum -y install podman
+            ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1
             ;;
         esac
+      echo
+        echo "Detected podman version: $(podman verseion)"
       fi
 
       echo "Relax SELinux - not for production!"
-      setenforce Permissive
+      setenforce Permissive || true
 
       echo "Podman installed successfully"
 

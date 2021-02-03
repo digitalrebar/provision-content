@@ -109,13 +109,13 @@ Templates:
             when: services["dr-provision.service"] is not defined
 
           - name: "change rocketskates password"
-            shell: "drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} users password rocketskates {{ .Param "dr-server/initial-password" }}"
+            shell: "/usr/local/bin/drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} users password rocketskates {{ .Param "dr-server/initial-password" }}"
             ignore_errors: true
             when: services["dr-provision.service"] is not defined
 
           - name: "upgrading.... via drpcli system upgrade"
             become: true
-            shell: "drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} system upgrade dr-provision.zip"
+            shell: "/usr/local/bin/drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} system upgrade dr-provision.zip"
             when: services["dr-provision.service"] is defined
             ignore_errors: true
             register: shell_result2
@@ -126,11 +126,13 @@ Templates:
             when: services["dr-provision.service"] is defined
 
           - name: "make sure license is uploaded"
-            shell: "drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} contents upload rackn-license.json"
+            become: true
+            shell: "/usr/local/bin/drpcli -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} contents upload rackn-license.json"
             ignore_errors: true
 
           - name: "retrieve version of dr-provision"
-            shell: "drpcli  -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} info get"
+            become: true
+            shell: "/usr/local/bin/drpcli  -P {{ .Param "dr-server/initial-password" }} -U {{ .Param "dr-server/initial-user" }} info get"
             register: drp_version
 
           - name: "version of dr-provision"
@@ -138,6 +140,7 @@ Templates:
               var: (drp_version.stdout | from_json).version
 
           - name: check for dr-provision pids (makes sure we started)
+            become: true
             shell: pidof dr-provision
             register: drprovision_pids
             ignore_errors: true
