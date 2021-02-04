@@ -51,17 +51,20 @@ resource "azurerm_network_security_group" "security_group" {
     location            = azurerm_resource_group.main.location
     resource_group_name = azurerm_resource_group.main.name
 
+    {{ range $i, $p := (.Param "network/firewall-ports") }}
+    {{- $portdef := split "/" $p -}}
     security_rule {
-        name                       = "SSH"
-        priority                   = 1001
+        name                       = "nfp-{{$i}}_"
+        priority                   = {{add $i 1}}00
         direction                  = "Inbound"
         access                     = "Allow"
-        protocol                   = "Tcp"
+        protocol                   = "{{coalesce $portdef._1 "Tcp"}}"
         source_port_range          = "*"
-        destination_port_range     = "22"
+        destination_port_range     = "{{$portdef._0}}"
         source_address_prefix      = "*"
         destination_address_prefix = "*"
     }
+    {{ end }}
 }
 
 resource "azurerm_network_interface" "machine_nic" {
@@ -247,20 +250,16 @@ resource "aws_security_group" "digitalrebar_basic" {
 
 	name_prefix 	= "drp_"
 	description		= "Digital Rebar Cloud Wrapper"
+  {{ range $i, $p := (.Param "network/firewall-ports") }}
+  {{- $portdef := split "/" $p -}}
 	ingress {
-		description = "SSH"
-		from_port   = 22
-		to_port     = 22
-		protocol    = "tcp"
+		description = "network/firewall-ports[{{$i}}]"
+		from_port   = {{$portdef._0}}
+		to_port     = {{$portdef._0}}
+		protocol    = "{{coalesce $portdef._1 "tcp"}}"
 		cidr_blocks = ["0.0.0.0/0"]
 	}
-	ingress {
-		description = "HTTPS"
-		from_port   = 443
-		to_port     = 443
-		protocol    = "tcp"
-		cidr_blocks = ["0.0.0.0/0"]
-	}
+  {{ end }}
 	egress {
 		from_port   = 0
 		to_port     = 0

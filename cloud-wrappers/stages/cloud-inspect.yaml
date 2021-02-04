@@ -1,8 +1,8 @@
 ---
 Name: "cloud-inspect"
-Description: "Stage to dynamically determine if machine is in AWS and record metadata"
+Description: "Collect cloud metadata"
 Documentation: |
-  Collect information about AWS cloud
+  Collect information from cloud metadata API
 Tasks:
   - "cloud-inspect"
 Meta:
