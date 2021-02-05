@@ -198,10 +198,10 @@ kubectl create -f /tmp/krib-default-psps.yaml
         helm install cilium cilium/cilium --version 1.9.4 \
           --set hubble.listenAddress=":4244" \
           --set hubble.relay.enabled=true \
-          --set hubble.ui.enabled=true \
-          --set kubeProxyReplacement=strict \
-          --set k8sServiceHost={{ .Param "krib/cluster-master-vip" }} \
-          --set k8sServicePort={{ .Param "krib/cluster-api-port" }}         
+          --set hubble.ui.enabled=true
+          # --set kubeProxyReplacement=strict \
+          # --set k8sServiceHost={{ .Param "krib/cluster-master-vip" }} \
+          # --set k8sServicePort={{ .Param "krib/cluster-api-port" }}         
         ;;        
       weave)
         echo "Starting weave networking..."
@@ -217,7 +217,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
     get_param $KRIB_MASTER_CERTS_PARAM | jq -r . | base64 -d - | tar -zxvf -
     cd -
 
-    kubeadm init --skip-phases=addon/kube-proxy --config=/tmp/kubeadm.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 > /tmp/kubeadm.init.log
+    kubeadm init --config=/tmp/kubeadm.cfg --ignore-preflight-errors {{ .Param "krib/ignore-preflight-errors" }} 2>&1 > /tmp/kubeadm.init.log
 
   fi
 
