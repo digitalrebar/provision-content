@@ -78,8 +78,8 @@ etcd:
 kubernetesVersion: {{ .Param "krib/cluster-kubernetes-version" }}
 networking:
   dnsDomain: "{{ .Param "krib/cluster-service-dns-domain" }}"
-  podSubnet: "{{ .Param "krib/cluster-pod-subnet" }}"
-  serviceSubnet: "{{ .Param "krib/cluster-service-subnet" }}"
+#  podSubnet: "{{ .Param "krib/cluster-pod-subnet" }}"
+#  serviceSubnet: "{{ .Param "krib/cluster-service-subnet" }}"
 scheduler:
   extraVolumes:
     - name: "config"
