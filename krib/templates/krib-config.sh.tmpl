@@ -191,7 +191,23 @@ kubectl create -f /tmp/krib-default-psps.yaml
       cilium)
         echo "Starting cilium networking..."
         # download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
-        kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.9.4/install/kubernetes/quick-install.yaml
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+        #kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.9.4/install/kubernetes/quick-install.yaml
+        helm install cilium cilium/cilium --version 1.9.4 \
+          --namespace kube-system \
+          --set nodeinit.enabled=true \
+          --set kubeProxyReplacement=partial \
+          --set hostServices.enabled=false \
+          --set externalIPs.enabled=true \
+          --set nodePort.enabled=true \
+          --set hostPort.enabled=true \
+          --set bpf.masquerade=false \
+          --set image.pullPolicy=IfNotPresent \
+          --set ipam.mode=kubernetes \
+          --set hubble.listenAddress=":4244" \
+          --set hubble.relay.enabled=true \
+          --set hubble.ui.enabled=true \
+          --set k8s.requireIPv4PodCIDR=true     
         ;;        
       weave)
         echo "Starting weave networking..."
