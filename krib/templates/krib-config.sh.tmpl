@@ -188,11 +188,11 @@ kubectl create -f /tmp/krib-default-psps.yaml
         echo "Starting flannel networking..."
         download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
         ;;
-      # cilium)
-      #   echo "Starting cilium networking..."
-      #   # download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
-      #   kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.9.4/install/kubernetes/quick-install.yaml
-      #   ;;        
+      cilium)
+        echo "Starting cilium networking..."
+        # download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
+        kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.9.4/install/kubernetes/quick-install.yaml
+        ;;        
       weave)
         echo "Starting weave networking..."
         kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
