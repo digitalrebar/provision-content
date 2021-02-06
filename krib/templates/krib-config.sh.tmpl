@@ -201,6 +201,8 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set hubble.relay.enabled=true \
           --set hubble.ui.enabled=true
           --set kubeProxyReplacement=disabled
+          # we need kubeproxyreplacement disabeld for istio support
+          
           # --set hostServices.enabled=false \
           # --set k8sServiceHost={{ .Param "krib/cluster-master-vip" }} \
           # --set k8sServicePort={{ .Param "krib/cluster-api-port" }}         
