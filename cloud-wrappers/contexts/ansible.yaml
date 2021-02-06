@@ -14,4 +14,4 @@ Meta:
   color: "blue"
   title: "RackN Content"
   Dockerpull: "digitalrebar/context-ansible"
-  Imagepull: "http://get.rebar.digital/containers/latest/ansible.tar.gz"
+  Imagepull: "https://s3-us-west-2.amazonaws.com/get.rebar.digital/containers/latest/ansible.tar.gz"
