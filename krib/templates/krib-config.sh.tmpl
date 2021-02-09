@@ -201,8 +201,8 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set hubble.relay.enabled=true \
           --set hubble.ui.enabled=true \
           --set kubeProxyReplacement=disabled \
-          --set image=repository=gergorg/cilium \
-          
+          --set image.repository=gergorg/cilium \
+
           # --set k8s.requireIPv4PodCIDR=true
           # we need kubeproxyreplacement disabeld for istio support
 
