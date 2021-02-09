@@ -2,9 +2,6 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  annotations:
-    # See https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
   name: privileged
 spec:
   allowedCapabilities:
@@ -77,11 +74,6 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: z-default
-  annotations:
-    seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default,runtime/default'
- #   apparmor.security.beta.kubernetes.io/allowedProfileNames: 'runtime/default'
-    seccomp.security.alpha.kubernetes.io/defaultProfileName:  'runtime/default'
- #   apparmor.security.beta.kubernetes.io/defaultProfileName:  'runtime/default'
 spec:
   privileged: false
   # Required to prevent escalations to root.
