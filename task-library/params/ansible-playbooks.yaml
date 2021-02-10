@@ -23,6 +23,7 @@ Documentation: |
   * data (optionalm boolean): if true, use items provided in args
   * args (optional): additional arguments to be passed into the ansible-playbook cli
   * verbosity (optional, boolean): if false, suppresses output from ansiblie using no_log.
+  * extravars (optional, string): name of a template to expand as part of the extra-vars.  See below.
 
   For example
 
@@ -50,6 +51,14 @@ Documentation: |
           "verbosity": true
         }
       ]
+
+  Using extravars allows pulling data from Digital Rebar template expansion into github
+  based playbooks.  These will show up as top level variables.  For example:
+
+    ::
+
+      foo: "{{ .Param "myvar" }}",
+      bar: "{{ .Param "othervar" }"}
 
 Schema:
   type: "array"
