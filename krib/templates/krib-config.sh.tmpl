@@ -207,7 +207,6 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set updateStrategy.rollingUpdate.maxUnavailable=1 \
           --set resourceQuotas.enabled=true \
           --set prometheus.enabled=true \
-          --set prometheus.serviceMonitor.enabled=true \
           --set rollOutCiliumPods=true \
           --set operator.rollOutPods=true \
           --set podDisruptionBudget.maxUnavailable=1 \
@@ -215,7 +214,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set resources.requests.memory=128Mi
           --set containerRuntime.integration=containerd \
           --set containerRuntime.socketPath=/run/containerd/containerd.sock
-          
+
           # --set k8s.requireIPv4PodCIDR=true
           # we need kubeproxyreplacement disabeld for istio support
 
