@@ -203,8 +203,19 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set kubeProxyReplacement=disabled \
           --set image.repository=gergorg/cilium \
           --set extraArgs.api-rate-limit='endpoint-create=rate-limit:10/s,rate-burst:20,parallel-requests:20,auto-adjust:false' \
-          --set extraArgs.api-rate-limit='endpoint-delete=parallel-requests:20,auto-adjust:false'
-
+          --set extraArgs.api-rate-limit='endpoint-delete=parallel-requests:20,auto-adjust:false' \
+          --set updateStrategy.rollingUpdate.maxUnavailable=1 \
+          --set resourceQuotas.enabled=true \
+          --set prometheus.enabled=true \
+          --set prometheus.serviceMonitor.enabled=true \
+          --set rollOutCiliumPods=true \
+          --set operator.rollOutPods=true \
+          --set podDisruptionBudget.maxUnavailable=1 \
+          --set resources.requests.cpu=1 \
+          --set resources.requests.memory=128Mi
+          --set containerRuntime.integration=containerd \
+          --set containerRuntime.socketPath=/run/containerd/containerd.sock
+          
           # --set k8s.requireIPv4PodCIDR=true
           # we need kubeproxyreplacement disabeld for istio support
 
