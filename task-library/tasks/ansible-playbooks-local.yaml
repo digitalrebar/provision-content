@@ -86,6 +86,9 @@ Templates:
         echo "Making DRP machine JSON available to playbook"
         tee digitalrebar.json >/dev/null << EOF
     { digitalrebar: $(drpcli machines show $RS_UUID)
+    {{- if $playbook.extravars -}},
+      {{$.CallTemplate $playbook.extravars $}}
+    {{ end -}}
     }
     EOF
         
