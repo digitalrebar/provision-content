@@ -38,6 +38,7 @@ Templates:
       want_reboot=no
       failed=no
       {{ range $index, $elem := .Param "flash-list" }}
+        {{ if not (has $elem.File ($.Param "flash-list-check-list")) }}
         FILENAME="file.{{$index}}"
         {{ if $elem.Force }}
         FORCE="-f"
@@ -55,6 +56,7 @@ Templates:
         {{ end }}
 
         # Check to see if RPM is already installed.
+        lfailed=no
         set +e
         RPMNAME=$(basename {{$elem.File}} | sed "s/.rpm//")
         if ! rpm -q ${RPMNAME} 2>/dev/null >/dev/null ; then
@@ -89,7 +91,7 @@ Templates:
               echo "Nothing to do";;
             *)
               echo "$SETUP returned $?"
-              failed=yes;;
+              lfailed=yes;;
           esac
         else
           $SETUP -s -g ${TPMARG} ${FORCE} |& tee $FILENAME.log || case $? in
@@ -110,13 +112,22 @@ Templates:
               echo "Nothing to do - hardware disabled";;
             7)
               echo "A failure has occurred."
-              failed=yes;;
+              lfailed=yes;;
             *)
               echo "$SETUP returned $?"
-              failed=yes;;
+              lfailed=yes;;
           esac
         fi
         cd -
+        if [[ $lfailed = no ]] ; then
+          drpcli machines get $RS_UUID param flash-list-check-list | jq ' (.+ ["{{$elem.File}}"] | unique)' | drpcli machines set $RS_UUID param flash-list-check-list to -
+        fi
+        if [[ $lfailed = yes ]] ; then
+          failed=yes
+        fi
+        {{ else }}
+        echo "Image {{$elem.File}} is already installed.  To reinstall, clear the 'flash-list-installed-list'"
+        {{ end }}
       {{ end }}
 
       if [[ $want_reboot = yes ]]; then
