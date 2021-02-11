@@ -192,18 +192,17 @@ kubectl create -f /tmp/krib-default-psps.yaml
         echo "Starting cilium networking..."
         # download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
         curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-        helm repo add cilium https://helm.cilium.io/
+        helm repo add cilium https://funkypenguin.github.io/helm-cilium/
         helm repo update
         #kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.9.4/install/kubernetes/quick-install.yaml
-        helm install cilium cilium/cilium --version 1.9.4 \
+        helm install cilium cilium/cilium --version 1.9.5 \
           --namespace kube-system \
           --set hubble.listenAddress=":4244" \
           --set hubble.relay.enabled=true \
           --set hubble.ui.enabled=true \
           --set kubeProxyReplacement=disabled \
           --set image.repository=gergorg/cilium \
-          --set extraArgs.api-rate-limit.endpoint-create="rate-limit:20/s\,rate-burst:50\,parallel-requests:50\,auto-adjust:false,max-wait-duration:0" \
-          --set extraArgs.api-rate-limit.endpoint-delete="parallel-requests:50\,auto-adjust:false" \
+          --set extraArgsList="{api-rate-limit=rate-limit:20/s\,rate-burst:50\,parallel-requests:50\,auto-adjust:false,max-wait-duration:0,api-rate-limit.endpoint-delete=parallel-requests:50\,auto-adjust:false}" \
           --set updateStrategy.rollingUpdate.maxUnavailable=1 \
           --set resourceQuotas.enabled=true \
           --set prometheus.enabled=true \
