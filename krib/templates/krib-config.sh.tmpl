@@ -202,18 +202,21 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set hubble.ui.enabled=true \
           --set kubeProxyReplacement=disabled \
           --set image.repository=gergorg/cilium \
-          --set extraArgs.api-rate-limit='endpoint-create=rate-limit:10/s,rate-burst:20,parallel-requests:20,auto-adjust:false' \
-          --set extraArgs.api-rate-limit='endpoint-delete=parallel-requests:20,auto-adjust:false' \
+          --set extraArgs.api-rate-limit='endpoint-create=rate-limit:20/s,rate-burst:50,parallel-requests:50,auto-adjust:false' \
+          --set extraArgs.api-rate-limit='endpoint-delete=parallel-requests:50,auto-adjust:false' \
           --set updateStrategy.rollingUpdate.maxUnavailable=1 \
           --set resourceQuotas.enabled=true \
           --set prometheus.enabled=true \
+          --set prometheus.port=19090 \
           --set rollOutCiliumPods=true \
           --set operator.rollOutPods=true \
+          --set operator.prometheus.enabled=true \
           --set podDisruptionBudget.maxUnavailable=1 \
           --set resources.requests.cpu=1 \
           --set resources.requests.memory=128Mi
           --set containerRuntime.integration=containerd \
-          --set containerRuntime.socketPath=/run/containerd/containerd.sock
+          --set containerRuntime.socketPath=/run/containerd/containerd.sock \
+          --set hubble.metrics.enabled="{dns,drop,tcp,flow,icmp,http}"
 
           # --set k8s.requireIPv4PodCIDR=true
           # we need kubeproxyreplacement disabeld for istio support
