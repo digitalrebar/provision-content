@@ -19,6 +19,24 @@ Templates:
       # origin: rackn/image-builder
       {{template "setup.tmpl" .}}
 
-      install cloud-init
+      case $OS_FAMILY in
+        debian)
+          export DEBIAN_FRONTEND=noninteractive
+          faketty () {
+              script -qfce "$(printf "%q " "$@")"
+          }
+          if grep -q devpts /proc/mounts ; then
+              faketty apt-get install -y cloud-init
+          else
+              mount -t devpts devpts /dev/pts
+              faketty apt-get install -y cloud-init
+              umount /dev/pts
+          fi
+          ;;
+        rhel)
+            install cloud-init
+        ;;
+      esac
+      exit 0
     Name: image-install-cloud-init
     Path: ""
