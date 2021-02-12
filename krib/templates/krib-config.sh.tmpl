@@ -202,7 +202,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set hubble.ui.enabled=true \
           --set kubeProxyReplacement=disabled \
           --set image.repository=gergorg/cilium \
-          --set extraArgsList="{api-rate-limit=rate-limit:20/s\,rate-burst:50\,parallel-requests:50\,auto-adjust:false,max-wait-duration:0,api-rate-limit.endpoint-delete=parallel-requests:50\,auto-adjust:false}" \
+          --set extraArgsList="{api-rate-limit=rate-limit:20/s\,rate-burst:50\,parallel-requests:50\,auto-adjust:false\,max-wait-duration:0,api-rate-limit.endpoint-delete=parallel-requests:50\,auto-adjust:false}" \
           --set updateStrategy.rollingUpdate.maxUnavailable=1 \
           --set resourceQuotas.enabled=true \
           --set prometheus.enabled=true \
