@@ -192,7 +192,7 @@ kubectl create -f /tmp/krib-default-psps.yaml
         echo "Starting cilium networking..."
         # download -gfsSL {{ .Param "provider/flannel-config" }} | kubectl apply -f -
         curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-        helm repo add cilium https://geek-cookbook.github.io/helm-cilium/
+        helm repo add cilium https://funkypenguin.github.io/helm-cilium/
         helm repo update
         #kubectl create -f https://raw.githubusercontent.com/cilium/cilium/1.9.4/install/kubernetes/quick-install.yaml
         helm install cilium cilium/cilium --version 1.9.5 \
