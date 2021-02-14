@@ -215,7 +215,9 @@ kubectl create -f /tmp/krib-default-psps.yaml
           --set resources.requests.memory=128Mi \
           --set containerRuntime.integration=containerd \
           --set containerRuntime.socketPath=/run/containerd/containerd.sock \
-          --set hubble.metrics.enabled="{dns,drop,tcp,flow,icmp,http}"
+          --set hubble.metrics.enabled="{dns,drop,tcp,flow,icmp,http}" \
+          --set etcd.enabled=true \
+          --set etcd.managed=true
 
           # --set k8s.requireIPv4PodCIDR=true
           # we need kubeproxyreplacement disabeld for istio support
