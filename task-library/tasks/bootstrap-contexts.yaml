@@ -10,13 +10,13 @@ Documentation: |
   * Stage installs Podman and the Docker-Context Plugin even if you do not have Docker-Contexts defined
   * Contexts are a licensed feature (the stage will abort if no license is exists)
 
-  1. Installs Podman on DRP Host
+  1. Installs Podman/Docker on DRP Host
   1. Installs the Docker-Context from Catalog
   1. Creates the runner context if missing
   1. Attempts to build & upload images for all Docker-Contexts
-  1. Initializes Podman for all Contexts
+  1. Initializes Podman/Docker for all Contexts
 
-  Podman build files are discovered in the following precidence order:
+  Podman/Docker build files are discovered in the following precidence order:
   1. using Container Buildfile from files/contexts/docker-build/[contextname]
   1. using URL from Meta.Imagepull
   1. using Container  Buildfile downloaded Context Meta.Dockerfile
@@ -57,9 +57,10 @@ Templates:
         echo "No Docker Contexts"
       fi
 
-      if ! which podman ; then
+      tool="podman"
+      if ! which podman || ! which docker ; then
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
-        echo "Installing Podman for $FAMILY"
+        echo "Installing Podman/Docker for $FAMILY"
         case $FAMILY in
           redhat|centos)
             if which yum > /dev/null 2>&1
@@ -82,23 +83,24 @@ Templates:
             apk add podman
             ;;
           amzn)
-            sudo curl -L -o /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/CentOS_7/devel:kubic:libcontainers:stable.repo
-            sudo yum -y install yum-plugin-copr
-            sudo yum -y copr enable lsm5/container-selinux
-            sudo yum -y install podman
+            sudo amazon-linux-extras install -y docker
+            sudo service docker start
+            sudo usermod -a -G docker ec2-user
+            sudo systemctl enable --now docker
+            tool="docker"
             ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
              exit 1
             ;;
         esac
       echo
-        echo "Detected podman version: $(podman verseion)"
+        echo "Detected $tool version: $($tool version)"
       fi
 
       echo "Relax SELinux - not for production!"
       setenforce Permissive || true
 
-      echo "Podman installed successfully"
+      echo "$tool installed successfully"
 
       echo "Install Docker-Context"
       pv="tip"
@@ -151,21 +153,21 @@ Templates:
             if [[ "$dockerbuild" != "" ]]; then
               echo "    pulling dockerfile from contexts/docker-build/$context"
               drpcli files download contexts/docker-build/$context > $context-dockerfile
-              podman build --tag=$image --file="$context-dockerfile" .
+              $tool build --tag=$image --file="$context-dockerfile" .
             elif [[ "$dockerfile" != "null" ]]; then
               echo "    pulling docker build from $dockerfile"
               curl -fsSL $dockerfile -o $context-dockerfile
-              podman build --tag=$image --file="$context-dockerfile" .
+              $tool build --tag=$image --file="$context-dockerfile" .
             elif [[ "$dockerpull" != "null" ]]; then
               echo "    pulling container image from $dockerpull"
-              podman pull $dockerpull
+              $tool pull $dockerpull
               echo "    tagging $dockerpull as $image"
-              podman tag $dockerpull $image
+              $tool tag $dockerpull $image
             else
               echo "!! Stopping context-bootstrap - missing container image for $context"
               exit 1
             fi
-            podman save $image > /root/$context.tar
+            $tool save $image > /root/$context.tar
             gzip /root/$context.tar
             echo "  Uploading Container from /root/$context.tar.gz"
             drpcli files upload /root/$context.tar.gz as "contexts/docker-context/$image"
@@ -175,9 +177,9 @@ Templates:
           fi
         else
           echo "  Found $container_sum in files/contexts/docker-context, skipping upload"
-          if podman images | grep -q localhost/$image ; then
+          if $tool images | grep -q localhost/$image ; then
             echo   "  localhost/$image is installed, removing to ensure correct download"
-            podman rmi localhost/$image
+            $tool rmi localhost/$image
           else
             echo   "  localhost/$image does NOT exist locally, no action"
           fi
