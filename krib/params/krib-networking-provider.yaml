@@ -13,6 +13,7 @@ Documentation: |
       flannel
       calico
       weave
+      cilium
 
   The default is 'flannel'.
 
@@ -23,6 +24,7 @@ Schema:
     - "flannel"
     - "calico"
     - "weave"
+    - "cilium"
 Meta:
   color: "blue"
   icon: "ship"
