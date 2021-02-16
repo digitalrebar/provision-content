@@ -15,6 +15,7 @@ Schema:
     - "linode"
     - "azure"
     - "digitalocean"
+    - "unknown"
 Meta:
   type: "value"
   icon: "cloud"
