@@ -55,3 +55,4 @@ Schema:
 Meta:
   type: "value"
   icon: "chip"
+  clipboard: true
