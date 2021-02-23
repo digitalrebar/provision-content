@@ -53,7 +53,7 @@ Schema:
         ProductName: ".DMI.System.ProductName"
         Family: ".DMI.System.Family"
     raid:
-      Command: "drp-raid"
+      Command: "drp-raid -tools \"{{.Param \"raid-usable-utilities\" | join \",\"}}\""
       JQargs: ""
       Fields:
         RaidControllers: "length"
