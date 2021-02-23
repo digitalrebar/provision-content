@@ -56,7 +56,7 @@ Templates:
     FLATTEN="{{.Param "inventory/flatten"}}"
 
     echo "=== COLLECTING INVENTORY ===="
-    {{range $index, $group := .Param "inventory/collect"}}
+    {{range $index, $group := .ParamExpand "inventory/collect"}}
       echo "Parsing Inventory Group {{$index}} for Machine $RS_UUID"
       echo "  Collecting Data with cmd: {{$group.Command}}"
       if {{$group.Command}} 2>/dev/null >/dev/null ; then
