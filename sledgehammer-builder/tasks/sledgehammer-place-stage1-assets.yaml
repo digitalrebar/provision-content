@@ -144,6 +144,7 @@ Templates:
 
       thedev=${pxedev}
       if [[ "$myvlan" != "" ]] ; then
+        modprobe 8021q
         pxedevvlan="${pxedev}.${myvlan}"
         ip link add link $pxedev name $pxedevvlan type vlan id $myvlan
         ip link set "$pxedevvlan" up
