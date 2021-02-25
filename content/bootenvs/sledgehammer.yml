@@ -18,17 +18,17 @@ Meta:
   color: "green"
   title: "Digital Rebar Community Content"
 Loaders:
-  amd64-uefi: 2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86/shimx64.efi
+  amd64-uefi: d2406f2479eb9d7c4d574b5a93e62824e4c2484f/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86/sledgehammer-2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86.amd64.tar"
-      Kernel: "2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86/vmlinuz0"
+      IsoFile: "sledgehammer-d2406f2479eb9d7c4d574b5a93e62824e4c2484f.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/d2406f2479eb9d7c4d574b5a93e62824e4c2484f/sledgehammer-d2406f2479eb9d7c4d574b5a93e62824e4c2484f.amd64.tar"
+      Kernel: "d2406f2479eb9d7c4d574b5a93e62824e4c2484f/vmlinuz0"
       Initrds:
-        - "2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86/stage1.img"
+        - "d2406f2479eb9d7c4d574b5a93e62824e4c2484f/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -268,10 +268,10 @@ Templates:
     Path: 'grub/{{.Machine.MacAddr "grub"}}.cfg'
   - ID: "default-grub.tmpl"
     Name: "grub-secure"
-    Path: "sledgehammer/2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86/grub.cfg-{{.Machine.HexAddress}}"
+    Path: "sledgehammer/d2406f2479eb9d7c4d574b5a93e62824e4c2484f/grub.cfg-{{.Machine.HexAddress}}"
   - ID: "default-grub.tmpl"
     Name: "grub-secure-mac"
-    Path: 'sledgehammer/2c5a42476ad25b1e28df62cf7e8bffa7a71f4e86/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
+    Path: 'sledgehammer/d2406f2479eb9d7c4d574b5a93e62824e4c2484f/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
   - ID: drp-agent-cfg.yaml.tmpl
     Name: agent-cfg
     Path: "{{.Machine.Path}}/agent-cfg.yml"
