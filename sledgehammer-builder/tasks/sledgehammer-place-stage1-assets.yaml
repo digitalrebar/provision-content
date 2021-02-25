@@ -212,7 +212,8 @@ Templates:
       mkdir -p /newinitramfs/etc/systemd/network
       {
       echo '[Match]'
-      printf 'MACAddress=%s\n\n' "$bootif"
+      printf 'MACAddress=%s\n' "$bootif"
+      printf 'Type=!vlan\n\n'
       if [[ "$mymtu" != "" ]] ; then
       echo '[Link]'
       echo "MTUBytes=$mymtu"
