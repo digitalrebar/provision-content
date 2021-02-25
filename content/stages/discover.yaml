@@ -15,7 +15,6 @@ Tasks:
   - set-machine-ip-in-sledgehammer
   - reserve-dhcp-address
   - ssh-access
-  - configure-network
 Meta:
   type: "discover"
   icon: "spinner"
