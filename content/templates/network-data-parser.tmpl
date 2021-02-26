@@ -63,7 +63,7 @@
 {{- $_ := set $NETDATA "tag" "" }}
 {{- $_ := set $NETDATA "dns_servers" "" }}
 {{- $_ := set $NETDATA "ntp_servers" "" }}
-{{- $_ := set $NETDATA "dhcp" "" }}
+{{- $_ := set $NETDATA "dhcp" "true" }}
 {{- $_ := set $NETDATA "address" "" }}
 {{- $_ := set $NETDATA "netmask" "" }}
 {{- $_ := set $NETDATA "cidr" "" }}
@@ -87,6 +87,7 @@
   {{ if hasKey $nd $tag -}}
   {{ $data := ( get $nd $tag ) -}}
 
+  {{- $_ := set $NETDATA "dhcp" "false" }}
   {{ if ( hasKey $data "dhcp" ) -}}
     {{ $_dyn := ( ( get $data "dhcp" ) | toString ) -}}
     {{ if or ( eq ( lower $_dyn ) "yes" ) ( eq ( lower $_dyn ) "on" ) ( eq ( lower $_dyn ) "true" ) -}}
