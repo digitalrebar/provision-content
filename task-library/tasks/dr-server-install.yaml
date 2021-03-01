@@ -30,6 +30,9 @@ ExtraClaims:
   - scope: "contents"
     action: "get"
     specific: "rackn-license"
+  - scope: "endpoints"
+    action: "*"
+    specific: "*"
 OptionalParams:
   - "dr-server/install-drpid"
   - "dr-server/initial-password"
@@ -96,11 +99,18 @@ Templates:
               src: "./dr-provision.zip"
               dest: "./dr-provision.zip"
               mode: 0555
+            when: has_zip == "true"
 
-          - name: "run install.sh script install mode"
+          - name: "run install.sh script install mode (download ZIP)"
             become: true
             shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --no-content --systemd --bootstrap --zip-file=dr-provision.zip --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
-            when: services["dr-provision.service"] is not defined
+            when: services["dr-provision.service"] is not defined and has_zip == "false"
+            register: shell_result1
+
+          - name: "run install.sh script install mode (use local ZIP)"
+            become: true
+            shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --no-content --systemd --bootstrap --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
+            when: services["dr-provision.service"] is not defined and has_zip == "true"
             register: shell_result1
 
           - name: "install output log"
@@ -155,11 +165,21 @@ Templates:
 
       set -e
       {{ template "setup.tmpl" .}}
+      {{ template "download-tools.tmpl" . }}
 
       {{ if .ParamExists "dr-server/install-drpid" }}
       DRPID={{ regexFind "[a-zA-Z0-9-]+" (.Param "dr-server/install-drpid") }}
+      echo "Using dr-server/install-drpid is $DRPID"
       {{ else }}
-      DRPID="{{ regexFind "[a-zA-Z0-9-]+" (list "site" .Machine.Name | join "-") }}"
+      if drpcli machines meta get $RS_UUID "dr-server/install-drpid" > /dev/null 2> /dev/null; then
+        echo "recovering DRPID from Meta.dr-server/install-drpid"
+        DRPID=$(drpcli machines meta get $RS_UUID "dr-server/install-drpid" | jq -r .)
+      else
+        echo "buiding DRPID from Name"
+        DRPID={{ regexFind "[a-zA-Z0-9-]+" (list "site" .Machine.Name | join "-") }}
+      fi
+      drpcli machines add $RS_UUID param "dr-server/install-drpid" to "$DRPID" > /dev/null
+      echo "dr-server/install-drpid not set... adding $DRPID"
       {{ end }}
 
       echo "==== DRP Server Install for ${DRPID} ===="
@@ -184,13 +204,19 @@ Templates:
           -o rackn-license.json
       fi
 
-      if drpcli files exists bootstrap/install.sh >/dev/null ; then
-        echo "get local copies of install.sh & dr-provision.zip (will be copied to target)"
+      if drpcli files exists bootstrap/install.sh >/dev/null 2>/dev/null ; then
+        echo "downloading install.sh to cache (will be copied to target)"
         drpcli files download bootstrap/install.sh to install.sh >/dev/null
-        drpcli files download bootstrap/dr-provision.zip to dr-provision.zip >/dev/null
       else
-        echo "ERROR: install script REQUIRES bootstrap/install.sh and bootstrap/dr-provision.zip"
-        exit 1
+        echo "using files/bootstrap/install.sh (will be copied to target)"
+        drp_cache "install.sh" "stable" "linux" "amd64" "http://get.rebar.digital/stable" "*"
+      fi
+
+      has_zip="false"
+      if drpcli files exists bootstrap/dr-provision.zip >/dev/null 2>/dev/null ; then
+        echo "using files/bootstrap/dr-provision.zip (will be copied to target)"
+        drpcli files download bootstrap/dr-provision.zip to dr-provision.zip >/dev/null
+        has_zip="true"
       fi
 
       # we need a keypair for Ansible
@@ -206,8 +232,47 @@ Templates:
       ansible-playbook \
         -i {{.Machine.Address}}, \
         --private-key=rsa-{{.Machine.Name}} \
-        --extra-vars "drpid=$DRPID" \
+        --extra-vars "drpid=$DRPID has_zip=$has_zip" \
         playbook.yaml
+
+      manager="$(drpcli info get | jq -r .manager)"
+      if [[ "$manager" == "true" ]] ; then
+
+        if drpcli endpoints exists $DRPID >/dev/null 2>/dev/null ; then
+          echo "Endpoint $DRPID already registered in Manager"
+        else
+          tee ep.json >/dev/null << EOF
+      {
+        "Id":"$DRPID",
+        "Description": "{{ .Machine.Name }}",
+        "Params":{
+          "manager/url": "https://{{ .Machine.Address }}:8092"
+        },
+        "Meta":{{ .Machine.Meta | toJson }}
+      }
+      EOF
+
+          echo "This DRP is a Manager, register new endpoint $DRPID (from machine {{.Machine.Name}})"
+          drpcli endpoints create - < ep.json > /dev/null
+          drpcli endpoints meta add $DRPID key "Uuid" to "{{ .Machine.Uuid }}" > /dev/null
+          drpcli endpoints set $DRPID param "manager/username" to "{{ .Param "dr-server/initial-user" }}" > /dev/null
+          drpcli endpoints set $DRPID param "manager/password" to "{{ .Param "dr-server/initial-password" }}" > /dev/null
+  
+          echo "let's let things settle for 30 seconds"
+          sleep 30
+
+          drpcli machines meta set $RS_UUID param "icon" to "chess rook"
+        fi
+
+        if [[ "$(drpcli endpoints show $DRPID | jq -r .Available)" == "true" ]]; then
+          echo "Yes: Endpoint $DRPID is Available."
+        else
+          echo "WARNING: Endpoint $DRPID is NOT available"
+        fi
+
+      else
+        echo "This DRP is NOT a manager, do not register new endpoint"
+      fi
 
       echo "Done"
       exit 0

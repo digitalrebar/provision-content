@@ -15,5 +15,5 @@ Tasks:
 Meta:
   type: "remove"
   icon: "cloud download"
-  color: "brown"
+  color: "orange"
   title: "RackN Content"

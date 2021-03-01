@@ -5,12 +5,15 @@ Documentation: |
   Used as a validate that the right params have been set for cloud
   scenarios and provide operator friendly feedback in the Machine.Description
 
+  NOTE: The required cloud/dr-install value is NOT user settable.  It is managed by the calling stage.
+
   Developer Notes:
   * Please add synchronize with the `cloud/provider` enum!
   * Sets the `terraform/plan-automation` value on the machine if missing
 
 RequiredParams:
   - cloud/provider
+  - cloud/dr-install
 OptionalParams:
   - linode/token
   - aws/access-key
@@ -26,6 +29,18 @@ Templates:
 
       set -e
       {{template "setup.tmpl" .}}
+
+      {{ if (.Param "cloud/dr-install") }}
+      echo "This is a DRP server process... skip dr-server/install-drpid check"
+      {{ else }}
+        {{ if (.ParamExists "dr-server/install-drpid") }}
+          echo "CANNOT PROCEED! This machine may be a DRP server"
+          echo "  remove dr-server/install-drpid and try again."
+          exit 1
+        {{ else }}
+        echo "ok to proceed - this is NOT a DRP server installed via cloud-provision"
+        {{ end }}
+      {{ end }}
 
       {{ if .ParamExists "cloud/provider" }}
 
