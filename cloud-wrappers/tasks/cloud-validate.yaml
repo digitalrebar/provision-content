@@ -27,18 +27,18 @@ Templates:
       set -e
       {{template "setup.tmpl" .}}
 
-
-      {{ if (empty (.Param "terraform/plan-automation")) }}
-        echo "No automation plan: Adding default terraform/plan-automation"
-        drpcli machines set $RS_UUID param terraform/plan-automation to '["cloud-provision-reference.tf.tmpl"]'
-      {{ else }}
-        echo "NOTE: terraform/plan-automation found! Using {{ .ParamExists "terraform/plan-automation" }}"
-      {{ end }}
-
       {{ if .ParamExists "cloud/provider" }}
+
         {{ $cloud := .Param "cloud/provider" }}
 
-        echo "We have cloud provider {{ .Param "cloud/provider"}}!  Do we have the right credentials?"
+        {{ if (empty (.Param "terraform/plan-automation")) }}
+          echo "No automation plan: Adding default terraform/plan-automation of cloud-provision-{{ $cloud }}.tf.tmpl"
+          drpcli machines set $RS_UUID param terraform/plan-automation to '["cloud-provision-{{ $cloud }}.tf.tmpl"]'
+        {{ else }}
+          echo "NOTE: terraform/plan-automation found! Using {{ .ParamExists "terraform/plan-automation" }}"
+        {{ end }}
+
+        echo "We have cloud provider {{ $cloud }}!  Do we have the right credentials?"
 
         {{ if eq "aws" $cloud }}
           {{ if .ParamExists "aws/secret-key" }}

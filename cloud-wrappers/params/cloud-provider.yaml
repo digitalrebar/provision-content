@@ -4,18 +4,13 @@ Description: "Cloud Provider"
 Documentation: |
   The cloud provider detected by join-up script in discovery
 
-  Implemented types: aws, google, linode, azure
+  Custom types are supported by adding Terraform plan template 'cloud-provision-[provider].tf.tmpl'
+
+  Implemented types: aws, google, linode, azure, digitalocean
 
   Expand this list as new types are added!
 Schema:
   type: "string"
-  enum: 
-    - "aws"
-    - "google"
-    - "linode"
-    - "azure"
-    - "digitalocean"
-    - "unknown"
 Meta:
   type: "value"
   icon: "cloud"
