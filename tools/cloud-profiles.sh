@@ -31,8 +31,13 @@ else
 fi
 
 if ! drpcli contents exists rackn-license > /dev/null 2>/dev/null ; then
-  echo "MISSING: rackn-license.  Install using UX"
-  exit 1
+  if [[ -f rackn-license.json ]] ; then
+    echo "  found local copy of rackn-license, uploading"
+    drpcli contents upload rackn-license.json > /dev/null 2>/dev/null
+  else
+    echo "MISSING: rackn-license.  Install using UX"
+    exit 1
+  fi
 else
   echo "  verified rackn-license is available"
 fi
@@ -51,8 +56,8 @@ if drpcli machines exists Name:$drpid > /dev/null 2>/dev/null ; then
   drpcli machines workflow Name:$drpid bootstrap-advanced > /dev/null
   drpcli machines run Name:$drpid > /dev/null
   echo "    up can monitor progress via the UX"
-  echo "    waiting up to 60 seconds for workflow to complete..."
-  drpcli machines wait Name:$drpid WorkflowComplete true 60
+  echo "    waiting up to 120 seconds for workflow to complete..."
+  drpcli machines wait Name:$drpid WorkflowComplete true 120
 else
   if ! drpcli plugins exists docker-context > /dev/null 2>/dev/null ; then
     echo "  INSTALLING: missing docker-context plugin, installing"

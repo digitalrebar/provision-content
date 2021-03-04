@@ -31,6 +31,34 @@ cat $KEYS | sort -u > $TMP_KEYS
 [[ -s "$TMP_KEYS" ]] && cp $TMP_KEYS $KEYS
 [[ -f "$TMP_KEYS" ]] && rm -f $TMP_KEYS
 chmod 600 $KEYS
+
+{{if .ParamExists "access-keys" -}}
+{{range $key := .Param "access-keys" -}}
+{{- $k := split " " $key -}}
+echo "  access-keys added: {{ $k._2 }}"
+{{end -}}
+{{else -}}
+echo "  access-keys: none defined"
+{{end -}}
+{{if .ParamExists "access-keys-shared" -}}
+{{range $key := .Param "access-keys-shared" -}}
+{{- $k := split " " $key -}}
+echo "  access-keys-shared added: {{ $k._2 }}"
+{{end -}}
+{{else -}}
+echo "  access-keys-shared: none defined"
+{{end -}}
+{{if .ParamExists "access-keys-global" -}}
+{{range $key := .Param "access-keys-global" -}}
+{{- $k := split " " $key -}}
+echo "  access-keys-global added: {{ $k._2 }}"
+{{else -}}
+echo "  access-keys-global: none defined"
+{{end -}}
+{{end -}}
+
+{{else}}
+echo "No SSH keys added: no values for access-keys, access-keys-shared or access-keys-global"
 {{end}}
 
 {{if .ParamExists "access-ssh-template" }}

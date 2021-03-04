@@ -46,7 +46,7 @@ Templates:
       set -e
       {{template "setup.tmpl" .}}
 
-      if drpcli contents exists rackn-license ; then
+      if drpcli contents exists rackn-license >/dev/null 2>/dev/null ; then
         echo "license installed, no action"
       else
         echo "SKIPPING due to missing RackN license"
@@ -63,12 +63,10 @@ Templates:
         echo "Installing Podman/Docker for $FAMILY"
         case $FAMILY in
           redhat|centos)
-            if which yum > /dev/null 2>&1
-            then
-              yum -y install podman
-            elif which dnf > /dev/null 2>&1
-            then
+            if which dnf > /dev/null 2>&1 ; then
               dnf -y install podman
+            elif which yum > /dev/null 2>&1 ; then
+              yum -y install podman
             else
               echo "No 'yum' or 'dnf' found on $FAMILY OS.  Unable to install 'podman'."
               exit 1
@@ -104,7 +102,7 @@ Templates:
 
       echo "Install Docker-Context"
       pv="tip"
-      if drpcli plugin_providers exists docker-context; then
+      if drpcli plugin_providers exists docker-context >/dev/null 2>/dev/null; then
         pv="$(drpcli plugin_providers show docker-context | jq .Version -r)"
         echo "Plugin Exists at version $pv"
       else
@@ -112,7 +110,7 @@ Templates:
         drpcli catalog item install docker-context --version=$pv
       fi
 
-      if drpcli contexts exists drpcli-runner ; then
+      if drpcli contexts exists drpcli-runner >/dev/null 2>/dev/null ; then
         echo "Built-In Runner Detected"
       else
         echo "ERROR: this process requires the built-in runner context"
