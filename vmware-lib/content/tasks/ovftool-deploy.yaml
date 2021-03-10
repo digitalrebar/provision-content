@@ -100,7 +100,7 @@ Templates:
       # this allows for in-the-field injection of remappings if needed
       {{ if ( .ParamExists "ova/ovftool-deploy-more-mapping-template" ) -}}
       {{ .CallTemplate (.Param "ova/ovftool-deploy-more-mapping-template" ) .}}
-      {{ end -}}
+      {{- end }}
 
       {{ if $ovajson.DiskProvisioning }}MORE+="--diskMode=\"{{ $ovajson.DiskProvisioning }}\" "{{ end }}
       {{ if $ovajson.IPAllocationPolicy }}MORE+="--ipAllocationPolicy=\"{{ $ovajson.IPAllocationPolicy }}\" "{{ end }}
@@ -138,13 +138,13 @@ Templates:
       echo ">>>                                                                            <<<"
       echo ""
 
-      {{ if ( .Param "govc/datastore" ) }}DATASTORE"--datastore=\"{{ .ParamExpand "govc/datastore" }}\""{{ else }}
+      {{ if ( .Param "govc/datastore" ) }}DATASTORE="--datastore=\"{{ .ParamExpand "govc/datastore" }}\""{{ else }}
       echo ""
       echo ">>> NOTICE !!!  No 'govc/datastore' configuration was provided. Hopefully you <<<"
       echo ">>>             do not need to specify one for this deployment.               <<<"
       echo ""
       DATASTORE=""
-      {{ end -}}
+      {{- end }}
 
       cat << EOOVF > $OVFCMD
       ovftool \\
