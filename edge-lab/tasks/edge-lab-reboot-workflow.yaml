@@ -14,7 +14,7 @@ Templates:
       {{ template "setup.tmpl" . }}
 
       drpcli machines workflow $RS_UUID "" >/dev/null
-      drpcli machines workflow $RS_UUID {{ .Param "edge-lab/reboot-workflow" }} >/dev/null
+      drpcli machines workflow $RS_UUID {{ .Param "edge-lab/reset-workflow" }} >/dev/null
 
       # this is going to look like a reboot, fake a powercycle
       # MUST BE AFTER other machine updates or it will be over-written by next event
@@ -29,11 +29,6 @@ Templates:
         sleep 5
       else
         echo "Warning: failed trying to post Reboot Event (powercycle)"
-      fi
-
-      if [[ $(drpcli machines count Uuid Eq $RS_UUID Runnable Eq true) -eq 0 ]]; then
-        echo "HALTED: operator marked machine not runnable during wait"
-        exit 1
       fi
 
       echo "reboot exit code..."
