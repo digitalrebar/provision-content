@@ -5,7 +5,7 @@ Documentation: |
   If a SQUID LED is attached to the RPi, this will turn on different colors.
   It is very helpful for validating workflows during development
 
-  You can supply an array with specific number of the GPIO pins to set.
+  You can supply an hash with specific number of the GPIO pins to set and the 0/1 value to set
 
   Three pin mappings to colors have been pre-wired:
 
@@ -17,11 +17,11 @@ Documentation: |
   https://github.com/simonmonk/squid
   https://www.raspberrypi.org/forums/viewtopic.php?f=5&t=5185#p68739
 Schema:
-  type: "array"
-  items:
-    type: "string"
+  type: "object"
   default: 
-  - "green"
+    "red": 0
+    "green": 1
+    "blue": 0
 Meta:
   color: "blue"
   icon: "lightbulb"

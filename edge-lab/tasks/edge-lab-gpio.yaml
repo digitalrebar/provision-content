@@ -32,19 +32,21 @@ Templates:
       sudo chgrp gpio /sys/class/gpio/unexport
       sudo chmod 775 /sys/class/gpio/unexport
 
-      {{ range $pin := .Param "edge-lab/gpio" }}
+      echo "Pin setting {{.Param "edge-lab/gpio" }}"
+      {{ range $p, $v := .Param "edge-lab/gpio" }}
 
-        {{ if eq $pin "green" }}{{ $pin := 23 }}{{ end }}
-        {{ if eq $pin "blue" }}{{ $pin := 24 }}{{ end }}
-        {{ if eq $pin "red" }}{{ $pin := 18 }}{{ end }}
+        pin={{$p}}
+        if [[ "$pin" == "green" ]]; then pin=23; fi
+        if [[ "$pin" == "blue" ]]; then pin=24; fi
+        if [[ "$pin" == "red" ]]; then pin=18; fi
 
-        echo "enabling gpio{{$pin}}"
-        echo "{{$pin}}" > /sys/class/gpio/export
-        chmod -R 775 /sys/class/gpio/gpio{{$pin}}
+        echo "setting gpio${pin} ({{$p}}) to {{$v}}"
+        echo "$pin" > /sys/class/gpio/export
+        chmod -R 775 /sys/class/gpio/gpio${pin}
   
-        echo "setting gpio{{$pin}} to output 1"
-        echo "out" > /sys/class/gpio{{$pin}}/direction
-        echo "1" > /sys/class/gpio{{$pin}}/value
+        echo "setting gpio${pin} to output 1"
+        echo "out" > /sys/class/gpio/gpio${pin}/direction && true
+        echo "{{$v}}" > /sys/class/gpio/gpio${pin}/value && true
 
       {{ else }}
         echo "no GPIO defined in edge-lab/gpio"
@@ -53,8 +55,7 @@ Templates:
       echo "done"
       exit 0
 Meta:
-  icon: "recycle"
-  color: "red"
+  icon: "lightbulb"
+  color: "blue"
   title: "Community Content"
-  feature-flags: "sane-exit-codes"
-  copyright: "RackN 2019"
+  copyright: "RackN 2021"
