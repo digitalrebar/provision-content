@@ -327,6 +327,24 @@ Templates:
       mac_re='BOOTIF=([^ ]+)'
       if [[ $(cat /proc/cmdline) =~ $mac_re ]]; then
           drpcli machines set "$RS_UUID" param last-boot-macaddr to "\"${BASH_REMATCH[1]}\"" &>/dev/null
+          mac="${BASH_REMATCH[1]}"
+          mac=${mac#01-}
+          mac=${mac//-/:}
+          mac=${mac,,}
+          bootif=""
+          cd /sys/class/net 2>&1 >/dev/null
+          for nic in *; do
+              [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
+              addr=$(cat "$nic/address")
+              if [[ "$addr" == "$mac" ]] ; then
+                  bootif=${nic#/}
+                  break
+              fi
+          done
+          cd - 2>&1 >/dev/null
+          if [[ "$bootif" != "" ]] ; then
+              drpcli machines set "$RS_UUID" param last-boot-interface to "$bootif" &>/dev/null
+          fi
       fi
       json="$(drpcli machines show "$RS_UUID")"
       # The machine does not have hardware addresses set, so set them
