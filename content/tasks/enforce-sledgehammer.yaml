@@ -35,7 +35,8 @@ Templates:
       {{else -}}
         echo "Skipping sledgehammer enforcement"
       {{end -}}
-      drpcli machines update $RS_UUID '{ "OS": "centos-7" }' 2>/dev/null >/dev/null
+      VERID=$(grep "^VERSION_ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+      drpcli machines update $RS_UUID "{ \"OS\": \"centos-$VERID\" }" 2>/dev/null >/dev/null
       exit 0
 Meta:
   type: "sledgehammer"
