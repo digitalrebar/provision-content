@@ -53,7 +53,7 @@ OS:
         root=/dev/ram0
         ramdisk_size=1500000
         ip=dhcp
-        url={{.ProvisionerURL}}/isos/ubuntu-20.04-live-server-amd64.iso
+        url={{.ProvisionerURL}}/isos/{{.Env.OS.SupportedArchitectures.amd64.IsoFile}}
         autoinstall
         ds=nocloud-net;s={{.Machine.Url}}/autoinstall/
 #        {{.Param "kernel-options"}}
