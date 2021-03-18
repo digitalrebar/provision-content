@@ -10,4 +10,5 @@ Description: Photon 4 install stages.  References the latest Photon 4 release.
 Documentation: ''
 BootEnv: photon-4-1526e30ba-install
 Tasks:
+  - systemd-networkd-bootif-only
   - ssh-access
