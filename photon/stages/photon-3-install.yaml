@@ -1,0 +1,13 @@
+---
+Name: photon-3-install
+Meta:
+  color: yellow
+  icon: download
+  title: Digital Rebar Community Content
+  type: os
+Endpoint: ''
+Description: Photon 3 install stages.  References the latest Photon 3 release.
+Documentation: ''
+BootEnv: photon-3-a0f216d-install
+Tasks:
+  - ssh-access

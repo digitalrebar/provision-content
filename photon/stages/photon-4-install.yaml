@@ -1,0 +1,13 @@
+---
+Name: photon-4-install
+Meta:
+  color: yellow
+  icon: download
+  title: Digital Rebar Community Content
+  type: os
+Endpoint: ''
+Description: Photon 4 install stages.  References the latest Photon 4 release.
+Documentation: ''
+BootEnv: photon-4-1526e30ba-install
+Tasks:
+  - ssh-access

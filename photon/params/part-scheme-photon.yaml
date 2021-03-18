@@ -1,0 +1,35 @@
+---
+Name: part-scheme-photon
+Meta:
+  color: blue
+  icon: disk outline
+  title: Digital Rebar Community Content
+  type: config
+Description: >-
+  Defines a string that references a template for partitioning during
+  installation of the Photon OS.
+Documentation: >
+  This string contains the name of a Photon partitioning template.  The
+  Photon OS partitioning is based on JSON syntax, and documentation can
+  be found at:
+
+    * https://vmware.github.io/photon/assets/files/html/3.0/photon_user/kickstart.html
+
+  The Template must be in correct JSON format, and should follow the same
+  format as found in the default partitioning template:
+
+    * part-scheme-photon-default.json.tmpl
+
+  .. warning:: You must include the trailing JSON comma in custom partitioning templates
+
+  The string will be expanded into the following template name:
+
+    ::
+
+      part-scheme-photon-<string>.json.tmpl
+
+  e.g. a value of ``lvm`` would expand to use the template ``part-scheme-photon-lvm.json.tmpl``.
+
+Schema:
+  type: string
+  default: "default"

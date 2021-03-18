@@ -1,0 +1,16 @@
+---
+Name: photon-select-kickstart
+Meta:
+  color: blue
+  icon: database
+  title: Digital Rebar Community Content
+  type: config
+Description: Defines what template to use for the Photon OS kickstart installation.
+Documentation: |
+  The default Photon OS kickstart is ``photon.json.tmpl``, which is served on the
+  Machines URL path as ``photon.ks``.  If this param is set to a value, then the
+  alternate Kickstart template will be used by the param definition.
+
+Secure: false
+Schema:
+  type: string
