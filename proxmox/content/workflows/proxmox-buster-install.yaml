@@ -37,11 +37,6 @@ Documentation: |
   enslaved by the bridge, but also bring up a NAT Masquerade bridge
   to attach machines to.
 
-  **ToDo**:
-  Future implementations should provide customized injection of the
-  preseed selections answers, and allow specifying the version of
-  Proxmox VE to install.
-
 Meta:
   color: orange
   icon: expand arrows alternate
