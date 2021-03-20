@@ -4,7 +4,7 @@ Description: "Turns on debug output in the 'network-data-parser.tmpl' template."
 Documentation: |
   If set to boolean ``true``, will output execution environment specific
   echo/print statements for deugging how the parser interpretted the
-  `network-data structure.  The bare variables (eg $_nd_address)
+  ``network-data`` structure.  The bare variables (eg ``$_nd_address``)
   and the more complex data structure (associative array, dict, or
   hash table) will both be printed out.
 

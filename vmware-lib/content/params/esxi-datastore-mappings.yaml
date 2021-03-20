@@ -18,7 +18,7 @@ Documentation: |
   Required datastore configuration values are as follows:
 
     * ``name`` = the name of the datastore to create
-    * ``type`` = either ``get_first_available``, ``nfs``, ``nfs41``, ``cifs``, ``vmfs``, or ``local`
+    * ``type`` = either ``get_first_available``, ``nfs``, ``nfs41``, ``cifs``, ``vmfs``, or ``local``
 
   .. note:: The ``get_first_available`` simulates the orignal datastore create
             pattern in the mappings data structure.  Provided only for legacy use.
