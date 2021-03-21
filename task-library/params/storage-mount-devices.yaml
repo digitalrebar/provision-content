@@ -3,7 +3,7 @@ Name: "storage/mount-devices"
 Description: "Attached Storage Devices to Mount"
 Documentation: |
 
-  .. mount_attached_storage:
+  .. _mount_attached_storage:
 
   Mount Attached Storage
   ++++++++++++++++++++++
@@ -17,8 +17,8 @@ Documentation: |
   This design allows operators to specific multiple mount points
   or have a single point with multiple potential configurations.
 
-  * rebuilt will wide and rebuild the mount
-  * reset will rm -rf all files if UUID changes
+    * rebuilt will wide and rebuild the mount
+    * reset will rm -rf all files if UUID changes
 
   example:
 
