@@ -14,7 +14,14 @@ Documentation: |
   OVFTool command line flags are operated.  As a consequence, mapping of
   arguments must be performed in a lot of cases.  It is impossible to map
   all argument possibilities without seeing how they are output by OVFTool in
-  conjunction with ``govc import.spec``.
+  conjunction with ``govc import.spec``.  Additionally, ``ovftool`` can be
+  used to determine what the OVF properties are for customization.  Examples:
+
+    * ``govc import.spec VMware-Cloud-Builder-4.1.0.0-16961769_OVF10.ova``
+    * or ``ovftool --schemaValidate VMware-Cloud-Builder-4.1.0.0-16961769_OVF10.ova``
+
+  The GoVC command produces a JSON data structure which should be valid for use
+  in conjunction with ``ovo/param-json`` or ``ova/template-json`` Params.
 
   This tool attempts to map as many values as possible.  Where the mappings don't
   exist for your use case, there are some options available to customize the
@@ -109,6 +116,7 @@ Templates:
       {{ if eq $ovajson.MarkAsTemplate true }}MORE+="--importAsTemplate "{{ end }}
       {{ if eq $ovajson.PowerOn true }}MORE+="--powerOn "{{ end }}
       {{ if eq $ovajson.WaitForIP true }}MORE+="--X:waitForIp "{{ end }}
+      {{ if eq $ovajson.InjectOvfEnv true }}MORE+="--X:injectOvfEnv "{{ end }}
 
       if [[ "{{ .Param "govc/debug" }}" == "true" ]]
       then
