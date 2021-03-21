@@ -326,6 +326,7 @@ Templates:
       }
       mac_re='BOOTIF=([^ ]+)'
       if [[ $(cat /proc/cmdline) =~ $mac_re ]]; then
+          drpcli machines set "$RS_UUID" param machine/PXE to true &>/dev/null
           drpcli machines set "$RS_UUID" param last-boot-macaddr to "\"${BASH_REMATCH[1]}\"" &>/dev/null
           mac="${BASH_REMATCH[1]}"
           mac=${mac#01-}
@@ -345,6 +346,8 @@ Templates:
           if [[ "$bootif" != "" ]] ; then
               drpcli machines set "$RS_UUID" param last-boot-interface to "$bootif" &>/dev/null
           fi
+      else
+          drpcli machines set "$RS_UUID" param machine/PXE to false &>/dev/null
       fi
       json="$(drpcli machines show "$RS_UUID")"
       # The machine does not have hardware addresses set, so set them

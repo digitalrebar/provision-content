@@ -52,6 +52,7 @@ Schema:
         SerialNumber: ".DMI.System.SerialNumber"
         ProductName: ".DMI.System.ProductName"
         Family: ".DMI.System.Family"
+        Hypervisor: ".DMI.Hypervisor"
     raid:
       Command: "drp-raid -tools \"{{.Param \"raid-usable-utilities\" | join \",\"}}\""
       JQargs: ""

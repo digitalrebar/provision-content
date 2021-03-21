@@ -8,7 +8,10 @@ Description: Enhances Global profile by providing local references to hardware t
 Documentation: |
   Using the RackN provided hardware tools tarball, this profile allows DRP to be the
   hardware tools provider for sledgehammer.
+
+  This clears the flash-list by default so that the internet is not contacted for images.
 Params:
+  flash-list: []
   dell-dsu-base-url: '{{.ProvisionerURL}}/files/hw_repo/'
   hpe-repo-urls:
     - name: local
