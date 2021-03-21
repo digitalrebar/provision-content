@@ -64,15 +64,15 @@ function cl_process_param_to_profile() {
   local _name=$1
   local _pname=${_name/\//-}
   local _fail=$2
+  local _UA=$(drpcli machines get $RS_UUID param $_name --aggregate | jq -r .)
+  _UA=${_UA// /_}
+  local _profile="${_pname}-${_UA}"
 
   # Find the application params and remove them.
   drpcli machines show $RS_UUID --slim "Params,Meta" | \
     jq "del(.Profiles[] | select(.|test(\"${_pname}-\")))" | \
     drpcli machines update $RS_UUID - >/dev/null
 
-  UA=$(drpcli machines get $RS_UUID param $_name --aggregate | jq -r .)
-  UA=${UA// /_}
-  _profile="${_pname}-${UA}"
   if drpcli profiles exists "$_profile"
   then
     if drpcli machines show $RS_UUID | jq -r '.Profiles' | grep -q "\"$_profile\""
