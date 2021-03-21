@@ -104,13 +104,13 @@ Templates:
           - name: "run install.sh script install mode (download ZIP)"
             become: true
             shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --no-content --systemd --bootstrap --zip-file=dr-provision.zip --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
-            when: services["dr-provision.service"] is not defined and has_zip == "false"
+            when: services["dr-provision.service"] is not defined and has_zip == "true"
             register: shell_result1
 
           - name: "run install.sh script install mode (use local ZIP)"
             become: true
             shell: "./install.sh --startup --drp-id={{`{{drpid}}`}} --no-content --systemd --bootstrap --no-content --start-runner --drp-password={{ .Param "dr-server/initial-password" }} --drp-user={{ .Param "dr-server/initial-user" }} --initial-contents=\"./rackn-license.json\" install"
-            when: services["dr-provision.service"] is not defined and has_zip == "true"
+            when: services["dr-provision.service"] is not defined and has_zip == "false"
             register: shell_result1
 
           - name: "install output log"
