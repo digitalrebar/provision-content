@@ -42,7 +42,7 @@ Schema:
     "ubuntu-14.04": "ubuntu-10.04-install"
     "ubuntu-16.04": "ubuntu-16.04-install"
     "ubuntu-18.04": "ubuntu-18.04-install"
-    "ubuntu-20.04": "ubunut-20.04-install"
+    "ubuntu-20.04": "ubuntu-20.04-install"
 Meta:
   icon: "linux"
   color: "blue"
