@@ -19,7 +19,8 @@ Meta:
 OptionalParams: []
 Prerequisites: []
 Templates:
-  - Contents: |-
+  - Name: "lab-drp-network"
+    Contents: |-
       #!/usr/bin/env bash
       # Lab DRP network setup
 
@@ -70,8 +71,3 @@ Templates:
 
       rpm -q lldpd && { systemctl enable lldpd; systemctl start lldpd; } || echo "LLDPD not installed, not enabling"
 
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "lab-drp-network"
-    Path: ""

@@ -13,7 +13,8 @@ OptionalParams: []
 Prerequisites: []
 RequiredParams: []
 Templates:
-  - Contents: |-
+  - Name: "proxmox-lab-createnodes"
+    Contents: |-
       #!/usr/bin/env bash
       # Proxmox destroy all virtual machines
 
@@ -47,8 +48,3 @@ Templates:
         cat $LOG
         echo "---------------------------------------------------------------------------"
       done
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "proxmox-lab-createnodes"
-    Path: ""

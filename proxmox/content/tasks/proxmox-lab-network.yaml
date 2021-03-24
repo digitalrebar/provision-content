@@ -15,7 +15,8 @@ Prerequisites: []
 RequiredParams:
   - "proxmox/lab-student-count"
 Templates:
-  - Contents: |-
+  - Name: "proxmox-lab-network"
+    Contents: |-
       #!/usr/bin/env bash
       # Proxmox Lab Networking setup
 
@@ -79,8 +80,3 @@ Templates:
       apt -y update
       apt -y install lldpd
 
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "proxmox-lab-network"
-    Path: ""
