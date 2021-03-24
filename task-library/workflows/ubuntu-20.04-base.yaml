@@ -1,6 +1,10 @@
 Name: "ubuntu-20.04-base"
 Description: "Basic Ubuntu 20.04 Install Workflow + Runner"
 Documentation: |
+  .. warning:: DEPRECATED - This workflow will be removed from future versions of
+               DRP.  Please use the ``universal`` content pack and workflows.  See
+               :ref:`_deploy_linux_with_universal`.
+
   This workflow includes the DRP Runner in Ubuntu provisioning process for DRP.
 
   After the install completes, the workflow installs the runner
@@ -10,7 +14,7 @@ Documentation: |
   .. note:: To enable, upload the Ubuntu-20.04 ISO as per the ubuntu-20.04 BootEnv
 
 Stages:
-  - ubuntu-20.04-install
+  - ubuntu-20.04.2-install
   - drp-agent
   - finish-install
   - complete
