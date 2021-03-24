@@ -3,7 +3,7 @@ Description: "Basic Ubuntu 20.04 Install Workflow + Runner"
 Documentation: |
   .. warning:: DEPRECATED - This workflow will be removed from future versions of
                DRP.  Please use the ``universal`` content pack and workflows.  See
-               :ref:`_deploy_linux_with_universal`.
+               :ref:`deploy_linux_with_universal`.
 
   This workflow includes the DRP Runner in Ubuntu provisioning process for DRP.
 
