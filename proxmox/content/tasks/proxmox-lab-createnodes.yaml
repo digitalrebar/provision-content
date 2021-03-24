@@ -15,7 +15,8 @@ RequiredParams:
   - "proxmox/lab-student-count"
   - "proxmox/lab-student-vms"
 Templates:
-  - Contents: |-
+  - Name: "proxmox-lab-createnodes"
+    Contents: |-
       #!/usr/bin/env bash
       # Proxmox Lab setup virtual machines
 
@@ -168,8 +169,3 @@ Templates:
         echo "------------------------------------------------------------------------------------------"
       done
 
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "proxmox-lab-createnodes"
-    Path: ""

@@ -13,7 +13,8 @@ Meta:
 OptionalParams: []
 Prerequisites: []
 Templates:
-  - Contents: |-
+  - Name: "proxmox-lab-accounts"
+    Contents: |-
       #!/usr/bin/env bash
       # Proxmox Lab setup virtual machines
 
@@ -33,9 +34,3 @@ Templates:
       pveum groupadd operators -c "Operator Group"
       pveum aclmod /vms -group operators --roles PVEVMUser
       set +x
-
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "proxmox-lab-accounts"
-    Path: ""
