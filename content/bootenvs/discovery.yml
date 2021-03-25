@@ -345,12 +345,39 @@ Templates:
           fi
       fi
       if [[ ! $HOSTNAME ]]; then
-          # Try DNS reverse lookup
-          candidate="$(getent hosts $IP |awk "/$IP/ {print \$2}" |head -1)"
-          if [[ $candidate && $candidate != localhost* ]]; then
-              # Found a sane one
-              HOSTNAME="$candidate"
-          else
+          case {{ .Param "discovery-hostname-selector" }} in
+            d-mac) echo "Using default dMAC hostname method, skipping reverse IP lookup."
+            ;;
+            reverse-dns)
+              # Try DNS reverse lookup
+              candidate="$(getent hosts $IP |awk "/$IP/ {print \$2}" |head -1)"
+              [[ $candidate && $candidate != localhost* ]] && HOSTNAME="$candidate" || true
+              [[ -z "$HOSTNAME" ]] \
+                && echo "No reverse DNS record found for '$IP', reverting to default dMAC hostname." \
+                || echo "Reverse DNS record lookup candidate of '$HOSTNAME' found..."
+            ;;
+            external-template)
+              {{ if .Param "discovery-hostname-template" -}}
+              {{ $templateName := (.Param "discovery-hostname-template") -}}
+              echo "Using external template '{{ $templateName }}' to set hostname."
+
+              {{ .CallTemplate $templateName .}}
+
+              [[ -z "$HOSTNAME" ]] && echo "External template did not set HOSTNAME, falling back to dMAC hostname." || true
+              {{ else -}}
+              echo "WARNING: No 'discovery-hostname-template' set. Defaulting to dMAC hostname."
+              {{ end -}}
+            ;;
+            random)
+              echo "Starting random hostname generation."
+              HOSTNAME=$(pwmake 256 | tr -dc 'a-zA-Z' | fold -w 8 | head -n 1)
+              echo "Setting HOSTNAME to random value of '$HOSTNAME'."
+            ;;
+          *) echo "NOTICE: unsupported 'discovery-default-hostname-selector', falling through to dMAC hostname."
+            ;;
+          esac
+
+          if [[ -z $HOSTNAME ]]; then
               # Go with the default.
               default_host=true
               HOSTNAME="d${MAC//:/-}"
