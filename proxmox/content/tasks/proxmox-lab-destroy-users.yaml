@@ -13,7 +13,8 @@ OptionalParams: []
 Prerequisites: []
 RequiredParams: []
 Templates:
-  - Contents: |-
+  - Name: "proxmox-lab-destroy-networks"
+    Contents: |-
       #!/usr/bin/env bash
       # Proxmox destroy users
 
@@ -25,8 +26,3 @@ Templates:
       pveum group delete operators || true
       pveum user delete operator@pve || true
 
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "proxmox-lab-destroy-networks"
-    Path: ""
