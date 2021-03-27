@@ -1,4 +1,8 @@
 {{if or (eq "debian" .Env.OS.FamilyName) (eq "ubuntu" .Env.OS.FamilyName) -}}
+{{ $ver := (.Env.OS.Version | float64) -}}
+{{ if ge $ver 20.04 -}}
+# no Ubuntu 20.04 or newer default part-scheme template definition
+{{ else -}}
 d-i partman-auto/disk string /dev/{{.Param "operating-system-disk"}}
 d-i grub-installer/choose_bootdev select /dev/{{.Param "operating-system-disk"}}
 d-i grub-installer/bootdev string /dev/{{.Param "operating-system-disk"}}
@@ -8,11 +12,12 @@ d-i partman-auto-lvm/new_vg_name string {{.Machine.ShortName}}
 d-i partman-auto/choose_recipe select atomic
 d-i grub-installer/only_debian boolean true
 {{ end -}}
+{{ end -}}
 
 {{if or (eq "redhat" .Env.OS.FamilyName) (eq "fedora" .Env.OS.FamilyName) -}}
 {{ if and (regexMatch ".*rhel-server.*" .Env.OS.Name) (.Env.OS.VersionEq "8") -}}
 # RHEL Server 8 partitioning default scheme
-bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
+bootloader {{.ParamExpand "redhat-bootorder" }} --location=mbr --append="rhgb quiet"
 zerombr
 ignoredisk --only-use={{.Param "operating-system-disk"}}
 clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
@@ -20,7 +25,7 @@ autopart --type=lvm
 {{ else -}}
 
 # Fedora / CentOS 6, 7 and 8 / RHEL Server 7 partitioning scheme default
-bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
+bootloader {{.ParamExpand "redhat-bootorder" }} --location=mbr --append="rhgb quiet"
 zerombr
 ignoredisk --only-use={{.Param "operating-system-disk"}}
 clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
