@@ -118,22 +118,22 @@ Templates:
           esac
         fi
 
-        if [[ $this_one_reboot = yes ]] ; then
-            echo "Package {{$elem.File}} needs a reboot"
-            if [[ "{{$elem.File}}" =~ xcc ]] ; then
-                echo "Rebooting xcc"
-                ipmitool mc reset cold
-                # Wait for the reset to take effect.
-                sleep 20
-                set +e
-                while true ; do
-                    ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
-                    echo "Not up yet"
-                    sleep 5
-                done
-                set -e
-                echo "BMC is back up"
-            else
+        if [[ "{{$elem.File}}" =~ xcc ]] ; then
+            echo "Rebooting xcc"
+            ipmitool mc reset cold
+            # Wait for the reset to take effect.
+            sleep 20
+            set +e
+            while true ; do
+                ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
+                echo "Not up yet"
+                sleep 5
+            done
+            set -e
+            echo "BMC is back up"
+        else
+            if [[ $this_one_reboot = yes ]] ; then
+                echo "Package {{$elem.File}} needs a reboot"
                 echo "Want to reboot system"
                 want_reboot=yes
             fi
