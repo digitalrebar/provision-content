@@ -2,7 +2,7 @@ License: Kube-Lib is APLv2
 
 This document provides information on how to use the Digital Rebar *Kube-Lib* content add-on.  Use of this content supports common functions needed for other Kubernetes workflows like KRIB and EdgeLab.
 
-.. _component_Kube-Lib:
+.. _component_kube_lib:
 
 Digital Rebar Kube-Lib
 ----------------------
@@ -27,7 +27,7 @@ Elected -vs- Specified Leaders
 
 By default, the Kube-Lib process will dynamically elect a leader(s) for the Kubernetes cluster.  This leader is simply selected by the cluster manager and the rest of the cluster will coalesce around the elected leader(s).
 
-If you wish to specify a specific machines to be the designated leaders using ``cluster/leader`` to true, you can do so by setting a *Param* on the target machine(s).  
+If you wish to specify a specific machines to be the designated leaders using ``cluster/leader`` to true, you can do so by setting a *Param* on the target machine(s).
 
 Operating Kube-Lib
 ------------------

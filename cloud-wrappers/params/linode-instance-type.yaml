@@ -3,6 +3,8 @@ Name: "linode/instance-type"
 Description: "linode Instance Type"
 Documentation: |
   Provision Linode allocation size
+
+  retrieve with ``curl https://api.linode.com/v4/linode/types | jq '.data.[].id'``
 Schema:
   type: "string"
   default: "g6-standard-1"

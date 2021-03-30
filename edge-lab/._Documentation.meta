@@ -36,7 +36,7 @@ If you make changes, you can repeat steps 3 and 4 to upload the latest content.
 Setup K3s Cluster via Kube-Lib
 ------------------------------
 
-This process uses the standard :ref:`component_Kube-Lib` module.  Use ``catalog item install kube-lib`` if it is missing.
+This process uses the standard :ref:`component_kube_lib` module.  Use ``catalog item install kube-lib`` if it is missing.
 
 Recommended, install `kubectl` has been installed on your client system.
 
@@ -45,10 +45,12 @@ Recommended, install `kubectl` has been installed on your client system.
 By default, the ``cluster/filter`` will select ALL machines in the edge-lab cluster.  To build your cluster:
 
 #. select the ``edge-lab-manager`` machine (which is also the DRP server)
-#. apply the ``k3-cluster-build`` workflow 
+#. apply the ``k3-cluster-build`` workflow
 #. wait for workflow to complete on cluster manager
+
   #. this will select and start the k3s install on the leader
   #. after the leader is installed, this will install k3s on all the remaining machines as workders
+
 #. use `drpcli profiles get ``edge-lab-manager`` param kube-lib/kube-config --decode > kube.conf` to get the kube.config file.  You can also download from the cluster's profile in the UX.
 
 To access on the DRP server or cluster:

@@ -25,7 +25,6 @@ OptionalParams:
 Prerequisites: []
 Templates:
   - Name: proxmox-debconf-set-selections
-    ID: proxmox-debconf-set-selections
     Contents: |
       #!/usr/bin/env bash
       # Get the debconf selections template and save it to /root/proxmox-debconf-set-selections

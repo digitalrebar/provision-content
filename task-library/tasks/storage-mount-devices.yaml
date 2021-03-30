@@ -7,8 +7,9 @@ Documentation: |
 
   If we've need a storage area, this task will mount the requested resources under
   /mnt/storage.
-        
-  See :ref:`mount_attached_stroage`
+
+  See :ref:`mount_attached_storage`
+
 RequiredParams:
   - storage/mount-devices
 Templates:
