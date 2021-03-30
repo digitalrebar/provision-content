@@ -22,8 +22,15 @@ zerombr
 ignoredisk --only-use={{.Param "operating-system-disk"}}
 clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
 autopart --type=lvm
+{{ else if ( eq "photon" .Env.OS.Codename ) -}}
+    "partition_type": "gpt",
+    "partitions": [
+      { "mountpoint": "/", "size": 0, "filesystem": "ext4" },
+      { "mountpoint": "/boot", "size": 128, "filesystem": "ext4" },
+      { "mountpoint": "/root", "size": 128, "filesystem": "ext4" },
+      { "size": 128, "filesystem": "swap" }
+    ],
 {{ else -}}
-
 # Fedora / CentOS 6, 7 and 8 / RHEL Server 7 partitioning scheme default
 bootloader {{.ParamExpand "redhat-bootorder" }} --location=mbr --append="rhgb quiet"
 zerombr
