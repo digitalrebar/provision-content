@@ -1,7 +1,3 @@
-{{if .ParamExists "photon-select-kickstart" -}}
-  {{ $selectKickStart := ( printf "%s" ( .Param "photon-select-kickstart" ) ) -}}
-  {{ .CallTemplate $selectKickStart .}}
-{{ else -}}
 {
     "hostname": "{{ .Machine.Name }}",
     "bootmode": "{{ .Param "photon-bootmode" }}",
@@ -9,12 +5,17 @@
     "password":
         {
             "crypted": true,
-            "text": "{{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1{{end}}"
+            "text": "{{ if .ParamExists "provisioner-default-password-hash" }}{{ .Param "provisioner-default-password-hash"}}{{ else }}$6$drprocksdrprocks$upAIK9ynEEdFmaxJ5j0QRvwmIu2ruJa1A1XB7GZjrnYYXXyNr4qF9FttxMda2j.cmh.TSiLgn4B/7z0iSHkDC1{{ end }}"
         },
-    "disk": "/dev/{{.Param "operating-system-disk"}}",
-{{ $part := (printf "part-scheme-photon-%s.json.tmpl" (.Param "part-scheme-photon")) }}{{ .CallTemplate $part .}}
+    "disk": "/dev/{{ .Param "operating-system-disk"}}",
+{{ if .ParamExists "part-scheme" -}}
+{{ $templateName := ( printf "part-scheme-%s.tmpl" ( .Param "part-scheme" ) ) }}
+    {{ .CallTemplate $templateName . }}
+{{- else }}
+    {{ template "part-scheme-default.tmpl" . }}
+{{- end }}
     "packages": {{ .ParamAsJSON "photon-base-packages" }},
-    "additional_packages": {{if .ParamExists "extra-packages" }}{{ .ParamAsJSON "extra-packages" }}{{else}}[]{{end }},
+    "additional_packages": {{ if .ParamExists "extra-packages" }}{{ .ParamAsJSON "extra-packages" }}{{ else }}[]{{ end }},
     "postinstall": [
                      "#!/bin/sh",
                      "mkdir /rackn",
@@ -25,4 +26,3 @@
     "log_level": "info",
     "install_linux_esx": false
 }
-{{- end }}

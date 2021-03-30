@@ -8,7 +8,6 @@ d-i partman-auto-lvm/new_vg_name string {{.Machine.ShortName}}
 d-i partman-auto/choose_recipe select atomic
 d-i grub-installer/only_debian boolean true
 {{ end -}}
-
 {{if or (eq "redhat" .Env.OS.FamilyName) (eq "fedora" .Env.OS.FamilyName) -}}
 {{ if and (regexMatch ".*rhel-server.*" .Env.OS.Name) (.Env.OS.VersionEq "8") -}}
 # RHEL Server 8 partitioning default scheme
@@ -17,8 +16,15 @@ zerombr
 ignoredisk --only-use={{.Param "operating-system-disk"}}
 clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
 autopart --type=lvm
+{{ else if ( eq "photon" .Env.OS.Codename ) -}}
+    "partition_type": "gpt",
+    "partitions": [
+      { "mountpoint": "/", "size": 0, "filesystem": "ext4" },
+      { "mountpoint": "/boot", "size": 128, "filesystem": "ext4" },
+      { "mountpoint": "/root", "size": 128, "filesystem": "ext4" },
+      { "size": 128, "filesystem": "swap" }
+    ],
 {{ else -}}
-
 # Fedora / CentOS 6, 7 and 8 / RHEL Server 7 partitioning scheme default
 bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
 zerombr

@@ -1,6 +1,0 @@
-Installation content for VMware's Photon OS via network PXE install path.
-
-  * ISOS can be found at: https://packages.vmware.com/photon/
-  * Documentation at: https://vmware.github.io/photon/assets/files/html/3.0/photon_admin/Photon-RPM-OSTree-7-Installing-a-host-against-a-custom-server-repository.html#automated-install-of-a-custom-host-via-kickstart
-  * Kickstart Doc: https://vmware.github.io/photon/assets/files/html/3.0/photon_user/kickstart.html
-

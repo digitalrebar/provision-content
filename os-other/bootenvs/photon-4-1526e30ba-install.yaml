@@ -3,7 +3,7 @@ Name: photon-4-1526e30ba-install
 Description: VMware Photon OS deployment boot environment.
 Documentation: |
   This BootEnv installs the VMware Photon distribution.
-  
+
     * ISOS can be found at: https://packages.vmware.com/photon/
 
   photon v3 urls - need updated to v4 references:
@@ -23,8 +23,8 @@ Meta:
   title: Digital Rebar Community Content
   type: os
 OS:
-  Codename: "photon"
   Family: "redhat"
+  Codename: "photon"
   IsoFile: ""
   IsoSha256: ""
   IsoUrl: ""
@@ -32,7 +32,7 @@ OS:
   SupportedArchitectures:
     x86_64:
       BootParams: >-
-        root=/dev/ram0 ks={{.ApiURL}}/{{.Machine.Path}}/photon.ks loglevel=3 insecure_installation=1
+        root=/dev/ram0 ks={{.ApiURL}}/{{.Machine.Path}}/compute.ks loglevel=3 insecure_installation=1
         repo={{.Env.InstallUrl}}/RPMS
         {{.Param "kernel-options"}} -- {{.Param "kernel-console"}}
       Initrds:
@@ -54,49 +54,38 @@ OptionalParams:
 ReadOnly: true
 RequiredParams: []
 Templates:
-- Contents: ""
-  ID: kexec.tmpl
+- ID: kexec.tmpl
   Name: kexec
   Path: '{{.Machine.Path}}/kexec'
-- Contents: ""
-  ID: default-pxelinux.tmpl
+- ID: default-pxelinux.tmpl
   Name: pxelinux
   Path: pxelinux.cfg/{{.Machine.HexAddress}}
-- Contents: ""
-  ID: default-ipxe.tmpl
+- ID: default-ipxe.tmpl
   Name: ipxe
   Path: '{{.Machine.Address}}.ipxe'
-- Contents: ""
-  ID: default-pxelinux.tmpl
+- ID: default-pxelinux.tmpl
   Name: pxelinux-mac
   Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
-- Contents: ""
-  ID: default-ipxe.tmpl
+- ID: default-ipxe.tmpl
   Name: ipxe-mac
   Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
-- Contents: ""
-  ID: default-grub.tmpl
+- ID: default-grub.tmpl
   Name: grub
   Path: grub/{{.Machine.Address}}.cfg
-- Contents: ""
-  ID: default-grub.tmpl
+- ID: default-grub.tmpl
   Name: grub-mac
   Path: grub/{{.Machine.MacAddr "grub"}}.cfg
-- Contents: ""
-  ID: default-grub.tmpl
+- ID: default-grub.tmpl
   Name: grub-secure-mac
   Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.MacAddr "pxelinux"}}'
-- Contents: ""
-  ID: default-grub.tmpl
+- ID: default-grub.tmpl
   Name: grub-secure
   Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
-- Contents: ""
-  ID: photon.json.tmpl
-  Name: photon.ks
-  Path: '{{.Machine.Path}}/photon.ks'
-- Contents: |
+- ID: "select-kickseed.tmpl"
+  Name: "compute.ks"
+  Path: "{{.Machine.Path}}/compute.ks"
+- Name: reset-workflow-runner.sh
+  Path: '{{.Machine.Path}}/reset-workflow-runner.sh'
+  Contents: |
     {{template "reset-workflow.tmpl" .}}
     {{template "runner.tmpl" .}}
-  Name: reset-workflow-runner.sh
-  Path: '{{.Machine.Path}}/reset-workflow-runner.sh'
-

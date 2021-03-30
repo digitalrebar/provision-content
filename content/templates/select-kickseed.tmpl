@@ -28,19 +28,23 @@
   {{ .CallTemplate $selectKickSeed .}}
 {{else -}}
   {{ if ( eq "redhat" .Env.OS.FamilyName ) -}}
-    {{ if ( regexMatch ".*rhel-server.*" .Env.OS.Name ) -}}
-      {{ if ( .Env.OS.VersionEq "8" ) -}}
-        {{ template "rhel-8.ks.tmpl" .}}
-      {{ else if ( .Env.OS.VersionEq "7" ) -}}
-        {{ template "rhel-7.ks.tmpl" .}}
-      {{ end -}}
+    {{ if ( eq .Env.OS.Codename "photon" ) -}}
+      {{ template "photon.json.tmpl" .}}
     {{ else -}}
-      {{ if ( .Env.OS.VersionEq "8" )  -}}
-        {{ template "centos-8.ks.tmpl" .}}
-      {{ else if ( .Env.OS.VersionEq "7" ) -}}
-        {{ template "centos-7.ks.tmpl" .}}
-      {{ else if ( .Env.OS.VersionEq "6" ) -}}
-        {{ template "centos-6.ks.tmpl" .}}
+      {{ if ( regexMatch ".*rhel-server.*" .Env.OS.Name ) -}}
+        {{ if ( .Env.OS.VersionEq "8" ) -}}
+          {{ template "rhel-8.ks.tmpl" .}}
+        {{ else if ( .Env.OS.VersionEq "7" ) -}}
+          {{ template "rhel-7.ks.tmpl" .}}
+        {{ end -}}
+      {{ else -}}
+        {{ if ( .Env.OS.VersionEq "8" )  -}}
+          {{ template "centos-8.ks.tmpl" .}}
+        {{ else if ( .Env.OS.VersionEq "7" ) -}}
+          {{ template "centos-7.ks.tmpl" .}}
+        {{ else if ( .Env.OS.VersionEq "6" ) -}}
+          {{ template "centos-6.ks.tmpl" .}}
+        {{ end -}}
       {{ end -}}
     {{ end -}}
   {{ else if ( eq "debian" .Env.OS.FamilyName ) -}}
@@ -57,6 +61,7 @@
 # select-kickseed did not match any kickstart or preseed templates to serve
 #      Name: '{{ .Env.OS.Name }}'
 #    Family: '{{ .Env.OS.FamilyName }}'
+#  Codename: '{{ .Env.OS.Codename }}'
 #   Version: '{{ .Env.OS.Version }}'
   {{ end -}}
 {{ end -}}
