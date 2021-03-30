@@ -11,7 +11,7 @@ Templates:
       {{ template "setup.tmpl"  .}}
 
       mfgr="$(drpcli gohai |jq -r '.DMI | .System | .Manufacturer')"
-      {{ if "flash-manufacturer-override" -}}
+      {{ if ( .ParamExists "flash-manufacturer-override" ) -}}
       old="$mfgr"
       mfgr="{{ .Param "flash-manufacturer-override" }}"
       echo ">>> WARNING: 'flash-manufacturer-override' forced to '$mfgr'."
