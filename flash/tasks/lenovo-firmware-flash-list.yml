@@ -84,7 +84,7 @@ Templates:
             case $line in
               *STATUS*)
                 echo "STATUS line is $line"
-                [[ $line = *'Package installed successfully'* ]] || lfailed=yes;;
+                [[ $line = *'Package installed successfully'* ]] || [[ $line = *'Parse Firmware Package XML successfully'* ]] || lfailed=yes;;
               *REBOOT*)
                 echo "REBOOT line is $line"
                 [[ $lfailed = no && $line = *'Reboot Required'* ]] && this_one_reboot=yes
