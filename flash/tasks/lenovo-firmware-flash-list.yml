@@ -131,7 +131,7 @@ Templates:
             done
             set -e
             echo "BMC is back up"
-            sleep {{ .ParamExpand "flash-lenovo-xcc-reboot-wait" }}
+            sleep {{ $.ParamExpand "flash-lenovo-xcc-reboot-wait" }}
         else
             if [[ $this_one_reboot = yes ]] ; then
                 echo "Package {{$elem.File}} needs a reboot"
