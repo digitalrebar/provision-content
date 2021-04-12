@@ -27,7 +27,7 @@ resource "aws_security_group" "digitalrebar_basic" {
 
 	name_prefix 	= "drp_"
 	description		= "Digital Rebar Cloud Wrapper"
-  {{ range $i, $p := (.Param "network/firewall-ports") }}
+  {{ range $i, $p := (.ComposeParam "network/firewall-ports") }}
   {{- $portdef := split "/" $p -}}
 	ingress {
 		description = "network/firewall-ports[{{$i}}]"

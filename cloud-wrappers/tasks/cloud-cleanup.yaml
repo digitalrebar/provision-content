@@ -14,7 +14,7 @@ Templates:
       set -e
       {{template "setup.tmpl" .}}
 
-      items="cloud/dmi-hypervisor cloud/instance-id cloud/instance-type cloud/placement/availability-zone cloud/public-hostname cloud/public-ipv4"
+      items="cloud/instance-id cloud/instance-type cloud/placement/availability-zone cloud/public-hostname cloud/public-ipv4"
       for p in $items; do
         echo "removing param $p from {{ .Machine.Name }}"
         drpcli machines remove $RS_UUID param $p || true
