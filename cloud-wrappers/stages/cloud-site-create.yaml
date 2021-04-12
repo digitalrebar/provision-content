@@ -11,6 +11,8 @@ Documentation: |
     The DRP server becomes the self-runner!
 Params:
   cloud/dr-install: true
+  network/firewall-ports:
+    - 8092/tcp
 Tasks:
   - "context:drpcli-runner"
   - "cloud-validate"
