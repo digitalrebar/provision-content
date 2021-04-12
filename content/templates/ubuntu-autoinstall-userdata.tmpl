@@ -2,6 +2,8 @@
 autoinstall:
   version: 1
   {{ if .ParamExists "proxy-servers" -}}
+  refresh-installer:
+    update: {{ .Param "ubuntu-autoinstall-refresh-installer" }}
   proxy: "{{ index (.Param "proxy-servers") 0 }}"
   {{ end -}}
   identity:

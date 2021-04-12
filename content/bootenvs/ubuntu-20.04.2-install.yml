@@ -37,6 +37,20 @@ Documentation: |
     * https://provision.readthedocs.io/en/latest/doc/content-packages/image-deploy.html#curtin-partitions
     * https://curtin.readthedocs.io/en/latest/topics/storage.html
 
+  The Ubuntu 20.04 enforced UEFI boot re-ordering can be corrected by
+  **adding** this additional stanza to the ``storage`` YAML structure:
+
+    ::
+
+      # Note Indentation matters with the extra two spaces.
+        storage:
+          grub:
+            reorder_uefi: False
+
+  .. note:: If any ``storage`` definition is used, then the all options for
+            setting disk partitioning **must** be used.  The above UEFI disable
+            can not be used on it's own without additional disk configuration.
+
 Meta:
   color: "purple"
   feature-flags: "change-stage-v2"
