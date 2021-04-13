@@ -1,6 +1,6 @@
 ---
 Name: sledgehammer-0b8f38aeecc5a40f915758d9af47102fee6fb83e
-Description: 'Bootenv override for sledgehammer amd64 (CentOS 8)'
+Description: 'Bootenv override for sledgehammer amd64 (CentOS 8) - deprecated'
 Params:
   bootenv-customize:
     discovery:
