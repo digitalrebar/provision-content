@@ -9,8 +9,9 @@ storage "raft" {
   path = "/var/lib/vault"
   node_id = "{{.Machine.Name}}"
   retry_join {
-      leader_api_addr = "http://{{.Param "krib/cluster-master-vip"}}:8200"
-  }  
+      leader_api_addr = "https://{{.Param "krib/cluster-master-vip"}}:8200"
+      leader_ca_cert_file = "/etc/vault/pki/server-ca.pem"
+    }
 }
 
 api_addr = "http://{{.Machine.Address}}:8200"
