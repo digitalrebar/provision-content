@@ -175,6 +175,7 @@ Templates:
       tar
       tpm2-tools
       unzip
+      usbutils
       util-linux
       vim-enhanced
       wget
