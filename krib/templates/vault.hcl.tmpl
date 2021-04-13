@@ -6,7 +6,7 @@ listener "tcp" {
 }
 
 storage "raft" {
-  path = "/var/lib/vault/raft"
+  path = "/var/lib/vault"
   node_id = "{{.Machine.Name}}"
   retry_join {
       leader_api_addr = "http://{{.Param "krib/cluster-master-vip"}}:8200"
