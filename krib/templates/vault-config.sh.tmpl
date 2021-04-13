@@ -55,16 +55,16 @@ setup_seal
 systemctl daemon-reload
 systemctl restart vault
 
-# Wait around until consul has elected a leader
-until consul operator raft list-peers | grep -q leader;
-do
-  SLEEP=$[ ( $RANDOM % 5 ) ];
-done
+# # Wait around until consul has elected a leader
+# until consul operator raft list-peers | grep -q leader;
+# do
+#   SLEEP=$[ ( $RANDOM % 5 ) ];
+# done
 
 # Only initialize vault on the consul leader, to avoid races
 set +e
-$(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
-if [[ $? -eq 0 ]] ; then
+# $(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
+# if [[ $? -eq 0 ]] ; then
   set -e
   # Before attempting to init vault, sleep 5s to give it time to wake up
   sleep 5s
@@ -97,7 +97,7 @@ if [[ $? -eq 0 ]] ; then
   mkdir -p /tmp/cleanup
   mv /tmp/vault.json /tmp/cleanup
   mv /tmp/token.json /tmp/cleanup
-fi
+#fi
 
 set -e
 
