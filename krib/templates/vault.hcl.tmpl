@@ -10,7 +10,7 @@ storage "raft" {
   node_id = "{{.Machine.Name}}"
   retry_join {
       leader_api_addr = "http://{{.Param "krib/cluster-master-vip"}}:8200"
-    }  
+  }  
 }
 
 api_addr = "http://{{.Machine.Address}}:8200"
