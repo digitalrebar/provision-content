@@ -65,6 +65,10 @@ systemctl restart vault
 set +e
 # $(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
 # if [[ $? -eq 0 ]] ; then
+# Only do this on master[0]
+MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
+if [[ $MASTER_INDEX == 0 ]] ; then
+
   set -e
   # Before attempting to init vault, sleep 5s to give it time to wake up
   sleep 5s
