@@ -54,6 +54,9 @@ setup_seal
 systemctl daemon-reload
 systemctl restart vault
 
+# wait for vault to start up
+sleep 5s
+
 # # Wait around until consul has elected a leader
 # until consul operator raft list-peers | grep -q leader;
 # do
@@ -69,9 +72,6 @@ if [[ $? -ne 0 ]] ; then
   echo "Vault has not been initialized yet, so let's do it"
 
   set -e
-  # Before attempting to init vault, sleep 5s to give it time to wake up
-  sleep 5s
-
 
   vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
