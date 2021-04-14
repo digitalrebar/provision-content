@@ -77,9 +77,10 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   sleep 20s
   set -e
 
-  vault status | grep Initialized | grep -q true
+  vault status > /dev/null
   
-  if [[ $? -ne 0 ]]
+  # is vault unsealed?
+  if [[ $? -eq 2 ]]
   then
     vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
