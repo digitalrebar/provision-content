@@ -69,6 +69,8 @@ set +e
 MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
 if [[ $MASTER_INDEX == 0 ]] ; then
 
+  echo "I am the master[0], so setting up unseal keys"
+
   set -e
   # Before attempting to init vault, sleep 5s to give it time to wake up
   sleep 5s
