@@ -12,7 +12,7 @@ storage "raft" {
   # Iterate through all the cluster masters to setup retry_join
 {{ range $index, $elem := .Param "vault/servers" }}
   retry_join {
-      leader_api_addr = "https://{ $elem.Address }}:8200"
+      leader_api_addr = "https://{{ $elem.Address }}:8200"
       leader_ca_cert_file = "/etc/vault/pki/server-ca.pem"
     }    
 {{ end -}}            
