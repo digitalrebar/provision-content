@@ -25,7 +25,6 @@ xiterr 1 "Missing vault/cluster-profile on the machine!"
 
 {{template "krib-lib.sh.tmpl" .}}
 
-# Ensure that the vault systemd service specifies all vault nodes using retry-join
 setup_seal() {
   echo "Setting up seal..."
 
@@ -64,12 +63,9 @@ systemctl restart vault
 # Only initialize vault on the consul leader, to avoid races
 set +e
 # $(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
-# if [[ $? -eq 0 ]] ; then
-# Only do this on master[0]
-MASTER_INDEX=$(find_me $KRIB_MASTERS_PARAM "Uuid" $RS_UUID)
-if [[ $MASTER_INDEX == 0 ]] ; then
-
-  echo "I am the master[0], so setting up unseal keys"
+$(VAULT_CACERT=/etc/vault/pki/server-ca.pem vault status | grep Initialized | grep true)
+if [[ $? -ne 0 ]] ; then
+  echo "Vault has not been initialized yet, so let's do it"
 
   set -e
   # Before attempting to init vault, sleep 5s to give it time to wake up

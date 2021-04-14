@@ -9,12 +9,20 @@ storage "raft" {
   path = "/var/lib/vault"
   node_id = "{{.Machine.Name}}"
   # Iterate through all the cluster masters to setup retry_join
-{{- range $elem := .Param "krib/cluster-masters"}}
+
   retry_join {
-      leader_api_addr = "https://{{ $elem.Address }}:8200"
+      leader_api_addr = "https://192.168.33.11:8200"
       leader_ca_cert_file = "/etc/vault/pki/server-ca.pem"
     }    
-{{ end -}}
+  retry_join {
+      leader_api_addr = "https://192.168.33.12:8200"
+      leader_ca_cert_file = "/etc/vault/pki/server-ca.pem"
+    }    
+  retry_join {
+      leader_api_addr = "https://192.168.33.13:8200"
+      leader_ca_cert_file = "/etc/vault/pki/server-ca.pem"
+    }    
+            
 }
 
 api_addr = "http://{{.Machine.Address}}:8200"
