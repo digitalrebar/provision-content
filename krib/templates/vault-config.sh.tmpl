@@ -74,6 +74,7 @@ echo "My vault Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX == 0 ]] ; then
 
   echo "Initializing vault..."
+  sleep 10s
   set -e
 
   vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
