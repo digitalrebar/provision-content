@@ -91,6 +91,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
 
+    sleep 10s # does it take a while for auto-unlock to sort itself out?
   fi
   # enable the transit secret backend
   vault secrets enable transit
