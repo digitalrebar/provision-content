@@ -62,8 +62,9 @@ systemctl restart vault
 
 # Only initialize vault on the consul leader, to avoid races
 set +e
+export VAULT_CACERT=/etc/vault/pki/server-ca.pem
 # $(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
-$(VAULT_CACERT=/etc/vault/pki/server-ca.pem vault status | grep Initialized | grep true)
+$(vault status | grep Initialized | grep true)
 if [[ $? -ne 0 ]] ; then
   echo "Vault has not been initialized yet, so let's do it"
 
@@ -71,7 +72,7 @@ if [[ $? -ne 0 ]] ; then
   # Before attempting to init vault, sleep 5s to give it time to wake up
   sleep 5s
 
-  export VAULT_CACERT=/etc/vault/pki/server-ca.pem
+
   vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
   # Get our recovery key and token, then delete the local record
