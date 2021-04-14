@@ -156,8 +156,7 @@ unzip -o ${TMP_DIR}/vault_${VAULT_VERSION}_linux_amd64.zip -d ${INSTALL_DIR}
 
 systemctl daemon-reload
 systemctl enable vault
-systemctl restart vault
-systemctl status vault
+
 
 rm -rf ${TMP_DIR}
 
