@@ -68,12 +68,12 @@ set +e
 export VAULT_CACERT=/etc/vault/pki/server-ca.pem
 # $(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
 
-# Let's see if we're racing...
-SLEEP=$[ ( $RANDOM % 60 ) ];
-vault status | grep Initialized | grep true
-if [[ $? -ne 0 ]] ; then
-  echo "Vault has not been initialized yet, so let's do it"
+MASTER_INDEX=$(find_me vault/servers "Uuid" $RS_UUID)
+echo "My vault Master index is $MASTER_INDEX"
 
+if [[ $MASTER_INDEX == 0 ]] ; then
+
+  echo "Initializing vault..."
   set -e
 
   vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
