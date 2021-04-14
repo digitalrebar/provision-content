@@ -74,19 +74,24 @@ echo "My vault Master index is $MASTER_INDEX"
 if [[ $MASTER_INDEX == 0 ]] ; then
 
   echo "Initializing vault..."
-  sleep 10s
+  sleep 20s
   set -e
 
-  (vault status | grep Initialized | grep -q true) || vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
+  vault status | grep Initialized | grep -q true
+  
+  if [[ $? -eq 0 ]]
+  then
+    vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
-  # Get our recovery key and token, then delete the local record
-  export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
-  export VAULT_TOKEN=`cat /tmp/vault.json | jq -r '[.root_token][0]'`
+    # Get our recovery key and token, then delete the local record
+    export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
+    export VAULT_TOKEN=`cat /tmp/vault.json | jq -r '[.root_token][0]'`
 
-  # Insert recovery key and token into params
-  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
-  drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
+    # Insert recovery key and token into params
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/unseal-key" to "$VAULT_UNSEAL_KEY"
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/root-token" to "$VAULT_TOKEN"
 
+  fi
   # enable the transit secret backend
   vault secrets enable transit
 
