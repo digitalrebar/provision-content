@@ -67,7 +67,7 @@ sleep 5s
 set +e
 export VAULT_CACERT=/etc/vault/pki/server-ca.pem
 # $(consul operator raft list-peers | grep `hostname -s` | grep -q leader)
-$(vault status | grep Initialized | grep true)
+vault status | grep Initialized | grep true
 if [[ $? -ne 0 ]] ; then
   echo "Vault has not been initialized yet, so let's do it"
 
