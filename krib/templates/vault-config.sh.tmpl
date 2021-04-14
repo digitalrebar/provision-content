@@ -79,7 +79,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
 
   vault status | grep Initialized | grep -q true
   
-  if [[ $? -eq 0 ]]
+  if [[ $? -ne 0 ]]
   then
     vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
