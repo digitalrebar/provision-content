@@ -8,10 +8,13 @@ listener "tcp" {
 storage "raft" {
   path = "/var/lib/vault"
   node_id = "{{.Machine.Name}}"
+  # Iterate through all the cluster masters to setup retry_join
+{{- range $elem := .Param "krib/cluster-masters"}}
   retry_join {
-      leader_api_addr = "https://{{.Param "krib/cluster-master-vip"}}:8200"
+      leader_api_addr = "https://{{ $elem.Address }}:8200"
       leader_ca_cert_file = "/etc/vault/pki/server-ca.pem"
-    }
+    }    
+{{ end -}}
 }
 
 api_addr = "http://{{.Machine.Address}}:8200"
