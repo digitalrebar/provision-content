@@ -65,7 +65,7 @@ frontend etcd-client
   default_backend etcd-client
 
 frontend vault-api
-  bind *:8200
+  bind *:6200
   mode tcp
   option tcplog
   tcp-request inspect-delay 5s
