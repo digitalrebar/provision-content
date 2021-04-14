@@ -77,7 +77,7 @@ if [[ $MASTER_INDEX == 0 ]] ; then
   sleep 10s
   set -e
 
-  vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
+  (vault status | grep Initialized | grep -q true) || vault operator init -recovery-shares=1 -recovery-threshold=1 -key-shares=1 -key-threshold=1 -format json > /tmp/vault.json
 
   # Get our recovery key and token, then delete the local record
   export VAULT_UNSEAL_KEY=`cat /tmp/vault.json | jq -r '[.recovery_keys_b64][0][0]'`
