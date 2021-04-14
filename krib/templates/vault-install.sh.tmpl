@@ -93,6 +93,10 @@ if [[ $EXISTING_INDEX == notme ]] ; then
       SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-name" to "$SERVER_CA" || true
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-pw" to "$SERVER_CA_PW" || true
+
+      drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA | jq -r . > tmp.ca
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "vault/server-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
+
     else
       if [[ $(get_param "vault/server-ca-pw") == null ]] ; then
         xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"

@@ -1,0 +1,12 @@
+---
+Name: "vault/server-ca-cert"
+Description: "The vault server CA cert"
+Documentation: |
+  Stores vault CA cert for use in non-DRP managed hosts (like a backup host)
+  Requires Cert Plugin
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "book"
+  title: "Community Content"
