@@ -10,6 +10,7 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       [[ {{.Param "skip-flash"}} = true ]] && exit 0
+      {{ template "set-proxy-servers.sh.tmpl" .}}
       mt="$(drpcli gohai |jq -r '.DMI.Chassis| .[0]| .SKUNumber')"
       mt="${mt:0:4}"
       /opt/OneCli/OneCli update acquire --ostype platform --scope latest --mt "$mt"
@@ -18,6 +19,7 @@ Templates:
       #!/usr/bin/env bash
       [[ {{.Param "skip-flash"}} = true ]] && exit 0
       [[ -d /sys/module/sg ]] || modprobe sg
+      {{ template "set-proxy-servers.sh.tmpl" .}}
       /opt/OneCli/OneCli update flash --noreboot
       reboot=false
       fail=false
