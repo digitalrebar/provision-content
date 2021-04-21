@@ -2,11 +2,18 @@
 Name: "cloud/provider"
 Description: "Cloud Provider"
 Documentation: |
-  The cloud provider detected by join-up script in discovery
+  The cloud provider detected by join-up script in cloud-provision
 
   Custom types are supported by adding Terraform plan template 'cloud-provision-[provider].tf.tmpl'
 
-  Implemented types: aws, google, linode, azure, digitalocean
+  Implemented types: 
+
+    * aws (Amazon Web Services)
+    * google (Google Compute Engine)
+    * linode
+    * azure (Microsoft Cloud)
+    * digitalocean
+    * pnap (Phoenix NAP)
 
   Expand this list as new types are added!
 Schema:

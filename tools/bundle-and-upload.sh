@@ -7,13 +7,18 @@ changed="$1 $(git status -s | awk 'match($0, /\sM\s([a-z,\-]+)/, arr) { print ar
 echo "Bundle and Update to $RS_ENDPOINT ..."
 
 for b in $changed; do
-    if [[ ! -f "$b/$b.yaml" ]]; then
-        cd $b
-        echo "  updating $b/$b.yaml"
-        drpcli contents bundle $b.yaml > /dev/null
-        drpcli contents upload $b.yaml > /dev/null
-        cd ..
-    fi
+    case "$b" in
+    	"integrations"|"tools") echo "  skipping $b (not content)";;
+	*)
+	    if [[ ! -f "$b/$b.yaml" ]]; then
+	        cd $b
+	        echo "  updating $b/$b.yaml"
+	        drpcli contents bundle $b.yaml > /dev/null
+	        drpcli contents upload $b.yaml > /dev/null
+	        cd ..
+        fi
+    ;;
+	esac
 done
 
 for b in $changed; do

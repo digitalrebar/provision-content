@@ -46,7 +46,7 @@ resource "azurerm_network_security_group" "security_group" {
     location            = azurerm_resource_group.main.location
     resource_group_name = azurerm_resource_group.main.name
 
-    {{ range $i, $p := (.ComposeParam "network/firewall-ports") }}
+    {{ range $i, $p := (.ComposeParam "network/firewall-ports" | uniq) }}
     {{- $portdef := split "/" $p -}}
     security_rule {
         name                       = "nfp-{{$i}}_"

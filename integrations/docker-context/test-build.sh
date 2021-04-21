@@ -6,6 +6,9 @@ set -e
 
 echo "Testing Container Build Process"
 
+docker rmi hashicorp/terraform:light || true
+docker rmi alpine:latest || true
+
 files="$(ls *-dockerfile)"
 
 for f in $files; do

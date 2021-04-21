@@ -110,6 +110,25 @@ Templates:
 
         {{ end }}
 
+        {{ if eq "pnap" $cloud }}
+          echo "pnap/* check..."
+          {{ if .ParamExists "pnap/client-secret" }}
+            echo "  required secret is set"
+          {{ else }}
+            echo "  ERROR: you must set the pnap/client-secret for {{ .Param "cloud/provider" }}"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the pnap/client-secret!"}' > /dev/null
+            exit 1
+          {{ end }}
+          {{ if .ParamExists "pnap/client-id" }}
+            echo "  required secret is set"
+          {{ else }}
+            echo "  ERROR: you must set the pnap/client-id"
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the pnap/client-id!"}' > /dev/null
+            exit 1
+          {{ end }}
+
+        {{ end }}
+
         {{ if eq "digitalocean" $cloud }}
           echo "digitalocean/token check..."
           {{ if .ParamExists "digitalocean/token" }}
