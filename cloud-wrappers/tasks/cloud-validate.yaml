@@ -126,7 +126,12 @@ Templates:
             drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the pnap/client-id!"}' > /dev/null
             exit 1
           {{ end }}
-
+          echo "  PNAP requires a local config file, build that right here"
+          mkdir ~/.pnap
+          tee ~/.pnap/config.yaml > /dev/null << EOF
+      clientId: {{ .Param "pnap/client-id" }}
+      clientSecret: {{ .Param "pnap/client-secret" }}
+      EOF
         {{ end }}
 
         {{ if eq "digitalocean" $cloud }}

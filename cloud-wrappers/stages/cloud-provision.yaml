@@ -6,9 +6,9 @@ Params:
 BootEnv: "sledgehammer"
 Tasks:
   - "context:drpcli-runner"
-  - "cloud-validate"
   - "rsa-key-create"
   - "context:terraform"
+  - "cloud-validate"
   - "terraform-apply"
   - "context:ansible"
   - "ansible-join-up"

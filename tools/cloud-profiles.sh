@@ -202,6 +202,7 @@ Name: "pnap"
 Description: "Phoenix NAP Credentials"
 Params:
   "cloud/provider": "pnap"
+  "rsa/key-user": "ubuntu"
   "pnap/client-id": "$(cat ~/.pnap/config.yaml | grep "clientId:" | awk '{split($0,a,": "); print a[2]}')"
 Meta:
   color: "blue"

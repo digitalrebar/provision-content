@@ -39,6 +39,11 @@ Templates:
 
       {{template "setup.tmpl" .}}
 
+      {{ if empty .Machine.Address }}
+      echo "ERROR: missing Machine Address - cannot proceed"
+      exit 1
+      {{ end }}
+      
       # we need a keypair for Ansible
       echo "Retrieving SSH key from Machine Params rsa/key-*"
       tee rsa-{{.Machine.Name}} >/dev/null << EOF
