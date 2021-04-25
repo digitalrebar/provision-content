@@ -37,14 +37,17 @@ OptionalParams:
   - "dr-server/install-drpid"
   - "dr-server/initial-password"
   - "dr-server/initial-user"
+RequiredParams:
+  - "rsa/key-user"
+  - "rsa/key-private"
 Templates:
   - Name: "playbook.yaml"
     Path: "playbook.yaml"
     Contents: |-
-      ---
+      ---{{ $user := .Param "rsa/key-user" }}
       ### Run DRP Install/Upgrade via Ansible
       - hosts: all
-        remote_user: "{{ .Param "rsa/key-user" }}"
+        remote_user: "{{$user}}"
         connection: "ssh"
         gather_facts: false
         debugger: {{ if .Param "rs-debug-enable" }}on_failed{{ else }}never{{ end }}
@@ -55,6 +58,36 @@ Templates:
           - name: Wait for the instances to boot by checking the ssh port
             wait_for_connection:
               timeout: 300
+
+          {{if .ParamExists "access-keys"}}
+          {{range $name, $key := .Param "access-keys"}}
+          - name: Set authorized key from access-keys
+            authorized_key:
+              user: "{{$user}}"
+              state: present
+              key: "{{$key}}"
+          {{end}}
+          {{end}}
+
+          {{if .ParamExists "access-keys-global"}}
+          {{range $name, $key := .Param "access-keys-global"}}
+          - name: Set authorized key from access-keys-global
+            authorized_key:
+              user: "{{$user}}"
+              state: present
+              key: "{{$key}}"
+          {{end}}
+          {{end}}
+
+          {{if .ParamExists "access-keys-shared"}}
+          {{range $name, $key := .Param "access-keys-shared"}}
+          - name: Set authorized key from access-keys-shared
+            authorized_key:
+              user: "{{$user}}"
+              state: present
+              key: "{{$key}}"
+          {{end}}
+          {{end}}
 
           - name: "What is my DRP ID?"
             debug:
@@ -68,7 +101,7 @@ Templates:
               msg: "DRP status is {{`{{ services['dr-provision.service'].status }}`}}"
             when: services["dr-provision.service"] is defined
 
-          {{range $index, $port := .Param "network/firewall-ports" }}
+          {{range $index, $port := (.ComposeParam "network/firewall-ports" | uniq)}}
           - name: "enable firewall ports... enable {{$port}} for DRP server"
             {{ if contains "/" $port -}}
             shell: "firewall-cmd --permanent --add-port={{$port}}"

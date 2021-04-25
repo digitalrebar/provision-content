@@ -17,7 +17,20 @@ Documentation: |
 RequiredParams:
   - rsa/key-private
   - rsa/key-user
-Templates:
+Templates:  
+  - ID: discovery-common-bootstrap.sh.tmpl
+    Name: discovery-common-bootstrap.sh
+    Path: discovery-common-bootstrap.sh
+  - Contents: |-
+      #!/bin/bash
+      # replaces join-up.sh via the /machines/join-up.sh
+      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+      set -x
+      . discovery-common-bootstrap.sh
+      find_by_saved_uuid
+      switch_to_control
+    Name: join-up.sh
+    Path: join-up.sh
   - Contents: |-
       #!/bin/bash
       # RackN Copyright 2020
@@ -26,6 +39,11 @@ Templates:
 
       {{template "setup.tmpl" .}}
 
+      {{ if empty .Machine.Address }}
+      echo "ERROR: missing Machine Address - cannot proceed"
+      exit 1
+      {{ end }}
+      
       # we need a keypair for Ansible
       echo "Retrieving SSH key from Machine Params rsa/key-*"
       tee rsa-{{.Machine.Name}} >/dev/null << EOF
@@ -68,13 +86,17 @@ Templates:
               dest: /etc/rs-uuid
             when: "'drpcli.service' not in services"
 
-          - name: download join-up script
-            become: true
-            get_url:
-              url: "{{.ProvisionerURL}}/machines/join-up.sh"
+          - name: "transfer join-up script"
+            copy:
+              src: "./join-up.sh"
               dest: "./join-up.sh"
               mode: 0755
-            when: "'drpcli.service' not in services"
+
+          - name: "transfer discovery-common-bootstrap.sh script"
+            copy:
+              src: "./discovery-common-bootstrap.sh"
+              dest: "./discovery-common-bootstrap.sh"
+              mode: 0755
 
           - name: run join-up script
             become: true

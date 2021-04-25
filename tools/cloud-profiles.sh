@@ -191,6 +191,31 @@ else
   echo "  Skipping Linode, no token LINODE_TOKEN"
 fi
 
+if [[ -f ~/.pnap/config.yaml ]]; then
+  if drpcli profiles exists pnap > /dev/null 2>/dev/null ; then
+    echo "  Skipping Phoenix NAP, already exists"
+  else
+    echo "  upload Phoenix NAP (pnap) credentials"
+    drpcli profiles create - >/dev/null << EOF
+---
+Name: "pnap"
+Description: "Phoenix NAP Credentials"
+Params:
+  "cloud/provider": "pnap"
+  "rsa/key-user": "ubuntu"
+  "pnap/client-id": "$(cat ~/.pnap/config.yaml | grep "clientId:" | awk '{split($0,a,": "); print a[2]}')"
+Meta:
+  color: "blue"
+  icon: "cloud"
+  title: "generated"
+EOF
+    drpcli profiles add pnap param "pnap/client-secret" to "$(cat ~/.pnap/config.yaml | grep "clientSecret:" | awk '{split($0,a,": "); print a[2]}')" > /dev/null
+  fi
+else
+  echo "  Skipping Phoenix NAP, no ~/.pnap/config.yaml"
+fi
+
+
 if which az > /dev/null ; then
   if drpcli profiles exists azure > /dev/null 2>/dev/null ; then
     echo "  Skipping Azure, already exists"

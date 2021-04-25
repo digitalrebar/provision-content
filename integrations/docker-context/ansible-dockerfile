@@ -5,9 +5,10 @@ RUN echo "===> Adding Python runtime..."  && \
     apk --no-cache --update add --virtual build-dependencies \
                 python3-dev libffi-dev openssl-dev build-base  && \
     apk add py3-pip && \
+    pip3 install cryptography==3.1.1 && \
     pip3 install --upgrade pip cffi
 RUN echo "===> Installing Ansible..."  && \
-    pip3 install ansible==2.9.1         && \
+    pip3 install ansible==3.2.0         && \
     echo "===> Removing package list..."  && \
     apk del build-dependencies            && \
     rm -rf /var/cache/apk/*
@@ -25,11 +26,7 @@ RUN echo "===> Installing Libraries..."  && \
         openssh-keygen && \
     rm -rf /var/cache/apk/*
 RUN pip3 install --no-cache-dir --upgrade yq
-# AWS EC2
-RUN pip3 install --no-cache-dir --upgrade mitogen boto3
-# Linode
-RUN pip3 install --no-cache-dir --upgrade linode-api4
-RUN curl -o /usr/bin/drpcli https://s3-us-west-2.amazonaws.com/rebar-catalog/drpcli/v4.5.0/amd64/linux/drpcli && \
+RUN curl -o /usr/bin/drpcli https://s3-us-west-2.amazonaws.com/rebar-catalog/drpcli/v4.5.4/amd64/linux/drpcli && \
     chmod 755 /usr/bin/drpcli && \
     ln -s /usr/bin/drpcli /usr/bin/jq && \
     ln -s /usr/bin/drpcli /usr/bin/drpjq && \

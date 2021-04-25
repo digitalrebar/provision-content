@@ -171,7 +171,7 @@ Templates:
         echo "Uploading other keys from terraform output"
         for key in $(jq -r 'keys[]' <<< ${out}); do
           echo "  adding $key to machine"
-          drpcli machines set $RS_UUID param "terraform-var/$key" to "\"$(jq -r ".$key.value" <<< ${out})\""  > /dev/null
+          drpcli machines set $RS_UUID param "terraform-var/$key" to "\"$(jq -cr ".$key.value" <<< ${out})\""  > /dev/null
         done
 
         {{ else }}
