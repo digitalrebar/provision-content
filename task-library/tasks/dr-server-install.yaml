@@ -28,7 +28,7 @@ ExtraClaims:
     action: "*"
     specific: "*"
   - scope: "contents"
-    action: "get"
+    action: "*"
     specific: "rackn-license"
   - scope: "endpoints"
     action: "*"
@@ -244,21 +244,19 @@ Templates:
       echo "getting license file (will be copied to target)"
       drpcli contents show rackn-license > rackn-license.json
 
-      echo "  verify that endpoint $DRPID is in license"
-      epl=$(cat rackn-license.json | jq ".sections.profiles[\"rackn-license\"].Params[\"rackn/license-object\"].Endpoints | contains([\"$drpid\"])")
-      anymatch=$(cat rackn-license.json | jq '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["MatchAny"])')
+      echo "  verify that endpoint $DRPID is in license $(cat rackn-license.json | jq .meta.Version)"
+      epl=$(cat rackn-license.json | jq -r ".sections.profiles[\"rackn-license\"].Params[\"rackn/license-object\"].Endpoints | contains([\"$DRPID\"])")
+      anymatch=$(cat rackn-license.json | jq -r '.sections.profiles["rackn-license"].Params["rackn/license-object"].Endpoints | contains(["MatchAny"])')
+      KEY=$(cat rackn-license.json | jq -r '.sections.profiles["rackn-license"].Params["rackn/license"]')
+      echo "  endpoint $DRPID found? $epl.  MatchAny found? $anymatch"
       if [[ "$epl" == "true" || "$anymatch" == "true" ]] ; then
-        echo "  endpoint found!"
+        echo "  endpoint $DRPID found in license!"
       else
-        echo "  endpoint missing, attempt to add to license"
-        # TODO: this should move to a RackN URL at some point
-        curl -X GET "https://1p0q9a8qob.execute-api.us-west-2.amazonaws.com/v40/license" \
-          -H "rackn-contactid: ${CONTACTID}" \
-          -H "rackn-ownerid: ${OWNERID}" \
-          -H "rackn-endpointid: ${MGR_LBL}" \
-          -H "rackn-key: ${KEY}" \
-          -H "rackn-version: ${VERSION}" \
-          -o rackn-license.json
+        echo "  endpoint $DRPID missing, attempt to add to license"
+        curl -X POST "https://cloudia.rackn.io/api/v1/license/update" \
+          -H "Authorization: ${KEY}" \
+          -H "rackn-endpointid: $DRPID" > rackn-license.json
+        drpcli contents update rackn-license rackn-license.json > /dev/null
       fi
 
       if drpcli files exists bootstrap/install.sh >/dev/null 2>/dev/null ; then
