@@ -4,7 +4,10 @@ Description: Number of seconds to wait after XCC reboot
 Documentation: |
   This parameter defines the number of seconds to wait after an XCC reboot.
 
-  This defaults to 60 seconds.
+  This defaults to 1 seconds.
+
+  OneCli handles this now.  Leave the timeout just in case.
+
 Schema:
   type: integer
-  default: 60
+  default: 1

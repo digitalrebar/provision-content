@@ -5,9 +5,6 @@ RequiredParams:
   - skip-flash
   - flash-list
 Templates:
-  - Name: prep-usb-nic
-    Path: attach-usb-lan.sh
-    ID: prep-usb-nic.sh.tmpl
   - Name: lenovo-firmware-flash-list
     Contents: |
       #!/usr/bin/env bash
@@ -26,9 +23,6 @@ Templates:
               xiterr 1 "Failed to download $_dest from $_src"
           fi
       }
-
-      chmod +x attach-usb-lan.sh
-      ./attach-usb-lan.sh
 
       skip_flash="{{.Param "skip-flash"}}"
       if [[ $skip_flash = true ]]; then
@@ -72,8 +66,13 @@ Templates:
         clean_curl "{{$.ProvisionerURL}}/$DNAME/$ID.xml" "$TMPDIR/$ID.xml"
         {{ end }}
 
+        rebootme="--noreboot"
+        if [[ "{{$elem.File}}" =~ xcc ]] ; then
+          rebootme=""
+        fi
+
         set +e
-        /opt/OneCli/OneCli update flash --noreboot --scope individual --dir $TMPDIR --includeid ${ID} ${FORCE} --output flash.{{$index}}
+        /opt/OneCli/OneCli update flash $rebootme --scope individual --dir $TMPDIR --includeid ${ID} ${FORCE} --output flash.{{$index}}
         set -e
 
         lfailed=no
@@ -119,17 +118,6 @@ Templates:
         fi
 
         if [[ "{{$elem.File}}" =~ xcc ]] ; then
-            echo "Rebooting xcc"
-            ipmitool mc reset cold
-            # Wait for the reset to take effect.
-            sleep 20
-            set +e
-            while true ; do
-                ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
-                echo "Not up yet"
-                sleep 5
-            done
-            set -e
             echo "BMC is back up"
             sleep {{ $.ParamExpand "flash-lenovo-xcc-reboot-wait" }}
         else
@@ -142,11 +130,14 @@ Templates:
         rm -rf $TMPDIR
 
         if [[ $lfailed = no ]] ; then
+          echo "Updating flash-list-check-list"
+          env
           drpcli machines get $RS_UUID param flash-list-check-list | jq ' (.+ ["{{$elem.File}}"] | unique)' | drpcli machines set $RS_UUID param flash-list-check-list to -
         fi
         if [[ $lfailed = yes ]] ; then
           failed=yes
         fi
+        sleep 20
         {{ else }}
         echo "Image {{$elem.File}} is already installed.  To reinstall, clear the 'flash-list-installed-list'"
         {{ end }}
