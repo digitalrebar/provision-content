@@ -12,6 +12,7 @@ Params:
             Initrds:
             - e3ae2c7a668b0a2da690b463631a55ddaaa64c80/stage1.img
             IsoFile: sledgehammer-e3ae2c7a668b0a2da690b463631a55ddaaa64c80.amd64.tar
+            IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e3ae2c7a668b0a2da690b463631a55ddaaa64c80/sledgehammer-e3ae2c7a668b0a2da690b463631a55ddaaa64c80.amd64.tar"
             Kernel: e3ae2c7a668b0a2da690b463631a55ddaaa64c80/vmlinuz0
       Templates:
       - ID: allarch-grub.tmpl
@@ -27,6 +28,7 @@ Params:
             Initrds:
             - e3ae2c7a668b0a2da690b463631a55ddaaa64c80/stage1.img
             IsoFile: sledgehammer-e3ae2c7a668b0a2da690b463631a55ddaaa64c80.amd64.tar
+            IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e3ae2c7a668b0a2da690b463631a55ddaaa64c80/sledgehammer-e3ae2c7a668b0a2da690b463631a55ddaaa64c80.amd64.tar"
             Kernel: e3ae2c7a668b0a2da690b463631a55ddaaa64c80/vmlinuz0
       Templates:
       - ID: default-grub.tmpl
