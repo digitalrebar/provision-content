@@ -129,6 +129,7 @@ Templates:
       libtomcrypt
       libtommath
       libyaml
+      libxslt
       linux-firmware
       lldpd
       lshw
