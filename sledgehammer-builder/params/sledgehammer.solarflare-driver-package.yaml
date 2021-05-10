@@ -6,4 +6,5 @@ Documentation: |
   to install current Solarflare Ethernet drivers from.
 Schema:
   type: string
-  default: "https://support-nic.xilinx.com/wp/drivers?sd=SF-103848-LS-54&pe=1945"
+  default: "https://support-nic.xilinx.com/wp/drivers?sd=SF-103848-LS-57&pe=1945"
+
