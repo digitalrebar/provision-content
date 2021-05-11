@@ -27,7 +27,7 @@ Templates:
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
       set -x
       . discovery-common-bootstrap.sh
-      find_by_saved_uuid
+      export RS_UUID={{ .Machine.Uuid }}
       switch_to_control
     Name: join-up.sh
     Path: join-up.sh
