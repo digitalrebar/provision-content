@@ -25,10 +25,10 @@ Documentation: |
       mkdir -p $RKN_DIR
       cd $RKN_DIR
       # For 6.x
-      wget -O DRP-Agent.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/DRP-Agent-signed.zip
+      wget -O DRP-Agent.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/RKN-DRPY-Agent_1.3-0.0.0000-offline_bundle-17977725.zip
       wget -O DRP-Firewall-Rule.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/RKN-DRPY-FW-RULE_1.0-0.0.0003-offline_bundle-16370411.zip
       # For 7.x
-      wget -O DRP-Agent.vib [internal ip]:8091/files/plugin_providers/vmware/7.x/DRP-Agent-signed.zip
+      wget -O DRP-Agent.vib [internal ip]:8091/files/plugin_providers/vmware/7.x/RKN-DRPY-Agent_1.3-0.0.0000_17977727.zip
       wget -O DRP-Firewall-Rule.zip [internal ip]:8091/files/plugin_providers/vmware/7.x/RKN-DRPY-FW-RULE_1.0-0.0.0003_16333171.zip
 
       wget [internal ip]:8091/files/plugin_providers/vmware/drpy.conf
