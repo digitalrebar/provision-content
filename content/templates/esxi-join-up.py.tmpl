@@ -11,6 +11,7 @@ try:
     from drpy.api.client import Client
     from drpy.models.machine import Machine
     from drpy.models.whoami import WhoAmI
+    from drpy.cli import cli
 except ImportError:
     print("DRP-Agent vib has not been installed.")
     print("DRP-Agent can be retrieved from your local DRP endpoint.")
@@ -211,13 +212,13 @@ if __name__ == "__main__":
     agent_conf = get_drpy_conf(client, m.Uuid)
     agent_conf_par = configparser.ConfigParser()
     agent_conf_par.read_string(agent_conf)
-    vmfs_cmd_str = "localcli --formatter json storage filesystem list"
-    vmfs_cmd = _run(vmfs_cmd_str)
-    x = json.loads(vmfs_cmd.stdout)
-    y = [i for i in x if i['Type'] == 'VFFS' or 'vmfs' in i['Type'].lower()]
-    c_file = "{}/rackn/drpy.conf".format(y[0]['Mount Point'])
-    with open(c_file, 'w') as conf:
-        agent_conf_par.write(conf)
+    vols = cli.get_volumes(vol_filter="vfat")
+    for vol in vols:
+        if not os.path.isdir(vol+"/rackn"):
+            os.makedirs(vol+"/rackn")
+        c_file = "{}/rackn/drpy.conf".format(vol)
+        with open(c_file, 'w') as conf:
+            agent_conf_par.write(conf)
     start_agent = "/etc/init.d/rackn-agent.sh start"
     os.system(start_agent)
     print("done")
