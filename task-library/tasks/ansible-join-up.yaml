@@ -71,6 +71,36 @@ Templates:
             wait_for_connection:
               timeout: 300
 
+          {{if .ParamExists "access-keys"}}
+          {{range $name, $key := .Param "access-keys"}}
+          - name: Set authorized key from access-keys
+            authorized_key:
+              user: "{{$user}}"
+              state: present
+              key: "{{$key}}"
+          {{end}}
+          {{end}}
+
+          {{if .ParamExists "access-keys-global"}}
+          {{range $name, $key := .Param "access-keys-global"}}
+          - name: Set authorized key from access-keys-global
+            authorized_key:
+              user: "{{$user}}"
+              state: present
+              key: "{{$key}}"
+          {{end}}
+          {{end}}
+
+          {{if .ParamExists "access-keys-shared"}}
+          {{range $name, $key := .Param "access-keys-shared"}}
+          - name: Set authorized key from access-keys-shared
+            authorized_key:
+              user: "{{$user}}"
+              state: present
+              key: "{{$key}}"
+          {{end}}
+          {{end}}
+
           - name: check if drpcli is running (makes join idempotent)
             service_facts:
 
