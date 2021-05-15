@@ -50,6 +50,7 @@ Templates:
       {{.Param "rsa/key-private" | replace "|" "\n" }}
       EOF
       chmod 600 rsa-{{.Machine.Name}}
+      {{ $user := .Param "rsa/key-user" }}
 
       export ANSIBLE_HOST_KEY_CHECKING=False
 
@@ -59,7 +60,7 @@ Templates:
       ---
       ### Run Join-Up via Ansible
       - hosts: all
-        remote_user: "{{ .Param "rsa/key-user" }}"
+        remote_user: "{{$user}}"
         connection: "ssh"
         gather_facts: false
         debugger: {{ if .Param "rs-debug-enable" }}on_failed{{ else }}never{{ end }}
