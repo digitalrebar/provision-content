@@ -30,6 +30,8 @@
   {{ if ( eq "redhat" .Env.OS.FamilyName ) -}}
     {{ if ( eq .Env.OS.Codename "photon" ) -}}
       {{ template "photon.json.tmpl" .}}
+    {{ else if ( eq .Env.OS.Codename "rocky" ) -}}
+      {{ template "rocky-8.ks.tmpl" .}}
     {{ else -}}
       {{ if ( regexMatch ".*rhel-server.*" .Env.OS.Name ) -}}
         {{ if ( .Env.OS.VersionEq "8" ) -}}
