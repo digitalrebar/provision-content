@@ -7,15 +7,14 @@ Documentation: |
 
   This workflow includes the DRP Runner in Ubuntu provisioning process for DRP.
 
-  After the install completes, the workflow installs the runner
-  in a waiting state so that DRP will automatically detect and start a
-  new workflow if the Machine.Workflow is updated.
+  This does NOT start a runner service because it creates a dependency loop with
+  the task-library.  It should be moved into the task-library, but it is already
+  DEPRECATED.  Use the universal-application-debian-10 instead.
 
   .. note:: To enable, upload the firmware-10 ISO as per the debian-10 BootEnv
 
 Stages:
   - debian-10-install
-  - runner-service
   - finish-install
   - complete
 Meta:
