@@ -17,6 +17,7 @@ Templates:
     #!/bin/bash
     # Reset etcd CA params
     set -e
+    set -x
 
     {{template "setup.tmpl" .}}
     export RS_IP="{{.Machine.Address}}"
@@ -37,28 +38,26 @@ Templates:
     {{end -}}
 
     echo "Checking CA"
-    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca"
-    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-server-ca) || true
+    echo "drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-client-ca"
+    CA_TEST=$(drpcli machines runaction $RS_UUID getca certs/root {{.Param "etcd/name"}}-client-ca) || true
     if [[ $CA_TEST != "" && $CA_TEST != null ]] ; then
       echo "CA contains $CA_TEST"
       echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
       echo "==========================================================================="
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
 
       sleep 1
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
-      drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
     else
       echo "  No CA root detected - no reset required"
     fi
-    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
+    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/controller-client-cert' 'etcd/controller-client-key')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
-  Name: etcd CA clear
+  Name: etcd-CA-clear.sh
 - Contents: |-
     #!/bin/bash
     # Reset etcd params
@@ -252,48 +251,29 @@ Templates:
     # remanants of the old cluster. This script brutally removes any cluster-specific content,
     # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
 
-    # # Stop any running pods
-    # for POD in `crictl pods -q`
-    # do
-    #   crictl stopp $POD
-    #   crictl rmp $POD
-    # done
-
-    timeout 10 kubeadm reset -f
+    kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
     systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
     systemctl stop vault || echo "vault not running, no need to stop"
     systemctl stop consul-server || echo "consul-server not running, no need to stop"
     systemctl stop consul-agent || echo "consul-agent not running, no need to stop"
-    systemctl stop kubelet || echo "failed to stop kubelet. let's proceed anyway..."
 
+    # Whether we're using containerd or dockerd, kill either
+    pkill containerd || pkill dockerd
 
     # Wipe out any persistent content
     rm -rf /var/lib/cni/
     rm -rf /var/lib/kubelet/*
     rm -rf /etc/cni/
     rm -rf /docker/etcd/*
-    rm -rf /etc/kubernetes
-    rm -rf /opt/containerd/*
-
+    rm -rf /var/lib/containerd/*
     rm -rf /var/lib/docker/*
     rm -rf /var/lib/rook/*
-    rm -rf /var/lib/vault/*
     rm -rf /var/lib/consul/client
     rm -rf /var/lib/consul/server
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 
-    # Whether we're using containerd or dockerd, kill either
-    rm -rf /var/lib/containerd/*
-    pkill containerd || pkill dockerd
-    for i in `pidof /usr/local/bin/containerd-shim-runc-v1`; do kill -9 $i; done
-
-  Name: KRIB wipe machine for cluster reinstall
-- Contents: |-
-    #!/bin/bash
-
-    set -x
     {{ if .ParamExists "rook/ceph-target-disk"}}
     {{if .ParamExists "krib/selective-mastership" -}}
     SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
@@ -311,7 +291,39 @@ Templates:
       fi
     fi
     {{ end -}}
-  Name: KRIB wipe disks used for rook-ceph (if exists)
+  Name: KRIB wipe machine for cluster reinstall
+- Contents: |-
+    #!/bin/bash
+
+    {{ if .ParamExists "rook/ceph-target-disk"}}
+    {{if .ParamExists "krib/selective-mastership" -}}
+    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
+    {{end -}}
+    {{if .ParamExists "krib/i-am-master" -}}
+    I_AM_MASTER={{.Param "krib/i-am-master" }}
+    {{end -}}
+    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
+      if [[ ! "$I_AM_MASTER" == true ]] ; then
+        # I'm a worker, so wipe disk in preparation for next ceph installation
+        yum install -y gdisk
+        for disk in `ls /dev/ | grep {{ .Param "rook/ceph-target-disk" }}`
+        do
+          # Don't wipe OS filesystems
+          echo {{ .Param "operating-system-disk" }} | grep $disk
+          if [[ $? -ne 0 ]]; then
+            echo "DESTRUCTIVELY zapping /dev/$disk"
+            sgdisk --zap-all /dev/$disk
+          else
+            echo "/dev/$disk matches {{ .Param "operating-system-disk" }}, so NOT zapping"
+          fi
+
+        done
+        # Now remove devicemapper details
+        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
+      fi
+    fi
+    {{ end -}}
+  Name: KRIB wipe disks used for rook-ceph (if configured)
 Meta:
   icon: "ship"
   color: "orange"
