@@ -63,7 +63,7 @@ controlPlaneEndpoint: {{ .Param "krib/cluster-master-vip" }}:{{ .Param "krib/clu
 imageRepository: {{ .Param "krib/cluster-image-repository" }}
 etcd:
   external:
-    caFile: /etc/kubernetes/pki/etcd/server-ca.pem
+    caFile: /etc/kubernetes/pki/etcd/client-ca.pem
     certFile: /etc/kubernetes/pki/etcd/client.pem
     keyFile: /etc/kubernetes/pki/etcd/client-key.pem
     endpoints:
