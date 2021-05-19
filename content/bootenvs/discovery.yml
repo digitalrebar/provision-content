@@ -296,8 +296,8 @@ Templates:
 
       export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
       set -x
-      curl -o /tmp/discovery-common-bootstrap.sh \
-          '{{.ProvisionerURL}}/machines/common-bootstrap.sh'
+      curl -ko /tmp/discovery-common-bootstrap.sh \
+          '{{.ApiURL}}/machines/common-bootstrap.sh'
 
       . /tmp/discovery-common-bootstrap.sh
 
