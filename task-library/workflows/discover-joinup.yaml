@@ -20,7 +20,7 @@ Documentation: |
   the workflow into a bootenv (potentially rebooting) when finished.
 Stages:
   - "discover-nobootenv"
-  - "runner-service"
+  - "drp-agent"
   - "complete-nobootenv"
 Meta:
   color: "green"
