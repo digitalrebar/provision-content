@@ -21,10 +21,7 @@ Templates:
     {{template "setup.tmpl" .}}
 
     if ! which ansible 2>/dev/null >/dev/null ; then
-        echo "installing ansible..."
         install ansible
-    else
-        echo "ansible installed, no action take"
     fi
 
     ansible -m setup -o 127.0.0.1 2>/dev/null | sed "s/127.0.0.1 | SUCCESS => //g" > ansible.json

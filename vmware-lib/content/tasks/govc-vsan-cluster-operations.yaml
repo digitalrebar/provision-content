@@ -43,13 +43,10 @@ Templates:
       #!/usr/bin/env bash
       # Build the VSAN cluster from the hosts.
 
-      ### start setup.tmpl
+      ### setup.tmpl
       {{ template "setup.tmpl" . }}
 
-      ### start govc-lib.sh.tmpl
-      {{ template "govc-lib.sh.tmpl" . }}
-
-      ### start esxi-vsan-cluster-operations.sh
+      ### esxi-vsan-cluster-operations.sh
       ON='{{ .Param "esxi/vsan-enabled" }}'
       [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
 
@@ -75,7 +72,7 @@ Templates:
       {{ if .ParamExists "esxi/vsan-nodes-override" }}
       NODES="{{ .Param "esxi/vsan-nodes-override" }}"
       {{ else -}}
-      NODES=$(get_cluster_members $CLUSTER)
+      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
       {{ end }}
 
       # additional global vars used throughout functions
@@ -163,6 +160,14 @@ Templates:
         [[ -n "$_param" && "$_param" != "null" ]] && echo "$_param"
       }
 
+      # TODO:  Try to set based on Machien Name, FQDN, or fallback to IP Address.
+      #        This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
+        echo $ADDR
+      }
+
       set_govc_env() {
         export GOVC_URL=$(get_member_name $NODE)
         export GOVC_USERNAME=root
@@ -241,7 +246,7 @@ Templates:
 
       cluster_join() {
         local _m="MISSING SubClusterUUID from Master !!"
-        [[ -z "$SCUUID" ]] && xiterr 1 "$_m"
+        [[ -z "$SCUUID" ]] && xiterr 1"$_m"
         vmk_set
         cmd host.esxcli vsan cluster join -u $SCUUID
         cluster_get

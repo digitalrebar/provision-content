@@ -1,36 +1,67 @@
+Proxmox
+-------
 
-This content pack manages deployment of Proxmox nodes and configuration for
-student training labs.  At some point in the future, this will likely be
+This content pack managed deployment of Proxmox nodes and configuration for
+sutdent training labs.  At some point in the future, this will likely be
 broken out in to two content packs.
 
-This content pack utilizes the Debian 10 (Buster) *bootenv* as a baseline for
-the Proxmox installation.  The Proxmox released "appliance ISO" is not network
-installable by default, and requires a fair amount of work to rip apart the ISO
-and rebuild it to make it network installable.
+.. note:: Proxmox deployments are not designed to be automated, there are
+          serious challenges with automation.
+
+This content pack currently uses a customized ISO to PXE boot and install
+the Proxmox server over the network.  This is not the best approach.  The
+correct approach for automation is to deploy a Debian Buster 10 system with
+appropriate baseline configuration, then to install the Proxmox packages on
+top of them.
 
 
 Installation of Proxmox
------------------------
+=======================
 
-Installation is performed with the ``proxmox-buster-install`` Workflow.  This workflow
-requires the ``drp-community-content`` to install Debian 10 (Buster) on the target
-systems.  Configuration of Proxmox is performed via RackN Workflow stages.  Please
-start by reviewing the provided workflow before attempting to rework the workflows
-for your use case.
+Use the ``proxmox-rackn`` Bootenv to install Proxmox.  There is no workflow
+for the installation.  Simply clear the existing workflow on the target
+machine, then set the BootEnv.
 
-The goal of the workflow is to perform initial installation and setup of Proxmox
-with a basic Virtualized network configuration on top of Proxmox.  More advanced
-operational (i.e. *day two*) workflow patterns have not been developed yet.
+You will need to log in to the console of the target machine and answer the
+4 or 5 GUI based install form inputs.  Once that has been completed, the
+rest of this content pack is fully automated.
 
-There are some "destroy" workflows or stages that are designed to remove the virtualized
-infrastructure on top of Proxmox.
 
-Debian 10 prerequisites require human input to the packaging system.  To get around
-this, we utilize the ``debconf-set-selections`` mechanism to preseed the answers to
-those packages (eg Samba and Postfix).  Currently the preseed answers are hard coded
-but future implementations should allow injection of specific override answers.
+Setup a Runner (Agent) for Workflow
++++++++++++++++++++++++++++++++++++
 
-If you need to rely on Postfix or Samba mechanisms, you may still need to reconfigure
-these packages to be correct for your use case.
+The RackN customized ISO does not (at this time) embed the Digital Rebar
+Platform Runner (agent; drpcli) in to the ISO image.  This will be corrected
+with automation rewrite to use Debian Buster and packages on top of Buster.
+
+You will need to perform the following tasks to enable Workflow automation
+of the Proxmox server - which the rest of this documentation relies on.
+
+  ::
+
+    # ssh to the Proxmox system
+    # initiate the DRP Join script process
+    wget http://$drp:8091/machines/join-up.sh | bash -s
+
+This will create a new Machine Object for the Proxmox node.  You will need
+to run the following Stages to install the AGent permanently, and optionally
+install SSH access keys:
+
+  * drp-agent
+  * access-keys
+
+
+Configure Student Labs
+======================
+
+The student labs can be configured by running the ``proxmox-lab-setup``
+workflow on the target.
+
+
+Destroying Lab Setup
+====================
+
+The workflow ``proxmox-lab-destroy`` will destroy all virtual machines on the proxmox
+node, then strip off any bridge configurations in /etc/network/interfaces.d
 
 

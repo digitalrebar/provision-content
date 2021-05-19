@@ -1,0 +1,118 @@
+---
+Description: "Install Helm"
+Name: "edge-lab-helm-install"
+Documentation: |
+  Installs Helm on the leader.
+  This uses the Digital Rebar Cluster pattern so cluster/profile and cluster/leader must be set.
+RequiredParams:
+  - cluster/profile
+  - cluster/leaders
+  - edge-lab/helm-version
+  - edge-lab/helm-download-url
+ExtraClaims:
+  - scope: "files"
+    action: "post,get"
+    specific: "*"
+Templates:
+  - Name: "helm-intsall.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{ template "cluster-shared.tmpl" .}}
+      {{ template "download-tools.tmpl" .}}
+
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
+        exit 0
+      fi
+
+      echo "Run helm on the leader (skip for workers)..."
+
+      {{ if .ParamExists "cluster/profile" -}}
+      CLUSTER_PROFILE={{.Param "cluster/profile"}}
+      PROFILE_TOKEN={{.GenerateProfileToken (.Param "cluster/profile") 7200}}
+      {{else -}}
+      xiterr 1 "Missing cluster/profile on the machine!"
+      {{end -}}
+
+      HELM_VERSION="latest"
+      {{ if .ParamExists "helm/version" -}}
+        echo "using general helm version from helm/version"
+        HELM_VERSION="{{ .Param "helm/version"}}"
+      {{ else -}}
+        {{ if .ParamExists "krib/helm-version" -}}
+        HELM_VERSION="{{ .Param "krib/helm-version" }}"
+        echo "using krib helm version from krib/helm-version"
+        {{ end -}}
+        {{ if .ParamExists "edge-lab/helm-version" -}}
+        HELM_VERSION="{{ .Param "edge-lab/helm-version"}}"
+        echo "using edge-lab helm version from edge-lab/helm-version"
+        {{ end -}}
+      {{ end -}}
+
+      if which helm 2>/dev/null >/dev/null ; then
+        echo "found $(which helm) binary version $(helm version), moving on..."
+      else
+        BINARIES="/usr/local/bin/helm"
+        if drpcli files exists "helm/helm" 2>/dev/null >/dev/null ; then
+          echo "Found in DRP helm/helm - downloading from there"
+          drpcli files download "helm/helm" to $BINARIES
+        else
+          if [[ "$HELM_VERSION" == "latest" ]]; then
+            echo "Looking up latest version, requested $HELM_VERSION"
+            download -L --remote-name-all "https://api.github.com/repos/helm/helm/releases/latest" -o helm_latest.json
+            HELM_VERSION="$(jq -r .tag_name <<< cat helm_latest.json)"
+          fi
+          echo "Using Helm Version $HELM_VERSION"
+          echo "Installing Helm for arch $arch from {{ .Param "edge-lab/helm-download-url" }}"
+          HELM_DOWNLOAD="{{ .Param "edge-lab/helm-download-url" -}}/helm-$HELM_VERSION-linux-$arch.tar.gz"
+          echo "Download helm from $HELM_DOWNLOAD"
+          download -L --remote-name-all "$HELM_DOWNLOAD" -o helm.tar.gz
+          echo "Download helm checksum from $HELM_DOWNLOAD.sha256"
+          download -L --remote-name-all "$HELM_DOWNLOAD.sha256" -o helm.tar.gz.sha256
+
+          if [[ "$(sha256sum helm.tar.gz)" == "$(cat helm.tar.gz.sha256)  helm.tar.gz" ]]; then
+            echo "Checksum Test Pass: $(cat helm.tar.gz.sha256)"
+          else
+            echo "Checksum Does not match: $(cat helm.tar.gz.sha256)"
+            sha256sum helm.tar.gz
+            exit 1
+          fi
+          if tar --version 2>/dev/null >/dev/null ; then
+            echo "tar installed, no action"
+          else
+            case $osfamily in
+              redhat|centos) sudo yum install -y tar ;;
+              debian|ubuntu) sudo apt install -y tar ;;
+              *) >&2 echo "Unsupported package manager family '$osfamily'."
+                 exit 1 ;;
+            esac
+          fi
+          tar -zxvf helm.tar.gz
+          if [[ -e linux-$arch/helm ]] ; then
+            echo "save downloaded files to helm/helm for next pass"
+            drpcli files upload linux-$arch/helm as helm/helm
+            echo "moving from linux-$arch/helm to $BINARIES"
+            mv linux-$arch/helm $BINARIES
+          else
+            echo "ERROR: did not create linux-$arch/helm!"
+            exit 1
+          fi
+        fi
+        chmod +x $BINARIES
+        echo "helm downloaded to $BINARIES"
+      fi
+
+      echo "Running helm version $(helm version)"
+      echo "Done"
+      exit 0
+
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

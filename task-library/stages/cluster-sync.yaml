@@ -1,6 +1,5 @@
 ---
 Name: "cluster-sync"
-Documentation: DEPRECATED in v4.6
 Description: "Wait for Queue Empty"
 Tasks:
   - "cluster-sync"

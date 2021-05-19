@@ -1,0 +1,24 @@
+---
+Name: "govc/template-json"
+Description: "Render a template inside the govc context container."
+Documentation: |
+  Render the template named in this Param, to the govc context container.  Several
+  of the govc commands require a JSON config file passed in to the command.  For example,
+  the OVA deploy option requires a JSON template to configure the deployed OVA.
+
+  This template will be rendered to ``/tmp/template.json`` inside the container
+  for use by the ``govc/commands``.  For example, to deploy an OVA, save your OVA
+  JSON template to the DRP system, assign the template name to this Param, and
+  then set the ``govc/template`` accordingly.
+
+  Unfortunately, it appears the GoVC command is not able to utilize a remote HTTP path
+  as the JSON template input.  This is true at least up until version 0.22.1 of GoVC.
+
+
+Schema:
+  type: "string"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"
+  route: "templates"

@@ -1,10 +1,9 @@
 ---
 Name: "network/firewall-ports"
-Description: "Enable Ports for Firewalld"
+Description: "Enable Ports for Firewall"
 Documentation: |
   Map of ports to open for Firewalld including the ``/tcp`` or ``/udp`` filter.
 
-  Skip: An array to empty [] to skip this task.
 Schema:
   type: "array"
   default:

@@ -31,6 +31,3 @@ Schema:
     - name: fwpp
       url: 'https://downloads.linux.hpe.com/SDR/repo/fwpp-$hpe_gen/$fwpp_ver/'
       requireToken: true
-    - name: iloerest
-      url: 'https://downloads.linux.hpe.com/SDR/repo/ilorest/rhel/$releasever/$basearch/$stk_ver/'
-      requireToken: false

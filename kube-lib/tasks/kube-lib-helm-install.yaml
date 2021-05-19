@@ -6,18 +6,28 @@ Documentation: |
   This uses the Digital Rebar Cluster pattern so cluster/profile and cluster/leader must be set.
 RequiredParams:
   - cluster/profile
-  - cluster/manager
+  - cluster/leaders
   - kube-lib/helm-version
+  - kube-lib/helm-download-url
   - kube-lib/kube-config
 ExtraClaims:
   - scope: "files"
-    action: "*"
-    specific: "*"
+    action: "get"
+    specific: "/kubernetes/helm-*"
+  - scope: "files"
+    action: "get"
+    specific: "/kubernetes/helm-amd64"
+  - scope: "files"
+    action: "post"
+    specific: "/kubernetes/helm-arm64"
+  - scope: "files"
+    action: "post"
+    specific: "/kubernetes/helm-amd64"
 Templates:
   - Name: "kube.config"
     Path: "kube.config"
     Contents: |
-      {{ .Param "kube-lib/kube-config" | toPrettyJson }}
+      {{ .ParamAsJSON "kube-lib/kube-config" }}
   - Name: "helm-install.sh"
     Path: ""
     Contents: |
@@ -25,30 +35,68 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      {{ template "cluster-shared.tmpl" .}}
       {{ template "download-tools.tmpl" .}}
+      export KUBECONFIG="./kube.config"
 
-      {{ if .Param "cluster/manager" }}
-        echo "Verified: Must be Cluster Manager"
-      {{ else }}
-        echo "Cluster Manager only.  Stopping execution"
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
         exit 0
-      {{ end }}
+      fi
 
-      echo "Checking Helm Install and Version"
-      if helm version ; then
-        echo "  found helm, moving on..."
+      echo "Running helm on the leader (skip for workers)..."
+
+      if which helm 2>/dev/null >/dev/null ; then
+        echo "found $(which helm) binary version $(helm version), moving on..."
       else
-        {{ $cachesource := "kube-lib/helm-version" }}
-        OS="linux"
-        ARCH="{{ .Machine.Arch }}"
+        HELM_VERSION="{{ .Param "kube-lib/helm-version"}}"
         BINARIES="/usr/local/bin/helm"
-        {{ $arch := list "linux" .Machine.Arch | join "-" }}
-        {{ $file := .Param $cachesource }}
-        {{ $source := get $file $arch }}
-        drp_cache "{{ get $file "name" }}" "{{ get $file "version" }}" "$OS" "$ARCH" "{{ get $source "url" }}" "{{ get $source "sha256sum" }}" "{{ get $source "explode" }}"
-        chmod +x "{{ get $file "name" }}"
-        mv "{{ get $file "name" }}" $BINARIES
+        if drpcli files exists "kubernetes/helm-$arch" 2>/dev/null >/dev/null ; then
+          echo "Found in DRP kubernetes/helm-$arch - downloading from there"
+          drpcli files download "kubernetes/helm-$arch" to $BINARIES
+        else
+          if [[ "$HELM_VERSION" == "latest" ]]; then
+            echo "Looking up latest version, requested $HELM_VERSION"
+            download -L --remote-name-all "https://api.github.com/repos/helm/helm/releases/latest" -o helm_latest.json
+            HELM_VERSION="$(jq -r .tag_name <<< cat helm_latest.json)"
+          fi
+          echo "Using Helm Version $HELM_VERSION"
+          echo "Installing Helm for arch $arch from {{ .Param "kube-lib/helm-download-url" }}"
+          HELM_DOWNLOAD="{{ .Param "kube-lib/helm-download-url" -}}/helm-$HELM_VERSION-linux-$arch.tar.gz"
+          echo "Download helm from $HELM_DOWNLOAD"
+          download -L --remote-name-all "$HELM_DOWNLOAD" -o helm.tar.gz
+          echo "Download helm checksum from $HELM_DOWNLOAD.sha256"
+          download -L --remote-name-all "$HELM_DOWNLOAD.sha256" -o helm.tar.gz.sha256
 
+          if [[ "$(sha256sum helm.tar.gz)" == "$(cat helm.tar.gz.sha256)  helm.tar.gz" ]]; then
+            echo "Checksum Test Pass: $(cat helm.tar.gz.sha256)"
+          else
+            echo "Checksum Does not match: $(cat helm.tar.gz.sha256)"
+            sha256sum helm.tar.gz
+            exit 1
+          fi
+          if tar --version 2>/dev/null >/dev/null ; then
+            echo "tar installed, no action"
+          else
+            case $osfamily in
+              redhat|centos) sudo yum install -y tar ;;
+              debian|ubuntu) sudo apt install -y tar ;;
+              *) >&2 echo "Unsupported package manager family '$osfamily'."
+                 exit 1 ;;
+            esac
+          fi
+          tar -zxvf helm.tar.gz
+          if [[ -e linux-$arch/helm ]] ; then
+            echo "save downloaded files to kubernetes/helm-$arch for next pass"
+            drpcli files upload linux-$arch/helm as kubernetes/helm-$arch
+            echo "moving from linux-$arch/helm to $BINARIES"
+            mv linux-$arch/helm $BINARIES
+          else
+            echo "ERROR: did not create linux-$arch/helm!"
+            exit 1
+          fi
+        fi
+        chmod +x $BINARIES
         echo "helm downloaded to $BINARIES"
       fi
 

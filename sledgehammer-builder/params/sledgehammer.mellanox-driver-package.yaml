@@ -8,4 +8,4 @@ Documentation: |
   attempt to install the drivers that enable Infiniband or RDMA.
 Schema:
   type: string
-  default: 'http://www.mellanox.com/downloads/ofed/MLNX_EN-5.3-1.0.0.1/MLNX_EN_SRC-5.3-1.0.0.1.tgz'
+  default: 'http://www.mellanox.com/downloads/ofed/MLNX_EN-5.0-1.0.0.0/MLNX_EN_SRC-5.0-1.0.0.0.tgz'

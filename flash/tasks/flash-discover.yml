@@ -7,16 +7,8 @@ Templates:
   - Name: discover
     Contents: |
       #!/usr/bin/env bash
-
       {{ template "setup.tmpl"  .}}
-
       mfgr="$(drpcli gohai |jq -r '.DMI | .System | .Manufacturer')"
-      {{ if ( .ParamExists "flash-manufacturer-override" ) -}}
-      old="$mfgr"
-      mfgr="{{ .Param "flash-manufacturer-override" }}"
-      echo ">>> WARNING: 'flash-manufacturer-override' forced to '$mfgr'."
-      echo "              Overriding discovered value of '$old'."
-      {{ end -}}
 
       {{if eq (.Param "flash-method") "list" }}
       {{ if .ParamExists "flash-list" }}
@@ -39,8 +31,6 @@ Templates:
       APPEND="-list"
       {{ end }}
       {{end}}
-
-      [[ -z "$mfgr" ]] && echo ">>> WARNING:  Discovered Manufacturer has no value." || true
 
       case $mfgr in
           "Dell Inc.") drpcli machines tasks add {{.Machine.UUID}} at 0 dell-firmware-flash${APPEND};;

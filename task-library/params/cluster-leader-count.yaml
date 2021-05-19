@@ -1,10 +1,6 @@
 ---
 Name: "cluster/leader-count"
 Description: "Number of leaders to elect while building cluster"
-Documentation: |
-  Used by cluster-initialize add cluster/leader Param to cluster leaders
-
-  For operational guidelines, see :ref:`rs_cluster_pattern`
 Schema:
   type: integer
   default: 1

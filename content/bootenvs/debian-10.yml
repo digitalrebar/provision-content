@@ -14,9 +14,6 @@ OS:
   Version: "10"
   SupportedArchitectures:
     amd64:
-      IsoFile: "mini.iso"
-      IsoSha256: "577d490ccef8a9a16b97af07c2863e3b6b000ba869732df7fd92ae347038cb80"
-      IsoUrl: "http://ftp.nl.debian.org/debian/dists/buster/main/installer-amd64/current/images/netboot/mini.iso"
       Initrds:
         - "initrd.gz"
       Kernel: "linux"
@@ -38,7 +35,6 @@ OS:
         hw-detect/load_firmware=true
         rw
         quiet
-        {{.Param "debian-buster-netcfg"}}
         {{.Param "kernel-options"}}
         {{.Param "kernel-console"}}
 RequiredParams:

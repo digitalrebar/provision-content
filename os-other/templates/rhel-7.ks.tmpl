@@ -16,7 +16,7 @@ firewall --disabled
 authconfig --enableshadow --enablemd5
 selinux --disabled
 
-bootloader --location=mbr {{.ParamExpand "redhat-bootorder" }} --append="rhgb quiet"
+bootloader --location=mbr {{if .ParamExists "operating-system-disk"}}--driveorder={{.Param "operating-system-disk"}}{{end}} --append="rhgb quiet"
 zerombr
 {{if .ParamExists "operating-system-disk"}}ignoredisk --only-use={{.Param "operating-system-disk"}}{{end}}
 clearpart --all {{if .ParamExists "operating-system-disk"}}--drives={{.Param "operating-system-disk"}}{{end}}

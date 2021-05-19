@@ -2,22 +2,16 @@
 Name: "part-scheme"
 Description: "Defines a string that references a template for partitioning during installation."
 Documentation: |
-  This string contains the name of a template that holds the OS installer partitioning
+  This string contains the name of a template that holds the Debian installer partitioning
   commands for use during installation.
 
   The string will be expanded into this template name:
 
     ::
 
-      part-scheme-<string>.tmpl
+      part-seed-<string>.tmpl
 
-  e.g. a value of ``softraid`` would expand to the template name ``part-scheme-softraid.tmpl``
-
-  Each Operating System utilizes different format network configuration files
-  (eg kickstart, preseed, yaml, or json) types.  The specified partitioning
-  scheme must follow the OS installers formatting guidelines.  In particular,
-  formatting constraings based on the type must be followed exactly (eg,
-  yaml space indentation, json comma separation, etc.).
+  e.g. softraid
 
 Schema:
   type: "string"

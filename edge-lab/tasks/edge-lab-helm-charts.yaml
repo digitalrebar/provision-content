@@ -1,0 +1,137 @@
+---
+Description: "Run Helm Charts"
+Name: "edge-lab-helm-charts"
+Documentation: |
+  Installs Helm on the leader.
+  This uses the Digital Rebar Cluster pattern so cluster/profile and cluster/leader must be set.
+RequiredParams:
+  - cluster/profile
+  - cluster/leaders
+  - k3s/admin-conf
+  - edge-lab/helm-charts
+Templates:
+  - Name: "helm-charts.sh"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      {{ template "cluster-shared.tmpl" .}}
+
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
+        exit 0
+      fi
+
+      echo "Run helm on the leader (skip for workers)..."
+
+      {{ $helmcharts := .Param "edge-lab/helm-charts" -}}
+
+      if which helm ; then
+        echo "found $(which helm) binary version $(helm version)"
+      else
+        echo "helm not installed"
+        exit 1
+      fi
+
+      # helm requires the admin config
+      export KUBECONFIG="./admin.conf"
+      tee $KUBECONFIG >/dev/null << EOF
+      {{ .ParamAsJSON "k3s/admin-conf" }}
+      EOF
+      echo "testing cluster access"
+      kubectl --kubeconfig=$KUBECONFIG get nodes
+
+      {{ range $index, $chart := $helmcharts -}}
+
+      echo "{{$index}}==== Installing {{$chart.name}} (from {{$chart.chart}}) ===="
+
+      if [[ "$(helm list -o json --filter '{{$chart.name}}' | jq length)" == "0" ]] ; then
+
+        {{ if $chart.git }}
+        echo "cloning repo from {{$chart.git}}"
+        if ! which git ; then
+          echo "installing git for $osfamily"
+          case $osfamily in
+            redhat|centos) yum -y install git ;;
+            debian|ubuntu) apt -y install git ;;
+            *) >&2 echo "Unsupported package manager family '$osfamily'."
+               exit 1 ;;
+          esac
+        fi
+        {{ range $index, $clone := $chart.git -}}
+        git clone "{{$clone}}"
+        {{ end -}}
+        {{ else -}}
+        echo "no git clone"
+        {{ end -}}
+
+        {{ if $chart.targz }}
+        echo "retrieving chart from {{$chart.targz}}"
+        download -L --remote-name-all "{{$chart.targz}}" -o chart.targz
+        tar -xz chart.targz
+        {{ else -}}
+        echo "no extra targz"
+        {{ end -}}
+
+        {{ if $chart.repos }}
+        {{ range $name, $url := $chart.repos -}}
+        echo "adding chart repo {{$name}}"
+        helm repo add {{$name}} {{$url}}
+        {{ end -}}
+        {{ else -}}
+        echo "no charts provided, using official Helm stable"
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+        {{ end -}}
+        helm repo update
+
+        {{ range $index, $before := $chart.prekubectl -}}
+        echo "running kubectl {{$before}}"
+        kubectl --kubeconfig=$KUBECONFIG {{$before}}
+        {{ else }}
+        echo "No kubectl before steps"
+        {{ end }}
+
+        echo "installing helm chart {{$chart.name}}"
+        helm upgrade {{$chart.name}} \
+          --install "{{$chart.chart}}" \
+          --kubeconfig=$KUBECONFIG \
+          {{ if $chart.namespace }} --namespace {{$chart.namespace}}{{ end }} \
+          {{ range $index, $value := $chart.set }} --set {{$value}}{{ end }} \
+          {{ range $param, $value := $chart.params }} --{{$param}} {{$value}}{{ end }}
+
+        {{ if $chart.sleep }}
+        echo "sleep {{$chart.sleep}}"
+        sleep {{$chart.sleep}}
+        {{ end -}}
+
+        {{ range $key, $after := $chart.postkubectl -}}
+        echo "running kubectl {{$after}} (save to {{$key}})"
+        OUTPUT=$(kubectl --kubeconfig=$KUBECONFIG {{$after}})
+        if [[ $(drpcli -T $PROFILE_TOKEN get $CLUSTER_PROFILE param {{$key}}) == "null" ]] ; then
+          drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        else
+          drpcli -T $PROFILE_TOKEN profiles set $CLUSTER_PROFILE param {{$key}} to "$OUTPUT"
+        fi
+        {{ else }}
+        echo "No kubectl after steps"
+        {{ end }}
+
+      else
+        echo "Skipping Install: Found chart using helm list --filter={{$chart.name}}"
+        helm list
+      fi
+      echo "{{$index}}==== Done {{$chart.name}} ===="
+      {{ else -}}
+      echo "No charts included in helm/charts to install"
+      {{ end -}}
+
+      echo "Done"
+      exit 0
+Meta:
+  icon: "map outline"
+  color: "yellow"
+  title: "Community Content"
+  copyright: "RackN 2020"
+  feature-flags: "sane-exit-codes"

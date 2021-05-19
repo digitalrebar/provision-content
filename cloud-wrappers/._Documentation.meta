@@ -12,10 +12,10 @@ The design uses the idea that Digital Rebar can manage a machine instance ...
 
 The approach:
 
-#. Uses Terraform to provide the "give me a machine"
-#. Uses Ansible to SSH into a machine and start the DRP runner
-#. Controls the machine with the DRP runner in a standard way
-#. Uses Terraform to provide the "destroy a machine" controls
+  1. Uses Terraform to provide the "give me a machine"
+  1. Uses Ansible to SSH into a machine and start the DRP runner
+  1. Controls the machine with the DRP runner in a standard way
+  1. Uses Terraform to provide the "destroy a machine" controls
 
 The default Terraform plans include only create the most basic machines with SSH access.  We anticipate that advanced operators will create or extend these tasks for based on their specific requirements.
 
@@ -25,18 +25,18 @@ Prerequistes
 ------------
 
 Inbound Access 
-==============
+~~~~~~~~~~~~~~
 
 The Digital Rebar Server must be at a location that is accessible to the machines being provisioned.  This is required because the machines must be able to download the `join-up` script from the server.
 
 Outbound Access
-===============
+~~~~~~~~~~~~~~~
 
 The Digital Rebar Server must be able to SSH into the newly created machines so that it can run the `join-up` script.  Once the script is run, the runner will be able to pull instructions from the DRP and the SSH port could be closed.
 
 
 Catalog Items
-=============
+~~~~~~~~~~~~~
 
 The Cloud Wrapper requires Contexts because it uses Runner, Terraform and Ansible Contexts in Docker Containers.  This feature also requires that you have enabled a RackN licensed feature.
 
@@ -49,12 +49,12 @@ You must set the `cloud/provider` to the correct cloud.  Beyond that, each cloud
 You must set Security credentials for each cloud!  In many cases, you must also provide the name of the SSH user.
 
 Required Values
-===============
+~~~~~~~~~~~~~~~
 
 The Cloud Wrapper components require at least two parameters without a default be set:
 
-#. `cloud/provider` determine which cloud is to be used. 
-#. `cloud/token` enables the API
+1. `cloud/provider` determine which cloud is to be used. 
+1. `cloud/token` enables the API
 
 AWS
 +++
@@ -81,7 +81,7 @@ Linode
 Additional values, e.g. region, image and instance type, have safe defaults but should be reviewed.
 
 Optional Values
-===============
+~~~~~~~~~~~~~~~
 
 When possble, the machine on the cloud provider is given the name of the machine in Digital Rebar.
 
@@ -101,12 +101,12 @@ want to use more customized Terraform plans.
 The `cloud-inspect` task will use the Metadata API to collect additional information and set the `cloud/*` params where possible.  These values will be removed by the `cloud-cleanup` task on decommission.
 
 Create
-======
+~~~~~~
 
 To create a cloud backed machine:
 
-#. Starting from a Digital Rebar machine with an active runner.
-#. Run the 'cloud-provision' workflow.
+  1. Starting from a Digital Rebar machine with an active runner.
+  1. Run the 'cloud-provision' workflow.
 
 If you have created a `linode` profile with the correct tokens, then this example will create and provision a machine in Linode:
 
@@ -125,12 +125,12 @@ Note that the machine will have several `cloud/*` and `terraform/*` parameters d
 
 
 Destroy
-=======
+~~~~~~~
 
 From a cloud backed machine:
 
-#. Starting from a Digital Rebar machine with an active runner.
-#. Run the 'cloud-decommission' workflow
+  1. Starting from a Digital Rebar machine with an active runner.
+  1. Run the 'cloud-decommission' workflow
 
 Note that the machine will have removed the `cloud/*` parameters.  If these are missing, the machine can be assumed to no longer have a backing cloud instance.
 

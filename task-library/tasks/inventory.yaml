@@ -18,9 +18,6 @@ OptionalParams:
   - inventory/data
   - inventory/integrity
 Templates:
-- Path: tpm-info.sh
-  Name: tpm-info.sh
-  ID: tpm-info.sh.tmpl
 - Contents: |-
     #!/bin/bash
     # JQ parse gohai data into simpler inventory/data map
@@ -28,10 +25,6 @@ Templates:
     set -e
 
     {{template "setup.tmpl" .}}
-
-    if [[ -e tpm-info.sh ]] ; then
-        chmod +x ./tpm-info.sh
-    fi
 
     INVENTORY="{}"
 
@@ -56,7 +49,7 @@ Templates:
     FLATTEN="{{.Param "inventory/flatten"}}"
 
     echo "=== COLLECTING INVENTORY ===="
-    {{range $index, $group := .ParamExpand "inventory/collect"}}
+    {{range $index, $group := .Param "inventory/collect"}}
       echo "Parsing Inventory Group {{$index}} for Machine $RS_UUID"
       echo "  Collecting Data with cmd: {{$group.Command}}"
       if {{$group.Command}} 2>/dev/null >/dev/null ; then
@@ -81,33 +74,6 @@ Templates:
       echo "Cannot collect inventory: inventory/collect was not defined"
       exit 1
     {{end}}
-
-    if [[ "$FLATTEN" == "true" ]] ; then
-      echo "=== INVENTORY UPDATE WITH DEFAULTS ==="
-      HYP=$(drpcli machines get $RS_UUID param inventory/Hypervisor | jq . -r)
-      if [[ "$HYP" == "" ]] ; then
-        HYP="null"
-      fi
-      MFG=$(drpcli machines get $RS_UUID param inventory/Manufacturer | jq . -r)
-      MT="virtual"
-      if [[ "$HYP" == "null" && ("$MFG" == "null" || "$MFG" == "container") ]] ; then
-        MT="container"
-        drpcli machines set $RS_UUID param inventory/Manufacturer to "container" >/dev/null
-        drpcli machines set $RS_UUID param inventory/ProductName to "container" >/dev/null
-        INVENTORY="$(jq ". += {\"Manufacturer\": \"container\"}" <<< "$INVENTORY")"
-        INVENTORY="$(jq ". += {\"ProductName\": \"container\"}" <<< "$INVENTORY")"
-      elif [[ "$HYP" == "null" ]] ; then
-        MT="physical"
-      fi
-      drpcli machines set $RS_UUID param machine/type to $MT >/dev/null
-
-      TAGS="$(drpcli machines get $RS_UUID param machine/tags)"
-      {{ if .Param "machine/PXE" }}
-      TAGS="$(jq ". |= (.+ [\"PXE\"] | unique)" <<< "$TAGS")"
-      {{ end }}
-      TAGS="$(jq ". |= (.+ [\"$MT\"] | unique)" <<< "$TAGS")"
-      drpcli machines set $RS_UUID param machine/tags to "$TAGS" >/dev/null
-    fi
 
     echo "=== INVENTORY INTEGRITY CHECK ===="
     {{if .Param "inventory/integrity"}}

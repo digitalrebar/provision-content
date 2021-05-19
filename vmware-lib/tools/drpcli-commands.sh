@@ -3,8 +3,8 @@
 # commands to run after building container tar files
 
 [[ -n "$*" ]] && contexts="$*"
-#contexts=${contexts:-"vcsa-deploy-context:latest govc-context:latest govc-pwsh-context:latest pwsh-context:latest pyvmomi-context:latest vmware-tools-context:latest"}
-contexts=${contexts:-"govc-context:latest govc-pwsh-context:latest pwsh-context:latest pyvmomi-context:latest vmware-tools-context:latest"}
+#contexts="vcsa-deploy-context:latest govc-context:latest context-runner-context:latest"
+contexts=${contexts:-"vcsa-deploy-context:latest govc-context:latest pyvmomi-context:latest"}
 
 # run as:  CONTEXT=0 ./drpcli-commands.sh
 # if your contexts are already installed on the DRP Endpoint
@@ -17,7 +17,6 @@ main () {
   do
     name=$(echo $context | sed 's/-context:.*$//g' )
     ver=$(echo $context | sed 's/^.*-context:\(.*\)$/\1/g' )
-    [[ -z "$ver" ]] && ver="latest" || true
     # should plumb version tags in here
     image="$name:$ver"
 

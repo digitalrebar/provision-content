@@ -2,8 +2,6 @@
 Name: "cluster-add"
 Description: "A task that adds nodes to a cluster profile"
 Documentation: |
-  DEPRECATED in v4.6
-  
   Injects the Machine Uuid into the cluster/machines param.
   This is the first step in a the cluster workflow.
   Typical cluster workflow is ``add -> step -> remove -> sync``
@@ -39,6 +37,7 @@ Documentation: |
   Using ``escape=0`` will allow the cluster stages to exit normally and noop while
   using ``escape=1`` will exit with an error and the stages will stop progressing.
   ``Escape=1`` is safter since downstream actions are blocked.
+
 Meta:
   icon: "object group"
   color: "blue"

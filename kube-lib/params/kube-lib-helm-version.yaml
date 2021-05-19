@@ -1,51 +1,13 @@
 ---
 Name: "kube-lib/helm-version"
-Description: "Version of the Helm v3 to download"
+Description: "Version of the Helm v3 to use in cluster"
 Documentation: |
   Allows operators to determine the version of Helm to install
-  Includes the download URLs and sha256sums
-  Uses task-lib download-utilities format
 Schema:
-  type: "object"
-  default:
-    name: "helm"
-    version: "v3.4.1"
-    linux-amd64:
-      url: "https://get.helm.sh/helm-v3.4.1-linux-amd64.tar.gz"
-      sha256sum: "7fb909f81b02892f4b062f20edceaf7743484dec9e2acd17a00d5c47df17d005"
-      explode: "linux-amd64/helm"
-    linux-arm64:
-      url: "https://get.helm.sh/helm-v3.4.1-linux-arm64.tar.gz"
-      sha256sum: "ebe5d535eaa2188927392a5f3ddb333606dd40bdfa5a4243e91b3e8372d2ccab"
-      explode: "linux-arm64/helm"
-  required:
-    - version
-    - name
-    - linux-amd64
-  items:
-    properties:
-      name:
-        type: string
-      version:
-        type: string
-      linux-amd64:
-        type: object
-        items:
-          properties:
-            url:
-              type: string
-            sha256sum:
-              type: string
-      linux-arm64:
-        type: object
-        items:
-          properties:
-            url:
-              type: string
-            sha256sum:
-              type: string
+  type: "string"
+  default: "latest"
 Meta:
-  type: "config"
   color: "blue"
   icon: "hashtag"
   title: "Community Content"
+  render: "semver"

@@ -13,9 +13,6 @@ OS:
   Name: "debian-9"
   Family: "debian"
   Version: "9"
-  IsoFile: "debian-9.12.0-amd64-netinst.iso"
-  IsoSha256: "3c47f64693435b0b42b6ef59624edbffa7c4004317d9f9a3f04ecb6a4e30f191"
-  IsoUrl: "https://cdimage.debian.org/cdimage/archive/9.12.0/amd64/iso-cd/debian-9.12.0-amd64-netinst.iso"
 Initrds:
   - "initrd.gz"
 Kernel: "linux"

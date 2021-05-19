@@ -95,7 +95,7 @@ Templates:
       tfstate="add"
       if [[ -e terraform.tfstate ]] ; then
         echo "WARNING: tfstate file exists: uploading now, keeping in place"
-        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate  > /dev/null 
+        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
       else
         echo "no terraform/tfstate exists"
       fi
@@ -125,16 +125,6 @@ Templates:
       echo "^^^^^ end of {{$plan}} loop ^^^^^ "
       {{ end }}
 
-      ## this is a sad hack required by Terraform deprecation
-      tfver=$(terraform -v)
-      tf13reg="Terraform v0\.13\."
-      if [[ $tfver =~ $tf13reg ]]; then
-        echo "=== FORCE v0.13 UPGRADE ===="
-        terraform 0.13upgrade -yes -no-color .
-      else
-        echo "=== NO v0.13 UPGRADE was $tfver ==== "
-      fi
-
       echo "=== INIT $(terraform version) ===="
 
       terraform init -no-color
@@ -162,29 +152,29 @@ Templates:
         ip=$(jq -r '.machine_ip.value' <<< ${out})
         if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
           echo "Detected IP from TF, Updateing Machine IP to $ip"
-          drpcli machines update $RS_UUID "{\"Address\":\"$ip\"}" | jq .Address > /dev/null
+          drpcli machines update $RS_UUID "{\"Address\":\"$ip\"}" | jq .Address
         else
           echo "No IP address (machine_ip.value) detected in terraform output"
         fi
 
         # capture all the output vars in the parms
-        echo "Uploading other keys from terraform output"
+        echo "uploading other keys from terraform output"
         for key in $(jq -r 'keys[]' <<< ${out}); do
           echo "  adding $key to machine"
-          drpcli machines set $RS_UUID param "terraform-var/$key" to "\"$(jq -cr ".$key.value" <<< ${out})\""  > /dev/null
+          drpcli machines set $RS_UUID param "terraform-var/$key" to "\"$(jq -r ".$key.value" <<< ${out})\""
         done
 
         {{ else }}
             echo "******** DESTROY POST ACTIONS ***********"
-            {{ if .ParamExists "terraform-var/machine_ip" }}
+            {{ if .ParamExists "terraform-var/machine_ip" }}          
               echo "Clear IP and terraform-var/machine_ip when performing destroy with IP"
               drpcli machines update $RS_UUID "{\"Address\":\"\"}" | jq .Address
-              drpcli machines remove $RS_UUID param terraform-var/machine_ip  > /dev/null 
+              drpcli machines remove $RS_UUID param terraform-var/machine_ip
             {{ else }}
               echo "Does not set IP, do not clear IP"
             {{ end }}
             echo "Always try to remove terraform/plan-automation, OK if fails"
-            drpcli machines remove $RS_UUID param terraform/plan-automation  > /dev/null || true
+            drpcli machines remove $RS_UUID param terraform/plan-automation || true
         {{ end }}
 
       else
@@ -196,14 +186,14 @@ Templates:
       if [[ -e terraform.tfstate ]] ; then
         if [[ "$(cat terraform.tfstate | jq -r '.resources | length')" == "0" ]] ; then
           echo "Removing empty terraform.tfstate file"
-          drpcli machines remove $RS_UUID param terraform/tfstate > /dev/null || true
+          drpcli machines remove $RS_UUID terraform/tfstate || true
         else
           echo "Saving terraform.tfstate file to machine"
-          drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate >/dev/null
+          drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate
         fi
       else
         echo "no terraform.state file exists - cannot save"
-        drpcli machines remove $RS_UUID remove terraform/tfstate > /dev/null || true
+        drpcli machines remove $RS_UUID remove terraform/tfstate || true
       fi
 
       if [[ $success != true ]] ; then

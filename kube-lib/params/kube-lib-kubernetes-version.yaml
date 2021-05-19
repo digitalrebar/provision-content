@@ -1,49 +1,18 @@
 ---
 Name: "kube-lib/kubernetes-version"
-Description: "Version of Kubernetes to download."
+Description: "Define what version of Kubernetes to install."
 Documentation: |
-  Allows operators to specify the version of Kubernetes to install
+  Allows operators to specify the version of Kubernetes containers to
+  pull from the 'krib/cluster-image-repository'.
 
   to get latest, `curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`
+
 Schema:
-  type: "object"
-  default:
-    name: "kubernetes"
-    version: "v1.19.4"
-    linux-amd64:
-      url: "https://storage.googleapis.com/kubernetes-release/release"
-      sha256sum: "?"
-    linux-arm64:
-      url: "https://get.helm.sh/helm-v3.4.1-linux-arm64.tar.gz"
-      sha256sum: "?"
-  required:
-    - version
-    - name
-    - linux-amd64
-  items:
-    properties:
-      name:
-        type: string
-      version:
-        type: string
-      linux-amd64:
-        type: object
-        items:
-          properties:
-            url:
-              type: string
-            sha256sum:
-              type: string
-      linux-arm64:
-        type: object
-        items:
-          properties:
-            url:
-              type: string
-            sha256sum:
-              type: string
+  type: "string"
+  default: "latest"
 Meta:
-  type: "config"
   color: "blue"
-  icon: "hashtag"
+  icon: "book"
   title: "Community Content"
+  copyright: "RackN 2020"
+  render: "semver"

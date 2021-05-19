@@ -1,9 +1,0 @@
----
-Name: "configure-network"
-Description: "Stage to install configure the network"
-Tasks:
-  - "configure-network"
-Meta:
-  icon: "talk"
-  color: "yellow"
-  title: "RackN Content"

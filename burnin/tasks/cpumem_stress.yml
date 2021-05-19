@@ -22,11 +22,6 @@ Templates:
     exit 0
     {{ end }}
 
-    {{ if ne (.Param "machine/type") "physical" }}
-    echo "Burnin Reboot should be only run on physical system"
-    exit 0
-    {{ end }}
-
     NUMPROCS="$(grep '^processor' /proc/cpuinfo |wc -l)"
     DURATION="{{.Param "burnin-cpumem-duration"}}m"
     echo 3 >/proc/sys/vm/drop_caches

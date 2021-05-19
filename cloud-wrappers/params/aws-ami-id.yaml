@@ -5,11 +5,10 @@ Documentation: |
   Provision AWS O/S Image
 Schema:
   type: "string"
-  default: "ami-0d5d1a3aa3516231f"
+  default: "ami-0e34e7b9ca0ace12d"
 Meta:
   type: "os"
   color: "black"
   icon: "disk outline"
   title: "RackN Content"
   clipboard: "uuid"
-  cloud: "aws"

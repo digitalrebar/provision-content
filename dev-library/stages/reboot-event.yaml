@@ -1,9 +1,0 @@
----
-Name: reboot-event
-Description: "Send Reboot Event (dev testing)"
-Tasks:
-  - reboot-event
-Meta:
-  title: "RackN Content"
-  color: red
-  icon: redo

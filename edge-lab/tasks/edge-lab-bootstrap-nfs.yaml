@@ -1,0 +1,89 @@
+---
+Description: "A task to create an NFS share from the DRP server"
+Name: "edge-lab-bootstrap-nfs"
+Documentation: |
+  Install NFS server and creates a share
+  Primary usecase is to support shared storage for a k3s cluster
+ExtraClaims:
+  - scope: "subnets"
+    action: "get"
+    specific: "edge-lab"
+  - scope: "profiles"
+    action: "*"
+    specific: "global"
+Templates:
+  - Name: "build_key_add_it"
+    Path: ""
+    Contents: |
+      #!/usr/bin/env bash
+
+      {{ template "setup.tmpl" . }}
+
+      FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+      echo "FAMILY set from os-release to:  '$FAMILY'"
+
+      case $FAMILY in
+        redhat|centos) _pkgmgr="yum -y install nfs-utils"; yum -y install epel-release ;;
+        debian|ubuntu) _pkgmgr="apt -y install nfs-kernel-server"; apt update ;;
+        *) >&2 echo "Unsupported package manager family '$FAMILY'."
+           exit 1 ;;
+      esac
+
+      echo "starting NFS install"
+
+      if systemctl is-active nfs-server.service ; then
+        STATUS="$(systemctl is-active nfs-server.service)"
+        echo "NSF-Server status ${STATUS}...."
+        case $STATUS in
+          active) echo "NFS-Server already running, do not reinstall."
+            systemctl stop nfs-server ;;
+          failed) echo "NFS-Server in failed state - halting!"
+            exit 1 ;;
+          inactive) echo "install NFS-Server"
+            $_pkgmgr ;;
+          *) echo "NFS-Server in $STATUS state - halting!"
+            exit 1 ;;
+        esac
+      else
+        echo "install NFS-Server (is-active failed)"
+        $_pkgmgr
+      fi
+
+      if [[ -e "/export/shared" ]]; then
+        echo "/export/shared file space exists, do not create"
+      else
+        echo "creating /export/shared"
+        mkdir -p /export/shared
+        chmod 777 /export/shared
+        case $FAMILY in
+          redhat|centos) chown -R nobody /export/shared ;;
+          debian|ubuntu) chown -R nobody:nogroup /export/shared ;;
+          *) >&2 echo "Unsupported package manager family '$FAMILY'."
+             exit 1 ;;
+        esac
+        touch /export/shared/test.0
+      fi
+
+      SUBNET=$(drpcli subnets show edge-lab | jq -r .Subnet)
+      echo "creating shares for edge-lab subnet ${SUBNET}"
+      tee /etc/exports >/dev/null << EOF
+      /export        ${SUBNET}(rw,fsid=0,insecure,no_subtree_check,async)
+      /export/shared ${SUBNET}(rw,nohide,no_root_squash,insecure,no_subtree_check,async)
+      EOF
+
+      echo "saving the NFS mount"
+      drpcli profiles set "global" param "edge-lab/nfs-share" to "{{.ProvisionerAddress}}:/export/shared"
+
+      systemctl enable --now nfs-server
+      systemctl start nfs-server
+      systemctl status nfs-server
+      exportfs -a
+
+      echo "done"
+      exit 0
+Meta:
+  icon: "file text"
+  color: "yellow"
+  title: "Community Content"
+  feature-flags: "sane-exit-codes"
+  copyright: "RackN 2020"

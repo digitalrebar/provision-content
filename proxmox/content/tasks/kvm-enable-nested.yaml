@@ -14,8 +14,7 @@ Meta:
 OptionalParams: []
 Prerequisites: []
 Templates:
-  - Name: "kvm-enable-nested"
-    Contents: |-
+  - Contents: |-
       #!/usr/bin/env bash
       # KVM enable nested hypervisors mode.
 
@@ -42,3 +41,8 @@ Templates:
       modprobe kvm
       modprobe kvm_$VID
 
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "kvm-enable-nested"
+    Path: ""

@@ -13,9 +13,6 @@ OS:
   Name: "debian-8"
   Family: "debian"
   Version: "8"
-  IsoFile: "debian-8.11.1-amd64-netinst.iso"
-  IsoSha256: "ea444d6f8ac95fd51d2aedb8015c57410d1ad19b494cedec6914c17fda02733c"
-  IsoUrl: "https://cdimage.debian.org/cdimage/archive/8.11.1/amd64/iso-cd/debian-8.11.1-amd64-netinst.iso"
 Initrds:
   - "initrd.gz"
 Kernel: "linux"

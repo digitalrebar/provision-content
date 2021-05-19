@@ -19,23 +19,15 @@ Templates:
   - Name: "esxi-vsan-destroy-cluster.sh"
     Contents: |
       #!/usr/bin/env bash
-      # VSAN destroy cluster
+      # VSAN destroy 
       # RackN Copyright 2020
 
-      ### begin setup.tmpl
+      ### setup.tmpl
       {{ template "setup.tmpl" .}}
 
-      ### begin govc-setup.sh.tmpl
+      ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
 
-      ### begin govc-lib.sh.tmpl
-      {{ template "govc-lib.sh.tmpl" .}}
-
-      ### begin esxi-vsan-destroy-cluster.sh
-      ON='{{ .Param "esxi/vsan-enabled" }}'
-      [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
-
-      ### begin esxi-vsan-destroy-cluster.sh
       set -e
 
       JQ=$(which jq)
@@ -54,7 +46,7 @@ Templates:
 
       export GOVC_PERSIST_SESSION=false
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
-      MEMBERS=$(get_cluster_members $CLUSTER)
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
       echo ""
       echo "      Cluster to operate on: '$CLUSTER'"
@@ -128,6 +120,14 @@ Templates:
         echo ">>>>>>>>>>>>>>>>>>>>>>>> END destroy vsan log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
       }
 
+      # try to set based on Machien Name, FQDN, or fallback to IP Address
+      # TODO:  This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        echo $ADDR
+        # echo $MEMBER.$DNAME
+      }
+
       if [[ -z "$MEMBERS" ]]
       then
         echo "No members with 'esxi/cluster-name' found to operate on."
@@ -143,8 +143,8 @@ Templates:
         ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
         DESTROY_LOG=/tmp/cluster-destroy-$$.$MEMBER.$ADDR.log
 
-        HNAME=$(get_member_name $MEMBER)
-        if [[ -n "$HNAME" ]]
+        HNAME=$(get_member_name)
+        if [[ -n "$ADDR" ]]
         then
           destroy_vsan > $DESTROY_LOG 2>&1 &
           sleep 3

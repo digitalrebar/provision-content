@@ -1,0 +1,85 @@
+---
+Name: "edge-lab/mount-devices"
+Description: "Attached Storage Devices to Mount"
+Documentation: |
+  .. _edgelab_storage:
+
+  Mount Attached Storage
+  ++++++++++++++++++++++
+
+  Ordered list of of devices to attempt mounting from the OS.
+
+  The EdgeLab K3s install will attempt to mount all the drives
+  in the list in in order.  If the desired mount point is already
+  in use then the code will skip attempting to assign it.
+
+  This design allows operators to specific multiple mount points
+  or have a single point with multiple potential configurations.
+
+  example:
+
+    ::
+
+      [
+        {
+          disk: "/dev/mmcblk0",
+          partition: "/dev/mmcblkp1",
+          mount: "/mnt/storage",
+          type: "xfs",
+          rebuild: true,
+          comment: "example"
+        }
+        {
+          disk: "/dev/sda",
+          partition: "/dev/sda1",
+          mount: "/mnt/storage",
+          type: "xfs",
+          rebuild: true,
+          comment: "put something here"
+        }
+      ]
+
+Schema:
+  default:
+    - disk: "/dev/mmcblk0"
+      partition: "/dev/mmcblk0p2"
+      mount: "/mnt/storage"
+      type: "ext4"
+      rebuild: false
+      comment: "EdgeLab rpi-client sd card"
+    - disk: "/dev/mmcblk0"
+      partition: "/dev/mmcblk0p1"
+      mount: "/mnt/storage"
+      type: "xfs"
+      rebuild: true
+      comment: "blank RPi sd card"
+    - disk: "/dev/sda"
+      partition: "/dev/sda1"
+      mount: "/mnt/storage"
+      type: "xfs"
+      rebuild: false
+      comment: "EdgeLab rpi-client sd card"
+  type: array
+  items:
+    required:
+      - disk
+      - partition
+      - mount
+      - type
+      - rebuild
+      - comment
+    properties:
+      disk:
+        type: string
+      partition:
+        type: string
+      mount:
+        type: string
+      type:
+        type: string
+      rebuild:
+        type: boolean
+Meta:
+  color: "blue"
+  icon: "disk"
+  title: "Community Content"

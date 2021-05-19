@@ -8,7 +8,6 @@ Documentation: |
 BootEnv: "sledgehammer"
 Tasks:
   - set-machine-ip-in-sledgehammer
-  - reserve-dhcp-address
   - "ssh-access"
 Meta:
   type: "deprecated"

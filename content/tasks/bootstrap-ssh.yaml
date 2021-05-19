@@ -26,16 +26,11 @@ Templates:
         echo "SSH key pair already exists"
       fi
 
-      PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
-      MY_KEY="\"$(drpcli info get | jq -r .id)\": \"$PUB_KEY\""
-      GLOBAL_KEY="$(drpcli profiles get global param access-keys)"
-      if [[ "$GLOBAL_KEY" == "null" ]] ; then
-        echo "Adding global access-keys.  First key is this endpoint"
-        drpcli profiles add global param access-keys to "{ $MY_KEY }" >/dev/null
+      if [[ "$(drpcli profiles get global param access-keys)" == "null" ]] ; then
+        PUB_KEY="$(cat ~/.ssh/id_rsa.pub)"
+        drpcli profiles set global param access-keys to "{ \"dr-provision\": \"$PUB_KEY\" }"
       else
-        echo "Updating global access-keys.  Adding this endpoint's key...."
-        GLOBAL_KEY=$(jq ". + { $MY_KEY }" <<< "$GLOBAL_KEY")
-        drpcli profiles set global param access-keys to "$GLOBAL_KEY" >/dev/null
+        echo "SSH access-keys already exists.  Not updating it...."
       fi
 
       echo "done"

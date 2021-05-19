@@ -35,98 +35,17 @@ Templates:
       sha1sum vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi >sha1sums
       mkdir $signature
       mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
-
-      echo "Making cd iso"
-      mkdir -p iso/boot/grub
-      mkdir -p iso/images
-      mkdir -p iso/isolinux
-      mkdir -p iso/EFI/BOOT/fonts
-      cp $signature/vmlinuz0 iso
-      cp $signature/stage1.img iso
-      wget -O iso/EFI/BOOT/BOOTIA32.EFI {{.Env.PathFor "http" "EFI/BOOT/BOOTIA32.EFI" }}
-      wget -O iso/EFI/BOOT/BOOTX64.EFI {{.Env.PathFor "http" "EFI/BOOT/BOOTX64.EFI" }}
-      wget -O iso/EFI/BOOT/grubia32.efi {{.Env.PathFor "http" "EFI/BOOT/grubia32.efi" }}
-      wget -O iso/EFI/BOOT/TRANS.TBL {{.Env.PathFor "http" "EFI/BOOT/TRANS.TBL" }}
-      wget -O iso/EFI/BOOT/grubx64.efi {{.Env.PathFor "http" "EFI/BOOT/grubx64.efi" }}
-      wget -O iso/EFI/BOOT/mmia32.efi {{.Env.PathFor "http" "EFI/BOOT/mmia32.efi" }}
-      wget -O iso/EFI/BOOT/mmx64.efi {{.Env.PathFor "http" "EFI/BOOT/mmx64.efi" }}
-      wget -O iso/EFI/BOOT/fonts/unicode.pf2 {{.Env.PathFor "http" "EFI/BOOT/fonts/unicode.pf2" }}
-      wget -O iso/EFI/BOOT/fonts/TRANS.TBL {{.Env.PathFor "http" "EFI/BOOT/fonts/TRANS.TBL" }}
-      wget -O iso/images/efiboot.img {{.Env.PathFor "http" "images/efiboot.img" }}
-      wget -O iso/isolinux/TRANS.TBL {{.Env.PathFor "http" "isolinux/TRANS.TBL" }}
-      wget -O iso/isolinux/libutil.c32 {{.Env.PathFor "http" "isolinux/libutil.c32" }}
-      wget -O iso/isolinux/libcom32.c32 {{.Env.PathFor "http" "isolinux/libcom32.c32" }}
-      wget -O iso/isolinux/ldlinux.c32 {{.Env.PathFor "http" "isolinux/ldlinux.c32" }}
-      wget -O iso/isolinux/isolinux.bin {{.Env.PathFor "http" "isolinux/isolinux.bin" }}
-      cat >iso/EFI/BOOT/BOOT.conf << 'EOFGRUB'
-      if [ ${grub_platform} == "efi" ]; then
-        set root=(cd0)
-        set linuxcmd=linuxefi
-        set initrdcmd=initrdefi
-      else
-        set root=(cd)
-        set linuxcmd=linux
-        set initrdcmd=initrd
-      fi
-      timeout=0
-      # There are 15 lines of 80 comments after for padding.
-      # REPLACE HERE
-      menuentry "Sledgehammer" {
-        $linuxcmd /vmlinuz0 BOOTIF=discovery provisioner.web=http://555.168.100.001:8091 provisioner.ip=555.168.100.25/24 provisioner.gw=555.168.100.1
-        $initrdcmd /stage1.img
-        boot
-      }
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      EOFGRUB
-      cat >iso/isolinux/isolinux.cfg <<'EOFCFG'
-      # There are 15 lines of 80 comments after for padding.
-      # REPLACE 2 HERE
-      timeout 0
-      default 1
-
-      # PC-DOS
-      label 1
-          kernel /vmlinuz0
-          append initrd=/stage1.img BOOTIF=discovery provisioner.web=http://555.168.100.001:8091 provisioner.ip=555.168.100.25/24 provisioner.gw=555.168.100.1
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      ################################################################################
-      EOFCFG
-      cp iso/EFI/BOOT/BOOT.conf iso/EFI/BOOT/grub.cfg
-      cp iso/EFI/BOOT/BOOT.conf iso/boot/grub/grub.cfg
-      mkisofs -o $signature/cdboot.iso -b isolinux/isolinux.bin -J -R -l -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -graft-points -V "sledgehammer" iso
-
+      tar cf $tarname $signature
+      # Push back to dr-provision
+      echo "Uploading Sledgehammer to dr-provision"
+      drpcli isos upload $tarname as $tarname
+      echo "$tarname uploaded to isos"
       case {{.Machine.Arch}} in
           amd64) shim="shimx64.efi";;
           arm64) shim="grubaa64.efi";;
       esac
-      cat >"$signature/sledgehammer-$signature.yaml" <<EOF
+      echo "Creating profile for sledgehammer-$signature"
+      drpcli profiles create - <<EOF
       ---
       Name: sledgehammer-$signature
       Description: 'Bootenv override for sledgehammer {{.Machine.Arch}}'
@@ -166,10 +85,3 @@ Templates:
                 Path: 'sledgehammer/$signature/grub.cfg-{{`{{.Machine.MacAddr "pxelinux"}}`}}'
                 ID: default-grub.tmpl
       EOF
-      tar cf $tarname $signature
-      # Push back to dr-provision
-      echo "Uploading Sledgehammer to dr-provision"
-      drpcli isos upload $tarname as $tarname
-      echo "$tarname uploaded to isos"
-      echo "Creating profile for sledgehammer-$signature"
-      drpcli profiles create - < "$signature/sledgehammer-$signature.yaml"

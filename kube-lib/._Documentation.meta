@@ -2,35 +2,51 @@ License: Kube-Lib is APLv2
 
 This document provides information on how to use the Digital Rebar *Kube-Lib* content add-on.  Use of this content supports common functions needed for other Kubernetes workflows like KRIB and EdgeLab.
 
-.. _component_kube_lib:
-
-Digital Rebar Kube-Lib
-----------------------
-
-Kube-Lib is a library of standard Kubernetes (and k3s) installation processes leveraging v4.6 cluster pattern and other advanced features of Digital Rebar.
-
-Note: Kube-Lib replaces install components in KRIB and edge-lab.
+.. _component_Kube-Lib:
 
 Local vs Online Requirements
-============================
+----------------------------
 
 By default, Kube-Lib uses online components; it will attempt to download and store local copies when posssible.  For that reason, our goal is to look for local copies first.  Depending on the use-case,
 that may allow operators to use Kube-Lib is Air-Gap environments by pre-populating resources.
 
 Kube-Lib Basics
-===============
+---------------
 
 Kube-Lib is a Content Pack addition to Digital Rebar Provision.  It uses the :ref:`rs_cluster_pattern` which provides atomic guarantees.  This allows for Kubernetes leader(s) to be dynamically elected, forcing all other nodes to wait until the kubeadm on the elected leader to generate an installation token for the rest of the nodes.  Once the Kubernetes leader is bootstrapped, the Digital Rebar system facilitates the security token hand-off to rest of the cluster so they can join without any operator intervention.
 
-Elected -vs- Specified Leaders
-==============================
+Elected -vs- Specified Leader
+-----------------------------
 
-By default, the Kube-Lib process will dynamically elect a leader(s) for the Kubernetes cluster.  This leader is simply selected by the cluster manager and the rest of the cluster will coalesce around the elected leader(s).
+By default, the Kube-Lib process will dynamically elect a leader for the Kubernetes cluster.  This leader simply win the *race-to-leader* election process and the rest of the cluster will coalesce around the elected leader.
 
-If you wish to specify a specific machines to be the designated leaders using ``cluster/leader`` to true, you can do so by setting a *Param* on the target machine(s).
+If you wish to specify a specific machines to be the designated leaders, you can do so by setting a *Param* in the cluster *Profile* to the specific *Machine* that will be come the leader.  To do so, set the ``Kube-Lib/cluster-leaders``  *Param* to a JSON structure with the Name, UUID and IP of the machines to become leaders.  You may add this *Param* to the *Profile* in the below specifications, as follows:
+
+  ::
+
+    # JSON reference to add to the Profile Params section
+    "kube-Lib/cluster-leaders": [{"Name":"<NAME>", "Uuid":"<UUID>", "Address": "<ADDRESS>"}]
+
+    # or drpcli command line option
+    drpcli profiles set cluster01 param lube-Lib/cluster-leader to <JSON>
+
+The Kubernetes leader will be built on this Machine specified by the *<UUID>* value.
+
+.. note:: This *MUST* be in the cluster profile because all machines in the cluster must be able to see this parameter.
 
 Operating Kube-Lib
 ------------------
+
+Who is my leader?
+=================
+
+If you have not specified who the Kubernetes leader should be; and the leader was chosen by election - you will need to determine which Machine is the cluster leader.
+
+  ::
+
+    # returns the Kubernetes cluster Machine UUID
+    drpcli profiles get cluster01 param "kube-Lib/cluster-leaders"
+
 
 Use ``kubectl`` - from anywhere
 ===============================

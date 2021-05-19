@@ -9,7 +9,6 @@ Stages:
   - "cloud-provision"
   - "context-clear"
   - "discover-nobootenv"
-  - "inventory"
   - "cloud-inspect"
   - "network-firewall"
   - "runner-service"

@@ -13,16 +13,19 @@ OptionalParams: []
 Prerequisites: []
 RequiredParams: []
 Templates:
-  - Name: "proxmox-lab-destroy-networks"
-    Contents: |-
+  - Contents: |-
       #!/usr/bin/env bash
       # Proxmox destroy users
 
       set -e
       PVENODE=$(hostname)
 
-      set -x
-      pveum acl delete /vms -user operator@pve -role PVEVMUser || true
-      pveum group delete operators || true
-      pveum user delete operator@pve || true
+      pveum acl delete /vms -user operator@pve -role PVEVMUser
+      pveum group delete operators
+      pveum user delete operator@pve
 
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-destroy-networks"
+    Path: ""

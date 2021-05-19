@@ -1,6 +1,0 @@
----
-Name: sledgehammer-build-7
-Description: Build a Sledgehammer CentOS-7 image.
-Documentation: |
-Stages:
-  - sledgehammer-build-7

@@ -4,6 +4,8 @@ Description: "Reboot a node back into discover-base"
 Documentation: |
   Reboot a node back into discover-base
 RunnerWait: true
+Params:
+  edge-lab/reboot-workflow: discover-base
 Tasks:
   - "edge-lab-reboot-workflow"
 Meta:

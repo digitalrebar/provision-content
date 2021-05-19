@@ -2,7 +2,6 @@
 Name: "bootstrap-advanced"
 Description: "Bootstrap Advanced Install"
 Documentation: |
-  DEPRECATED: Use unversal-bootstrap with the bootstrap-contexts profile
   Bootstrap stage to build out an advanced setup
 
   This augments the bootstrap-base.  It does NOT replace it.

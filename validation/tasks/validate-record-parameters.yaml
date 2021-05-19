@@ -27,7 +27,7 @@ Templates:
          {{if eq $parm "inventory/CPUSpeed" }}
          JSONSTR="${JSONSTR}${COMMA} \"{{$parm}}\": { \"Op\": \"equal\", \"Values\": [ \"{{$.Param $parm}}\" ] }"
          {{ else }}
-         JSONSTR="${JSONSTR}${COMMA} \"{{$parm}}\": { \"Op\": \"equal\", \"Values\": [ {{$.ParamAsJSON $parm | replace "\"" "\\\"" }} ] }"
+         JSONSTR="${JSONSTR}${COMMA} \"{{$parm}}\": { \"Op\": \"equal\", \"Values\": [ {{$.ParamAsJSON $parm}} ] }"
          {{ end }}
          COMMA=","
       {{end}}

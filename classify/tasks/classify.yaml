@@ -10,20 +10,8 @@ Meta:
   feature-flags: "sane-exit-codes"
   icon: "search"
   title: "RackN"
-ExtraClaims:
-- scope: 'pools'
-  action: '*'
-  specific: '*'
 Templates:
-- Meta:
-    OS: "linux,darwin"
+- Contents: ""
   ID: "classify.sh.tmpl"
-  Name: "Classify linux-darwin Machine"
-- Meta:
-    OS: "windows"
-  ID: "classify.ps1.tmpl"
-  Name: "Classify windows Machine"
-- Meta:
-    OS: "esxi"
-  ID: "classify-esxi.sh.tmpl"
-  Name: "Classify esxi Machine"
+  Name: "Classify Machine"
+  Path: ""

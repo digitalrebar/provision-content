@@ -1,7 +1,0 @@
----
-Name: flash-list-installed-hash
-Description: The sha256sum of the flash list when it was installed.
-Documentation: |
-  The sha256sum of the flash list when it was installed.
-Schema:
-  type: string

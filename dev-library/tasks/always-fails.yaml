@@ -20,9 +20,6 @@ Templates:
 
     {{template "setup.tmpl" .}}
 
-    echo "waiting dev/wait-time before failing"
-    sleep {{ .Param "dev/wait-time" }}
-
     {{if .ParamExists "dev/fail-code" -}}
     FAILCODE={{.Param "dev/fail-code"}}
     {{else -}}

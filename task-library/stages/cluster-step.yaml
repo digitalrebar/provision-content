@@ -1,7 +1,6 @@
 ---
 Name: "cluster-step"
 Description: "Select Next N In Queue"
-Documentation: DEPRECATED in v4.6
 Tasks:
   - "cluster-step"
 Meta:

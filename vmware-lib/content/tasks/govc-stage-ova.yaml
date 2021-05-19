@@ -24,12 +24,6 @@ Templates:
 
       {{ template "setup.tmpl" .}}
 
-      {{ if eq ( .Param "govc/skip-ova-stage" ) true -}}
-      echo "Skipping OvA staging process since 'govc/skip-ova-stage' is 'false' (the default value)."
-      {{ else -}}
-      echo "Starting OVA staging process.  To disable, set 'govc/skip-ova-stage' to 'true'."
-      {{ end -}}
-
       {{ if .ParamExists "govc/ova-location" }}
       which curl > /dev/null 2>&1 && { CMD="curl"; OPTS="-o"; }
       which wget > /dev/null 2>&1 && { CMD="wget"; OPTS="-O"; }

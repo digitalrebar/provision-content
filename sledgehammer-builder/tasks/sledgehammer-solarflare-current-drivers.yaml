@@ -15,11 +15,9 @@ Templates:
   - Name: install-solarflare-drivers
     Contents: |
       #!/bin/bash
-      {{ template "setup.tmpl" . }}
       mkdir -p /tmp/solarflare-install
       cd /tmp/solarflare-install
       pkg='{{.Param  "sledgehammer/solarflare-driver-package"}}'
-      rm -rf solarflar.zip RPMS sfc-*
       curl -fgL "$pkg" -o solarflare.zip
       unzip solarflare.zip
       kv="$(rpm -q kernel)"

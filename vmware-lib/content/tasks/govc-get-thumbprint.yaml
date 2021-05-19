@@ -30,10 +30,6 @@ Templates:
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
 
-      ### govc-lib.sh.tmpl
-      {{ template "govc-lib.sh.tmpl" .}}
-
-      ### govc-get-thumbprint.sh
       set -e
 
       get_thumb() {
@@ -45,7 +41,7 @@ Templates:
 
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
-      MEMBERS=$(get_cluster_members $CLUSTER)
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
 
       echo "Starting create operation with the following information:"
       echo "---------------------------------------------------------"

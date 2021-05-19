@@ -24,46 +24,14 @@
 #
 */}}
 {{if .ParamExists "select-kickseed" -}}
-  {{ $selectKickSeed := ( printf "%s" ( .Param "select-kickseed" ) ) -}}
-  {{ .CallTemplate $selectKickSeed .}}
+  {{$selectKickSeed := (printf "%s" (.Param "select-kickseed")) -}}
+  {{.CallTemplate $selectKickSeed .}}
 {{else -}}
-  {{ if ( eq "redhat" .Env.OS.FamilyName ) -}}
-    {{ if ( eq .Env.OS.Codename "photon" ) -}}
-      {{ template "photon.json.tmpl" .}}
-    {{ else if ( eq .Env.OS.Codename "rocky" ) -}}
-      {{ template "rocky-8.ks.tmpl" .}}
-    {{ else -}}
-      {{ if ( regexMatch ".*rhel-server.*" .Env.OS.Name ) -}}
-        {{ if ( .Env.OS.VersionEq "8" ) -}}
-          {{ template "rhel-8.ks.tmpl" .}}
-        {{ else if ( .Env.OS.VersionEq "7" ) -}}
-          {{ template "rhel-7.ks.tmpl" .}}
-        {{ end -}}
-      {{ else -}}
-        {{ if ( .Env.OS.VersionEq "8" )  -}}
-          {{ template "centos-8.ks.tmpl" .}}
-        {{ else if ( .Env.OS.VersionEq "7" ) -}}
-          {{ template "centos-7.ks.tmpl" .}}
-        {{ else if ( .Env.OS.VersionEq "6" ) -}}
-          {{ template "centos-6.ks.tmpl" .}}
-        {{ end -}}
-      {{ end -}}
-    {{ end -}}
-  {{ else if ( eq "debian" .Env.OS.FamilyName ) -}}
-      {{ if ( .Env.OS.VersionEq "10" ) -}}
-        {{ template "deb10-net-seed.tmpl" .}}
-      {{ else -}}
-        {{ template "net-seed.tmpl" .}}
-      {{ end -}}
-  {{ else if ( eq "ubuntu" .Env.OS.FamilyName ) -}}
-      {{ template "net-seed.tmpl" .}}
-  {{ else if ( eq "fedora" .Env.OS.FamilyName ) -}}
-      {{ template "centos-7.ks.tmpl" .}}
-  {{ else -}}
-# select-kickseed did not match any kickstart or preseed templates to serve
-#      Name: '{{ .Env.OS.Name }}'
-#    Family: '{{ .Env.OS.FamilyName }}'
-#  Codename: '{{ .Env.OS.Codename }}'
-#   Version: '{{ .Env.OS.Version }}'
-  {{ end -}}
-{{ end -}}
+  {{if and (eq "redhat" .Env.OS.FamilyName) (.Env.OS.VersionEq "7") -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
+  {{if and (eq "redhat" .Env.OS.FamilyName) (.Env.OS.VersionEq "8") -}} {{template "centos-8.ks.tmpl" .}} {{end -}}
+  {{if (eq "fedora" .Env.OS.FamilyName) -}} {{template "centos-7.ks.tmpl" .}} {{end -}}
+  {{if and (eq "debian" .Env.OS.FamilyName) (.Env.OS.VersionEq "10") -}} {{template "deb10-net-seed.tmpl" .}} {{end -}}
+  {{if and (eq "debian" .Env.OS.FamilyName) (.Env.OS.VersionEq "9") -}} {{template "net-seed.tmpl" .}} {{end -}}
+  {{if and (eq "debian" .Env.OS.FamilyName) (.Env.OS.VersionEq "8") -}} {{template "net-seed.tmpl" .}} {{end -}}
+  {{if (eq "ubuntu" .Env.OS.FamilyName) -}} {{template "net-seed.tmpl" .}} {{end -}}
+{{end -}}

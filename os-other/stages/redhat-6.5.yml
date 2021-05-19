@@ -1,0 +1,14 @@
+---
+Name: "redhat-6.5-install"
+Description: "Stage for RedHat 6.5 install"
+Documentation: |
+  Stage for RedHat 6.5 install
+BootEnv: "redhat-6.5-install"
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "RackN Content"

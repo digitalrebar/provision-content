@@ -5,7 +5,7 @@ Documentation: |
   This Stage runs _govc_ commands to create clusters in vCenter.
 
 Tasks:
-  - "context:vmware-tools"
+  - "context:govc"
   - "govc-get-thumbprint"
   - "govc-cluster-create"
 Meta:

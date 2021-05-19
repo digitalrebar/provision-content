@@ -2,12 +2,11 @@
 Name: "centos-6.9-install"
 Description: "CentOS-6.9 install bootenv"
 OS:
-  Name: "centos-6.9"
   Family: "redhat"
-  Version: "6"
+  Name: "centos-6.9"
   IsoFile: "CentOS-6.9-x86_64-bin-DVD1.iso"
   IsoSha256: "d27cf37a40509c17ad70f37bc743f038c1feba00476fe6b69682aa424c399ea6"
-  IsoUrl: "https://mirrors.oit.uci.edu/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-bin-DVD1.iso"
+  IsoUrl: "http://mirrors.kernel.org/centos/6.9/isos/x86_64/CentOS-6.9-x86_64-bin-DVD1.iso"
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
@@ -38,9 +37,9 @@ Templates:
   - ID: "default-ipxe.tmpl"
     Name: "ipxe-mac"
     Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
-  - ID: "select-kickseed.tmpl"
+  - ID: "centos-6.ks.tmpl"
     Name: "compute.ks"
-    Path: '{{.Machine.Path}}/compute.ks'
+    Path: "{{.Machine.Path}}/compute.ks"
 Meta:
   feature-flags: "sane-exit-codes"
   icon: "linux"

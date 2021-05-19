@@ -15,7 +15,7 @@ Documentation: |
   See the documentation for each of those Params for more details.
 
   Many of the GoVC commands require a JSON configuration that defines more the
-  values for customizing.  In these cases, use the ``ova/template-json`` param
+  values for customizing.  In these cases, use the ``govc/template-json`` param
   to define the Template to render inside of the GoVC container context.
 
   If an OVA file is found inside the container at ``/ova/import.ova``, and if the
@@ -41,7 +41,7 @@ OptionalParams:
   - "govc/ova-location"
   - "govc/ova-type"
   - "govc/ova-version"
-  - "ova/template-json"
+  - "govc/template-json"
 Templates:
   - Name: "govc-command.sh"
     Contents: |
@@ -61,9 +61,9 @@ Templates:
 
       TMPL=""
 
-      {{ if .ParamExists "ova/template-json" -}}
+      {{ if .ParamExists "govc/template-json" -}}
       {{ $dot := . -}}
-      {{ $govctmpl := .Param "ova/template-json" -}}
+      {{ $govctmpl := .Param "govc/template-json" -}}
       mkdir -p /ova
       cat <<EOTMPL > /ova/template.json
       {{ $dot.CallTemplate $govctmpl $dot }}
@@ -84,23 +84,24 @@ Templates:
 
       COUNT=0
       {{ range $key, $cmd := ( .Param "govc/commands" ) -}}
-      $(echo "{{ $cmd }}" | egrep -q "import.ova|import.spec") && (( COUNT++ )) || true
-      [[ $COUNT -ge 2 ]] && xiterr 1 "multiple 'import.ova' or 'import.spec' values (only 1 allowed)" || true
+      $(echo "{{ $cmd }}" | grep -q "import.ova") && (( COUNT++ )) || true
+      [[ $COUNT -ge 2 ]] && exit 1 || true
       {{ end -}}
 
       {{ range $cmd := ( .Param "govc/commands" ) -}}
       CMD='{{ $cmd }}'
 
-      if echo $CMD | egrep -q "import.ova|import.spec"
+      if echo $CMD | grep -q "import.ova"
       then
         if [[ -r "/ova/import.ova" ]]
         then
           CMD="$CMD $TMPL /ova/import.ova"
         else
-          xiterr 1 "'import.ova' specified, but /ova/import.ova image not found (run task 'govc-stage-ova' first)"
+          xiterr 1 "'import.ova' command was specified, but no /ova/import.ova image found in the container"
         fi
       fi
 
+      # sigh ... are we going to need to throttle calls with sleep timers and other fun stuff ? 
       echo ""
       echo "==== RUN GOVC COMMAND ===="
       echo ""

@@ -1,8 +1,3 @@
-{{if or (eq "debian" .Env.OS.FamilyName) (eq "ubuntu" .Env.OS.FamilyName) -}}
-{{ $ver := (.Env.OS.Version | float64) -}}
-{{ if ge $ver 20.04 -}}
-# no Ubuntu 20.04 or newer default part-scheme template definition
-{{ else -}}
 d-i partman-auto/disk string /dev/{{.Param "operating-system-disk"}}
 d-i grub-installer/choose_bootdev select /dev/{{.Param "operating-system-disk"}}
 d-i grub-installer/bootdev string /dev/{{.Param "operating-system-disk"}}
@@ -11,36 +6,3 @@ d-i partman-auto-lvm/guided_size string max
 d-i partman-auto-lvm/new_vg_name string {{.Machine.ShortName}}
 d-i partman-auto/choose_recipe select atomic
 d-i grub-installer/only_debian boolean true
-{{ end -}}
-{{ end -}}
-
-{{if or (eq "redhat" .Env.OS.FamilyName) (eq "fedora" .Env.OS.FamilyName) -}}
-{{ if and (regexMatch ".*rhel-server.*" .Env.OS.Name) (.Env.OS.VersionEq "8") -}}
-# RHEL Server 8 partitioning default scheme
-bootloader {{.ParamExpand "redhat-bootorder" }} --location=mbr --append="rhgb quiet"
-zerombr
-ignoredisk --only-use={{.Param "operating-system-disk"}}
-clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
-autopart --type=lvm
-{{ else if ( eq "photon" .Env.OS.Codename ) -}}
-    "partition_type": "gpt",
-    "partitions": [
-      { "mountpoint": "/", "size": 0, "filesystem": "ext4" },
-      { "mountpoint": "/boot", "size": 128, "filesystem": "ext4" },
-      { "mountpoint": "/root", "size": 128, "filesystem": "ext4" },
-      { "size": 128, "filesystem": "swap" }
-    ],
-{{ else -}}
-# Fedora / CentOS 6, 7 and 8 / RHEL Server 7 partitioning scheme default
-bootloader {{.ParamExpand "redhat-bootorder" }} --location=mbr --append="rhgb quiet"
-zerombr
-ignoredisk --only-use={{.Param "operating-system-disk"}}
-clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
-part /boot --fstype ext4 --size=512 --ondisk={{.Param "operating-system-disk"}}
-part /boot/efi --fstype vfat --size=512 --ondisk={{.Param "operating-system-disk"}}
-part swap --recommended
-part pv.6 --size=1 --grow --ondisk={{.Param "operating-system-disk"}}
-volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
-logvol / --fstype xfs --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
-{{ end -}}
-{{ end -}}

@@ -251,7 +251,7 @@ Advanced Stages - Helm and Sonobuoy
 
 KRIB includes stages for advanced Kubernetes operating support.
 
-The reference workflows already install Helm using the ``krib-helm`` stage.  To leverage this utility simply define the required JSON syntax for your charts as shown in the ``krib-helm`` stage in the :ref:`rs_cp_krib` documentation.
+The reference workflows already install Helm using the `krib-helm` stage.  To leverage this utility simply define the required JSON syntax for your charts as shown in :ref:`krib_helm`.
 
 Sonobuoy can be used to validate that the cluster conforms to community specification.  Adding the `krib-sonobuoy` stage will start a test run.  It can be rerun to collect the results or configured to wait for them.  Storing test results in the `files` path requires setting the `unsafe/password` parameter and is undesirable for production clusters.
 
@@ -263,8 +263,7 @@ The Kubernetes dashboard is enabled within a default KRIB built cluster.  Howeve
 
 These are all issues relating to managing, operating, and running a Kubernetes cluster, and not restrictions that are imposed by Digital Rebar Provision.  Please see the appropriate Kubernetes documentation on questions regarding operating, running, and administering Kubernetes (https://kubernetes.io/docs/home/).
 
-For Istio via Helm, please consult the ``krib-helm`` stage in the :ref:`rs_cp_krib` documentation for a reference install.
-
+For Istio via Helm, please consult :ref:`krib_helm` for a reference install
 
 .. _rs_k8s_proxy:
 
@@ -316,7 +315,7 @@ Please consult :ref:`rs_k8s_proxy` for information on getting the login token
 
 Rook Ceph Manager Dashboard
 ===========================
-If you install the rook via the ``krib-helm`` chart template and have ``krib-ingress-nginx`` stage in your workflow an ingress will be created so you can access the Ceph Manager Dashboard at ``https://rook-db.LOADBALANCER_IP.xip.io``.  The access url and cert-manager tls can also be configured by setting the appropriate params in your profile.   See ``example-rook-db-ingress`` profile.
+If you install the rook via the `krib-helm` chart template and have ``krib-ingress-nginx`` stage in your workflow an ingress will be created so you can access the Ceph Manager Dashboard at ``https://rook-db.LOADBALANCER_IP.xip.io``.  The access url and cert-manager tls can also be configured by setting the appropriate params in your profile.   See ``example-rook-db-ingress`` profile.
 
 The default username is ``admin`` and you can get the generated password with the with the following command:
 

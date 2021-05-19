@@ -44,8 +44,6 @@ Templates:
       rm -rf firmware
       mv firmware.new firmware
       cd /
-      echo "Remove package repo entries"
-      rm -rf /etc/yum.repos.d/00-*
       echo "Restoring Selinux file contexts"
       restorecon -r -F -i -p .
   - Name: fix-up-services
@@ -63,7 +61,3 @@ Templates:
       {{ range (.Param "sledgehammer/enable-services") }}
       systemctl enable {{ . }}
       {{ end }}
-  - Name: set-default-python
-    Contents: |
-      #!/bin/bash
-      alternatives --set python {{ .Param "sledgehammer/default-python" }}

@@ -16,8 +16,6 @@ Meta:
   feature-flags: "sane-exit-codes"
 Templates:
 - Name: "flexiflow_start.sh"
-  Meta:
-    OS: "linux,darwin"
   Contents: |
     #!/bin/bash
     # Copyright RackN, 2019
@@ -58,16 +56,4 @@ Templates:
     echo '>>> Flexiflow dynamically adding task:  {{$taskname}}'
     drpcli machines inserttask $RS_UUID "{{$taskname}}" {{$index}} >/dev/null
     {{ end -}}
-- Name: "flexiflow_start.ps1"
-  Meta:
-    OS: "windows"
-  Contents: |
-    Write-Host "Flexiflow start not implemented for windows"
-    exit 0
-- Name: "flexiflow_start-esxi.sh"
-  Meta:
-    OS: "esxi"
-  Contents: |
-    #!/bin/sh
-    echo "Flexiflow start not implemented for esxi"
-    exit 0
+

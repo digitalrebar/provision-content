@@ -1,6 +1,6 @@
 ---
-Name: "kube-lib-kubectl-install"
 Description: "Install KubeCTL"
+Name: "kube-lib-kubectl-install"
 Documentation: |
   Installs KubeCTL on machine.
 
@@ -11,23 +11,68 @@ Documentation: |
   Air-Gap: populate files/kubernetes/kubectl-[arch] to avoid download.
 RequiredParams:
   - kube-lib/kubernetes-version
+  - kube-lib/kubernetes-download-url
   - kube-lib/kube-config
 ExtraClaims:
   - scope: "files"
-    action: "*"
-    specific: "*"
+    action: "get"
+    specific: "/kubernetes/kubectl-amd64"
+  - scope: "files"
+    action: "get"
+    specific: "/kubernetes/kubectl-arm64"
+  - scope: "files"
+    action: "post"
+    specific: "/kubernetes/kubectl-amd64"
+  - scope: "files"
+    action: "post"
+    specific: "/kubernetes/kubectl-arm64"
 Templates:
   - Name: "kube.config"
     Path: "kube.config"
     Contents: |
-      {{ .Param "kube-lib/kube-config" | toPrettyJson }}
+      {{ .ParamAsJSON "kube-lib/kube-config" }}
   - Name: "kubectl-install.sh"
     Path: ""
     Contents: |
       #!/usr/bin/env bash
 
       {{ template "setup.tmpl" . }}
-      {{ template "kube-lib-kubectl-install.tmpl" .}}
+      {{ template "download-tools.tmpl" .}}
+      export KUBECONFIG="./kube.config"
+
+      if which kubectl 2>/dev/null >/dev/null ; then
+        echo "found $(which kubectl) binary, moving on..."
+      else
+        BINARIES="/usr/local/bin/kubectl"
+
+        if drpcli files exists "kubernetes/kubectl-$arch" 2>/dev/null >/dev/null ; then
+          echo "Found in DRP kubernetes/kubectl-$arch - downloading from there"
+          drpcli files download "kubernetes/kubectl-$arch" to $BINARIES
+        else
+          KUBECTL_VERSION="{{ .Param "kube-lib/kubernetes-version" }}"
+          if [[ "$KUBECTL_VERSION" == "latest" ]]; then
+            echo "Looking up latest version"
+            KUBECTL_VERSION=$(download -L --remote-name-all "{{ .Param "kube-lib/kubernetes-download-url" }}/stable.txt")
+          fi
+          echo "Using kubectl Version $KUBECTL_VERSION"
+          echo "Installing kubectl for arch $arch from {{ .Param "kube-lib/kubernetes-download-url" }}"
+          DOWNLOAD="{{ .Param "kube-lib/kubernetes-download-url" -}}/$KUBECTL_VERSION/bin/linux/$arch/kubectl"
+          echo "Download kubectl from $DOWNLOAD"
+          download -L --remote-name-all "$DOWNLOAD" -o kubectl
+
+          if [[ -e kubectl ]] ; then
+            echo "save downloaded files to kubernetes/kubectl-$arch for next pass"
+            drpcli files upload kubectl as kubernetes/kubectl-$arch
+            echo "moving from kubectl to $BINARIES"
+            mv kubectl $BINARIES
+          else
+            echo "ERROR: did not download kubectl!"
+            exit 1
+          fi
+        fi
+        echo "kubectl downloaded to $BINARIES, setting +x"
+        chmod +x $BINARIES
+      fi
 
       echo "Done"
       exit 0

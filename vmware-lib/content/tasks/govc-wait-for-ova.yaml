@@ -6,7 +6,7 @@ Documentation: |
   to a ``govc about`` request call.
 
 RequiredParams:
-  - "ova/template-json"
+  - "govc/template-json"
 OptionalParams:
 Templates:
   - Name: "govc-wait-for-ova.sh"

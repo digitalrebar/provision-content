@@ -29,10 +29,18 @@ Templates:
 
       function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; printf "FATAL: $*\n"; exit $XIT; }
 
+      VSW='{{ .Param "esxi/vsan-vswitch-standard" }}'
+      VMN='{{ .Param "esxi/vsan-vmnic" }}'
       PGR='{{ .Param "esxi/vsan-portgroup" }}'
       {{ if .Param "esxi/vsan-vmk" }}VMK={{ .Param "esxi/vsan-vmk" }}{{ else }}{{ if .Param "esxi/network-firstboot-vmk" }}VMK="{{ .Param "esxi/network-firstboot-vmk" }}{{ end }}{{ end }}
       IP='{{ .Param "esxi/vsan-vmknic-ip" }}'
       NM='{{ .Param "esxi/vsan-vmknic-netmask" }}'
+
+      # TODO: select Standard/Distributed vSwitch, check if exists, build if not
+
+      #esxcli network vswitch standard add -v $VSW
+      #esxcli network vswitch standard uplink add -v $VSW -u $VMN
+      #esxcfg-vswitch -A $PGR $VSW
 
       #if [[ -z "$IP" && -z "$NM" ]]
       #then

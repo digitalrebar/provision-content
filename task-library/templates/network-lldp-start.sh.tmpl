@@ -41,8 +41,7 @@ function set_family() {
     redhat|centos) _pkgmgr="yum"; yum -y install epel-release ;;
     debian|ubuntu) _pkgmgr="apt" ;;
     *) >&2 echo "Unsupported package manager family '$FAMILY'."
-       >&2 echo "Failed installing and/or starting... giving up ... :( "
-       exit 0 ;;
+       exit 1 ;;
   esac
 }
 

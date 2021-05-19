@@ -1,9 +1,0 @@
----
-Name: "network-convert-interface-to-bridge"
-Description: "Convert network interface to bridge"
-Tasks:
-  - "network-convert-interface-to-bridge"
-Meta:
-  icon: "download"
-  color: "blue"
-  title: "Digital Rebar Community Content"

@@ -13,7 +13,6 @@ BootEnv: "sledgehammer"
 Tasks:
   - enforce-sledgehammer
   - set-machine-ip-in-sledgehammer
-  - reserve-dhcp-address
   - ssh-access
 Meta:
   type: "discover"

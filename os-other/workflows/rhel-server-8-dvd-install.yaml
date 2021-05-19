@@ -1,11 +1,7 @@
 ---
 Name: rhel-server-8-dvd-install
-Description: "[DEPRECATED] Basic RHEL 8 Install (full dvd) Workflow + Runner"
+Description: Basic RHEL 8 Install (full dvd) Workflow + Runner
 Documentation: |
-  .. warning:: DEPRECATED - This workflow will be removed from future versions of
-               DRP.  Please use the ``universal`` content pack and workflows.  See
-               :ref:`deploy_linux_with_universal` and :ref:`rs_release_v46_deprecations`.
-
   This workflow includes the DRP Runner in RHEL provisioning process for DRP.
 
   After the install completes, the workflow installs the runner

@@ -16,8 +16,6 @@ Meta:
   feature-flags: "sane-exit-codes"
 Templates:
 - Name: "validation_stop.sh"
-  Meta:
-    OS: "linux,darwin"
   Contents: |
     #!/bin/bash
     # Copyright RackN, 2019
@@ -42,17 +40,3 @@ Templates:
     {{ end }}
 
     exit $RC
-
-- Name: "validation_stop.ps1"
-  Meta:
-    OS: "windows"
-  Contents: |
-    Write-Host "Validation stop not implemented for windows"
-    exit 0
-- Name: "validation_stop-esxi.sh"
-  Meta:
-    OS: "esxi"
-  Contents: |
-    #!/bin/sh
-    echo "Validation stop not implemented for esxi"
-    exit 0

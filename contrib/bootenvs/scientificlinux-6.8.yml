@@ -2,12 +2,11 @@
 Name: "scientificlinux-6.8-install"
 Description: "Scientific Linux 6.8 install bootenv"
 OS:
-  Name: "scientificlinux-6.8"
   Family: "redhat"
-  Version: "6"
+  Name: "scientificlinux-6.8"
   IsoFile: "SL-68-x86_64-2016-06-29-DVD-DL.iso"
   IsoSha256: "ada95b0e920612a5a9c56e268515a9965663377407a7897167be7a2efdade804"
-  IsoUrl: "http://ftp.scientificlinux.org/linux/scientific/obsolete/6.8/x86_64/iso/SL-68-x86_64-2016-06-29-DVD-DL.iso"
+  IsoUrl: "http://ftp1.scientificlinux.org/linux/scientific/6.8/x86_64/iso/SL-68-x86_64-2016-06-29-DVD-DL.iso"
 Kernel: "images/pxeboot/vmlinuz"
 Initrds:
   - "images/pxeboot/initrd.img"
@@ -35,9 +34,9 @@ Templates:
   - ID: "default-ipxe.tmpl"
     Name: "ipxe-mac"
     Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
-  - ID: "select-kickseed.tmpl"
+  - ID: "centos-6.ks.tmpl"
     Name: "compute.ks"
-    Path: '{{.Machine.Path}}/compute.ks'
+    Path: "{{.Machine.Path}}/compute.ks"
 Meta:
   feature-flags: "sane-exit-codes"
   icon: "linux"

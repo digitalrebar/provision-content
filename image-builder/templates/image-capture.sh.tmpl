@@ -5,10 +5,7 @@
 
 # ensure we escape any wildcards so shell globbing doesn't cause
 # this to fail
-TAG=$(echo {{ .Env.OS.Name }} | tr '[:upper:]' '[:lower:]')
 IMAGE=/RS_IMAGE
-# exclude file needs help - 'tar' argument processing is extremely fragile
-#EXCLUDE_FILE="${IMAGE}/exclude-list.txt"
 [[ -d $IMAGE ]] && rm -rf "$IMAGE"
 mkdir -p "$IMAGE"
 
@@ -21,15 +18,8 @@ export RS_BUILDER_DATE="`date`"
 
 DSTAMP=`date +%Y%m%d-%H%M%S`
 export RS_IMAGE_IDENT=`uuidgen | md5sum | awk ' { print $1 } ' | cut -c 1-10`
-
-UP_PATH="$(echo "{{ .Param "image-builder/upload-path" -}}" | sed 's|/$||g')"
-UP_NAME="$(echo "{{ .Param "image-builder/upload-rootfs-name" -}}" | sed 's|.tgz||g')"
-UP_MANI="$(echo "{{ .Param "image-builder/upload-manifest-name" -}}" | sed 's|.txt||g')"
-
-export RS_UPLOAD_TARBALL="${UP_PATH}/${UP_NAME}.tgz"
-export RS_UPLOAD_MANIFEST="${UP_PATH}/${UP_MANI}.txt"
-#export RS_UPLOAD_TARBALL="$UP_PATH/$TAG-rootfs-$DSTAMP-$RS_IMAGE_IDENT.tgz"
-#export RS_UPLOAD_MANIFEST="$UP_PATH/$TAG-MANIFEST-$DSTAMP-$RS_IMAGE_IDENT.txt"
+export RS_UPLOAD_TARBALL="images/$OS_TYPE-tarball-$DSTAMP-$RS_IMAGE_IDENT.tgz"
+export RS_UPLOAD_MANIFEST="images/$OS_TYPE-MANIFEST-$DSTAMP-$RS_IMAGE_IDENT.txt"
 
 # branding
 for F in issue issue.net
@@ -69,52 +59,23 @@ Image built with Digital Rebar Provision.  (c) RackN, Inc.\n\n" > /etc/motd
 # built system and not chroot'd to the installed structure
 cd /
 
-# build up the exclude file
-{{ if ( .Param "image-builder/additional-excludes" ) -}}
-echo "Building exclude file ('$EXCLUDE_FILE') for final tar..."
-echo "Adding entries:"
-#rm -f $EXCLUDE_FILE
-{{ range $exclude := ( .Param "image-builder/additional-excludes" ) -}}
-#echo "{{ $exclude }}" | tee $EXCLUDE_FILE
-XCLD="{{$exclude}}"
-echo "$XCLD"
-EXCLUDES+="--exclude=$XCLD "
-{{ end -}}
-echo "Done building exclude list..."
-{{ end -}}
-
 # for short tests, use var/ directory
 #  -czvf ${RS_BUILDER_TARNAME} ./var/                  \
 
-echo ""
-echo "Beginning tar capture of image at $(date)..."
 export GZIP="-9"
-
-save=$-
-set -x
-
-# should move all of these excludes to image-builder/additional-excludes and get the
-# --exclude-from=FILE option working right
-tar                                                          \
-    --exclude={.${IMAGE}\*,./proc/\*,./sys/\*,./tmp/\*,./dev/\*,./var/tmp/\*,./run/\*,./root/post-install.log} ${EXCLUDES} \
+tar                                                        \
+    --exclude={.${IMAGE}\*,./proc/\*,./sys/\*,./tmp/\*,./dev/\*,./var/tmp/\*,./run/\*,./root/post-install.log} \
     --numeric-owner                                          \
-    {{ .Param "image-builder/additional-tar-options" }}      \
     -czvf ${RS_BUILDER_TARNAME} .                            \
     > ${RS_BUILDER_MANIFEST}                                 \
     2> >(tee -a ${RS_BUILDER_BASE}-ERRORS.txt >&2)
 
-# restore to original 'x' value
-[[ $save =~ x ]] && set -x || set +x
-
-echo "Tar capture completed at $(date)..."
 # both STDOUT and STDERR to screen and file
 #  > >(tee -a ${RS_BUILDER_MANIFEST})             \
 #  2> >(tee -a ${RS_BUILDER_BASE}-ERRORS.txt >&2)
 # end tar command
 
 MD5=`md5sum ${RS_BUILDER_TARFILE} | awk ' { print $1 } '`
-
-echo ""
 
 if [[ -f $RS_BUILDER_TARFILE ]]
 then
@@ -132,12 +93,5 @@ fi
 # build_json_manifest !!
 # insert above info, plus files manifest, etc... should be JSON so it can be "consumed"
 
-echo ""
-echo "Beginning image upload process to DRP Endpoint..."
-echo "Uploading RootFS image..."
 drpcli files upload "${RS_BUILDER_TARFILE}"  as "${RS_UPLOAD_TARBALL}"
-echo "Uploading image manifest..."
 drpcli files upload "${RS_BUILDER_MANIFEST}" as "${RS_UPLOAD_MANIFEST}"
-
-echo ""
-

@@ -42,8 +42,6 @@ Schema:
         NICs: ".Networking.Interfaces | map(select(.Sys.BusAddress != \\\"virtual\\\"))|length"
         NICInfo: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.Vendor+\\\" \\\"+.Model+\\\" \\\"+.Sys.BusAddress)"
         NICSpeed: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map((.Speed|tostring)+\\\" \\\"+(.Duplex|tostring))"
-        NICDescr: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.Vendor+\\\" \\\"+.Model+\\\" \\\"+.HardwareAddr+\\\" \\\"+.Name)"
-        NICMac: ".Networking.Interfaces|map(select(.Sys.BusAddress != \\\"virtual\\\"))|map(.HardwareAddr)"
         CPUs: ".System.ProcessorCount"
         CPUType: ".System.Processors[0].Model"
         CPUSpeed: ".System.Processors[0].Speed"
@@ -52,9 +50,8 @@ Schema:
         SerialNumber: ".DMI.System.SerialNumber"
         ProductName: ".DMI.System.ProductName"
         Family: ".DMI.System.Family"
-        Hypervisor: ".DMI.Hypervisor"
     raid:
-      Command: "drp-raid -tools \"{{if .ParamExists \"raid-usable-utilities\"}}{{.Param \"raid-usable-utilities\" | join \",\"}}{{else}}[]{{end}}\""
+      Command: "drp-raid"
       JQargs: ""
       Fields:
         RaidControllers: "length"
@@ -62,11 +59,6 @@ Schema:
         RaidDisks: "map(.Disks | length)"
         RaidDiskSizes: "map(.Disks | map(.Size))"
         RaidDiskStatuses: "map(.Disks | map(.Status))"
-    tpm:
-      Command: "./tpm-info.sh"
-      JQargs: ""
-      Fields:
-        TpmPublicKey: ".TpmPublicKey"
 Meta:
   color: "green"
   icon: "handshake outline"

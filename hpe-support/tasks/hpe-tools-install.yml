@@ -19,7 +19,6 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       {{ template "setup.tmpl" . }}
-      . /etc/os-release
       rm -f /etc/yum.repos.d/drp-hpe*.repo || :
       repos="$(get_param hpe-repo-urls)"
       versions="$(get_param hpe-repo-versions)"
@@ -27,7 +26,7 @@ Templates:
       while read -r repo; do
           name=$(jq -r '.name' <<<"$repo")
           url=$(jq -r '.url' <<<"$repo")
-          url=$(echo "$url" | sed 's+{{"{{"}}.ProvisionerURL{{"}}"}}+{{.ProvisionerURL}}+g' | sed "s+\${VERSION_ID}+${VERSION_ID}+g" )
+          url=$(echo "$url" | sed 's+{{"{{"}}.ProvisionerURL{{"}}"}}+{{.ProvisionerURL}}+g')
           want_token=$(jq -r '.requireToken' <<<"$repo")
           if [[ $want_token = true && ($token = unset || !$token) ]]; then
               echo "Skipping repo for $name because it wants an auth token and none was provided"
@@ -57,4 +56,4 @@ Templates:
       {{ template "set-proxy-servers.sh.tmpl" .}}
       yum -y makecache
       yum -y install yum-plugin-ovl || :
-      yum -y install hponcfg hpsum ssacli sut hp-scripting-tools ilorest
+      yum -y install hponcfg hpsum ssacli sut hp-scripting-tools

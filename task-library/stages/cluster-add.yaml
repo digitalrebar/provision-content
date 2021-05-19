@@ -1,7 +1,6 @@
 ---
 Name: "cluster-add"
 Description: "Enqueue for Operation"
-Documentation: DEPRECATED in v4.6
 Tasks:
   - "cluster-add"
 Meta:

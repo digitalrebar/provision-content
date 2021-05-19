@@ -1,0 +1,98 @@
+---
+Name: rhel-server-7-install
+Description: Install BootEnv for RedHat 7.7
+Documentation: |
+  This BootEnv installs the RHEL Server 7.7 operating system from the DVD ISO.
+Meta:
+  color: blue
+  feature-flags: change-stage-v2
+  icon: linux
+  title: Digital Rebar Community Content
+OS:
+  Name: rhel-server-7
+  Codename: ""
+  Family: redhat
+  IsoFile: ""
+  IsoSha256: ""
+  IsoUrl: ""
+  Version: "7"
+  SupportedArchitectures:
+    amd64:
+      BootParams: ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}}
+        inst.geoloc=0 {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        -- {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+      Initrds:
+      - images/pxeboot/initrd.img
+      IsoFile: rhel-server-7.7-x86_64-dvd.iso
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/redhat/rhel/7/rhel-server-7.7-x86_64-dvd.iso"
+      Kernel: images/pxeboot/vmlinuz
+      Loader: ""
+      Sha256: 88b42e934c24af65e78e09f0993e4dded128d74ec0af30b89b3cdc02ec48f028
+    x86_64:
+      BootParams: ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}}
+        inst.geoloc=0 {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}}
+        -- {{if .ParamExists "kernel-console"}}{{.Param "kernel-console"}}{{end}}
+      Initrds:
+      - images/pxeboot/initrd.img
+      IsoFile: rhel-server-7.7-x86_64-dvd.iso
+      IsoUrl: ""
+      Kernel: images/pxeboot/vmlinuz
+      Loader: ""
+      Sha256: 88b42e934c24af65e78e09f0993e4dded128d74ec0af30b89b3cdc02ec48f028
+BootParams: ksdevice=bootif ks={{.Machine.Url}}/compute.ks method={{.Env.InstallUrl}}
+  {{if .ParamExists "kernel-options"}}{{.Param "kernel-options"}}{{end}} -- {{ if
+  .ParamExists "kernel_console"}}{{.Param "kernel_console" }}{{ end }}
+Kernel: images/pxeboot/vmlinuz
+Initrds:
+  - images/pxeboot/initrd.img
+OnlyUnknown: false
+RequiredParams: []
+OptionalParams:
+  - kernel-console
+  - kernel-options
+  - ntp-servers
+  - operating-system-disk
+  - provisioner-default-password-hash
+  - proxy-servers
+Templates:
+  - Contents: ""
+    ID: kexec.tmpl
+    Meta: {}
+    Name: kexec
+    Path: '{{.Machine.Path}}/kexec'
+  - Contents: ""
+    ID: default-pxelinux.tmpl
+    Meta: {}
+    Name: pxelinux
+    Path: pxelinux.cfg/{{.Machine.HexAddress}}
+  - Contents: ""
+    ID: default-ipxe.tmpl
+    Meta: {}
+    Name: ipxe
+    Path: '{{.Machine.Address}}.ipxe'
+  - Contents: ""
+    ID: default-pxelinux.tmpl
+    Meta: {}
+    Name: pxelinux-mac
+    Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
+  - Contents: ""
+    ID: default-ipxe.tmpl
+    Meta: {}
+    Name: ipxe-mac
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - Contents: ""
+    ID: default-grub.tmpl
+    Meta: {}
+    Name: grub
+    Path: grub/{{.Machine.Address}}.cfg
+  - Contents: ""
+    ID: default-grub.tmpl
+    Meta: {}
+    Name: grub-mac
+    Path: grub/{{.Machine.MacAddr "grub"}}.cfg
+  - Contents: ""
+    ID: rhel-7.ks.tmpl
+    Meta: {}
+    Name: compute.ks
+    Path: '{{.Machine.Path}}/compute.ks'
+

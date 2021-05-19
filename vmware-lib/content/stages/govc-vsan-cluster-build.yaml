@@ -5,7 +5,7 @@ Documentation: |
   Build VSAN cluster from VSAN configured hosts.
 
 Tasks:
-  - "context:vmware-tools"
+  - "context:govc"
   - "govc-vsan-cluster-operations"
 Params:
   esxi/vsan-operations: "cluster-build"

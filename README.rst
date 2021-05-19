@@ -32,10 +32,6 @@ directory              used for
 =====================  ============================================================
 content/               main "drp-community-content" pack
 task-library/          A library of tasks and helper functions
-hardware-tooling/      Selector library for hardware components
-hpe-support/           HPE hardware support
-dell-support/          Dell hardware support
-lenovo-support/        Lenovo hardware support
 krib/                  Kubernetes Rebar Integrated Bootstrap content pack
 rose/                  Rebar OpenStack Environment - single node master and cluster
 sledgehammer-builder/  contains the Sledgehammer Builder content
@@ -43,5 +39,3 @@ sledgehammer-builder/  contains the Sledgehammer Builder content
 
 The extraneous directories and files (images, tools, .gitignore, etc.) are
 not part of the content packs.
-
-.. Release v4.7.0 Start

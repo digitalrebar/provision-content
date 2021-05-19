@@ -19,7 +19,6 @@ Templates:
   - Name: install-drivers
     Contents: |
       #!/bin/bash
-      {{ template "setup.tmpl" . }}
       mkdir -p /tmp/mellanox-install
       cd /tmp/mellanox-install
       pkg='{{.Param  "sledgehammer/mellanox-driver-package"}}'
@@ -47,5 +46,5 @@ Templates:
           -b
       rpm -qa >postinstalled
       sort preinstalled postinstalled |uniq -u |xargs rpm -e
-      cd RPMS/*/$(uname -m)/
+      cd RPMS/*/$(uname -m)/COMMON/
       dnf -y localinstall kmod-mlnx-en-5*.rpm mlnx-en-utils*.rpm

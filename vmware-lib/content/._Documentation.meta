@@ -1,42 +1,13 @@
+VMware Library
+--------------
 
 The Vmware Library provides additional content that enables capabilities for
 interacting with VMware ESXi, vSphere, and VCF (VMware Cloud Foundation)
 environments.
 
-This content provides *Software Defined Data Center* (SDDC) build and operational
-management workflows.
-
-Some examples of operations that can be achieved with this workflow:
-
-  * deploy vCenter on one or more ESXi nodes
-  * create a *Datacenter* construct in vCenter
-  * create a *Cluster* construct in vCenter
-  * enroll specified ESXi machines in to the *Cluster*
-  * configure VSAN datastore capabilities
-  * claim disks in to the VSAN datastore
-  * deploy arbitrary OVA appliance devices
-  * deploy NSX-T
-
-This content pack utilizes several Digital Rebar Provision (DRP) Context containers
-to perform most of the heavy lifting work.  The context container is generally a
-separate "fake" machine which drives API operations against either ESXi or vCenter
-API endpoints.  There are several tools which are available and used, based on the
-tools capabilities, and the required job at hand:
-
-  * ``govc`` - a Golang compiled binary which implements the *GoVMOMI* library
-  * VMware's Python SDK
-  * VMware's Ansible *Galaxy* modules, which utilize PyVMOMI and Python SDK libraries
-  * OVFTool
-
-All of the content provided in ``vmware-lib`` builds upon, and requires the ``vmware``
-plugin to be installed, and generally relies on ESXi nodes to be built by a workflow
-like the ``esxi-install`` workflow.  It is feasible that setting the appropriate Param
-values will allow this content to work on non-DRP built ESXi nodes; however this is
-not tested nor advised.
-
 
 GoVC General Information
-------------------------
+========================
 
 GoVC is a Golang binary that implements the VMOMI library of capabilities.  The
 primary benefit is it's a single statically compiled binary (stand alone) that has
@@ -59,7 +30,7 @@ context container, please see:
 
 
 GoVC Context
-============
+++++++++++++
 
 The GoVC context implements a RackN Context Container with the Agent (runner, drpcli
 binary) and the ``govc`` compiled binary inside of it.  By use of setting Param values,
@@ -67,7 +38,7 @@ binary) and the ``govc`` compiled binary inside of it.  By use of setting Param 
 
 
 GoVC and VCSA Deployment
-========================
+++++++++++++++++++++++++
 
 VCSA (vCenter Server Appliance) can be deployed via the GoVC tool.  The operator must
 perform the following preparotry tasks to enable the Context environment to operate
@@ -133,7 +104,7 @@ Scripts referenced in this document should be available from:
   * https://github.com/digitalrebar/provision-content/tree/v4/vmware-lib
 
 vCenter Complete Note
-=====================
++++++++++++++++++++++
 
 If install vCenter 7.x - the ``govc`` connect URL method seems to have changed.
 AS of 2020/07/01 - the Stage ``govc-wait-for-vcenter`` will not complete successfully.
@@ -145,7 +116,7 @@ Workflow from the Context Machine, or ignore the status stage error.
 
 
 Prepare the VCSA JSON Deployment Template
-=========================================
++++++++++++++++++++++++++++++++++++++++++
 
 The Param ``govc/template-json`` defines the name of a Template that you must provide with
 the configuration details for the deployed VCSA instance.  This template can be a standard
@@ -162,7 +133,7 @@ to execute the deployment to.  Set these Params as defined in the below section.
 
 
 Define the Deployment Target
-============================
+++++++++++++++++++++++++++++
 
 You must define the vSphere deployment target (eg ESXi node) to deploy the VCSA OVA to.
 This is done by specifying the URL directly as a single Param, or the individual Param
@@ -208,7 +179,7 @@ then add the Profile to the Context Machine that will deploy the vCenter VCSA OV
 
 
 Example GOVC Usage
-------------------
+==================
 
 A (begining of) a collection of useful resources for understanding how to
 use ``govc`` to manage vSphere resources.

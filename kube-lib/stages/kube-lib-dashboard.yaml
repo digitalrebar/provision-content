@@ -8,6 +8,7 @@ Documentation: |
   Note: will skip if the dashboard version does not start with v
 RunnerWait: true
 Tasks:
+  - "kube-lib-legacy-migration"
   - "kube-lib-kubectl-install"
   - "kube-lib-dashboard-install"
 Meta:

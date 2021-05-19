@@ -9,12 +9,7 @@ Documentation: |
 
   Leaves the machines in a Runner Context not on the machine
 
-  .. note:: If the Param ``govc/ova-location`` is specified on the machine, the
-            OVA will be downloaded to ``/ova/import.ova``.  To skip this behavior,
-            set the Param ``govc/skip-ova-stage`` to ``true``.
-
 Stages:
-  - "govc-stage-ova"
   - "govc-commands"
   - "govc-complete"
 Meta:

@@ -23,11 +23,6 @@ Templates:
     exit 0
     {{ end }}
 
-    {{ if ne (.Param "machine/type") "physical" }}
-    echo "Burnin Reboot should be only run on physical system"
-    exit 0
-    {{ end }}
-
     echo "Starting disk stress test"
     TEST_SSDS={{.Param "burnin-disk-test-ssd"}}
     DESTRUCTIVE={{.Param "burnin-disk-destructive"}}

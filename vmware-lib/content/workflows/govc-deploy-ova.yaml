@@ -35,9 +35,9 @@ Documentation: |
 
   .. note:: The ``govc-stage-ova`` Stage downloads and stages an OVA based on
             the ``govc/ova-location`` URL.
-
+  
 Stages:
-  - "govc-datastore-manage"
+  - "govc-datastore-create"
   - "govc-stage-ova"
   - "govc-deploy-ova"
   - "govc-wait-for-ova"

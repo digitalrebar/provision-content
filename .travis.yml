@@ -4,7 +4,7 @@ branches:
   - gh-pages
 sudo: false
 go:
-- '1.13'
+- '1.12.7'
 git:
   depth: 500
 addons:

@@ -6,23 +6,13 @@ Documentation: |
   and makes sure that the sshd config for PermitRootLogin is populated.
 
   Runs as part of a shell script for kickstart or net-post-install.
-
-  If the `access-ssh-template` is specified, that template is used to replace
-  the existing sshd config file.
-
-  Otherwise, the task will use the access-keys, access-keys-shared, and access-keys-global
-  parameters to define keys to inject into the authorized_keys file for root.
-
-  The access-ssh-root-mode and access-ssh-parameters will alter the sshd config file.
-  The access-ssh-parameters parameter is a general key/value map to replace config sections.
+  The template does nothing if access-keys, access-keys-sharedm AND access-keys-global are undefined
 
   Optional Parameters:
   * access-keys
   * access-keys-shared
   * access-keys-global
   * access-ssh-root-mode
-  * access-ssh-parameters
-  * access-ssh-template
 
   Parameter YAML format:
 
@@ -42,8 +32,6 @@ OptionalParams:
   - "access-keys-shared"
   - "access-keys-global"
   - "access-ssh-root-mode"
-  - "access-ssh-template"
-  - "access-ssh-parameters"
 Templates:
   - ID: "access-keys.sh.tmpl"
     Name: "Put access keys in place for root user"

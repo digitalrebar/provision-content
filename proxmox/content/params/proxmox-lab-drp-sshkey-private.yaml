@@ -5,8 +5,8 @@ Documentation: |
   This param is used to define lab DRP systems private key.
 
 Meta:
-  color: orange
-  icon: database
+  color: red
+  icon: agent
   title: Digital Rebar Community Content
 Schema:
   default: |

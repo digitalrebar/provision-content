@@ -1,4 +1,13 @@
 # extends Classifier to check if 'inventory-data' field matches value
 function has_inventory_value() {
-  cl_has_inventory_value "$1" "$2"
+  local _path=$1
+  local _value="$(echo -e "$2" | tr -d '[:space:]')"
+  local _data="$(drpcli machines get $RS_UUID param "inventory/data")"
+  local _jdata="$(jq -r ".[\"$_path\"]" <<< "${_data}" | tr -d '[:space:]')"
+
+  if [[ "$_jdata" == "$_value" ]] ; then
+    echo "pass"
+  else
+    echo "fail"
+  fi
 }

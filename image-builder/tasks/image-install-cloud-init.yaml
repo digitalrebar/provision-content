@@ -19,24 +19,6 @@ Templates:
       # origin: rackn/image-builder
       {{template "setup.tmpl" .}}
 
-      case $OS_FAMILY in
-        debian)
-          /usr/sbin/sshd -p 2222
-          ssh-keygen -t rsa -N '' -q -f /root/.ssh/id_rsa
-          cp /root/.ssh/authorized_keys /root/.ssh/ak.bak
-          cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
-          ssh -p 2222 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -t localhost date
-          ssh -p 2222 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -t localhost 'apt-get update'
-          ssh -p 2222 -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -t localhost 'DEBIAN_FRONTEND=noninteractive apt-get install -y cloud-init'
-          rm -f /root/.ssh/id_rsa*
-          cp /root/.ssh/ak.bak /root/.ssh/authorized_keys
-          rm -f /root/.ssh/ak.bak
-          ps auxwww | grep 2222 | grep -v grep | awk '{ print $2 }' | xargs kill || :
-          ;;
-        rhel)
-            install cloud-init
-        ;;
-      esac
-      exit 0
+      install cloud-init
     Name: image-install-cloud-init
     Path: ""

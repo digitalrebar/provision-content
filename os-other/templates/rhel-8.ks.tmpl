@@ -9,20 +9,19 @@
 {{if eq ( .Param "redhat/kickstart-shell") true}}
 {{if .ParamExists "provisioner-access-key"}}
 sshpw --username={{if .ParamExists "provisioner-default-user"}}{{.Param "provisioner-default-user"}}{{else}}rocketskates{{end}} --sshkey {{.Param "provisioner-access-key"}}
-
 {{else -}}
 sshpw --username={{if .ParamExists "provisioner-default-user"}}{{.Param "provisioner-default-user"}}{{else}}rocketskates{{end}} --iscrypted {{if .ParamExists "provisioner-default-password-hash"}}{{.Param "provisioner-default-password-hash"}}{{else}}$6$TNfj2zjqvI5ICeDM$jMOazmEcMphCFQYd47sCmjtdIkXjI3eegqE17sydyRo7bjCVntZ9dE815KUYnnUCZnvjOdvYbSkK80lnnNgSM1{{end}}
-
 {{end -}}
 {{else -}}
 # no SSH Shell username/key configured
-
 {{end -}}
 
-# set up the install repos from package-repositories
-{{ range .InstallRepos -}}
-{{ .Install }}
-{{ end -}}
+#######################
+####################### Needs .InstallRepos handling for RHEL
+#######################
+# Assumes full DVD ISO is exploded on DRP Endpoint
+url --url={{.Env.PathFor "tftp" ""}}/BasseOs
+url --url={{.Env.PathFor "tftp" ""}}/AppStream
 
 eula --agreed
 timezone Etc/UTC --isUtc
@@ -37,12 +36,20 @@ firewall --disabled
 auth --passalgo=sha512 --useshadow
 selinux --{{.Param "provisioner-selinux"}}
 
-{{if .ParamExists "part-scheme" -}}
-{{$templateName := (printf "part-scheme-%s.tmpl" (.Param "part-scheme")) -}}
-{{.CallTemplate $templateName .}}
-{{else -}}
-{{template "part-scheme-default.tmpl" .}}
-{{end -}}
+# Partition clearing information
+bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
+zerombr
+ignoredisk --only-use={{.Param "operating-system-disk"}}
+#clearpart --none --initlabel
+clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
+
+autopart --type=lvm
+#part /boot --fstype ext4 --size=512 --ondisk={{.Param "operating-system-disk"}}
+#part /boot/efi --fstype vfat --size=512 --ondisk={{.Param "operating-system-disk"}}
+#part swap --recommended
+#part pv.6 --size=1 --grow --ondisk={{.Param "operating-system-disk"}}
+#volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
+#logvol / --fstype xfs --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
 
 # Run the Setup Agent on first boot
 firstboot --enable

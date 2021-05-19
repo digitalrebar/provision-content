@@ -8,18 +8,8 @@
 # classifer to provide custom function blocks to extend the tests you can
 # apply to the classifier
 
-{{ $functParameter := "classify/custom-functions" }}
-{{ if ne 1 (.Param "classify/version" | int) }}
-  {{ if .ParamExists "classify/function-parameter" }}
-    {{ $functParameter = .Param "classify/function-parameter" }}
-  {{ else }}
-    {{ $functParameter = "unknown-function-parameter" }}
-  {{ end }}
-{{ end }}
-
-{{ if .ParamExists $functParameter }}
 {{ $dot := . -}}
-{{range $index, $template := .Param $functParameter -}}
+{{range $index, $template := .Param "classify/custom-functions" -}}
 
 #############################################################################
 # injecting custom template: {{ squote $template }}
@@ -27,6 +17,5 @@
 # end injection of template: {{ squote $template }}
 
 {{ end -}}
-{{ end }}
 ### end custom template injection
 #############################################################################

@@ -13,25 +13,16 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
+      {{ if .ParamExists "edge-lab/reboot-workflow" }}
+      drpcli machines meta set $RS_UUID key icon to "recycle"
+      drpcli machines meta set $RS_UUID key color to "red"
       drpcli machines workflow $RS_UUID "" >/dev/null
-      drpcli machines workflow $RS_UUID {{ .Param "edge-lab/reset-workflow" }} >/dev/null
+      drpcli machines workflow $RS_UUID {{ .Param "edge-lab/reboot-workflow" }} >/dev/null
+      {{ else }}
+      echo "Missing parameter edge-lib/reboot-workflow"
+      exit 1
+      {{ end }}
 
-      # this is going to look like a reboot, fake a powercycle
-      # MUST BE AFTER other machine updates or it will be over-written by next event
-      if drpcli events post '{
-        "Action": "powercycle",
-        "Key": "{{ .Machine.Uuid }}",
-        "Object": {{ .Machine | toJson }},
-        "Principal": "runner:{{ .Machine.Uuid }}",
-        "Type": "machines"
-      }' > /dev/null; then
-        echo "Sending Reboot Event (powercycle)"
-        sleep 5
-      else
-        echo "Warning: failed trying to post Reboot Event (powercycle)"
-      fi
-
-      echo "reboot exit code..."
       exit 192
 Meta:
   icon: "recycle"

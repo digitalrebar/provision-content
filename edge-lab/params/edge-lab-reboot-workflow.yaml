@@ -5,7 +5,6 @@ Documentation: |
   Workflow to set before rebooting system.
 Schema:
   type: "string"
-  default: "discover-base"
 Meta:
   color: "blue"
   icon: "recycle"

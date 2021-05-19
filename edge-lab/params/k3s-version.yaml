@@ -1,0 +1,14 @@
+---
+Name: "k3s/version"
+Description: "k3s version"
+Documentation: |
+  Version of k3s to install.
+
+  Override the default in cluster or global profile to use a different version.
+Schema:
+  type: "string"
+  default: "v1.17.5+k3s1"
+Meta:
+  color: "blue"
+  icon: "hashtag"
+  title: "Community Content Copyright RackN 2019"

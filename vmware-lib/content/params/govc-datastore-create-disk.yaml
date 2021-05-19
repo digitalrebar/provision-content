@@ -3,16 +3,15 @@ Name: "govc/datastore-create-disk"
 Description: "The disk to create a Datastore on, or 'first_available'"
 Documentation: |
   This param sets the disk to create the datastore defined in the param
-  ``govc/datastore-create-name``.  The param can be set to a rule that
+  ``govc/datastore-datastore-name``.  The param can be set to a rule that
   will search for a disk, or directly to a specific disk.
 
-  Supported *rules* and direct disk definition settings:
+  Supported _rules_ and direct disk definition settings:
 
-    * ``datastore_mappings``
     * ``first_available``
     * ``disk=t10.ATA_____Micron_M500DC_MTFDDAK120MBB_____________________14260DAD9402``
-
-  Defaults to ``datastore_mappings``.
+  
+  Defaults to ``first_available``.
 
   The ``first_available`` rule attempts to filter out used disk devices, then
   chooses the first of any remaining disks that are unused.
@@ -21,13 +20,9 @@ Documentation: |
             ``govc host.esxcli storage core path list`` (after setting up the appropriate
             ``GOVC_`` environment variables, of course.).
 
-  .. warning:: Setting this param to ``first_available``, and setting a Param
-               ``esxi/datastore-mappings`` type of ``first_available`` is not
-               supported and will result in a failure error.
-
 Schema:
   type: "string"
-  default: "datastore_mappings"
+  default: "first_available"
 Meta:
   color: "blue"
   icon: "hdd"

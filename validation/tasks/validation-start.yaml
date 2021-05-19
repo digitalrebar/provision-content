@@ -16,8 +16,6 @@ Meta:
   feature-flags: "sane-exit-codes"
 Templates:
 - Name: "validation_start.sh"
-  Meta:
-    OS: "linux,darwin"
   Contents: |
     #!/bin/bash
     # Copyright RackN, 2019
@@ -60,16 +58,3 @@ Templates:
     drpcli machines remove $RS_UUID param "validation/errors" >/dev/null || :
     drpcli machines add $RS_UUID param "validation/errors" to "[]" >/dev/null
 
-- Name: "validation_start.ps1"
-  Meta:
-    OS: "windows"
-  Contents: |
-    Write-Host "Validation start not implemented for windows"
-    exit 0
-- Name: "validation_start-esxi.sh"
-  Meta:
-    OS: "esxi"
-  Contents: |
-    #!/bin/sh
-    echo "Validation start not implemented for esxi"
-    exit 0

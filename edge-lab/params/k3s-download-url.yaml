@@ -1,0 +1,13 @@
+---
+Name: "k3s/download-url"
+Description: "k3s download location"
+Documentation: |
+  Points to Rancher github for inital download  
+Schema:
+  type: "string"
+  default: "https://github.com/rancher/k3s/releases"
+Meta:
+  color: "blue"
+  clipboard: "yes"
+  icon: "download"
+  title: "Community Content Copyright RackN 2019"

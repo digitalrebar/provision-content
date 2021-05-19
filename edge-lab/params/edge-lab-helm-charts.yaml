@@ -1,0 +1,141 @@
+---
+Name: "edge-lab/helm-charts"
+Description: "Helm Charts to Install"
+Documentation: |
+  .. _krib_helm:
+
+  Install Helm Charts
+  +++++++++++++++++++
+
+  Array of charts to install via Helm.  The list will be followed in order.
+
+  Work is idempotent: No action is taken if charts are already installed.
+
+  Fields: chart and name are required.
+
+  Options exist to inject additional control flags into helm install instructions:
+
+  * name: name of the chart (required)
+  * chart: reference of the chart (required) - may rely on repo, path or other helm install [chart] standard
+  * namespace: kubernetes namespace to use for chart (defaults to none)
+  * params: map of parameters to include in the helm install (optional).  Keys and values are converted to --[key] [value] in the install instruction.
+  * set: array of values to set in the helm install (optional).  values are converted to --set [value] in the install instruction.
+  * targz (optional) provides a location for a tar.gz file containing charts to install. Path is relative.
+  * repos (optional) adds the requested repos to helm using `helm repo add` before installing helm.  syntax is `[repo name]: [repo path]`.
+  * sleep (optional): time in seconds to wait after install (defaults to none)
+  * postkubectl (optional) map of kubectl [request] commands to run after the helm install - stored using the map key
+  * prekubectl (optional) array of kubectl [request] commands to run before the helm install
+  * git (optional): array of urls for cloning repos into local path
+
+  NOT YET PORTED FROM KRIB
+  * wait: wait for name (and namespace if provided) to be running before next action
+  * templates (optional) map of DRP templates keyed to the desired names (must be uploaded!) to render before doing other work.
+  * templatesbefore (optional) expands the provided template files inline before the helm install happens.
+  * templatesafter (optional) expands the provided template files inline after the helm install happens
+
+  example:
+
+    ::
+
+      [
+        {
+          "chart": "stable/mysql",
+          "name": "mysql"
+        }, {
+          "chart": "openfaas/openfaas",
+          "name": "openfaas",
+          "namespace": "openfaas",
+          "git": [
+            "https://github.com/openfaas/faas-netes/"
+          ],
+          "repos": {
+            "openfaas":"https://openfaas.github.io/faas-netes/"
+            },
+          "prekubectl": [
+             "apply -f ./faas-netes/namespaces.yml",
+             "apply -f ./faas-netes/yaml_amd64"
+          ],
+          "postkubectl": {
+            "openfaas/password": "-n openfaas get secret basic-auth -o jsonpath=\"{.data.basic-auth-password}\" | base64 --decode"
+          },
+          "set": [
+            "functionNamespace=openfaas-fn",
+            "generateBasicAuth=true"
+          ],
+          "sleep": 10
+        }
+      ]
+
+Schema:
+  default: []
+  items:
+    properties:
+      chart:
+        type: string
+      kubectlafter:
+        default: []
+        items:
+          type: string
+        type: array
+      kubectlbefore:
+        default: []
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      namespace:
+        type: string
+      params:
+        default: {}
+        properties:
+          repo:
+            type: string
+          set:
+            type: string
+          values:
+            type: string
+        type: object
+      repos:
+        type: object
+      sleep:
+        default: 10
+        type: integer
+      targz:
+        type: string
+      templates:
+        type: object
+      templatesafter:
+        default: []
+        items:
+          type: object
+        type: array
+      templatesbefore:
+        default: []
+        items:
+          properties:
+            name:
+              type: string
+            nodes:
+              type: string
+              values:
+                - all
+                - masters
+                - leader
+            runIfInstalled:
+              default: false
+              type: boolean
+          type: object
+        type: array
+      wait:
+        default: false
+        type: boolean
+    required:
+      - chart
+      - name
+    type: object
+  type: array
+Meta:
+  color: "blue"
+  icon: "map outline"
+  title: "Community Content"

@@ -14,8 +14,7 @@ OptionalParams: []
 Prerequisites: []
 RequiredParams: []
 Templates:
-  - Name: "proxmox-lab-destroy-networks"
-    Contents: |-
+  - Contents: |-
       #!/usr/bin/env bash
       # Proxmox destroy all bridge networks
 
@@ -34,3 +33,8 @@ Templates:
       echo "Nuke all configuration files matching /etc/network/interfaces.d/${BASE}\*..."
       rm -f /etc/network/interfaces.d/${BASE}*
 
+    ID: ""
+    Link: ""
+    Meta: {}
+    Name: "proxmox-lab-destroy-networks"
+    Path: ""

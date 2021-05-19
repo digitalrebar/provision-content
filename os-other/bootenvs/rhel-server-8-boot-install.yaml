@@ -83,6 +83,6 @@ Templates:
     Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
     ID: default-grub.tmpl
   - Name: compute.ks
+    ID: rhel-8.ks.tmpl
     Path: '{{.Machine.Path}}/compute.ks'
-    ID: select-kickseed.tmpl
 

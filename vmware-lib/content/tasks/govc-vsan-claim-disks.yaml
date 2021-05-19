@@ -27,20 +27,16 @@ OptionalParams:
   - "esxi/insecure-password"
   - "esxi/vsan-nodes-override"
   - "esxi/vsan-data/sub-cluster-uuid"
-  - "esxi/vsan-tag-only"
 Templates:
   - Name: "esxi-vsan-cluster-operations.sh"
     Contents: |
       #!/usr/bin/env bash
       # Build the VSAN cluster from the hosts.
 
-      ### begin setup.tmpl
+      ### setup.tmpl
       {{ template "setup.tmpl" . }}
 
-      ### begin govc-lib.sh.tmpl
-      {{ template "govc-lib.sh.tmpl" . }}
-
-      ### begin esxi-vsan-cluster-operations.sh
+      ### esxi-vsan-cluster-operations.sh
       ON='{{ .Param "esxi/vsan-enabled" }}'
       [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
 
@@ -63,13 +59,8 @@ Templates:
       {{ if .ParamExists "esxi/vsan-nodes-override" }}
       NODES="{{ .Param "esxi/vsan-nodes-override" }}"
       {{ else -}}
-      NODES=$(get_cluster_members $CLUSTER)
+      NODES=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
       {{ end }}
-
-      [[ -z "$NODES" ]] && xiterr 1 "No nodes to operate on were found (check esxi/cluster-name filter, and esxi/vsan-nodes-overrides)."
-
-      # check if we should only tag but not claim disks
-      TAG_ONLY='{{ .Param "esxi/vsan-tag-only" }}'
 
       SELECTION_RULE='{{ .Param "esxi/vsan-disk-selection-rule" }}'
 
@@ -90,19 +81,12 @@ Templates:
         echo ">> NOTICE: 'esxi/vsan-zero-count-fatal' is 'false'"
         echo "           any single node failure to acquire disks is hunky dory"
         {{ end }}
-        if [[ "$TAG_ONLY" == "true" ]]
-        then
-          echo ">> NOTICE: 'esxi/vsan-tag-only' param is 'true', will not claim disks as requested."
-          echo "           Disks will only be tagged for VSAN use."
-        else
-          echo ">> NOTICE: Disks will be both tagged and claimed for VSAN use."
-        fi
         echo "----------------------------------------------------------------------------------------"
         echo ""
 
         for NODE in $NODES
         do
-          ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
+          ADDR=$(get_member_name)
           DISK_JSON=/tmp/claim-disks-$$.$NODE.$ADDR.log
           DISKS=/tmp/disks-$$.$NODE.$ADDR.log
           HDR=1
@@ -132,6 +116,7 @@ Templates:
 
           if [[ -n "$DISKS_CACHE" && -n "$DISKS_CAPACITY" ]]
           then
+            _my_args=$(build_args)
             echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
             echo ""
 
@@ -149,16 +134,10 @@ Templates:
               fi
             done
 
-            if [[ "$TAG_ONLY" == "true" ]]
-            then
-              echo "Skipping 'vsan storage add' disk claiming as requested."
-            else
-              _my_args=$(build_args)
-              echo "CMD TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
-              govc host.esxcli vsan storage add $_my_args
-              echo ""
-              echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-            fi
+            echo "CMD TO RUN: 'govc host.esxcli vsan storage add $_my_args'"
+            govc host.esxcli vsan storage add $_my_args
+            echo ""
+            echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
           fi
 
           echo ""
@@ -202,6 +181,14 @@ Templates:
       param_get() {
         local _param=$(drpcli profiles get "$_name" param "$_param" | jq -r '.')
         [[ -n "$_param" && "$_param" != "null" ]] && echo "$_param"
+      }
+
+      # TODO:  Try to set based on Machien Name, FQDN, or fallback to IP Address.
+      #        This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        ADDR=$(drpcli machines show Name:$NODE --slim=Params,Meta | jq -r '.Address')
+        echo $ADDR
       }
 
       set_govc_env() {

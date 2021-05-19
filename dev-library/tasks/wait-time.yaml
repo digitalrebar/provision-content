@@ -29,19 +29,14 @@ Templates:
       icon='black'
     fi
 
-    wait={{ (.Param "dev/wait-time") }}
-    if [[ $wait -lt 0 ]]; then
-      wait=$((1 + $RANDOM % 10))
-    fi
-
+    {{ $wait := (.Param "dev/wait-time") }}
     {{ range $index, $icon := (.Param "dev/wait-icons") -}}
-      echo "wait $wait cycle {{$index}}"
+      echo "wait cycle {{$index}}"
       drpcli machines meta set $RS_UUID key icon to "{{$icon}}"
       drpcli machines meta set $RS_UUID key color to "brown"
-      sleep $wait
+      sleep {{ $wait }}
     {{ else -}}
-      echo "no icons defined, just wait $wait once"
-      sleep $wait
+      echo "no icons defined, no wait"
       exit 0
     {{ end -}}
 

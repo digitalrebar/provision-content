@@ -2,28 +2,12 @@
 Name: dell-dsu-base-url
 Description: The base URL that the Dell System Update yum repos live at.
 Documentation: |
-  The Dell System Update (DSU) repositories contain BIOS and firmware
-  updates for all supported Dell servers (in the ``os_independent`` repo)
-  as well as OpenManage Server Administrator (OMSA) (in the ``os_dependent`` repo).
+  The Dell System Update repositories contain BIOS and firmware
+  updates for all supported Dell servers (in the os_independent repo)
+  as well as OpenManage Server Administrator (in the os_dependent repo).
 
   You can find more information on DSU and the update process we take advantage of
   at https://linux.dell.com/repo/hardware/dsu/
-
-  If the the firmware or BIOS components are mirrored, you can specify that
-  location; however, the mirror structures must match the Dell repository
-  layout.
-
-  If the Param ``dell-dsu-block-release`` is not set, then the Base URL will
-  be used directly.  If a specific block release is defined, then the trailing
-  ``/dsu`` path part will be trimmed, and if not already specified, the block
-  release version will be prefixed with ``DSU_``.
-
-  This results in the following example scenarios:
-
-    * ``dell-dsu-block-release = ""`` = ``http://linux.dell.com/repo/hardware/dsu``
-    * ``dell-dsu-block-release = "20.08.01"`` = ``http://linux.dell.com/repo/hardware/DSU_20.08.01``
-    * ``dell-dsu-block-release = "DSU_19.09.01"`` = ``http://linux.dell.com/repo/hardware/DSU_19.08.01``
-
 Schema:
   type: string
   default: http://linux.dell.com/repo/hardware/dsu

@@ -1,8 +1,6 @@
 ---
-Name: "centos-drp-only-repos"
 Description: "A task to force the machine to switch to DRP hosted-only centos repos."
-Documentation: |
-  NOTICE: If you are installing WITHOUT internet access, set ``package-repositories`` to ``[]``
+Name: "centos-drp-only-repos"
 OptionalParams:
   - "package-repositories"
 Templates:

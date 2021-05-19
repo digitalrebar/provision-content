@@ -16,22 +16,9 @@ Meta:
   feature-flags: "sane-exit-codes"
 Templates:
 - Name: "flexiflow_stop.sh"
-  Meta:
-    OS: "linux,darwin"
   Contents: |
     #!/bin/bash
     # Copyright RackN, 2019
 
     echo "End of the FlexiFlow stage reached."
-    exit 0
-- Name: "flexiflow_stop.ps1"
-  Meta:
-    OS: "windows"
-  Contents: |
-    exit 0
-- Name: "flexiflow_stop-esxi.sh"
-  Meta:
-    OS: "esxi"
-  Contents: |
-    #!/bin/sh
     exit 0

@@ -2,8 +2,6 @@
 Description: "Create Shared Profile & Elect Leader"
 Name: "cluster-setup"
 Documentation: |
-  DEPRECATED in v4.6
-  
   Creates the Cluster for Digital Rebar
 
     1. will verify machine is in a shared profile

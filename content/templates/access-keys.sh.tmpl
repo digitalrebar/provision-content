@@ -1,6 +1,24 @@
 #!/bin/bash
 #
-# See task definition for more information.
+# This template populates the root's authorized keys file
+# and makes sure that the sshd config for PermitRootLogin is populated.
+#
+# Runs as part of a shell script for kickstart or net-post-install
+# The template does nothing if access-keys is undefined
+#
+# Required Parameters: access-keys
+# Optional Parameters: access-ssh-root-mode
+#
+# Parameter YAML format:
+#
+# access-keys:
+#   greg:  ssh-rsa key
+#   greg2:  ssh-rsa key
+# access-ssh-root-mode: "without-password|yes|no|forced-commands-only"
+#
+# Defaults:
+# access-keys - empty
+# access-ssh-root-mode - defaults to "without-password" if unspecified
 #
 
 {{if or (.ParamExists "access-keys") (or (.ParamExists "access-keys-global") (.ParamExists "access-shared")) }}
@@ -25,47 +43,13 @@ cat >>$KEYS <<EOFSSHACCESS
 {{end -}}
 {{end -}}
 EOFSSHACCESS
-
 # if the we are called multiple times we get duplicate keys, lets fix that
 cat $KEYS | sort -u > $TMP_KEYS
 [[ -s "$TMP_KEYS" ]] && cp $TMP_KEYS $KEYS
 [[ -f "$TMP_KEYS" ]] && rm -f $TMP_KEYS
 chmod 600 $KEYS
-
-{{if .ParamExists "access-keys" -}}
-{{range $key := .Param "access-keys" -}}
-{{- $k := split " " $key -}}
-echo "  access-keys added: {{ $k._2 }}"
-{{end -}}
-{{else -}}
-echo "  access-keys: none defined"
-{{end -}}
-{{if .ParamExists "access-keys-shared" -}}
-{{range $key := .Param "access-keys-shared" -}}
-{{- $k := split " " $key -}}
-echo "  access-keys-shared added: {{ $k._2 }}"
-{{end -}}
-{{else -}}
-echo "  access-keys-shared: none defined"
-{{end -}}
-{{if .ParamExists "access-keys-global" -}}
-{{range $key := .Param "access-keys-global" -}}
-{{- $k := split " " $key -}}
-echo "  access-keys-global added: {{ $k._2 }}"
-{{else -}}
-echo "  access-keys-global: none defined"
-{{end -}}
-{{end -}}
-
-{{else}}
-echo "No SSH keys added: no values for access-keys, access-keys-shared or access-keys-global"
 {{end}}
 
-{{if .ParamExists "access-ssh-template" }}
-cat >/etc/ssh/sshd_config <<EOFSSHCONFIG
-{{ .CallTemplate (.Param "access-ssh-template") . }}
-EOFSSHCONFIG
-{{ else }}
 echo "Updating SSHD default values"
 # This is Ubuntu-ish - so keep it - though it doesn't really work properly without the below as well.
 sed --in-place -r -e '/^#?PermitRootLogin/ s/^#//' -e '/^#?PermitRootLogin/ s/prohibit-password/{{if .ParamExists "access-ssh-root-mode"}}{{.Param "access-ssh-root-mode"}}{{else}}without-password{{end}}/' /etc/ssh/sshd_config
@@ -77,19 +61,6 @@ sed --in-place -r -e '/PermitRootLogin/ s/PermitRootLogin .*/PermitRootLogin {{i
 sed --in-place -r -e '/^#?PasswordAuthentication/ s/^#//' /etc/ssh/sshd_config
 sed --in-place -r -e '/PasswordAuthentication/ s/PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 {{ end }}
-{{ end }}
-
-{{if .ParamExists "access-ssh-parameters" }}
-{{ range $k, $v := .Param "access-ssh-parameters" }}
-if grep -q "{{$k}} " /etc/ssh/sshd_config ; then
-    sed --in-place -r -e '/^#?{{$k}}/ s/^#//' /etc/ssh/sshd_config
-    sed --in-place -r -e '/{{$k}}/ s/{{$k}} .*/{{$k}} {{$v}}/' /etc/ssh/sshd_config
-else
-    sed --in-place "$ a\{{$k}} {{$v}}" /etc/ssh/sshd_config
-fi
-  {{ end }}
-{{ end }}
-
 {{ end }}
 
 # Restart sshd but os badness.

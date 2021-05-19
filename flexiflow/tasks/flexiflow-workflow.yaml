@@ -7,8 +7,6 @@ Meta:
   title: "RackN Content"
 Templates:
   - Name: "flexiflow-workflow.sh"
-    Meta:
-      OS: "linux,darwin"
     Contents: |
       #!/usr/bin/env bash
 
@@ -30,75 +28,4 @@ Templates:
       {{ end -}}
 
       exit 0
-  - Name: "flexiflow-workflow-esxi.ps1"
-    Meta:
-      OS: "windows"
-    Contents: |
-      {{if .Param "flexiflow/maintenance-mode" }}
-      Write-Host "Complete maintenance mode and return to local"
-      & \curtin\drpcli.exe -T {{.GenerateInfiniteToken}} -E {{.ApiURL}} machines remove {{.Machine.UUID}} param "flexiflow/maintenance-mode"
-      & \curtin\drpcli.exe -T {{.GenerateInfiniteToken}} -E {{.ApiURL}} machines workflow {{.Machine.UUID}} local
-      exit $lastExitCode
-      {{ end }}
 
-      {{ if .ParamExists "flexiflow/workflow" -}}
-      {{ $newworkflow := .Param "flexiflow/workflow" }}
-      Write-Host "Assigning next workflow to {{$newworkflow}}"
-      & \curtin\drpcli.exe -T {{.GenerateInfiniteToken}} -E {{.ApiURL}} machines workflow {{.Machine.UUID}} {{$newworkflow}}
-      exit $lastExitCode
-      {{else}}
-      Write-Host "No workflow to move to."
-      exit 0
-      {{end}}
-  - Name: "flexiflow-workflow-esxi.sh"
-    Meta:
-      OS: "esxi"
-    Contents: |
-      #!/usr/bin/env python
-
-      import os, urllib, urllib.request, socket, ssl, time
-
-      {{ $newworkflow := "" }}
-      {{if .ParamExists "flexiflow/workflow"}}
-        {{ $newworkflow = .Param "flexiflow/workflow" }}
-      {{end}}
-
-      {{if .Param "flexiflow/maintenance-mode" }}
-      print('Complete maintenance mode and return to local')
-
-      # drpcli machines remove {{.Machine.UUID}} param "flexiflow/maintenance-mode"
-      url = '{{.ApiURL}}/api/v3/machines/{{.Machine.UUID}}/params/flexiflow/maintenance-mode'
-      print(url)
-      req = urllib.request.Request(url, method='DELETE')
-      req.add_header('Content-Type', 'application/json')
-      req.add_header('Authorization','Bearer {{.GenerateInfiniteToken}}')
-      rep = urllib.request.urlopen(req,context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
-      print(rep)
-
-      {{ $newworkflow = "local" }}
-      {{end}}
-
-      {{if eq $newworkflow "" }}
-      print("No workflow to move to.")
-      exit 0
-      {{else}}
-      # drpcli machines workflow {{.Machine.UUID}} {{$newworkflow}}
-      print("Assigning next workflow to {{$newworkflow}}")
-
-      url = '{{.ApiURL}}/api/v3/machines/{{.Machine.UUID}}'
-      print(url)
-
-      # Create the json blob needed to call the action
-      data = b'''
-      {
-        "Workflow": "{{$newworkflow}}"
-      }
-      '''
-
-      print(data)
-      req = urllib.request.Request(url, method='PUT',data=data)
-      req.add_header('Content-Type', 'application/json')
-      req.add_header('Authorization','Bearer {{.GenerateInfiniteToken}}')
-      rep = urllib.request.urlopen(req,context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
-      print(rep)
-      {{end}}

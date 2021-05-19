@@ -2,20 +2,7 @@
 Name: rhel-server-8-dvd-install
 Description: Install BootEnv for RedHat 8 - full DVD ISO
 Documentation: |
-  This BootEnv installs the RHEL Server 8 operating system from the full dvd
-  ISO. By default, it will install as a trial with no registration. This is
-  specified by the redhat/subscription-username parameter with the default
-  username of "trial" and redhat/subscription-password blank. Adding a
-  password and/or changing the username will be verified by RedHat's servers
-  and the install will hang if it fails. You can also completely skip
-  registration even with the username and password parameters set by adding
-  the redhat/subscription-skip-activation parameter.
-
-  The ISO can be downloaded from the RedHat Access website with an authorized
-  login and account.  The website is typically found at:
-
-    * https://access.redhat.com/downloads/content/479/ver=/rhel---8/
-
+  This BootEnv installs the RHEL Server 8 operating system from the full dvd ISO. By default, it will install as a trial with no registration. This is specified by the redhat/subscription-username parameter with the default username of "trial" and redhat/subscription-password blank. Adding a password and/or changing the username will be verified by RedHat's servers and the install will hang if it fails. You can also completely skip registration even with the username and password parameters set by adding the redhat/subscription-skip-activation parameter.
 Meta:
   color: red
   feature-flags: change-stage-v2
@@ -38,11 +25,11 @@ OS:
         {{.Param "kernel-console"}}
       Initrds:
         - images/pxeboot/initrd.img
-      IsoFile: "rhel-8.3-x86_64-dvd.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/redhat/rhel/8/rhel-8.3-x86_64-dvd.iso"
+      IsoFile: "rhel-8.2-x86_64-dvd.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/redhat/rhel/8/rhel-8.2-x86_64-dvd.iso"
       Kernel: images/pxeboot/vmlinuz
       Loader: ""
-      Sha256: "30fd8dff2d29a384bd97886fa826fa5be872213c81e853eae3f9d9674f720ad0"
+      Sha256: "7fdfed9c7cced4e526a362e64ed06bcdc6ce0394a98625a40e7d05db29bf7b86"
 Loaders:
   amd64-uefi: EFI/BOOT/BOOTX64.EFI
 OnlyUnknown: false
@@ -95,6 +82,6 @@ Templates:
     Path: '{{.Env.PathFor "tftp" ""}}/EFI/BOOT/grub.cfg-{{.Machine.HexAddress}}'
     ID: default-grub.tmpl
   - Name: compute.ks
-    ID: select-kickseed.tmpl
+    ID: rhel-8.ks.tmpl
     Path: '{{.Machine.Path}}/compute.ks'
 

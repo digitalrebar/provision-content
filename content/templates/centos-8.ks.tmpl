@@ -16,13 +16,16 @@ firewall --disabled
 auth --passalgo=sha512 --enableshadow
 selinux --disabled
 
-{{if .ParamExists "part-scheme" -}}
-{{$templateName := (printf "part-scheme-%s.tmpl" (.Param "part-scheme")) -}}
-{{.CallTemplate $templateName .}}
-{{else -}}
-{{template "part-scheme-default.tmpl" .}}
-{{end -}}
-
+bootloader --location=mbr --driveorder={{.Param "operating-system-disk"}} --append="rhgb quiet"
+zerombr
+ignoredisk --only-use={{.Param "operating-system-disk"}}
+clearpart --all --initlabel --drives={{.Param "operating-system-disk"}}
+part /boot --fstype ext4 --size=512 --ondisk={{.Param "operating-system-disk"}}
+part /boot/efi --fstype vfat --size=512 --ondisk={{.Param "operating-system-disk"}}
+part swap --recommended
+part pv.6 --size=1 --grow --ondisk={{.Param "operating-system-disk"}}
+volgroup {{.Machine.ShortName}} --pesize=32768 pv.6
+logvol / --fstype xfs --name=lv_root --vgname={{.Machine.ShortName}} --size=1 --grow --maxsize=10240
 text
 skipx
 reboot {{if .Param "kexec-ok" }}--kexec{{end}}
@@ -43,12 +46,6 @@ reboot {{if .Param "kexec-ok" }}--kexec{{end}}
 {{$element}}
 {{end -}}
 {{end -}}
-%end
-
-%pre
-{{ range $intf := .Param "kickstart/extra-ifs" }}
-nmcli con add type ethernet con-name {{ $intf }} ifname {{ $intf }}
-{{end}}
 %end
 
 %post

@@ -11,7 +11,7 @@ Documentation: |
   NOTE - Default Ubuntu ISOs will attempt to check internet repositories, this
   can cause problems during provisioning if your environment does not have
   outbound access.  Workaround this by defining Options 3 (Gateway) and 6 (DNS)
-  for your Subnet settings. See https://provision.readthedocs.io/en/latest/doc/kb/kb-00033.html
+  for your Subnet settings.
 Meta:
   type: "os"
   color: "purple"
@@ -25,9 +25,9 @@ OS:
   Version: "18.04"
   SupportedArchitectures:
     amd64:
-      IsoFile: "ubuntu-18.04.5-server-amd64.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.5-server-amd64.iso"
-      IsoSha256: "8c5fc24894394035402f66f3824beb7234b757dd2b5531379cb310cedfdf0996"
+      IsoFile: "ubuntu-18.04.4-server-amd64.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.4-server-amd64.iso"
+      IsoSha256: "e2ecdace33c939527cbc9e8d23576381c493b071107207d2040af72595f8990b"
       Kernel: "install/netboot/ubuntu-installer/amd64/linux"
       Initrds:
         - "install/netboot/ubuntu-installer/amd64/initrd.gz"
@@ -45,9 +45,9 @@ OS:
         --
         {{.Param "kernel-console"}}
     arm64:
-      IsoFile: "ubuntu-18.04.5-server-arm64.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.5-server-arm64.iso"
-      IsoSha256: "2cd7742c91bbb325622e8314500106cfa1074fcf5a6a380e8878bbbb9974e9f3"
+      IsoFile: "ubuntu-18.04.4-server-arm64.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/canonical/ubuntu/18.04/ubuntu-18.04.4-server-arm64.iso"
+      IsoSha256: "8eb3c1866ca3b68e4cd22ec9d7c02f97f4d2b3713447370f3c252a4189116824"
       Kernel: "install/netboot/ubuntu-installer/arm64/linux"
       Loader: "grubarm64.efi"
       Initrds:

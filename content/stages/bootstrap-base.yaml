@@ -6,14 +6,12 @@ Documentation: |
 
   The following things are done:
 
-  * Run gohai on endpoint machine
   * Make sure the prefs are set correctly
   * Make and install a public/private key pair for ssh access to clients.
   * Make sure sledgehammer iso is loaded
   * Lock the machine to prevent accidental changes
 
 Tasks:
-  - "gohai"
   - "bootstrap-prefs"
   - "bootstrap-ssh"
   - "bootstrap-discovery-iso"

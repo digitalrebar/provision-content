@@ -17,20 +17,7 @@ Documentation: |
 RequiredParams:
   - rsa/key-private
   - rsa/key-user
-Templates:  
-  - ID: discovery-common-bootstrap.sh.tmpl
-    Name: discovery-common-bootstrap.sh
-    Path: discovery-common-bootstrap.sh
-  - Contents: |-
-      #!/bin/bash
-      # replaces join-up.sh via the /machines/join-up.sh
-      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-      set -x
-      . discovery-common-bootstrap.sh
-      export RS_UUID={{ .Machine.Uuid }}
-      switch_to_control
-    Name: join-up.sh
-    Path: join-up.sh
+Templates:
   - Contents: |-
       #!/bin/bash
       # RackN Copyright 2020
@@ -39,18 +26,12 @@ Templates:
 
       {{template "setup.tmpl" .}}
 
-      {{ if empty .Machine.Address }}
-      echo "ERROR: missing Machine Address - cannot proceed"
-      exit 1
-      {{ end }}
-      
       # we need a keypair for Ansible
       echo "Retrieving SSH key from Machine Params rsa/key-*"
       tee rsa-{{.Machine.Name}} >/dev/null << EOF
       {{.Param "rsa/key-private" | replace "|" "\n" }}
       EOF
       chmod 600 rsa-{{.Machine.Name}}
-      {{ $user := .Param "rsa/key-user" }}
 
       export ANSIBLE_HOST_KEY_CHECKING=False
 
@@ -60,10 +41,9 @@ Templates:
       ---
       ### Run Join-Up via Ansible
       - hosts: all
-        remote_user: "{{$user}}"
+        remote_user: "{{ .Param "rsa/key-user" }}"
         connection: "ssh"
         gather_facts: false
-        debugger: {{ if .Param "rs-debug-enable" }}on_failed{{ else }}never{{ end }}
         become: true
 
         tasks:
@@ -72,40 +52,10 @@ Templates:
             wait_for_connection:
               timeout: 300
 
-          {{if .ParamExists "access-keys"}}
-          {{range $name, $key := .Param "access-keys"}}
-          - name: Set authorized key from access-keys
-            authorized_key:
-              user: "{{$user}}"
-              state: present
-              key: "{{$key}}"
-          {{end}}
-          {{end}}
-
-          {{if .ParamExists "access-keys-global"}}
-          {{range $name, $key := .Param "access-keys-global"}}
-          - name: Set authorized key from access-keys-global
-            authorized_key:
-              user: "{{$user}}"
-              state: present
-              key: "{{$key}}"
-          {{end}}
-          {{end}}
-
-          {{if .ParamExists "access-keys-shared"}}
-          {{range $name, $key := .Param "access-keys-shared"}}
-          - name: Set authorized key from access-keys-shared
-            authorized_key:
-              user: "{{$user}}"
-              state: present
-              key: "{{$key}}"
-          {{end}}
-          {{end}}
-
           - name: check if drpcli is running (makes join idempotent)
             service_facts:
 
-          - name: "drpcli is installed? - skip if drpcli is installed"
+          - name: "drpcli is installed - no further actions"
             debug:
               msg: "DRPCLI status is {{`{{ services['drpcli.service'].status }}`}}"
             when: "'drpcli.service' in services"
@@ -117,83 +67,31 @@ Templates:
               dest: /etc/rs-uuid
             when: "'drpcli.service' not in services"
 
-          - name: "transfer join-up script"
-            copy:
-              src: "./join-up.sh"
+          - name: download join-up script
+            become: true
+            get_url:
+              url: "{{.ProvisionerURL}}/machines/join-up.sh"
               dest: "./join-up.sh"
               mode: 0755
-
-          - name: "transfer discovery-common-bootstrap.sh script"
-            copy:
-              src: "./discovery-common-bootstrap.sh"
-              dest: "./discovery-common-bootstrap.sh"
-              mode: 0755
+            when: "'drpcli.service' not in services"
 
           - name: run join-up script
             become: true
             shell: "nohup ./join-up.sh >/dev/null 2>&1 &"
             when: "'drpcli.service' not in services"
-
-          - name: wait for joinup
-            pause:
-              seconds: 10
-            when: "'drpcli.service' not in services"
-
-          - name: check for drpcli pids (makes sure we started)
-            shell: pidof drpcli
-            register: drpcli_pids
-            ignore_errors: true
-
-          - name: Printing the process IDs obtained
-            debug:
-              msg: "PIDS of DRPCLI: {{`{{drpcli_pids.stdout}}`}}"
-
-          - name: rerun join-up script if no pids - skip is normal
-            become: true
-            shell: "nohup ./join-up.sh >/dev/null 2>&1 &"
-            when: drpcli_pids.stdout == ""
-
-          - name: wait for joinup second time
-            pause:
-              seconds: 10
-            when: drpcli_pids.stdout == ""
-
-          - name: last chance for pids of drpcli [fail if none]
-            shell: pidof drpcli
-            when: "'drpcli.service' not in services"
       EOF
 
-      {{ if .Param "rs-debug-enable" }}
-      echo "========= DEBUG output playbook ========="
-      cat join-up.yaml
-      echo "========= DEBUG output playbook ========="
-      {{ end }}
-
       echo "Prevent the task list from restarting!"
-      drpcli machines set $RS_UUID param start-over to false > /dev/null
-
-      # this is going to look like a reboot, fake a powercycle
-      # MUST BE AFTER other machine updates or it will be over-written by next event
-      if drpcli events post '{
-        "Action": "powercycle",
-        "Key": "{{ .Machine.Uuid }}",
-        "Object": {{ .Machine | toJson }},
-        "Principal": "runner:{{ .Machine.Uuid }}",
-        "Type": "machines"
-      }' > /dev/null; then
-        echo "Sending Reboot Event (powercycle)"
-      else
-        echo "Warning: failed trying to post Reboot Event (powercycle)"
-      fi
-
-      echo "REMINDER: SSH user, {{ .Param "rsa/key-user" }}, must be available on target o/s!"
+      drpcli machines set $RS_UUID param start-over to false
 
       echo "Run Join-Up Playbook using $(ansible-playbook --version)"
       ansible-playbook \
         -i {{ .Machine.Address }}, \
         --private-key=rsa-{{ .Machine.Name }} \
         join-up.yaml
-     
+
+      drpcli machines meta set $RS_UUID key color to "green"
+      
       echo "Done"
     Name: "Run Playbooks"
 Meta:

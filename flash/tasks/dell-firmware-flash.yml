@@ -12,8 +12,6 @@ Templates:
 
       {{ template "setup.tmpl" . }}
 
-      {{ template "set-proxy-servers.sh.tmpl" .}}
-
       skip_flash="{{.Param "skip-flash"}}"
       if [[ $skip_flash = true ]]; then
           echo "Skipping all flash operations due to skip-flash being true"

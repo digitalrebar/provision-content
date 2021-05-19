@@ -2,8 +2,6 @@
 Name: "cluster-step"
 Description: "Waits for machine to be top of queue (use before cluster-remove!)"
 Documentation: |
-  DEPRECATED IN v4.6
-  
   Waits until machine is in *Nth* (or earlier) position.
 
   Replies on ``cluster-remove`` to advance queue.

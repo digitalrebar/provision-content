@@ -2,7 +2,6 @@
 Name: "cluster-setup"
 Description: "Setup cluster leader and members"
 Documentation: |
-  DEPRECATED in v4.6
   Initialize Cluster using Digital Rebar Patterns
 
   1. will verify machine is in a shared profile

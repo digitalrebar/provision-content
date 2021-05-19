@@ -1,6 +1,7 @@
 ---
 Name: dell-dsu-block-release
-Description: The block release to pull firmware and OMSA from.  Defaults to the latest block release.
+Description: The block release to pull firmware and OMSA from.  Defaults to the latest block
+  release.
 Documentation: |
   Dell releases updates to its firmware on a block schedule (usually
   once a month) and the tooling assumes that all firmware in a block
@@ -11,26 +12,11 @@ Documentation: |
 
   Block releases are named according to the following format:
 
-    * ``YY.MM.NN``
+    YY.MM.NN
 
-  Where:
-
-    * ``YY`` is the last two digits of the year
-    * ``MM`` is the month
-    * ``NN`` is the nth release in a month, starting at 00
-
-  An example value:
-
-    * ``20.08.01``
-
-  Block release versions can be found at:
-
-    * https://linux.dell.com/repo/hardware/
-
-  .. note:: The repo mirror directories contain the prefix ``DSU_`` in front
-            of the BlocK Release number.  This will be automatically added,
-            if not specified in the ``dell-dsu-block-release`` Param value.
-
+  YY is the last two digits of the year
+  MM is the month
+  NN is the nth release in a month, starting at 00
 Schema:
   type: string
   default: ''

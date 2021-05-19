@@ -12,7 +12,7 @@ Documentation: |
 RequiredParams:
   - cluster/profile
   - cluster/leaders
-  - kube-lib/kube-config
+  - k3s/admin-conf
   - kube-lib/dashboard-version
 OptionalParams:
   - kube-lib/dashboard-token
@@ -20,7 +20,7 @@ Templates:
   - Name: "kube.config"
     Path: "kube.config"
     Contents: |
-      {{ .Param "kube-lib/kube-config" | toPrettyJson }}
+      {{ .ParamAsJSON "kube-lib/kube-config" }}
   - Name: "dashboard-adminuser.yaml"
     Path: "dashboard-adminuser.yaml"
     Contents: |-
@@ -49,16 +49,19 @@ Templates:
       #!/usr/bin/env bash
 
       {{ template "setup.tmpl" . }}
+      {{ template "cluster-shared.tmpl" .}}
+      export KUBECONFIG="./kube.config"
 
-      {{ if not (.Param "cluster/manager") }}
-        echo "Managers only.  Stopping execution"
-        exit 1
-      {{ end }}
+      {{ if (hasPrefix "v" (.Param "kube-lib/dashboard-version"))}}
+      if ! $CLUSTER_I_AM_LEADER ; then
+        echo "Leaders only.  Stopping execution"
+        exit 0
+      fi
 
-      {{ if hasPrefix "v" (.Param "kube-lib/dashboard-version") }}
-
-      {{ template "cluster-utilities.tmpl" .}}
-      {{ template "kube-lib-kubectl-install.tmpl" .}}
+      cat $KUBECONFIG
+      # dashboard requires the admin config
+      echo "testing cluster access"
+      kubectl --kubeconfig=$KUBECONFIG get nodes
 
       # skip if already installed
       pods="$(kubectl get pods -n kubernetes-dashboard --output json | jq '.items | length')"
@@ -68,30 +71,30 @@ Templates:
       fi
 
       echo "Apply Dashboard YAML"
-      if kubectl get namespace kubernetes-dashboard ; then
+      if kubectl --kubeconfig=$KUBECONFIG get namespace kubernetes-dashboard ; then
         echo "kubernetes-dashboard namespace exists, skipping"
       else
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/{{ .Param "kube-lib/dashboard-version"}}/aio/deploy/recommended.yaml
+        kubectl --kubeconfig=$KUBECONFIG apply -f https://raw.githubusercontent.com/kubernetes/dashboard/{{ .Param "kube-lib/dashboard-version"}}/aio/deploy/recommended.yaml
         sleep 10
       fi
 
       echo "Create Service Accounts"
-      kubectl create serviceaccount dashboard-admin-sa || true
-      kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa || true
+      kubectl --kubeconfig=$KUBECONFIG create serviceaccount dashboard-admin-sa || true
+      kubectl --kubeconfig=$KUBECONFIG create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa || true
 
       echo "Create Admin User"
       if [[ -f dashboard-adminuser.yaml ]] ; then
-        kubectl apply -f dashboard-adminuser.yaml || true
-        kubectl apply -f cluster-binding.yaml || true
+        kubectl --kubeconfig=$KUBECONFIG apply -f dashboard-adminuser.yaml || true
+        kubectl --kubeconfig=$KUBECONFIG apply -f cluster-binding.yaml || true
       else
         echo "missing key files"
         exit 1
       fi
 
       echo "Save Dashboard Token"
-      userid=$(kubectl get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .metadata.name')
-      tokenraw=$(kubectl get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .data.token')
-      token=$(echo $tokenraw | base64 -d)
+      userid=$(kubectl --kubeconfig=$KUBECONFIG get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .metadata.name')
+      tokenraw=$(kubectl --kubeconfig=$KUBECONFIG get secret -n kubernetes-dashboard --output=json | jq -r '.items[] | select(.metadata.name|startswith("admin-user")) | .data.token')
+      token=$(echo $tokenraw | base64 --decode)
       {{ if .ParamExists "kube-lib/dashboard-token" }}
       drpcli -T $PROFILE_TOKEN profiles set $CLUSTER_PROFILE param "kube-lib/dashboard-token" to "$token"
       {{ else }}
@@ -99,12 +102,11 @@ Templates:
       {{ end }}
 
       echo "Save Dashboard Status"
-      kubectl describe pods -n=kubernetes-dashboard
+      kubectl --kubeconfig=$KUBECONFIG describe pods -n=kubernetes-dashboard
 
       {{ else }}
       echo "kube-lib/dashboard-version ({{ .Param "kube-lib/dashboard-version"}}) does not start with v"
       {{ end }}
-
       echo "Done"
       exit 0
 Meta:

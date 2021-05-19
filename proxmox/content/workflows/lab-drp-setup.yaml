@@ -1,0 +1,12 @@
+---
+Name: lab-drp-setup
+Description: "Configure the DRP system"
+Documentation: ""
+Meta:
+  color: blue
+  icon: shuffle
+  title: RackN Content
+Stages:
+  - lab-drp-network
+  - ssh-access
+  - drp-agent

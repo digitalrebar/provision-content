@@ -23,11 +23,6 @@ Templates:
     exit 0
     {{ end }}
 
-    {{ if ne (.Param "machine/type") "physical" }}
-    echo "Burnin Reboot should be only run on physical system"
-    exit 0
-    {{ end }}
-
     NUMTIMES={{.Param "burnin-reboot-count"}}
     CURRENTTIME={{.Param "burnin-reboot-progress"}}
 

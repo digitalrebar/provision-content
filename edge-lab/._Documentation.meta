@@ -7,10 +7,7 @@ Assumptions:
 * all nodes have have internet access for downloading containers
 * `drpcli` has been installed on client system
 
-Requirements:
-
-* Edge Lab requires Digital Rebar Platform tip (post v4.2) due to RPi install requirements.
-* K3s has been migrated to use the standardized ``kube-lib`` content pack instead of a specialized k3s installation.  This also uses the v4.6 cluster pattern where the DRP server acts as the cluster manager.
+Edge Lab requires Digital Rebar Platform tip (post v4.2) due to RPi install requirements.
 
 Building & Installing DRP on Edge Lab
 -------------------------------------
@@ -22,7 +19,9 @@ Setup Edge Lab Content
 
 Note: make sure that you `export RS_ENDPOINT` to your endpoint!
 
-Edge Lab (edge-lab) is available in the RackN Catalog, you can install it using `drpcli catalog item install edge-lab` This was done for you as part of the bootstrapping process.
+Edge Lab (edge-lab) is available in the RackN Catalog, you
+can install it using `drpcli catalog item install edge-lab`
+This was done for you as part of the bootstrapping process.
 
 To manually create and upload:
 
@@ -33,25 +32,18 @@ To manually create and upload:
 
 If you make changes, you can repeat steps 3 and 4 to upload the latest content.
 
-Setup K3s Cluster via Kube-Lib
-------------------------------
+Setup K3s Cluster
+-----------------
 
-This process uses the standard :ref:`component_kube_lib` module.  Use ``catalog item install kube-lib`` if it is missing.
-
-Recommended, install `kubectl` has been installed on your client system.
+Before starting, install `kubectl` has been installed on client system
 
 .. note:: You _must_ have attached storage in each node for the k3s cluster to operate!  This could be an SDcard or USB drive.  If the partitions are not xfs, the code will wipe the drive!
 
-By default, the ``cluster/filter`` will select ALL machines in the edge-lab cluster.  To build your cluster:
+To build your cluster:
 
-#. select the ``edge-lab-manager`` machine (which is also the DRP server)
-#. apply the ``k3-cluster-build`` workflow
-#. wait for workflow to complete on cluster manager
-
-  #. this will select and start the k3s install on the leader
-  #. after the leader is installed, this will install k3s on all the remaining machines as workders
-
-#. use `drpcli profiles get ``edge-lab-manager`` param kube-lib/kube-config --decode > kube.conf` to get the kube.config file.  You can also download from the cluster's profile in the UX.
+#. select the nodes for installation and apply the `k3s-install` workflow
+#. wait for workflow to complete on leader
+#. use `drpcli profiles get cluster01 param k3s/admin-conf --decode > kube.conf`
 
 To access on the DRP server or cluster:
 
@@ -66,20 +58,21 @@ To access from another system, use an SSH tunnel:
 Access Kubernetes Dashboard
 ---------------------------
 
-The Kubernetes Dashboard v2 is automatically installed by the ``k3s-cluster-manager`` workflow.  Admin and service accounts are created for access.
+The Kubernetes Dashboard v2 is automatically installed by the k3s-install` workflow.
+Admin and service accounts are created for access.
 
 To access the Dashboard:
 
 #. use `kubectl --kubeconfig=kube.conf proxy` to create a network
 path to your cluster.
-#. get the Dashboard authentication token `drpcli profiles get edge-lab-manager param kube-lib/dashboard-token --decode`
+#. get the Dashboard authentication token `drpcli profiles get cluster01 param edge-lab/dashboard-token --decode`
 #. open the Dashboard using the proxy: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
 
 Install OpenFaaS via Helm
 -------------------------
 
 The k3s install above will automatically include Helm v3 and run
-charts defined in the `kube-lib/helm-charts` param array.
+charts defined in the `edge-lab/helm-charts` param array.
 
 OpenFaaS is provided as an example in the `helm-openfaas` profile.
 To include OpenFaaS in the k3s install, simply assign the
@@ -113,7 +106,8 @@ a workflow, stage, and tasks to:
 #. Set the default preferences to make Edge Lab work.
 #. Set up an ssh key pair if one does not exist and update the global profile with it.
    This can be used to access the clients from the server.
-#. Set up the storage attach Param for the Edge Lab
 #. Create the default subnet for the Edge Lab.
+#. Lock the Machine to prevent unintented actions
 
-The start_me.sh script will install the edge-lab content pack and set the DRP server's workflow to the bootstrap workflow.  The status of bootstrapping can be tracked in the jobs for the DRP server.
+The start_me.sh script will install the edge-lab content pack and set the DRP server's workflow to the bootstrap
+workflow.  The status of bootstrapping can be tracked in the jobs for the DRP server.

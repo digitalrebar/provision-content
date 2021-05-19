@@ -5,15 +5,12 @@ Documentation: |
   Used as a validate that the right params have been set for cloud
   scenarios and provide operator friendly feedback in the Machine.Description
 
-  NOTE: The required cloud/dr-install value is NOT user settable.  It is managed by the calling stage.
-
   Developer Notes:
   * Please add synchronize with the `cloud/provider` enum!
   * Sets the `terraform/plan-automation` value on the machine if missing
 
 RequiredParams:
   - cloud/provider
-  - cloud/dr-install
 OptionalParams:
   - linode/token
   - aws/access-key
@@ -30,170 +27,63 @@ Templates:
       set -e
       {{template "setup.tmpl" .}}
 
-      {{ if (.Param "cloud/dr-install") }}
-      echo "This is a DRP server process... skip dr-server/install-drpid check"
+
+      {{ if (empty (.Param "terraform/plan-automation")) }}
+        echo "No automation plan: Adding default terraform/plan-automation"
+        drpcli machines set $RS_UUID param terraform/plan-automation to '["cloud-provision-reference.tf.tmpl"]'
       {{ else }}
-        {{ if (.ParamExists "dr-server/install-drpid") }}
-          echo "CANNOT PROCEED! This machine may be a DRP server"
-          echo "  remove dr-server/install-drpid and try again."
-          exit 1
-        {{ else }}
-        echo "ok to proceed - this is NOT a DRP server installed via cloud-provision"
-        {{ end }}
+        echo "NOTE: terraform/plan-automation found! Using {{ .ParamExists "terraform/plan-automation" }}"
       {{ end }}
 
       {{ if .ParamExists "cloud/provider" }}
 
-        {{ $cloud := .Param "cloud/provider" }}
+        echo "We have cloud provider {{ .Param "cloud/provider"}}!  Do we have the right credentials?"
 
-        {{ if (empty (.Param "terraform/plan-automation")) }}
-          echo "No automation plan: Adding default terraform/plan-automation of cloud-provision-{{ $cloud }}.tf.tmpl"
-          drpcli machines set $RS_UUID param terraform/plan-automation to '["cloud-provision-{{ $cloud }}.tf.tmpl"]'
-        {{ else }}
-          echo "NOTE: terraform/plan-automation found! Using {{ .ParamExists "terraform/plan-automation" }}"
-        {{ end }}
-
-        echo "We have cloud provider {{ $cloud }}!  Do we have the right credentials?"
-
-        {{ if eq "aws" $cloud }}
+        {{ if eq "aws" (.Param "cloud/provider") }}
           {{ if .ParamExists "aws/secret-key" }}
             echo "  required secret-key is set"
           {{ else }}
             echo "  ERROR: you must set the aws/secret-key for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key!"}' > /dev/null
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key!"}'
             exit 1
           {{ end }}
           {{ if .ParamExists "aws/access-key-id" }}
             echo "  required access-key is set"
           {{ else }}
             echo "  ERROR: you must set the aws/access-key-id for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key-id!"}' > /dev/null
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the aws/access-key-id!"}'
             exit 1
           {{ end }}
         {{ end }}
 
-        {{ if eq "google" $cloud }}
+        {{ if eq "google" (.Param "cloud/provider") }}
           {{ if .ParamExists "google/credential" }}
             echo "  required google/credentialis set"
           {{ else }}
             echo "  ERROR: you must set the google/credential for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/credential!"}' > /dev/null
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/credential!"}'
             exit 1
           {{ end }}
           {{ if .ParamExists "google/project-id" }}
             echo "  required google/project-id is set"
           {{ else }}
             echo "  ERROR: you must set the google/project-id for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/project-id!"}' > /dev/null
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the google/project-id!"}'
             exit 1
           {{ end }}
         {{ end }}
 
-        {{ if eq "linode" $cloud }}
+        {{ if eq "linode" (.Param "cloud/provider") }}
           echo "linode/token check..."
           {{ if .ParamExists "linode/token" }}
             echo "  required token is set"
           {{ else }}
             echo "  ERROR: you must set the linode/token for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the linode/token!"}' > /dev/null
+            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the linode/token!"}'
             exit 1
-          {{ end }}
-          {{ range $i, $p := .Machine.Profiles }}
-          s="{{$p}}"
-          if [[ ${#s} -gt 2  ]]; then
-            echo "  verified \"$s\" tag length (must be >2 characters, was ${#s})"
-          else
-            echo "FAIL! \"$s\" profile IS NOT >2 characters. Min 3 is required by Linode"
-            exit 1
-          fi
           {{ end }}
 
         {{ end }}
-
-        {{ if eq "pnap" $cloud }}
-          echo "pnap/* check..."
-          {{ if .ParamExists "pnap/client-secret" }}
-            echo "  required secret is set"
-          {{ else }}
-            echo "  ERROR: you must set the pnap/client-secret for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the pnap/client-secret!"}' > /dev/null
-            exit 1
-          {{ end }}
-          {{ if .ParamExists "pnap/client-id" }}
-            echo "  required secret is set"
-          {{ else }}
-            echo "  ERROR: you must set the pnap/client-id"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the pnap/client-id!"}' > /dev/null
-            exit 1
-          {{ end }}
-          echo "  PNAP requires a local config file, build that right here"
-          mkdir ~/.pnap
-          tee ~/.pnap/config.yaml > /dev/null << EOF
-      clientId: {{ .Param "pnap/client-id" }}
-      clientSecret: {{ .Param "pnap/client-secret" }}
-      EOF
-        {{ end }}
-
-        {{ if eq "digitalocean" $cloud }}
-          echo "digitalocean/token check..."
-          {{ if .ParamExists "digitalocean/token" }}
-            echo "  required token is set"
-          {{ else }}
-            echo "  ERROR: you must set the digitalocean/token for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the digitalocean/token!"}' > /dev/null
-            exit 1
-          {{ end }}
-          {{ range $i, $p := .Machine.Profiles }}
-          s="{{$p}}"
-          if [[ ${#s} -gt 2  ]]; then
-            echo "  verified \"$s\" tag length (must be >2 characters, was ${#s})"
-          else
-            echo "FAIL! \"$s\" profile IS NOT >2 characters. Min 3 is required by Linode"
-            exit 1
-          fi
-          {{ end }}
-
-        {{ end }}
-
-        {{ if eq "azure" $cloud }}
-          {{ if .ParamExists "azure/subscription_id" }}
-            echo "  required subscription_id is set"
-          {{ else }}
-            echo "  ERROR: you must set the azure/subscription_id for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/subscription_id!"}' > /dev/null
-            exit 1
-          {{ end }}
-          {{ if .ParamExists "azure/appId" }}
-            echo "  required appId is set"
-          {{ else }}
-            echo "  ERROR: you must set the azure/appId for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/appId!"}' > /dev/null
-            exit 1
-          {{ end }}
-          {{ if .ParamExists "azure/password" }}
-            echo "  required password is set"
-          {{ else }}
-            echo "  ERROR: you must set the azure/password for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/password!"}' > /dev/null
-            exit 1
-          {{ end }}
-          {{ if .ParamExists "azure/tenant" }}
-            echo "  required tenant is set"
-          {{ else }}
-            echo "  ERROR: you must set the azure/tenant for {{ .Param "cloud/provider" }}"
-            drpcli machines update $RS_UUID '{"Description":"ERROR: You must define the azure/tenant!"}' > /dev/null
-            exit 1
-          {{ end }}
-        {{ end }}
-
-        cloudicon="cloud"
-        {{ if hasKey (.Param "cloud/provider-icons") $cloud }}
-          cloudicon="{{ get (.Param "cloud/provider-icons") $cloud }}"
-        {{ else }}
-          cloudicon="{{ get (.Param "cloud/provider-icons") "default" }}"
-        {{ end }}
-        echo "set icon to $cloudicon"
-        drpcli machines meta set $RS_UUID key icon to "${cloudicon}" > /dev/null
 
       {{ else }}
         echo "You must define which cloud is being used!"

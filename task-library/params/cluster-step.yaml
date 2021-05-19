@@ -9,8 +9,3 @@ Meta:
   color: "blue"
   icon: "clone"
   title: "RackN Content"
-  deprecated: "v4.6"  
-Documentation:
-  ======================
-  DEPRECATED in v4.6
-  ======================

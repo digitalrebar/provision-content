@@ -1,0 +1,43 @@
+---
+Name: "redhat-7.0-install"
+Description: "Install BootEnv for RedHat 7.0"
+Documentation: |
+  Install BootEnv for RedHat 7.0
+OS:
+  Family: "redhat"
+  Name: "redhat-7.0"
+Kernel: "images/pxeboot/vmlinuz"
+Initrds:
+  - "images/pxeboot/initrd.img"
+BootParams: >-
+  ksdevice=bootif
+  ks={{.Machine.Url}}/compute.ks
+  method={{.Env.InstallUrl}}
+  inst.geoloc=0
+  {{.Param "kernel-options"}}
+  --
+  {{ if .ParamExists "kernel_console"}}{{.Param "kernel_console" }}{{ end }}
+OptionalParams:
+  - "kernel-console"
+  - "kernel-options"
+  - "ntp-servers"
+  - "operating-system-disk"
+  - "provisioner-default-password-hash"
+  - "proxy-servers"
+Templates:
+  - ID: "default-pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "default-elilo.tmpl"
+    Name: "elilo"
+    Path: "{{.Machine.HexAddress}}.conf"
+  - ID: "default-ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "centos-7.ks.tmpl"
+    Name: "compute.ks"
+    Path: "{{.Machine.Path}}/compute.ks"
+Mta:
+  icon: "linux"
+  color: "red"
+  title: "RackN Content"

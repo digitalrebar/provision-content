@@ -1,11 +1,6 @@
 Name: "bootstrap-advanced"
-Description: "[DEPRECATED] Bootstrap Advanced Install"
+Description: "Bootstrap Advanced Install"
 Documentation: |
-  .. warning:: DEPRECATED - This workflow will be removed from future versions of
-               DRP.  Please use the ``universal`` content pack and workflows.  See
-               :ref:`deploy_linux_with_universal` and :ref:`rs_release_v46_deprecations`.
-               Use universal-bootstrap with bootstrap-contexts profile
-
   Bootstrap Digital Rebar server for advanced operation
   Includes the bootstrap-base!
 

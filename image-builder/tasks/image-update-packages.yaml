@@ -1,11 +1,8 @@
 Name: image-update-packages
-Description: Install required additional packages.
+Description: On Ubuntu 16.04, run apt-get 'update' and 'dist-upgrade'.
 Documentation: |
-  Should be run after fixing repo packages, but before installing cloud-init.
-
-  Installs additional required packages for successful deployment in various
-  ``image-deploy`` scenarios.
-
+  Should be run after fixing repo packages, but
+  before installing cloud-init.
 ReadOnly: true
 Meta:
   color: purple
@@ -14,16 +11,9 @@ Meta:
   title: Image Builder suite
   origin: rackn/image-builder
 Templates:
-  - Name: image-update-packages.sh.tmpl
-    Contents: |
-      #!/usr/bin/env bash
-      # Inject required packages to support various image-deploy scenarios
-
+  - Contents: |
+      #!/bin/bash
       {{ template "setup.tmpl" .}}
-
-      {{ range $pkg := ( .Param "image-builder/additional-packages" ) -}}
-      PKGS+="{{ $pkg }} "
-      {{ end -}}
-
-      echo "Installing additional packages as requested by 'image-builder/additional-packages'."
-      install $PKGS
+      #[[ "$OS_TYPE" == "ubuntu" && "$OS_VER" == "16.04" ]] && { apt-get -y update; apt-get -y dist-upgrade; }
+    Name: image-update-packages
+    Path: ""

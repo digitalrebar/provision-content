@@ -15,7 +15,3 @@ Templates:
       curl -fgL "$src" -o onecli.tgz
       tar xzf onecli.tgz -C "$target"
       rm onecli.tgz
-      # This is a hack to enable OneCli to run on Centos 8.3
-      if [[ -e /etc/redhat-release && ! -e /etc/SaLIE-release ]] ; then
-        cp /etc/redhat-release /etc/SaLIE-release
-      fi

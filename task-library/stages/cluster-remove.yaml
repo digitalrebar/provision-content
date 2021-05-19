@@ -1,7 +1,6 @@
 ---
 Name: "cluster-remove"
 Description: "Dequeue After Servicing"
-Documentation: DEPRECATED in v4.6
 Tasks:
   - "cluster-remove"
 Meta:

@@ -17,5 +17,8 @@ Meta:
   color: "yellow"
   icon: "search"
   title: "RackN"
+Reboot: false
+RequiredParams:
+  - "classify/classification-data"
 Tasks:
   - "classify"

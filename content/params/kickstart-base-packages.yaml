@@ -40,15 +40,6 @@ Schema:
       - curl
       - efibootmgr
       - tar
-    rocky:
-      - "@core"
-      - trousers
-      - fipscheck
-      - device-mapper-multipath
-      - openssh
-      - curl
-      - efibootmgr
-      - tar
     fedora:
       - "@core"
       - fipscheck

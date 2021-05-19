@@ -10,15 +10,11 @@ Templates:
   - Name: write-network-config
     Contents: |
       #!/usr/bin/env bash
-      {{ if eq .Machine.Context "" }}
       if ! grep -q autogen < <(drpcli net); then
           echo "drpcli net autogen is not a valid command"
           exit 1
       fi
       drpcli net autogen {{.Machine.UUID}}
-      {{ else }}
-      echo "NO ACTION TAKEN - skip networking configure if in Context {{ .Machine.Context }}"
-      {{ end }}
 Meta:
   type: "config"
   icon: "talk"

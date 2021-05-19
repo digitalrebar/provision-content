@@ -1,6 +1,6 @@
 {{ if .ParamExists "chef-bootstrap/first_boot" }}
 {{.Param "chef-bootstrap/first_boot"}}
-{{ else if and (.ParamExists "chef-bootstrap/policy_name") (.ParamExists "chef-bootstrap/policy_group") }}
+{{ else if and .ParamExists "chef-bootstrap/policy_name" .ParamExists "chef-bootstrap/policy_group" }}
 {
 "policy_group": "{{.Param "chef-bootstrap/policy_group"}}",
 "policy_name": "{{.Param "chef-bootstrap/policy_name"}}"

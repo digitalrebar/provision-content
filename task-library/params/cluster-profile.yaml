@@ -1,20 +1,9 @@
 ---
 Name: "cluster/profile"
 Description: "Name of the profile for this cluster"
-Documentation: |
-  Name of the profile used by the machines in the cluster for shared
-  information.  Typically, this is simply self-referential (it contains the
-  name of the containing profile) to allow machines to know the shared profile.
-
-  Note: the default value will be removed in v4.6.  In versions 4.3-4.5, the default
-  value was added to make it easier for operators to use clusters without having to
-  understand need to create a cluster/profile value.  While helpful, it leads to
-  nonobvious cluster errors that are difficult to troubleshoot.
-
-  For operational guidelines, see :ref:`rs_cluster_pattern`
 Schema:
   type: "string"
-  default: "cluster-v43"
+  default: "cluster01"
 Meta:
   color: "blue"
   icon: "object group outline"

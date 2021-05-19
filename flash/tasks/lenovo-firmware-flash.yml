@@ -10,7 +10,6 @@ Templates:
     Contents: |
       #!/usr/bin/env bash
       [[ {{.Param "skip-flash"}} = true ]] && exit 0
-      {{ template "set-proxy-servers.sh.tmpl" .}}
       mt="$(drpcli gohai |jq -r '.DMI.Chassis| .[0]| .SKUNumber')"
       mt="${mt:0:4}"
       /opt/OneCli/OneCli update acquire --ostype platform --scope latest --mt "$mt"
@@ -19,26 +18,17 @@ Templates:
       #!/usr/bin/env bash
       [[ {{.Param "skip-flash"}} = true ]] && exit 0
       [[ -d /sys/module/sg ]] || modprobe sg
-      {{ template "set-proxy-servers.sh.tmpl" .}}
       /opt/OneCli/OneCli update flash --noreboot
       reboot=false
       fail=false
       while read line; do
-        case $line in
-          *STATUS*)
-            echo "STATUS line is $line"
-            [[ $line = *'Package installed successfully'* ]] || [[ $line = *'Parse Firmware Package XML successfully'* ]] || lfailed=yes;;
-          *REBOOT*)
-            echo "REBOOT line is $line"
-            [[ $lfailed = no && $line = *'Reboot Required'* ]] && this_one_reboot=yes
-            [[ $lfailed = no && $line = *'reboot required'* ]] && this_one_reboot=yes
-            [[ $lfailed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=yes
-            [[ $lfailed = no && $line = *'reboot is required'* ]] && this_one_reboot=yes
-            [[ $lfailed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=no
-            [[ $lfailed = no && $line = *'No reboot required'* ]] && this_one_reboot=no
-            [[ $lfailed = no && $line = *'no reboot required'* ]] && this_one_reboot=no;;
-        esac
-        [[ $reboot = true || $fail = true ]] && break
+          case $line in
+             *STATUS*)
+                 [[ $line = *'Package installed successfully'* ]] || fail=true;;
+             *REBOOT*)
+                 [[ $fail = false && $line = *'Reboot Required to take effect'* ]] && reboot=true;;
+          esac
+          [[ $reboot = true || $fail = true ]] && break
       done < <(awk '/<(REBOOT|STATUS)>/' logs/*/Onecli-update_flash_status.xml |tac)
       [[ $reboot = true ]] && exit 192
       [[ $fail = false ]]

@@ -20,9 +20,6 @@ Templates:
         drpcli machines remove $RS_UUID param $p || true
       done
 
-      echo "set icon to cube to show de-provisioned"
-      drpcli machines meta set $RS_UUID key icon to cube > /dev/null
-
       echo "done"
       exit 0
 Meta:

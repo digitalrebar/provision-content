@@ -46,7 +46,6 @@ Templates:
       want_reboot=no
       failed=no
       {{ range $index, $elem := .Param "flash-list" }}
-        {{ if not (has $elem.File ($.Param "flash-list-check-list")) }}
         FILENAME=$(basename "{{$elem.File}}")
         ID=$(basename $FILENAME .uxz)
         ID=$(basename $ID .bin)
@@ -76,7 +75,6 @@ Templates:
         /opt/OneCli/OneCli update flash --noreboot --scope individual --dir $TMPDIR --includeid ${ID} ${FORCE} --output flash.{{$index}}
         set -e
 
-        lfailed=no
         this_one_reboot=false
         # Check for the presence of flash.{{$index}}/Onecli-update_flash_status.xml
         if [[ -e flash.{{$index}}/Onecli-update_flash_status.xml ]] ; then
@@ -84,16 +82,16 @@ Templates:
             case $line in
               *STATUS*)
                 echo "STATUS line is $line"
-                [[ $line = *'Package installed successfully'* ]] || [[ $line = *'Parse Firmware Package XML successfully'* ]] || lfailed=yes;;
+                [[ $line = *'Package installed successfully'* ]] || failed=yes;;
               *REBOOT*)
                 echo "REBOOT line is $line"
-                [[ $lfailed = no && $line = *'Reboot Required'* ]] && this_one_reboot=yes
-                [[ $lfailed = no && $line = *'reboot required'* ]] && this_one_reboot=yes
-                [[ $lfailed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=yes
-                [[ $lfailed = no && $line = *'reboot is required'* ]] && this_one_reboot=yes
-                [[ $lfailed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=no
-                [[ $lfailed = no && $line = *'No reboot required'* ]] && this_one_reboot=no
-                [[ $lfailed = no && $line = *'no reboot required'* ]] && this_one_reboot=no;;
+                [[ $failed = no && $line = *'Reboot Required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'reboot required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'Reboot is Required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'reboot is required'* ]] && this_one_reboot=yes
+                [[ $failed = no && $line = *'No Reboot Required'* ]] && this_one_reboot=no
+                [[ $failed = no && $line = *'No reboot required'* ]] && this_one_reboot=no
+                [[ $failed = no && $line = *'no reboot required'* ]] && this_one_reboot=no;;
             esac
           done < <(awk '/<(REBOOT|STATUS)>/' flash.{{$index}}/Onecli-update_flash_status.xml |tac)
         else
@@ -114,42 +112,31 @@ Templates:
             *)
               echo "OneCli returned $retco"
               cat flash.{{$index}}/common_result.xml
-              lfailed=yes;;
+              failed=yes;;
           esac
         fi
 
-        if [[ "{{$elem.File}}" =~ xcc ]] ; then
-            echo "Rebooting xcc"
-            ipmitool mc reset cold
-            # Wait for the reset to take effect.
-            sleep 20
-            set +e
-            while true ; do
-                ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
-                echo "Not up yet"
-                sleep 5
-            done
-            set -e
-            echo "BMC is back up"
-            sleep {{ $.ParamExpand "flash-lenovo-xcc-reboot-wait" }}
-        else
-            if [[ $this_one_reboot = yes ]] ; then
-                echo "Package {{$elem.File}} needs a reboot"
+        if [[ $this_one_reboot = yes ]] ; then
+            echo "Package {{$elem.File}} needs a reboot"
+            if [[ "{{$elem.File}}" =~ xcc ]] ; then
+                echo "Rebooting xcc"
+                ipmitool mc reset cold
+                # Wait for the reset to take effect.
+                sleep 20
+                set +e
+                while true ; do
+                    ./attach-usb-lan.sh && /opt/OneCli/OneCli inventory getdevices && break
+                    echo "Not up yet"
+                    sleep 5
+                done
+                set -e
+                echo "BMC is back up"
+            else
                 echo "Want to reboot system"
                 want_reboot=yes
             fi
         fi
         rm -rf $TMPDIR
-
-        if [[ $lfailed = no ]] ; then
-          drpcli machines get $RS_UUID param flash-list-check-list | jq ' (.+ ["{{$elem.File}}"] | unique)' | drpcli machines set $RS_UUID param flash-list-check-list to -
-        fi
-        if [[ $lfailed = yes ]] ; then
-          failed=yes
-        fi
-        {{ else }}
-        echo "Image {{$elem.File}} is already installed.  To reinstall, clear the 'flash-list-installed-list'"
-        {{ end }}
       {{ end }}
 
       if [[ $want_reboot = yes ]]; then
@@ -161,8 +148,6 @@ Templates:
           echo "Something failed - error"
           exit 1
       fi
-
-      {{ template "flash-list-installed.sh.tmpl" . }}
 
       echo "Nothing else to do and complete"
       drpcli machines set "$RS_UUID" param skip-flash to true

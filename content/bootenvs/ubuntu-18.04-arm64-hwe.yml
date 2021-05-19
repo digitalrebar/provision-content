@@ -7,7 +7,7 @@ Documentation: |
   NOTE - Default Ubuntu ISOs will attempt to check internet repositories, this
   can cause problems during provisioning if your environment does not have
   outbound access.  Workaround this by defining Options 3 (Gateway) and 6 (DNS)
-  for your Subnet settings. See https://provision.readthedocs.io/en/latest/doc/kb/kb-00033.html
+  for your Subnet settings.
 Meta:
   type: "os"
   color: "purple"

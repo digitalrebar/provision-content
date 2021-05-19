@@ -1,25 +1,21 @@
-FROM bitnami/minideb:buster
+FROM alpine:latest
+RUN apk update
+RUN apk upgrade
+
 MAINTAINER "The RackN Team <support@rackn.com>"
 
 ENV GOVC_VER="v0.23.0"
 ENV GOVC_SHA256="6de2afb3276b950ded9b6bd59ec6b0c57e43a4acdbb0450783d7c9ea85dd7ca4"
-ENV DRPCLI_VER="v4.4.0"
-ENV DRPCLI_SHA256="4c46d0169e7bc37ac1ec754b4b00dd02fed5885b6007bad7593a9530304e695d"
+ENV DRPCLI_VER="v4.3.3"
+ENV DRPCLI_SHA256="e42fe87000639b66803588889ddee8cbb79449e55b365f6f80a651b112d7d674"
 
-RUN install_packages bash dnsutils wget curl apt-utils
+RUN apk add --no-cache bash bind-tools
 
-### save this for proper stable release versions
-#ADD https://github.com/vmware/govmomi/releases/download/${GOVC_VER}/govc_linux_amd64.gz ./
-#RUN gunzip govc_linux_amd64.gz
-#RUN mv govc_linux_amd64 /usr/bin/govc
-#RUN chmod 755 /usr/bin/govc
-#RUN rm -f govc_linux_amd64.gz
-
-### hacked version with multi-VSAN disk claiming capability
-ADD https://s3-us-west-2.amazonaws.com/get.rebar.digital/artifacts/govc/govc-multi-disk-try2 ./
-RUN mv govc-multi-disk-try2 /usr/bin/
-RUN chmod 755 /usr/bin/govc-multi-disk-try2
-RUN ln -s /usr/bin/govc-multi-disk-try2 /usr/bin/govc
+ADD https://github.com/vmware/govmomi/releases/download/${GOVC_VER}/govc_linux_amd64.gz ./
+RUN gunzip govc_linux_amd64.gz
+RUN mv govc_linux_amd64 /usr/bin/govc
+RUN chmod 755 /usr/bin/govc
+RUN rm -f govc_linux_amd64.gz
 
 ADD https://rebar-catalog.s3-us-west-2.amazonaws.com/drpcli/${DRPCLI_VER}/amd64/linux/drpcli /usr/bin/
 RUN chmod 755 /usr/bin/drpcli

@@ -1,0 +1,14 @@
+---
+Name: "edge-lab/helm-version"
+Description: "Version of the helm to use in cluster"
+Documentation: |
+  Allows operators to determine the version of etcd to install
+  Note: Changes should be coordinate with KRIB Kubernetes version
+Schema:
+  type: "string"
+  default: "v3.2.1"
+Meta:
+  color: "blue"
+  icon: "hashtag"
+  title: "Community Content"
+  render: "semver"

@@ -1,0 +1,15 @@
+---
+Name: "kube-lib/kubernetes-download-url"
+Description: "Base URL for downloading Kubernetes"
+Documentation: |
+  Allows operators to determine where to get the Helm version
+
+  DO NOT INCLUDE A TRAILING /
+Schema:
+  type: "string"
+  default: "https://storage.googleapis.com/kubernetes-release/release"
+Meta:
+  color: "blue"
+  icon: "download"
+  clipboard: "yes"
+  title: "Community Content"

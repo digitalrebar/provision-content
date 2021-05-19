@@ -1,0 +1,30 @@
+[Service]
+# Added from Template in dr-server-install task
+
+{{ if .ParamExists "dr-server/ha-id" }}
+# RS_HA_ENABLED tells dr-provision to operate in high-availability mode.
+Environment=RS_HA_ENABLED=true
+
+# RS_HA_ID is the cluster ID.  This must be the same for all members participating in the cluster.
+Environment=RS_HA_ID={{ .Param "dr-server/ha-id" }}
+
+# RS_HA_INTERFACE is the network interface that dr-provision will add/remove 
+Environment=RS_HA_INTERFACE={{ .Param "dr-server/ha-interface" }}
+
+# RS_HA_ADDRESS is the IP address and netmask in CIDR format that all communication to
+# and from dr-provision will use.
+Environment=RS_HA_ADDRESS={{ .Param "dr-server/ha-address" }}
+
+# RS_HA_TOKEN is a long-lived access token that the cluster nodes will use to authenticate with each other.
+{{ if .ParamExists "dr-server/ha-token" -}}
+Environment=RS_HA_TOKEN={{ .Param "dr-server/ha-token" }}
+{{ else -}}
+Environment=RS_HA_TOKEN=ERROR-NO-TOKEN-DEFINED
+{{ end }}
+
+# RS_HA_PASSIVE is true for stand-by instances and false for the active instance
+Environment=RS_HA_PASSIVE={{ .Param "dr-server/ha-passive" }}
+{{ else }}
+# Do not setup HA mode
+Environment=RS_HA_ENABLED=false
+{{ end }}

@@ -34,11 +34,6 @@ Templates:
           reboot
       }
 
-      debug=$(grep -o 'provisioner.debug=[^ ]*' /proc/cmdline)
-      if [[ "$debug" != "" ]] ; then
-        set -x
-      fi
-
       export PATH=/bin
       export SIGNATURE="::SIGNATURE::"
       echo "Stage1 $SIGNATURE in Busybox"
@@ -85,27 +80,10 @@ Templates:
       postportdelay=$(grep -o 'provisioner.postportdelay=[^ ]*' /proc/cmdline)
       routedelay=$(grep -o 'provisioner.routedelay=[^ ]*' /proc/cmdline)
       wgetretrycount=$(grep -o 'provisioner.wgetretrycount=[^ ]*' /proc/cmdline)
-      myip=$(grep -o 'provisioner.ip=[^ ]*' /proc/cmdline)
-      mygw=$(grep -o 'provisioner.gw=[^ ]*' /proc/cmdline)
-      mymtu=$(grep -o 'provisioner.mtu=[^ ]*' /proc/cmdline)
-      myvlan=$(grep -o 'provisioner.vlan=[^ ]*' /proc/cmdline)
-      mydns=$(grep -o 'provisioner.dns=[^ ]*' /proc/cmdline)
-      interfaces=$(grep -o 'provisioner.interface=[^ ]*' /proc/cmdline)
-
       if [[ "$bootif" == "BOOTIF=discovery" ]] ; then
-        interfaces=${interfaces#*=}
-        if [[ "$interfaces" == "" ]] ; then
-          interfaces="eth0"
-        fi
-        for i in ${interfaces//,/ } ; do
-           if [ ! -f /sys/class/net/$i/address ] ; then
-             continue
-           fi
-           bootif=$(cat /sys/class/net/$i/address)
-           bootif=${bootif//:/-}
-           bootif="BOOTIF=01-$bootif"
-           break
-        done
+        bootif=$(cat /sys/class/net/eth0/address)
+        bootif=${bootif//:/-}
+        bootif="BOOTIF=01-$bootif"
       fi
       test -z "$bootif" && fail "Missing required parameter BOOTIF"
       test -z "$nextone" && fail "Missing required parameter provisioner.web"
@@ -119,14 +97,8 @@ Templates:
       routedelay=${routedelay#*=}
       wgetretrycount=${wgetretrycount#*=}
       wgetretrycount=${wgetretrycount:-65}
-      myip=${myip#*=}
-      mygw=${mygw#*=}
-      mydns=${mydns#*=}
-      myvlan=${myvlan#*=}
-      mymtu=${mymtu#*=}
 
       pxedev=""
-      pxedevvlan=""
       for dev in /sys/class/net/*; do
           test -f "$dev/address" || continue
           if test "$(cat "$dev/address")" = "$bootif"; then
@@ -141,33 +113,12 @@ Templates:
       ip link set "$pxedev" up
       # if a post port delay is sent - wait
       test -z "$postportdelay" || sleep $postportdelay
-
-      thedev=${pxedev}
-      if [[ "$myvlan" != "" ]] ; then
-        modprobe 8021q
-        pxedevvlan="${pxedev}.${myvlan}"
-        ip link add link $pxedev name $pxedevvlan type vlan id $myvlan
-        ip link set "$pxedevvlan" up
-        thedev=${pxedevvlan}
-      fi
-      if [[ "$mymtu" != "" ]] ; then
-        ip link set dev $pxedev mtu $mymtu
-        if [[ "$pxedevvlan" != "" ]] ; then
-          ip link set dev $pxedevvlan mtu $mymtu
-        fi
-      fi
-      if [[ "$myip" != "" ]] ; then
-        ip ad add $myip dev $thedev
-        ip route add default via $mygw
+      if [[ "$ip6" == "" ]] ; then
+          udhcpc -b -R -a -i "$pxedev"
       else
-        if [[ "$ip6" == "" ]] ; then
-          udhcpc -b -R -a -i "$thedev"
-        else
           test -z "$routedelay" || sleep $routedelay
-          udhcpc6 -b -R -i "$thedev"
-        fi
+          udhcpc6 -b -R -i "$pxedev"
       fi
-
       echo "Fetching second-stage initramfs"
       ARCH={{.Machine.Arch}}
       squashfs="$nextone/sledgehammer/$ARCH/$SIGNATURE/root.squashfs"
@@ -212,84 +163,22 @@ Templates:
       mkdir -p /newinitramfs/etc/systemd/network
       {
       echo '[Match]'
-      printf 'MACAddress=%s\n' "$bootif"
-      printf 'Type=!vlan\n\n'
-      if [[ "$mymtu" != "" ]] ; then
-      echo '[Link]'
-      echo "MTUBytes=$mymtu"
-      echo
-      fi
+      printf 'MACAddress=%s\n\n' "$bootif"
       echo '[Network]'
-      if [[ "$myvlan" == "" ]] ; then
-        if [[ "$myip" == "" ]] ; then
-          if [[ "$ip6" == "" ]] ; then
-            echo 'DHCP=ipv4'
-            echo
-            echo '[DHCPv4]'
-            echo 'ClientIdentifier=mac'
-            echo 'SendDecline=false'
-            echo 'SendRelease=false'
-          else
-            echo 'DHCP=ipv6'
-            echo
-            echo '[DHCPv6]'
-            echo 'ClientIdentifier=mac'
-          fi
-        else
-            echo "Address=${myip}"
-            echo "Gateway=${mygw}"
-            if [[ "$mydns" != "" ]] ; then
-              echo "DNS=$mydns"
-            fi
-        fi
+      if [[ "$ip6" == "" ]] ; then
+          echo 'DHCP=ipv4'
+          echo
+          echo '[DHCPv4]'
+          echo 'ClientIdentifier=mac'
+          echo 'SendDecline=false'
+          echo 'SendRelease=false'
       else
-        echo "DHCP=no"
-        echo "VLAN=myvlan"
+          echo 'DHCP=ipv6'
+          echo
+          echo '[DHCPv6]'
+          echo 'ClientIdentifier=mac'
       fi
       } > /newinitramfs/etc/systemd/network/20-bootif.network
-
-      if [[ "$myvlan" != "" ]] ; then
-        {
-          echo '[NetDev]'
-          echo 'Name=myvlan'
-          echo 'Kind=vlan'
-          echo
-          echo '[VLAN]'
-          echo "Id=$myvlan"
-        } > /newinitramfs/etc/systemd/network/myvlan.netdev
-        {
-          echo '[Match]'
-          echo 'Name=myvlan'
-          echo
-          if [[ "$mymtu" != "" ]] ; then
-            echo '[Link]'
-            echo "MTUBytes=$mymtu"
-            echo
-          fi
-          echo '[Network]'
-          if [[ "$myip" == "" ]] ; then
-            if [[ "$ip6" == "" ]] ; then
-              echo 'DHCP=ipv4'
-              echo
-              echo '[DHCPv4]'
-              echo 'ClientIdentifier=mac'
-              echo 'SendDecline=false'
-              echo 'SendRelease=false'
-            else
-              echo 'DHCP=ipv6'
-              echo
-              echo '[DHCPv6]'
-              echo 'ClientIdentifier=mac'
-            fi
-          else
-            echo "Address=${myip}"
-            echo "Gateway=${mygw}"
-            if [[ "$mydns" != "" ]] ; then
-              echo "DNS=$mydns"
-            fi
-          fi
-        } > /newinitramfs/etc/systemd/network/myvlan.network
-      fi
 
       echo "$SIGNATURE" > /newinitramfs/etc/sledgehammer-id
       echo "SLEDGEHAMMER_VERSION=${SIGNATURE}" > /newinitramfs/etc/sledgehammer-release
@@ -308,19 +197,10 @@ Templates:
       echo "" >/proc/sys/kernel/hotplug
       # pkill -9 here to keep udhcpc from releasing the IP
       # address when we will want it back in a second or two.
-      if [[ "$myip" == "" ]] ; then
-        if [[ "$ip6" == "" ]] ; then
-            pkill -9 udhcpc
-        else
-            pkill -9 udhcpc6
-        fi
+      if [[ "$ip6" == "" ]] ; then
+          pkill -9 udhcpc
       else
-        ip route delete default
-        ip a del $myip
-      fi
-      if [[ "$pxedevvlan" != "" ]] ; then
-        ip link set "$pxedevvlan" down
-        ip link delete "$pxedevvlan"
+          pkill -9 udhcpc6
       fi
       ip link set "$pxedev" down
 

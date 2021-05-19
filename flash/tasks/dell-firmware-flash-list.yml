@@ -39,7 +39,6 @@ Templates:
       failed=no
       hpe=no
       {{ range $index, $elem := .Param "flash-list" }}
-        {{ if not (has $elem.File ($.Param "flash-list-check-list")) }}
         FILENAME="file.{{$index}}"
         {{ if $elem.Force }}
         FORCE="-f"
@@ -56,14 +55,13 @@ Templates:
         clean_curl "{{$.ProvisionerURL}}/{{$elem.File}}" "$FILENAME"
         {{ end }}
 
-        lfailed=no
         chmod +x $FILENAME
         ./$FILENAME -q ${FORCE} |& tee $FILENAME.log || case $? in
           1)
              # If the system is up to date, this is the return code and
              # the log will have the message "No Applicable Updates Available"
-             lfailed=yes
-             fgrep -q "No Applicable Updates Available" $FILENAME.log && lfailed=no
+             failed=yes
+             fgrep -q "No Applicable Updates Available" $FILENAME.log && failed=no
              ;;
           2)
              echo "$FILENAME wants a reboot"
@@ -73,7 +71,7 @@ Templates:
              echo "Likely at the exact level already.";;
           4)
              echo "Hard error for $FILENAME"
-             lfailed=yes;;
+             failed=yes;;
           5)
              echo "Unquailifed update for $FILENAME"
              echo "Either missing or not applicable - skipping";;
@@ -82,23 +80,13 @@ Templates:
              want_reboot=yes;;
           9)
              echo "RPM verify failed for $FILENAME"
-             lfailed=yes;;
+             failed=yes;;
           13)
              echo "Dependency failure, but success!";;
           14)
              echo "Dependency failure, but reboot wanted"
              want_reboot=yes;;
         esac
-
-        if [[ $lfailed = no ]] ; then
-          drpcli machines get $RS_UUID param flash-list-check-list | jq ' (.+ ["{{$elem.File}}"] | unique)' | drpcli machines set $RS_UUID param flash-list-check-list to -
-        fi
-        if [[ $lfailed = yes ]] ; then
-          failed=yes
-        fi
-        {{ else }}
-        echo "Image {{$elem.File}} is already installed.  To reinstall, clear the 'flash-list-installed-list'"
-        {{ end }}
       {{ end }}
 
       if [[ $want_reboot = yes ]]; then
@@ -110,8 +98,6 @@ Templates:
           echo "Something failed - error"
           exit 1
       fi
-
-      {{ template "flash-list-installed.sh.tmpl" . }}
 
       echo "Nothing else to do and complete"
       drpcli machines set "$RS_UUID" param skip-flash to true

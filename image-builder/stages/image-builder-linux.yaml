@@ -18,13 +18,7 @@ Documentation: |
     2. Update all packages to the latest versions in the package repositories
     3. Install ``cloud-init`` for image bootstrap configuration
     4. Clean up the image by stripping out useless kernels, package meta files, etc.
-
-  With use of the ``image-builder/pre-builder-workflow`` Paramater on the builder
-  machine, a dynamic list of *Tasks* can be injected **BEFORE** this Stage.
-
-  With use of the ``image-builder/post-builder-flexiflow`` Parameter on the
-  builder machine, a dynamic list of *Tasks* can be injected **AFTER** this Stage,
-  but before the final image is captured.
+    5. Perform the root filesystem tarball capture and stage it to the DRP Endpoint for use
 
 Meta:
   color: purple
@@ -37,5 +31,6 @@ Tasks:
   - image-update-packages
   - image-install-cloud-init
   - image-builder-cleanup
+  - image-capture
 Templates: []
 

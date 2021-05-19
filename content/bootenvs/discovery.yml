@@ -12,38 +12,6 @@ Documentation: |
       #!/bin/bash
       curl -fsSL [internal ip]:8091/machines/join-up.sh | sudo bash --
 
-  To join EXISTING machines or CLOUD machines running ESXi into DRP, you can use `esxi-join-up.py`.
-  To run this you will first need to install 2 packages RackN provides in vib or component format that
-  have been signed by VMware. You will need the DRP-Firewall-Rule and the DRP-Agent packages. These
-  packages are available on your local DRP endpoint. Before those packages can be installed a partial
-  configuration file will need to be placed on the HostSystem. These steps will need to be done in order.
-  The following commands can be run from the HostSystem you plan to join to DRP.
-
-    ::
-
-      RKN_DIR=$(localcli --formatter json storage filesystem list|python -c "import sys,json;x=json.load(sys.stdin);y=[i for i in x if i['Type']=='VFFS' or 'vmfs' in i['Type'].lower()];print(y[0]['Mount Point'])")/rackn
-      mkdir -p $RKN_DIR
-      cd $RKN_DIR
-      # For 6.x
-      wget -O DRP-Agent.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/RKN-DRPY-Agent_1.3-0.0.0000-offline_bundle-17977725.zip
-      wget -O DRP-Firewall-Rule.zip [internal ip]:8091/files/plugin_providers/vmware/6.x/RKN-DRPY-FW-RULE_1.0-0.0.0003-offline_bundle-16370411.zip
-      # For 7.x
-      wget -O DRP-Agent.vib [internal ip]:8091/files/plugin_providers/vmware/7.x/RKN-DRPY-Agent_1.3-0.0.0000_17977727.zip
-      wget -O DRP-Firewall-Rule.zip [internal ip]:8091/files/plugin_providers/vmware/7.x/RKN-DRPY-FW-RULE_1.0-0.0.0003_16333171.zip
-
-      wget [internal ip]:8091/files/plugin_providers/vmware/drpy.conf
-      localcli software vib install -d ./DRP-Firewall-Rule.zip
-      localcli software vib install -d ./DRP-Agent.zip
-
-  Next you can download the join up script, and then run it:
-
-    ::
-
-      wget [internal ip]:8091/machines/esxi-join-up.py
-      python esxi-join-up.py
-
-  When this process completes you will get output letting you know the machine was added to inventory.
-
 Meta:
   type: "discovery"
   feature-flags: "change-stage-v2"
@@ -52,17 +20,17 @@ Meta:
   title: "Digital Rebar Community Content"
 OnlyUnknown: true
 Loaders:
-  amd64-uefi: baad16af1d185f87450b01cce24cf2c15be40b64/shimx64.efi
+  amd64-uefi: e1a0019788acff426f7cc2eb5e5373d771716eaa/shimx64.efi
 OS:
   Family: "redhat"
   Name: "sledgehammer"
   SupportedArchitectures:
     amd64:
-      IsoFile: "sledgehammer-baad16af1d185f87450b01cce24cf2c15be40b64.amd64.tar"
-      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/baad16af1d185f87450b01cce24cf2c15be40b64/sledgehammer-baad16af1d185f87450b01cce24cf2c15be40b64.amd64.tar"
-      Kernel: "baad16af1d185f87450b01cce24cf2c15be40b64/vmlinuz0"
+      IsoFile: "sledgehammer-e1a0019788acff426f7cc2eb5e5373d771716eaa.amd64.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/sledgehammer-e1a0019788acff426f7cc2eb5e5373d771716eaa.amd64.tar"
+      Kernel: "e1a0019788acff426f7cc2eb5e5373d771716eaa/vmlinuz0"
       Initrds:
-        - "baad16af1d185f87450b01cce24cf2c15be40b64/stage1.img"
+        - "e1a0019788acff426f7cc2eb5e5373d771716eaa/stage1.img"
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -98,11 +66,11 @@ OS:
         {{.Param "kernel-console"}}
     rpi4:
       Loader: grubarm64.efi
-      IsoFile: sledgehammer-d50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar
-      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/d50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-d50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
-      Kernel: rpi-5.4.35/kernel8.img
+      IsoFile: sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar
+      IsoUrl: "https://rackn-sledgehammer.s3-us-west-2.amazonaws.com/sledgehammer/e50c0910deee78591225ef5ede200021b7288b5b/sledgehammer-e50c0910deee78591225ef5ede200021b7288b5b.rpi4.tar"
+      Kernel: rpi-5.4.34/kernel8.img
       Initrds:
-        - rpi-5.4.35/stage1.img
+        - rpi-5.4.34/stage1.img
       BootParams: >-
         rootflags=loop
         root=live:/sledgehammer.iso
@@ -122,16 +90,16 @@ OptionalParams:
   - "kernel-options"
 Templates:
   - Name: start4.elf
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/start4.elf" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/start4.elf" "rpi4"}}'
     Path: start4.elf
   - Name: fixup4.dat
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/fixup4.dat" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/fixup4.dat" "rpi4"}}'
     Path: fixup4.dat
   - Name: bcm2711-rpi-4-b.dtb
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/bcm2711-rpi-4-b.dtb" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/bcm2711-rpi-4-b.dtb" "rpi4"}}'
     Path: bcm2711-rpi-4-b.dtb
   - Name: root.squashfs
-    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.35/root.squashfs" "rpi4"}}'
+    Link: '{{.Env.PathForArch "tftp" "rpi-5.4.34/root.squashfs" "rpi4"}}'
     Path: 'sledgehammer/rpi4/rpi/root.squashfs'
   - Name: rpi4b-cmdline.txt
     Path: cmdline.txt
@@ -260,7 +228,7 @@ Templates:
         source (tftp)/grub/discovery.cfg
       fi
   - Name: "grub-secure-discovery"
-    Path: "sledgehammer/baad16af1d185f87450b01cce24cf2c15be40b64/grub.cfg"
+    Path: "sledgehammer/e1a0019788acff426f7cc2eb5e5373d771716eaa/grub.cfg"
     ID: allarch-grub.tmpl
   - Name: "grub-discovery"
     Path: "grub/discovery.cfg"
@@ -345,39 +313,12 @@ Templates:
           fi
       fi
       if [[ ! $HOSTNAME ]]; then
-          case {{ .Param "discovery-hostname-selector" }} in
-            d-mac) echo "Using default dMAC hostname method, skipping reverse IP lookup."
-            ;;
-            reverse-dns)
-              # Try DNS reverse lookup
-              candidate="$(getent hosts $IP |awk "/$IP/ {print \$2}" |head -1)"
-              [[ $candidate && $candidate != localhost* ]] && HOSTNAME="$candidate" || true
-              [[ -z "$HOSTNAME" ]] \
-                && echo "No reverse DNS record found for '$IP', reverting to default dMAC hostname." \
-                || echo "Reverse DNS record lookup candidate of '$HOSTNAME' found..."
-            ;;
-            external-template)
-              {{ if .Param "discovery-hostname-template" -}}
-              {{ $templateName := (.Param "discovery-hostname-template") -}}
-              echo "Using external template '{{ $templateName }}' to set hostname."
-
-              {{ .CallTemplate $templateName .}}
-
-              [[ -z "$HOSTNAME" ]] && echo "External template did not set HOSTNAME, falling back to dMAC hostname." || true
-              {{ else -}}
-              echo "WARNING: No 'discovery-hostname-template' set. Defaulting to dMAC hostname."
-              {{ end -}}
-            ;;
-            random)
-              echo "Starting random hostname generation."
-              HOSTNAME=$(pwmake 256 | tr -dc 'a-zA-Z' | fold -w 8 | head -n 1)
-              echo "Setting HOSTNAME to random value of '$HOSTNAME'."
-            ;;
-          *) echo "NOTICE: unsupported 'discovery-default-hostname-selector', falling through to dMAC hostname."
-            ;;
-          esac
-
-          if [[ -z $HOSTNAME ]]; then
+          # Try DNS reverse lookup
+          candidate="$(getent hosts $IP |awk "/$IP/ {print \$2}" |head -1)"
+          if [[ $candidate && $candidate != localhost* ]]; then
+              # Found a sane one
+              HOSTNAME="$candidate"
+          else
               # Go with the default.
               default_host=true
               HOSTNAME="d${MAC//:/-}"
@@ -410,7 +351,3 @@ Templates:
       # This last line is required to let Sledgehammer know it has loaded a valid start-up.sh
       # Do not alter or remove it.
       # /tmp/control.sh
-
-  - Name: "esxi-join-up.py"
-    Path: "machines/esxi-join-up.py"
-    ID: esxi-join-up.py.tmpl

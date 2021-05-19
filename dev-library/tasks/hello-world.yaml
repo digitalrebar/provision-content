@@ -54,7 +54,7 @@ Templates:
     Exit 0
 - Name: hello-world.sh
   Meta:
-    OS: "linux,darwin,esxi"
+    OS: "linux,darwin"
   Contents: |-
     #!/usr/bin/env sh
 

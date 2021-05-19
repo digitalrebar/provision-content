@@ -8,35 +8,20 @@ echo ">>> In cleanup step ..."
 #(( $SETX )) && set -x
 set -x
 
-###
-#  OS_FAMILY and OS_VER (among others) comes from setup.tmpl - indirectly,
-#  from - https://github.com/digitalrebar/provision/blob/v4/agent/cmdHelper.go
-###
 case $OS_FAMILY in
   rhel|centos)
-    echo "Performing rhel/centos generic cleanup tasks..."
     # clean all the Yum things, and NUKE the cache/history dirs
     yum clean all
     rm -rf /var/cache/yum var/lib/yum/history/*
 
-    case $OS_VER in
-      7)
-        echo "Removing rescue image from Ver 7 rhel/centos variants..."
-        # remove the rescue image
-        if [[ -f /boot/grub2/grub.cfg ]]; then
-          RESCUE=`cat /boot/grub2/grub.cfg | grep rescue | grep linux16 | awk ' { print $2 } '`
-          grubby --config-file=/boot/grub2/grub.cfg --remove-kernel=${RESCUE}
-        fi
-        rm -rf /boot/initramfs-*-rescue-*.img /boot/vmlinuz-*-rescue-*
-      ;;
-      8) echo "Ver '$OS_VER' has no additional specific cleanup tasks..."
-      ;;
-      *) echo "Did not match OS_VER '$OS_VER' in our cleanup tasks, no specific tasks run..."
-      ;;
-    esac
-  ;;
+    # remove the rescue image
+    if [[ -f /boot/grub2/grub.cfg ]]; then
+      RESCUE=`cat /boot/grub2/grub.cfg | grep rescue | grep linux16 | awk ' { print $2 } '`
+      grubby --config-file=/boot/grub2/grub.cfg --remove-kernel=${RESCUE}
+    fi
+    rm -rf /boot/initramfs-*-rescue-*.img /boot/vmlinuz-*-rescue-*
+    ;;
   debian|ubuntu)
-    echo "Performing debian/ubuntu generic cleanup tasks..."
     # need to remove extraneous kernel/initrd versions here
     rm -f /usr/sbin/policy-rc.d
     apt-get -y autoremove
@@ -54,18 +39,12 @@ esac
 find /var/log -type f -exec cp /dev/null '{}' \;
 
 # clean up drpcli local cache settings
-echo "Emptying the old 'etc/drpcli' agent configuration file..."
 > /etc/drpcli
 
-echo "Removing all files in new agent config directory '/var/lib/drp-agent/'..."
-rm -f /var/lib/drp-agent/*
-
 # zero out /etc/resolv.conf
-echo "Emptying '/etc/resolv.conf' file..."
 > /etc/resolv.conf
 
 # clean bash history
-echo "Removing BASH shell history..."
 > /root/.bash_history
 
 exit 0

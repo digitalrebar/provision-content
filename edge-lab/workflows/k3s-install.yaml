@@ -1,0 +1,20 @@
+Name: "k3s-install"
+Description: "Install K3s cluster"
+Documentation: |
+  Builds a k3s cluster
+  Uses the task-library cluster building components
+
+  Downloads from the Rancher Github (`k3s/download-url`)
+  unless binary is already present as `/files/k3s/k3s`
+Stages:
+  - "cluster-setup"
+  - "k3s-install"
+  - "edge-lab-install-dashboard"
+  - "edge-lab-helm"
+  - "complete-nobootenv"
+Meta:
+  color: "green"
+  icon: "ship"
+  title: "k3s cluster"
+  k3s: "true"
+  copyright: "RackN 2019"

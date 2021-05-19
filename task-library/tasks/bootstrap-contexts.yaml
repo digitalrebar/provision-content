@@ -10,13 +10,13 @@ Documentation: |
   * Stage installs Podman and the Docker-Context Plugin even if you do not have Docker-Contexts defined
   * Contexts are a licensed feature (the stage will abort if no license is exists)
 
-  1. Installs Podman/Docker on DRP Host
+  1. Installs Podman on DRP Host
   1. Installs the Docker-Context from Catalog
   1. Creates the runner context if missing
   1. Attempts to build & upload images for all Docker-Contexts
-  1. Initializes Podman/Docker for all Contexts
+  1. Initializes Podman for all Contexts
 
-  Podman/Docker build files are discovered in the following precidence order:
+  Podman build files are discovered in the following precidence order:
   1. using Container Buildfile from files/contexts/docker-build/[contextname]
   1. using URL from Meta.Imagepull
   1. using Container  Buildfile downloaded Context Meta.Dockerfile
@@ -40,13 +40,29 @@ ExtraClaims:
     specific: "rackn-license"
 Templates:
   - Contents: |-
+      {
+        "Name": "runner",
+        "Description": "Run DRPCLI in Docker Context",
+        "Documentation": "Very minimal container to run the DRPCLI as a starting or idle point for Machines. This provides a very low overhead system to start or complete workflows so that tasks can continue to execute even if the target machine is not available (or never exists).",
+        "Engine": "docker-context",
+        "Image": "digitalrebar-context-runner",
+        "Meta": {
+          "icon": "cube",
+          "color": "green",
+          "copyright": "RackN 2020",
+          "Dockerpull": "digitalrebar/context-runner"
+        }
+      }
+    Name: "runner-context"
+    Path: "runner.json"
+  - Contents: |-
       #!/bin/bash
       # RackN Copyright 2020
 
       set -e
       {{template "setup.tmpl" .}}
 
-      if drpcli contents exists rackn-license >/dev/null 2>/dev/null ; then
+      if drpcli contents exists rackn-license ; then
         echo "license installed, no action"
       else
         echo "SKIPPING due to missing RackN license"
@@ -57,52 +73,25 @@ Templates:
         echo "No Docker Contexts"
       fi
 
-      tool="podman"
-      if ! which podman || ! which docker ; then
+      if ! which podman ; then
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
-        echo "Installing Podman/Docker for $FAMILY"
+        echo "Installing Podman"
         case $FAMILY in
-          redhat|centos)
-            if which dnf > /dev/null 2>&1 ; then
-              dnf -y install podman
-            elif which yum > /dev/null 2>&1 ; then
-              yum -y install podman
-            else
-              echo "No 'yum' or 'dnf' found on $FAMILY OS.  Unable to install 'podman'."
-              exit 1
-            fi
-            ;;
+          redhat|centos) yum install -y dnf; dnf install -y podman ;;
           debian|ubuntu) . /etc/os-release
             echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
             curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
-            sudo apt-get update -qq; sudo apt-get -qq -y install podman
-            ;;
-          alpine)
-            apk add podman
-            ;;
-          amzn)
-            sudo amazon-linux-extras install -y docker
-            sudo service docker start
-            sudo usermod -a -G docker ec2-user
-            sudo systemctl enable --now docker
-            tool="docker"
-            ;;
+            sudo apt-get update -qq; sudo apt-get -qq -y install podman ;;
           *) >&2 echo "Unsupported package manager family '$FAMILY'."
-             exit 1
-            ;;
+             exit 1 ;;
         esac
-      echo
-        echo "Detected $tool version: $($tool version)"
       fi
 
-      echo "Relax SELinux - not for production!"
-      setenforce Permissive || true
-
-      echo "$tool installed successfully"
+      echo "Podman installed successfully"
 
       echo "Install Docker-Context"
-      pv="tip"
-      if drpcli plugin_providers exists docker-context >/dev/null 2>/dev/null; then
+      pv="stable"
+      if drpcli plugin_providers exists docker-context; then
         pv="$(drpcli plugin_providers show docker-context | jq .Version -r)"
         echo "Plugin Exists at version $pv"
       else
@@ -110,11 +99,12 @@ Templates:
         drpcli catalog item install docker-context --version=$pv
       fi
 
-      if drpcli contexts exists drpcli-runner >/dev/null 2>/dev/null ; then
-        echo "Built-In Runner Detected"
+      echo "Create Runner Context if missing (requires license)"
+      if drpcli contexts exists runner ; then
+        echo "  runner context exists, no action"
       else
-        echo "ERROR: this process requires the built-in runner context"
-        exit 1
+        echo "  runner context missing, creating"
+        drpcli contexts create runner.json
       fi
 
       echo "Check which files are uploaded (error = none)"
@@ -151,21 +141,21 @@ Templates:
             if [[ "$dockerbuild" != "" ]]; then
               echo "    pulling dockerfile from contexts/docker-build/$context"
               drpcli files download contexts/docker-build/$context > $context-dockerfile
-              $tool build --tag=$image --file="$context-dockerfile" .
+              podman build --tag=$image --file="$context-dockerfile" .
             elif [[ "$dockerfile" != "null" ]]; then
               echo "    pulling docker build from $dockerfile"
               curl -fsSL $dockerfile -o $context-dockerfile
-              $tool build --tag=$image --file="$context-dockerfile" .
+              podman build --tag=$image --file="$context-dockerfile" .
             elif [[ "$dockerpull" != "null" ]]; then
               echo "    pulling container image from $dockerpull"
-              $tool pull $dockerpull
+              podman pull $dockerpull
               echo "    tagging $dockerpull as $image"
-              $tool tag $dockerpull $image
+              podman tag $dockerpull $image
             else
               echo "!! Stopping context-bootstrap - missing container image for $context"
               exit 1
             fi
-            $tool save $image > /root/$context.tar
+            podman save $image > /root/$context.tar
             gzip /root/$context.tar
             echo "  Uploading Container from /root/$context.tar.gz"
             drpcli files upload /root/$context.tar.gz as "contexts/docker-context/$image"
@@ -175,18 +165,9 @@ Templates:
           fi
         else
           echo "  Found $container_sum in files/contexts/docker-context, skipping upload"
-          if $tool images | grep -q localhost/$image ; then
-            echo   "  localhost/$image is installed, removing to ensure correct download"
-            $tool rmi localhost/$image
-          else
-            echo   "  localhost/$image does NOT exist locally, no action"
-          fi
         fi
         i=$(($i + 1))
       done
-
-      echo "Restart Plugin (handles case where plugin exists before podman"
-      drpcli plugins runaction docker-context restartProvider
 
       echo "Populate the contexts"
       i=0

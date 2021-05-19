@@ -44,9 +44,6 @@ Templates:
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
 
-      ### govc-lib.sh.tmpl
-      {{ template "govc-lib.sh.tmpl" .}}
-
       ### govc-cluster-create.sh
       JQ=$(which jq)
       [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
@@ -62,13 +59,20 @@ Templates:
         fi
       fi
 
+      run_govc() {
+        local _args="$*"
+        echo "CMD: govc $_args"
+        govc $_args
+      }
+
       USERNAME="root"
       DC='{{ .Param "esxi/datacenter-name" }}'
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
       OPTIONS='{{ .Param "esxi/cluster-options" }}'
+      VSAN_ENABLED='{{ .Param "esxi/vsan-enabled" }}'
       FOLDER='{{ .ParamExpand "esxi/cluster-folder" }}'
       [[ -z "$CLUSTER" ]] && xiterr 1 "'esxi/cluster-name' not specified"
-      MEMBERS=$(get_cluster_members $CLUSTER)
+      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
       {{ if .ParamExists "esxi/cluster-profile" -}}
       {{ if eq ( .Param "esxi/cluster-profile" ) "" -}}
       xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') exists but has an empty value."
@@ -77,6 +81,7 @@ Templates:
       {{ else -}}
       xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not been assigned."
       {{ end }}
+      PARAM_SCUUID="esxi/vsan-data/sub-cluster-uuid"
 
       export GOVC_PERSIST_SESSION=false
 
@@ -103,6 +108,81 @@ Templates:
       fi
 
       export GOVC_DATACENTER="$DC"
+      ###
+      #  FOLDER CREATE options moved to template 'govc-folder-create.sh.tmpl'
+      #  not called here - as there are problems with conflicting Datacenter and
+      #  folder name handling. (See CLUSTER, create in FOLD construct also)
+      ###
+      [[ -n "$FOLDER" ]] && printf '>>>\n>>> FOLDER CREATE process disabled, needs help\n>>>\n'
+
+      # try to set based on Machien Name, FQDN, or fallback to IP Address
+      # TODO:  This needs enhanced in conjunction with the govc context container
+      #        to support DNS record checks in the future.
+      get_member_name() {
+        echo $ADDR
+        # echo $MEMBER.$DNAME
+      }
+
+      get_vmk_device() {
+        _vmk=$(drpcli machines get Name:$MEMBER param esxi/vsan-vmk | jq -r '.' || true)
+        if [[ -n "$_vmk" && "$_vmk" != "null" ]]
+        then
+          echo "Found VMK device '$_vmk' from 'esxi/vsan-vmk' param..."
+        else
+          echo "'esxi/vsan-vmk' has no assigned value, checking 'esxi/network-firstboot-vmk'..."
+          _vmk=$(drpcli machines get Name:$MEMBER param esxi/network-firstboot-vmk| jq -r '.' || true)
+          [[ -z "$_vmk" || "$_vmk" == "null" ]] && echo "No value assigned by 'esxi/network-firstboot-vmk' ... " || true
+        fi
+
+        [[ -z "$_vmk" || "$_vmk" == "null" ]] && { _vmk="vmk0"; echo "Falling back to default 'vmk0'."; } || true
+
+        echo "Using VMK device '$VMK' for VSAN traffic ... "
+        VMK="$_vmk"
+      }
+
+      set_vmk_on_host() {
+        local _has_vsan _vmk _pass
+        local GOVC_URL=$(get_member_name $NODE)
+        local GOVC_USERNAME=root
+        local GOVC_DATACENTER=""  # must be empty for this operation on ESXi host
+        local GOVC_INSECURE=1
+        local GOVC_DATASTORE=""
+        local GOVC_RESOURCE_POOL=""
+        local GOVC_PASSWORD
+
+        _pass=$(drpcli machines get Name:$MEMBER param esxi/insecure-password | jq -r '.' || true)
+        [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
+        GOVC_PASSWORD="$_pass"
+
+        _msg="Running 'govc' with the following credentials against '$HNAME' ... "
+
+        if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
+        then
+          echo "WARNING: GOVC_PASSWORD is visible since 'rs-debug-enable' is set to 'true'."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_"
+        else
+          echo "NOTICE: GOVC_PASSWORD is obfuscated.  Set 'rs-debug-enable' to 'true' to view it on next run."
+          echo ""
+          echo "$_msg"
+          env | grep -v grep | grep "GOVC_" | sed 's/^\(.*PASSWORD=\).*$/\1*** obfuscated ***/'
+        fi
+
+        get_vmk_device
+
+        _has_vsan=$(govc host.esxcli vsan network list 2> /dev/null)
+        if [[ -n "$_has_vsan" ]]
+        then
+          echo ">>> VMK $VMK appears to have VSAN type already"
+        else
+          echo ">>> adding VMK $VMK with VSAN type"
+          _args="host.esxcli vsan network ip add -i $VMK"
+          echo "CMD: govc $_args"
+          govc $_args
+        fi
+
+      } # end set_vmk_on_host()
 
       # uses variable MEMBER to operate against
       cluster_add() {
@@ -174,8 +254,8 @@ Templates:
           ADD_LOG=/tmp/cluster-add.$MEMBER.$ADDR.$$.log
           echo "Initializing member '$MEMBER' log '$ADD_LOG' ... " | tee $ADD_LOG
 
-          HNAME=$(get_member_name $MEMBER)
-          if [[ -n "$HNAME" ]]
+          HNAME=$(get_member_name)
+          if [[ -n "$ADDR" ]]
           then
             echo "Starting cluster setup for '$MEMBER'."
             #cluster_add &

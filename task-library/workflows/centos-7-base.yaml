@@ -1,10 +1,6 @@
 Name: "centos-7-base"
-Description: "[DEPRECATED] Basic CentOS 7 Install Workflow + Runner"
+Description: "Basic CentOS 7 Install Workflow + Runner"
 Documentation: |
-  .. warning:: DEPRECATED - This workflow will be removed from future versions of
-               DRP.  Please use the ``universal`` content pack and workflows.  See
-               :ref:`deploy_linux_with_universal` and :ref:`rs_release_v46_deprecations`.
-
   This workflow includes the DRP Runner in CentOS provisioning process for DRP.
 
   After the install completes, the workflow installs the runner

@@ -100,7 +100,6 @@ Templates:
       dmidecode
       dnf
       dosfstools
-      dpkg
       e2fsprogs
       efibootmgr
       file
@@ -124,12 +123,7 @@ Templates:
       kernel-tools
       kexec-tools
       less
-      libssh2
       libsysfs
-      libtomcrypt
-      libtommath
-      libyaml
-      libxslt
       linux-firmware
       lldpd
       lshw
@@ -143,7 +137,6 @@ Templates:
       {{end}}
       mktemp
       ncurses
-      ncurses-compat-libs
       nfs-utils
       ntfs-3g
       ntfsprogs
@@ -157,12 +150,7 @@ Templates:
       policycoreutils
       procps-ng
       python2
-      python2-crypto
-      python2-pyyaml
       python36
-      python3-crypto
-      python3-oauthlib
-      python3-pyyaml
       rootfiles
       rpm
       rsyslog
@@ -174,16 +162,13 @@ Templates:
       systemd
       systemd-networkd
       tar
-      tpm2-tools
       unzip
-      usbutils
       util-linux
       vim-enhanced
       wget
       which
       xfsdump
       xfsprogs
-      xorriso
       xz
       yum
       zlib

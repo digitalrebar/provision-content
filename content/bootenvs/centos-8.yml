@@ -4,11 +4,6 @@ Description: "CentOS-8 installer that points to the latest CentOS 8 release."
 Documentation: |
   This BootEnv installs the CentOS 8 Minimal operating system.  Both x86_64
   and aarch64 architectures are supported.
-
-  ISOs can be downloaded from:
-
-    * http://isoredirect.centos.org/centos
-
 Meta:
   type: "os"
   feature-flags: "change-stage-v2"
@@ -24,9 +19,9 @@ OS:
   Name: "centos-8"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-8.3.2011-x86_64-dvd1.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.3.2011-x86_64-dvd1.iso"
-      Sha256: "aaf9d4b3071c16dbbda01dfe06085e5d0fdac76df323e3bbe87cce4318052247"
+      IsoFile: "CentOS-8.1.1911-x86_64-dvd1.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.1.1911-x86_64-dvd1.iso"
+      Sha256: "3ee3f4ea1538e026fff763e2b284a6f20b259d91d1ad5688f5783a67d279423b"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -40,9 +35,9 @@ OS:
         {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: "CentOS-8.3.2011-aarch64-dvd1.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.3.2011-aarch64-dvd1.iso"
-      Sha256: "ecf586b30fa16b28a33b2fb4ffadd8801201608f9755c94da1212876d32fba92"
+      IsoFile: "CentOS-8.1.1911-aarch64-dvd1.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.1.1911-aarch64-dvd1.iso"
+      Sha256: "357f34e86a28c86aaf1661462ef41ec4cf5f58c120f46e66e1985a9f71c246e3"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"

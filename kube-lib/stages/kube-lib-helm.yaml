@@ -11,6 +11,7 @@ Documentation: |
   Unless helm is uploaded to file helm/helm, this stage requires internet access.
 RunnerWait: true
 Tasks:
+  - "kube-lib-legacy-migration"
   - "kube-lib-kubectl-install"
   - "kube-lib-helm-install"
   - "kube-lib-helm-charts"

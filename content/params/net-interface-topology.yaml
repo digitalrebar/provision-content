@@ -115,4 +115,3 @@ Schema:
 Meta:
   type: "config"
   icon: "chip"
-  clipboard: true

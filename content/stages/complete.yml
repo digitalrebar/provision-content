@@ -1,14 +1,7 @@
 ---
 Name: "complete"
-Description: "Stage that represents workflow completion to local disk boot but leaves the runner running on the machine."
-Documentation: |
-  This stage is used to indicate the completion of a workflow that expects the runner to be running on the machine in
-  a local boot environment.  This should NOT be used by workflows running in contexts unless the goal is to transition
-  back to the machine.
-
+Description: "Stage that represents workflow completion to local disk boot but leaves the runner running."
 BootEnv: "local"
-Tasks:
-  - "context:"
 Meta:
   type: "complete"
   icon: "check circle outline"

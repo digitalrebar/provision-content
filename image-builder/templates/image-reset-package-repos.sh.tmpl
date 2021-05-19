@@ -6,13 +6,6 @@
 ######## set to true - as the local repos will not contain packages we
 ######## need for subsequent install tasks to succeed
 
-{{ if eq ( .Param "image-builder/skip-package-reset") true -}}
-echo "Skipping package repository reset task as specified by the skip param."
-exit 0
-{{ else -}}
-echo "Beginning package repository reset - to disable set 'image-builder/skip-package-reset' to 'true'."
-{{ end -}}
-
 {{template "setup.tmpl" .}}
 
 case $OS_FAMILY in

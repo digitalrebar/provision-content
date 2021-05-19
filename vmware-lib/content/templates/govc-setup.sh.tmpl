@@ -9,30 +9,22 @@ echo ""
 
 MSG="Showing GOVC environment variables built from Params ... "
 
-{{ if .ParamExists "esxi/insecure-password" -}}
-PW='{{ .Param "esxi/insecure-password" }}'
-{{ else -}}
-PW='{{ .Param "govc/password" }}'
-{{ end -}}
-
 # REQUIRED
 export GOVC_USERNAME='{{ .Param "govc/username" }}'
-export GOVC_PASSWORD="$PW"
+export GOVC_PASSWORD='{{ .Param "govc/password" }}'
 export GOVC_URL='{{ .ParamExpand "govc/url" }}'
 
 # OPTIONAL
 {{ if ( .Param "govc/port" ) }}export GOVC_URL="${GOVC_URL}:{{ .Param "govc/port" | toString }}"{{ end }}
 {{ if eq (.Param "govc/insecure") true -}}export GOVC_INSECURE=1{{ end }}
-{{ if ( .Param "govc/datastore" )       }}export GOVC_DATASTORE='{{ .ParamExpand "govc/datastore" }}'{{ end }}
+{{ if ( .Param "govc/datastore" )       }}export GOVC_DATASTORE='{{ .Param "govc/datastore" }}'{{ end }}
 {{ if ( .Param "govc/network" )         }}export GOVC_NETWORK='{{ .Param "govc/network" }}'{{ end }}
 {{ if ( .Param "govc/resource-pool" )   }}export GOVC_RESOURCE_POOL='{{ .Param "govc/resource-pool" }}'{{ end }}
 
-[[ -z "$GOVC_URL" ]] && WARN="required setting GOVC_URL is empty (param: 'govc/url') (hopefully it's set later on)"
-[[ -z "$GOVC_USERNAME" ]] && ERR="required setting GOVC_PASSWORD is empty (param: 'govc/password')"
+[[ -z "$GOVC_URL" ]] && ERR=":: required setting GOVC_URL is empty (param: 'govc/url')"
+[[ -z "$GOVC_USERNAME" ]] && ERR="$ERR :: required setting GOVC_PASSWORD is empty (param: 'govc/password')"
 [[ -z "$GOVC_PASSWORD" ]] && ERR="$ERR :: required setting GOVC_USERNAME is empty (param: 'govc/username')"
-
 [[ -n "$ERR" ]] && xiterr 1 "$ERR"
-[[ -n "$WARN" ]] && echo "WARNING: $WARN"
 
 if [[ "{{ .Param "rs-debug-enable" }}" == "true" ]]
 then

@@ -1,0 +1,14 @@
+---
+Name: "redhat-7.0-install"
+Description: "Stage for installing RedHat 7.0"
+Documentation: |
+  Stage for installing RedHat 7.0
+BootEnv: "redhat-7.0-install"
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+Meta:
+  icon: "download"
+  color: "yellow"
+  title: "RackN Content"

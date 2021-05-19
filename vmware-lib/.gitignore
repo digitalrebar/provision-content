@@ -1,4 +1,3 @@
-*.swp
 *.tgz
 archive
 dockerfile-govc.tar

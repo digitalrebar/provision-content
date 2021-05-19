@@ -1,5 +1,4 @@
 #!/usr/local/bin/env bash
-# DEPRECATED
 # Cluster Add-Step-Remove-Sync Common Code
 #
 ###
@@ -23,7 +22,6 @@ cluster_wait_for_variable() {
   local timer_count=0
   local timer_expire=600
 
-  echo "WARNING: DEPRECATED"
   while [[ $var == null ]] ; do
     sleep $sleep_time
     var=$(get_param "$varname" | jq -r .)
@@ -41,7 +39,6 @@ cluster_wait_for_count() {
   local timer_expire=600
 
   local cl=$(get_param "$varname")
-  echo "WARNING: DEPRECATED"
   while [[ $(jq length <<< "$cl") -lt $count ]]; do
     # we're good!
     sleep $sleep_time
@@ -53,7 +50,6 @@ cluster_wait_for_count() {
 }
 
 echo "=== CLUSTER SHARED CODE START ==="
-echo "WARNING: DEPRECATED"
 
 echo "Assign $CLUSTER_PROFILE Profile to Machine if missing"
 {{ $profiles := .Machine.Profiles }}
@@ -105,5 +101,4 @@ CLUSTER_LEADER_INDEX=-1
   echo "No Leaders Assigned - make sure cluster-setup is run if needed"
 {{end}}
 
-echo "WARNING: DEPRECATED"
 echo "=== CLUSTER SHARED CODE END ==="

@@ -13,7 +13,6 @@ Meta:
 OS:
   Family: "fedora"
   Name: "fedora-31"
-  Version: "31"
   SupportedArchitectures:
     x86_64:
       IsoFile: "Fedora-Server-dvd-x86_64-31-1.9.iso"

@@ -7,10 +7,7 @@
 macs=()
 for nic in /sys/class/net/*; do
     [[ -f $nic/type && -f $nic/address && $(cat "$nic/type") == 1 ]] || continue
-    newmac=$(cat "$nic/address")
-    # Calico is bad and makes fake addresses
-    [[ "$newmac" != "ee:ee:ee:ee:ee:ee" ]] || continue
-    macs+=($newmac)
+    macs+=($(cat "$nic/address"))
 done
 hwaddrs="$(printf '"%s",' "${macs[@]}")"
 hwaddrs="[${hwaddrs%,}]"
@@ -34,8 +31,8 @@ for tool in drpcli jq; do
     which "$tool" &>/dev/null && continue
     echo "Installing $tool in /usr/local/bin"
     case $tool in
-        drpcli) curl -kgsfLo "/usr/local/bin/$tool" "{{.ApiURL}}/files/drpcli.$ARCH.linux";;
-        jq)     curl -kgsfLo "/usr/local/bin/$tool" "{{.ApiURL}}/files/jq";;
+        drpcli) curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/drpcli.$ARCH.linux";;
+        jq)     curl -gsfLo "/usr/local/bin/$tool" "{{.ProvisionerURL}}/files/jq";;
     esac
     chmod 755 "/usr/local/bin/$tool"
 done
@@ -49,26 +46,20 @@ switch_to_control() {
     echo "${RS_UUID}" > /etc/rs-uuid
     {{template "profile.tmpl" .}}
 
-    echo "Downlading $RS_ENDPOINT/machines/$RS_UUID/control.sh"
-    if ! curl -kgsfLo /tmp/control.sh "$RS_ENDPOINT/machines/$RS_UUID/control.sh" && \
+    echo "$PROVISIONER_WEB/machines/$RS_UUID/control.sh"
+    if ! curl -g -s -f -L -o /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
             grep -q '^exit 0$' /tmp/control.sh && \
             head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
-        echo "WARNING: could not attach using HTTPS, falling back to HTTP"
-        echo "Failling back to $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
-        if ! curl -kgsfLo /tmp/control.sh "$PROVISIONER_WEB/machines/$RS_UUID/control.sh" && \
-                grep -q '^exit 0$' /tmp/control.sh && \
-                head -1 /tmp/control.sh | grep -q '^#!/bin/bash'; then
-            echo "Could not load our control.sh!"
-            echo "Either the machine is not in the proper bootenv, or"
-            echo "the bootenv is broken and fell through to Sledgehammer"
-            exit 1
-        fi
+        echo "Could not load our control.sh!"
+        echo "Either the machine is not in the proper bootenv, or"
+        echo "the bootenv is broken and fell through to Sledgehammer"
+        exit 1
     fi
     chmod 755 /tmp/control.sh
     export RS_UUID BOOTDEV PROVISIONER_WEB MAC DOMAIN DNS_SERVERS HOSTNAME IP
     echo "transfer from start-up to control script"
     [[ -x /tmp/control.sh ]] && exec /tmp/control.sh
-    echo "Did not get control.sh from $RS_ENDPOINT/machines/$RS_UUID/control.sh"
+    echo "Did not get control.sh from $PROVISIONER_WEB/machines/$RS_UUID/control.sh"
     exit 1
 }
 

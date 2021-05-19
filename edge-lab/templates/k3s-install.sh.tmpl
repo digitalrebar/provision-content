@@ -1,0 +1,311 @@
+#!/usr/bin/env bash
+# k3s part of Kubernetes Rebar Integrated Boot (KRIB) Kubeadm Installer
+# Copyright RackN 2019
+set -e
+
+echo "starting k3s install"
+# Get access and who we are.
+{{ template "setup.tmpl" .}}
+
+if kubectl get nodes 2>/dev/null >/dev/null ; then
+  echo "kubectl works... no (re)install needed"
+  exit 0
+else 
+  echo "no kubectl, install k3s"
+fi
+
+if $CLUSTER_I_AM_LEADER ; then
+  drpcli machines meta set $RS_UUID key icon to anchor
+else
+  drpcli machines meta set $RS_UUID key icon to ship
+fi
+drpcli machines meta set $RS_UUID key color to yellow
+
+{{ template "cluster-shared.tmpl" .}}
+{{ template "download-tools.tmpl" .}}
+
+echo "setting up paths for arch $arch"
+case $arch in
+    amd64|x86_64) SHA256SUM="sha256sum-amd64.txt";;
+    arm64|aarch64) SHA256SUM="sha256sum-arm64.txt";;
+esac
+case $arch in
+    amd64|x86_64) ARCH="k3s";;
+    arm64|aarch64) ARCH="k3s-arm64";;
+    *)
+        echo "Unknown arch $arch"
+        exit 1;;
+esac
+
+if which setenforce 2>/dev/null >/dev/null ; then
+  if sestatus | grep disabled 2>/dev/null >/dev/null ; then
+    echo "SELinux status disabled, no action required"
+  else
+    echo "this is a lab...setting SELinux to permissive"
+    setenforce Permissive
+  fi
+else
+  echo "no SELinux setenforce, skipping"
+fi
+
+{{ if .ParamExists "edge-lab/nfs-share" }}
+  FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+  echo "Installing NFS client for :  '$FAMILY'"
+  case $FAMILY in
+    redhat|centos) sudo yum -y install nfs-utils ;;
+    debian|ubuntu) sudo apt -y install nfs-common ;;
+    *) >&2 echo "Unsupported package manager family '$FAMILY'."
+       exit 1 ;;
+  esac
+  mkdir -p /mnt/nfs/share
+  if [[ ! -f /mnt/nfs/share/test.0 ]] ; then
+    if mount {{ .Param "edge-lab/nfs-share" }} /mnt/nfs/share ; then
+      echo "share mounted, not verified"
+      echo "General shared storage available at /mnt/nfs/share"
+    else
+      echo "could not mount share {{ .Param "edge-lab/nfs-share" }}"
+      exit 1
+    fi
+  fi
+  if [[ -f /mnt/nfs/share/test.0 ]] ; then
+    echo "share verified.  create machine directory for remote storage"
+    mkdir -p /mnt/nfs/share/{{ .Machine.Name }}
+    echo "Machine specific remote storage available at /mnt/nfs/share/{{.Machine.Name}}"
+  else
+    echo "cannot find shared file {{ .Param "edge-lab/nfs-share" }}/test.0"
+    exit 1
+  fi
+{{ else }}
+  echo "No NFS share avilable, skipping"
+{{ end }}
+
+# NFS and the sledgehammer OS filesystem can't be used by the k3s containerd overlayfs system.
+# We need a storage area.  This will be mounted on /mnt/storage and containerd will be linked to it.
+# Check for a scsi device or a ssd card
+#
+mkdir -p /mnt/storage
+
+if grep -qsE '/dev/sd[a-c](.*)[xfs|ext4]' /proc/mounts ; then
+  echo "Found suitable local storage, skipping mounting"
+  mkdir -p /mnt/storage/containerd
+else
+  echo "Attempting to mount attached storage from edge-lab/mount-devices"
+  {{range $index, $device := (.Param "edge-lab/mount-devices") }}
+    echo "=============== {{$index}}. {{$device.partition}}: {{$device.comment}} ==============="
+    if grep -qs {{$device.mount}} /proc/mounts ; then
+      echo "{{$device.mount}} already mounted, cannot redefine at {{$device.partition}}... skipping"
+    else
+      echo "attempting to mount {{$device.mount}} from {{$device.partition}}"
+      if lsblk {{$device.disk}} 2>/dev/null >/dev/null ; then
+        echo "found disk {{$device.disk}}, checking partition {{$device.partition}}"
+        rebuild={{$device.rebuild}}
+        if lsblk {{$device.partition}} 2>/dev/null >/dev/null ; then
+          rebuild=false
+          echo "found partition {{$device.partition}}, mounting to {{$device.mount}}"
+          if mount {{$device.partition}} {{$device.mount}} ; then
+            fstype=$(mount | grep /mnt/storage | awk '{ print $5 }')
+            if [[ "$fstype" != "{{$device.type}}" ]] ; then
+              echo "Was $fstype filesystem, needed {{$device.type}} filesystem. rebuild it"
+              rebuild={{$device.rebuild}}
+              umount {{$device.mount}}
+            else
+              echo "Partition is already {{$device.type}}, no change needed"
+            fi
+          else
+            echo "could not mount {{$device.partition}} {{$device.mount}}, moving on..."
+          fi
+        else
+          echo "no disk {{$device.disk}}, trying next disk in array"
+        fi
+        if [[ $rebuild == true ]] ; then
+          echo "do rebuild disk flag set - will wipefs and partition"
+          wipefs -a {{$device.disk}}
+          parted {{$device.disk}} mklabel GPT
+          parted {{$device.disk}} mkpart primary 2048s 100%
+          mkfs -t {{$device.type}} {{$device.partition}}
+          mount {{$device.partition}} {{$device.mount}}
+        else
+          echo "do not rebuild disk (request was rebuild={{$device.rebuild}})"
+        fi
+      else
+        echo "no {{$device.disk}} found, moving on..."
+      fi
+    fi
+  {{else}}
+    echo "no attached storage drives defined"
+  {{end}}
+
+  if grep -qs /mnt/storage /proc/mounts ; then
+    # Reset the storage if it isn't ours.
+    echo "Checking for storage marker"
+    if [[ "$(cat /mnt/storage/marker)" != "$RS_UUID" ]] ; then
+      echo "Marker didn't match.  Reset the container space"
+      rm -rf /mnt/storage/containerd
+      echo -n "$RS_UUID" > /mnt/storage/marker
+    fi
+    mkdir -p /mnt/storage/containerd
+  else
+    echo "HALTING: Install requires external storage."
+    exit 1
+  fi
+fi
+
+# Link to attached storage if there.
+mkdir -p /var/lib/rancher/k3s/agent
+ln -s /mnt/storage/containerd /var/lib/rancher/k3s/agent/containerd
+
+# Fix hostname lookup
+echo "{{.Machine.Address}} $(hostname -s) $(hostname)" >> /etc/hosts
+
+TMP_DIR=/tmp/k3s-tmp
+INSTALL_DIR=/usr/bin
+SYSTEMD_DIR="/etc/systemd/system"
+BINARIES="$INSTALL_DIR/k3s"
+
+echo "Checking for $ARCH"
+if ! which k3s 2>/dev/null >/dev/null ; then
+  if $CLUSTER_I_AM_LEADER; then
+    if drpcli files exists "k3s/k3s-$arch" 2>/dev/null >/dev/null ; then
+      echo "Found in DRP files/k3s - downloading from there"
+      drpcli files download "k3s/k3s-$arch" to $BINARIES
+    else
+      K3S_URL="{{ .Param "k3s/download-url" }}/download/{{ .Param "k3s/version" }}"
+      echo "Download k3s from $K3S_URL/${ARCH}"
+      download -L --remote-name-all "$K3S_URL/${ARCH}" -o $ARCH
+      echo "Download k3s checksum from $K3S_URL/${SHA256SUM}"
+      download -L --remote-name-all "$K3S_URL/${SHA256SUM}" -o ${SHA256SUM}
+
+      if grep -Fxq "$(sha256sum $ARCH)" $SHA256SUM ; then
+        echo "Checksum Test Pass"
+      else
+        echo "Checksum Does not match"
+        sha256sum $ARCH -c ${SHA256SUM}
+        exit 1
+      fi
+
+      mv $ARCH $BINARIES
+      drpcli files upload "$BINARIES" as "k3s/k3s-$arch"
+    fi
+  else
+    echo "Not the leader - waiting for k3s/node-token to be defined"
+    cluster_wait_for_variable "k3s/node-token"
+    echo "download binaries from DRP k3s/k3s-$arch"
+    drpcli files download "k3s/k3s-$arch" to $BINARIES
+  fi
+  if [ -f $BINARIES ] ; then
+    chmod +x $BINARIES
+  else
+    echo "$BINARIES not installed on system"
+    exit 1
+  fi
+else
+  echo "found $BINARIES binary, moving on..."
+fi
+
+echo "Installing k3s version: $(k3s -v)"
+
+if $CLUSTER_I_AM_LEADER ; then
+
+  echo "I am leader - run k3s server"
+
+  K3S_URL=https://{{ .Machine.Address }}:{{ .Param "k3s/api-port" }}
+  EXECSTART="${BINARIES} server --bind-address={{ .Machine.Address }} --node-label=worker --https-listen-port={{ .Param "k3s/api-port" }} --node-label=worker"
+  SYSTEMD_TYPE="notify"
+
+else
+
+  echo "I am a worker - run k3s agent"
+
+  cluster_wait_for_variable "k3s/node-token"
+
+  # we need to get the decoded version
+  K3S_TOKEN=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param k3s/node-token --decode)
+  ADMIN_CONFIG=$(drpcli -T $PROFILE_TOKEN profiles get $CLUSTER_PROFILE param k3s/admin-conf --decode)
+
+  echo "Running Agent: join with k3s/node-token value"
+  K3S_URL=$(jq -r '.clusters[0].cluster.server' <<< "$ADMIN_CONFIG")
+  EXECSTART="${BINARIES} agent --server ${K3S_URL} --node-label=worker --token ${K3S_TOKEN}"
+  SYSTEMD_TYPE="exec"
+
+fi
+
+MODPROBE=$(which modprobe)
+
+if [[ ! -f /etc/systemd/system/k3s.service.env ]]; then
+  ## Build Systemd environment vars
+  echo "Attaching to K3s at $K3S_URL"
+  tee /etc/systemd/system/k3s.service.env >/dev/null << EOF
+K3S_URL=${K3S_URL}
+K3S_TOKEN=${K3S_TOKEN}
+EOF
+else
+  echo "No action: k3s.service.env file exists"
+fi
+
+if [[ ! -f /etc/systemd/system/k3s.service ]]; then
+  ## Build Systemd service
+  echo "Building k3s.service file"
+  tee /etc/systemd/system/k3s.service >/dev/null << EOF
+[Unit]
+Description=K3s - Lightweight Kubernetes
+Documentation=https://k3s.io
+After=network-online.target
+
+[Service]
+Type=${SYSTEMD_TYPE}
+EnvironmentFile=/etc/systemd/system/k3s.service.env
+ExecStartPre=${MODPROBE} br_netfilter
+ExecStartPre=${MODPROBE} overlay
+ExecStart=${EXECSTART}
+KillMode=process
+Delegate=yes
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+chmod 0755 /etc/systemd/system/k3s.service
+else
+  echo "No action: k3s.service file exists"
+fi
+
+systemctl daemon-reload && systemctl start k3s
+
+echo "create symlinks for kubectl and others"
+ln -sf k3s $INSTALL_DIR/kubectl
+ln -sf k3s $INSTALL_DIR/crictl
+ln -sf k3s $INSTALL_DIR/ctr
+
+echo "waiting 3 seconds"
+sleep 3
+
+if $CLUSTER_I_AM_LEADER; then
+  # need more delay for leader
+  while [[ "$(kubectl get nodes -o json | jq '.items | length')" == "0" ]] ; do
+    sleep 1
+    echo "waiting for cluster to start (1 second)"
+  done
+  echo "Verify install: kubectl MUST succeed"
+  kubectl get nodes
+  echo "Recording cluster admin config ..."
+  drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param k3s/admin-conf to - < /etc/rancher/k3s/k3s.yaml
+  if [[ -f /var/lib/rancher/k3s/server/node-token ]] ; then
+    # collect the cluster bootstrap token, then store it on the Param
+    echo "Recording cluster token ... (releases waiting workers)"
+    K3S_TOKEN=$(cat /var/lib/rancher/k3s/server/node-token)
+    drpcli -T $PROFILE_TOKEN profiles add $CLUSTER_PROFILE param k3s/node-token to "$K3S_TOKEN"
+  else
+    echo "halting, could not find /var/lib/rancher/k3s/server/node-token"
+    exit 1
+  fi
+fi
+
+drpcli machines meta set $RS_UUID key color to green
+echo "Finished k3s install successfully"
+exit 0

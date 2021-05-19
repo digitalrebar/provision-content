@@ -9,39 +9,9 @@ set -e
 {{template "setup.tmpl" .}}
 [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
-{{ $dataParameter := "classify/classification-data" }}
-{{ $functionParameter := "classify/custom-functions" }}
-{{ $disableParameter := "classify/disable-classifier" }}
-DISABLE_CLASSIFIER="{{.Param $disableParameter}}"
-{{ if ne 1 (.Param "classify/version" | int) }}
-  {{ if .ParamExists "classify/data-parameter" }}
-    {{ $dataParameter = .Param "classify/data-parameter" }}
-  {{ else }}
-    {{ $dataParameter = "unknown-data-parameter" }}
-  {{ end }}
-
-  {{ if .ParamExists "classify/function-parameter" }}
-    {{ $functionParameter = .Param "classify/function-parameter" }}
-  {{ else }}
-    {{ $functionParameter = "unknown-function-parameter" }}
-  {{ end }}
-
-  {{ if .ParamExists "classify/disable-parameter" }}
-    {{ $disableParameter = .Param "classify/disable-parameter" }}
-    {{ if .ParamExists $disableParameter }}
-      DISABLE_CLASSIFIER="{{ .Param $disableParameter }}"
-    {{ else }}
-      DISABLE_CLASSIFIER="false"
-    {{ end }}
-  {{ end }}
-{{ end }}
-
-echo "Using data parameter: {{$dataParameter}}"
-echo "Using function parameter: {{$functionParameter}}"
-echo "Using disable parameter: {{$disableParameter}}"
-
+DISABLE_CLASSIFIER="{{.Param "classify/disable-classifier"}}"
 if [[ "$DISABLE_CLASSIFIER" == "true" ]]; then
-  echo "Classification system disabled ('{{$disableParameter}}' set to 'true')."
+  echo "Classification system disabled ('classify/disable-classifier' set to 'true')."
   exit 0
 fi
 
@@ -49,20 +19,116 @@ fi
 MY_MAC_ADDR=""
 
 ###
-### Actions functions have no return
+#   Sets a given parameter to a given value on a Machine object.
 ###
-{{ template "classify-base-actions.sh.tmpl" . }}
+function set_parameter() {
+  local _parameter="$1"
+  local _value="$2"
+
+  drpcli machines set $RS_UUID param "$_parameter" to "$_value"
+}
 
 ###
-###  Test functions echo pass for success and fail for failure
+#  Adds a given ARGv1 profile to the Machine object
 ###
-{{ template "classify-base-tests.sh.tmpl" . }}
+function add_profile() {
+  local _profile="$1"
+
+  if drpcli profiles exists "$_profile"
+  then
+    if drpcli machines show $RS_UUID | jq -r '.Profiles' | grep -q "\"$_profile\""
+    then
+      echo "Profile ('$_profile') already exists on Machine - no action taken."
+    else
+      drpcli machines addprofile $RS_UUID "$_profile"
+    fi
+  else
+    echo "Requested profile ('$_profile') does not exist."
+    exit 1
+  fi
+}
+
+###
+#  Changes the Machine workflow to ARGv1 specified workflow
+###
+function change_workflow() {
+  local _wf="$1"
+
+  if drpcli workflows exists "$_wf"
+  then
+    drpcli machines update $RS_UUID "{ \"Workflow\": \"$_wf\" }"
+  else
+    echo "Requested workflow ('$_wf') does not exist."
+    exit 1
+  fi
+}
+
+###
+###  Test functions echo 0 for success and 1 for failure
+###
+
+###
+#  Generally a fallthrough function, that will always succeed if Requested###
+function always() {
+  echo "pass"
+}
+
+###
+#  Determine if the Machine is in a given in_subnet
+###
+function in_subnet() {
+  local _cidr="$1"
+  local _prefix=${_cidr#*/}
+  local _myaddr="{{.Machine.Address}}/$_prefix"
+
+  local _mynet=$(ipcalc -n $_myaddr)
+  local _thenet=$(ipcalc -n $_cidr)
+
+  if [[ "$_mynet" == "$_thenet" ]] ; then
+      echo "pass"
+  else
+      echo "fail"
+  fi
+}
+
+###
+#  Determine if the Machine has the given MAC address
+###
+function has_mac() {
+  # normalize the input MAC for comparison
+  local _mac_match=$(echo "$1" | tr -d " :-" | tr '[:upper:]' '[:lower:]')
+  get_my_mac    # sets global var MY_MAC_ADDR
+  # strip it down to 12 chars (tosses 01 type if exists)
+  _mac_match=${_mac_match:(-12)}
+
+  if [[ "$_mac_match" == "$MY_MAC_ADDR" ]]; then
+    echo "pass"
+  else
+    echo "fail"
+  fi
+}
+
+###
+#  get the Machines boot interface Mac Addr
+#  NOTE: we shouuld NOT echo anything out here
+###
+function get_my_mac() {
+  bootif_re='BOOTIF=([^ ]+)'
+  local _macaddr="UNKNOWN"
+  if [[ $(cat /proc/cmdline) =~ $bootif_re ]]; then
+    _macaddr="${BASH_REMATCH[1]//-/:}"
+    _macaddr=$(echo $_macaddr | tr -d " :-" | tr '[:upper:]' '[:lower:]')
+    _macaddr=${_macaddr:(-12)}
+  else
+    xiterr 1 "Unable to 'cat /proc/cmdline' and rematch successfully"
+  fi
+  MY_MAC_ADDR="$_macaddr"
+}
 
 # if any custom classify functions are specified, inject them here
 {{ template "classify-custom-functions.tmpl" .}}
 
-{{ if .ParamExists $dataParameter }}
-{{range $index, $group := .Param $dataParameter }}
+{{range $index, $group := .Param "classify/classification-data"}}
 
 [[ $RS_DEBUG_ENABLE ]] && echo ">>>   INDEX:  {{$index}}"
 [[ $RS_DEBUG_ENABLE ]] && echo ">>>   GROUP:  {{$group}}"
@@ -85,7 +151,6 @@ if [[ $RESULT == "pass" ]] ; then
    exit 0
  {{ end -}}
 fi
-{{end}}
 
 {{else}}
 echo "No data to classify.  Continuing without classification ..."

@@ -17,9 +17,7 @@ Secure: true
 Schema:
   type: object
 Meta:
-  type: "password"
   color: "blue"
   icon: "file code"
   title: "Community Content Copyright RackN 2019"
   downloadable: "kube.config"
-  clipboard: true

@@ -17,34 +17,26 @@
 
 set -e
 
+function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*";  __exit $XIT; }
+
+###
+#  if we want debugging of our scripts, set the Param to true
+#  also set shell variable for script reuse if desired for further
+#  debugging
+###
+{{ if .ParamExists "rs-debug-enable" }}
+{{ if eq (.Param "rs-debug-enable") true }}
+# use in shell as: [[ $RS_DEBUG_ENABLE ]] && echo "debugging"
+RS_DEBUG_ENABLE="{{.Param "rs-debug-enable"}}"
+set -x
+{{ end }}
+{{ end }}
+
 # We pretty much always need these parameters set, but
 # don't overwrite them if they already exist.
 [[ $RS_TOKEN ]] || export RS_TOKEN="{{.GenerateInfiniteToken}}"
 [[ $RS_ENDPOINT ]] || export RS_ENDPOINT="{{.ApiURL}}"
 [[ $RS_UUID ]] || export RS_UUID="{{.Machine.UUID}}"
-[[ $HOME ]] || export HOME=$(pwd)
-###
-#  if we want debugging of our scripts, set the Param to true
-#  also set shell variable for script reuse if desired for further
-#  debugging
-#  for security, this can be disabled universally by setting security/debug-block
-###
-{{ if .ParamExists "rs-debug-enable" }}
-  {{ if .Param "rs-debug-enable" }}
-    {{ if .ParamExists "security/debug-block"}}
-      {{ if .Param "security/debug-block" }}
-      echo "NOTE: secury/debug-block enabled: overriding rs-debug-enable on machine"
-      drpcli machines set $RS_UUID param rs-debug-enable to false > /dev/null
-      {{ end }}
-    {{ else }}
-      # use in shell as: [[ $RS_DEBUG_ENABLE ]] && echo "debugging"
-      RS_DEBUG_ENABLE="{{.Param "rs-debug-enable"}}"
-      set -x
-    {{ end }}
-  {{ end }}
-{{ end }}
-
-function xiterr() { [[ $1 =~ ^[0-9]+$ ]] && { XIT=$1; shift; } || XIT=1; echo "FATAL: $*";  __exit $XIT; }
 
 function fixup_path() {
   local _add_path
@@ -67,13 +59,6 @@ esac
 
 osfamily=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
 
-osclass="linux"
-case $osfamily in
-    mac*|dar*) osclass="darwin";;
-    win*) osclass="windows";;
-    *) true;;
-esac
-
 INSTALL_DIR=/usr/local/bin
 if grep -q coreos /etc/os-release ; then
   INSTALL_DIR=/opt/bin
@@ -84,7 +69,7 @@ mkdir -p $INSTALL_DIR
 
 if ! which drpcli ; then
     echo "Installing drpcli in $INSTALL_DIR"
-    curl --noproxy '*' -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.$osclass"
+    curl --noproxy '*' -gsfLo "$INSTALL_DIR/drpcli" "{{.ProvisionerURL}}/files/drpcli.$arch.linux"
     chmod 755 "$INSTALL_DIR/drpcli"
 else
     INSTALL_DIR="$(dirname $(which drpcli))"

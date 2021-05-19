@@ -1,0 +1,35 @@
+---
+Name: "windows-2012r2-install"
+Description: "WimPE-based windows install bootenv"
+Documentation: |
+  DEPRECATED Bootenv
+OS:
+  Name: "windows-2012r2"
+  IsoFile: "rebar-win2012r2.iso"
+  IsoSha256: "8ce9f9b23aaf397913d927c7fda3343d411f6846ef7b94f29b51108e95c46f6e"
+Kernel: "wimboot"
+Initrds:
+  - "boot/bcd"
+  - "boot/boot.sdi"
+  - "rebar-winpe.wim"
+BootParams: ""
+RequiredParams:
+  - "operating-system-license-key"
+  - "operating-system-install-flavor"
+Templates:
+  - ID: "windows.pxelinux.tmpl"
+    Name: "pxelinux"
+    Path: "pxelinux.cfg/{{.Machine.HexAddress}}"
+  - ID: "windows.ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "stage1.cmd.tmpl"
+    Name: "start-install"
+    Path: "{{.Machine.Path}}/stage1.ps1"
+  - ID: "2012r2-unattend.xml.tmpl"
+    Name: "unattend.xml"
+    Path: "{{.Machine.Path}}/unattend.xml"
+Meta:
+  icon: "windows"
+  color: "blue"
+  title: "RackN Content"

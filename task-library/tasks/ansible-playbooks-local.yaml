@@ -2,19 +2,10 @@ Description: A task to invoke a specific set of ansible playbooks pulled from gi
 Documentation: |
   A task to invoke a specific set of ansible playbooks pulled from git.
 
-  Sequence of operations (loops over all entries:
-  1. collect args if provided
-  1. git clone repo to name
-  1. git checkout commit if provided
-  1. cd to name & path
-  1. run ansible-playbook playbook and args if provided
-  1. remove the directories
-
   .. note:: Requires Param ``ansible/playbooks`` - List of playbook git repos
             to run on the local machine.
 
 Meta:
-  type: "config"
   color: black
   feature-flags: sane-exit-codes
   icon: play
@@ -35,74 +26,42 @@ Templates:
     {{template "setup.tmpl" .}}
     [[ $RS_UUID ]] && export RS_UUID="{{.Machine.UUID}}"
 
-    if ! which ansible 2>/dev/null >/dev/null ; then
-        echo "Installing ansible..."
-        install ansible
-    else
-        echo "Ansible installed, no action required"
-    fi
-
-    echo "Running local ansible/playbooks"
+    echo "Running Git-based ansible playbooks"
     {{range $index, $playbook := .Param "ansible/playbooks"}}
-
-        echo "======== Item {{$index}} of ansible/playbooks ========="
-        NAME="{{if $playbook.name}}{{$playbook.name}}{{else}}playbook{{$index}}{{end}}"
-        DIR="/{{if $playbook.path}}{{$playbook.path}}{{else}}{{end}}"
-        PB="{{if $playbook.playbook}}{{$playbook.playbook}}{{else}}playbook{{$index}}.yaml{{end}}"
-
-        {{if $playbook.template }}
-          echo "  Creating playbook ${NAME}/${PB} from DRP template: {{$playbook.template}}"
-          mkdir ${NAME}
-          tee ${NAME}/${PB} >/dev/null << EOF
-    {{$.CallTemplate $playbook.template $}}
-    EOF
-        {{else}}
-          {{ if not $playbook.repo}}
-            echo "ERROR: template or repo must be defined!"
-            exit 1
-          {{else}}
-            echo "  Cloning the git repo: {{$playbook.repo}}"
-            git clone "{{$playbook.repo}}" "$NAME"
-            {{if not $playbook.commit }}
-              echo "  No commit requsted, using default commit"
-            {{else}}
-              echo "  Checking out {{$playbook.commit}}"
-              git checkout {{$playbook.commit}}
-            {{end}}
-          {{end}}
-        {{end}}
+        NAME={{$playbook.name}}
+        REPO={{$playbook.repo}}
+        DIR={{$playbook.path}}
+        PB={{$playbook.playbook}}
+        L=$(mktemp "./$F.$$.XXXXXXXX.log")
 
         {{if not $playbook.data }}
-            echo "  No special args requsted"
             ARGS=""
         {{else}}
-            echo "  Using args: {{$playbook.args}}"
             ARGS="{{$playbook.args}}"
         {{end}}
 
+        echo "Getting the git repo: $REPO"
+        git clone "$REPO" "$NAME"
 
-        cd "${NAME}${DIR}"
+        {{if not $playbook.commit }}
+        echo "No commit"
+        {{else}}
+        git checkout {{$playbook.commit}}
+        {{end}}
 
-        echo "Making DRP machine JSON available to playbook"
-        tee digitalrebar.json >/dev/null << EOF
-    { digitalrebar: $(drpcli machines show $RS_UUID)
-    {{- if $playbook.extravars -}},
-      {{$.CallTemplate $playbook.extravars $}}
-    {{ end -}}
-    }
-    EOF
-        
-        echo "  Running the playbook $PB in $(pwd)"
-        ansible-playbook -i localhost, \
-          $ARGS {{if not $playbook.verbosity}}no_log: True{{end}} \
-          --extra-vars @digitalrebar.json \
-          "$PB"
-
+        echo "Running the playbook, $PB, from $DIR"
+        echo "Setting log file to:  '$L'"
+        cd "$NAME/$DIR"
+        {{if not $playbook.verbosity }}
+        echo "ansible-playbook $ARGS \"$PB\" | tee -a \"$L\""
+        ansible-playbook $ARGS "$PB" 2>&1 | tee -a "$L"
+        {{else}}
+        echo "ansible-playbook $ARGS {{$playbook.verbosity}} \"$PB\" | tee -a \"$L\""
+        ansible-playbook $ARGS {{$playbook.verbosity}} "$PB" 2>&1 | tee -a "$L"
+        {{end}}
         cd -
-    {{else}}
-        echo "NOTE: No ansible/playbooks defined."
-    {{end}}
-    echo "======== End of Loop ========="
 
-    echo "done"
+        rm -rf $NAME $L
+    {{end}}
+
     exit 0

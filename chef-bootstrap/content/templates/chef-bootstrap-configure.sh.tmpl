@@ -7,7 +7,7 @@
 /bin/mkdir -p /var/log/chef
 
 # Make sure we have a node name
-{{ if not (.ParamExists "chef-bootstrap/node_name") }}
+{{if not (.ParamExists "chef-bootstrap/node_name")}}
   drpcli machines set {{.Machine.UUID}} param "chef-bootstrap/node_name" to "$(hostname -f )"
 {{end}}
 

@@ -113,11 +113,11 @@ Schema:
       arch: aarch64
       url: http://mirror.centos.org/altarch/7/os/aarch64/
       installSource: true
-    - tag: centos-7.9.2009
+    - tag: centos-7.8.2003
       os:
-        - centos-7.9.2009
+        - centos-7.8.2003
       arch: x86_64
-      url: http://mirrors.edge.kernel.org/centos/7.9.2009/os/x86_64/
+      url: http://mirrors.edge.kernel.org/centos/7.6.1810/os/x86_64/
       installSource: true
     - tag: centos-7-everything
       os:
@@ -128,7 +128,6 @@ Schema:
         - centos-7.6.1810
         - centos-7.7.1908
         - centos-7.8.2003
-        - centos-7.9.2009
       arch: x86_64
       url: "http://mirrors.edge.kernel.org/centos"
       distribution: "7"
@@ -151,7 +150,6 @@ Schema:
         - centos-7.6.1810
         - centos-7.7.1908
         - centos-7.8.2003
-        - centos-7.9.2009
       arch: aarch64
       url: "http://mirror.centos.org/altarch"
       distribution: "7"
@@ -171,7 +169,6 @@ Schema:
         - centos-7.6.1810
         - centos-7.7.1908
         - centos-7.8.2003
-        - centos-7.9.2009
       arch: any
 #      url: http://mirrors.kernel.org/fedora-epel/7/$basearch
       url: https://download.fedoraproject.org/pub/epel/7/$basearch
@@ -188,31 +185,10 @@ Schema:
       arch: x86_64
       url: http://mirrors.edge.kernel.org/centos/8.1.1911/BaseOS/x86_64/os
       installSource: true
-    - tag: centos-8.2.2004
-      os:
-        - centos-8.2.2004
-      arch: x86_64
-      url: http://mirrors.edge.kernel.org/centos/8.2.2004/BaseOS/x86_64/os
-      installSource: true
-    - tag: centos-8.3.2011
-      os:
-        - centos-8.3.2011
-      arch: x86_64
-      url: http://mirrors.edge.kernel.org/centos/8.3.2011/BaseOS/x86_64/os
-      installSource: true
-    - tag: sledgehammer8
-      os:
-        - sledgehammer8
-      arch: x86_64
-      url: http://mirrors.edge.kernel.org/centos/8.3.2011/BaseOS/x86_64/os
-      installSource: true
     - tag: centos-8-everything
       os:
-        - sledgehammer8
         - centos-8
         - centos-8.1.1911
-        - centos-8.2.2004
-        - centos-8.3.2011
       arch: x86_64
       url: "http://mirrors.edge.kernel.org/centos"
       distribution: "8"
@@ -227,33 +203,17 @@ Schema:
         - fasttrack
     - tag: epel-8-everything
       os:
-        - sledgehammer8
         - centos-8
         - centos-8.1.1911
-        - centos-8.2.2004
-        - centos-8.3.2011
       arch: any
       url: http://mirrors.kernel.org/fedora-epel/8/Everything/$basearch
       distribution: "8"
     - tag: epel-8-modular
       os:
-        - sledgehammer8
         - centos-8
         - centos-8.1.1911
-        - centos-8.2.2004
-        - centos-8.3.2011
       arch: any
       url: http://mirrors.kernel.org/fedora-epel/8/Modular/$basearch
-      distribution: "8"
-    - tag: certs-8
-      os:
-        - sledgehammer8
-        - centos-8
-        - centos-8.1.1911
-        - centos-8.2.2004
-        - centos-8.3.2011
-      arch: any
-      url:	https://forensics.cert.org/centos/cert/8/$basearch
       distribution: "8"
     - tag: ubuntu-16.04
       os:

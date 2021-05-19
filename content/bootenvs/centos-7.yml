@@ -19,9 +19,9 @@ OS:
   Name: "centos-7"
   SupportedArchitectures:
     x86_64:
-      IsoFile: "CentOS-7-x86_64-Minimal-2009.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-x86_64-Minimal-2009.iso"
-      Sha256: "07b94e6b1a0b0260b94c83d6bb76b26bf7a310dc78d7a9c7432809fb9bc6194a"
+      IsoFile: "CentOS-7-x86_64-Minimal-2003.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-x86_64-Minimal-2003.iso"
+      Sha256: "659691c28a0e672558b003d223f83938f254b39875ee7559d1a4a14c79173193"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"
@@ -35,9 +35,9 @@ OS:
         {{.Param "kernel-console"}}
     aarch64:
       Loader: "grubarm64.efi"
-      IsoFile: "CentOS-7-aarch64-Minimal-2009.iso"
-      Sha256: "1bef71329e51f9bed12349aa026b3fe0c4bb27db729399a3f9addae22848da9b"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-aarch64-Minimal-2009.iso"
+      IsoFile: "CentOS-7-aarch64-Minimal-2003.iso"
+      Sha256: "36f48ca26a284442f6abba221cc1279fca103289ade411ee298d38cbf66967bc"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/7/CentOS-7-aarch64-Minimal-2003.iso"
       Kernel: "images/pxeboot/vmlinuz"
       Initrds:
         - "images/pxeboot/initrd.img"

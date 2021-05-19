@@ -1,11 +1,7 @@
 ---
 Name: rhel-server-7-reset
-Description: "[DEPRECATED] Basic RHEL Install Workflow, Register, and Runner"
+Description: Basic RHEL Install Workflow, Register, and Runner
 Documentation: |
-  .. warning:: DEPRECATED - This workflow will be removed from future versions of
-               DRP.  Please use the ``universal`` content pack and workflows.  See
-               :ref:`deploy_linux_with_universal` and :ref:`rs_release_v46_deprecations`.
-
   This workflow includes the DRP Runner in RHEL provisioning process for DRP.
   It also will register the system with Redhat Subscription Manager.  Requires
   the ``redhat/subscription-username`` and ``redhat/subscription-password``

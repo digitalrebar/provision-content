@@ -1,9 +1,0 @@
----
-Name: sledgehammer/exablaze-driver-repo
-Description: The direct repo URL to download the Exablaze drivers from
-Documentation: |
-  This param points at the Exablaze RPM repo that should be used
-  to install current Exablaze drivers from.
-Schema:
-  type: string
-  default: "https://exablaze.com/downloads/yum/redhat/el8/x86_64/"

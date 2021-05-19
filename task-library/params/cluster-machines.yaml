@@ -11,8 +11,3 @@ Meta:
   icon: "object ungroup"
   title: "RackN Content"
   render: "machines-array"
-  deprecated: "v4.6"
-Documentation:
-  ======================
-  DEPRECATED in v4.6
-  ======================
