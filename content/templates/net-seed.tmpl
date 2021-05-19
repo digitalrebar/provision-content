@@ -32,7 +32,7 @@ d-i mirror/country string manual
 {{end -}}
 
 {{if .ParamExists "proxy-servers" -}}
-d-i mirror/http/proxy string {{index (.Param "proxy-servers") 0}}
+d-i mirror/http/proxy string {{index (.Param "proxy-servers") -}}
 {{else -}}
 d-i mirror/http/proxy string
 {{end -}}
@@ -41,7 +41,7 @@ d-i mirror/http/proxy string
 d-i clock-setup/utc boolean true
 {{if .ParamExists "ntp-servers" -}}
 d-i clock-setup/ntp boolean true
-d-i clock-setup/ntp-server string {{index (.Param "ntp-servers") 0}}
+d-i clock-setup/ntp-server string {{index (.Param "ntp-servers") -}}
 {{else -}}
 d-i clock-setup/ntp boolean false
 {{end -}}
