@@ -12,7 +12,7 @@ Stages:
   - "inventory"
   - "cloud-inspect"
   - "network-firewall"
-  - "runner-service"
+  - "drp-agent"
   - "complete-nobootenv"
 Meta:
   type: "setup"
