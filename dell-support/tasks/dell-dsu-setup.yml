@@ -8,10 +8,12 @@ Templates:
   - Name: dell-dsu-repo-setup
     Contents: |
       #!/usr/bin/env bash
+      # Setup Dell DSU utilities in Sledgehammer
+
       {{ template "setup.tmpl" . }}
       . /etc/os-release
-      baseurl="{{.ParamExpand "dell-dsu-base-url"}}"
-      release="{{.Param "dell-dsu-block-release"}}"
+      baseurl='{{.ParamExpand "dell-dsu-base-url" | trimSuffix "/"}}'
+      release='{{.Param "dell-dsu-block-release" | trimPrefix "DSU_"}}'
 
       if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
           echo "System not in Sledgehammer, exiting"
@@ -21,9 +23,10 @@ Templates:
       {{ template "set-proxy-servers.sh.tmpl" .}}
 
       REPO_NAME=dell-system-update
-      url="$baseurl"
       if [[ $release ]]; then
-          url="${url}/DSU_${release}"
+          url="$(echo ${baseurl} | sed 's|/dsu||')/DSU_${release}"
+      else
+          url="$baseurl"
       fi
       checksig=0
 

@@ -1,0 +1,7 @@
+Meta:
+  color: yellow
+  icon: cloud
+Name: linux-selector
+Description: Select the Linux installer
+Tasks:
+  - linux-selector

@@ -1,0 +1,14 @@
+---
+Name: "pnap/os"
+Description: "Phoenix NAP Instance OS"
+Documentation: |
+  Provision Phoenix NSP O/S Image from available list
+Schema:
+  type: "string"
+  default: "ubuntu/bionic"
+Meta:
+  type: "os"
+  color: "black"
+  icon: "disk outline"
+  title: "RackN Content"
+  cloud: "linode"

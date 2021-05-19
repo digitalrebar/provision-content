@@ -19,7 +19,7 @@ Templates:
   - Name: "esxi-vsan-cluster-get.sh"
     Contents: |
       #!/usr/bin/env bash
-      # VSAN destroy 
+      # VSAN destroy
       # RackN Copyright 2020
 
       ### setup.tmpl
@@ -28,6 +28,12 @@ Templates:
       ### govc-setup.sh.tmpl
       {{ template "govc-setup.sh.tmpl" .}}
 
+      ### govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" .}}
+
+      ### begin esxi-vsan-cluster-get.sh
+      ON='{{ .Param "esxi/vsan-enabled" }}'
+      [[ "$ON" == "false" ]] && { echo "VSAN ops disabled ('esxi/vsan-enabled' set to '$VSAN_ENABLED'"; exit 0; }
       set -e
 
       JQ=$(which jq)
@@ -46,7 +52,7 @@ Templates:
 
       export GOVC_PERSIST_SESSION=false
       CLUSTER='{{ .Param "esxi/cluster-name" }}'
-      MEMBERS=$(drpcli machines list esxi/cluster-name Eq "$CLUSTER" Meta.BaseContext Ne govc | jq -r '.[].Name' | tr '\n' ' ')
+      MEMBERS=$(get_cluster_members $CLUSTER)
 
       echo ""
       echo "      Cluster to operate on: '$CLUSTER'"
@@ -97,14 +103,6 @@ Templates:
         echo ">>>>>>>>>>>>>>>>>>>>>>>> END get log for '$MEMBER' <<<<<<<<<<<<<<<<<<<<<<<<"
       }
 
-      # try to set based on Machien Name, FQDN, or fallback to IP Address
-      # TODO:  This needs enhanced in conjunction with the govc context container
-      #        to support DNS record checks in the future.
-      get_member_name() {
-        echo $ADDR
-        # echo $MEMBER.$DNAME
-      }
-
       # iterate over members of cluster an destroy VSAN
       if [[ -n "$MEMBERS" ]]
       then
@@ -115,8 +113,8 @@ Templates:
           ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
           GET_LOG=/tmp/cluster-get-$$-$MEMBER.$ADDR.log
 
-          HNAME=$(get_member_name)
-          if [[ -n "$ADDR" ]]
+          HNAME=$(get_member_name $MEMBER)
+          if [[ -n "$HNAME" ]]
           then
             vsan_cluster_get >> $GET_LOG 2>&1 &
           else

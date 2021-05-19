@@ -2,7 +2,8 @@
 Name: proxmox-lab-network
 Description: Set up the lab network.
 Documentation: |
-  Set up the proxmox based lab network enviornment.
+  Set up the proxmox based lab network enviornment for the target
+  VMs systems.
 
 Meta:
   color: blue
@@ -14,7 +15,8 @@ Prerequisites: []
 RequiredParams:
   - "proxmox/lab-student-count"
 Templates:
-  - Contents: |-
+  - Name: "proxmox-lab-network"
+    Contents: |-
       #!/usr/bin/env bash
       # Proxmox Lab Networking setup
 
@@ -73,10 +75,8 @@ Templates:
         fi
       done
 
-      yum -y install lldpd
+      ENT="/etc/apt/sources.list.d/pve-enterprise.list"
+      [[ -r "$ENT" ]] && rm -f "$ENT"
+      apt -y update
+      apt -y install lldpd
 
-    ID: ""
-    Link: ""
-    Meta: {}
-    Name: "proxmox-lab-network"
-    Path: ""

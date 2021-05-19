@@ -1,23 +1,28 @@
 Name: "edge-lab-bootstrap"
 Description: "Bootstrap Edge Lab server"
 Documentation: |
+  *****************************************
+  DEPRECATED in favor of bootstrap-edge-lab
+  *****************************************
+
   Bootstrap Edge Lab server.
 
   * Base Bootstrap
     * Make sure discovery bootenvs are loaded for operation.
     * Setup an ssh key pair and install it to the global profile.
     * Set the discovery preferences.
+    * Update the Global Profiles
   * Edge Bootstrap
-    * DRP as NFS server
     * Edge Lab DHCP Subnet
-  * Lock the Bootstrap
+
+  Do NOT lock the bootstrap - it's used for the cluster manager too.
 
 Stages:
   - "bootstrap-base"
   - "edge-lab-bootstrap"
-  - "lock-machine"
   - "complete-nobootenv"
 Meta:
-  color: "green"
+  type: deprecated
+  color: "grey"
   icon: "sort amount up"
   copyright: "RackN 2019"

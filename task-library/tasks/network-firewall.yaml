@@ -15,38 +15,47 @@ Templates:
 
     set -e
 
+    {{ if empty (.Param "network/firewall-ports") }}
+      echo "No Action: No Firewall Ports defined in network/firewall-ports."
+    {{ else }}
+
     {{template "setup.tmpl" .}}
 
-    FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
-
-    case $FAMILY in
+    case $osfamily in
       redhat|centos|amzn) yum install -y firewalld ;;
       debian|ubuntu) sudo apt install -y ufw ;;
-      *) >&2 echo "Unsupported package manager family '$FAMILY'."
+      *) >&2 echo "Unsupported package manager family '$osfamily'."
          exit 1 ;;
     esac
 
-    {{range $index, $port := .Param "network/firewall-ports" }}
-      {{ if contains "/" $port }}
-      PORT={{$port}}
-      {{ else }}
-      PORT={{$port}}/tcp
-      {{ end }}
-      echo "Rule {{$index}}: add-port $PORT"
-      case $FAMILY in
-        redhat|centos) firewall-cmd --permanent --add-port=$PORT ;;
-        debian|ubuntu) sudo ufw allow $PORT ;;
-      esac
-    {{else}}
-      echo "No network/firewall-ports defined"
-    {{end}}
+    # just in case, try starting firewalld
+    if systemctl status firewalld | grep Loaded ; then
 
-    echo "restart firewall"
-    case $FAMILY in
-      redhat|centos) firewall-cmd --reload ;;
-      debian|ubuntu) sudo ufw reload ;;
-    esac
+      {{range $index, $port := .Param "network/firewall-ports" }}
+        {{ if contains "/" $port }}
+        PORT={{$port}}
+        {{ else }}
+        PORT={{$port}}/tcp
+        {{ end }}
+        echo "Rule {{$index}}: add-port $PORT"
+        case $osfamily in
+          redhat|centos) firewall-cmd --permanent --add-port=$PORT ;;
+          debian|ubuntu) sudo ufw allow $PORT ;;
+        esac
+      {{else}}
+        echo "No network/firewall-ports defined"
+      {{end}}
+
+      echo "restart firewall"
+      case $osfamily in
+        redhat|centos) firewall-cmd --reload ;;
+        debian|ubuntu) sudo ufw reload ;;
+      esac
     
+      {{ end }}
+    else
+      echo "WARNING: no firewalld found, skipping network config"
+    fi
 
     echo "done"
 

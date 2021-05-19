@@ -1,0 +1,14 @@
+---
+Name: "azure/appId"
+Description: "Azure App ID"
+Documentation: |
+  App ID
+Schema:
+  type: "string"
+Meta:
+  type: "value"
+  color: "blue"
+  icon: "pin"
+  title: "RackN Content"
+  cloud: "azure"
+  clipboard: "cut"
