@@ -15,7 +15,7 @@ Documentation: |
 
 Stages:
   - debian-10-install
-  - runner-service
+  - drp-agent
   - finish-install
   - complete
 Meta:
