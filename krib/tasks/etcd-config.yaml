@@ -16,8 +16,6 @@ OptionalParams:
   - etcd/peer-ca-name
   - etcd/peer-ca-pw
   - etcd/peer-port
-  - etcd/server-ca-name
-  - etcd/server-ca-pw
   - etcd/server-count
   - etcd/version
 Templates:
