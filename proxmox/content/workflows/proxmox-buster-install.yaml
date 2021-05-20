@@ -43,7 +43,7 @@ Meta:
   title: RackN Content
 Stages:
   - debian-10-install
-  - runner-service
+  - drp-agent
   - finish-install
   - proxmox-generate-ssh-key
   - proxmox-buster-installer
