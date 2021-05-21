@@ -57,8 +57,8 @@ get_member_list() {
   set +e
   ENDPOINTS=$1
   export ETCDCTL_API=3
-  echo `etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+  echo `etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+   --key=/etc/kubernetes/pki/etcd/server-key.pem \
    --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member list 2>/dev/null`
@@ -69,8 +69,8 @@ get_member_id() {
   set +e
   ENDPOINTS=$1
   export ETCDCTL_API=3
-  MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+  MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+   --key=/etc/kubernetes/pki/etcd/server-key.pem \
    --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member list | grep ${ETCD_IP} | awk -F', ' '{print $1}'`
@@ -250,15 +250,15 @@ if [[ $EXISTING_INDEX != notme ]] ; then
   export ETCDCTL_API=3
 
   if [[ "${MEMBER_ID}" != "" ]] ; then
-    etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-     --key=/etc/kubernetes/pki/etcd/client-key.pem \
+    etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+     --key=/etc/kubernetes/pki/etcd/server-key.pem \
      --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
      --endpoints=${ENDPOINTS} \
      member remove ${MEMBER_ID}
   fi
 
-  etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+  etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+   --key=/etc/kubernetes/pki/etcd/server-key.pem \
    --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member add ${ETCD_NAME} --peer-urls https://${ETCD_IP}:${ETCD_PEER_PORT}
