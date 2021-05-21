@@ -1,6 +1,9 @@
 ---
 Name: "runner-service"
-Description: "Stage to install the drpcli job processor as a service"
+Description: "DEPRECATED Stage to install the drpcli job processor as a service"
+Documentation:
+  This stage has been deprecated.
+  Use drp-agent from drp-community-content instead.
 Tasks:
   - "drpcli-install"
 Meta:

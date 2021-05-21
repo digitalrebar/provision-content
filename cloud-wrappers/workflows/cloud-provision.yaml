@@ -12,7 +12,6 @@ Stages:
   - "inventory"
   - "cloud-inspect"
   - "network-firewall"
-  - "runner-service"
   - "complete-nobootenv"
 Meta:
   type: "setup"

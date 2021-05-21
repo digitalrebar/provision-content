@@ -301,7 +301,7 @@ Templates:
       cp /usr/share/zoneinfo/GMT /etc/localtime
       # Set up for the agent
       mkdir -p /var/lib/drp-agent/
-      curl -fgLo /var/lib/drp-agent/agent-cfg.yml "{{.Machine.Url}}/agent-cfg.yml"
+      curl -fgLko /var/lib/drp-agent/agent-cfg.yml "{{.ApiURL}}/{{.Machine.Path}}/agent-cfg.yml"
       cat >/etc/sysconfig/drp-agent <<EOF
       IP=$IP
       EOF

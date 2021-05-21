@@ -22,7 +22,7 @@ Stages:
   - rhel-server-8-dvd-install
   - redhat-subscription-register
   - centos-setup-repos
-  - runner-service
+  - drp-agent
   - finish-install
   - complete
 

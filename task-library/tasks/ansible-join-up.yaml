@@ -17,20 +17,7 @@ Documentation: |
 RequiredParams:
   - rsa/key-private
   - rsa/key-user
-Templates:  
-  - ID: discovery-common-bootstrap.sh.tmpl
-    Name: discovery-common-bootstrap.sh
-    Path: discovery-common-bootstrap.sh
-  - Contents: |-
-      #!/bin/bash
-      # replaces join-up.sh via the /machines/join-up.sh
-      export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-      set -x
-      . discovery-common-bootstrap.sh
-      export RS_UUID={{ .Machine.Uuid }}
-      switch_to_control
-    Name: join-up.sh
-    Path: join-up.sh
+Templates:
   - Contents: |-
       #!/bin/bash
       # RackN Copyright 2020
@@ -117,17 +104,14 @@ Templates:
               dest: /etc/rs-uuid
             when: "'drpcli.service' not in services"
 
-          - name: "transfer join-up script"
-            copy:
-              src: "./join-up.sh"
+          - name: download join-up script
+            become: true
+            get_url:
+              url: "{{.ApiURL}}/machines/join-up.sh"
               dest: "./join-up.sh"
               mode: 0755
-
-          - name: "transfer discovery-common-bootstrap.sh script"
-            copy:
-              src: "./discovery-common-bootstrap.sh"
-              dest: "./discovery-common-bootstrap.sh"
-              mode: 0755
+              validate_certs: false
+            when: "'drpcli.service' not in services"
 
           - name: run join-up script
             become: true
