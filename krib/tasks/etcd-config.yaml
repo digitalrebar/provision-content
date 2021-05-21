@@ -8,9 +8,9 @@ Documentation: |
 RequredParams:
   - etcd/cluster-profile
 OptionalParams:
-  - etcd/client-ca-name
-  - etcd/client-ca-pw
-  - etcd/client-ca-name
+  - etcd/server-ca-name
+  - etcd/server-ca-pw
+  - etcd/server-ca-name
   - etcd/cluster-client-vip-port
   - etcd/name
   - etcd/peer-ca-name

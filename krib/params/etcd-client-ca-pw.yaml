@@ -1,6 +1,6 @@
 ---
-Name: "etcd/client-ca-pw"
-Description: "Password to access the etcd client CA"
+Name: "etcd/server-ca-pw"
+Description: "Password to access the etcd Server CA"
 Documentation: |
   Allows operators to set the CA password for the client certificate
   Requires Cert Plugin

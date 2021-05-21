@@ -59,7 +59,7 @@ get_member_list() {
   export ETCDCTL_API=3
   echo `etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
    --key=/etc/kubernetes/pki/etcd/client-key.pem \
-   --cacert=/etc/kubernetes/pki/etcd/client-ca.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member list 2>/dev/null`
   set -e
@@ -71,7 +71,7 @@ get_member_id() {
   export ETCDCTL_API=3
   MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
    --key=/etc/kubernetes/pki/etcd/client-key.pem \
-   --cacert=/etc/kubernetes/pki/etcd/client-ca.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member list | grep ${ETCD_IP} | awk -F', ' '{print $1}'`
   set -e
@@ -122,7 +122,7 @@ if [[ $ETCD_INDEX == notme ]] ; then
   exit 0
 fi
 
-CLIENT_CA=${ETCD_CLUSTER_NAME}-client-ca
+SERVER_CA=${ETCD_CLUSTER_NAME}-server-ca
 PEER_CA=${ETCD_CLUSTER_NAME}-peer-ca
 
 EXISTING_INDEX=$(find_me "etcd/servers-done" "Uuid" $RS_UUID)
@@ -137,16 +137,16 @@ if [[ $EXISTING_INDEX == notme ]] ; then
 
     # We only need 2 sets of CAs. One for client/server communications, and one for peer-to-peer communications.
     # First, setup the client/server
-    if ! drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA 2>/dev/null >/dev/null ; then
-      CLIENT_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $CLIENT_CA | jq -r .)
-      echo "  Client CA created as $CLIENT_CA and now adding to profile: $CLUSTER_PROFILE"
-      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-name" to "$CLIENT_CA" || true
-      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
+    if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
+      SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
+      echo "  Server CA created as $SERVER_CA and now adding to profile: $CLUSTER_PROFILE"
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-name" to "$SERVER_CA" || true
+      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-pw" to "$SERVER_CA_PW" || true
     else
-      if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-        xiterr 1 "Client CA Exists ($CLIENT_CA), but we did not set password.  Need to reset!!"
+      if [[ $(get_param "etcd/server-ca-pw") == null ]] ; then
+        xiterr 1 "Server CA Exists ($SERVER_CA), but we did not set password.  Need to reset!!"
       else
-        echo "  Client CA $CLIENT_CA configured"
+        echo "  Server CA $SERVER_CA configured"
       fi
     fi
 
@@ -165,12 +165,12 @@ if [[ $EXISTING_INDEX == notme ]] ; then
     # Generate a client cert for the controller
     echo "Generating controller client certificate with IP ${ETCD_CONTROLLER_IP}"
     # First, get the CA cert into a param
-    drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA | jq -r . > tmp.ca
-    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
+    drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA | jq -r . > tmp.ca
+    drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
 
     # Next, generate a client cert and key for the controller's IP
     drpcli certs csr client $ETCD_CONTROLLER_IP > tmp.csr
-    drpcli machines runaction $RS_UUID signcert certs/root $CLIENT_CA certs/root-pw $CLIENT_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile client | jq -r . > controller.pem
+    drpcli machines runaction $RS_UUID signcert certs/root $SERVER_CA certs/root-pw $SERVER_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile client | jq -r . > controller.pem
     jq -r .Key tmp.csr > controller.key
 
     # Now put the etcd controller cert details _back_ into params, to be extracted on the controller
@@ -191,7 +191,7 @@ wait_for_count "etcd/servers" $ETCD_SERVER_COUNT
 
 echo "${ETCD_SERVER_COUNT} servers started!"
 
-CLIENT_CA_PW=$(wait_for_variable "etcd/client-ca-pw")
+SERVER_CA_PW=$(wait_for_variable "etcd/server-ca-pw")
 PEER_CA_PW=$(wait_for_variable "etcd/peer-ca-pw")
 
 mkdir -p /var/lib/etcd
@@ -199,7 +199,7 @@ mkdir -p /etc/kubernetes/pki/etcd
 
 ETCD_NAME="etcd$ETCD_INDEX"
 
-build_cert "client" $CLIENT_CA $CLIENT_CA_PW $ETCD_NAME $ETCD_IP
+build_cert "client" $SERVER_CA $SERVER_CA_PW $ETCD_NAME $ETCD_IP
 build_cert "peer" $PEER_CA $PEER_CA_PW $ETCD_NAME $ETCD_IP
 
 ETCD_URLS=""
@@ -252,14 +252,14 @@ if [[ $EXISTING_INDEX != notme ]] ; then
   if [[ "${MEMBER_ID}" != "" ]] ; then
     etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
      --key=/etc/kubernetes/pki/etcd/client-key.pem \
-     --cacert=/etc/kubernetes/pki/etcd/client-ca.pem \
+     --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
      --endpoints=${ENDPOINTS} \
      member remove ${MEMBER_ID}
   fi
 
   etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
    --key=/etc/kubernetes/pki/etcd/client-key.pem \
-   --cacert=/etc/kubernetes/pki/etcd/client-ca.pem \
+   --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member add ${ETCD_NAME} --peer-urls https://${ETCD_IP}:${ETCD_PEER_PORT}
 fi
@@ -296,7 +296,7 @@ ExecStart=${INSTALL_DIR}/etcd \
  --initial-advertise-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT} \
  --cert-file=/etc/kubernetes/pki/etcd/client.pem \
  --key-file=/etc/kubernetes/pki/etcd/client-key.pem \
- --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem \
+ --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/server-ca.pem \
  --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem \
  --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem \
  --initial-cluster \${URLS} --initial-cluster-token my-etcd-token --initial-cluster-state ${CLUSTER_STATE}

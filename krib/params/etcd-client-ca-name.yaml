@@ -1,5 +1,5 @@
 ---
-Name: "etcd/client-ca-name"
+Name: "etcd/server-ca-name"
 Description: "Name of the certificate root for the etcd client certs"
 Documentation: |
   Allows operators to set the CA name for the client certificate
