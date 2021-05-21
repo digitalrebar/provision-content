@@ -199,7 +199,7 @@ mkdir -p /etc/kubernetes/pki/etcd
 
 ETCD_NAME="etcd$ETCD_INDEX"
 
-build_cert "client" $SERVER_CA $SERVER_CA_PW $ETCD_NAME $ETCD_IP
+build_cert "server" $SERVER_CA $SERVER_CA_PW $ETCD_NAME $ETCD_IP
 build_cert "peer" $PEER_CA $PEER_CA_PW $ETCD_NAME $ETCD_IP
 
 ETCD_URLS=""
