@@ -1,4 +1,4 @@
-apiVersion: kubeadm.k8s.io/v1beta1
+apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: {{ .Param "krib/cluster-master-vip" }}
@@ -17,7 +17,7 @@ nodeRegistration:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
 ---
-apiVersion: kubeadm.k8s.io/v1beta1
+apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 apiServer:
   certSANs:
@@ -45,6 +45,13 @@ apiServer:
     {{ $key }}: {{ $value }}
     {{ end }}
     {{ end }}
+controllerManager:
+  extraArgs:
+    {{ if .ParamExists "krib/controllermanager-extra-args" -}}
+    {{ range $key, $value  := .Param "krib/controllermanager-extra-args" -}}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+    {{ end }}
 certificatesDir: /etc/kubernetes/pki
 clusterName: {{ .Param "krib/cluster-name" }}
 {{ $ha := ne (int 1) (int (.Param "krib/cluster-master-count")) -}}
@@ -57,8 +64,8 @@ imageRepository: {{ .Param "krib/cluster-image-repository" }}
 etcd:
   external:
     caFile: /etc/kubernetes/pki/etcd/server-ca.pem
-    certFile: /etc/kubernetes/pki/etcd/client.pem
-    keyFile: /etc/kubernetes/pki/etcd/client-key.pem
+    certFile: /etc/kubernetes/pki/etcd/server.pem
+    keyFile: /etc/kubernetes/pki/etcd/server-key.pem
     endpoints:
 {{if and $ha (.ParamExists "krib/cluster-master-vip") (.ParamExists "etcd/cluster-client-vip-port") }}
       - https://{{ .Param "krib/cluster-master-vip" }}:{{ .Param "etcd/cluster-client-vip-port" }}
@@ -68,12 +75,19 @@ etcd:
       - https://{{ $elem.Address }}:{{ $port }}
   {{ end -}}
 {{ end -}}
-useHyperKubeImage: true
 kubernetesVersion: {{ .Param "krib/cluster-kubernetes-version" }}
 networking:
   dnsDomain: "{{ .Param "krib/cluster-service-dns-domain" }}"
   podSubnet: "{{ .Param "krib/cluster-pod-subnet" }}"
   serviceSubnet: "{{ .Param "krib/cluster-service-subnet" }}"
+scheduler:
+  extraVolumes:
+    - name: "config"
+      hostPath: /etc/kubernetes/scheduler-config     # absolute path to ./scheduler-config directory
+      mountPath: /var/lib/scheduler
+      readOnly: true
+  extraArgs:
+    config: /var/lib/scheduler/scheduler-config.yaml  
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
@@ -104,12 +118,11 @@ ipvs:
   minSyncPeriod: 0s
   scheduler: ""
   syncPeriod: 30s
-metricsBindAddress: 127.0.0.1:10249
+metricsBindAddress: 0.0.0.0:10249
 mode: ""
 nodePortAddresses: null
 oomScoreAdj: -999
 portRange: ""
-resourceContainer: /kube-proxy
 udpIdleTimeout: 250ms
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
@@ -164,11 +177,11 @@ imageGCLowThresholdPercent: 80
 imageMinimumGCAge: 2m0s
 iptablesDropBit: 15
 iptablesMasqueradeBit: 14
-kubeAPIBurst: 10
-kubeAPIQPS: 5
+kubeAPIBurst: 100
+kubeAPIQPS: 50
 makeIPTablesUtilChains: true
 maxOpenFiles: 1000000
-maxPods: 110
+maxPods: 520
 nodeLeaseDurationSeconds: 40
 nodeStatusUpdateFrequency: 10s
 oomScoreAdj: -999
