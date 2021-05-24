@@ -18,7 +18,7 @@ Templates:
     # Reset etcd CA params
     set -e
 
-    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
+    declare -a WIPE_PARAMS=('etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/controller-client-cert' 'etcd/controller-client-key' 'etcd/server-ca-cert')
     {{if .ParamExists "etcd/cluster-profile" -}}
     CLUSTER_PROFILE={{.Param "etcd/cluster-profile"}}
     PROFILE_TOKEN={{.GenerateProfileToken (.Param "etcd/cluster-profile") 7200}}
@@ -34,13 +34,11 @@ Templates:
       echo "CA contains $CA_TEST"
       echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
       echo "==========================================================================="
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
 
       sleep 1
-      drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
     else
@@ -191,8 +189,8 @@ Templates:
     # We might want to re-initialize a cluster using this machine, but without any
     # remanants of the old cluster. This script brutally removes any cluster-specific content,
     # and it's expected that you'll reinstall docker/containerd and kubernetes before rebuilding
-
-    kubeadm reset -f
+ 
+    timeout 10 kubeadm reset -f
     systemctl stop etcd || echo "I'm not a master, don't need to stop etcd"
     systemctl stop vault-kms-plugin || echo "vault-kms-plugin not running, no need to stop"
     systemctl stop vault || echo "vault not running, no need to stop"
@@ -215,23 +213,6 @@ Templates:
     rm -rf /var/log/containers/* || echo "/var/log/containers doesn't exist, possibly we weren't using containerd"
     iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
 
-    {{ if .ParamExists "rook/ceph-target-disk"}}
-    {{if .ParamExists "krib/selective-mastership" -}}
-    SELECTIVE_MASTERSHIP={{.Param "krib/selective-mastership" }}
-    {{end -}}
-    {{if .ParamExists "krib/i-am-master" -}}
-    I_AM_MASTER={{.Param "krib/i-am-master" }}
-    {{end -}}
-    if [[ "$SELECTIVE_MASTERSHIP" == true ]] ; then
-      if [[ ! "$I_AM_MASTER" == true ]] ; then
-        # I'm a worker, so wipe disk in preparation for next ceph installation
-        yum install -y gdisk
-        sgdisk --zap-all /dev/{{ .Param "rook/ceph-target-disk" }}
-        # Now remove devicemapper details
-        for i in `ls /dev/mapper/ceph*`; do dmsetup remove $i || echo "Failed to remove but failing gracefully to continue script"; done
-      fi
-    fi
-    {{ end -}}
   Name: KRIB wipe machine for cluster reinstall
 - Contents: |-
     #!/bin/bash

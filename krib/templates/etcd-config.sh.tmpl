@@ -57,8 +57,8 @@ get_member_list() {
   set +e
   ENDPOINTS=$1
   export ETCDCTL_API=3
-  echo `etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+  echo `etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+   --key=/etc/kubernetes/pki/etcd/server-key.pem \
    --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member list 2>/dev/null`
@@ -69,8 +69,8 @@ get_member_id() {
   set +e
   ENDPOINTS=$1
   export ETCDCTL_API=3
-  MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+  MEMBER_ID=`etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+   --key=/etc/kubernetes/pki/etcd/server-key.pem \
    --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member list | grep ${ETCD_IP} | awk -F', ' '{print $1}'`
@@ -122,7 +122,6 @@ if [[ $ETCD_INDEX == notme ]] ; then
   exit 0
 fi
 
-CLIENT_CA=${ETCD_CLUSTER_NAME}-client-ca
 SERVER_CA=${ETCD_CLUSTER_NAME}-server-ca
 PEER_CA=${ETCD_CLUSTER_NAME}-peer-ca
 
@@ -135,29 +134,23 @@ if [[ $EXISTING_INDEX == notme ]] ; then
   if [[ $ETCD_INDEX == "0" ]] ; then
     echo "We are first machine in cluster, setting up the root certs..."
     # Are certs built yet?
-    if ! drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA 2>/dev/null >/dev/null ; then
-      CLIENT_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $CLIENT_CA | jq -r .)
-      echo "  Client CA created as $CLIENT_CA and now adding to profile: $CLUSTER_PROFILE"
-      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-name" to "$CLIENT_CA" || true
-      drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/client-ca-pw" to "$CLIENT_CA_PW" || true
-    else
-      if [[ $(get_param "etcd/client-ca-pw") == null ]] ; then
-        xiterr 1 "Client CA Exists ($CLIENT_CA), but we did not set password.  Need to reset!!"
-      else
-        echo "  Client CA $CLIENT_CA configured"
-      fi
-    fi
 
+    # We only need 2 sets of CAs. One for client/server communications, and one for peer-to-peer communications.
+    # First, setup the client/server
     if ! drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA 2>/dev/null >/dev/null ; then
       SERVER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $SERVER_CA | jq -r .)
+      echo "  Server CA created as $SERVER_CA and now adding to profile: $CLUSTER_PROFILE"
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-name" to "$SERVER_CA" || true
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-pw" to "$SERVER_CA_PW" || true
     else
       if [[ $(get_param "etcd/server-ca-pw") == null ]] ; then
-        xiterr 1 "SERVER CA Exists, but we did not set password.  Need to reset data in certs-data profile!!"
+        xiterr 1 "Server CA Exists ($SERVER_CA), but we did not set password.  Need to reset!!"
+      else
+        echo "  Server CA $SERVER_CA configured"
       fi
     fi
 
+    # Next, setup peer-to-peer
     if ! drpcli machines runaction $RS_UUID getca certs/root $PEER_CA 2>/dev/null >/dev/null ; then
       PEER_CA_PW=$(drpcli machines runaction $RS_UUID makeroot certs/root $PEER_CA | jq -r .)
       drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/peer-ca-name" to "$PEER_CA" || true
@@ -172,12 +165,12 @@ if [[ $EXISTING_INDEX == notme ]] ; then
     # Generate a client cert for the controller
     echo "Generating controller client certificate with IP ${ETCD_CONTROLLER_IP}"
     # First, get the CA cert into a param
-    drpcli machines runaction $RS_UUID getca certs/root $CLIENT_CA | jq -r . > tmp.ca
+    drpcli machines runaction $RS_UUID getca certs/root $SERVER_CA | jq -r . > tmp.ca
     drpcli -T "$PROFILE_TOKEN" profiles add "$CLUSTER_PROFILE" param "etcd/server-ca-cert" to "\"$(awk '{printf "%s\\n", $0}' tmp.ca)\""
 
     # Next, generate a client cert and key for the controller's IP
     drpcli certs csr client $ETCD_CONTROLLER_IP > tmp.csr
-    drpcli machines runaction $RS_UUID signcert certs/root $CLIENT_CA certs/root-pw $CLIENT_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile client | jq -r . > controller.pem
+    drpcli machines runaction $RS_UUID signcert certs/root $SERVER_CA certs/root-pw $SERVER_CA_PW certs/csr "$(jq .CSR tmp.csr)" certs/profile client | jq -r . > controller.pem
     jq -r .Key tmp.csr > controller.key
 
     # Now put the etcd controller cert details _back_ into params, to be extracted on the controller
@@ -198,7 +191,6 @@ wait_for_count "etcd/servers" $ETCD_SERVER_COUNT
 
 echo "${ETCD_SERVER_COUNT} servers started!"
 
-CLIENT_CA_PW=$(wait_for_variable "etcd/client-ca-pw")
 SERVER_CA_PW=$(wait_for_variable "etcd/server-ca-pw")
 PEER_CA_PW=$(wait_for_variable "etcd/peer-ca-pw")
 
@@ -207,7 +199,6 @@ mkdir -p /etc/kubernetes/pki/etcd
 
 ETCD_NAME="etcd$ETCD_INDEX"
 
-build_cert "client" $CLIENT_CA $CLIENT_CA_PW $ETCD_NAME $ETCD_IP
 build_cert "server" $SERVER_CA $SERVER_CA_PW $ETCD_NAME $ETCD_IP
 build_cert "peer" $PEER_CA $PEER_CA_PW $ETCD_NAME $ETCD_IP
 
@@ -238,13 +229,13 @@ KRIB_REPO={{.Param "krib/package-repository"}}
 {{end -}}
 
 if [[ ! -z "$KRIB_REPO" ]] ; then
-  download -L ${KRIB_REPO}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+  download -L ${KRIB_REPO}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz
 else
-  download -L https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz
+  download -L https://github.com/etcd-io/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz -o ${TMP_DIR}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz
 fi
 
 echo "Install etcd version: ${ETCD_VERSION}"
-tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
+tar -C ${INSTALL_DIR} -xzf ${TMP_DIR}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz --strip-components=1
 
 CLUSTER_STATE="new"
 if [[ $EXISTING_INDEX != notme ]] ; then
@@ -259,15 +250,15 @@ if [[ $EXISTING_INDEX != notme ]] ; then
   export ETCDCTL_API=3
 
   if [[ "${MEMBER_ID}" != "" ]] ; then
-    etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-     --key=/etc/kubernetes/pki/etcd/client-key.pem \
+    etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+     --key=/etc/kubernetes/pki/etcd/server-key.pem \
      --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
      --endpoints=${ENDPOINTS} \
      member remove ${MEMBER_ID}
   fi
 
-  etcdctl --cert=/etc/kubernetes/pki/etcd/client.pem \
-   --key=/etc/kubernetes/pki/etcd/client-key.pem \
+  etcdctl --cert=/etc/kubernetes/pki/etcd/server.pem \
+   --key=/etc/kubernetes/pki/etcd/server-key.pem \
    --cacert=/etc/kubernetes/pki/etcd/server-ca.pem \
    --endpoints=${ENDPOINTS} \
    member add ${ETCD_NAME} --peer-urls https://${ETCD_IP}:${ETCD_PEER_PORT}
@@ -299,13 +290,13 @@ TimeoutStartSec=0
 ExecStart=${INSTALL_DIR}/etcd \
  --name \${PEER_NAME} \
  --data-dir /docker/etcd \
- --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT},http://127.0.0.1:\${CLIENT_PORT} \
+ --listen-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT} \
  --advertise-client-urls https://\${ADVERTISE_IP}:\${CLIENT_PORT} \
  --listen-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT},http://127.0.0.1:\${PEER_PORT} \
  --initial-advertise-peer-urls https://\${ADVERTISE_IP}:\${PEER_PORT} \
  --cert-file=/etc/kubernetes/pki/etcd/server.pem \
  --key-file=/etc/kubernetes/pki/etcd/server-key.pem \
- --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/client-ca.pem \
+ --client-cert-auth --trusted-ca-file=/etc/kubernetes/pki/etcd/server-ca.pem \
  --peer-cert-file=/etc/kubernetes/pki/etcd/peer.pem --peer-key-file=/etc/kubernetes/pki/etcd/peer-key.pem \
  --peer-client-cert-auth --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/peer-ca.pem \
  --initial-cluster \${URLS} --initial-cluster-token my-etcd-token --initial-cluster-state ${CLUSTER_STATE}

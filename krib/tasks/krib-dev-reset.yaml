@@ -17,6 +17,7 @@ Templates:
     #!/bin/bash
     # Reset etcd CA params
     set -e
+    set -x
 
     {{template "setup.tmpl" .}}
     export RS_IP="{{.Machine.Address}}"
@@ -43,22 +44,20 @@ Templates:
       echo "CA contains $CA_TEST"
       echo "HALTING!!! YOU MUST RESET THE CA BY HAND!"  Run:
       echo "==========================================================================="
-      echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca"
       echo "drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca"
       echo "==========================================================================="
 
       sleep 1
-      drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-client-ca
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-server-ca
       drpcli plugins runaction certs deleteroot certs/root {{.Param "etcd/name"}}-peer-ca
     else
       echo "  No CA root detected - no reset required"
     fi
-    declare -a WIPE_PARAMS=('etcd/client-ca-name' 'etcd/client-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/server-ca-cert' 'etcd/controller-client-cert' 'etcd/controller-client-key')
+    declare -a WIPE_PARAMS=('etcd/server-ca-name' 'etcd/server-ca-pw' 'etcd/peer-ca-name' 'etcd/peer-ca-pw' 'etcd/controller-client-cert' 'etcd/controller-client-key')
     {{template "krib-dev-reset.sh.tmpl" .}}
     echo "done CA params reset"
-  Name: etcd CA clear
+  Name: etcd-CA-clear.sh
 - Contents: |-
     #!/bin/bash
     # Reset etcd params
