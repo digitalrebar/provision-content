@@ -3,8 +3,11 @@ Name: "cloud-inspect"
 Description: "Collect cloud metadata"
 Documentation: |
   Collect information from cloud metadata API
+
+  If a mist/api-token is defined, then attempt to synchronize with Mist.io
 Tasks:
   - "cloud-inspect"
+  - "mist-io-sync"
 Meta:
   type: "fetch"
   icon: "cloud"
