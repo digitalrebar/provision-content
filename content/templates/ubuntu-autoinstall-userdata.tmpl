@@ -12,7 +12,6 @@ autoinstall:
     username: {{ if .ParamExists "provisioner-default-user" }}{{ .Param "provisioner-default-user" }}{{ else }}rocketskates{{ end }}
   ssh:
     install-server: yes
-{{- if .ParamExists "access-ssh-root-mode" }}{{ printf "\n" }}    allow-pw: {{ .Param "access-ssh-root-mode" }}{{ end }}
     {{- if .ParamExists "access-keys" }}
     authorized-keys:
       {{ range $key := .Param "access-keys" -}}
