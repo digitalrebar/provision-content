@@ -4,7 +4,8 @@
 
 [[ -n "$*" ]] && contexts="$*"
 #contexts=${contexts:-"vcsa-deploy-context:latest govc-context:latest govc-pwsh-context:latest pwsh-context:latest pyvmomi-context:latest vmware-tools-context:latest"}
-contexts=${contexts:-"govc-context:latest govc-pwsh-context:latest pwsh-context:latest pyvmomi-context:latest vmware-tools-context:latest"}
+#contexts=${contexts:-"govc-context:latest govc-pwsh-context:latest pwsh-context:latest pyvmomi-context:latest vmware-tools-context:latest"}
+contexts=${contexts:-"govc-context:latest vmware-tools-context:latest"}
 
 # run as:  CONTEXT=0 ./drpcli-commands.sh
 # if your contexts are already installed on the DRP Endpoint

@@ -1,3 +1,5 @@
+---
+Name: bootstrap-contexts
 Description: Profile to bootstrap contexts
 Documentation: |
   Bootstrap Digital Rebar server for advanced operation
@@ -12,8 +14,6 @@ Meta:
   color: blue
   icon: world
   title: Digital Rebar Provision
-Name: bootstrap-contexts
 Params:
   universal/bootstrap-post-flexiflow:
     - bootstrap-contexts
-    - lock-machine

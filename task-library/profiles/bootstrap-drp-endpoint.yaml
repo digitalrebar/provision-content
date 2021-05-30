@@ -1,0 +1,18 @@
+---
+Name: bootstrap-drp-endpoint
+Description: Profile to perform a full bootstrap DRP Endpoint
+Documentation: |
+  Bootstrap Digital Rebar server with commonly required tools and
+  contexts for operational use.
+
+Meta:
+  color: blue
+  icon: boxes
+  title: Digital Rebar Provision
+Params:
+  bootstrap-tools:
+    - ipmitool
+  universal/bootstrap-post-flexiflow:
+    - bootstrap-tools
+    - bootstrap-ipmi
+    - bootstrap-contexts

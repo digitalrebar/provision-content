@@ -1,10 +1,38 @@
 ---
 Name: vmware-tools
 Description: 'vmware-tools context using image vmware-tools:latest'
-Documentation: ''
+Documentation: |
+  The ``vmware-tools`` context is an enormous fat bloated Container image that
+  contains pretty much every imaginable tool for interacting with and managing
+  VMware vSphere and Cloud Foundation (VCF) API services.  This context is used
+  by several of the Workflows in the ``vmware-lib`` content pack for higher
+  level API interaction with ESXi or vSphere vCenter and Cloud Foundation services.
+
+  The tools included are:
+
+    * govc - Golang compiled binary from the govmomi library
+    * pyvmomi - Python library
+    * ovftool - for deployment of OVA appliance packages
+    * powershell - for PowerShell scripted language support
+    * powercli - PowerCLI addon for PowerShell
+    * vmware perl libraries
+    * vmware SDK Python standalone libraries (vsphere-automation-sdk-python)
+    * Ansible
+    * Ansible VMware Galaxy modules
+    * Python3
+    * various utility tools (curl, wget, git, yq, jq, etc.)
+    * RackN ``drpcli`` client
+
+  The container also runs an Agent (runner) for executing Workflow stage/tasks.
+
+  Expect that the first invocation run of this Context may take as long as 1 or 2
+  minutes for the container to startup, as it is over 1 GB in size.
+
+Image: 'vmware-tools:latest'
+Engine: docker-context
 Meta:
   color: yellow
   icon: wrench
   title: RackN Content
-Image: 'vmware-tools:latest'
-Engine: docker-context
+  Dockerpull: "digitalrebar/vmware-tools"
+  Imagepull: "https://s3-us-west-2.amazonaws.com/get.rebar.digital/containers/latest/vmware-tools.tar.gz"
