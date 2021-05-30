@@ -2,7 +2,7 @@ Description: Profile to bootstrap kibana
 Documentation: Profile to bootstrap kibana
 Meta:
   color: blue
-  icon: world
+  icon: clock outline
   title: Digital Rebar Provision
 Name: bootstrap-kibana
 Params:

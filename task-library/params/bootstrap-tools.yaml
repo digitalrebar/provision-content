@@ -1,0 +1,40 @@
+---
+Name: "bootstrap-tools"
+Description: "Defines a list of tools to install on the DRP Endpoint via the bootstrap capability"
+Documentation: |
+  This is an array of strings where each string is a package name for the
+  base Operating System that is running on the DRP Endpoint, to be installed.
+
+  This is used by the bootstrapping system to add packages to the DRP Endpoint.
+
+  By default no packages are specified.  If the operator sets this Param on the
+  self-runner Machine object (either directly or via a Profile), then runs one
+  of the bootstrap workflows, the packages will be installed.
+
+  An example workflow is ``universal-bootstrap``.
+
+  Example setting in YAML:
+
+    ::
+
+      bootstrap-tools:
+        - package1
+        - package2
+
+  Or in JSON:
+
+    ::
+
+      { "bootstrap-tools": [ "package1", "package2" ] }
+
+Meta:
+  icon: "cog"
+  color: "blue"
+  title: "Digital Rebar Community Connect"
+  copyright: "RackN 2021"
+
+Schema:
+  type: "array"
+  items:
+    type: "string"
+

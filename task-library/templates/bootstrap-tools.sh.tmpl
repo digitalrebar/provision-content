@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# installs packages defined by 'boostrap-tools' array on a DRP Endpoint
+# RackN Copyright 2021
+
+set -e
+{{template "setup.tmpl" .}}
+
+# set of packages to install (space separated), package names may need
+# to be overridden if these are incorrect for a given Linux distro
+
+{{ if ( .ParamExists "bootstrap-tools" ) -}}
+echo ">>> Bootstrap tools Param contains a package list, starting processing."
+{{ else -}}
+echo ">>> There are not bootstrap tools listed in Param 'bootstrap-tools'.  Exiting."
+exit 0
+{{ end -}}
+
+{{ $pkgs := ( .Param "bootstrap-tools" ) | join " " -}}
+PKGS="{{ $pkgs }}"
+FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
+
+# figure out if we need to try and use 'sudo' to run package installers
+if which sudo > /dev/null 2>&1 ; then
+  ID=$(id -u)
+  [[ "$ID" == "0" ]] && SUDO="" || SUDO="sudo"
+fi
+
+case $FAMILY in
+  rhel|redhat|centos|photon|amzn)
+    if which tdnf > /dev/null 2>&1 ; then
+$SUDO tdnf -y install $PKGS
+    elif which dnf > /dev/null 2>&1 ; then
+$SUDO dnf -y install $PKGS
+    elif which yum > /dev/null 2>&1 ; then
+$SUDO yum -y install $PKGS
+    else
+echo "No 'yum' or 'dnf' found on '$FAMILY' OS.  Unable to install '$PKGS'."
+exit 1
+    fi
+    ;;
+  debian|ubuntu) . /etc/os-release
+    $SUDO apt-get update
+    $SUDO apt-get -y install $PKGS
+    ;;
+  alpine)
+    $SUDO apk add $PKGS
+    ;;
+  *) >&2 echo "Unsupported package manager family '$FAMILY'."
+     exit 1
+    ;;
+esac

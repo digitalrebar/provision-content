@@ -1,0 +1,16 @@
+---
+Name: bootstrap-ipmi
+Description: "Profile to bootstrap IPMI plugin provider, and install 'ipmitool'"
+Documentation: |
+  Bootstrap Digital Rebar server for with IPMI plugin provider, and install
+  the ``ipmitool`` for IPMI protocol operations.
+
+Meta:
+  color: blue
+  icon: cart plus
+  title: Digital Rebar Provision
+Params:
+  bootstrap-tools:
+    - ipmitool
+  universal/bootstrap-post-flexiflow:
+    - bootstrap-ipmi

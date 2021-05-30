@@ -5,8 +5,7 @@
 #  building them from source.
 ###
 
-#CONTEXTS="govc vcsa-deploy context-runner"
-CONTEXTS="govc govc-pwsh pwsh pyvmomi vcsa-deploy"
+CONTEXTS="govc vmware-tools"
 
 for CONTEXT in $CONTEXTS
 do

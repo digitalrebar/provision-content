@@ -16,4 +16,6 @@ Meta:
   color: blue
   icon: terminal
   title: RackN Content
+  Dockerpull: "digitalrebar/govc"
+  Imagepull: "https://s3-us-west-2.amazonaws.com/get.rebar.digital/containers/latest/govc.tar.gz"
 

@@ -1,0 +1,87 @@
+---
+Name: "bootstrap-ipmi"
+Description: "Bootstraps the IPMI plugin on a DRP Endpoint"
+Documentation: |
+  This task bootstraps the DRP Endpoint to be functional for Baseboard
+  Management Control capabilities by installing the ``ipmi`` plugin
+  provider and installs the ``ipmitool`` package on the DRP Endpoint
+  operating system.
+
+  This Task utilizes the external template ``bootstrap-tools.sh.tmpl``,
+  which must be configured with a list of packages.  In this case, the
+  ``bootstrap-tools`` array Param must be set to incldue ``ipmitool``
+  package.
+
+  Generally, the bootstrap process is controlled by a bootstrapping workflow
+  (ege ``universal-bootstrap``) which uses a Profile to expand the bootstrap
+  workflow.  This profile should contain the Param value setting.  This is
+  due to Tasks not carrying their own Param or Profile definitions.
+
+Meta:
+  icon: "cart-plus"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2021"
+  feature-flags: "sane-exit-codes"
+ExtraClaims:
+  - scope: "plugin_providers"
+    action: '*'
+    specific: '*'
+  - scope: "catalog_items"
+    action: "*"
+    specifig: "*"
+Templates:
+  - Name: "bootstrap-tools.sh"
+    ID: "bootstrap-tools.sh.tmpl"
+  - Name: "bootstrap-ipmi.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # installs common tools required on a DRP Endpoint for some content/plugins
+      # RackN Copyright 2020
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      # set of packages to install (space separated), package names may need
+      # to be overridden if these are incorrect for a given Linux distro
+
+      if which ipmitool > /dev/null 2>&1
+      then
+        echo ">>> 'ipmitool' exists on system, continuing bootstrap process"
+      else
+        echo "--- FATAL: no 'ipmitool' found on system, exiting with error"
+        exit 1
+      fi
+
+      # Try and find out what version of DRP we are, and match that for the plugin
+      # version, if we can't determine if we're stable or tip DRP, then fall back
+      # just stable version for the plugin provider
+      DCV=$(drpcli info get | jq -r '.version')
+      DSV=$(drpcli catalog show | jq -r '.sections."catalog_items" | ."drp-stable".ActualVersion')
+      DTV=$(drpcli catalog show | jq -r '.sections."catalog_items" | ."drp-tip".ActualVersion')
+
+      if [[ "$DCV" == "$DSV" ]]
+      then
+        VER="stable"
+      elif [[ "$DCV" == "$DTV" ]]
+      then
+        VER="tip"
+      else
+        VER="stable"
+      fi
+
+      if drpcli plugin_providers exists ipmi >/dev/null 2>/dev/null; then
+        PPV=$(drpcli plugin_providers show ipmi | jq -r '.Version')
+        PCV=$(drpcli catalog show | jq -r '.sections."catalog_items" | ."ipmi-'$VER'".ActualVersion')
+        echo "IPMI Plugin Exists at version '$PPV'"
+
+        if [[ "$PPV" == "$PCV" ]]
+        then
+          echo "Plugin provider is at correct version."
+          exit 0
+        fi
+      else
+        echo "Plugin install to version '$VER'"
+      fi
+
+      drpcli catalog item install ipmi --version=$VER

@@ -1,0 +1,14 @@
+---
+Name: bootstrap-tools
+Description: Profile to bootstrap commonly used tools on a DRP Endpoint
+Documentation: |
+  Bootstrap Digital Rebar server with commonly required tools for
+  content/plugins (eg ``ipmitool``).
+
+Meta:
+  color: blue
+  icon: wrench
+  title: Digital Rebar Provision
+Params:
+  universal/bootstrap-post-flexiflow:
+    - bootstrap-tools

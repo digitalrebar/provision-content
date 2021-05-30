@@ -1,12 +1,12 @@
 ---
-Description: "Setup Containers for Docker-Context"
 Name: "bootstrap-contexts"
+Description: "Setup Containers for Docker-Context"
 Documentation: |
   Multi-Step Docker-Context Boostrap.
 
   This task is idempotent.
 
-  IMPORANT NOTES: 
+  IMPORANT NOTES:
   * Stage installs Podman and the Docker-Context Plugin even if you do not have Docker-Contexts defined
   * Contexts are a licensed feature (the stage will abort if no license is exists)
 
@@ -38,8 +38,15 @@ ExtraClaims:
   - scope: "contents"
     action: "get"
     specific: "rackn-license"
+Meta:
+  icon: "boxes"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2021"
+  feature-flags: "sane-exit-codes"
 Templates:
-  - Contents: |-
+  - Name: "docker-context"
+    Contents: |-
       #!/bin/bash
       # RackN Copyright 2020
 
@@ -62,7 +69,7 @@ Templates:
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
         echo "Installing Podman/Docker for $FAMILY"
         case $FAMILY in
-          redhat|centos)
+          rhel|redhat|centos)
             if which dnf > /dev/null 2>&1 ; then
               dnf -y install podman
             elif which yum > /dev/null 2>&1 ; then
@@ -71,6 +78,17 @@ Templates:
               echo "No 'yum' or 'dnf' found on $FAMILY OS.  Unable to install 'podman'."
               exit 1
             fi
+            ;;
+          photon)
+            tool="docker"
+            if which docker > /dev/null 2>&1; then
+              echo "Docker already installed.  Ensuring it's enabled/started."
+            else
+              echo "Installing Docker (podman is not available on PhotonOS)"
+              tdnf -y install docker docker-cli docker-engine
+            fi
+            systemctl enable docker
+            systemctl start docker
             ;;
           debian|ubuntu) . /etc/os-release
             echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
@@ -95,8 +113,13 @@ Templates:
         echo "Detected $tool version: $($tool version)"
       fi
 
-      echo "Relax SELinux - not for production!"
-      setenforce Permissive || true
+      case $FAMILY in
+        photon) ;; # no selinux
+        *)
+          echo "Relax SELinux - not for production!"
+          setenforce Permissive || true
+          ;;
+      esac
 
       echo "$tool installed successfully"
 
@@ -144,7 +167,6 @@ Templates:
             drpcli files upload $imagepull as "contexts/docker-context/$image"
           else
             echo "  Building Container --tag=$image --file=$context-dockerfile"
-            echo "Installing Buildah"
             dockerbuild=$(drpcli files exists "contexts/docker-build/$context" || true)
             dockerpull=$(jq -r ".[$i].Meta.Dockerpull" <<< "${raw}")
             dockerfile=$(jq -r ".[$i].Meta.Dockerfile" <<< "${raw}")
@@ -206,10 +228,3 @@ Templates:
 
       echo "done"
       exit 0
-    Name: "docker-context"
-Meta:
-  icon: "boxes"
-  color: "yellow"
-  title: "Digital Rebar Community Content"
-  copyright: "RackN 2020"
-  feature-flags: "sane-exit-codes"

@@ -1,0 +1,20 @@
+---
+Name: "bootstrap-tools"
+Description: "Install packages desired on DRP Endpoint"
+Documentation: |
+  If the Param ``bootstrap-tools`` contains an Array list of packages,
+  then this task will install those packages on the DRP Endpoint, when
+  used with one of the bootstrap workflows (eg ``universal-bootstrap``).
+
+  By default, no packages are defined in the ``bootstrap-tools`` Param,
+  so this task will no-op exit.
+
+Meta:
+  icon: "boxes"
+  color: "yellow"
+  title: "Digital Rebar Community Content"
+  copyright: "RackN 2021"
+  feature-flags: "sane-exit-codes"
+Templates:
+  - Name: "bootstrap-tools.sh"
+    ID: "bootstrap-tools.sh.tmpl"

@@ -1,0 +1,24 @@
+---
+Name: bootstrap-drp-endpoint
+Description: Profile to perform a full bootstrap DRP Endpoint
+Documentation: |
+  Bootstrap Digital Rebar server with the bootstrap operations for:
+  
+    * ``bootstrap-tools`` - install additional packages
+    * ``bootstrap-ipmi`` - install ``ipmitool`` package and ipmi plugin provider if needed
+    * ``bootstrap-contexts`` - install ``docker-context`` plugin_providder, and contexts in installed content
+    
+  Intended to be driven by a bootstrapping workflow on the DRP Endpoint
+  (like ``universal--bootstrap``).
+
+Meta:
+  color: blue
+  icon: boxes
+  title: Digital Rebar Provision
+Params:
+  bootstrap-tools:
+    - ipmitool
+  universal/bootstrap-post-flexiflow:
+    - bootstrap-tools
+    - bootstrap-ipmi
+    - bootstrap-contexts
