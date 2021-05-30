@@ -15,8 +15,15 @@ echo ">>> There are not bootstrap tools listed in Param 'bootstrap-tools'.  Exit
 exit 0
 {{ end -}}
 
-{{ $pkgs := ( .Param "bootstrap-tools" ) | join " " -}}
+###
+#  Package list is built with the ComposeParam template construct, so
+#  it's an aggregate list of all occurences of the values on the
+#  system for the Machine.
+###
+{{ $pkgs := ( .ComposeParam "bootstrap-tools" ) | join " " -}}
 PKGS="{{ $pkgs }}"
+echo ">>> Package list was composed to the following packages:"
+echo "    $PKGS"
 FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
 
 # figure out if we need to try and use 'sudo' to run package installers
@@ -25,6 +32,7 @@ if which sudo > /dev/null 2>&1 ; then
   [[ "$ID" == "0" ]] && SUDO="" || SUDO="sudo"
 fi
 
+echo ">>> Beginning package install process"
 case $FAMILY in
   rhel|redhat|centos|photon|amzn)
     if which tdnf > /dev/null 2>&1 ; then
