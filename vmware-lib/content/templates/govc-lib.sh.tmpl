@@ -82,14 +82,28 @@ run_govc() {
 } # end run_govc()
 
 ###
-#  Gets members of a cluster with the Param 'esxi/cluster-name' set to
-#  the value of ARGv1 input.  Returns a space separated list of Machine
-#  names
+#  Gets members of a datacenter or cluster with the Params of either
+#  'esxi/datacenter-name` or 'esxi/cluster-name'.  If the first ARG is
+#  '--datacenter` then get members by datacenter enrollment; if the ARG
+#  is '--cluster', then get members with clsuter tag.  If neither is
+#  specified, then default to '--cluster' (preserves previous usage).
+#
+#  Prints a list of Machine names that matches either datacenter or
+#  cluster tag, separated by a blank space.
 ###
 get_cluster_members() {
-  local _cluster="$1"
+  local _method="cluster"
+  local _tag
   local _mem
-  _mem=$(drpcli machines list esxi/cluster-name Eq $_cluster Meta.BaseContext Eq '' --slim Params,Meta | jq -r '.[].Name' | tr '\n' ' ')
+
+  case "$1" in
+    --datacenter) _method="datacenter"; shift 1 ;;
+    --cluster) _method="cluster"; shift 1 ;;
+  esac
+
+  _tag="$1"
+
+  _mem=$(drpcli machines list esxi/${_method}-name Eq "$_tag" Meta.BaseContext Eq '' --slim Params,Meta | jq -r '.[].Name' | tr '\n' ' ')
   printf "%s\n" "$_mem"
 } # end get_cluster_members()
 

@@ -1,0 +1,17 @@
+---
+Name: "govc-host-add"
+Description: "Add an ESXi host to Datacenter and/or Cluster."
+Documentation: |
+  This Stage runs _govc_ commands to add an ESXi host to the Datacenter
+  and/or Cluster.  See the Taks documentaiton for more details.
+
+Tasks:
+  - "context:"
+  - "esxi-host-thumbprint"
+  - "context:govc"
+  - "govc-host-add"
+  - "context:"
+Meta:
+  icon: "terminal"
+  color: "black"
+  title: "RackN Content"

@@ -1,0 +1,230 @@
+---
+Description: "A task to add ESXi nodes to a Datacenter or Cluster on vCenter"
+Name: "govc-host-add"
+Documentation: |
+  This task will enroll ESXi nodes in to either a datacenter or cluster.  If
+  just ``esxi/datacenter-name`` is specified and  ``esxi/cluster-name`` is not
+  specified then the host will be added to the Datacenter.  If both are specified,
+  then the host will be added to the Cluster that exists in the specified
+  Datacenter.
+
+  If ``esxi/cluster-folder`` is provided then the host will also be added to
+  that Folder.
+
+  If *datacenter* and/or *cluster* does not yet exist on the vCenter, they will
+  be created first.
+
+  The Param ``esxi/cluster-options`` can be specified to change the cluster
+  configuration options.  This is also used to enable VSAN configuration on
+  the cluster level.  Cluster options are only configured if the cluster name
+  Param is also specified.
+
+  This task is intended to be run from the ``govc`` context.  It is not run
+  as a standalone workflow, as the older ``govc-cluster-create`` pattern used
+  to operate.
+
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+  - scope: "profiles"
+    action: "*"
+    specific: "*"
+Meta:
+  icon: "terminal"
+  color: "purple"
+  title: "Digital Rebar Community Content"
+  feature-flags: "sane-exit-codes"
+RequiredParams:
+  - "esxi/datacenter-name"
+  - "esxi/cluster-profile"
+OptionalParams:
+  - "esxi/cluster-name"
+  - "esxi/cluster-folder"
+  - "esxi/cluster-options"
+Templates:
+  - Name: "govc-node-add.sh"
+    Contents: |
+      #!/usr/bin/env bash
+      # Enroll ESXi host in to either a datacenter and/or cluster, enable VSAN optionally
+      # RackN Copyright 2021
+
+      ###
+      #   At least ``esxi/datacenter-name`` must be specified, and optionally,
+      #   the ``esxi/cluster-name``.  If cluster name is not specified, the host
+      #   will be enrolled in only the base Datacenter.
+      ###
+
+      ### setup.tmpl
+      {{ template "setup.tmpl" . }}
+
+      ### govc-setup.sh.tmpl
+      {{ template "govc-setup.sh.tmpl" .}}
+
+      ### govc-lib.sh.tmpl
+      {{ template "govc-lib.sh.tmpl" .}}
+
+      ### govc-cluster-create.sh
+      JQ=$(which jq)
+      [[ -z "$JQ" ]] && JQ=$(which drpjq)    || true
+      [[ -z "$JQ" ]] && JQ=$(which drpclijq) || true
+      [[ -z "$JQ" ]] && JQ=$(which gojq)     || true
+      if [[ -z "$JQ" ]]; then
+        D="$(which drpcli)"
+        if [[ -n "$D" ]]; then
+          ln -s $D /usr/local/bin/drpjq
+          JQ="/usr/local/bin/drpjq"
+        else
+          xiterr 1 "Unable to find 'jq' or alternative to use."
+        fi
+      fi
+
+      USERNAME="root"
+      DC='{{ .Param "esxi/datacenter-name" }}'
+      CLUSTER='{{ .Param "esxi/cluster-name" }}'
+      OPTIONS='{{ .Param "esxi/cluster-options" }}'
+      FOLDER='{{ .ParamExpand "esxi/cluster-folder" }}'
+      [[ -n "$FOLDER" ]] && FOLDER="-folder=\"$FOLDER\""
+
+      [[ -z "$DC" ]] && xiterr 1 "No 'esxi/datacenter-name' was specified."
+
+      if [[ -z "$CLUSTER" ]]
+      then
+        echo "NOTICE: 'esxi/cluster-name' not specified, host add will be to 'datacenter' only."
+        HOST_OP="--datacenter"
+      else
+        HOST_OP="--cluster"
+      fi
+
+      {{ if .ParamExists "esxi/cluster-profile" -}}
+      {{ if eq ( .Param "esxi/cluster-profile" ) "" -}}
+      xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') exists but has an empty value."
+      {{ end -}}
+      CLUSTER_PROFILE='{{ .Param "esxi/cluster-profile" }}'
+      {{ else -}}
+      xiterr 1 "ESXi cluster data storage profile ('esxi/cluster-profile') has not been assigned."
+      {{ end }}
+
+      export GOVC_PERSIST_SESSION=false
+
+      echo "Starting host add operation with the following information:"
+      echo "-----------------------------------------------------------"
+      echo ""
+      echo "     Datacenter:  '$DC'"
+      echo "         Folder:  '$FOLDER'"
+      echo "        Cluster:  '$CLUSTER'"
+      echo "Cluster Options:  '$OPTIONS'"
+      echo ""
+
+      if [[ -n "$DC" ]]
+      then
+        if govc datacenter.info "$DC" > /dev/null 2>&1
+        then
+          echo "Datacenter '$DC' exists already."
+        else
+          run_govc datacenter.create "$DC"
+        fi
+      fi
+
+      export GOVC_DATACENTER="$DC"
+
+      # enrolls ESXi host in to a Cluster, when both datacenter and cluster is provided
+      # $1 should be "--datacenter" or "--cluster" as the host add operation to run
+      # requires datacenter/cluster member (DRP Machine Name) as $2
+      # requires resolved ESXi name as $3 (ip addr, DRP machine name, or FQDN)
+      # optionally specify the host Thumbprint as $4 - if not set, then use '-noverify'
+      host_add() {
+        local _pass
+        local _node_op="$1"
+        local _mem="$2"
+        local _hname="$3"
+        local _thumb="$4"
+        local _current
+
+        [[ -n "$_thumb" ]] && _thumb="-thumbprint $_thumb" || _thumb="-noverify"
+        [[ "$VSAN_ENABLED" == "true" ]] && set_vmk_on_host || true
+        _pass=$(drpcli machines get Name:$_mem param esxi/insecure-password | jq -r '.' || true)
+        [[ -z "$_pass" || "$_pass" == "null" ]] && _pass="RocketSkates" || true
+
+        # 'govc host.info' seems to output the error NOT on STDOUT and/or STDERR ... wth??
+        echo ">>> It is safe to ignore the error:  'Error: GET: machines/Name:: Not Found'"
+        _current=$(govc host.info -host="$_hname" | grep Path: | cut -d":" -f2 | tr -d '[:space:]' || true)
+
+        case $_node_op in
+          --datacenter)
+            if [[ "$_current" =~ "/$DC/host/$_hname"* ]]
+            then
+              echo "+++ Host appears to be in datacenter inventory already ('$_current')"
+              echo "    No actions performed."
+            else
+              run_govc host.add -hostname "$_hname" -username "$USERNAME" -password "$_pass" $FOLDER $_thumb
+            fi
+          ;;
+          --cluster)
+            if [[ "$_current" == "/$DC/host/$CLUSTER/$_hname" ]]
+            then
+              echo "+++ Host appears to be in cluster inventory already ('$_current')"
+              echo "    No actions performed."
+            else
+              run_govc cluster.add -cluster "$CLUSTER" -hostname "$_hname" -username "$USERNAME" -password "$_pass" $FOLDER $_thumb
+            fi
+          ;;
+          *)
+            xiterr 1 "invalid operation (ARGv1) input for host_add() function"
+          ;;
+        esac
+      } # end cluster_add()
+
+      # create cluster if doesn't exist already
+      if [[ -n "$CLUSTER" ]]
+      then
+        # there appears to be no 'cluster.info' to test if exists
+        # this is overloading cluster.rule.info but works
+        if govc cluster.rule.info -cluster "$CLUSTER" > /dev/null 2>&1
+        then
+          echo "Cluster '$CLUSTER' exists already."
+        else
+          run_govc cluster.create $FOLDER "$CLUSTER"
+        fi
+      else
+        echo "NOTICE:  'esxi/cluster-name' was not set, no cluster operations performed."
+      fi
+
+      if [[ "$VSAN_ENABLED" == "true" ]]
+      then
+        if ! echo "$OPTIONS" | grep -q ".*-vsan-enabled.*"
+        then
+          echo "Appending '-vsan-enabled' option to cluster options."
+          echo "If '-vsan-autoclaim' is desired, you must set it on 'esxi/cluster-options' and rebuild."
+          OPTIONS="-vsan-enabled $OPTIONS"
+        fi
+      fi
+
+      # if doing cluster operations, set cluster optional configuration if specified
+      if [[ -n "$OPTIONS" && -n "$CLUSTER" ]]
+      then
+        if govc cluster.rule.info -cluster "$CLUSTER" > /dev/null 2>&1
+        then
+          run_govc cluster.change $OPTIONS "$CLUSTER"
+        else
+          xiterr 1 "'govc/options' specified, but no 'esxi/cluster-name' exists - failed create step?"
+        fi
+      fi
+
+      MEMBER='{{ .Machine.Name }}'
+      THUMB="$(drpcli machines get Name:$MEMBER param esxi/thumbprint-sha1 | jq -r '.' || true)"
+      #DNAME=$(drpcli machines get Name:$MEMBER param dns-domain | jq -r '.')
+      ADDR=$(drpcli machines show Name:$MEMBER --slim=Params,Meta | jq -r '.Address')
+      PASS=$(drpcli machines get Name:$NODE param esxi/insecure-password | jq -r '.' || true)
+      TMP_LOG=$(mktemp)
+      LOGS="$LOGS $TMP_LOG"
+
+      HNAME=$(get_member_name $MEMBER)
+      if [[ -n "$HNAME" ]]
+      then
+        echo "Starting host add for '$MEMBER'."
+        host_add $HOST_OP $MEMBER $HNAME $THUMB
+      else
+        xiterr 1 "Unable to get '$MEMBER' host reference (IP address, FQDN, etc)"
+      fi
+
