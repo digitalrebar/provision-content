@@ -19,4 +19,4 @@ Params:
       url: '{{.ProvisionerURL}}/files/hw_repo/os_dependent/RHEL${VERSION_ID}_64/'
   hpe-repo-versions:
     local: current
-  lenovo-onecli-url: '{{.ProvisionerURL}}/files/hw_repo/lnvgy_utl_lxce_onecli02f-3.1.0_rhel_x86-64.tgz'
+  lenovo-onecli-url: '{{.ProvisionerURL}}/files/hw_repo/lnvgy_utl_lxce_onecli01l-3.1.2_rhel_x86-64.tgz'
