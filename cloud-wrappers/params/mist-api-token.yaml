@@ -1,0 +1,17 @@
+---
+Name: "mist/api-token"
+Description: "API Token to use the Mist.io API"
+Documentation: |
+  The ID needed to use the Mist.io API
+
+Secure: true
+Schema:
+  type: "string"
+Meta:
+  type: "id"
+  icon: "hashtag"
+  color: "blue"
+  title: "Digital Rebar Community Content"
+  password: "showable"
+  clipboard: "cut"
+  cloud: "mist"

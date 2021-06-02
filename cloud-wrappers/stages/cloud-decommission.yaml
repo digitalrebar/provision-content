@@ -11,6 +11,7 @@ Tasks:
   - "terraform-apply"
   - "context:drpcli-runner"
   - "cloud-cleanup"
+  - "mist-io-sync"
   - "context-set"
 Meta:
   type: "remove"

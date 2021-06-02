@@ -1,0 +1,68 @@
+---
+Name:  "mist-io-sync"
+Description: "A task to synchronize resources with Mist.io"
+Documentation: |
+  Make sure instance is registered with Mist.io
+OptionalParams:
+  - mist/api-token
+Templates:
+  - Name: "mist-sync"
+    Contents: |
+      #!/bin/bash
+      # RackN Copyright 2021
+
+      set -e
+      {{template "setup.tmpl" .}}
+
+      {{ if .ParamExists "mist/api-token" }}
+
+      if which curl > /dev/null; then
+        echo "Starting Mist.io sync"
+
+        PROVIDER="{{ .Param "cloud/provider" }}"
+        # fix provider mapping
+        case $PROVIDER in
+          aws) PROVIDER="ec2" ;;
+          azure) PROVIDER="azure_arm" ;;
+        esac
+        echo "  looking for Mist Provider $PROVIDER"
+
+        curl -H "Authorization: {{.Param "mist/api-token" }}" -s -w "%{http_code}" -o "mist-clouds.json" "https://mist.io/api/v1/clouds"
+        CLOUDID=$(cat mist-clouds.json | jq -r "map(select(.provider == \"$PROVIDER\"))[0].id")
+
+        {{ if $.ParamExists "rs-debug-enable" }}
+        cat mist-clouds.json | jq
+        {{ end }}
+
+        echo " poke the Mist.io API for the $PROVIDER instance ${CLOUDID}"
+        curl -s -w "%{http_code}" -o mist-machines.json -H "Authorization: {{.Param "mist/api-token" }}" "https://mist.io/api/v1/clouds/${CLOUDID}/machines"
+
+        {{ if $.ParamExists "rs-debug-enable" }}
+        cat mist-machines.json | jq
+        {{ end }}
+
+        {{ if .ParamExists "cloud/instance-id" }}
+          echo " set DigitalRebar tag via Mist.io API for the $PROVIDER instance ${CLOUDID}"
+          MC=$(cat mist-machines.json | jq -r 'map(select(.machine_id == "{{.Param "cloud/instance-id"}}"))[0]')
+          MCID=$(jq -r '.id' <<< "$MC")
+          jq -r '. + {"tags":{"DigitalRebar":"{{.Machine.Uuid}}"}}' <<< "$MC" > mc.json
+          echo "updating Mist.io instance $MCID with tag DigitalRebar"
+          curl -X PUT -H "Authorization: {{.Param "mist/api-token" }}" -d @mc.json "https://mist.io/api/v1/machines/$MCID"
+        {{ end }}
+
+      else
+        echo "Abort: cannot proceed without CURL"
+      fi
+
+      {{ else }}
+        echo "No action - mist/api-token is not defined"
+      {{ end }}
+
+      echo "done"
+      exit 0
+Meta:
+  type: "fetch"
+  icon: "cloud"
+  color: "blue"
+  title: "RackN Content"
+  feature-flags: "sane-exit-codes"

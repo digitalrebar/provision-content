@@ -9,6 +9,7 @@ Params:
 Tasks:
   - "context:drpcli-runner"
   - "cloud-site-destroy"
+  - "mist-io-sync"
 Meta:
   icon: "erase"
   color: "orange"

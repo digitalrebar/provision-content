@@ -228,6 +228,13 @@ EOF
     echo "  Skipping Phoenix NAP, no ~/.pnap/config.yaml"
   fi
 
+if [[ $MIST_TOKEN ]]; then
+  echo "  setting Mist.io API Token"
+  drpcli profiles set global param "mist/api-token" to "$MIST_TOKEN" > /dev/null
+else
+  echo "  Skipping Mist.io Synch, no exported MIST_TOKEN"
+fi
+
 
   if which az > /dev/null ; then
     if drpcli $ep profiles exists azure > /dev/null 2>/dev/null ; then

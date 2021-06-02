@@ -22,6 +22,7 @@ Tasks:
   - "context:ansible"
   - "dr-server-install"
   - "context:drpcli-runner"
+  - "mist-io-sync"
 Meta:
   icon: "chess rook"
   color: "brown"
