@@ -251,7 +251,7 @@ Schema:
         - centos-8.1.1911
         - centos-8.2.2004
         - centos-8.3.2011
-      arch: any
+      arch: x86_64
       url:	https://forensics.cert.org/centos/cert/8/$basearch
       distribution: "8"
     - tag: ubuntu-16.04

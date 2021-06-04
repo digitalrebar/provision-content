@@ -13,12 +13,19 @@ Templates:
       # for ARM arch types - not tested yet
       # orig source location: https://koji.fedoraproject.org/koji/packageinfo?packageID=8762
       arch=$(uname -p)
+      rm -rf /tmp/extra-packages
       mkdir -p /tmp/extra-packages
       cd /tmp/extra-packages
       dnf -y install stress
-      wget https://s3-us-west-2.amazonaws.com/rackn-sledgehammer/sipcalc-1.1.6-15.fc30.$arch.rpm
-      wget https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/29/Everything/x86_64/os/Packages/s/stress-ng-0.07.29-7.fc29.x86_64.rpm
-      dnf -y localinstall *.rpm
+      if [[ "$arch" == "ppc64le" ]] ; then
+        wget https://rpmfind.net/linux/fedora-secondary/releases/32/Everything/ppc64le/os/Packages/j/Judy-1.0.5-22.fc32.ppc64le.rpm
+        dnf -y localinstall *.rpm
+        dnf -y install sipcalc stress-ng
+      else
+        wget https://s3-us-west-2.amazonaws.com/rackn-sledgehammer/sipcalc-1.1.6-15.fc30.$arch.rpm
+        wget https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/29/Everything/x86_64/os/Packages/s/stress-ng-0.07.29-7.fc29.$arch.rpm
+        dnf -y localinstall *.rpm
+      fi
   - Name: add-customization-tasks
     Contents: |
       #!/usr/bin/env bash

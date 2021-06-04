@@ -157,6 +157,51 @@ OS:
         {{.Param "kernel-options"}}
         --
         {{.Param "kernel-console"}}
+    ppc64le:
+      Loader: "core.elf"
+      IsoFile: "sledgehammer-7d7c0bf77daa43785e2716ecb9177dfde8dcffbf.ppc64le.tar"
+      IsoUrl: "http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/sledgehammer/7d7c0bf77daa43785e2716ecb9177dfde8dcffbf/sledgehammer-7d7c0bf77daa43785e2716ecb9177dfde8dcffbf.ppc64le.tar"
+      Kernel: "7d7c0bf77daa43785e2716ecb9177dfde8dcffbf/vmlinuz0"
+      Initrds:
+        - "7d7c0bf77daa43785e2716ecb9177dfde8dcffbf/stage1.img"
+      BootParams: >-
+        rootflags=loop
+        root=live:/sledgehammer.iso
+        rootfstype=auto
+        ro
+        liveimg
+        rd_NO_LUKS
+        rd_NO_MD
+        rd_NO_DM
+        provisioner.web={{.ProvisionerURL}}
+        rs.uuid={{.Machine.UUID}}
+        {{ if .ParamExists "network-data" }}
+        {{ $nd := .ComposeParam "network-data" }}
+        {{ if hasKey $nd "prov" }}
+        {{ $prov := get $nd "prov" }}
+        {{ if and (hasKey $prov "address") (hasKey $prov "netmask") }}
+        provisioner.ip={{ get $prov "address" }}/{{ .NetmaskToCIDR (get $prov "netmask") }}
+        {{ end }}
+        {{ if hasKey $prov "gateway" }}
+        provisioner.gw={{ get $prov "gateway" }}
+        {{ end }}
+        {{ if hasKey $prov "interface" }}
+        provisioner.interface={{ get $prov "interface" }}
+        {{ end }}
+        {{ if hasKey $prov "vlan" }}
+        provisioner.vlan={{ get $prov "vlan" }}
+        {{ end }}
+        {{ if hasKey $prov "mtu" }}
+        provisioner.mtu={{ get $prov "mtu" }}
+        {{ end }}
+        {{ end }}
+        {{ end }}
+        {{ if .ParamExists "dns-servers" }}
+        provisioner.dns={{ first (.Param "dns-servers") }}
+        {{ end }}
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
 OptionalParams:
   - "kernel-console"
   - "kernel-options"

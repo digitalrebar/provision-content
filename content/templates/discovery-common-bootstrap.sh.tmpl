@@ -21,6 +21,7 @@ export ARCH="$(uname -m)"
 case $ARCH in
     amd64|x86_64) ARCH=amd64;;
     arm64|aarch64) ARCH=arm64;;
+    ppc64le) ARCH=ppc64le;;
     *)
         echo "Unknown arch $ARCH"
         exit 1;;

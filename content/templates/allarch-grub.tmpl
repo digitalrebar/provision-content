@@ -24,6 +24,12 @@ elif [ "${grub_cpu}" = "arm64" ] ; then
    module (tftp)/{{$.Env.PathForArch "tftp" $initrd "arm64"}}
    {{end}}
    boot
+elif [ "${grub_cpu}" = "powerpc" ] ; then
+   kernel (tftp)/{{.Env.PathForArch "tftp" (.Env.KernelFor "ppc64le") "ppc64le"}} {{.BootParamsFor "ppc64le"}} BOOTIF=01-${net_default_mac}
+   {{range $initrd := .Env.InitrdsFor "ppc64le"}}
+   module (tftp)/{{$.Env.PathForArch "tftp" $initrd "ppc64le"}}
+   {{end}}
+   boot
 else
    echo "No idea how to boot ${grub_cpu} ${grub_platform}"
    sleep 60

@@ -8,6 +8,7 @@ Templates:
   - Name: create-stage-2
     Contents: |
       #!/bin/bash
+      set -x
       [[ -f /IMAGE/root.squashfs ]] && exit 0
       echo "Creating root.squashfs.  This may take upwards of 10 minutes"
       # Clean up resolv.conf now.
