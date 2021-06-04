@@ -1,0 +1,10 @@
+---
+Name: supermicro-manager-install-target
+Description: The target directory to install SuperMicro Update Manager
+Documentation: |
+  Supermicro Update Manager is packaged as tarball that contains the
+  sum executable and support files.  They will be extracted into this
+  directory, and the sum executable itself will be placed in /opt/bin
+Schema:
+  type: string
+  default: /opt/Supermicro/Manager

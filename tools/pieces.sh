@@ -16,6 +16,7 @@ subs=(edge-lab
       kube-lib
       kubespray
       lenovo-support
+      supermicro-support
       opsramp
       os-other
       rancheros

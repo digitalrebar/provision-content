@@ -18,6 +18,7 @@ Templates:
           HPE|HP) tasks=hpe-tools-install;;
           "Dell Inc.") tasks="dell-dsu-setup dell-install-omsa";;
           Lenovo) tasks=lenovo-install-onecli;;
+          Supermicro) tasks=supermicro-install-manager;;
           *) echo "No idea how to install tooling for mfgr $mfgr"; exit 0;;
       esac
       drpcli machines tasks add {{.Machine.UUID}} at 0 $tasks
