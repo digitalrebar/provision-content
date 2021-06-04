@@ -1,0 +1,11 @@
+---
+Name: supermicro-manager-archive
+Description: The tarball of SuperMicro Update Manager that you want to install.
+Documentation: |
+  Supermicro systems are configured in-band via a the sum command.
+  This parameter is the name of the archive that contains the version
+  of the command you want to install in the Sledgehammer environment
+  for in-band BIOS configuration management and firmware updates.
+Schema:
+  type: string
+  default: sum_2.5.2_Linux_x86_64_20210112.tar.gz

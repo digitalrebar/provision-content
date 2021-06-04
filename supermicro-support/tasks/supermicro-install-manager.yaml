@@ -1,0 +1,24 @@
+---
+Name: supermicro-install-manager
+Description: "Install sum to manage servers in-band"
+Documentation: |
+  This task assumes that the archive containing the management binaries
+  lives on the dr-provision static file server at files/hw_repo.
+Templates:
+  - Name: "sum-install"
+    Contents: |
+      #!/usr/bin/env bash
+      {{ template "setup.tmpl" . }}
+      {{ template "set-proxy-servers.sh.tmpl" .}}
+      target="{{.Param "supermicro-manager-install-target"}}"
+      src="{{.ProvisionerURL}}/files/hw_repo/{{.Param "supermicro-manager-archive"}}"
+
+      [[ -d $target ]] || mkdir -p "$target"
+      [[ -d /opt/bin ]] || mkdir -p /opt/bin
+      [[ -x /opt/bin/sum ]] && exit 0
+      cd "$target"
+      curl -fgL "$src" -o onecli.tgz
+      tar xzf onecli.tgz
+      rm onecli.tgz
+      mv sum*/* .
+      mv sum /opt/bin
