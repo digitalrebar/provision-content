@@ -1,0 +1,35 @@
+---
+Name: "validate/failure-mode"
+Description: "This param specifies how certain Validation tasks should ultimately fail."
+Documentation: |
+  Set this param to the name of a validation failure function to specify
+  how certain validation tasks are recorded, which will impact the final
+  exit and continued task running.
+
+  Examples:
+
+    * validation_add_error (default value)
+    * validation_add_error_ignore
+
+  This Param is a free-form String type, as the Validation functions can
+  be dynamically expanded, so an Enum list can not be safely provided.  Ensure
+  you specify a validation failure mode correctly in this param.
+
+  This Param should only be set to a value of a Function in the validation
+  system that records the errors, but does not directly exit (eg no ``exit 0``
+  or ``exit 1`` type exit codes in the function).
+
+  The default will be to ``validation_add_error``.
+
+  For instance, if this Param is set to ``validation_add_error_ignore``, then
+  errors will be recorded on the ``validation/errors-ignore`` Param.  This
+  Param defines the ``validation-stop`` processing should not exit with an
+  error (eg *ignore*) the errors and continue workflow/task processing.
+
+Schema:
+  type: "string"
+  default: "validation_add_error"
+Meta:
+  color: "blue"
+  icon: "bug"
+  title: "RackN Content"

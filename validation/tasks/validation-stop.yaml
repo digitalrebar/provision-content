@@ -25,21 +25,53 @@ Templates:
     {{ template "setup.tmpl" . }}
     {{ template "validation-lib.tmpl" . }}
 
+    # default return code of 0 (success)
+    RC=0
+
     # Print Errors
-    {{ range $index, $error := .Param "validation/errors" }}
+    {{ if ( .Param "validation/errors-ignore" ) -}}
+    echo ">>> Validation errors found - these errors have been marked IGNORE:"
+    {{ range $index, $ignore := .Param "validation/errors-ignore" -}}
+    cat <<EOF{{$index}}
+    {{$ignore}}
+    EOF{{$index}}
+    {{ end -}}
+    echo ""
+    {{ end -}}
+
+    # Print Errors
+    {{ if ( .Param "validation/errors" ) -}}
+    echo ">>> Validation errors found - these errors are FATAL:"
+    {{ range $index, $error := .Param "validation/errors" -}}
     cat <<EOF{{$index}}
     {{$error}}
     EOF{{$index}}
-    {{ end }}
+    {{ end -}}
+    echo ""
+    {{ end -}}
 
-    {{ if eq (len (.Param "validation/errors")) 0 }}
-    RC=0
-    echo "No errors found"
+    {{ if and ( eq (len (.Param "validation/errors-ignore")) 0 ) ( eq (len (.Param "validation/errors")) 0 ) -}}
+    echo ">>> No errors found (ignored or fatal)"
     {{ else }}
+
+    {{ if eq (len (.Param "validation/errors-ignore")) 0 -}}
+    echo ""
+    echo ">>> No IGNORE validation errors found"
+    {{ else -}}
+    echo ""
+    echo "{{len (.Param "validation/errors-ignore")}} errors found marked IGNORE."
+    {{ end -}}
+
+    {{ if eq (len (.Param "validation/errors")) 0 -}}
+    echo ""
+    echo ">>> No fatal validation errors found"
+    {{ else -}}
     RC=1
-    echo
-    echo "{{len (.Param "validation/errors")}} errors found"
-    {{ end }}
+    echo ""
+    echo "{{len (.Param "validation/errors")}} fatal errors found"
+    {{ end -}}
+
+    {{ end -}}
 
     exit $RC
 
