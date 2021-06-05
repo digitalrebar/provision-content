@@ -36,6 +36,7 @@ Templates:
       mkdir $signature
       mv sha1sums vmlinuz0 stage1.img root.squashfs grubx64.efi shimx64.efi $signature
 
+      {{ if (eq .Machine.Arch "amd64") }}
       echo "Making cd iso"
       mkdir -p iso/boot/grub
       mkdir -p iso/images
@@ -121,6 +122,7 @@ Templates:
       cp iso/EFI/BOOT/BOOT.conf iso/EFI/BOOT/grub.cfg
       cp iso/EFI/BOOT/BOOT.conf iso/boot/grub/grub.cfg
       mkisofs -o $signature/cdboot.iso -b isolinux/isolinux.bin -J -R -l -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e images/efiboot.img -no-emul-boot -graft-points -V "sledgehammer" iso
+      {{end}}
 
       case {{.Machine.Arch}} in
           amd64) shim="shimx64.efi";;
@@ -133,8 +135,10 @@ Templates:
       Params:
         bootenv-customize:
           discovery:
+      {{ if (ne .Machine.Arch "ppc64le") }}
             Loaders:
               '{{.Machine.Arch}}-uefi': $signature/$shim
+      {{ end }}
             OS:
               Name: sledgehammer
               SupportedArchitectures:
@@ -148,8 +152,10 @@ Templates:
                 Path: sledgehammer/$signature/grub.cfg
                 ID: allarch-grub.tmpl
           sledgehammer:
+      {{ if (ne .Machine.Arch "ppc64le") }}
             Loaders:
               '{{.Machine.Arch}}-uefi': $signature/$shim
+      {{ end }}
             OS:
               Name: sledgehammer
               SupportedArchitectures:

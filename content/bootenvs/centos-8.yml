@@ -54,6 +54,22 @@ OS:
         {{.Param "kernel-options"}}
         --
         {{.Param "kernel-console"}}
+    ppc64le:
+      Loader: "core.elf"
+      IsoFile: "CentOS-8.3.2011-ppc64le-dvd1.iso"
+      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/centos/8/CentOS-8.3.2011-ppc64le-dvd1.iso"
+      Sha256: "a56fc1039534155253ca412fcd8e0293e6f67fd92c526a8b754309578140dff6"
+      Kernel: "ppc/ppc64/vmlinuz"
+      Initrds:
+        - "ppc/ppc64/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/compute.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        {{.Param "kernel-options"}}
+        --
+        {{.Param "kernel-console"}}
 RequiredParams:
 OptionalParams:
   - "operating-system-disk"

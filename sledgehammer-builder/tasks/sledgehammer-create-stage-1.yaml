@@ -11,6 +11,7 @@ Templates:
   - Name: prepare-stage-1
     Contents: |
       #!/bin/bash
+      set -x
       ARCH={{.Machine.Arch}}
       bk="$(cd /boot && echo config-*)"
       bk="${bk#config-}"
@@ -88,11 +89,17 @@ Templates:
       rm -rf lib
       echo "Staging bootloader, kernel and busybox for stage1 initramfs"
       cp /boot/$KERNEL /IMAGE/vmlinuz0
+      {{if (eq .Machine.Arch "amd64")}}
       cp /boot/efi/EFI/centos/grubx64.efi /IMAGE/grubx64.efi
       cp /boot/efi/EFI/centos/shimx64.efi /IMAGE/shimx64.efi
       rpm -e grub2-efi-x64 shim-x64
+      {{end}}
       cd /IMAGE/initrd
       mkdir -p dev proc sys bin lib etc usr/share/udhcpc tmp newinitramfs
+      {{if (eq .Machine.Arch "ppc64le")}}
+      curl -fgL -o bin/busybox http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/busybox-1.33.1.${ARCH}
+      {{else}}
       curl -fgL -o bin/busybox http://rackn-sledgehammer.s3-website-us-west-2.amazonaws.com/busybox-1.29.3.${ARCH}
+      {{end}}
       (cd bin && chmod 755 busybox && ./busybox --install .)
       chmod 755 init usr/share/udhcpc/default.script

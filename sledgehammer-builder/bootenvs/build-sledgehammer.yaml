@@ -37,6 +37,18 @@ OS:
         inst.geoloc=0
         --
         {{.Param "kernel-console"}}
+    ppc64le:
+      Loader: "core.elf"
+      Kernel: "ppc/ppc64/vmlinuz"
+      Initrds:
+        - "ppc/ppc64/initrd.img"
+      BootParams: >-
+        ksdevice=bootif
+        ks={{.Machine.Url}}/sledgehammer.ks
+        method={{.Env.InstallUrl}}
+        inst.geoloc=0
+        --
+        {{.Param "kernel-console"}}
 Templates:
   - ID: "default-pxelinux.tmpl"
     Name: "pxelinux"
@@ -79,9 +91,13 @@ Templates:
       bootloader --location=mbr
       zerombr
       clearpart --all
+      {{if (eq .Machine.Arch "ppc64le")}}
+      autopart
+      {{else}}
       part /boot --fstype ext4 --size=512
       part /boot/efi --fstype vfat --size=512
       part / --fstype ext4 --size=1 --grow
+      {{end}}
       text
       poweroff
       %packages
@@ -97,12 +113,16 @@ Templates:
       cpio
       curl
       dhclient
+      {{if (ne .Machine.Arch "ppc64le")}}
       dmidecode
+      {{end}}
       dnf
       dosfstools
       dpkg
       e2fsprogs
+      {{if (ne .Machine.Arch "ppc64le")}}
       efibootmgr
+      {{end}}
       file
       filesystem
       firewalld
@@ -157,10 +177,14 @@ Templates:
       policycoreutils
       procps-ng
       python2
+      {{if (ne .Machine.Arch "ppc64le")}}
       python2-crypto
+      {{end}}
       python2-pyyaml
       python36
+      {{if (ne .Machine.Arch "ppc64le")}}
       python3-crypto
+      {{end}}
       python3-oauthlib
       python3-pyyaml
       rootfiles

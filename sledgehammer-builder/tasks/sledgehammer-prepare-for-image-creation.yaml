@@ -11,6 +11,7 @@ Templates:
   - Name: remove-unwanted-pkgs
     Contents: |
       #!/bin/bash
+      set -x
       chmod 755 /sbin/sledgehammer-start-up.sh
       echo "Removing unwanted packages"
       dnf -y autoremove {{ .Param "sledgehammer/unwanted-packages" |join " " }}
