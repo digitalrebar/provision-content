@@ -1,0 +1,15 @@
+---
+Name: "test-flexiscript-scriptlet"
+Description: "Test scriptlet to test FlexiScript system"
+Documentation: |
+  This stage defines the scriptlet to run for the ``flexiscript``
+  task for testing purposes.
+
+Params:
+  "flexiscript/scriptlet": "test-flexiscript/scriptlet"
+Tasks:
+  - "flexiscript-scriptlet"
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"
