@@ -18,7 +18,7 @@ Documentation: |
 
   The flash system uses the following command to get the manufacturer from the DMI data:
 
-    * ``drpcli gohai | jq -r '.DMI | .System | .Manufacturer'`
+    * ``drpcli gohai | jq -r '.DMI | .System | .Manufacturer'``
 
   The *drpcli gohai* command must be run on the target Machine.
 
