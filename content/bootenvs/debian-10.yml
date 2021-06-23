@@ -14,9 +14,9 @@ OS:
   Version: "10"
   SupportedArchitectures:
     amd64:
-      IsoFile: "mini.iso"
-      IsoSha256: "577d490ccef8a9a16b97af07c2863e3b6b000ba869732df7fd92ae347038cb80"
-      IsoUrl: "http://ftp.nl.debian.org/debian/dists/buster/main/installer-amd64/current/images/netboot/mini.iso"
+      IsoFile: "debian-10.9.0-amd64-netinst.iso"
+      IsoSha256: "8660593d10de0ce7577c9de4dab886ff540bc9843659c8879d8eea0ab224c109"
+      IsoUrl: "https://cdimage.debian.org/cdimage/archive/10.9.0/amd64/iso-cd/debian-10.9.0-amd64-netinst.iso"
       Initrds:
         - "initrd.gz"
       Kernel: "linux"
