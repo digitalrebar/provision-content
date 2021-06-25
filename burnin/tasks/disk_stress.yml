@@ -31,7 +31,7 @@ Templates:
     echo "Starting disk stress test"
     TEST_SSDS={{.Param "burnin-disk-test-ssd"}}
     DESTRUCTIVE={{.Param "burnin-disk-destructive"}}
-    BBARGS="-s -v -b 4096 -c 4096"
+    BBARGS="-v -b 4096 -c 256 -e {{.Param "burnin-disk-max-errors"}}"
     if [[ $DESTRUCTIVE = true ]]; then
         # Nuke it all.
         declare vg pv maj min blocks name
@@ -85,11 +85,13 @@ Templates:
                 echo "passed "
             else
                 echo "failed"
-            fi > "test-${i##*/}"
+            fi 2>&1 | gzip > "test-${i##*/}.gz"
             exit
-        ) &
+        )  &
     done
     wait
-    cat test-*
+    for f in test-*.gz; do
+        gunzip < "$f"
+    done
     grep -q failed test-* && exit 1 || exit 0
 
