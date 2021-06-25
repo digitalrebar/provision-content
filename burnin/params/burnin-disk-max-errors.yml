@@ -1,0 +1,11 @@
+---
+Name: "burnin-disk-max-errors"
+Description: "The number disk errors before giving up.  0 means never give up."
+Schema:
+  type: "number"
+  default: 0
+Meta:
+  type: "input"
+  color: "blue"
+  icon: "fire"
+  title: "RackN Content"
