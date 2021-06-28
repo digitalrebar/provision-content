@@ -1,0 +1,16 @@
+---
+Name: generic-flash-list
+Description: Generic Firmware Flash From List
+RequiredParams:
+  - skip-flash
+  - flash-list
+Templates:
+  - Name: generic-flash-list
+    Contents: |
+      #!/usr/bin/env bash
+
+      applyFlash() {
+        echo "Generic flash from $FILESRC requires a Script!"
+      }
+      
+      {{ template "flash-list-generic.sh.tmpl" . }}

@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -o pipefail
+clean_curl() {
+    # src=$1
+    echo "Downloading $1"
+    curl -L -f -k -O "$1" && return
+    echo "Failed to download $1"
+    exit 1
+}
+
+if [[ {{.Param "skip-flash"}} = true ]]; then
+    echo "Skipping all flash operations due to skip-flash being true"
+    exit 0
+fi
+
+if ! grep -q 'sledgehammer\.iso' /proc/cmdline; then
+    echo "System not in Sledgehammer, exiting"
+    exit 0
+fi
+
+{{ range $index, $elem := .Param "flash-list" }}
+    {{ if (has $elem.File ($.Param "flash-list-check-list")) }}
+echo "Image {{$elem.File}} is already installed.  To reinstall, clear the 'flash-list-installed-list'"
+    {{ else }}
+        {{ if hasPrefix "http" $elem.File }}
+FILESRC='{{$elem.File}}'
+        {{ else }}
+FILESRC='{{$.ProvisionerURL}}/{{$elem.File}}'
+        {{ end }}
+        {{ if (or $elem.Force ($.Param "flash-list-force")) }}
+FORCE=true
+        {{ else }}
+FORCE=''
+        {{ end }}
+FILENAME="${FILESRC##*/}"
+clean_curl "$FILESRC"
+want_reboot=''
+failed=''
+        {{ if (gt (len $elem.Script) 0) }}
+{{ $elem.Script }}
+        {{ else }}
+applyFlash
+        {{ end }}
+if [[ $failed ]]; then
+    echo "Flash failed processing $FILENAME"
+    exit 1
+fi
+drpcli machines get $RS_UUID param flash-list-check-list | jq ' (.+ ["{{$elem.File}}"] | unique)' | drpcli machines set $RS_UUID param flash-list-check-list to -
+if [[ $want_reboot ]]; then
+    echo "$FILENAME wants a reboot"
+    exit 192
+fi
+    {{ end }}
+{{ end }}
+{{ template "flash-list-installed.sh.tmpl" . }}
+echo "Nothing else to do and complete"
+drpcli machines set "$RS_UUID" param skip-flash to true
+exit 0

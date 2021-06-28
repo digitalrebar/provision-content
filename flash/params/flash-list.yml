@@ -4,24 +4,33 @@ Description: List of flash images to apply.
 Documentation: |
   This parameter contains a list of files to retrieve and run against the system.
 
-  The list contains objects that specify a type (RPM or BIN) and a URL or file to
-  retrieve the files directory.
+  The list contains a URL or file to retrieve the files directory in the File
+  field, a Force flag to indicate whether the update is allowed to be skipped,
+  and an optional Script section that should contains whatever glue is needed
+  to run the update.
+  The Script section can take:
 
-  If not specified, the system will attempt to update to the latest block release.
-  If the list is empty, nothing is updated.
+  $FILENAME is name of the firmware archive.
+  $FILESRC is the location the firmware archive was downloaded from
+  $FORCE is set to 'true' if this update should be forced.
+
+  The Script section must set $failed if the updated failed for any reason, and
+  $want_reboot if the firmware update requires a reboot.
+
+  If the list is updated, nothing will be updated.
 
 Schema:
   type: array
   items:
     type: object
     properties:
+      # Type is pretty much meaningless these days.
+      # It is present for backwards compatibility
       Type:
         type: string
-        enum:
-          - "rpm"
-          - "bin"
-          - "onecli"
       File:
         type: string
       Force:
         type: boolean
+      Script:
+        type: string
