@@ -50,7 +50,37 @@ Templates:
       if [[ ! $order ]]; then
           efibootmgr -o "$current"
       else
-          efibootmgr -o "${current},${order}"
+          IFS=',' read -r -a array <<< "$order"
+          data="$(efibootmgr -D | grep -i NIC | awk '{ print $1 }' | awk -F\* '{ print $1 }' | sed 's/Boot//')"
+
+          firstorder=""
+          firstcomma=""
+          lastorder=""
+          lastcomma=""
+          for elem in "${array[@]}"
+          do
+              FOUND=false
+              while read NIC
+              do
+                  if [[ "$NIC" == "$elem" ]] ; then
+                      FOUND=true
+                      break
+                  fi
+              done < <(echo "$data")
+              if [[ "$FOUND" == "true" ]] ; then
+                  firstorder="${firstorder}${firstcomma}${elem}"
+                  firstcomma=","
+              else
+                  lastorder="${lastorder}${lastcomma}${elem}"
+                  lastcomma=","
+              fi
+          done
+          order="${firstorder}${firstcomma}${lastorder}"
+
+          echo "Setting order to $order"
+
+          # remove the current from the front of order.
+          efibootmgr -o "${order}"
       fi
       efibootmgr -D || :
       efibootmgr -v || :
