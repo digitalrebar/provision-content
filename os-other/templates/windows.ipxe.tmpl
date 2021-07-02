@@ -1,9 +1,10 @@
 #!ipxe
 
-kernel {{.Env.PathFor "http" .Env.Kernel}} {{.BootParams}}
-imgfetch {{.Env.PathFor "http" "boot/bcd"}}                     BCD
-imgfetch {{.Env.PathFor "http" "boot/boot.sdi"}}                boot.sdi
-imgfetch {{.Env.PathFor "http" "rebar-winpe.wim"}}              boot.wim
+kernel {{.Env.PathFor "http" "wimboot"} {{.BootParams}}
+imgfetch {{.Env.PathFor "http" "stage0.ps1"}}      stage0.ps1              
+imgfetch {{.Env.PathFor "http" "boot/bcd"}}        BCD
+imgfetch {{.Env.PathFor "http" "boot/boot.sdi"}}   boot.sdi
+imgfetch {{.Env.PathFor "http" "rebar-winpe.wim"}} boot.wim
 imgstat
 prompt
 boot

@@ -1,0 +1,28 @@
+---
+Name: "windows-pe"
+Description: "WinPE-based utility bootenv"
+Documentation: |
+  This is a Windows PE based utility environment.
+OS:
+  Name: "windows-pe"
+  IsoFile: "winpe.iso"
+  IsoSha256: ""
+Loaders:
+  386-pcbios: ipxe.pxe
+  amd64-uefi: ipxe.efi
+Kernel: "wimboot"
+Initrds:
+  - "boot/bcd"
+  - "boot/boot.sdi"
+  - "winpe.wim"
+Templates:
+  - ID: "windows.ipxe.tmpl"
+    Name: "ipxe"
+    Path: "{{.Machine.Address}}.ipxe"
+  - ID: "winpe-stage0.ps1.tmpl"
+    Name: "stage0"
+    Path: "{{.Machine.Path}}/stage0.ps1"
+Meta:
+  icon: "windows"
+  color: "blue"
+  title: "RackN Content"
