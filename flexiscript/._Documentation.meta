@@ -1,0 +1,62 @@
+
+The FlexiScript system allows an operator to flexibly inject scritlets
+in to an existing stage in a workflow.  FlexiScript currently supports
+the following mechanisms for command injection:
+
+  * ``scriptlet`` - simple String based Param defining Script to run
+
+Operating FlexiScript Scriptlets
+--------------------------------
+
+The Param named ``flexiscript/scriptlet`` should be set to the value
+of an existing and type defined Param on the system, which contains
+the scriptlets to run.
+
+This allows for multiple Stages to be inserted in to a single Workflow,
+and flexibly run different scriptlets at those points in the Workflow.
+
+For Linux, Darwin (MacOS X), Unix, and VMware ESXi systems, the VERY
+FIRST line of the scriptlet must be a validly formed *SheBang* that
+defines the interpreter used to execute the scriptlet.  This allows
+for the Scriptlet to subsequently define the interpreter language
+that will be used to execute the scriptlet.
+
+For Windows systems, only PowerShell scriptlets are supported, as
+Windows does not use a *SheBang* construct to define what command
+to interpret the text script in.
+
+It is the Operators responsibility to catch any and all errors
+and act accordingly based on their intentions.  Scripts MUST EXIT
+with a zero exit code for Workflow operations to continue.
+
+.. note:: Poorly behaved commands/binaries/tools may fail the requested
+          task, but still exit with a Zero Exit Code.  It is the operator
+          responsibility to parse the output and behave accordingly, as
+          a Zero (0) exit code will mark the Job successful when completed.
+
+
+Example Scriptlet on Linux
+--------------------------
+
+Here is a simple Example on Linux.
+
+Create a Param named ``linux-scriptlet-example`` with the Type defines as
+``string``, and the ``default`` value set to:
+
+  ::
+
+    #!/usr/bin/env bash
+    echo "Date:"
+    date
+
+Create a Stage named ``linux-scriptlet-example``.  In the Stage, specify the
+``flexiscript/scriptlet`` Param to the value ``linux-scriptlet-example``.
+Set the ``Stage`` to ``flexiscript/scriptlet``.
+
+
+On a test Machine currently running in any OS with a valid BASH shell
+(most linux systems including Sledgehammer, Darwin, etc.), set the Workflow
+to empty, then set the Stage to ``linux-scriptlet-example``.
+
+Additionally, you can observe the ``test-flexiscript/scriptlet`` content
+as an example.

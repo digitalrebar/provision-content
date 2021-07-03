@@ -1,0 +1,40 @@
+---
+Name: "flexiscript/scriptlet"
+Description: "The name of the parameter that contains the Param name which has the scriptlets to run."
+Documentation: |
+  This defines the parameter that the ``flexiscript`` stage
+  will use to reference the list of scriptlets to dynamically execute. It
+  essentially operates as a "control pointer" to the real Param, allowing
+  for flexible usage of a single defined Param to point to a variably
+  defined Param for re-use in workflow stages.
+
+  The Param that it points to **must be** type defined in the system, and
+  it must be a String.  The contents of the referenced Param is a set of
+  scriptlets to run on the system.
+
+  In addition, the Param ``flexiscript/interpreter`` defines what system
+  interpreter to use on the target system.  The default value is ``bash``,
+  for Linux/Darwin/Unix systems with a BASH shell interpretter.  For
+  Linux/Darwin/Unix/ESXi systems, the *SheBang* (*#!*) in the first line
+  of the script will be set to the value of the Param.
+
+  For example, to run the scriptlet directly as Python interpreted code,
+  set ``flexiscript/interpreter`` to ``python`` or possibly ``python3``.
+  Then the *SheBang* will be set to ``#!/usr/bin/env python3`` (as an
+  example).
+
+  Windows systems do not support a flexibly *SheBang* construct, and
+  consequently this content currently only supports PowerShell execution.
+  Future implementations may wrap a Batch script to call the appropriate
+  executing tool (or something like that).
+
+  The contents of the referenced Param is a multi-line text, which will
+  be executed directly.  It is up to the operator to catch and intepret
+  exit codes correctly to handle normal workflow operations.
+
+Schema:
+  type: "string"
+Meta:
+  color: "orange"
+  icon: "terminal"
+  title: "RackN Content"

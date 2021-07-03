@@ -1,0 +1,8 @@
+---
+Name: test-flexiscript
+Meta:
+  color: green
+  icon: terminal
+Description: Main workflow to test FlexiScript scriptlets.
+Stages:
+  - test-flexiscript-scriptlet
