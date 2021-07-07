@@ -1,0 +1,61 @@
+This content pack contains the workflows and profiles needed to build Sledgehammer on CentOS 8.  Additionally,
+the content pack contains profiles the build expanded drivers for Sledgehammer (exablaze, mellanox, solarflare smart nics).
+
+Design
+------
+
+Following the standard RackN Digital Rebar methods, a workflow is used to build the new sledgehammer on a machine.  The
+machine can be virtual or physical, but must have internet access.
+
+The process drives the machine through a centos 8 installation, customs the image for sledgehammer usage, and uploads
+the resulting image and profiles into DRP for usage.
+
+Customizations can be done through the parameters.  This includes injecting additional tasks or data.  See the
+``sledgehammer/customize-tasks`` parameter for more details.
+
+Prerequisites
+-------------
+
+DRP Requirements
+================
+
+DRP requires a couple of things to make this happen.
+
+#. The ``drp-community-content`` content pack needs to be loaded.  This can be done through the Catalog UX page.
+#. The ``sledgehammer-builder`` content pack needs to be loaded.  This can be done through the Catalog UX page.
+#. The CentOS 8 iso needs to be loaded into DRP.  This can be done by running: ``drpcli bootenvs uploadiso centos-8``
+
+That should prepare DRP for building sledgehammer.
+
+Machine Requirements
+====================
+
+To build sledgehammer, a machine is needed to do an install of centos 8 and then post installation work to capture the image.
+
+The machine needs at least 2GB of memory and 20GB of storage.  The machine needs to be able to PXE to DRP and get discovered.
+Additionally, the machine needs to be able to access the internet.  This could be through a second interface with DHCP,
+see the ``sledgehammer/extra-ifs`` parameter.
+
+NOTE: This will be destructive to the machine in question.
+
+Outbound Access
+===============
+
+The target machine **MUST** have outbound internet access to get packages and components needed to build sledgehammer.
+To that end, there is a parameter, ``sledgehammer/extra-ifs`` that can be used to cause DHCP to run on secondary interfaces.
+This is particularly useful for VMs that have a second interface that has internet access.
+
+Building Sledgehammer
+---------------------
+
+The following steps will produce a new sledgehammer image.
+
+#. Discover machine into DRP as normal.
+#. (Optional) Add ``sledgehammer-full-drivers`` profile to the machine if you wish to include the additional nic drivers.
+#. Set the workflow on the machine to: ``sledgehammer-build``
+#. Wait for the workflow to complete.
+
+Upon completion, there will be a new iso in the isos directory and a new profile in the profiles view for the new sledgehammer.
+These are named by the checksum of the image.  The last job log for the process contains the name if you are running this
+multiple times.
+
