@@ -19,13 +19,13 @@ Templates:
       {{ end -}}
 
       {{if eq (.Param "flash-method") "list" }}
-      {{ if .ParamExists "flash-list" }}
+        {{ if .ParamExists "flash-list" }}
       echo "Hardware system, $mfgr, updated by list. Assume list is self-contained."
       APPEND="-list"
-      {{ else }}
+        {{ else }}
       echo "List install requested, but list not specified!"
       exit 1
-      {{ end }}
+        {{ end }}
       {{end}}
 
       {{if eq (.Param "flash-method") "block" }}
@@ -34,10 +34,10 @@ Templates:
 
       {{if eq (.Param "flash-method") "list-then-block" }}
       APPEND=""
-      {{ if .ParamExists "flash-list" }}
+        {{ if .ParamExists "flash-list" }}
       echo "Hardware system, $mfgr, updated by list. Assume list is self-contained."
       APPEND="-list"
-      {{ end }}
+        {{ end }}
       {{end}}
 
       [[ -z "$mfgr" ]] && echo ">>> WARNING:  Discovered Manufacturer has no value." || true
@@ -46,5 +46,9 @@ Templates:
           "Dell Inc.") drpcli machines tasks add {{.Machine.UUID}} at 0 dell-firmware-flash${APPEND};;
           "HP"|"HPE") drpcli machines tasks add {{.Machine.UUID}} at 0 hpe-firmware-flash${APPEND};;
           Lenovo) drpcli machines tasks add {{.Machine.UUID}} at 0 lenovo-firmware-flash${APPEND};;
-          *) echo "No idea how to flash${APPEND} for $mfgr";;
+      {{ if .ParamExists "flash-list" }}
+          *) drpcli machines tasks add {{.Machine.UUID}} at 0 generic-flash-list;;
+      {{ else }}
+          *) echo "Automated flash updates not available for $mfgr";;
+      {{ end }}
       esac
