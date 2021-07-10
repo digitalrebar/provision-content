@@ -1,0 +1,18 @@
+---
+Name: "cloud/cluster-count"
+Description: "Number of Instances to Provision in Terraform"
+Documentation: |
+  Used in the ``cloud-cluser-[provider].tf.tmpl`` references plans
+  to set the ``count=#`` in the Provisioner block.
+
+  Defaults to 3.  (use ``cloud-provision`` if creating 1 machine at a time)
+
+  Terraform local-exec is used to create/delete the number of created machines.
+Schema:
+  type: "integer"
+  default: 3
+Meta:
+  type: "id"
+  icon: "hashtag"
+  color: "blue"
+  title: "Digital Rebar Community Content"

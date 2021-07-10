@@ -1,0 +1,31 @@
+# Configure the Linode provider
+terraform {
+  required_providers {
+    linode = {
+      source = "linode/linode"
+      version = ">= 1.13.4"
+    }
+  }
+}
+
+provider "linode" {
+  token = "{{ .Param "linode/token" }}"
+}
+
+resource "linode_instance" "drp_node" {
+  count     = "{{ .Param "cloud/cluster-count" }}"
+  image     = "{{ .Param "linode/instance-image" }}"
+  label     = "{{ .Param "cluster/profile" }}-${count.index}"
+  region    = "{{ .Param "linode/region" -}}"
+  type      = "{{ .Param "linode/instance-type" }}"
+  root_pass = "{{ .Param "linode/root-password" }}"
+  tags      = [ {{ range $i, $p := .Machine.Profiles }}"{{$p}}",{{ end }}"DigitalRebar" ]
+  {{ if .ParamExists "rsa/key-public" }}
+  authorized_keys = ["{{ .Param "rsa/key-public" }}"]
+  {{ end }}
+
+  {Name:${self.label}, Description:"Created by Digital Rebar Cloud Cluster", Address:${self.ip_address}, Params:{cloud/instance-id:${self.id}
+
+  LOCAL EXEC TO CREATE
+
+}
