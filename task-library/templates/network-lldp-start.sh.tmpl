@@ -60,6 +60,11 @@ then
   else
     echo "Not running. Starting ... "
     systemctl enable lldpd
+
+    cat > /etc/sysconfig/lldpd <<EOF
+    LLDPD_OPTIONS="-r"
+EOF
+
     systemctl start lldpd
     printf "Sleeping for '$SLEEP' seconds to collect LLDPD data... "
     do_sleep
@@ -71,6 +76,11 @@ else
   set_family
   $_pkgmgr -y install lldpd
   systemctl enable lldpd
+
+  cat > /etc/sysconfig/lldpd <<EOF
+LLDPD_OPTIONS="-r"
+EOF
+
   systemctl start lldpd.service
 
   if pgrep lldpd > /dev/null 2>&1
