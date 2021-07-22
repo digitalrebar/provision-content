@@ -67,7 +67,7 @@ Templates:
               echo "Partial upgrade failure, but system reboot required"
               want_reboot=yes
               failed=yes;;
-          34)
+          24|34)
               echo "Nothing to do";;
           *)
               echo "Unhandleable exit code $?"
