@@ -1,0 +1,53 @@
+Contents: |
+  @ECHO OFF
+  TITLE Windows Rubber Mallet
+  ECHO Initalizing Windows PE
+  wpeinit
+
+  ECHO Updating system boot information registry
+  wpeutil UpdateBootInfo
+
+  ECHO Disabling firewall
+  Wpeutil DisableFirewall
+
+  ECHO Waiting for the Network to initalize..
+  wpeutil WaitForNetwork
+
+  ECHO Rubber Mallet is starting..
+  ECHO.
+  ECHO                 ####
+  ECHO               ##    ##
+  ECHO             ##  ########
+  ECHO           ################
+  ECHO           ##############  ##
+  ECHO             ##################
+  ECHO               ##################
+  ECHO                 ##############  ##
+  ECHO               ######################
+  ECHO             ########################
+  ECHO           ##########  ############
+  ECHO         ##########      ########
+  ECHO       ##########          ####
+  ECHO     ##########
+  ECHO   ##########
+  ECHO ##########
+  ECHO   ######
+  ECHO     ##
+  ECHO.
+
+  ECHO Retreiving agent configuration..
+  SET RS_ENDPOINT={{.ApiURL}}
+  SET RS_UUID={{.Machine.UUID}}
+  SET RS_TOKEN={{.GenerateInfiniteToken}}
+
+  ECHO Machine ID: %RS_UUID%
+
+  ECHO Setting up the agent and marking machine runnable..
+  %SystemRoot%\System32\drpcli.exe machines update %RS_UUID% {'Runnable':true} >nul 2>&1
+  START /min cmd.exe @cmd /k "%SystemRoot%\System32\drpcli.exe machines processjobs %RS_UUID%"
+  ECHO The agent is now running in a new window and ready to process jobs. Entering the command line shell
+ID: startnet.cmd
+Meta:
+  color: black
+  icon: file text outline
+  title: User added
