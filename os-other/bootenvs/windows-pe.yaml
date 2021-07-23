@@ -1,0 +1,96 @@
+Description: Boot system using WindowsPE drp-runner image
+Kernel: ../wimboot
+Meta:
+  color: red
+  feature-flags: change-stage-v2
+  icon: windows
+  title: windows-pe
+  type: os
+Name: windows-pe
+OS:
+  Codename: Windows
+  Family: Microsoft
+  IsoFile: winpe.iso
+  IsoSha256: ""
+  IsoUrl: ""
+  Name: windows-pe
+  Version: PE
+Templates:
+  - Contents: |-
+      DEFAULT {{.Env.Name}}
+      PROMPT 0
+      TIMEOUT 0
+      LABEL {{.Env.Name}}
+        KERNEL pxechn.c32 ipxe.pxe
+    Name: pxelinux
+    Path: pxelinux.cfg/{{.Machine.HexAddress}}
+  - Contents: |-
+      DEFAULT {{.Env.Name}}
+      PROMPT 0
+      TIMEOUT 0
+      LABEL {{.Env.Name}}
+        KERNEL pxechn.c32 ipxe.pxe
+    Name: pxelinux-mac
+    Path: pxelinux.cfg/{{.Machine.MacAddr "pxelinux"}}
+  - Contents: |-
+      #!ipxe
+      echo ========================================================
+      echo         UUID: ${uuid}
+      echo Manufacturer: ${manufacturer}
+      echo Product name: ${product}
+      echo     Hostname: ${hostname}
+      echo
+      echo  MAC address: ${net0/mac}
+      echo   IP address: ${net0/ip}
+      echo IPv6 address: ${net0.ndp.0/ip6:ipv6}
+      echo
+      echo      Netmask: ${net0/netmask}
+      echo      Gateway: ${gateway}
+      echo          DNS: ${dns}
+      echo     IPv6 DNS: ${dns6}
+      echo       Domain: ${domain}
+      echo ========================================================
+      kernel {{.Env.Kernel}} {{.BootParams}}
+      initrd -n drpcli.exe {{.ProvisionerURL}}/files/drpcli.amd64.windows  drpcli.exe
+      initrd {{.Machine.Path}}/startnet.cmd                                startnet.cmd
+      initrd {{.Machine.Path}}/agent-cfg.yml                               agent-cfg.yml
+      imgfetch {{.Env.PathFor "http" "BOOT/BCD"}}                          BCD
+      imgfetch {{.Env.PathFor "http" "BOOT/BOOT.SDI"}}                     BOOT.SDI
+      imgfetch {{.Env.PathFor "http" "SOURCES/BOOT.WIM"}}                  BOOT.WIM
+      boot
+    Name: ipxe
+    Path: '{{.Machine.Address}}.ipxe'
+  - Contents: |-
+      #!ipxe
+      echo ========================================================
+      echo         UUID: ${uuid}
+      echo Manufacturer: ${manufacturer}
+      echo Product name: ${product}
+      echo     Hostname: ${hostname}
+      echo
+      echo  MAC address: ${net0/mac}
+      echo   IP address: ${net0/ip}
+      echo IPv6 address: ${net0.ndp.0/ip6:ipv6}
+      echo
+      echo      Netmask: ${net0/netmask}
+      echo      Gateway: ${gateway}
+      echo          DNS: ${dns}
+      echo     IPv6 DNS: ${dns6}
+      echo       Domain: ${domain}
+      echo ========================================================
+      kernel {{.Env.Kernel}} {{.BootParams}}
+      initrd -n drpcli.exe {{.ProvisionerURL}}/files/drpcli.amd64.windows  drpcli.exe
+      initrd {{.Machine.Path}}/startnet.cmd                                startnet.cmd
+      initrd {{.Machine.Path}}/agent-cfg.yml                               agent-cfg.yml
+      imgfetch {{.Env.PathFor "http" "BOOT/BCD"}}                          BCD
+      imgfetch {{.Env.PathFor "http" "BOOT/BOOT.SDI"}}                     BOOT.SDI
+      imgfetch {{.Env.PathFor "http" "SOURCES/BOOT.WIM"}}                  BOOT.WIM
+      boot
+    Name: ipxe-mac
+    Path: '{{.Machine.MacAddr "ipxe"}}.ipxe'
+  - ID: drp-agent-cfg.yaml.tmpl
+    Name: agent-cfg.yml
+    Path: '{{.Machine.Path}}/agent-cfg.yml'
+  - ID: startnet.cmd
+    Name: startnet.cmd
+    Path: '{{.Machine.Path}}/startnet.cmd'
