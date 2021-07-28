@@ -10,6 +10,8 @@ Tasks:
   - "context:terraform"
   - "cloud-validate"
   - "terraform-apply"
+  - "context:ansible"
+  - "ansible-join-up"
 Meta:
   type: "build"
   icon: "cloud upload"
