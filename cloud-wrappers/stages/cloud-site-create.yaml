@@ -11,6 +11,8 @@ Documentation: |
     The DRP server becomes the self-runner!
 Params:
   cloud/dr-install: true
+  terraform/set-machine-context: false
+  terraform/next-workflow: ''
   network/firewall-ports:
     - 8092/tcp
 Tasks:

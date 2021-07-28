@@ -1,0 +1,16 @@
+---
+Name: "terraform/plan-machine"
+Description: "Machine that ran Terraform to Create this machine instance"
+Documentation: |
+  Since machines created by Terraform-Apply can be managed by other
+  machines, this Param tracks the holder of the Terraform state
+
+  This prevents Terrform-Apply from running on the wrong systems.
+Schema:
+  type: "string"
+Meta:
+  color: "blue"
+  icon: "map outline"
+  title: "RackN Content"
+  copyright: "RackN 2021"
+  clipboard: "handy"

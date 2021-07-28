@@ -5,6 +5,8 @@ Documentation: |
 
   Will reset the firewall at the end of the task.
 
+  No action when running in a context
+
 Name: "network-firewall"
 RequiredParams:
   - network/firewall-ports
@@ -15,6 +17,8 @@ Templates:
 
     set -e
 
+    {{ if eq (len .Machine.Context) 0 }}
+    
     {{ if empty (.Param "network/firewall-ports") }}
       echo "No Action: No Firewall Ports defined in network/firewall-ports."
     {{ else }}
@@ -56,6 +60,10 @@ Templates:
     else
       echo "WARNING: no firewalld found, skipping network config"
     fi
+
+    {{ else }}
+      echo "No Action: No Firewall Config in Machine.Context {{.Machine.Context}}"
+    {{ end }}
 
     echo "done"
 

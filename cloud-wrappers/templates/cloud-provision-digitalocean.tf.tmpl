@@ -28,15 +28,8 @@ resource "digitalocean_droplet" "drp_machine" {
   size     = "{{ .Param "digitalocean/size" }}"
   name     = "{{ .Machine.Name }}"
   ssh_keys = [digitalocean_ssh_key.drp_machine.fingerprint]
-  tags     = [ {{ range $i, $p := .Machine.Profiles }}"{{$p}}",{{ end }}"DigitalRebar" ]
-}
+  tags     = [ {{ range $i, $p := .Machine.Profiles }}"{{lower $p}}",{{ end }}"digitalrebar" ]
 
-output "machine_ip" {
-  value       = digitalocean_droplet.drp_machine.ipv4_address
-  description = "The IP of Machine"
-}
-
-output "instance_id" {
-  value       = digitalocean_droplet.drp_machine.id
-  description = "Digital Ocean Droplet ID"
+  # this template synchronizes the Terraform instance with Digital Rebar
+  {{template "cloud-provision-local-exec.tf.tmpl" . }}
 }

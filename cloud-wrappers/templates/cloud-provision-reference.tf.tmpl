@@ -12,19 +12,24 @@ provider "{{ .Param "cloud/provider" }}" {
 }
 
 resource "instance" "drp_node" {
-    name         = "{{ .Machine.Name }}"
-    tags         = [ {{ range $i, $p := .Machine.Profiles }}"{{$p}}",{{ end }}"digitalrebar" ]
+    # will use the DRP cluster logic to attach machines to clusters
+    {{ if .ParamExists "cluster/profile" }}
+    count            = "{{ .Param "cloud/cluster-count" }}"
+    name            = "{{ .Param "cluster/profile" }}-\${count.index}"
+    {{ else }}
+    # names must match to automatically link the TF instance with the DRP machine
+    name            = "{{ .Machine.Name }}"
+    {{ end }}
+    tags         = [ {{ range $i, $p := .Machine.Profiles }}"{{lower $p}}",{{ end }}"digitalrebar" ]
     {{ if .ParamExists "rsa/key-public" -}}
     ssh-keys = "{{ .Param "rsa/key-user" }}:{{ .Param "rsa/key-public" }}"
     {{ end }}
-}
 
-output "machine_ip" {
-  value       = instance.drp_node.public_ip
-  description = "The IP of Machine"
-}
+  # calls the DRP join-up
+	user_data = <<-EOT
+	  {{template "cloud-provision-cloud-init.tf.tmpl" . }}
+	EOT
 
-output "instance_id" {
-  value       = instance.drp_node.id
-  description = "Instance ID"
+  # this template synchronizes the Terraform instance with Digital Rebar
+  {{template "cloud-provision-local-exec.tf.tmpl" . }}
 }

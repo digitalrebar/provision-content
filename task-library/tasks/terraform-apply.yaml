@@ -26,18 +26,195 @@ Documentation: |
   have a task that uses terraform behind the scenes.  This parameter is automatically
   removed from machines (not profiles!) automatically on destroy.
 
+  The synchronize.sh script is used by "local-exec" to connect/update/destroy machines
+  from Terraform into Digital Rebar.
+
+  To match existing machines, cloud/instance-id and cloud/provider are used first.  Name is used as a backup.
+
+  When updating/creating sets the Params for
+    - cloud/instance-id
+    - cloud/provider
+    - machine/PXE
+    - machine/type
+    - machine/tags
+
   Notes:
   * having SSH keys requires using the 'rsa-key-create' generator task.
   * if creating cloud machines, use the 'ansible-join-up' task for join
+ExtraClaims:
+  - scope: "machines"
+    action: "*"
+    specific: "*"
+  - scope: "workflows"
+    action: "get"
+    specific: "*"
 RequiredParams:
   - terraform/plan-action
   - terraform/plan-automation
   - terraform/plan-templates
+  - terraform/next-workflow
+  - terraform/map-ip-address
+  - terraform/map-instance-name
+  - cloud/provider
 OptionalParams:
+  - cluster/profile
   - terraform/tfstate
+  - terraform/plan-templates
   - rsa/key-user
   - rsa/key-public
 Templates:
+  - Name: "DRP Machine Sync"
+    Path: "synchronize.sh"
+    Contents: |-
+      #!/bin/bash
+      # RackN Copyright 2021
+      {{ $cloud := .Param "cloud/provider" }}
+      {{ $templates := concat (.Param "terraform/plan-automation") (.Param "terraform/plan-templates") -}}
+
+      echo "====== Synchronize DRP<>Terraform for {{ $cloud }}  ======"
+      {{template "setup.tmpl" .}}
+
+      {{ if (hasKey (.Param "terraform/map-ip-address") $cloud) }}
+        JQADDRESS={{ get (.Param "terraform/map-ip-address") $cloud }}
+        echo "  Using terraform/map-ip-address = $JQADDRESS"
+      {{ else }}
+        JQADDRESS={{ get (.Param "terraform/map-ip-address") "default" }}
+        echo "  WARNING: Missing terraform/map-ip-address value for {{ $cloud }}. Using default $JQADDRESS"
+      {{ end }}
+
+      {{ if (hasKey (.Param "terraform/map-instance-name") $cloud) }}
+        JQNAME={{ get (.Param "terraform/map-instance-name") $cloud }}
+        echo "  Using terraform/map-instance-name = $JQNAME"
+      {{ else }}
+        JQNAME={{ get (.Param "terraform/map-instance-name") "default" }}
+        echo "   WARNING: Missing terraform/map-instance-name value for {{ $cloud }}. Using default $JQNAME"
+      {{ end }}
+
+      {{ if .ParamExists "cloud/provider-icons" }}
+        {{ if hasKey (.Param "cloud/provider-icons") $cloud }}
+          CLOUDICON="{{ get (.Param "cloud/provider-icons") $cloud }}"
+        {{ else }}
+          CLOUDICON="{{ get (.Param "cloud/provider-icons") "default" }}"
+        {{ end }}
+      {{ end }}
+
+      TFSELF="$1"
+      {{ if .ParamExists "rs-debug-enable" }}
+      {{ if .Param "rs-debug-enable" }}
+      echo "+++++ START DEBUG: INPUT FROM TERRAFORM ++++++"
+      jq . <<< "$TFSELF"
+      echo "+++++ END DEBUG: INPUT FROM TERRAFORM ++++++"
+      {{ end }}
+      {{ end }}
+
+      TFID=$(jq -rc .id <<< "${TFSELF}")
+      TFNAME="$(jq -rc $JQNAME <<< "${TFSELF}")"
+      TFADDRESS="$(jq -rc $JQADDRESS <<< "${TFSELF}")"
+
+      EXISTS=$(drpcli machines count cloud/instance-id Eq "$TFID" cloud/provider Eq "{{$cloud}}")
+      case $EXISTS in
+        0) if drpcli machines exists Name:${TFNAME} > /dev/null ; then
+             echo "  Looking for machine by Name $TFNAME"
+             RAW=$(drpcli machines show Name:${TFNAME})
+             MC=$(jq -rc '.Uuid' <<< "${RAW}")
+           else
+             echo "  No matching machine found"
+           fi
+           ;;
+        1) echo "  Looking for $EXISTS instances with {{$cloud}}:$TFID."
+           RAW=$(drpcli machines list cloud/instance-id Eq $TFID cloud/provider Eq {{$cloud}})
+           MC=$(jq -rc '.[0].Uuid' <<< "${RAW}")
+           ;;
+        *) echo "ERROR: multiple matches for {{$cloud}}:$TFID!"
+           exit 1
+           ;;
+      esac
+      echo "  Machine is $TFNAME (Uuid $MC)."
+      {{ if eq (.Param "terraform/plan-action") "apply" }}
+      if [[ -z "$MC" ]]; then
+        {{ range $i, $wf := (.Param "terraform/next-workflow") }}
+        if [[ -z $WORKFLOW ]] ; then 
+          if drpcli workflows exists $wf > /dev/null ; then
+            WORKFLOW="{{$wf}}";
+          fi
+        fi
+        echo "  selected $WORKFLOW as workflow"
+        {{ else }}
+        WORKFLOW="{{$wf}}"
+        {{ end }}
+        echo "  >>> Processing Terraform Apply to CREATE $TFNAME"
+        RAW=$(drpcli machines create "{
+          \"Name\":\"$TFNAME\",
+          \"Fingerprint\":{\"CloudInstanceID\":\"{{$cloud}}:$TFID\"},
+          \"Address\":\"$TFADDRESS\",
+          \"Workflow\":\"$WORKFLOW\",
+          {{- if .ParamExists "cluster/profile" -}}\"Profiles\":[\"{{ .Param "cluster/profile" }}\"],{{ end -}}
+          \"Params\":{
+            \"cloud/provider\":\"{{ $cloud }}\",
+            \"cloud/instance-id\":\"$TFID\",
+            {{- if .ParamExists "rsa/key-public" }}\"rsa/key-public\":\"{{ .Param "rsa/key-public"}}\",{{ end -}}
+            \"terraform/plan-machine\":\"{{ .Machine.Uuid }}\",
+            \"machine/type\":\"virtual\",
+            \"machine/PXE\":false,
+            \"machine/tags\":[\"Terraform\",\"virtual\",\"{{$cloud}}\"]
+          },
+          \"Meta\":{
+            \"icon\":\"$CLOUDICON\"
+          }
+        }")
+      else      
+        echo "  >>> Processing Terraform Apply to UPDATE $MC"
+        RAW=$(drpcli machines update $MC "{
+          \"Name\":\"$TFNAME\",
+          \"Fingerprint\":{\"CloudInstanceID\":\"{{$cloud}}:$TFID\"},
+          \"Address\":\"$TFADDRESS\",
+          \"Params\":{
+            \"cloud/provider\":\"{{ $cloud }}\",
+            \"cloud/instance-id\":\"$TFID\",
+            {{- if .ParamExists "rsa/key-public" }}\"rsa/key-public\":\"{{ .Param "rsa/key-public"}}\",{{ end -}}
+            \"terraform/plan-machine\":\"{{ .Machine.Uuid }}\",
+            \"machine/type\":\"virtual\",
+            \"machine/PXE\":false,
+            \"machine/tags\":[\"Terraform\",\"virtual\",\"{{$cloud}}\"]
+          },
+          \"Meta\":{
+            \"icon\":\"$CLOUDICON\"
+          }
+        }")
+      fi
+      MC=$(jq -rc .Uuid <<< "$RAW")
+      echo "  Completed machine $MC action"
+      echo "  Force Fingerprint via CURL (during v4.6 drpcli migration only)"
+      curl -X PATCH --insecure \
+        -H "Authorization: Bearer $RS_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "[{\"op\":\"replace\", \"path\":\"/Fingerprint/CloudInstanceID\", \"value\":\"{{$cloud}}:$TFID\"}]" \
+        {{.ApiURL}}/api/v3/machines/$MC \
+        > /dev/null
+      {{ if .ParamExists "rsa/key-private" }}
+      echo "  created/updated $MC.  setting private key"
+      drpcli machines set $MC param rsa/key-private to - <<< '{{ .Param "rsa/key-private" }}' > /dev/null
+      {{ end }}
+      {{ else }}
+      echo "  >>> Processing Terraform Destroy for $MC"
+        if [[ "$MC" == "{{ .Machine.Uuid }}" ]]; then
+        echo "  CLEAR TF data for $MC ..."
+        drpcli machines update $MC '{"Address":"", "Fingerprint":{"CloudInstanceID":""}}' > /dev/null
+        drpcli machines remove $MC param "cloud/provider" > /dev/null
+        drpcli machines remove $MC param "cloud/instance-id" > /dev/null
+        drpcli machines remove $MC param "terraform/plan-machine" > /dev/null
+        drpcli machines remove $MC param "machine/PXE" > /dev/null
+        drpcli machines remove $MC param "machine/type" > /dev/null
+        drpcli machines remove $MC param "machine/tags" > /dev/null
+        drpcli machines meta set $MC key icon to cube > /dev/null
+      else
+        echo "  DESTROY $MC ..."
+        drpcli machines destroy $MC > /dev/mull
+      fi
+      {{ end }}
+
+      echo "====== Completed $TFNAME ======"
+      exit 0
   - Name: "DRP Variables"
     Path: "tf.vars"
     Contents: |-
@@ -76,6 +253,7 @@ Templates:
       set -e
 
       {{template "setup.tmpl" .}}
+      chmod +x synchronize.sh
 
       {{ if $.ParamExists "rs-debug-enable" }}
       showplan={{ if eq ($.Param "rs-debug-enable") true }}true{{else}}false{{end}}
@@ -95,7 +273,8 @@ Templates:
       tfstate="add"
       if [[ -e terraform.tfstate ]] ; then
         echo "WARNING: tfstate file exists: uploading now, keeping in place"
-        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate  > /dev/null 
+        drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate  > /dev/null
+        drpcli machines $tfstate $RS_UUID param terraform/plan-machine to "{{.Machine.Uuid}}"  > /dev/null
       else
         echo "no terraform/tfstate exists"
       fi
@@ -197,13 +376,16 @@ Templates:
         if [[ "$(cat terraform.tfstate | jq -r '.resources | length')" == "0" ]] ; then
           echo "Removing empty terraform.tfstate file"
           drpcli machines remove $RS_UUID param terraform/tfstate > /dev/null || true
+          drpcli machines remove $RS_UUID param terraform/plan-machine > /dev/null || true
         else
           echo "Saving terraform.tfstate file to machine"
           drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate >/dev/null
+          drpcli machines $tfstate $RS_UUID param terraform/plan-machine to "{{.Machine.Uuid}}"  > /dev/null 
         fi
       else
         echo "no terraform.state file exists - cannot save"
-        drpcli machines remove $RS_UUID remove terraform/tfstate > /dev/null || true
+        drpcli machines remove $RS_UUID param terraform/tfstate > /dev/null || true
+        drpcli machines remove $RS_UUID param terraform/plan-machine  > /dev/null || true
       fi
 
       if [[ $success != true ]] ; then

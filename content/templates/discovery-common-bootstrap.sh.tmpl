@@ -124,7 +124,7 @@ find_by_kernel_cmdline() {
 
 find_by_hostname() {
     export RS_UUID=$(drpcli machines show Name:$HOSTNAME | jq -r .Uuid)
-    if [[ !$RS_UUID || $RS_UUID = null ]]; then
+    if [[ -z $RS_UUID || $RS_UUID = null ]]; then
         echo "Unable to map $HOSTNAME back to a UUID"
         unset RS_UUID
         return 1
@@ -133,7 +133,7 @@ find_by_hostname() {
 }
 
 find_by_saved_uuid() {
-    if ![[ -f /etc/rs-uuid ]]; then
+    if [[ ! -f /etc/rs-uuid ]]; then
         echo "No saved UUID"
         return 1
     fi

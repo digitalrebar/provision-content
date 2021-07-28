@@ -1,0 +1,9 @@
+  # This template provides a generalized utility DRP synch Terraform-Apply
+  provisioner "local-exec" {
+    command     = "./synchronize.sh '\${jsonencode(self)}'"
+  }
+
+  provisioner "local-exec" {
+    command     = "./synchronize.sh '\${jsonencode(self)}'"
+    when 			  = destroy
+  }

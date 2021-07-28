@@ -8,12 +8,16 @@ Documentation: /
   This is needed when using the Join-Up process in clouds
   where no DHCP is used and machines are assigned fixed addresses.
 
+  No action when running in a context
+
   Needed in >v4.3 because IP setting was removed from join-up.sh
 Templates:
   - Name: set-machine-ip
     Contents: |
       #!/usr/bin/env bash
 
+      {{ if eq (len .Machine.Context) 0 }}
+    
       IP=""
       BOOTDEV="eth0"
       echo "Looking up IP address on $BOOTDEV"
@@ -36,6 +40,10 @@ Templates:
         echo "Did not set/reset address: Detected = $IP and Machine.Address = $addr"
       fi
       
+      {{ else }}
+      echo "No Action: Do NOT SET IP when in Machine.Context {{.Machine.Context}}"
+      {{ end }}
+
       echo "done"
       exit 0
 Meta:

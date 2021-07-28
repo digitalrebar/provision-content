@@ -25,7 +25,11 @@ Templates:
       OS: linux
     Contents: |
       #!/usr/bin/env sh
-      exec drpcli agent install
+      if systemctl is-active --quiet drp-agent ; then
+        echo "NO ACTION: drp-agent is already installed and running"
+      else
+        exec drpcli agent install
+      fi
 Meta:
   icon: "motorcycle"
   color: "blue"

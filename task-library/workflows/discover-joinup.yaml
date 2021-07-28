@@ -1,7 +1,7 @@
 Name: "discover-joinup"
 Description: "Discover used with Join-Up script"
 Documentation: |
-  Discover including firewalld, run as a service and complete-nobootenv
+  Discover, run as a service and complete-nobootenv
 
   This workflow is recommended for joining cloud machines instead of `discover-base`.
 
@@ -11,10 +11,6 @@ Documentation: |
   Some operators may chooose to first create placeholder machines and then link
   with `join-up.sh` to the placeholder machine model using the UUID. See the
   `ansible-joinup` task for an example.
-
-  These added stages help for existing machines that may already
-  have basic configuration (like firewalld) and a stable operating
-  system (runner-service allows reboots).
 
   Complete-nobootenv ensures that Digital Rebar does not force
   the workflow into a bootenv (potentially rebooting) when finished.

@@ -1,0 +1,26 @@
+---
+Name: "terraform/map-instance-name"
+Description: "Map Terraform Instance Name to DRP Machine.Name"
+Documentation: |
+  Provides the JQ lookup .[name] reference that should be stored in the DRP Machine.Name field.
+
+  Uses the ``${self.[path]}`` address space used from inside the Terraform resource; however, ``self`` is not required since the results are parsed as JSON.
+
+  This allows users to create machines using the Terraform Instance Name from a Terraform run
+Schema:
+  type: "object"
+  default:
+    aws: ".private_dns"
+    azure: ".name"
+    google: ".name"
+    linode: ".label"
+    digitalocean: ".name"
+    pnap: ".hostname"
+    default: ".name"
+  required:
+    - "default"
+Meta:
+  type: "value"
+  icon: "map outline"
+  color: "black"
+  title: "Digital Rebar Community Content"

@@ -1,0 +1,23 @@
+---
+Name: "terraform/next-workflow"
+Description: "Preference of Workflow that is started on machines after Terraform apply"
+Documentation: |
+  Since Terraform creates machines, it's necessary to provide a starting
+  workflow for them during the join process.  This overrides the Default Workflow.
+
+  An ordered list is provided to allow for when workflows are missing from the system
+
+  If empty list then no workflow is set.
+Schema:
+  type: "array"
+  items:
+    type: "string"
+  default: 
+    - "universal-discover"
+    - "discover-joinup"
+    - "discover-base"
+Meta:
+  color: "blue"
+  icon: "map outline"
+  title: "RackN Content"
+  copyright: "RackN 2021"

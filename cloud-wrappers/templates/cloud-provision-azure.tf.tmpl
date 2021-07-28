@@ -109,21 +109,14 @@ resource "azurerm_linux_virtual_machine" "main" {
 
 	tags = {
 		DRP_ID      = "{{ .Machine.Uuid }}"
-		Provisoner  = "DigitalRebar"
+		Provisoner  = "digitalrebar"
 		{{ range $i, $p := .Machine.Profiles }}
 			{{- if not (hasPrefix "azure" $p) -}}
-			{{$p}}    = "DRP-Profile{{$i}}"
+			{{lower $p}}    = "DRP-Profile{{$i}}"
 			{{- end -}}
 		{{- end }}
 	}
-}
 
-output "machine_ip" {
-	value       = azurerm_linux_virtual_machine.main.public_ip_address
-	description = "The IP of Machine"
-}
-
-output "instance_id" {
-	value       = azurerm_linux_virtual_machine.main.id
-	description = "Azure Instance ID"
+  # this template synchronizes the Terraform instance with Digital Rebar
+  {{template "cloud-provision-local-exec.tf.tmpl" . }}
 }

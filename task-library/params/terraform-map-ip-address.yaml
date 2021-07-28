@@ -1,0 +1,26 @@
+---
+Name: "terraform/map-ip-address"
+Description: "Map Terraform Instance Name to DRP Machine.Name"
+Documentation: |
+  Provides the JQ lookup .[name] reference that should be stored in the DRP Machine.Name field.
+
+  Uses the ``${self.[path]}`` address space used from inside the Terraform resource; however, ``self`` is not required since the results are parsed as JSON.
+
+  This allows users to create machines using the Terraform Instance Name from a Terraform run
+Schema:
+  type: "object"
+  default:
+    aws: ".public_ip"
+    azure: ".public_ip_address"
+    google: ".network_interface[0].access_config[0].nat_ip"
+    linode: ".ip_address"
+    digitalocean: ".ipv4_address"
+    pnap: ".public_ip_addresses[0]"
+    default: ".ip_address"
+  required:
+    - "default"
+Meta:
+  type: "value"
+  icon: "map outline"
+  color: "black"
+  title: "Digital Rebar Community Content"

@@ -3,6 +3,11 @@ Name: "linode/token"
 Description: "Security Token for Linode API operations"
 Documentation: |
   The token required by cloud provider to act aginst the API
+
+  Make sure the Token has the following authority:
+    1. create Linodes
+    2. create Stackscripts
+    3. create Domains
 Secure: true
 Schema:
   type: "string"

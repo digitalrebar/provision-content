@@ -6,7 +6,7 @@ Documentation: |
   information.  Typically, this is simply self-referential (it contains the
   name of the containing profile) to allow machines to know the shared profile.
 
-  Note: the default value will be removed in v4.6.  In versions 4.3-4.5, the default
+  Note: the default value has been removed in v4.7.  In versions 4.3-4.6, the default
   value was added to make it easier for operators to use clusters without having to
   understand need to create a cluster/profile value.  While helpful, it leads to
   nonobvious cluster errors that are difficult to troubleshoot.
@@ -14,7 +14,8 @@ Documentation: |
   For operational guidelines, see :ref:`rs_cluster_pattern`
 Schema:
   type: "string"
-  default: "cluster-v43"
+  minLength: 1
+  pattern: '^[a-zA-Z0-9_\-]*$'
 Meta:
   color: "blue"
   icon: "object group outline"

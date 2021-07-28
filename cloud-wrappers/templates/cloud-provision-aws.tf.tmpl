@@ -3,7 +3,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = ">= 3.20.0"
+      version = ">= 3.50.0"
     }
   }
 }
@@ -13,6 +13,7 @@ provider "aws" {
   secret_key = "{{ .Param "aws/secret-key" }}"
 }
 
+# this is handy, but NOT required.  Ansible is not used in default process
 {{ if .ParamExists "rsa/key-public" }}
 resource "aws_key_pair" "DRP-{{ .Machine.Uuid }}" {
   key_name   = "DRP-{{ .Machine.Uuid }}"
@@ -50,14 +51,25 @@ resource "aws_security_group" "digitalrebar_basic" {
 {{ end }}
 
 resource "aws_instance" "drp_node" {
+	{{ if .ParamExists "cluster/profile" }}
+	# YES? use the DRP cluster logic to create multiple machines to run in clusters
+	count            = "{{ .Param "cloud/cluster-count" }}"
+	{{ end }}
 	ami           	= "{{ .Param "aws/ami-id" }}"
 	instance_type 	= "{{ .Param "aws/instance-type" }}"
 	tags      		= {
-		Name 		= "{{ .Machine.Name }}"
-		DRP_ID		= "{{ .Machine.Uuid }}"
-		Provisoner	= "DigitalRebar"
+		{{ if .ParamExists "cluster/profile" }}
+		# YES? use the DRP cluster logic to create multiple machines to run in clusters
+		Name            = "{{ .Param "cluster/profile" }}-\${count.index}"
+		{{ else }}
+		# NO? then names match the TF instance with the DRP machine
+		Name            = "{{ .Machine.Name }}"
+		DRP_ID		      = "{{ .Machine.Uuid }}"
+		{{ end }}
+		DRP_Plan_Machine = "{{ .Machine.Uuid }}"
+		Provisoner	= "digitalrebar"
 	{{ range $i, $p := .Machine.Profiles }}
-		{{$p}}		= "DRP-Profile{{$i}}"
+		{{lower $p}}		= "DRP-Profile{{$i}}"
 	{{- end }} }
 	{{ if .ParamExists "rsa/key-public" -}}
 	key_name 		= "DRP-{{ .Machine.Uuid }}"
@@ -67,9 +79,11 @@ resource "aws_instance" "drp_node" {
 	{{ else }}
 	security_groups = [aws_security_group.digitalrebar_basic.name]
 	{{ end }}
-}
+	user_data = <<-EOT
+  	#!/bin/bash
+    curl -kfsSL {{.ApiURL}}/machines/join-up.sh | sudo bash --
+  EOT
 
-output "machine_ip" {
-	value       = aws_instance.drp_node.public_ip
-	description = "The IP of Machine"
+  # this template synchronizes the Terraform instance with Digital Rebar
+  {{template "cloud-provision-local-exec.tf.tmpl" . }}
 }

@@ -21,6 +21,7 @@ OptionalParams:
   - google/credential
   - google/project-id
   - terraform/plan-automation
+  - cluster/profile
 Templates:
   - Name: "cloud-validate"
     Contents: |
@@ -30,15 +31,38 @@ Templates:
       set -e
       {{template "setup.tmpl" .}}
 
+      {{ if .ParamExists "terraform/plan-machine"}}
+        {{ if eq (.Param "terraform/plan-machine") (toString .Machine.Uuid) }}
+          echo "ok to proceed - this is the terraform/plan-machine"
+        {{ else }}
+          echo "ERROR: destroy must run from the terraform/plan-machine"
+          exit 1
+        {{ end }}
+      {{ else }}
+        {{ if eq (.Param "terraform/plan-action") "destroy" }}
+          echo "ERROR: destroy must run from the terraform/plan-machine"
+          exit 1
+        {{ else }}
+          echo "ok to proceed - running apply"
+        {{ end }}
+      {{ end }}
+
       {{ if (.Param "cloud/dr-install") }}
-      echo "This is a DRP server process... skip dr-server/install-drpid check"
+        echo "This is a DRP server process... skip dr-server/install-drpid check"
+        {{ if (.ParamExists "cluster/profile") }}
+          echo "CANNOT PROCEED! This machine may be in a cluster"
+          echo "  remove cluster/profile and try again."
+          exit 1
+        {{ else }}
+          echo "ok to proceed - this DRP server is not part of a cluster"
+        {{ end }}
       {{ else }}
         {{ if (.ParamExists "dr-server/install-drpid") }}
           echo "CANNOT PROCEED! This machine may be a DRP server"
           echo "  remove dr-server/install-drpid and try again."
           exit 1
         {{ else }}
-        echo "ok to proceed - this is NOT a DRP server installed via cloud-provision"
+          echo "ok to proceed - this is NOT a DRP server installed via cloud-provision"
         {{ end }}
       {{ end }}
 
@@ -185,15 +209,6 @@ Templates:
             exit 1
           {{ end }}
         {{ end }}
-
-        cloudicon="cloud"
-        {{ if hasKey (.Param "cloud/provider-icons") $cloud }}
-          cloudicon="{{ get (.Param "cloud/provider-icons") $cloud }}"
-        {{ else }}
-          cloudicon="{{ get (.Param "cloud/provider-icons") "default" }}"
-        {{ end }}
-        echo "set icon to $cloudicon"
-        drpcli machines meta set $RS_UUID key icon to "${cloudicon}" > /dev/null
 
       {{ else }}
         echo "You must define which cloud is being used!"

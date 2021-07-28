@@ -3,7 +3,7 @@ terraform {
   required_providers {
     google = {
       source = "hashicorp/google"
-      version = ">= 3.50.0"
+      version = ">= 3.76.0"
     }
   }
 }
@@ -16,32 +16,42 @@ provider "google" {
 }
 
 resource "google_compute_instance" "drp_node" {
-    name         = "{{ .Machine.Name }}"
-    {{ if (contains "." .Machine.Name) }}
-    hostname     = "{{ .Machine.Name }}"
-    {{ end }}
-    zone         = "{{ .Param "google/zone" }}"
-    machine_type = "{{ .Param "google/instance-type" }}"
-    tags         = [ {{ range $i, $p := .Machine.Profiles }}"{{$p}}",{{ end }}"digitalrebar" ]
-    boot_disk {
-        initialize_params {
-          image = "{{ .Param "google/boot-disk-image" }}"
-        }
-    }
-    {{ if .ParamExists "rsa/key-public" -}}
-    metadata = {
-        ssh-keys = "{{ .Param "rsa/key-user" }}:{{ .Param "rsa/key-public" }}"
-    }
-    {{ end }}
-    network_interface {
-        network = "default"
-        access_config {
-          // Ephemeral IP
-        }
-    }
-}
+  {{ if .ParamExists "cluster/profile" }}
+  # YES? use the DRP cluster logic to create multiple machines to run in clusters
+	count            = "{{ .Param "cloud/cluster-count" }}"
+  name            = "{{ .Param "cluster/profile" }}-\${count.index}"
+  {{ else }}
+  name         = "{{ .Machine.Name }}"
+  {{ if (contains "." .Machine.Name) }}
+  hostname     = "{{ .Machine.Name }}"
+  {{ end }}
+  {{ end }}
+  zone         = "{{ .Param "google/zone" }}"
+  machine_type = "{{ .Param "google/instance-type" }}"
+  tags         = [ {{ range $i, $p := .Machine.Profiles }}"{{lower $p}}",{{ end }}"digitalrebar" ]
+  boot_disk {
+      initialize_params {
+        image = "{{ .Param "google/boot-disk-image" }}"
+      }
+  }
+  {{ if .ParamExists "rsa/key-public" -}}
+  metadata = {
+      ssh-keys = "{{ .Param "rsa/key-user" }}:{{ .Param "rsa/key-public" }}"
+  }
+  {{ end }}
+  network_interface {
+      network = "default"
+      access_config {
+        // Ephemeral IP
+      }
+  }
 
-output "machine_ip" {
-	value       = google_compute_instance.drp_node.network_interface.0.access_config.0.nat_ip
-	description = "The IP of Machine"
+  # this template builds the cloud-init script to join with Digital Rebar
+  metadata_startup_script = <<-EOT
+  	#!/bin/bash
+    curl -kfsSL {{.ApiURL}}/machines/join-up.sh | sudo bash --
+	EOT
+
+  # this template synchronizes the Terraform instance with Digital Rebar
+  {{template "cloud-provision-local-exec.tf.tmpl" . }}
 }
