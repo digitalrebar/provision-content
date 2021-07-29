@@ -178,6 +178,55 @@ Schema:
     - tag: centos-8
       os:
         - centos-8
+      arch: ppc64le
+      url: https://mirrors.edge.kernel.org/centos/8/BaseOS/ppc64le/os
+      installSource: true
+    - tag: centos-8.1.1911
+      os:
+        - centos-8.1.1911
+      arch: ppc64le
+      url: http://mirrors.edge.kernel.org/centos/8.1.1911/BaseOS/ppc64le/os
+      installSource: true
+    - tag: centos-8.2.2004
+      os:
+        - centos-8.2.2004
+      arch: ppc64le
+      url: http://mirrors.edge.kernel.org/centos/8.2.2004/BaseOS/ppc64le/os
+      installSource: true
+    - tag: centos-8.3.2011
+      os:
+        - centos-8.3.2011
+      arch: ppc64le
+      url: http://mirrors.edge.kernel.org/centos/8.3.2011/BaseOS/ppc64le/os
+      installSource: true
+    - tag: sledgehammer8
+      os:
+        - sledgehammer8
+      arch: ppc64le
+      url: http://mirrors.edge.kernel.org/centos/8.3.2011/BaseOS/ppc64le/os
+      installSource: true
+    - tag: centos-8-everything
+      os:
+        - sledgehammer8
+        - centos-8
+        - centos-8.1.1911
+        - centos-8.2.2004
+        - centos-8.3.2011
+      arch: ppc64le
+      url: "http://mirrors.edge.kernel.org/centos"
+      distribution: "8"
+      components:
+        - AppStream
+        - BaseOS
+        - Devel
+        - HighAvailability
+        - PowerTools
+        - centosplus
+        - extras
+        - fasttrack
+    - tag: centos-8
+      os:
+        - centos-8
       arch: x86_64
       url: https://mirrors.edge.kernel.org/centos/8/BaseOS/x86_64/os
       installSource: true
