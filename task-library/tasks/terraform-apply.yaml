@@ -75,18 +75,18 @@ Templates:
       {{template "setup.tmpl" .}}
 
       {{ if (hasKey (.Param "terraform/map-ip-address") $cloud) }}
-        JQADDRESS={{ get (.Param "terraform/map-ip-address") $cloud }}
+        JQADDRESS="{{ get (.Param "terraform/map-ip-address") $cloud }}"
         echo "  Using terraform/map-ip-address = $JQADDRESS"
       {{ else }}
-        JQADDRESS={{ get (.Param "terraform/map-ip-address") "default" }}
+        JQADDRESS="{{ get (.Param "terraform/map-ip-address") "default" }}"
         echo "  WARNING: Missing terraform/map-ip-address value for {{ $cloud }}. Using default $JQADDRESS"
       {{ end }}
 
       {{ if (hasKey (.Param "terraform/map-instance-name") $cloud) }}
-        JQNAME={{ get (.Param "terraform/map-instance-name") $cloud }}
+        JQNAME="{{ get (.Param "terraform/map-instance-name") $cloud }}"
         echo "  Using terraform/map-instance-name = $JQNAME"
       {{ else }}
-        JQNAME={{ get (.Param "terraform/map-instance-name") "default" }}
+        JQNAME="{{ get (.Param "terraform/map-instance-name") "default" }}"
         echo "   WARNING: Missing terraform/map-instance-name value for {{ $cloud }}. Using default $JQNAME"
       {{ end }}
 
@@ -107,9 +107,9 @@ Templates:
       {{ end }}
       {{ end }}
 
-      TFID=$(jq -rc .id <<< "${TFSELF}")
-      TFNAME="$(jq -rc $JQNAME <<< "${TFSELF}")"
-      TFADDRESS="$(jq -rc $JQADDRESS <<< "${TFSELF}")"
+      TFID=$(jq -rc ".id" <<< "${TFSELF}")
+      TFNAME=$(jq -rc "$JQNAME" <<< "${TFSELF}")
+      TFADDRESS=$(jq -rc "$JQADDRESS" <<< "${TFSELF}")
 
       EXISTS=$(drpcli machines count cloud/instance-id Eq "$TFID" cloud/provider Eq "{{$cloud}}")
       case $EXISTS in
@@ -380,7 +380,7 @@ Templates:
         else
           echo "Saving terraform.tfstate file to machine"
           drpcli machines $tfstate $RS_UUID param terraform/tfstate to - < terraform.tfstate >/dev/null
-          drpcli machines $tfstate $RS_UUID param terraform/plan-machine to "{{.Machine.Uuid}}"  > /dev/null 
+          drpcli machines $tfstate $RS_UUID param terraform/plan-machine to "{{.Machine.Uuid}}"  > /dev/null || true
         fi
       else
         echo "no terraform.state file exists - cannot save"
