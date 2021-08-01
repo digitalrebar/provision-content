@@ -19,7 +19,7 @@ Templates:
   Meta:
     OS: "linux,darwin"
   Contents: |
-    #!/bin/bash
+    #!/usr/bin/env bash
     # Copyright RackN, 2019
 
     set -e

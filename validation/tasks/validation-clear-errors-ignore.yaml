@@ -24,7 +24,7 @@ Meta:
 Templates:
 - Name: "validation_clear_errors_ignore.sh"
   Contents: |
-    #!/bin/bash
+    #!/usr/bin/env bash
     # Copyright RackN, 2019
 
     set -e
