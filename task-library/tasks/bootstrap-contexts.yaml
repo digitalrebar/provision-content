@@ -47,7 +47,7 @@ Meta:
 Templates:
   - Name: "docker-context"
     Contents: |-
-      #!/bin/bash
+      #!/usr/bin/env bash
       # RackN Copyright 2020
 
       set -e
@@ -65,7 +65,7 @@ Templates:
       fi
 
       tool="podman"
-      if ! which podman || ! which docker ; then
+      if ! which podman && ! which docker ; then
         FAMILY=$(grep "^ID=" /etc/os-release | tr -d '"' | cut -d '=' -f 2)
         echo "Installing Podman/Docker for $FAMILY"
         case $FAMILY in

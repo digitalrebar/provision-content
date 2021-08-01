@@ -33,7 +33,11 @@ ExtraClaims:
 Templates:
   - Name: "bootstrap-tools.sh"
     ID: "bootstrap-tools.sh.tmpl"
+    Meta:
+      OS: "linux"
   - Name: "bootstrap-ipmi.sh"
+    Meta:
+      OS: "linux,darwin"
     Contents: |
       #!/usr/bin/env bash
       # installs common tools required on a DRP Endpoint for some content/plugins
