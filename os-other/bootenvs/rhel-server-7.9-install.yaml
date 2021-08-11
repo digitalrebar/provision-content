@@ -30,7 +30,6 @@ OS:
       Initrds:
       - images/pxeboot/initrd.img
       IsoFile: rhel-server-7.9-x86_64-dvd.iso
-      IsoUrl: "https://rackn-repo.s3-us-west-2.amazonaws.com/isos/redhat/rhel/7/rhel-server-7.9-x86_64-dvd.iso"
       Kernel: images/pxeboot/vmlinuz
       Loader: ""
       Sha256: 19d653ce2f04f202e79773a0cbeda82070e7527557e814ebbce658773fbe8191
