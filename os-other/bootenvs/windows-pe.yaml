@@ -11,8 +11,6 @@ OS:
   Codename: Windows
   Family: Microsoft
   IsoFile: winpe.iso
-  IsoSha256: ""
-  IsoUrl: ""
   Name: windows-pe
   Version: PE
 Templates:
