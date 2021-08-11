@@ -39,7 +39,6 @@ OS:
       Initrds:
         - images/pxeboot/initrd.img
       IsoFile: "rhel-8.3-x86_64-dvd.iso"
-      IsoUrl: "https://rackn-repo.s3.amazonaws.com/isos/redhat/rhel/8/rhel-8.3-x86_64-dvd.iso"
       Kernel: images/pxeboot/vmlinuz
       Loader: ""
       Sha256: "30fd8dff2d29a384bd97886fa826fa5be872213c81e853eae3f9d9674f720ad0"
