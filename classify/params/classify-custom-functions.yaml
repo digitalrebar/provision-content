@@ -20,12 +20,10 @@ Documentation: |
 
   .. code-block:: javascript
 
-    {
-      [
-        "my-classify-function-1.tmpl",
-        "my-classify-function-2.tmpl"
-      ]
-    }
+    [
+      "my-classify-function-1.tmpl",
+      "my-classify-function-2.tmpl"
+    ]
 
   .. note:: The executing environment is Sledgehammer with BASH scripts. You
             must ensure that the Function you inject operates correctly in
