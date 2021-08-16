@@ -21,42 +21,39 @@ Templates:
   Contents: |
     #!/usr/bin/env bash
     # Copyright RackN, 2019
-
     set -e
-
     {{ template "setup.tmpl" . }}
 
+    {{ $errmsg := "" -}}
+    {{ $ct := add .Machine.CurrentTask 1 -}}
+    {{ $oldtasks := .Machine.Tasks -}}
+    {{ $tasks := slice $oldtasks 0 $ct -}}
     {{ if eq (.ParamExists "flexiflow/list-parameter") false -}}
-    echo "flexiflow/list-parameter is not specified"
-    exit 1
+    {{   $errmsg = "flexiflow/list-parameter is not specified" -}}
     {{ end -}}
-
     {{ $lp := .Param "flexiflow/list-parameter" -}}
-    echo '>>> FlexiFlow list  parameter set  to:  {{$lp}}'
-
-    {{ if eq (.ParamExists $lp) false }}
-    echo "!!! flexiflow/list-parameter is '{{$lp}}' and it does not exist."
-    exit 1
-    {{ end }}
-
-    # TODO: This should done as a single update call.
-
-    # Clear tasks
-    {{ $seestop := false -}}
-    {{ range $index, $taskname := (slice .Machine.Tasks (add .Machine.CurrentTask 1)) -}}
-       {{ if and (not (eq $taskname "flexiflow-stop")) (not $seestop) -}}
-    echo ">>> Removing FlexiFlow task from list:  {{$taskname}}"
-    drpcli machines removetask $RS_UUID "{{$taskname}}" >/dev/null
-       {{ end -}}
-       {{ if eq $taskname "flexiflow-stop" -}}
-         {{ $seestop = true -}}
-       {{ end -}}
+    {{ if eq (.ParamExists $lp) false -}}
+    {{   $errmsg = cat "!!! flexiflow/list-parameter is " $lp " and it does not exist." -}}
+    {{ else -}}
+    {{   $newtasks := .ComposeParam $lp -}}
+    {{   $seestop := false -}}
+    {{   $stopindex := 0 -}}
+    {{   range $index, $taskname := (slice $oldtasks $ct) -}}
+    {{     if and (eq $taskname "flexiflow-stop") (not $seestop) -}}
+    {{       $stopindex = add $ct $index -}}
+    {{       $seestop = true -}}
+    {{     end -}}
+    {{   end -}}
+    {{   $tasks = concat $tasks $newtasks -}}
+    {{   $tasks = concat $tasks (slice $oldtasks $stopindex) -}}
     {{ end -}}
 
-    # Reset the task list
-    {{ range $index, $taskname := .ComposeParam $lp -}}
-    echo '>>> Flexiflow dynamically adding task:  {{$taskname}}'
-    drpcli machines inserttask $RS_UUID "{{$taskname}}" {{$index}} >/dev/null
+    {{ if eq $errmsg "" -}}
+    drpcli machines update $RS_UUID '{ "Tasks": {{toJson $tasks }} }' >/dev/null
+    exit 0
+    {{ else -}}
+    echo '{{$errmsg}}'
+    exit 1
     {{ end -}}
 - Name: "flexiflow_start.ps1"
   Meta:
@@ -68,6 +65,49 @@ Templates:
   Meta:
     OS: "esxi"
   Contents: |
-    #!/bin/sh
-    echo "Flexiflow start not implemented for esxi"
-    exit 0
+    #!/usr/bin/python
+    # python3 version
+
+    {{ $errmsg := "" -}}
+    {{ $ct := add .Machine.CurrentTask 1 -}}
+    {{ $oldtasks := .Machine.Tasks -}}
+    {{ $tasks := slice $oldtasks 0 $ct -}}
+    {{ if eq (.ParamExists "flexiflow/list-parameter") false -}}
+    {{   $errmsg = "flexiflow/list-parameter is not specified" -}}
+    {{ end -}}
+    {{ $lp := .Param "flexiflow/list-parameter" -}}
+    {{ if eq (.ParamExists $lp) false -}}
+    {{   $errmsg = cat "!!! flexiflow/list-parameter is " $lp " and it does not exist." -}}
+    {{ else -}}
+    {{   $newtasks := .ComposeParam $lp -}}
+    {{   $seestop := false -}}
+    {{   $stopindex := 0 -}}
+    {{   range $index, $taskname := (slice $oldtasks $ct) -}}
+    {{     if and (eq $taskname "flexiflow-stop") (not $seestop) -}}
+    {{       $stopindex = add $ct $index -}}
+    {{       $seestop = true -}}
+    {{     end -}}
+    {{   end -}}
+    {{   $tasks = concat $tasks $newtasks -}}
+    {{   $tasks = concat $tasks (slice $oldtasks $stopindex) -}}
+    {{ end -}}
+
+    {{ if eq $errmsg "" -}}
+    import os, urllib, urllib.request, socket, ssl, time
+    url = '{{.ApiURL}}/api/v3/machines/{{.Machine.UUID}}'
+
+    print('>>> FlexiFlow list  parameter set  to:  {{$lp}}')
+
+    patch = b'''
+    [
+      {"op":"replace","path":"/Tasks","value":{{toJson $tasks}}}
+    ]
+    '''
+    req = urllib.request.Request(url, method='PATCH',data=patch)
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('Authorization','Bearer {{.GenerateInfiniteToken}}')
+    urllib.request.urlopen(req,context=ssl.SSLContext(ssl.PROTOCOL_SSLv23))
+    {{ else -}}
+    print '{{$errmsg}}'
+    exit(1)
+    {{ end -}}
