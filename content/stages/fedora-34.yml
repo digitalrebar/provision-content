@@ -1,0 +1,14 @@
+---
+Name: "fedora-34-install"
+Description: "Fedora 34 Install Stage"
+BootEnv: "fedora-34-install"
+Tasks:
+  - "set-hostname"
+  - "centos-drp-only-repos"
+  - "ssh-access"
+  - "configure-network"
+Meta:
+  type: "os"
+  icon: "download"
+  color: "yellow"
+  title: "Digital Rebar Community Content"

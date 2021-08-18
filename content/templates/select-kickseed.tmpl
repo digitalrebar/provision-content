@@ -57,8 +57,12 @@
       {{ end -}}
   {{ else if ( eq "ubuntu" .Env.OS.FamilyName ) -}}
       {{ template "net-seed.tmpl" .}}
-  {{ else if ( eq "fedora" .Env.OS.FamilyName ) -}}
-      {{ template "centos-7.ks.tmpl" .}}
+  {{ else if ( eq "fedora" .Env.OS.Family ) -}}
+      {{ if ( .Env.OS.VersionEq "31" ) -}}
+        {{ template "centos-7.ks.tmpl" .}}
+      {{ else -}}
+        {{ template "fedora.ks.tmpl" .}}
+      {{ end -}}
   {{ else -}}
 # select-kickseed did not match any kickstart or preseed templates to serve
 #      Name: '{{ .Env.OS.Name }}'
