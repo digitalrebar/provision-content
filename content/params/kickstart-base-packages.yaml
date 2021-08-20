@@ -49,14 +49,28 @@ Schema:
       - curl
       - efibootmgr
       - tar
-    fedora:
-      - "@core"
-      - fipscheck
-      - device-mapper-multipath
-      - openssh
-      - curl
-      - efibootmgr
-      - tar
+    fedora-31:
+        - "@core"
+        - fipscheck
+        - device-mapper-multipath
+        - openssh
+        - curl
+        - efibootmgr
+        - tar
+    fedora-33:
+        - "@core"
+        - device-mapper-multipath
+        - openssh
+        - curl
+        - efibootmgr
+        - tar
+    fedora-34:
+        - "@core"
+        - device-mapper-multipath
+        - openssh
+        - curl
+        - efibootmgr
+        - tar
 Meta:
   type: "config"
   icon: "linux"
