@@ -31,6 +31,7 @@ Schema:
     - "debian-9"
     - "debian-10"
     - "fedora-latest"
+    - "fedora-31"
     - "fedora-33"
     - "fedora-34"
     - "redhat-latest"

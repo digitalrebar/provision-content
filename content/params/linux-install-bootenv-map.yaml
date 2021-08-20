@@ -30,6 +30,7 @@ Schema:
     "debian-9": "debian-9-install"
     "debian-10": "debian-10-install"
     "fedora-latest": "fedora-34-install"
+    "fedora-31": "fedora-31-install"
     "fedora-33": "fedora-33-install"
     "fedora-34": "fedora-34-install"
     "redhat-latest": "rhel-server-8-dvd-install"
