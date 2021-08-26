@@ -34,7 +34,7 @@ fi
 
 echo ">>> Beginning package install process"
 case $FAMILY in
-  rhel|redhat|centos|photon|amzn)
+  rhel|redhat|centos|photon|amzn|fedora)
     if which tdnf > /dev/null 2>&1 ; then
 $SUDO tdnf -y install $PKGS
     elif which dnf > /dev/null 2>&1 ; then
