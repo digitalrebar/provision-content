@@ -45,3 +45,5 @@ The extraneous directories and files (images, tools, .gitignore, etc.) are
 not part of the content packs.
 
 .. Release v4.7.0 Start
+
+.. Release v4.8.0 Start
