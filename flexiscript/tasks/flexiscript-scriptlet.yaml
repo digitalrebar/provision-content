@@ -1,0 +1,41 @@
+---
+Name: "flexiscript-scriptlet"
+Description: "Run scriptlets defined by the 'flexiscript/scriptlet' Param."
+Documentation: |
+  Runs the specified scriptlet inside the Param, referenced by the
+  ``flexiscript/scriptlet`` Param.
+
+  For Linux, Darwin (MacOS X), Unix, and VMware ESXi systems, you
+  must set the first line to a valid *SheBang* with the correct
+  interpreter for execution.
+
+  .. note:: VMware ESXi does NOT support BASH scripts, so for shell
+            scripts set the SheBang to ``#!/usr/bin/env sh``.  Or
+            possibly use a Python script with appropriate SheBang.
+
+  Windows systems currently only support executing PowerShell
+  scriptlets.
+
+Meta:
+  icon: "orange"
+  color: "terminal"
+  title: "RackN Content"
+Templates:
+  - Name: "flexiscript-scriptlet-RealOS.sh"
+    Meta:
+      OS: "linux,darwin,esxi"
+    Contents: |
+      {{ .ComposeParam ( .Param "flexiscript/scriptlet" ) }}
+
+  - Name: "flexiscript-scriptlet-windows.ps1"
+    Meta:
+      OS: "windows"
+    Contents: |
+      {{ .ComposeParam ( .Param "flexiscript/scriptlet" ) }}
+
+  - Name: "flexiscript-scriptlet-esxi.sh"
+    Meta:
+      OS: "esxi"
+    Contents: |
+      {{ .ComposeParam ( .Param "flexiscript/scriptlet" ) }}
+

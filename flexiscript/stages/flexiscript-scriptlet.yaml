@@ -1,0 +1,22 @@
+---
+Name: "flexiscript-scriptlet"
+Description: "Provides flexibly injected scriptlets to run during this stage."
+Documentation: |
+  This Stage implements the FlexiScript capability.
+
+  When the task ``flexiscript`` is run, it will reference the paramtger defined in
+  the ``flexiscript/scriptlet`` Param.  The Param that is referenced must be
+  defined as a String type.
+
+  The contents of the Param pointed to by ``flexiscript/scriptlet`` must have a
+  valid *SheBang* line for Linux, Darwin, Unix, and ESXi systems.  Windows systems
+  currently only support PowerShell scriptlet execution at this time.
+
+RequiredParams:
+  - "flexiscript/scriptlet"
+Tasks:
+  - "flexiscript-scriptlet"
+Meta:
+  color: "orange"
+  icon: "terminal"
+  title: "RackN Content"

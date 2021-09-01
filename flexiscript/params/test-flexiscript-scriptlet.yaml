@@ -1,0 +1,25 @@
+---
+Name: "test-flexiscript/scriptlet"
+Description: "Param for testing flexiscript"
+Documentation: |
+  Param for testing flexiscript system.  This Param contains an Array of
+  Strings that will define which scriptlets to dynamically add to the
+  ``flexiscript-stage``.
+
+Schema:
+  type: "string"
+  default: |
+    #!/usr/bin/env bash
+    # test scriptlet for FlexiScript system
+
+    echo ""
+    echo "Start FlexiScript test (outputs date/time on next line)."
+    date
+    echo "Done testing."
+    echo ""
+
+Meta:
+  color: "green"
+  icon: "terminal"
+  title: "RackN Content"
+
